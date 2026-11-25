@@ -27,7 +27,7 @@ const locale: typeof enUS = {
             'smart-toggle-filter': 'Attiva/disattiva filtro',
         },
         permission: {
-            filterErr: 'Non hai l’autorizzazione per usare il filtro.',
+            filterErr: 'L\'intervallo è protetto e non hai l\'autorizzazione per filtrare. Per filtrare, contatta il creatore.',
         },
         panel: {
             'clear-filter': 'Cancella filtro',

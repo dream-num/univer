@@ -39,7 +39,7 @@ const locale: typeof enUS = {
             add: 'Thêm liên kết',
         },
         permission: {
-            hyperLinkErr: 'Bạn không có quyền chèn liên kết.',
+            editErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền chỉnh sửa. Nếu cần chỉnh sửa, vui lòng liên hệ với người tạo.',
         },
         message: {
             noSheet: 'Bảng con này đã bị xóa',

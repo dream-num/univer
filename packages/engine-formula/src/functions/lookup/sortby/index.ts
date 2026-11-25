@@ -307,6 +307,10 @@ export class Sortby extends BaseFunction {
     }
 
     private _asc(columnA: BaseValueObject, columnB: BaseValueObject, compare: Function): number {
+        if ((columnA == null || columnA.isNull()) && (columnB == null || columnB.isNull())) {
+            return 0;
+        }
+
         if (columnA == null || columnA.isNull()) {
             return 1;
         }
@@ -329,6 +333,10 @@ export class Sortby extends BaseFunction {
 
         const columnAValue = (columnA as BaseValueObject).getValue();
         const columnBValue = (columnB as BaseValueObject).getValue();
+
+        if (columnA.isBoolean() && columnB.isBoolean()) {
+            return Number(columnAValue) - Number(columnBValue);
+        }
 
         if (columnA.isBoolean() && columnAValue === true) {
             return 1;
@@ -357,6 +365,10 @@ export class Sortby extends BaseFunction {
     }
 
     private _desc(columnA: BaseValueObject, columnB: BaseValueObject, compare: Function): number {
+        if ((columnA == null || columnA.isNull()) && (columnB == null || columnB.isNull())) {
+            return 0;
+        }
+
         if (columnA == null || columnA.isNull()) {
             return 1;
         }
@@ -379,6 +391,10 @@ export class Sortby extends BaseFunction {
 
         const columnAValue = (columnA as BaseValueObject).getValue();
         const columnBValue = (columnB as BaseValueObject).getValue();
+
+        if (columnA.isBoolean() && columnB.isBoolean()) {
+            return Number(columnBValue) - Number(columnAValue);
+        }
 
         if (columnA.isBoolean() && columnAValue === true) {
             return -1;

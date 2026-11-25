@@ -16,13 +16,6 @@
 
 import type { IAccessor, ICommand, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IMarkDirtyFilterChangeMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import type { LocaleKey } from '../../locale/types';
-import type { FilterColumn } from '../../models/filter-model';
-import type { IAutoFilter, IFilterColumn } from '../../models/types';
-import type {
-    ISetSheetsFilterCriteriaMutationParams,
-    ISetSheetsFilterRangeMutationParams,
-} from '../mutations/sheets-filter.mutation';
 import {
     CommandType,
     ErrorService,
@@ -40,6 +33,13 @@ import {
     MarkDirtyFilterChangeMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
+import type { FilterColumn } from '../../models/filter-model';
+import type { IAutoFilter, IFilterColumn } from '../../models/types';
+import type {
+    ISetSheetsFilterCriteriaMutationParams,
+    ISetSheetsFilterRangeMutationParams,
+} from '../mutations/sheets-filter.mutation';
 import { SheetsFilterService } from '../../services/sheet-filter.service';
 import {
     ReCalcSheetsFilterMutation,
@@ -88,6 +88,10 @@ export const SetSheetFilterRangeCommand: ICommand<ISetSheetFilterRangeCommandPar
         const redoMutation = { id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range } };
         const result = commandService.syncExecuteCommand(redoMutation.id, redoMutation.params);
         if (result) {
+            // A successful local filter command means the user has taken over the filter; stop
+            // waiting for the shared-filter catch-up before later remote filter mutations arrive.
+            sheetsFilterService.completeInitialFilterCatchUp(unitId);
+            sheetsFilterService.notifyLocalFilterOperationSucceeded(unitId, subUnitId);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [{ id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId } }],
@@ -126,6 +130,8 @@ export const RemoveSheetFilterCommand: ICommand<ISheetCommandSharedParams> = {
 
         const result = commandService.syncExecuteCommand(RemoveSheetsFilterMutation.id, { unitId, subUnitId });
         if (result) {
+            sheetsFilterService.completeInitialFilterCatchUp(unitId);
+            sheetsFilterService.notifyLocalFilterOperationSucceeded(unitId, subUnitId);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations,
@@ -237,6 +243,8 @@ export const SetSheetsFilterCriteriaCommand: ICommand<ISetSheetsFilterCriteriaCo
 
         const result = commandService.syncExecuteCommand(redoMutation.id, redoMutation.params);
         if (result) {
+            sheetsFilterService.completeInitialFilterCatchUp(unitId);
+            sheetsFilterService.notifyLocalFilterOperationSucceeded(unitId, subUnitId);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [undoMutation],
@@ -281,6 +289,8 @@ export const ClearSheetsFilterCriteriaCommand: ICommand<ISheetCommandSharedParam
 
         const result = sequenceExecute(redoMutations, commandService);
         if (result.result) {
+            sheetsFilterService.completeInitialFilterCatchUp(unitId);
+            sheetsFilterService.notifyLocalFilterOperationSucceeded(unitId, subUnitId);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations,
@@ -305,7 +315,7 @@ export const ClearSheetsFilterCriteriaCommand: ICommand<ISheetCommandSharedParam
 export const ReCalcSheetsFilterCommand: ICommand<ISheetCommandSharedParams> = {
     id: 'sheet.command.re-calc-filter',
     type: CommandType.COMMAND,
-    handler: (accessor, params) => {
+    handler: async (accessor, params) => {
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const commandService = accessor.get(ICommandService);
         const instanceSrv = accessor.get(IUniverInstanceService);
@@ -318,7 +328,12 @@ export const ReCalcSheetsFilterCommand: ICommand<ISheetCommandSharedParams> = {
         if (!filterModel) return false;
 
         // No need to handle undo redo for this command.
-        return commandService.executeCommand(ReCalcSheetsFilterMutation.id, { unitId, subUnitId } as ISheetCommandSharedParams);
+        const result = await commandService.executeCommand(ReCalcSheetsFilterMutation.id, { unitId, subUnitId } as ISheetCommandSharedParams);
+        if (result) {
+            sheetsFilterService.completeInitialFilterCatchUp(unitId);
+            sheetsFilterService.notifyLocalFilterOperationSucceeded(unitId, subUnitId);
+        }
+        return result;
     },
 };
 

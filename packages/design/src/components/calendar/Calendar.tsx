@@ -191,12 +191,13 @@ export function Calendar(props: ICalendarProps) {
             data-u-comp="calendar"
             dir={direction}
             className={clsx(`
-              univer-mx-auto univer-max-w-xs univer-select-none univer-rounded univer-bg-gray-0 univer-text-gray-900
+              univer-mx-auto univer-w-fit univer-max-w-full univer-select-none univer-rounded univer-bg-gray-0
+              univer-text-gray-900
               dark:!univer-bg-gray-700 dark:!univer-text-gray-0
             `, className)}
         >
             <nav
-                className="univer-mb-4 univer-flex univer-items-center univer-justify-between"
+                className="univer-mb-2 univer-flex univer-items-center univer-justify-between"
             >
                 <DayButton
                     className={`
@@ -286,7 +287,7 @@ export function Calendar(props: ICalendarProps) {
 
             <div
                 className={`
-                  univer-mb-1 univer-grid univer-grid-cols-7 univer-gap-1 univer-text-center univer-text-sm
+                  univer-mb-1 univer-grid univer-grid-cols-7 univer-gap-0.5 univer-text-center univer-text-sm
                   univer-text-gray-500
                   dark:!univer-text-gray-200
                 `}
@@ -296,7 +297,7 @@ export function Calendar(props: ICalendarProps) {
                 ))}
             </div>
 
-            <div className="univer-grid univer-grid-cols-7 univer-gap-1 univer-text-center">
+            <div className="univer-grid univer-grid-cols-7 univer-gap-0.5 univer-text-center">
                 {days.map((day, idx) =>
                     day
                         ? (
@@ -306,7 +307,11 @@ export function Calendar(props: ICalendarProps) {
                                     '!univer-bg-primary-600 univer-font-bold univer-text-gray-0': !isToday(day) && isSelected(day),
                                     'dark:!univer-text-gray-0': !isToday(day) && !isSelected(day),
                                     '!univer-bg-primary-600 univer-text-gray-0': isToday(day) && isSelected(day),
-                                    'univer-font-semibold univer-text-primary-600 dark:!univer-text-primary-500': isToday(day) && !isSelected(day),
+                                    [`
+                                      univer-font-semibold univer-text-primary-600
+                                      dark:!univer-text-primary-100
+                                      dark:hover:!univer-text-primary-50
+                                    `]: isToday(day) && !isSelected(day),
                                     'univer-cursor-not-allowed univer-opacity-40': isDisabled(day),
                                     'univer-cursor-pointer univer-text-gray-800 hover:univer-bg-primary-100': !isSelected(day) && !isDisabled(day),
                                 })}

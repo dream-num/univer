@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, Workbook } from '@univerjs/core';
-import { CellValueType, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { CellValueType, ICommandService, IUniverInstanceService, LocaleType, RegionService } from '@univerjs/core';
 import { ReorderRangeCommand, ReorderRangeMutation, SetSelectionsOperation } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 import type { IOrderRule } from '../../../services/interface';
@@ -27,6 +27,7 @@ import { createCommandTestBed } from './create-command-test-bed';
 interface ISortFixture {
     cells: Array<ICellData | null>;
     secondary?: number[];
+    region?: LocaleType;
 }
 
 /**
@@ -40,6 +41,9 @@ async function sortRows(fixture: ISortFixture, type: SortType, secondaryType?: S
         commands.registerCommand(SetSelectionsOperation);
         commands.registerCommand(ReorderRangeMutation);
         commands.registerCommand(ReorderRangeCommand);
+        if (fixture.region) {
+            get(RegionService).setRegion(fixture.region);
+        }
 
         const workbook = get(IUniverInstanceService).getUnit('test') as Workbook;
         const worksheet = workbook.getSheetBySheetId('sheet1')!;
@@ -70,6 +74,53 @@ async function sortRows(fixture: ISortFixture, type: SortType, secondaryType?: S
     }
 }
 
+describe('SortRangeCommand with text', () => {
+    async function sortText(values: string[], type: SortType, region: LocaleType) {
+        const rows = await sortRows({ cells: values.map((v) => ({ v })), region }, type);
+        return rows.map((row) => values[Number(row)]);
+    }
+
+    it('sorts punctuation before digits and accented letters beside their base letter', async () => {
+        const values = ['A_', 'Ábaco', 'A0', 'Zeta', 'abeja', 'A b', 'A!', 'A.'];
+        const ascending = ['A b', 'A!', 'A.', 'A_', 'A0', 'Ábaco', 'abeja', 'Zeta'];
+
+        expect(await sortText(values, SortType.ASC, LocaleType.ZH_CN)).toEqual(ascending);
+        expect(await sortText(values, SortType.DESC, LocaleType.ZH_CN)).toEqual(ascending.reverse());
+    });
+
+    it('uses word punctuation to break ties after comparing letters and accents', async () => {
+        const values = ['á-ba', 'abá', 'aba', 'a-ba', 'a-bá', 'ab-a', "a'ba"];
+        const ascending = ['aba', 'ab-a', "a'ba", 'a-ba', 'abá', 'a-bá', 'á-ba'];
+
+        expect(await sortText(values, SortType.ASC, LocaleType.ZH_CN)).toEqual(ascending);
+        expect(await sortText(values, SortType.DESC, LocaleType.ZH_CN)).toEqual(ascending.reverse());
+    });
+
+    it('keeps canonically equivalent spellings tied when comparing word punctuation', async () => {
+        const composed = 'café-';
+        const decomposed = 'cafe\u0301-';
+        const values = [composed, decomposed, 'café'];
+
+        expect(await sortText(values, SortType.ASC, LocaleType.ZH_CN)).toEqual(['café', composed, decomposed]);
+        expect(await sortText(values, SortType.DESC, LocaleType.ZH_CN)).toEqual([composed, decomposed, 'café']);
+    });
+
+    it('preserves spaces and the input order of case-equivalent English text', async () => {
+        const values = ['ann Lee', 'ANNE MARIE', 'Ann', '  ann', 'Ann  Lee', 'ann', 'Anne Marie', 'Ann '];
+
+        expect(await sortText(values, SortType.ASC, LocaleType.EN_US))
+            .toEqual(['  ann', 'Ann', 'ann', 'Ann ', 'Ann  Lee', 'ann Lee', 'ANNE MARIE', 'Anne Marie']);
+    });
+
+    it('collates text for the configured region', async () => {
+        const values = ['oso', 'ñu', 'nube'];
+
+        expect(await sortText(values, SortType.ASC, LocaleType.ES_ES)).toEqual(['nube', 'ñu', 'oso']);
+        expect(await sortText(values, SortType.ASC, LocaleType.EN_US)).toEqual(['ñu', 'nube', 'oso']);
+        expect(await sortText(['北京', '上海', '广州'], SortType.ASC, LocaleType.ZH_CN)).toEqual(['北京', '广州', '上海']);
+    });
+});
+
 describe('SortRangeCommand with mixed cell types', () => {
     const mixed: Array<ICellData | null> = [
         { v: 'zoe', t: CellValueType.STRING },
@@ -97,6 +148,17 @@ describe('SortRangeCommand with mixed cell types', () => {
 
         expect(await sortRows({ cells: booleans }, SortType.ASC)).toEqual([1, 3, 0, 2, 4]);
         expect(await sortRows({ cells: booleans }, SortType.DESC)).toEqual([0, 2, 4, 1, 3]);
+    });
+
+    it('orders numeric keys and breaks numeric ties with the secondary key', async () => {
+        const cells = [
+            { v: '10.0', t: CellValueType.NUMBER },
+            { v: 2, t: CellValueType.NUMBER },
+            { v: 10, t: CellValueType.NUMBER },
+        ];
+
+        expect(await sortRows({ cells, secondary: [2, 0, 1] }, SortType.ASC, SortType.ASC)).toEqual([1, 2, 0]);
+        expect(await sortRows({ cells, secondary: [2, 0, 1] }, SortType.DESC, SortType.DESC)).toEqual([0, 2, 1]);
     });
 
     it('uses the secondary key rather than the error token for distinct errors', async () => {

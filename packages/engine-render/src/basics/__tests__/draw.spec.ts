@@ -93,6 +93,20 @@ describe('draw extra', () => {
         expect(ctx.clearRectForTexture).toHaveBeenCalledTimes(4);
     });
 
+    it('extends every border line by the line width buffer at both ends', () => {
+        const ctx = createCtxMock();
+        const position = { startX: 10, startY: 20, endX: 30, endY: 40 };
+
+        drawLineByBorderType(ctx, BORDER_TYPE.TOP, 1, position);
+        drawLineByBorderType(ctx, BORDER_TYPE.BOTTOM, 1, position);
+        drawLineByBorderType(ctx, BORDER_TYPE.LEFT, 1, position);
+        drawLineByBorderType(ctx, BORDER_TYPE.RIGHT, 1, position);
+
+        // The bottom line has to reach as far as the top line, otherwise the bottom right corner of a thick border is left open.
+        expect(ctx.moveToByPrecision.mock.calls).toEqual([[9, 20], [9, 40], [10, 19], [30, 19]]);
+        expect(ctx.lineToByPrecision.mock.calls).toEqual([[31, 20], [31, 40], [10, 41], [30, 41]]);
+    });
+
     it('draws diagonal lines and sets line styles', () => {
         const ctx = createCtxMock();
         const position = { startX: 0, startY: 0, endX: 20, endY: 20 };

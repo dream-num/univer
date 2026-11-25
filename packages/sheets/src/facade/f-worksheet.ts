@@ -79,7 +79,7 @@ import {
     SetTabColorCommand,
     SetTextWrapCommand,
     SetWorksheetColumnCountCommand,
-    SetWorksheetDefaultStyleMutation,
+    SetWorksheetDefaultStyleCommand,
     SetWorksheetHideCommand,
     SetWorksheetNameCommand,
     SetWorksheetRowCountCommand,
@@ -333,12 +333,11 @@ export class FWorksheet extends FBaseInitialable {
     setDefaultStyle(style: string | Nullable<IStyleData>): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
-        this._commandService.syncExecuteCommand(SetWorksheetDefaultStyleMutation.id, {
+        this._commandService.syncExecuteCommand(SetWorksheetDefaultStyleCommand.id, {
             unitId,
             subUnitId,
             defaultStyle: style,
         });
-        this._worksheet.setDefaultCellStyle(style);
         return this;
     }
 

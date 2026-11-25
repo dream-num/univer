@@ -27,7 +27,7 @@ const locale: typeof enUS = {
             'smart-toggle-filter': 'Filter ein-/ausschalten',
         },
         permission: {
-            filterErr: 'Sie haben keine Berechtigung, den Filter zu verwenden.',
+            filterErr: 'Der Bereich ist geschützt und Sie haben keine Berechtigung zum Filtern. Zum Filtern wenden Sie sich bitte an den Ersteller.',
         },
         panel: {
             'clear-filter': 'Filter löschen',

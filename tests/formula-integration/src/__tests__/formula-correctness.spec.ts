@@ -1,10 +1,45 @@
+import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { describe, expect, it } from 'vitest';
 import { createFormulaTestBed } from '../__testing__/univer';
 import { expectCalculationResultMatchesSnapshot } from '../__testing__/util';
+import '@univerjs/sheets-numfmt/facade';
 
 describe('Test formula correctness', () => {
     it('basic sum', async () => {
         await expectCalculationResultMatchesSnapshot();
+    });
+
+    it('reads the array spill value from a cell with percentage formatting', async () => {
+        const testBed = createFormulaTestBed();
+        testBed.univer.registerPlugin(UniverSheetsNumfmtPlugin);
+
+        try {
+            const workbook = testBed.api.createWorkbook({
+                id: 'percentage-spill',
+                sheetOrder: ['sheet1'],
+                sheets: {
+                    sheet1: {
+                        id: 'sheet1',
+                        name: 'Sheet1',
+                        rowCount: 5,
+                        columnCount: 5,
+                        cellData: {
+                            0: { 0: { f: '=SEQUENCE(2,1,0.125,0.125)' } },
+                        },
+                    },
+                },
+            });
+            await testBed.api.getFormula().onCalculationResultApplied();
+
+            const sheet = workbook.getActiveSheet();
+            const spillCell = sheet.getRange('A2').setNumberFormat('0%');
+            expect(spillCell.getDisplayValue()).toBe('25%');
+            expect(spillCell.getRawValue() ?? null).toBeNull();
+            expect(spillCell.getValue()).toBe(0.25);
+            expect(sheet.getRange('A1:A2').getValues()).toEqual([[0.125], [0.25]]);
+        } finally {
+            testBed.univer.dispose();
+        }
     });
 
     it('preserves shared range values for aggregates calculated after SORT', async () => {

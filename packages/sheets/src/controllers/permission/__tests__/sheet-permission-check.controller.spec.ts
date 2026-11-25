@@ -38,10 +38,18 @@ import { RemoveWorksheetMergeCommand } from '../../../commands/commands/remove-w
 import { ReorderRangeCommand } from '../../../commands/commands/reorder-range.command';
 import { SetColHiddenCommand } from '../../../commands/commands/set-col-visible.command';
 import { SetProtectionCommand } from '../../../commands/commands/set-protection.command';
+import { SetRangeCustomMetadataCommand } from '../../../commands/commands/set-range-custom-metadata.command';
 import { SetRowHiddenCommand } from '../../../commands/commands/set-row-visible.command';
 import { SetTabColorCommand } from '../../../commands/commands/set-tab-color.command';
+import { SetWorkbookCalculationSettingsCommand } from '../../../commands/commands/set-workbook-calculation-settings.command';
 import { SetWorkbookNameCommand } from '../../../commands/commands/set-workbook-name.command';
+import { SetWorksheetColumnCountCommand } from '../../../commands/commands/set-worksheet-column-count.command';
+import { SetWorksheetDefaultStyleCommand } from '../../../commands/commands/set-worksheet-default-style.command';
 import { SetWorksheetHideCommand } from '../../../commands/commands/set-worksheet-hide.command';
+import { SetWorksheetPermissionPointsCommand } from '../../../commands/commands/set-worksheet-permission-points.command';
+import { SetWorksheetRowCountCommand } from '../../../commands/commands/set-worksheet-row-count.command';
+import { SplitTextToColumnsCommand } from '../../../commands/commands/split-text-to-columns.command';
+import { ToggleCellCheckboxCommand } from '../../../commands/commands/toggle-checkbox.command';
 import { AddRangeProtectionMutation } from '../../../commands/mutations/add-range-protection.mutation';
 import { AddWorksheetMergeMutation } from '../../../commands/mutations/add-worksheet-merge.mutation';
 import { AddWorksheetProtectionMutation } from '../../../commands/mutations/add-worksheet-protection.mutation';
@@ -66,6 +74,7 @@ import { WorkbookCreateSheetPermission } from '../../../services/permission/perm
 import { WorkbookDeleteSheetPermission } from '../../../services/permission/permission-point/workbook/delete-sheet';
 import { WorkbookEditablePermission } from '../../../services/permission/permission-point/workbook/editable';
 import { WorkbookHideSheetPermission } from '../../../services/permission/permission-point/workbook/hide-sheet';
+import { WorkbookInsertColumnPermission } from '../../../services/permission/permission-point/workbook/insert-column';
 import { WorksheetDeleteProtectionPermission } from '../../../services/permission/permission-point/worksheet/delete-protection';
 import { WorksheetEditPermission } from '../../../services/permission/permission-point/worksheet/edit';
 import { WorksheetManageCollaboratorPermission } from '../../../services/permission/permission-point/worksheet/manage-collaborator';
@@ -472,6 +481,93 @@ describe('SheetPermissionCheckController sheet commands', () => {
             })).resolves.toBe(true);
         } finally {
             testBed.univer.dispose();
+        }
+    });
+
+    it('checks the extended destination range when splitting text to columns', async () => {
+        const testBed = createPermissionTestBed();
+        const commandService = testBed.get(ICommandService);
+        const permissionService = testBed.get(IPermissionService);
+        const unitId = testBed.sheet.getUnitId();
+        const subUnitId = testBed.sheet.getActiveSheet().getSheetId();
+        const worksheet = testBed.sheet.getActiveSheet();
+        worksheet.getCellMatrix().setValue(0, 0, { v: 'a,b,c' });
+
+        testBed.get(RangeProtectionRuleModel).addRule(unitId, subUnitId, {
+            id: 'split-protected',
+            permissionId: 'split-protected',
+            ranges: [{ startRow: 0, endRow: 0, startColumn: 2, endColumn: 2 }],
+            unitType: UnitObject.Worksheet,
+            unitId,
+            subUnitId,
+            viewState: ViewStateEnum.OthersCanView,
+            editState: EditStateEnum.OnlyMe,
+        });
+        setPoint(permissionService, new RangeProtectionPermissionEditPoint(unitId, subUnitId, 'split-protected'), false);
+        commandService.registerCommand(SplitTextToColumnsCommand);
+
+        await expect(commandService.executeCommand(SplitTextToColumnsCommand.id, {
+            unitId,
+            subUnitId,
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            delimiter: 2,
+        } as never)).resolves.toBe(false);
+    });
+
+    it('requires workbook insert-column permission when splitting adds columns', async () => {
+        const testBed = createPermissionTestBed();
+        const commandService = testBed.get(ICommandService);
+        const permissionService = testBed.get(IPermissionService);
+        const unitId = testBed.sheet.getUnitId();
+        const subUnitId = testBed.sheet.getActiveSheet().getSheetId();
+        testBed.sheet.getActiveSheet().getCellMatrix().setValue(0, 0, { v: 'a,b,c' });
+        setPoint(permissionService, new WorkbookInsertColumnPermission(unitId), false);
+        commandService.registerCommand(SplitTextToColumnsCommand);
+
+        await expect(commandService.executeCommand(SplitTextToColumnsCommand.id, {
+            unitId,
+            subUnitId,
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            delimiter: 2,
+        } as never)).resolves.toBe(false);
+    });
+
+    it('blocks API-only commands that bypass the menu gates', async () => {
+        const testBed = createPermissionTestBed();
+
+        const commandService = testBed.get(ICommandService);
+        const permissionService = testBed.get(IPermissionService);
+        const unitId = testBed.sheet.getUnitId();
+        const subUnitId = testBed.sheet.getActiveSheet().getSheetId();
+        const range = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
+
+        [
+            ToggleCellCheckboxCommand,
+            SplitTextToColumnsCommand,
+            SetWorksheetRowCountCommand,
+            SetWorksheetColumnCountCommand,
+            SetWorksheetDefaultStyleCommand,
+            SetRangeCustomMetadataCommand,
+            SetWorkbookCalculationSettingsCommand,
+            SetWorksheetPermissionPointsCommand,
+        ].forEach((command) => commandService.registerCommand(command));
+
+        setPoint(permissionService, new WorkbookEditablePermission(unitId), false);
+        setPoint(permissionService, new WorkbookCreateProtectPermission(unitId), false);
+
+        const cases = [
+            { commandId: ToggleCellCheckboxCommand.id, params: { unitId, subUnitId, row: 0, col: 0, paragraphIndex: 0 } },
+            { commandId: SplitTextToColumnsCommand.id, params: { unitId, subUnitId, range } },
+            { commandId: SetWorksheetRowCountCommand.id, params: { unitId, subUnitId, rowCount: 120 } },
+            { commandId: SetWorksheetColumnCountCommand.id, params: { unitId, subUnitId, columnCount: 40 } },
+            { commandId: SetWorksheetDefaultStyleCommand.id, params: { unitId, subUnitId, style: {} } },
+            { commandId: SetRangeCustomMetadataCommand.id, params: { unitId, subUnitId, range, customMetadata: { custom: {} } } },
+            { commandId: SetWorkbookCalculationSettingsCommand.id, params: { unitId, settings: {} } },
+            { commandId: SetWorksheetPermissionPointsCommand.id, params: { rule: { unitId, subUnitId } } },
+        ];
+
+        for (const { commandId, params } of cases) {
+            await expect(commandService.executeCommand(commandId, params as never)).resolves.toBe(false);
         }
     });
 });

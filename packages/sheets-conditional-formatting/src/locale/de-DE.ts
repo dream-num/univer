@@ -24,6 +24,11 @@ const locale: typeof enUS = {
             mark: 'Zeichen',
             rank: 'Rang',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'Der Bereich ist geschützt und Sie haben keine Berechtigung, Stile festzulegen. Um Stile festzulegen, wenden Sie sich bitte an den Ersteller.',
+            },
+        },
     },
 };
 

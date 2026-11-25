@@ -21,7 +21,7 @@ import { SheetSkeletonService } from '@univerjs/sheets';
 import { expect, it, onTestFinished } from 'vitest';
 import type { ISheetImage } from '../../../services/sheet-drawing.service';
 import { createSheetsDrawingTestBed } from '../../../__tests__/create-sheets-drawing-test-bed';
-import { transformToAxisAlignPosition } from '../../../basics/transform-position';
+import { transformToAxisAlignPosition, transformToDrawingPosition } from '../../../basics/transform-position';
 import { SHEET_DRAWING_PLUGIN } from '../../../controllers/sheet-drawing.controller';
 import { getLegacySheetDrawingPosition } from '../../../services/sheet-drawing-placement';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../../../services/sheet-drawing.service';
@@ -180,4 +180,135 @@ it.each([{ reference: { axis: 'row', action: 'insert', start: 0, end: 0, limit: 
     expect(() => bed.commandService.syncExecuteCommand(SetDrawingApplyMutation.id, payload, { fromCollab: true }))
         .toThrow('Invalid drawing reference change.');
     expect(snapshot()).toEqual(before);
+});
+
+it('replays legacy chart history whose inserts collide with fields filled by placement refresh', () => {
+    // Shapes copied from a production changeset log written by v1.5.x clients:
+    // the chart insert carries only from/to markers, and the next update inserts
+    // flip/skew keys that the refreshed live drawing already has.
+    const bed = createSheetsDrawingTestBed();
+    onTestFinished(() => bed.univer.dispose());
+    const unitId = 'test';
+    const subUnitId = 'sheet1';
+    const drawingId = 'chart';
+    const position = {
+        from: { row: 4, rowOffset: 26, column: 5, columnOffset: 22 },
+        to: { row: 19, rowOffset: 22, column: 10, columnOffset: 38 },
+    };
+    const replay = { fromChangeset: true };
+    const apply = (op: JSON1.JSONOp, type: DrawingApplyType) => bed.commandService.syncExecuteCommand(
+        SetDrawingApplyMutation.id,
+        { unitId, subUnitId, op, objects: [{ unitId, subUnitId, drawingId }], type },
+        replay
+    );
+    const marker = (prefix: Record<string, number>, from: number[], to: number[]) => [
+        ['from', ['column', { i: from[0], r: prefix.fromColumn }], ['columnOffset', { i: from[1], r: prefix.fromColumnOffset }], ['row', { i: from[2], r: prefix.fromRow }], ['rowOffset', { i: from[3], r: prefix.fromRowOffset }]],
+        ['to', ['column', { i: to[0], r: prefix.toColumn }], ['columnOffset', { i: to[1], r: prefix.toColumnOffset }], ['row', { i: to[2], r: prefix.toRow }], ['rowOffset', { i: to[3], r: prefix.toRowOffset }]],
+    ];
+    const old = { fromColumn: 5, fromColumnOffset: 22, fromRow: 4, fromRowOffset: 26, toColumn: 10, toColumnOffset: 38, toRow: 19, toRowOffset: 22 };
+    const orientation = [['flipX', { i: false }], ['flipY', { i: false }]];
+    const skew = [['skewX', { i: 0 }], ['skewY', { i: 0 }]];
+    const [movedFrom, movedTo] = marker(old, [6, 78.8, 0, 14.8], [12, 18.8, 14, 22.8]);
+    const moved = [...orientation, movedFrom, ...skew, movedTo];
+
+    expect(apply([unitId, subUnitId, [
+        'data',
+        drawingId,
+        {
+            i: {
+                unitId,
+                subUnitId,
+                drawingId,
+                drawingType: DrawingTypeEnum.DRAWING_CHART,
+                componentKey: 'SheetsChartComponent',
+                sheetTransform: position,
+                transform: { left: 722, top: 154, width: 468, height: 369 },
+                axisAlignSheetTransform: position,
+                data: { border: '#979DAC', background: '#fff' },
+                allowTransform: true,
+            },
+        },
+    ], ['order', 0, { i: drawingId }]] as unknown as JSON1.JSONOp, DrawingApplyType.INSERT)).toBe(true);
+    expect(apply([unitId, subUnitId, 'data', drawingId, ['axisAlignSheetTransform', ...moved], ['sheetTransform', ...moved], ['transform', ...orientation, ['left', { i: 878.8, r: 722 }], ...skew, ['top', { i: 34.8, r: 154 }]]] as unknown as JSON1.JSONOp, DrawingApplyType.UPDATE)).toBe(true);
+    const resized = { fromColumn: 6, fromColumnOffset: 78.8, fromRow: 0, fromRowOffset: 14.8, toColumn: 12, toColumnOffset: 18.8, toRow: 14, toRowOffset: 22.8 };
+    const resize = marker(resized, [6, 78.8, 0, 14.8], [13, 33.8, 11, 18.8]);
+    expect(apply([unitId, subUnitId, 'data', drawingId, ['axisAlignSheetTransform', ...resize], ['sheetTransform', ...resize], ['transform', ['height', { i: 293, r: 369 }], ['width', { i: 571, r: 468 }]]] as unknown as JSON1.JSONOp, DrawingApplyType.UPDATE)).toBe(true);
+    expect(apply([unitId, subUnitId, 'data', drawingId, ['axisAlignSheetTransform', 'angle', { i: 0 }], ['sheetTransform', 'angle', { i: 0 }]] as unknown as JSON1.JSONOp, DrawingApplyType.UPDATE)).toBe(true);
+
+    const result = bed.get(ISheetDrawingService).getDrawingByParam({ unitId, subUnitId, drawingId })!;
+    expect(result).not.toHaveProperty('sheetTransform');
+    // One-cell anchor: the authored start marker and extent survive; the end
+    // marker is reprojected from the test bed's row heights.
+    expect(result.axisAlignSheetTransform.from).toMatchObject({ row: 0, column: 6, rowOffset: 14.8, columnOffset: 78.8 });
+    expect(result.transform).toMatchObject({ width: 571, height: 293, flipX: false, flipY: false });
+    expect(bed.get(IDrawingManagerService).getDrawingByParam({ unitId, subUnitId, drawingId })).toEqual(result);
+});
+
+it('replays the first v0.15.5-era edit of a drawing created before axisAlignSheetTransform existed, with its undo and redo', () => {
+    // v0.15.4 inserted drawings with `sheetTransform` only. Clients from
+    // v0.15.5 to v1.0.0-alpha.2 replaced each changed top-level field with
+    // `replaceOp(path, oldValue, newValue)`; axisAlignSheetTransform was missing on
+    // their side, so it reached the server as an insert without `r`. Their
+    // undo, from `invertWithDoc`, removes that field and restores the rest.
+    const bed = createSheetsDrawingTestBed();
+    onTestFinished(() => bed.univer.dispose());
+    const unitId = 'test';
+    const subUnitId = 'sheet1';
+    const drawingId = 'legacy-image';
+    const skeleton = bed.get(SheetSkeletonService).ensureSkeleton(unitId, subUnitId)!;
+    const transform = { left: 300, top: 160, width: 240, height: 150, angle: 0, flipX: false, flipY: false, skewX: 0, skewY: 0 };
+    const inserted = {
+        unitId,
+        subUnitId,
+        drawingId,
+        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+        imageSourceType: ImageSourceType.URL,
+        source: 'https://example.com/legacy.png',
+        transform,
+        sheetTransform: transformToDrawingPosition(transform, skeleton),
+    };
+    const objects = [{ unitId, subUnitId, drawingId }];
+    const replay = (op: JSON1.JSONOp, type: DrawingApplyType) => bed.commandService.syncExecuteCommand(
+        SetDrawingApplyMutation.id,
+        JSON.parse(JSON.stringify({ unitId, subUnitId, op, objects, type })),
+        { fromChangeset: true }
+    );
+    expect(replay(JSON1.type.compose(
+        JSON1.insertOp([unitId, subUnitId, 'data', drawingId], inserted as unknown as JSON1.Doc),
+        JSON1.insertOp([unitId, subUnitId, 'order', 0], drawingId)
+    ), DrawingApplyType.INSERT)).toBe(true);
+    const service = bed.get(ISheetDrawingService);
+    const loaded = Tools.deepClone(service.getDrawingByParam(objects[0])!);
+    expect(loaded.axisAlignSheetTransform).toBeDefined();
+
+    const moved = { ...transform, left: transform.left + 137.4, top: transform.top - 53.2 };
+    const field = (key: string) => [unitId, subUnitId, 'data', drawingId, key];
+    const drag = [
+        JSON1.replaceOp(field('transform'), transform, moved),
+        JSON1.replaceOp(field('sheetTransform'), inserted.sheetTransform as unknown as JSON1.Doc, transformToDrawingPosition(moved, skeleton) as unknown as JSON1.Doc),
+        JSON1.replaceOp(field('axisAlignSheetTransform'), undefined as never, transformToAxisAlignPosition(moved, skeleton) as unknown as JSON1.Doc),
+    ].reduce(JSON1.type.compose, null);
+    const wireDrag = JSON.parse(JSON.stringify(drag)) as JSON1.JSONOp;
+    const clientDoc = { [unitId]: { [subUnitId]: { data: { [drawingId]: inserted }, order: [drawingId] } } };
+    const undo = JSON1.type.invertWithDoc(wireDrag, clientDoc as unknown as JSON1.Doc);
+    const expectDragged = () => {
+        const result = service.getDrawingByParam(objects[0])!;
+        expect(result).not.toHaveProperty('sheetTransform');
+        expect(result.axisAlignSheetTransform.from).toEqual(transformToAxisAlignPosition(moved, skeleton).from);
+        expect(result.transform).toMatchObject({ left: moved.left, top: moved.top, width: 240, height: 150 });
+        expect(bed.get(IDrawingManagerService).getDrawingByParam(objects[0])).toEqual(result);
+    };
+
+    expect(replay(wireDrag, DrawingApplyType.UPDATE)).toBe(true);
+    expectDragged();
+
+    expect(replay(undo, DrawingApplyType.UPDATE)).toBe(true);
+    const restored = service.getDrawingByParam(objects[0])!;
+    expect(restored).not.toHaveProperty('sheetTransform');
+    expect(restored.axisAlignSheetTransform).toEqual(loaded.axisAlignSheetTransform);
+    expect(restored.transform).toMatchObject({ left: transform.left, top: transform.top, width: 240, height: 150 });
+    expect(bed.get(IDrawingManagerService).getDrawingByParam(objects[0])).toEqual(restored);
+
+    expect(replay(wireDrag, DrawingApplyType.UPDATE)).toBe(true);
+    expectDragged();
 });

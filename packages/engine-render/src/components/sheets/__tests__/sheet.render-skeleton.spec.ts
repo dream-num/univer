@@ -18,6 +18,7 @@ import type { ICellData, IWorkbookData, ObjectMatrix, Workbook } from '@univerjs
 import {
     BooleanNumber,
     BorderStyleTypes,
+    CellValueType,
     DataStreamTreeTokenType,
     DocumentFlavor,
     HorizontalAlign,
@@ -41,7 +42,79 @@ import { DocumentSkeleton } from '../../docs/layout/doc-skeleton';
 import { FontCache } from '../../docs/layout/shaping-engine/font-cache';
 import { DocumentViewModel } from '../../docs/view-model/document-view-model';
 import { Font } from '../extensions/font';
+import { SHEET_VIEWPORT_KEY } from '../interfaces';
 import { getCustomNumberDisplayText, getDocsSkeletonPageSize, getGeneralNumberDisplayText, SpreadsheetSkeleton } from '../sheet.render-skeleton';
+
+it('fits visible content and preserves wider empty columns', () => {
+    const environment = setupRenderTestEnv();
+    const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
+        width: text === DataStreamTreeTokenType.PARAGRAPH ? 4 : text.replace(/[\r\n]/g, '').length * 7,
+        fontBoundingBoxAscent: 10,
+        fontBoundingBoxDescent: 2,
+        actualBoundingBoxAscent: 10,
+        actualBoundingBoxDescent: 2,
+    }));
+    const rootInjector = new Injector([[Univer]]);
+    const univer = rootInjector.get(Univer);
+    const injector = univer.__getInjector();
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+        id: 'auto-column-width',
+        sheetOrder: ['sheet'],
+        sheets: {
+            sheet: {
+                id: 'sheet',
+                rowCount: 10,
+                columnCount: 8,
+                defaultColumnWidth: 140,
+                columnData: { 2: { w: 210 }, 6: { w: 180 } },
+                mergeData: [{ startRow: 7, endRow: 7, startColumn: 0, endColumn: 1 }],
+                cellData: {
+                    0: {
+                        0: { v: 'a123' },
+                        1: { v: 'Wide content '.repeat(12) },
+                        3: { v: 1223 },
+                        4: { v: BooleanNumber.TRUE, t: CellValueType.BOOLEAN },
+                        5: { v: 1223, s: { stf: BooleanNumber.TRUE } },
+                        7: { v: 'x' },
+                    },
+                    1: { 7: { v: 12345678 } },
+                    2: { 6: { f: '=""', v: '', t: CellValueType.STRING } },
+                },
+            },
+        },
+    });
+    const worksheet = workbook.getActiveSheet()!;
+    const createSkeleton = () => injector.createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+    injector.add([SpreadsheetSkeleton, { useFactory: createSkeleton }]);
+    try {
+        const skeleton = injector.get(SpreadsheetSkeleton);
+        skeleton.calculate();
+        const bound = { left: 0, top: 0, right: 600, bottom: 200 };
+        skeleton.updateVisibleRange({ viewBound: bound, cacheBound: bound, viewportKey: SHEET_VIEWPORT_KEY.VIEW_MAIN } as IViewportInfo);
+
+        const widths = skeleton.calculateAutoWidthInRange([
+            { startRow: 0, endRow: 9, startColumn: 0, endColumn: 7 },
+        ]);
+        const [short, long, empty, numeric, booleanValue, shrinkToFitNumber, emptyFormula, unmergedNumber] = widths;
+        expect([short.width, booleanValue.width, shrinkToFitNumber.width]).toEqual([32, 32, 32]);
+        expect(long.width).toBeGreaterThan(worksheet.getColumnWidth(1));
+        expect(empty.width).toBe(worksheet.getColumnWidth(2));
+        expect(numeric.width).toBeLessThan(worksheet.getColumnWidth(numeric.col));
+        expect([emptyFormula.width, unmergedNumber.width]).toEqual([180, 67]);
+
+        worksheet.getColumnManager().setColumnWidth(numeric.col, numeric.width!);
+        skeleton.makeDirty(true);
+        skeleton.calculate();
+        const cell = worksheet.getCell(0, numeric.col);
+        const style = worksheet.getComposedCellStyleByCellData(0, numeric.col, cell);
+        skeleton._setFontStylesCache(0, numeric.col, cell, style);
+        expect(skeleton.getFont(0, numeric.col)?.displayText).toBe('1223');
+    } finally {
+        rootInjector.dispose();
+        measure.mockRestore();
+        environment.restore();
+    }
+});
 
 describe('Scroll cache history', () => {
     it.each([false, true])('keeps unstyled empty cells sparse after a disjoint 10,000-row scan (stored empty cells: %s)', (stored) => {

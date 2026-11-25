@@ -97,11 +97,6 @@ const locale: typeof enUS = {
         showTime: {
             label: 'Mostrar seletor de hora',
         },
-        permission: {
-            dialog: {
-                setStyleErr: 'O intervalo está protegido e você não tem permissão para definir estilos. Para definir estilos, entre em contato com o criador.',
-            },
-        },
     },
 };
 

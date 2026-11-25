@@ -16,10 +16,12 @@
 
 import type { ICellData, Nullable } from '@univerjs/core';
 import type { ErrorType } from '@univerjs/engine-formula';
-import { CellValueType } from '@univerjs/core';
+import { CellValueType, LocaleType } from '@univerjs/core';
 import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
 import { getCellValue } from '@univerjs/sheets';
+import type { TextComparer } from './text-comparer';
 import { SortType } from '../services/interface';
+import { createRegionTextComparer } from './text-comparer';
 
 /**
  * Sort order of the value kinds recognized by range sorting. The order matches Excel's default
@@ -36,8 +38,6 @@ export enum SortRank {
 type SortableCell = Nullable<ICellData>;
 
 const HASH_CHAR_CODE = 35; // '#'
-
-const removeStringSymbol = (str: string) => str.replace(/-/gi, '').replace(/'/gi, '');
 
 export const isNullValue = (cell: Nullable<ICellData>) => !cell || (cell.v == null && cell.p == null);
 
@@ -107,12 +107,12 @@ function getUntypedCellRank(value: ICellData['v']): SortRank {
     return SortRank.TEXT;
 }
 
-function readNumber(cell: SortableCell): number {
+export function readNumber(cell: SortableCell): number {
     const value = cell?.v;
     return typeof value === 'number' ? value : Number.parseFloat(`${value}`);
 }
 
-function readText(cell: SortableCell): string {
+export function readText(cell: SortableCell): string {
     const richText = cell?.p?.body?.dataStream;
     if (richText) {
         return richText;
@@ -135,26 +135,30 @@ function readLogical(cell: SortableCell): number {
     return cell ? Number(getCellValue(CellValueType.BOOLEAN, cell)) : 0;
 }
 
-function compareText(a: string, b: string): number {
-    const left = removeStringSymbol(a.toLocaleLowerCase());
-    const right = removeStringSymbol(b.toLocaleLowerCase());
-    if (left < right) {
-        return -1;
-    }
-    if (left > right) {
-        return 1;
-    }
-    return 0;
-}
+const defaultTextComparer = createRegionTextComparer(LocaleType.EN_US).compare;
 
 /**
  * Compare two cells the same way Excel sorts a range: by value kind first, then by value inside the
- * kind. Blank cells are always sorted last, whichever direction is used.
+ * kind. Blank cells are always sorted last, whichever direction is used. Text is compared with
+ * `compareText`, which defaults to the English (US) order.
  */
-export function compareCells(type: SortType, a: SortableCell, b: SortableCell): number {
-    const rankA = getSortRank(a);
-    const rankB = getSortRank(b);
+export function compareCells(
+    type: SortType,
+    a: SortableCell,
+    b: SortableCell,
+    compareText: TextComparer = defaultTextComparer
+): number {
+    return compareRankedCells(type, a, b, getSortRank(a), getSortRank(b), compareText);
+}
 
+export function compareRankedCells(
+    type: SortType,
+    a: SortableCell,
+    b: SortableCell,
+    rankA: SortRank,
+    rankB: SortRank,
+    compareText: TextComparer
+): number {
     if (rankA === SortRank.BLANK || rankB === SortRank.BLANK) {
         if (rankA === rankB) {
             return 0;

@@ -16,7 +16,6 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuItem, IValueOption } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
 import { UniverInstanceType } from '@univerjs/core';
 import { FunctionType, IDescriptionService } from '@univerjs/engine-formula';
 import {
@@ -28,9 +27,14 @@ import {
     WorksheetEditPermission,
     WorksheetSetCellValuePermission,
 } from '@univerjs/sheets';
-import { getCurrentRangeDisable$, menuClipboardDisabledObservable } from '@univerjs/sheets-ui';
+import {
+    getCurrentRangeDisable$,
+    getWorkbookPermissionDisable$,
+    menuClipboardDisabledObservable,
+} from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatestWith, map } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import {
     SheetCopyFormulaOnlyCommand,
     SheetOnlyPasteFormulaCommand,
@@ -201,6 +205,7 @@ export function CalculationOptionsMenuItemFactory(accessor: IAccessor): IMenuIte
         icon: 'CalculationOptionsIcon',
         title: 'sheets-formula-ui.calculation.title',
         tooltip: 'sheets-formula-ui.calculation.title',
+        disabled$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission]),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

@@ -26,6 +26,7 @@
     ],
     "exports": {
         ".": "./src/index.ts",
+        "./locale/*": "./src/locale/*.ts",
         "./*": "./src/*",
         "./facade": "./src/facade/index.ts"
     },
@@ -45,6 +46,11 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
+            },
+            "./locale/*": {
+                "import": "./lib/es/locale/*.js",
+                "require": "./lib/cjs/locale/*.js",
+                "types": "./lib/types/locale/*.d.ts"
             },
             "./facade": {
                 "import": "./lib/es/facade.js",

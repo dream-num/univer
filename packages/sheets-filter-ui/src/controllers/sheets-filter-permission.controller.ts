@@ -16,11 +16,16 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
+import { Disposable, ICommandService, Inject, LocaleService, Tools } from '@univerjs/core';
+import {
+    RangeProtectionPermissionViewPoint,
+    SheetPermissionCheckController,
+    WorksheetFilterPermission,
+    WorksheetViewPermission,
+} from '@univerjs/sheets';
+import { SheetsFilterService } from '@univerjs/sheets-filter';
 import type { IOpenFilterPanelOperationParams } from '../commands/operations/sheets-filter.operation';
 import type { LocaleKey } from '../locale/types';
-import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
-import { expandToContinuousRange, getSheetCommandTarget, RangeProtectionPermissionViewPoint, SheetPermissionCheckController, SheetsSelectionsService, WorksheetFilterPermission, WorksheetViewPermission } from '@univerjs/sheets';
-import { SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
 import { OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
 
 export interface IUniverSheetsFilterUIConfig {
@@ -34,72 +39,42 @@ export const DefaultSheetFilterUiConfig = {};
  */
 export class SheetsFilterPermissionController extends Disposable {
     constructor(
-        @Inject(SheetsFilterService) private _sheetsFilterService: SheetsFilterService,
-        @Inject(LocaleService) private _localeService: LocaleService,
+        @Inject(SheetsFilterService) private readonly _sheetsFilterService: SheetsFilterService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetPermissionCheckController)
-        private readonly _sheetPermissionCheckPermission: SheetPermissionCheckController,
-        @Inject(Injector) private _injector: Injector,
-        @Inject(SheetsSelectionsService) private _sheetsSelectionService: SheetsSelectionsService
+        private readonly _sheetPermissionCheckController: SheetPermissionCheckController
     ) {
         super();
 
         this._commandExecutedListener();
     }
 
-    private _commandExecutedListener() {
+    private _commandExecutedListener(): void {
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
-                if (command.id === SmartToggleSheetsFilterCommand.id) {
-                    const univerInstanceService = this._injector.get(IUniverInstanceService);
-                    const target = getSheetCommandTarget(univerInstanceService);
-                    if (!target) return;
-                    const { unitId, subUnitId, worksheet } = target;
-                    const filterRange = this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange();
-                    let permission;
-                    if (filterRange) {
-                        permission = this._sheetPermissionCheckPermission.permissionCheckWithRanges({
-                            rangeTypes: [RangeProtectionPermissionViewPoint],
-                            worksheetTypes: [WorksheetFilterPermission, WorksheetViewPermission],
-                        }, [filterRange], unitId, subUnitId);
-                    } else {
-                        const range = this._sheetsSelectionService.getCurrentLastSelection()?.range;
-                        if (range) {
-                            let newRange = { ...range };
-                            const isCellRange = range.startColumn === range.endColumn && range.startRow === range.endRow;
-                            newRange = isCellRange ? expandToContinuousRange(newRange, { left: true, right: true, up: true, down: true }, worksheet) : newRange;
-                            permission = this._sheetPermissionCheckPermission.permissionCheckWithRanges({
-                                rangeTypes: [RangeProtectionPermissionViewPoint],
-                                worksheetTypes: [WorksheetViewPermission, WorksheetFilterPermission],
-                            }, [newRange], unitId, subUnitId);
-                        } else {
-                            permission = this._sheetPermissionCheckPermission.permissionCheckWithoutRange({
-                                rangeTypes: [RangeProtectionPermissionViewPoint],
-                                worksheetTypes: [WorksheetViewPermission, WorksheetFilterPermission],
-                            });
-                        }
-                    }
-
-                    if (!permission) {
-                        this._sheetPermissionCheckPermission.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-filter-ui.permission.filterErr'));
-                    }
+                if (command.id !== OpenFilterPanelOperation.id) {
+                    return;
                 }
-                if (command.id === OpenFilterPanelOperation.id) {
-                    const params = command.params as IOpenFilterPanelOperationParams;
-                    const { unitId, subUnitId } = params;
-                    const filterRange = this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange();
-                    const colRange = Tools.deepClone(filterRange);
-                    if (colRange) {
-                        colRange.startColumn = params.col;
-                        colRange.endColumn = params.col;
-                        const permission = this._sheetPermissionCheckPermission.permissionCheckWithRanges({
-                            rangeTypes: [RangeProtectionPermissionViewPoint],
-                            worksheetTypes: [WorksheetFilterPermission, WorksheetViewPermission],
-                        }, [colRange], unitId, subUnitId);
-                        if (!permission) {
-                            this._sheetPermissionCheckPermission.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-filter-ui.permission.filterErr'));
-                        }
-                    }
+
+                const params = command.params as IOpenFilterPanelOperationParams;
+                const { unitId, subUnitId } = params;
+                const filterRange = this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange();
+                const colRange = Tools.deepClone(filterRange);
+                if (!colRange) {
+                    return;
+                }
+
+                colRange.startColumn = params.col;
+                colRange.endColumn = params.col;
+                const permission = this._sheetPermissionCheckController.permissionCheckWithRanges({
+                    rangeTypes: [RangeProtectionPermissionViewPoint],
+                    worksheetTypes: [WorksheetFilterPermission, WorksheetViewPermission],
+                }, [colRange], unitId, subUnitId);
+                if (!permission) {
+                    this._sheetPermissionCheckController.blockExecuteWithoutPermission(
+                        this._localeService.t<LocaleKey>('sheets-filter-ui.permission.filterErr')
+                    );
                 }
             })
         );

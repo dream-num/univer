@@ -26,6 +26,8 @@ import { deleteCustomRanges, insertCustomRanges } from './apply-utils/common';
 import { updateAttribute } from './apply-utils/update-apply';
 import { getBodySliceForSplitTextXAction } from './utils';
 
+type IRangeUpdate = Omit<NonNullable<IRetainAction['rangeUpdates']>[number], 'fallbackOrderIndex'> & { fallbackOrder?: string[] };
+
 export function getChangedPropertyPaths(before: unknown, after: unknown, path: string[] = []): string[][] {
     if (Tools.diffValue(before, after)) {
         return [];
@@ -88,10 +90,15 @@ function patchRangeProperties(target: ICustomRange, source: ICustomRange, paths:
 }
 
 export function composeRangeUpdate(
-    first: NonNullable<IRetainAction['rangeUpdates']>[number] | undefined,
-    second: NonNullable<IRetainAction['rangeUpdates']>[number]
-): NonNullable<IRetainAction['rangeUpdates']>[number] {
+    first: IRangeUpdate | undefined,
+    second: IRangeUpdate
+): IRangeUpdate {
     if (!first || !second.propertyPaths || !second.range) {
+        if (first?.bookmarkOrderPosition !== undefined && second.range?.rangeType === CustomRangeType.BOOKMARK &&
+            second.bookmarkOrderPosition === undefined && second.nextRangeId === undefined) {
+            // The later move changes geometry while keeping the slot assigned by the insert.
+            return { ...second, bookmarkOrderPosition: first.bookmarkOrderPosition };
+        }
         return second;
     }
     if (!first.range) {
@@ -103,10 +110,10 @@ export function composeRangeUpdate(
 }
 
 export function transformRangeUpdate(
-    update: NonNullable<IRetainAction['rangeUpdates']>[number],
-    concurrent: NonNullable<IRetainAction['rangeUpdates']>[number] | undefined,
+    update: IRangeUpdate,
+    concurrent: IRangeUpdate | undefined,
     priority: 'left' | 'right'
-): NonNullable<IRetainAction['rangeUpdates']> {
+): IRangeUpdate[] {
     if (!concurrent || !update.range) {
         return [update];
     }
@@ -124,16 +131,29 @@ export function transformRangeUpdate(
     return propertyPaths.length ? [{ ...update, propertyPaths }] : [];
 }
 
-export function getRangeUpdates(actions: TextXAction[]): NonNullable<IRetainAction['rangeUpdates']> {
-    const updates = new Map<string, NonNullable<IRetainAction['rangeUpdates']>[number]>();
+export function getRangeUpdates(actions: TextXAction[]): IRangeUpdate[] {
+    const updates = new Map<string, IRangeUpdate>();
+    let orders: string[][] | undefined;
     for (const action of actions) {
-        if (action.t === TextXActionType.RETAIN) {
-            for (const update of action.rangeUpdates ?? []) {
-                updates.set(update.rangeId, composeRangeUpdate(updates.get(update.rangeId), update));
+        if (action.t !== TextXActionType.RETAIN) {
+            continue;
+        }
+        if (action.bookmarkOrders !== undefined) {
+            orders = action.bookmarkOrders;
+            if (!Array.isArray(orders) || orders.some((order) => !Array.isArray(order) || order.some((id) => typeof id !== 'string'))) {
+                throw new Error('Invalid bookmark order table.');
             }
         }
+        for (const { fallbackOrderIndex, ...update } of action.rangeUpdates ?? []) {
+            const fallbackOrder = fallbackOrderIndex === undefined ? undefined : orders?.[fallbackOrderIndex];
+            if (fallbackOrderIndex !== undefined && (!Number.isInteger(fallbackOrderIndex) || !fallbackOrder)) {
+                throw new Error('Invalid bookmark order reference.');
+            }
+            updates.set(update.rangeId, composeRangeUpdate(updates.get(update.rangeId), { ...update, fallbackOrder }));
+        }
     }
-    return updates.size ? Tools.deepClone(Array.from(updates.values())) : [];
+    // The shared orders are immutable during apply and transform.
+    return [...updates.values()].map(({ fallbackOrder, ...update }) => ({ ...Tools.deepClone(update), fallbackOrder }));
 }
 
 // Identity edits must never enter the positional iterator: an insertion may
@@ -148,27 +168,50 @@ export function withoutRangeUpdates(actions: TextXAction[]): TextXAction[] {
                 body: getBodySliceForSplitTextXAction(action.body, index, index + 1, false),
             }));
         }
-        if (action.t !== TextXActionType.RETAIN || !action.rangeUpdates) {
+        if (action.t !== TextXActionType.RETAIN || (!action.rangeUpdates && !action.bookmarkOrders)) {
             return [action];
         }
-        const { rangeUpdates, oldRangeUpdates, ...textAction } = action;
+        const { rangeUpdates, oldRangeUpdates, bookmarkOrders, ...textAction } = action;
         return textAction.len === 0 && !textAction.body ? [] : [textAction];
     });
 }
 
-export function appendRangeUpdates(actions: TextXAction[], updates: IRetainAction['rangeUpdates']): TextXAction[] {
-    return updates?.length ? [...actions, { t: TextXActionType.RETAIN, len: 0, rangeUpdates: updates }] : actions;
+export function appendRangeUpdates(actions: TextXAction[], updates: IRangeUpdate[] | undefined): TextXAction[] {
+    if (!updates?.length) {
+        return actions;
+    }
+    const bookmarkOrders: string[][] = [];
+    const indices = new Map<string[], number>();
+    const rangeUpdates = updates.map(({ fallbackOrder, ...update }) => {
+        if (!fallbackOrder) {
+            return update;
+        }
+        let fallbackOrderIndex = indices.get(fallbackOrder);
+        if (fallbackOrderIndex === undefined) {
+            fallbackOrderIndex = bookmarkOrders.push(fallbackOrder) - 1;
+            indices.set(fallbackOrder, fallbackOrderIndex);
+        }
+        return { ...update, fallbackOrderIndex };
+    });
+    const action: IRetainAction = { t: TextXActionType.RETAIN, len: 0, rangeUpdates };
+    if (bookmarkOrders.length) {
+        action.bookmarkOrders = bookmarkOrders;
+    }
+    return [...actions, action];
 }
 
-export function validateRangeUpdates(updates: IRetainAction['rangeUpdates'], resultLength: number): void {
-    for (const { rangeId, range, nextRangeId, fallbackNextRangeId, fallbackNextRangeIds, propertyPaths } of updates ?? []) {
+export function validateRangeUpdates(updates: IRangeUpdate[], resultLength: number): void {
+    for (const { rangeId, range, nextRangeId, fallbackNextRangeId, fallbackOrder, propertyPaths, bookmarkOrderPosition } of updates) {
         if (fallbackNextRangeId !== undefined && (range?.rangeType !== CustomRangeType.BOOKMARK || propertyPaths || nextRangeId !== undefined ||
             (fallbackNextRangeId !== null && typeof fallbackNextRangeId !== 'string'))) {
             throw new Error('Invalid bookmark move anchor.');
         }
-        if (fallbackNextRangeIds !== undefined && (typeof fallbackNextRangeId !== 'string' ||
-            !Array.isArray(fallbackNextRangeIds) || fallbackNextRangeIds.some((id) => typeof id !== 'string'))) {
+        if (fallbackOrder !== undefined && typeof fallbackNextRangeId !== 'string') {
             throw new Error('Invalid bookmark move anchors.');
+        }
+        if (bookmarkOrderPosition !== undefined && (range?.rangeType !== CustomRangeType.BOOKMARK || propertyPaths ||
+            nextRangeId !== undefined || !Number.isInteger(bookmarkOrderPosition) || bookmarkOrderPosition < 0 || bookmarkOrderPosition > resultLength)) {
+            throw new Error('Invalid bookmark ordering intent.');
         }
         if (propertyPaths !== undefined) {
             validatePropertyPaths(propertyPaths);
@@ -186,15 +229,15 @@ export function validateRangeUpdates(updates: IRetainAction['rangeUpdates'], res
     }
 }
 
-function getRangeUpdateApplyOrder(updates: NonNullable<IRetainAction['rangeUpdates']>): NonNullable<IRetainAction['rangeUpdates']> {
+function getRangeUpdateApplyOrder(updates: IRangeUpdate[]): IRangeUpdate[] {
     // Apply an updated anchor before the ranges that are restored in front of it.
     if (!updates.some(({ nextRangeId }) => nextRangeId != null)) {
         return [...updates].reverse();
     }
     const pending = new Map(updates.map((update) => [update.rangeId, update]));
-    const ordered: NonNullable<IRetainAction['rangeUpdates']> = [];
+    const ordered: IRangeUpdate[] = [];
     for (let index = updates.length - 1; index >= 0; index--) {
-        const chain: NonNullable<IRetainAction['rangeUpdates']> = [];
+        const chain: IRangeUpdate[] = [];
         let update = pending.get(updates[index].rangeId);
         while (update) {
             chain.push(update);
@@ -206,12 +249,8 @@ function getRangeUpdateApplyOrder(updates: NonNullable<IRetainAction['rangeUpdat
     return ordered;
 }
 
-export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['rangeUpdates']): void {
-    if (!updates?.length) {
-        return;
-    }
-    const ranges = doc.customRanges ?? [];
-    for (const { rangeId, range, nextRangeId, fallbackNextRangeId, fallbackNextRangeIds, propertyPaths } of getRangeUpdateApplyOrder(updates)) {
+function applyRangeUpdateBatch(ranges: ICustomRange[], updates: IRangeUpdate[]): void {
+    for (const { rangeId, range, nextRangeId, fallbackNextRangeId, fallbackOrder, propertyPaths } of getRangeUpdateApplyOrder(updates)) {
         const index = ranges.findIndex((item) => item.rangeId === rangeId);
         if (range && propertyPaths) {
             if (index >= 0) {
@@ -230,13 +269,16 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
                 ranges[index] = Tools.deepClone(range);
             } else {
                 let anchor = fallbackNextRangeId == null ? -1 : ranges.findIndex((item) => item.rangeId === fallbackNextRangeId);
-                if (anchor < 0 && fallbackNextRangeIds?.length) {
-                    const positions = new Map(ranges.map((item, index) => [item.rangeId, index]));
-                    for (const candidate of fallbackNextRangeIds) {
-                        const position = positions.get(candidate);
-                        if (position !== undefined) {
-                            anchor = position;
-                            break;
+                if (anchor < 0 && fallbackOrder && typeof fallbackNextRangeId === 'string') {
+                    const first = fallbackOrder.indexOf(fallbackNextRangeId);
+                    if (first >= 0) {
+                        const positions = new Map(ranges.map((item, index) => [item.rangeId, index]));
+                        for (let offset = first + 1; offset < fallbackOrder.length; offset++) {
+                            const position = positions.get(fallbackOrder[offset]);
+                            if (position !== undefined) {
+                                anchor = position;
+                                break;
+                            }
                         }
                     }
                 }
@@ -246,28 +288,54 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
             ranges.splice(index, 1);
         }
     }
+}
+
+export function applyRangeUpdates(doc: IDocumentBody, updates: IRangeUpdate[]): void {
+    if (!updates.length) {
+        return;
+    }
+    const ranges = doc.customRanges ?? [];
+    const positioned = updates.filter((update) => update.bookmarkOrderPosition !== undefined);
+    if (positioned.length) {
+        // Sort at the positions used by the insert before later identity edits retain their slots.
+        applyRangeUpdateBatch(ranges, positioned);
+        const positions = new Map(positioned.map(({ rangeId, bookmarkOrderPosition }) => [rangeId, bookmarkOrderPosition]));
+        ranges.sort((left, right) =>
+            (positions.get(left.rangeId) ?? left.startIndex) - (positions.get(right.rangeId) ?? right.startIndex));
+        applyRangeUpdateBatch(ranges, updates.filter((update) => update.bookmarkOrderPosition === undefined));
+    } else {
+        applyRangeUpdateBatch(ranges, updates);
+    }
     doc.customRanges = orderManagedBookmarks(ranges);
 }
 
 export function moveRangeUpdates(
-    updates: NonNullable<IRetainAction['rangeUpdates']>,
+    updates: IRangeUpdate[],
     actions: TextXAction[],
     preserveProperties = false
-): NonNullable<IRetainAction['rangeUpdates']> {
+): IRangeUpdate[] {
+    const insertsRanges = actions.some((action) => action.t === TextXActionType.INSERT && action.body.customRanges?.length);
     return updates.map((update) => {
         const { rangeId, range } = update;
         if (!range && preserveProperties) {
             return update;
         }
         const body: IDocumentBody = { dataStream: '', customRanges: range ? [Tools.deepClone(range)] : [] };
+        let orderPosition = update.bookmarkOrderPosition;
         let offset = 0;
         for (const action of actions) {
             if (action.t === TextXActionType.INSERT) {
+                if (orderPosition !== undefined && orderPosition >= offset) {
+                    orderPosition += action.len;
+                }
                 insertCustomRanges(body, {
                     dataStream: '',
                     customRanges: Tools.deepClone(action.body.customRanges?.filter((item) => item.rangeId === rangeId)),
                 }, action.len, offset);
             } else if (action.t === TextXActionType.DELETE) {
+                if (orderPosition !== undefined && orderPosition >= offset) {
+                    orderPosition = Math.max(offset, orderPosition - action.len);
+                }
                 deleteCustomRanges(body, action.len, offset);
                 continue;
             } else if (action.body?.customRanges) {
@@ -279,19 +347,22 @@ export function moveRangeUpdates(
             offset += action.len;
         }
         const moved = body.customRanges?.find((item) => item.rangeId === rangeId);
-        const mapped = { ...update, propertyPaths: moved ? update.propertyPaths : undefined, range: moved && range && preserveProperties
+        const mapped = { ...update, bookmarkOrderPosition: orderPosition, propertyPaths: moved ? update.propertyPaths : undefined, range: moved && range && preserveProperties
             ? { ...Tools.deepClone(range), startIndex: moved.startIndex, endIndex: moved.endIndex }
             : moved ?? null };
-        if (mapped.range?.rangeType !== CustomRangeType.BOOKMARK && mapped.fallbackNextRangeId !== undefined) {
+        if (mapped.range?.rangeType !== CustomRangeType.BOOKMARK) {
             delete mapped.fallbackNextRangeId;
-            delete mapped.fallbackNextRangeIds;
+            delete mapped.fallbackOrder;
+            delete mapped.bookmarkOrderPosition;
+        } else if (insertsRanges && (mapped.fallbackNextRangeId !== undefined || orderPosition !== undefined)) {
+            mapped.bookmarkOrderPosition = mapped.range.startIndex;
         }
         return mapped;
     });
 }
 
 /** A concurrent metadata payload must not resurrect an explicitly removed identity. */
-export function reconcileRangeUpdates(actions: TextXAction[], updates: IRetainAction['rangeUpdates']): TextXAction[] {
+export function reconcileRangeUpdates(actions: TextXAction[], updates: IRangeUpdate[]): TextXAction[] {
     const byId = new Map(updates?.map((update) => [update.rangeId, update]));
     if (!byId.size) {
         return actions;
@@ -320,7 +391,7 @@ export function reconcileRangeUpdates(actions: TextXAction[], updates: IRetainAc
 export function dropRemovedRangeAnchors(
     actions: TextXAction[],
     suppressed: ICustomRange[],
-    updates: NonNullable<IRetainAction['rangeUpdates']>
+    updates: IRangeUpdate[]
 ): TextXAction[] {
     if (!suppressed.length) {
         return appendRangeUpdates(actions, updates);

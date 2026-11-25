@@ -47,11 +47,15 @@ export interface IRetainAction {
         nextRangeId?: string | null;
         /** Where to reinsert a moved bookmark if a concurrent text edit removed its old target. */
         fallbackNextRangeId?: string | null;
-        /** Following ranges in original order, if the first anchor is also deleted. */
-        fallbackNextRangeIds?: string[];
+        /** Index in the latest bookmarkOrders table in this operation. */
+        fallbackOrderIndex?: number;
+        /** Position used when a range-bearing insertion sorted the old ranges. */
+        bookmarkOrderPosition?: number;
         /** Only these property paths are written; missing values remove properties. Arrays are atomic. */
         propertyPaths?: string[][];
     }>;
+    /** Shared successor orders for this and following retains, until another table is declared. */
+    bookmarkOrders?: string[][];
     /** Before-document values captured by makeInvertible; never persisted in a document body. */
     oldRangeUpdates?: IRetainAction['rangeUpdates'];
 }

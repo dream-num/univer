@@ -151,6 +151,78 @@ describe('test TextX methods and branches', () => {
         expect(TextX.apply(Tools.deepClone(original), TextX.compose(remove, TextX.transform(move, remove, 'right')))).toEqual(right);
     });
 
+    it.each([true, false])('converges when a peer pastes a field during a legacy bookmark move (replaces target: %s)', (replaceTarget) => {
+        const original: IDocumentBody = {
+            dataStream: 'One\rTwo\rEnd\rLast\r\n',
+            customRanges: [
+                { ...bookmarkAt('z'), endIndex: 2 },
+                { ...bookmarkAt('a', 4), endIndex: 6 },
+            ],
+        };
+        const move = TextX.makeInvertible(
+            updateBookmarks([{ rangeId: 'z', range: { ...bookmarkAt('z', 8), endIndex: 10 } }]),
+            Tools.deepClone(original)
+        );
+        const paste: TextXAction[] = [{
+            t: TextXActionType.INSERT,
+            len: 3,
+            body: {
+                dataStream: '\u001F1\u001E',
+                customRanges: [{ rangeId: 'field', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 2, properties: { instruction: 'PAGE' } }],
+            },
+        }];
+        if (replaceTarget) {
+            paste.unshift({ t: TextXActionType.DELETE, len: 3 });
+        }
+        const moveAfterPaste = TextX.transform(move, paste, 'right');
+        const pasteAfterMove = TextX.transform(paste, move, 'left');
+        const left = TextX.apply(TextX.apply(Tools.deepClone(original), move), pasteAfterMove);
+        const right = TextX.apply(TextX.apply(Tools.deepClone(original), paste), moveAfterPaste);
+        expect(left.customRanges?.map(({ rangeId }) => rangeId)).toEqual(['field', 'a', 'z']);
+        expect(right).toEqual(left);
+        const composed = TextX.compose(move, pasteAfterMove);
+        expect(TextX.apply(Tools.deepClone(original), composed)).toEqual(left);
+        expect(TextX.apply(Tools.deepClone(original), TextX.compose(paste, moveAfterPaste))).toEqual(left);
+
+        const later = TextX.makeInvertible(updateBookmarks([
+            { rangeId: 'a', range: bookmarkAt('a', replaceTarget ? 12 : 15) },
+        ]), Tools.deepClone(left));
+        const sequential = TextX.apply(Tools.deepClone(left), later);
+        expect(sequential.customRanges?.map(({ rangeId }) => rangeId)).toEqual(['field', 'a', 'z']);
+        expect(TextX.apply(Tools.deepClone(original), TextX.compose(composed, later))).toEqual(sequential);
+
+        const prefix: TextXAction[] = [{ t: TextXActionType.INSERT, len: 3, body: { dataStream: 'Pre' } }];
+        const prefixed = TextX.apply(Tools.deepClone(left), prefix);
+        const moveAgain = TextX.makeInvertible(updateBookmarks([
+            { rangeId: 'z', range: { ...bookmarkAt('z', replaceTarget ? 7 : 6), endIndex: replaceTarget ? 9 : 8 } },
+        ]), Tools.deepClone(prefixed));
+        const sequentialMove = TextX.apply(Tools.deepClone(prefixed), moveAgain);
+        expect(TextX.apply(Tools.deepClone(original), TextX.compose(TextX.compose(composed, prefix), moveAgain))).toEqual(sequentialMove);
+    });
+
+    it.each([1, 4])('keeps serialized history for a bulk move across %s retains linear', (batches) => {
+        const bytes = (count: number) => {
+            const body: IDocumentBody = {
+                dataStream: 'Body\rNext\r\n',
+                customRanges: Array.from({ length: count }, (_, index) => bookmarkAt(`bookmark-${String(index).padStart(4, '0')}`)),
+            };
+            const updates = body.customRanges!.map(({ rangeId }) => ({ rangeId, range: bookmarkAt(rangeId, 5) }));
+            const batchSize = Math.ceil(count / batches);
+            const actions = Array.from({ length: batches }, (_, index) => updateBookmarks(updates.slice(index * batchSize, (index + 1) * batchSize))).flat();
+            const edit = JSONX.getInstance().editOp(actions);
+            const original: IDocumentData = { id: 'doc', documentStyle: {}, body };
+            const undo = JSONX.invertWithDoc(edit, original);
+            const wireEdit = JSON.stringify(edit);
+            const after = JSONX.apply(Tools.deepClone(original), JSON.parse(wireEdit)) as unknown as IDocumentData;
+            expect(JSONX.apply(after, JSON.parse(JSON.stringify(undo)))).toEqual(original);
+            return wireEdit.length;
+        };
+        const small = bytes(500);
+        const large = bytes(1000);
+        expect(large).toBeLessThan(400_000);
+        expect(large).toBeLessThan(small * 2.1);
+    });
+
     it('converges when a peer pastes a bookmark during legacy bookmark undo', () => {
         const original: IDocumentBody = { dataStream: 'Body\rNext\r\n', customRanges: [bookmarkAt('old')], customBlocks: [] };
         const deletion = TextX.makeInvertible(updateBookmarks([{ rangeId: 'old', range: null }]), Tools.deepClone(original));

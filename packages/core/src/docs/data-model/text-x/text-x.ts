@@ -468,13 +468,22 @@ export class TextX {
         const reservedParagraphIds = new Set<string>();
         const reservedSectionIds = new Set<string>();
         const changesText = actions.some((action) => action.t !== TextXActionType.RETAIN || action.body?.customRanges?.length);
+        const ranges = doc.customRanges ?? [];
+        let rangeIndices: Map<string, number> | undefined;
+        let originalOrder: string[] | undefined;
+        let bookmarkOrders: string[][] | undefined;
+        let originalOrderIndex: number | undefined;
 
         for (const action of actions) {
+            if (action.t === TextXActionType.RETAIN && action.bookmarkOrders) {
+                bookmarkOrders = action.bookmarkOrders;
+                originalOrderIndex = undefined;
+            }
             if (action.t === TextXActionType.RETAIN && action.rangeUpdates) {
-                const ranges = doc.customRanges ?? [];
+                const positions = rangeIndices ??= new Map(ranges.map((range, index) => [range.rangeId, index]));
                 action.oldRangeUpdates = action.rangeUpdates.map((update) => {
                     const { rangeId, range, propertyPaths } = update;
-                    const index = ranges.findIndex((candidate) => candidate.rangeId === rangeId);
+                    const index = positions.get(rangeId) ?? -1;
                     const previous = ranges[index];
                     let nextRangeId = previous ? ranges[index + 1]?.rangeId ?? null : undefined;
                     if (previous?.rangeType === CustomRangeType.BOOKMARK && !propertyPaths) {
@@ -485,7 +494,12 @@ export class TextX {
                             if (update.fallbackNextRangeId === undefined) {
                                 update.fallbackNextRangeId = nextRangeId;
                                 if (index + 2 < ranges.length) {
-                                    update.fallbackNextRangeIds = ranges.slice(index + 2).map((item) => item.rangeId);
+                                    bookmarkOrders ??= action.bookmarkOrders = [];
+                                    if (originalOrderIndex === undefined) {
+                                        originalOrder ??= ranges.map((item) => item.rangeId);
+                                        originalOrderIndex = bookmarkOrders.push(originalOrder) - 1;
+                                    }
+                                    update.fallbackOrderIndex = originalOrderIndex;
                                 }
                             }
                             if (!changesText) {

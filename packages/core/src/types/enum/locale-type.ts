@@ -147,3 +147,7 @@ export const LOCALE_META: Record<LocaleType, ILocaleMeta> = {
         numberingSystem: 'arab',
     },
 };
+
+export function getRegionTag(region: string = ''): string {
+    return LOCALE_META[region as LocaleType]?.tag ?? region.replace(/^([a-z]{2,3})([A-Z]{2})$/, '$1-$2');
+}

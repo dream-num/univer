@@ -20,7 +20,7 @@ import { ErrorType } from '../../basics/error-type';
 import { ErrorValueObject } from '../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../engine/value-object/primitive-object';
 import { mapFinancialScalars } from '../financial/scalar-arguments';
-import { formatExcelFixedDecimal } from './excel-fixed-decimal';
+import { formatExcelFixedDecimal, groupExcelInteger } from './excel-fixed-decimal';
 import { formatExcelTextNumber } from './format-excel-text-number';
 import { formatJapaneseGeneral } from './japanese-number-format';
 import { normalizeExcelWeekdayFormat, Text } from './text';
@@ -45,7 +45,7 @@ function excelFormatInput(value: BaseValueObject): string | number {
     return typeof parsed?.v === 'number' ? parsed.v : raw;
 }
 
-function formatLiteralDigits(code: string, value: number): string | undefined {
+function formatLiteralDigits(code: string, value: number, region?: string): string | undefined {
     const match = /^([1-9][1-9,]*)(0*)(?:\.(0*)([1-9][0-9]*)?)?$/.exec(code);
     if (!match) return;
     const [, prefix, wholePlaceholders, fractionPlaceholders, fractionLiteral] = match;
@@ -56,7 +56,7 @@ function formatLiteralDigits(code: string, value: number): string | undefined {
     const [integer, fraction = ''] = amount.split('.');
     const minimum = wholePlaceholders.length;
     const wholeNumber = integer === '0' && minimum === 0 ? '' : integer.padStart(minimum, '0');
-    const whole = prefix.includes(',') ? wholeNumber.replace(/\B(?=(?:\d{3})+(?!\d))/g, ',') : wholeNumber;
+    const whole = prefix.includes(',') ? groupExcelInteger(wholeNumber, region) : wholeNumber;
     const fractional = decimals || fractionLiteral ? `.${fraction}${fractionLiteral ?? ''}` : '';
     return `${value < 0 ? '-' : ''}${literal}${whole}${fractional}`;
 }
@@ -142,11 +142,12 @@ export class ExcelText extends Text {
         let rendered: string;
         try {
             const dateSystem = cell.getDateSystem();
+            const region = this.getNumberFormatRegion();
             let pattern = normalizeExcelWeekdayFormat(code);
             let input = value;
             let prefix = '';
             if (typeof value === 'number' && Number.isFinite(value)) {
-                const digitFormat = formatLiteralDigits(code, value);
+                const digitFormat = formatLiteralDigits(code, value, region);
                 if (digitFormat !== undefined) return this._result(digitFormat);
                 const dbNumber = /^\[DBNum([1-3])\](\[\$-[^\]]+\])?General$/i.exec(code);
                 if (dbNumber) {
@@ -164,7 +165,7 @@ export class ExcelText extends Text {
                 pattern = normalizeCalendarElapsed(pattern, Number(input));
                 pattern = normalizeJapaneseEra(pattern, Number(input), dateSystem);
             }
-            rendered = numfmt.format(pattern, input, { dateSystem, throws: true, dateErrorThrows: true, overflow: OVERFLOW });
+            rendered = numfmt.format(pattern, input, { dateSystem, region, throws: true, dateErrorThrows: true, overflow: OVERFLOW });
             if (rendered !== OVERFLOW) rendered = prefix + rendered;
         } catch {
             return ErrorValueObject.create(ErrorType.VALUE);

@@ -65,6 +65,11 @@ export interface NumberDigits {
     frac: number;
 }
 
+export type NumberGrouping = readonly [number, number?] | {
+    readonly sizes: readonly number[];
+    readonly repeatLast: boolean;
+};
+
 export interface FormatOptions {
     overflow?: string;
     dateErrorThrows?: boolean;
@@ -78,7 +83,8 @@ export interface FormatOptions {
     invalid?: string;
     locale?: string;
     ignoreTimezone?: boolean;
-    grouping?: readonly [number, number?];
+    grouping?: NumberGrouping;
+    region?: string;
     indexColors?: boolean;
     skipChar?: string | boolean;
     fillChar?: string | boolean;
@@ -97,7 +103,8 @@ export interface ResolvedFormatOptions {
     invalid: string;
     locale: string;
     ignoreTimezone: boolean;
-    grouping: readonly [number, number?];
+    grouping: NumberGrouping;
+    currencyGrouping?: NumberGrouping;
     indexColors: boolean;
     skipChar: string | boolean;
     fillChar: string | boolean;

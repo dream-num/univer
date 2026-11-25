@@ -14,79 +14,26 @@
  * limitations under the License.
  */
 
-import { getCurrencySymbolByLocale, LocaleType } from '@univerjs/core';
+import type { LocaleType } from '@univerjs/core';
+import { getCurrencySymbolByLocale } from '@univerjs/core';
+
+const currencyIcons: Readonly<Record<string, string>> = {
+    '€': 'EuroIcon',
+    '₽': 'RoubleIcon',
+    '¥': 'RmbIcon',
+    '₫': 'DongIcon',
+    '﷼': 'RialIcon',
+    '₩': 'WonIcon',
+    Rp: 'RupiahIcon',
+    zł: 'ZlotyIcon',
+};
 
 /**
  * Get the currency symbol icon based on the locale.
  */
 export function getCurrencySymbolIconByLocale(locale: LocaleType) {
-    switch (locale) {
-        case LocaleType.CA_ES:
-        case LocaleType.DE_DE:
-        case LocaleType.ES_ES:
-        case LocaleType.FR_FR:
-        case LocaleType.IT_IT:
-        case LocaleType.SK_SK:
-            return {
-                icon: 'EuroIcon',
-                symbol: getCurrencySymbolByLocale(locale),
-                locale,
-            };
-        case LocaleType.RU_RU:
-            return {
-                icon: 'RoubleIcon',
-                symbol: getCurrencySymbolByLocale(locale),
-                locale,
-            };
-        case LocaleType.JA_JP:
-        case LocaleType.ZH_CN:
-            return {
-                icon: 'RmbIcon',
-                symbol: getCurrencySymbolByLocale(locale),
-                locale,
-            };
-        case LocaleType.VI_VN:
-            return {
-                icon: 'DongIcon',
-                symbol: getCurrencySymbolByLocale(locale),
-                locale,
-            };
-        case LocaleType.AR_SA:
-        case LocaleType.FA_IR:
-            return {
-                icon: 'RialIcon',
-                symbol: getCurrencySymbolByLocale(locale),
-                locale,
-            };
-        case LocaleType.KO_KR:
-            return {
-                icon: 'WonIcon',
-                symbol: getCurrencySymbolByLocale(locale),
-                locale,
-            };
-        case LocaleType.ID_ID:
-            return {
-                icon: 'RupiahIcon',
-                symbol: getCurrencySymbolByLocale(locale),
-                locale,
-            };
-        case LocaleType.PL_PL:
-            return {
-                icon: 'ZlotyIcon',
-                symbol: getCurrencySymbolByLocale(locale),
-                locale,
-            };
-        case LocaleType.EN_US:
-        case LocaleType.PT_BR:
-        case LocaleType.ZH_HK:
-        case LocaleType.ZH_TW:
-        default:
-            return {
-                icon: 'DollarIcon',
-                symbol: getCurrencySymbolByLocale(locale),
-                locale,
-            };
-    }
+    const symbol = getCurrencySymbolByLocale(locale);
+    return { icon: currencyIcons[symbol] ?? 'DollarIcon', symbol, locale };
 }
 
 /**

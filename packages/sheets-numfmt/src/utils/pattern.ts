@@ -36,12 +36,13 @@ export const getPatternPreview = (
     pattern: string,
     value: number,
     locale: INumfmtLocaleTag = 'en',
-    dateSystem?: DateSystem
+    dateSystem?: DateSystem,
+    region?: string
 ): IPatternPreview => {
     try {
         const formatColor = numfmt.formatColor(pattern, value);
         const color = formatColor ? String(formatColor) : undefined;
-        const result = numfmt.format(pattern, value, { locale, dateSystem, throws: false });
+        const result = numfmt.format(pattern, value, { locale, dateSystem, region, throws: false });
         return {
             result,
             color,
@@ -59,12 +60,13 @@ export const getPatternPreviewIgnoreGeneral = (
     pattern: string,
     value: number,
     locale?: INumfmtLocaleTag,
-    dateSystem?: DateSystem
+    dateSystem?: DateSystem,
+    region?: string
 ): IPatternPreview => {
     if (pattern === DEFAULT_NUMBER_FORMAT) {
         return {
             result: String(stripErrorMargin(value)), // In Excel, the default General format also needs to handle numeric precision.
         };
     }
-    return getPatternPreview(pattern, value, locale, dateSystem);
+    return getPatternPreview(pattern, value, locale, dateSystem, region);
 };

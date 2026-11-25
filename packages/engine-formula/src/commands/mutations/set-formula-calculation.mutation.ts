@@ -38,6 +38,7 @@ export interface ISetFormulaCalculationStartMutation extends IFormulaDirtyData {
 
 export interface ISetFormulaStringBatchCalculationMutation {
     formulas: IFormulaStringMap;
+    region?: LocaleType;
 }
 
 export interface ISetFormulaStringBatchCalculationResultMutation {

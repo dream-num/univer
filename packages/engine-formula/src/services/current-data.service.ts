@@ -158,7 +158,7 @@ export interface IFormulaCurrentConfigService {
 
     setSheetNameMap(sheetIdToNameMap: IUnitSheetIdToNameMap): void;
 
-    loadDataLite(rowData?: IUnitRowData): void;
+    loadDataLite(rowData?: IUnitRowData, region?: LocaleType): void;
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -487,7 +487,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._mergeNameMap(this._sheetNameMap, this._dirtyNameMap);
     }
 
-    loadDataLite(rowData?: IUnitRowData) {
+    loadDataLite(rowData?: IUnitRowData, region?: LocaleType) {
+        this._calculationRegion = region ?? this._regionService?.getCurrentRegion() ?? this.getLocale();
         const { allUnitData, unitNameMap, unitSheetNameMap, unitStylesData } = this._loadSheetData();
 
         this._unitData = copyUnitData(allUnitData);

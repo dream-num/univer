@@ -19,7 +19,10 @@
 
 // @vitest-environment node
 
+import { expect } from 'vitest';
+import { getCurrencySymbolByLocale } from '../../../services/locale/currency-symbol';
 import { DateSystem } from '../../../types/enum/date-system';
+import { LOCALE_META } from '../../../types/enum/locale-type';
 import { format } from '../api';
 import { getTimeZoneName, numfmtTest } from './test-utils';
 
@@ -97,11 +100,39 @@ numfmtTest('option: nbsp', (t) => {
     t.format('0 "foo bar" .0', 1.1, '1 foo bar .1', { nbsp: true });
 });
 
+numfmtTest('preserves number grouping and currency for built-in locale IDs and tags', (t) => {
+    for (const [locale, { tag }] of Object.entries(LOCALE_META)) {
+        t.format('#,##0', 1234567890, '1,234,567,890', { region: locale });
+        t.format('#,##0', 1234567890, '1,234,567,890', { region: tag });
+        expect(getCurrencySymbolByLocale(tag)).toBe(getCurrencySymbolByLocale(locale));
+    }
+});
+
+numfmtTest('region grouping can differ between numbers and currency', (t) => {
+    t.format('#,##0', 1234567890, '1,23,45,67,890', { region: 'bn-BD' });
+    t.format('#,##0', 1234567890, '1,23,45,67,890', { region: 'ml-IN' });
+    t.format('#,##0', 1234567890, '1,23,45,67,890', { region: 'mlIN' });
+    t.format('"₹"#,##0', 1234567890, '₹1,234,567,890', { region: 'ml-IN' });
+    t.format('"₹"#,##0', 1234567890, '₹1,23,45,67,890', { region: 'hi-IN' });
+    t.format('#,##0;"₹"#,##0', -1234567890, '₹1,234,567,890', { region: 'mr-IN' });
+});
+
+numfmtTest('grouping sequences support finite groups, repetition and no grouping', (t) => {
+    t.format('#,##0', 1234567890, '12345,67,890', { grouping: { sizes: [3, 2], repeatLast: false } });
+    t.format('#,##0', 1234567890, '1,234,5,67,890', { grouping: { sizes: [3, 2, 1, 3], repeatLast: true } });
+    t.format('#,##0', 1234567890, '1234567890', { grouping: { sizes: [], repeatLast: false } });
+    t.format('0', 1234567890, '1234567890', { grouping: { sizes: [3, 2], repeatLast: true } });
+});
+
 numfmtTest('option: grouping', (t) => {
     t.format('0', 1234567890, '1234567890', { grouping: [2, 2] });
     t.format('#,##0', 1234567890, '1,234,567,890', { grouping: [3, 3] });
     t.format('#,##0', 1234567890, '1,234,567,890', { grouping: [3] });
     t.format('#,##0', 1234567890, '1,23,45,67,890', { grouping: [3, 2] });
+    t.format('#,##0', 1234567890, '1,23,45,67,890', { region: 'en-IN' });
+    t.format('#,##0', 1234567890, '1,23,45,67,890', { region: 'enIN' });
+    t.format('#,##0', 1234567890, '1,234,567,890', { region: 'en-IN', grouping: [3, 3] });
+    t.format('0', 1234567890, '1234567890', { region: 'en-IN' });
     t.format('#,##0', 1234567890, '12,34,56,78,90', { grouping: [2, 2] });
     t.format('#,##0', 1234567890, '12,34,56,78,90', { grouping: [2] });
     t.format('#,##0', 1234567890, '12,345,678,90', { grouping: [2, 3] });

@@ -268,7 +268,7 @@ export function getCurrencyFormat(locale: LocaleType, numberDigits: number = 2):
 }
 
 export function applyCurrencyFormat(locale: LocaleType, number: number, numberDigits: number = 2): string {
-    return numfmt.format(getCurrencyFormat(locale, numberDigits), number);
+    return numfmt.format(getCurrencyFormat(locale, numberDigits), number, { region: locale });
 }
 
 /**

@@ -15,6 +15,7 @@
  */
 
 export * as numfmt from './api';
+export { getNumberGrouping as getNumfmtNumberGrouping, groupIntegerDigits as groupNumfmtIntegerDigits } from './grouping';
 export type { ParseOptions } from './parse-value';
 export type { IExcelDateTimeParts } from './serial-date';
 export { EXCEL_1904_OFFSET, excelDateTimePartsToSerial, excelSerialToDateTimeParts, getDateSystemMaxSerial } from './serial-date';

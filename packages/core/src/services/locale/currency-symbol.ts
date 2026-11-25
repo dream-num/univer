@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { LocaleType } from '../../types/enum/locale-type';
+import { getRegionTag, LocaleType } from '../../types/enum/locale-type';
 
-const localeCurrencySymbolMap = new Map<LocaleType, string>([
+const localeCurrencySymbols: readonly (readonly [string, string])[] = [
     [LocaleType.EN_US, '$'],
     [LocaleType.RU_RU, '₽'],
     [LocaleType.VI_VN, '₫'],
@@ -36,8 +36,13 @@ const localeCurrencySymbolMap = new Map<LocaleType, string>([
     [LocaleType.ID_ID, 'Rp'],
     [LocaleType.PL_PL, 'zł'],
     [LocaleType.AR_SA, '﷼'],
-]);
+    ['en-IN', '₹'],
+];
 
-export function getCurrencySymbolByLocale(locale: LocaleType): string {
-    return localeCurrencySymbolMap.get(locale) || '$';
+const localeCurrencySymbolMap = new Map(
+    localeCurrencySymbols.map(([locale, symbol]) => [getRegionTag(locale).toLowerCase(), symbol] as const)
+);
+
+export function getCurrencySymbolByLocale(locale: string): string {
+    return localeCurrencySymbolMap.get(getRegionTag(locale).toLowerCase()) ?? '$';
 }

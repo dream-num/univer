@@ -41,6 +41,7 @@ import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
+    SetTriggerFormulaCalculationStartMutation,
     UniverFormulaEnginePlugin,
 } from '@univerjs/engine-formula';
 import {
@@ -383,7 +384,7 @@ describe('ArrayFormulaCellInterceptorController with remote calculation', () => 
         testBed.workerUniver.dispose();
     });
 
-    async function calculateInWorker() {
+    async function calculateInWorker(startOnMain?: () => void) {
         await waitForCondition(() => testBed.workerInstanceService.getUnit(unitId) != null);
         [
             SetArrayFormulaDataMutation,
@@ -414,7 +415,11 @@ describe('ArrayFormulaCellInterceptorController with remote calculation', () => 
             });
         });
 
-        testBed.workerCommandService.syncExecuteCommand(SetFormulaCalculationStartMutation.id, { forceCalculation: true }, { onlyLocal: true });
+        if (startOnMain) {
+            startOnMain();
+        } else {
+            testBed.workerCommandService.syncExecuteCommand(SetFormulaCalculationStartMutation.id, { forceCalculation: true }, { onlyLocal: true });
+        }
         await calculationEnd;
         await resultSyncedToMain;
         await waitForMicrotasks(2);
@@ -434,6 +439,35 @@ describe('ArrayFormulaCellInterceptorController with remote calculation', () => 
             },
         });
     }
+
+    it('applies the main thread calculation region in the formula replica', async () => {
+        const data = createWorkerWorkbookData();
+        data.sheets[subUnitId].cellData = {
+            0: {
+                0: { v: 100000, t: CellValueType.NUMBER },
+                1: { f: '=TEXT(A1,"#,##0")' },
+            },
+        };
+        testBed = createWorkerFormulaTestBed(data);
+        commandService = testBed.commandService;
+        const api = FUniver.newAPI(testBed.mainUniver);
+        const startOnMain = () => {
+            commandService.syncExecuteCommand(SetTriggerFormulaCalculationStartMutation.id, { forceCalculation: true }, { onlyLocal: true });
+        };
+
+        api.setRegion('en-IN');
+        await calculateInWorker(startOnMain);
+        const sheet = testBed.sheet.getSheetBySheetId(subUnitId)!;
+        expect(sheet.getCellRaw(0, 1)?.v).toBe('1,00,000');
+
+        api.setRegion('enUS');
+        await calculateInWorker(startOnMain);
+        expect(sheet.getCellRaw(0, 1)?.v).toBe('100,000');
+
+        api.setRegion('bn-BD');
+        const result = await api.getFormula().executeFormulas({ [unitId]: { [subUnitId]: { 0: { 0: ['=TEXT(123456789,"#,##0")'] } } } });
+        expect(result[unitId]?.[subUnitId]?.[0]?.[0]?.[0]?.value).toBe('12,34,56,789');
+    });
 
     it('should synchronize worksheet moves to a formula-only replica before recalculation', async () => {
         const data = createWorkerWorkbookData();

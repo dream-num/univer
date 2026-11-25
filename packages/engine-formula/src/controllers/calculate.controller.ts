@@ -231,10 +231,8 @@ export class CalculateController extends Disposable {
     }
 
     private async _calculateFormulaString(param: ISetFormulaStringBatchCalculationMutation) {
-        const { formulas } = param;
-        const result = await this._calculateFormulaService.executeFormulas(
-            formulas
-        );
+        const { formulas, region } = param;
+        const result = await this._calculateFormulaService.executeFormulas(formulas, undefined, region);
         if (this._disposed) {
             return;
         }

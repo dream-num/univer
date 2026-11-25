@@ -22,9 +22,9 @@ import { getFormatPreview } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
-import { BaseFunction } from '../../base-function';
+import { RegionalNumberFormatFunction } from '../regional-number-format.function';
 
-export class Text extends BaseFunction {
+export class Text extends RegionalNumberFormatFunction {
     override minParams = 2;
 
     override maxParams = 2;
@@ -108,7 +108,8 @@ export class Text extends BaseFunction {
             const previewText = getFormatPreview(
                 normalizedFormatTextValueString,
                 textValueNumber,
-                textValue.getDateSystem()
+                textValue.getDateSystem(),
+                this.getNumberFormatRegion()
             );
 
             return StringValueObject.create(formatTextValueString === ' ' ? previewText.trimEnd() : previewText);

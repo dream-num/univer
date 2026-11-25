@@ -34,6 +34,14 @@ import {
     u_YEAR,
 } from './constants';
 
+export function hasCurrencyToken(part: FormatSection, currencyId?: string | null): boolean {
+    return part.tokens.some((token) => (
+        token.type === 'string' &&
+        typeof token.value === 'string' &&
+        (currencyId ? token.value === currencyId : reCurrencySymbols.test(token.value))
+    ));
+}
+
 function isParsedSection(part: FormatSection | undefined): part is ParsedFormatSection {
     return !!part && 'scale' in part;
 }
@@ -126,11 +134,7 @@ export function info(
     };
 
     // Currency identifier may be passed in, but otherwise report known glyphs.
-    const isCurrency = !output.isDate && !output.isText && !isError && partPositive.tokens.some((token) => (
-        token.type === 'string' &&
-        typeof token.value === 'string' &&
-        (currencyId ? token.value === currencyId : reCurrencySymbols.test(token.value))
-    ));
+    const isCurrency = !output.isDate && !output.isText && !isError && hasCurrencyToken(partPositive, currencyId);
 
     let codeType = 'G';
     let codeNumber: number | '' = fracMax !== undefined && fracMax >= 0 ? Math.min(15, fracMax) : '';

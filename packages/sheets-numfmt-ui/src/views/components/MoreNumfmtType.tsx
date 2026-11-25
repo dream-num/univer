@@ -117,7 +117,7 @@ export function Options() {
                               dark:!univer-text-gray-400
                             `}
                         >
-                            {item.pattern ? getPatternPreview(item.pattern || '', defaultValue, sheetsNumfmtCellContentController.locale).result.trim() : ''}
+                            {item.pattern ? getPatternPreview(item.pattern || '', defaultValue, sheetsNumfmtCellContentController.locale, undefined, region).result.trim() : ''}
                         </span>
                     </div>
                 );

@@ -29,6 +29,7 @@ import { FUniver } from '@univerjs/core/facade';
 import {
     excelLegacyLookupFunctions,
     excelReferenceInformationFunctions,
+    excelTextSerializationFunctions,
     SetFormulaCalculationStartMutation,
     UniverFormulaEnginePlugin,
 } from '@univerjs/engine-formula';
@@ -384,6 +385,38 @@ describe('standalone Sheet formula calculation trigger', () => {
         await formulaEditResultApplied;
         expect(output.getValue()).toBe(9);
         expect(calculationStarts).toBe(3);
+    });
+
+    it.each([false, true])('uses the calculation region for numeric text (Excel overrides: %s)', async (excelOverrides) => {
+        const injector = univer.__getInjector();
+        if (excelOverrides) {
+            const functions = excelTextSerializationFunctions.filter(([, name]) => ['TEXT', 'FIXED', 'DOLLAR'].includes(name));
+            univer.registerPlugin(UniverFormulaEnginePlugin, { function: functions });
+        }
+        univer.registerPlugin(UniverSheetsFormulaPlugin);
+
+        const api = FUniver.newAPI(univer);
+        api.setRegion('en-IN');
+        const data = createWorkbookData();
+        Object.assign(data.sheets['sheet-1']!.cellData![0], {
+            0: { v: 100000 },
+            1: { f: '=TEXT(A1,"#,##0")' },
+            2: { f: '=FIXED(A1,2)' },
+            3: { f: '=FIXED(A1,2,TRUE)' },
+            4: { f: '=DOLLAR(A1,2)' },
+        });
+        const sheet = api.createWorkbook(data).getActiveSheet();
+
+        const initialResult = api.getFormula().onCalculationResultApplied(10_000);
+        injector.get(LifecycleService).stage = LifecycleStages.Rendered;
+        await initialResult;
+        expect(sheet.getRange('B1:E1').getValues()).toEqual([['1,00,000', '1,00,000.00', '100000.00', '₹1,00,000.00']]);
+
+        api.setRegion('enUS');
+        const editResult = api.getFormula().onCalculationResultApplied(10_000);
+        sheet.getRange('A1').setValue(100001);
+        await editResult;
+        expect(sheet.getRange('B1:E1').getValues()).toEqual([['100,001', '100,001.00', '100001.00', '$100,001.00']]);
     });
 });
 

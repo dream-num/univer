@@ -23,9 +23,9 @@ import { round } from '../../../engine/utils/math-kit';
 import { applyCurrencyFormat } from '../../../engine/utils/numfmt-kit';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
-import { BaseFunction } from '../../base-function';
+import { RegionalNumberFormatFunction } from '../regional-number-format.function';
 
-export class Dollar extends BaseFunction {
+export class Dollar extends RegionalNumberFormatFunction {
     override minParams = 1;
 
     override maxParams = 2;
@@ -95,7 +95,7 @@ export class Dollar extends BaseFunction {
             decimalsValue = 0;
         }
 
-        const result = applyCurrencyFormat(this.getLocale(), numberValue, decimalsValue).trimEnd();
+        const result = applyCurrencyFormat(this.getNumberFormatRegion() ?? this.getLocale(), numberValue, decimalsValue).trimEnd();
 
         return StringValueObject.create(result);
     }

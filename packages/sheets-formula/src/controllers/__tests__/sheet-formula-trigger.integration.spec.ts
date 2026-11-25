@@ -390,8 +390,7 @@ describe('standalone Sheet formula calculation trigger', () => {
     it.each([false, true])('uses the calculation region for numeric text (Excel overrides: %s)', async (excelOverrides) => {
         const injector = univer.__getInjector();
         if (excelOverrides) {
-            const functions = excelTextSerializationFunctions.filter(([, name]) => ['TEXT', 'FIXED', 'DOLLAR'].includes(name));
-            univer.registerPlugin(UniverFormulaEnginePlugin, { function: functions });
+            univer.registerPlugin(UniverFormulaEnginePlugin, { function: excelTextSerializationFunctions });
         }
         univer.registerPlugin(UniverSheetsFormulaPlugin);
 

@@ -317,11 +317,124 @@ describe('GETPIVOTDATA', () => {
             ));
             const lookup = (measure: string, ...pairs: string[]) => getObjectValue(fn.calculate(textArg(measure), anchor(cells), ...pairs.map(textArg)));
             expect(lookup('Sales', 'Category', 'North')).toBe(mode === 'disabled' ? ErrorType.REF : 30);
+            expect(lookup('Sales', 'Category', 'North', 'Category', 'North')).toBe(mode === 'disabled' ? ErrorType.REF : 30);
+            expect(lookup('Sales', 'Category', 'North', 'Category', 'South')).toBe(ErrorType.REF);
             expect(lookup('Units', 'Category', 'North', 'Region', 'East')).toBe(mode === 'disabled' ? ErrorType.REF : 3);
             expect(lookup('Units', 'Category', 'South')).toBe(9);
             expect(lookup('Sales', 'Detail', 'Retail', 'Category', 'North')).toBe(mode === 'collapsed' ? ErrorType.REF : 10);
-            expect(lookup('Sales', 'Detail', 'Retail')).toBe(ErrorType.REF);
+            expect(lookup('Sales', 'Detail', 'Retail')).toBe(mode === 'collapsed' ? 90 : ErrorType.REF);
+            expect(lookup('Units', 'Detail', 'Online')).toBe(mode === 'collapsed' ? ErrorType.REF : 2);
             expect(lookup('Units')).toBe(12);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('matches separated column levels and selects the visible subtotal at the deepest requested level', () => {
+        const range = { startRow: 0, endRow: 5, startColumn: 0, endColumn: 10 };
+        class HostedGetpivotdata extends Getpivotdata {
+            protected override get pivotReportLookup(): IPivotFormulaReportLookup {
+                return {
+                    getPivotFormulaReport: () => ({
+                        ranges: [range],
+                        fields: ['Region', 'Category', 'Detail', 'Segment'],
+                        columnFields: ['Category', 'Detail', 'Segment'],
+                        dataFields: [{ sourceName: 'Sales', displayName: 'Sum of Sales' }],
+                        layout: {
+                            firstDataRow: 4,
+                            columnFieldNames: [['Category'], ['Detail'], ['Segment']],
+                            columnGrandTotals: [10],
+                            columnSubtotals: [[2, 2, -1], [4, 2, -1], [5, 1, -1], [8, 2, -1], [9, 1, -1]],
+                        },
+                    }),
+                };
+            }
+        }
+        const bed = createFunctionTestBed();
+        const fn = bed.get(Injector).createInstance(HostedGetpivotdata, FUNCTION_NAMES_LOOKUP.GETPIVOTDATA);
+        try {
+            const grid = [
+                ['Sum of Sales', 'Column Labels'],
+                ['', 'North', '', '', '', 'North Total', 'South', '', '', 'South Total'],
+                ['', 'Online', 'Online Total', 'Retail', 'Retail Total', '', 'Retail', '', 'Retail Total'],
+                ['Row Labels', 'B', '', 'A', '', '', 'A', 'C'],
+                ['East', 20, 20, 10, 10, 30],
+                ['Grand Total', 20, 20, 10, 10, 30, 90, 11, 101, 101, 131],
+            ];
+            const cells = grid.flatMap((row, r) => row.flatMap((value, c): Array<[number, number, ICellData]> =>
+                value === '' ? [] : [[r, c, typeof value === 'number' ? number(value) : text(value)]]
+            ));
+            const lookup = (...pairs: string[]) => getObjectValue(fn.calculate(textArg('Sales'), anchor(cells), ...pairs.map(textArg)));
+            expect(lookup('Detail', 'Online')).toBe(20);
+            expect(lookup('Detail', 'Retail')).toBe(ErrorType.REF);
+            expect(lookup('Category', 'South', 'Segment', 'A')).toBe(90);
+            expect(lookup('Detail', 'Retail', 'Segment', 'C')).toBe(11);
+            expect(lookup('Category', 'South', 'Segment', 'A', 'Region', 'East')).toBe(0);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it.each(['tabular', 'compact'])('checks each %s row criterion at its own level and rejects ambiguous visible items', (layout) => {
+        const range = { startRow: 0, endRow: 9, startColumn: 0, endColumn: 2 };
+        class HostedGetpivotdata extends Getpivotdata {
+            protected override get pivotReportLookup(): IPivotFormulaReportLookup {
+                return {
+                    getPivotFormulaReport: () => ({
+                        ranges: [range],
+                        fields: ['Category', 'Detail'],
+                        columnFields: [],
+                        dataFields: [{ sourceName: 'Sales', displayName: 'Sum of Sales' }],
+                        layout: {
+                            firstDataRow: 1,
+                            rowFieldNames: [['Category'], ['Detail']],
+                            compactRowGroups: layout === 'compact' ? [[1, 1, 'top'], [4, 1, 'top'], [7, 1, 'top'], [9, 0, 'bottom']] : undefined,
+                        },
+                    }),
+                };
+            }
+        }
+        const bed = createFunctionTestBed();
+        const fn = bed.get(Injector).createInstance(HostedGetpivotdata, FUNCTION_NAMES_LOOKUP.GETPIVOTDATA);
+        try {
+            const grid = layout === 'compact'
+                ? [
+                    ['Row Labels', 'Sum of Sales'],
+                    ['Gift Total', 14],
+                    ['North', 8],
+                    ['(Blank)', 6],
+                    ['North', 30],
+                    ['Online', 20],
+                    ['Retail', 10],
+                    ['South', 90],
+                    ['Retail', 90],
+                    ['Grand Total', 134],
+                ]
+                : [
+                    ['Category', 'Detail', 'Sum of Sales'],
+                    ['Gift Total', 'North', 8],
+                    ['', '(Blank)', 6],
+                    ['Gift Total Total', '', 14],
+                    ['North', 'Online', 20],
+                    ['', 'Retail', 10],
+                    ['North Total', '', 30],
+                    ['South', 'Retail', 90],
+                    ['South Total', '', 90],
+                    ['Grand Total', '', 134],
+                ];
+            const cells = grid.flatMap((row, r) => row.flatMap((value, c): Array<[number, number, ICellData]> =>
+                value === '' ? [] : [[r, c, typeof value === 'number' ? number(value) : text(value)]]
+            ));
+            const lookup = (...pairs: string[]) => getObjectValue(fn.calculate(textArg('Sales'), anchor(cells), ...pairs.map(textArg)));
+            expect(lookup('Detail', 'Retail')).toBe(ErrorType.REF);
+            expect(lookup('Detail', 'Online')).toBe(20);
+            expect(lookup('Detail', 'North')).toBe(8);
+            expect(lookup('Category', 'Gift Total')).toBe(14);
+            expect(lookup('Detail', '(blank)')).toBe(6);
+            expect(lookup('Category', 'North', 'Detail', 'Retail')).toBe(10);
+            expect(lookup('Detail', 'Retail', 'Category', 'North')).toBe(10);
+            expect(lookup('Category', 'Gift Total', 'Detail', 'Retail')).toBe(ErrorType.REF);
+            expect(lookup()).toBe(134);
         } finally {
             bed.univer.dispose();
         }

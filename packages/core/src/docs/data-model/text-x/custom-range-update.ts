@@ -15,7 +15,7 @@
  */
 
 import type { ICustomRange, IDocumentBody } from '../../../types/interfaces/i-document-data';
-import type { BookmarkOrder, IRetainAction, TextXAction } from './action-types';
+import type { BookmarkOrder, BookmarkOrderSegment, IRetainAction, TextXAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
 import { CustomRangeType } from '../../../types/interfaces/i-document-data';
@@ -137,8 +137,33 @@ function decodeBookmarkOrders(entries: BookmarkOrder[]): string[][] {
     }
     const orders: string[][] = [];
     for (const entry of entries) {
+        const previous = orders[orders.length - 1];
         if (!Array.isArray(entry)) {
-            throw new TypeError('Invalid bookmark order table.');
+            if (!previous || !entry || !Array.isArray(entry.segments)) {
+                throw new Error('Invalid bookmark order segments.');
+            }
+            let copied = 0;
+            const order: string[] = [];
+            for (const segment of entry.segments) {
+                if (typeof segment === 'string') {
+                    order.push(segment);
+                    continue;
+                }
+                if (!Array.isArray(segment) || segment.length !== 2) {
+                    throw new Error('Invalid bookmark order segment.');
+                }
+                const [start, count] = segment;
+                if (!Number.isInteger(start) || !Number.isInteger(count) || start < 0 || count < 1 ||
+                    start + count > previous.length || copied + count > previous.length) {
+                    throw new Error('Invalid bookmark order segment bounds.');
+                }
+                copied += count;
+                for (let index = start; index < start + count; index++) {
+                    order.push(previous[index]);
+                }
+            }
+            orders.push(order);
+            continue;
         }
         if (typeof entry[0] !== 'number') {
             if (entry.some((id) => typeof id !== 'string')) {
@@ -148,7 +173,6 @@ function decodeBookmarkOrders(entries: BookmarkOrder[]): string[][] {
             continue;
         }
         const [prefixCount, suffixCount, inserted] = entry;
-        const previous = orders[orders.length - 1];
         if (!previous || entry.length !== 3 || typeof prefixCount !== 'number' || typeof suffixCount !== 'number' ||
             !Number.isInteger(prefixCount) || !Number.isInteger(suffixCount) ||
             prefixCount < 0 || suffixCount < 0 || prefixCount + suffixCount > previous.length ||
@@ -173,11 +197,48 @@ function encodeBookmarkOrder(order: string[], previous: string[] | undefined, fu
     while (suffix < common - prefix && order[order.length - suffix - 1] === previous[previous.length - suffix - 1]) {
         suffix++;
     }
-    if (!prefix && !suffix) {
-        return order;
+    const inserted = order.slice(prefix, order.length - suffix);
+    const splice: BookmarkOrder = [prefix, suffix, inserted];
+    const spliceLength = prefix || suffix ? JSON.stringify(splice).length : fullLength;
+    const simpleOrder = spliceLength < fullLength ? splice : order;
+    if (inserted.length < 2) {
+        return simpleOrder;
     }
-    const splice: BookmarkOrder = [prefix, suffix, order.slice(prefix, order.length - suffix)];
-    return JSON.stringify(splice).length < fullLength ? splice : order;
+
+    // Common cases need only a few searches. Index the previous order if it is highly fragmented.
+    const segments: BookmarkOrderSegment[] = [];
+    let lookups = 0;
+    let positions: Map<string, number> | undefined;
+    let copied = 0;
+    for (let index = 0; index < order.length;) {
+        if (lookups++ === 8) {
+            positions = new Map(previous.map((id, offset) => [id, offset]));
+        }
+        const start = positions ? positions.get(order[index]) ?? -1 : previous.indexOf(order[index]);
+        let end = index + 1;
+        if (start >= 0) {
+            while (end < order.length && start + end - index < previous.length &&
+                order[end] === previous[start + end - index]) {
+                end++;
+            }
+        }
+        const count = end - index;
+        if (count > 1) {
+            copied += count;
+            if (copied > previous.length) {
+                return simpleOrder;
+            }
+            segments.push([start, count]);
+        } else {
+            segments.push(order[index]);
+        }
+        index = end;
+    }
+
+    const reuse = { segments };
+    return segments.length < order.length && JSON.stringify(reuse).length < Math.min(spliceLength, fullLength)
+        ? reuse
+        : simpleOrder;
 }
 
 export function getRangeUpdates(actions: TextXAction[]): IRangeUpdate[] {
@@ -350,7 +411,8 @@ function orderRangesAtInsertion(ranges: ICustomRange[], positioned: IRangeUpdate
     ranges.sort((left, right) => positionOf(left) - positionOf(right));
     const orders = new Map<number, string[]>();
     for (const { bookmarkOrderPosition, fallbackOrder } of positioned) {
-        if (fallbackOrder && !orders.has(bookmarkOrderPosition!)) {
+        if (fallbackOrder) {
+            // Later moves to the same position include the order established by earlier inserts.
             orders.set(bookmarkOrderPosition!, fallbackOrder);
         }
     }

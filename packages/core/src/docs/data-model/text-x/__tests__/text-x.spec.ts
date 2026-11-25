@@ -266,13 +266,13 @@ describe('test TextX methods and branches', () => {
         expect(JSONX.apply(current, JSONX.invertWithDoc(JSON.parse(wire), before))).toEqual(before);
     });
 
-    it('keeps a reconnect batch compact when 500 separate bookmark moves alternate with REF fields', { timeout: 30_000 }, () => {
+    it.each([false, true])('keeps 500 bookmark moves alternating with REF fields compact (later section: %s)', { timeout: 60_000 }, (laterSection) => {
         const count = 500;
         const before: IDocumentData = {
             id: 'doc',
             documentStyle: {},
             body: {
-                dataStream: `${'Book    '.repeat(count)}\r\n`,
+                dataStream: `${'Book    '.repeat(count)}Heading\r\n`,
                 customBlocks: [],
                 customRanges: Array.from({ length: count }, (_, index) => bookmarkAt(`legacy-bookmark-${index}`, index * 8)),
             },
@@ -290,9 +290,10 @@ describe('test TextX methods and branches', () => {
         }
 
         for (const bookmark of before.body!.customRanges!) {
-            record(updateBookmarks([{ rangeId: bookmark.rangeId, range: bookmarkAt(bookmark.rangeId, bookmark.startIndex + 1) }]));
+            const destination = laterSection ? count * 8 : bookmark.startIndex + 1;
+            record(updateBookmarks([{ rangeId: bookmark.rangeId, range: bookmarkAt(bookmark.rangeId, destination) }]));
             record([
-                { t: TextXActionType.RETAIN, len: count * 8 },
+                { t: TextXActionType.RETAIN, len: laterSection ? current.body!.dataStream.length - 2 : count * 8 },
                 { t: TextXActionType.INSERT, len: 3, body: {
                     dataStream: '\u001F1\u001E',
                     customRanges: [{

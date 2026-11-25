@@ -72,7 +72,7 @@ const regionGrouping = new Map<string, IRegionGrouping>([
     ['te-in', pairedGrouping],
 ]);
 
-export function getRegionGrouping(region?: string): IRegionGrouping {
+function resolveRegionGrouping(region?: string): IRegionGrouping {
     const locale = region && getRegionLocale(region);
     if (!locale) return standardGrouping;
     const exact = regionGrouping.get(locale.baseName.toLowerCase());
@@ -81,6 +81,18 @@ export function getRegionGrouping(region?: string): IRegionGrouping {
         return regionGrouping.get(`${locale.language}-${locale.region.toLowerCase()}`) ?? standardGrouping;
     }
     return standardGrouping;
+}
+
+// A workbook formats many cells with the same region. Bound the cache to that one region.
+let lastRegion: string | undefined;
+let lastGrouping: IRegionGrouping = standardGrouping;
+
+export function getRegionGrouping(region?: string): IRegionGrouping {
+    if (region !== lastRegion) {
+        lastGrouping = resolveRegionGrouping(region);
+        lastRegion = region;
+    }
+    return lastGrouping;
 }
 
 export function getNumberGrouping(region?: string, currency = false): NumberGrouping {

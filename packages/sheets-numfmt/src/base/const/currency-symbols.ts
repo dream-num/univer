@@ -52,5 +52,6 @@ export function getCurrencyFormat(locale: string, numberDigits: number = 2): str
         decimal = `.${'0'.repeat(_numberDigits)}`;
     }
 
-    return `"${getCurrencySymbolByLocale(locale)}"#,##0${decimal}_);[Red]("${getCurrencySymbolByLocale(locale)}"#,##0${decimal})`;
+    const symbol = getCurrencySymbolByLocale(locale);
+    return `"${symbol}"#,##0${decimal}_);[Red]("${symbol}"#,##0${decimal})`;
 }

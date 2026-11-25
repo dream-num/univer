@@ -17,11 +17,16 @@
 import { regionCurrencySymbols } from '../../shared/numfmt/currency-symbols';
 import { getRegionLocale } from '../../types/enum/locale-type';
 
+let lastRegion: string | undefined;
+let lastSymbol = '$';
+
 export function getCurrencySymbolByLocale(region: string): string {
-    const locale = getRegionLocale(region);
-    if (!locale) return '$';
-    const maximized = locale.maximize();
-    return regionCurrencySymbols.get(maximized.baseName)
-        ?? regionCurrencySymbols.get(maximized.region ?? '')
-        ?? '¤';
+    if (region !== lastRegion) {
+        const locale = getRegionLocale(region)?.maximize();
+        lastSymbol = locale
+            ? regionCurrencySymbols.get(locale.baseName) ?? regionCurrencySymbols.get(locale.region ?? '') ?? '¤'
+            : '$';
+        lastRegion = region;
+    }
+    return lastSymbol;
 }

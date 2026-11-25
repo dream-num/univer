@@ -577,7 +577,7 @@ function generateCustomFilterFn(filter: ICustomFilter): FilterFn {
     const compare = filter.val;
 
     if (filter.compareAsText && typeof compare === 'string' &&
-        (!filter.operator || filter.operator === CustomFilterOperator.NOT_EQUALS)) {
+        (!filter.operator || filter.operator === CustomFilterOperator.EQUAL || filter.operator === CustomFilterOperator.NOT_EQUALS)) {
         const pattern = regexp.createFromWildcard(compare);
         const negate = filter.operator === CustomFilterOperator.NOT_EQUALS;
         return (value) => {

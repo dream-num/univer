@@ -31,6 +31,13 @@ import { CustomFilterOperator } from '../types';
 
 describe('Test filter model and related utils', () => {
     describe('Test "FilterFn"s', () => {
+        it.each([undefined, CustomFilterOperator.EQUAL])('honors text equality with operator %s', (operator) => {
+            const text = generateFilterFn({ colId: 0, customFilters: {
+                customFilters: [{ operator, val: '01', compareAsText: true }],
+            } });
+            expect(['01', '1', 1].map((value) => text(value))).toEqual([true, false, false]);
+        });
+
         it('preserves explicit text comparison without changing numeric inequality', () => {
             const numeric = generateFilterFn({ colId: 0, customFilters: {
                 customFilters: [{ operator: CustomFilterOperator.NOT_EQUALS, val: '01' }],

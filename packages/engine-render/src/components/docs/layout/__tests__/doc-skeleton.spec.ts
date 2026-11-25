@@ -4670,6 +4670,52 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
+    it('rebuilds all continuous paragraphs after an edit past the incomplete initial prefix', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const paragraphs = Array.from({ length: 120 }, (_, index) => `Numbered paragraph ${index} remains in flow.\r`);
+        const content = paragraphs.join('');
+        const anchor = paragraphs.slice(0, 100).join('').length;
+        const editedContent = `${content.slice(0, anchor)}Edited ${content.slice(anchor)}`;
+        const initialModel = createDocumentModelWithStyle(content, {});
+        const editedModel = createDocumentModelWithStyle(editedContent, {});
+        initialModel.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        editedModel.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const viewModel = new DocumentViewModel(initialModel);
+        const skeleton = DocumentSkeleton.create(viewModel, localeService);
+        const initialGeneration = skeleton.startIncrementalLayout({ reason: 'initial' });
+        let progress = skeleton.stepIncrementalLayout(initialGeneration, 0, 1);
+        for (let step = 0; step < 80 && !progress.didPublish; step++) {
+            progress = skeleton.stepIncrementalLayout(initialGeneration, 0, 1);
+        }
+        expect(progress.didPublish).toBe(true);
+        expect(progress.complete).toBe(false);
+        expect(progress.laidOutThrough).toBeLessThan(anchor);
+        expect(skeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines.length).toBeGreaterThan(0);
+
+        viewModel.reset(editedModel);
+        const editGeneration = skeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor,
+            invalidation: { oldStart: anchor, oldEnd: anchor, newEnd: anchor + 'Edited '.length },
+        });
+        progress = skeleton.stepIncrementalLayout(editGeneration, 0);
+        for (let step = 0; step < 500 && !progress.complete; step++) {
+            progress = skeleton.stepIncrementalLayout(editGeneration, 0);
+        }
+        expect(progress.complete).toBe(true);
+        expect(skeleton.isCurrentLayoutComplete()).toBe(true);
+        const expected = DocumentSkeleton.create(new DocumentViewModel(editedModel), localeService);
+        expected.calculate();
+        expect(normalizeSkeleton(skeleton.getSkeletonData())).toEqual(normalizeSkeleton(expected.getSkeletonData()));
+
+        skeleton.dispose();
+        expected.dispose();
+        initialModel.dispose();
+        editedModel.dispose();
+        univer.dispose();
+    });
+
     it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])(
         'keeps text before empty paragraphs addressable after prefix reuse (flavor %s)',
         (documentFlavor) => {
@@ -10032,4 +10078,224 @@ describe('modern heading collapse', () => {
             univer.dispose();
         }
     });
+});
+
+describe('document print layout readiness', () => {
+    function createPrintSkeleton() {
+        const measure = mockCanvasTextMetrics(11, 5);
+        const univer = new Univer();
+        const dataStream = `${'Print readiness paragraph.\r'.repeat(30)}\n`;
+        const model = new DocumentDataModel({
+            id: 'print-readiness',
+            body: {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({
+                    startIndex: match.index!,
+                    paragraphId: `p-${index}`,
+                })),
+                sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: 'section' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 200, height: 160 },
+                marginTop: 10,
+                marginBottom: 10,
+                marginLeft: 10,
+                marginRight: 10,
+            },
+        });
+        const viewModel = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(viewModel, univer.__getInjector().get(LocaleService));
+        return {
+            model,
+            skeleton,
+            dispose: () => {
+                skeleton.dispose();
+                viewModel.dispose();
+                univer.dispose();
+                measure.mockRestore();
+            },
+        };
+    }
+
+    function createPublication(skeleton: DocumentSkeleton): IDocumentLayoutPageGeometryPublication {
+        const data = skeleton.getSkeletonData()!;
+        return {
+            kind: 'page',
+            left: data.left,
+            top: data.top,
+            st: data.st,
+            resources: { reset: true, skeHeaders: [], skeFooters: [], skeListLevel: null, drawingAnchor: null },
+            pages: data.pages.map((page, pageIndex) => ({ pageIndex, page: serializeDocumentSkeletonPage(page) })),
+        };
+    }
+
+    it('requires synchronous geometry for the current model revision', () => {
+        const { model, skeleton, dispose } = createPrintSkeleton();
+        try {
+            expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+            skeleton.calculate();
+            expect(skeleton.getSkeletonData()!.pages.length).toBeGreaterThan(1);
+            expect(skeleton.isCurrentLayoutComplete()).toBe(true);
+            model.updateDocumentDataMargin({ t: 80 });
+            expect(skeleton.hasCompleteLayout()).toBe(true);
+            expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+            skeleton.makeDirty(true);
+            skeleton.calculate();
+            expect(skeleton.isCurrentLayoutComplete()).toBe(true);
+        } finally {
+            dispose();
+        }
+    });
+
+    it('does not accept another document model with the same layout revision', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const model = createDocumentModelWithStyle('Original body\r', {});
+        const replacement = createDocumentModelWithStyle('Replacement body\r', {});
+        expect(model.getLayoutMutationRevision()).toBe(replacement.getLayoutMutationRevision());
+        const viewModel = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(viewModel, localeService);
+        skeleton.calculate();
+        expect(skeleton.isCurrentLayoutComplete()).toBe(true);
+
+        viewModel.reset(replacement);
+        expect(skeleton.hasCompleteLayout()).toBe(true);
+        expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+        expect(skeleton.getCompletedLayoutVersion()).toBeNull();
+
+        skeleton.dispose();
+        replacement.dispose();
+        model.dispose();
+        univer.dispose();
+    });
+
+    it('rejects partial and cancelled incremental layout despite retained complete geometry', () => {
+        const { skeleton, dispose } = createPrintSkeleton();
+        try {
+            skeleton.calculate();
+            const generation = skeleton.startIncrementalLayout({ reason: 'edit' });
+            expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+            expect(skeleton.stepIncrementalLayout(generation, 0, 1).complete).toBe(false);
+            expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+            skeleton.cancelIncrementalLayout(generation);
+            expect(skeleton.hasCompleteLayout()).toBe(true);
+            expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+            completeIncrementalLayout(skeleton);
+            expect(skeleton.isCurrentLayoutComplete()).toBe(true);
+        } finally {
+            dispose();
+        }
+    });
+
+    it('does not bless an edit arriving during incremental layout', () => {
+        const { model, skeleton, dispose } = createPrintSkeleton();
+        try {
+            const generation = skeleton.startIncrementalLayout({ reason: 'initial' });
+            model.updateDocumentDataMargin({ t: 80 });
+            let progress = skeleton.stepIncrementalLayout(generation, 0);
+            for (let step = 0; !progress.complete && step < 5_000; step++) {
+                progress = skeleton.stepIncrementalLayout(generation, 0);
+            }
+            expect(progress.complete).toBe(true);
+            expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+            completeIncrementalLayout(skeleton);
+            expect(skeleton.isCurrentLayoutComplete()).toBe(true);
+        } finally {
+            dispose();
+        }
+    });
+
+    it('invalidates print geometry on font changes without a model revision change', () => {
+        const { model, skeleton, dispose } = createPrintSkeleton();
+        try {
+            skeleton.calculate();
+            const revision = model.getLayoutMutationRevision();
+            const version = skeleton.getCompletedLayoutVersion();
+            expect(version).not.toBeNull();
+            skeleton.invalidateFontMetrics(['12px Arial']);
+            expect(model.getLayoutMutationRevision()).toBe(revision);
+            expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+            expect(skeleton.getCompletedLayoutVersion()).toBeNull();
+            skeleton.calculate();
+            expect(skeleton.isCurrentLayoutComplete()).toBe(true);
+            expect(skeleton.getCompletedLayoutVersion()).not.toBe(version);
+        } finally {
+            dispose();
+        }
+    });
+
+    it('requires complete external publication and rejects completion after cancellation', () => {
+        const { skeleton, dispose } = createPrintSkeleton();
+        try {
+            const progress = completeIncrementalLayout(skeleton);
+            const publication = createPublication(skeleton);
+            skeleton.beginExternalLayout({ reason: 'edit' });
+            expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+            skeleton.applyLayoutPublication(publication, { ...progress, complete: false });
+            expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+            skeleton.cancelExternalLayout();
+            expect(skeleton.hasCompleteLayout()).toBe(true);
+            expect(skeleton.getLayoutProgress()).toBeNull();
+            expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+            skeleton.applyLayoutPublication(publication, progress);
+            expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+            skeleton.beginExternalLayout({ reason: 'edit' });
+            skeleton.applyLayoutPublication(publication, { ...progress, cancelled: true });
+            expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+            skeleton.applyLayoutPublication(publication, progress);
+            expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+            skeleton.beginExternalLayout({ reason: 'edit' });
+            skeleton.applyLayoutPublication(publication, progress);
+            expect(skeleton.isCurrentLayoutComplete()).toBe(true);
+            skeleton.applyLayoutPublication(publication, progress);
+            expect(skeleton.isCurrentLayoutComplete()).toBe(true);
+        } finally {
+            dispose();
+        }
+    });
+
+    it('does not mark a stale external publication ready after an intervening edit', () => {
+        const { model, skeleton, dispose } = createPrintSkeleton();
+        try {
+            const progress = completeIncrementalLayout(skeleton);
+            const publication = createPublication(skeleton);
+            skeleton.beginExternalLayout({ reason: 'edit' });
+            model.updateDocumentDataMargin({ t: 80 });
+            skeleton.applyLayoutPublication(publication, progress);
+            expect(skeleton.hasCompleteLayout()).toBe(true);
+            expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+        } finally {
+            dispose();
+        }
+    });
+
+    it.each(['incremental', 'external'] as const)(
+        'rejects stale %s completion when font metrics changed during layout',
+        (mode) => {
+            const { skeleton, dispose } = createPrintSkeleton();
+            try {
+                const previousProgress = completeIncrementalLayout(skeleton);
+                const publication = createPublication(skeleton);
+                if (mode === 'external') {
+                    skeleton.beginExternalLayout({ reason: 'edit' });
+                    skeleton.invalidateFontMetrics(['12px Arial']);
+                    skeleton.applyLayoutPublication(publication, previousProgress);
+                } else {
+                    const generation = skeleton.startIncrementalLayout({ reason: 'edit' });
+                    skeleton.invalidateFontMetrics(['12px Arial']);
+                    let progress = skeleton.stepIncrementalLayout(generation, 0);
+                    for (let step = 0; !progress.complete && step < 5_000; step++) {
+                        progress = skeleton.stepIncrementalLayout(generation, 0);
+                    }
+                    expect(progress.complete).toBe(true);
+                }
+                expect(skeleton.isCurrentLayoutComplete()).toBe(false);
+                completeIncrementalLayout(skeleton);
+                expect(skeleton.isCurrentLayoutComplete()).toBe(true);
+            } finally {
+                dispose();
+            }
+        }
+    );
 });

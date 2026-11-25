@@ -24,6 +24,8 @@ export class Sumsq extends BaseFunction {
 
     override maxParams = 255;
 
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
+
     override calculate(...variants: BaseValueObject[]) {
         let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         const exponent = NumberValueObject.create(2);

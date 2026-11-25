@@ -1353,6 +1353,15 @@ describe('Quoted array constants in formulas', () => {
 });
 
 describe('Supported formula Excel compatibility', () => {
+    it.each(['MAX', 'MIN'])('keeps the range selected by IF for %s', async (name) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            expect((await bed.calculate(`=${name}(IF(B1,B2:B3,B4:B5))`))?.v).toBe(0);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
     it.each([
         '=FACTDOUBLE(INDIRECT("Missing!B1:B4"))',
         '=MROUND(INDIRECT("Missing!B1:B4"),5)',

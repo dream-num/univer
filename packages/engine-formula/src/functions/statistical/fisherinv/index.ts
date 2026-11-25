@@ -44,13 +44,9 @@ export class Fisherinv extends BaseFunction {
 
         const yValue = +yObject.getValue();
 
-        const num = Math.exp(2 * yValue) - 1;
-        const den = Math.exp(2 * yValue) + 1;
+        // Preserve the original formula's zero numerator when the exponential rounds to 1.
+        const result = Math.exp(2 * yValue) === 1 ? 0 : Math.tanh(yValue);
 
-        if (!Number.isFinite(num) && num > 0 && !Number.isFinite(den) && den > 0) {
-            return NumberValueObject.create(1);
-        }
-
-        return NumberValueObject.create(num / den);
+        return NumberValueObject.create(result);
     }
 }

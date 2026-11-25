@@ -447,6 +447,14 @@ export class ByConditionsModel extends Disposable implements IFilterByModel {
         }
 
         const filterColumn = FilterConditionItems.mapToFilterColumn(this.conditionItem, this.filterConditionFormParams);
+        const previousFilters = this._filterModel.getFilterColumn(this.col)?.getColumnData().customFilters?.customFilters;
+        filterColumn?.customFilters?.customFilters.forEach((filter, index) => {
+            const previous = previousFilters?.[index];
+            // The condition form does not expose the imported comparison type.
+            if (previous?.compareAsText && previous.operator === filter.operator && previous.val === filter.val) {
+                filter.compareAsText = true;
+            }
+        });
         return this.applyCriteria({
             unitId: this._filterModel.unitId,
             subUnitId: this._filterModel.subUnitId,

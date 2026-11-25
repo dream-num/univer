@@ -15,11 +15,19 @@
  */
 
 import type { Injector, IRange, Univer, Workbook } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
+import {
+    ICommandService,
+    IUniverInstanceService,
+    RANGE_TYPE,
+    RedoCommand,
+    UndoCommand,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IRangeProtectionRule } from '../../../../models/range-protection-rule.model';
 import { createTestBase, TEST_WORKBOOK_DATA_DEMO } from '../../../__tests__/util';
+import { RemoveRowByRangeCommand, RemoveRowCommand } from '../../../../commands/commands/remove-row-col.command';
 import { RemoveSheetCommand } from '../../../../commands/commands/remove-sheet.command';
 import { AddRangeProtectionMutation } from '../../../../commands/mutations/add-range-protection.mutation';
 import { DeleteRangeProtectionMutation } from '../../../../commands/mutations/delete-range-protection.mutation';
@@ -27,6 +35,8 @@ import { InsertColMutation, InsertRowMutation } from '../../../../commands/mutat
 import { MoveColsMutation, MoveRowsMutation } from '../../../../commands/mutations/move-rows-cols.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../../../commands/mutations/remove-row-col.mutation';
 import { SetRangeProtectionMutation } from '../../../../commands/mutations/set-range-protection.mutation';
+import { SetRangeValuesMutation } from '../../../../commands/mutations/set-range-values.mutation';
+import { SetSelectionsOperation } from '../../../../commands/operations/selection.operation';
 import { RangeProtectionRenderModel } from '../../../../models/range-protection-render.model';
 import { EditStateEnum, RangeProtectionRuleModel, ViewStateEnum } from '../../../../models/range-protection-rule.model';
 import { RangeProtectionCache } from '../../../../models/range-protection.cache';
@@ -102,6 +112,36 @@ describe('RangeProtectionRefRangeService', () => {
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    it('deletes rows crossing multiple protected ranges and restores cells and rules on undo', async () => {
+        for (const command of [RemoveRowCommand, RemoveRowByRangeCommand, SetRangeValuesMutation, SetSelectionsOperation]) {
+            commandService.registerCommand(command);
+        }
+        const target = { unitId, subUnitId };
+        const sheet = get(IUniverInstanceService).getUnit<Workbook>(unitId)!.getSheetBySheetId(subUnitId)!;
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            ...target,
+            cellValue: { 1: { 0: { v: 'A' } }, 2: { 0: { v: 'B' } }, 3: { 0: { v: 'C' } } },
+        });
+        const rules = [1, 2].map((column) => createRule({
+            ranges: [{ startRow: 1, endRow: 3, startColumn: column, endColumn: column }],
+        }));
+        expect(commandService.syncExecuteCommand(AddRangeProtectionMutation.id, { ...target, rules })).toBe(true);
+        const readRanges = () => rules.map((rule) => ruleModel.getRule(unitId, subUnitId, rule.id)?.ranges);
+        const before = readRanges();
+        expect(await commandService.executeCommand(RemoveRowCommand.id, {
+            ...target,
+            range: { startRow: 2, endRow: 2, startColumn: 0, endColumn: sheet.getColumnCount() - 1 },
+        })).toBe(true);
+        expect(sheet.getCellRaw(2, 0)?.v).toBe('C');
+        expect(readRanges().map((ranges) => ranges?.[0].endRow)).toEqual([2, 2]);
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(sheet.getCellRaw(2, 0)?.v).toBe('B');
+        expect(readRanges()).toEqual(before);
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(sheet.getCellRaw(2, 0)?.v).toBe('C');
+        expect(readRanges().map((ranges) => ranges?.[0].endRow)).toEqual([2, 2]);
     });
 
     it('should route handler by command id and fallback to empty mutations', () => {

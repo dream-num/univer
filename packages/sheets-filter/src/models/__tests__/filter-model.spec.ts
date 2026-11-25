@@ -31,6 +31,17 @@ import { CustomFilterOperator } from '../types';
 
 describe('Test filter model and related utils', () => {
     describe('Test "FilterFn"s', () => {
+        it('preserves explicit text comparison without changing numeric inequality', () => {
+            const numeric = generateFilterFn({ colId: 0, customFilters: {
+                customFilters: [{ operator: CustomFilterOperator.NOT_EQUALS, val: '01' }],
+            } });
+            const text = generateFilterFn({ colId: 0, customFilters: {
+                customFilters: [{ operator: CustomFilterOperator.NOT_EQUALS, val: '01', compareAsText: true }],
+            } });
+            expect(['1', '01', 'Other', 1].map((value) => numeric(value))).toEqual([true, true, true, false]);
+            expect(['1', '01', 'Other', 1].map((value) => text(value))).toEqual([true, false, true, true]);
+        });
+
         it('should AND work', () => {
             // equivalent to "between"
             const fn = generateFilterFn({

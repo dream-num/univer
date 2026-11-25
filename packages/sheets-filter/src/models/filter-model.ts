@@ -24,6 +24,7 @@ import {
     extractPureTextFromCell,
     mergeSets,
     Rectangle,
+    regexp,
     Tools,
 } from '@univerjs/core';
 import { COLOR_BLACK_RGB } from '@univerjs/engine-render';
@@ -574,6 +575,16 @@ function isCompoundCustomFilter(filter: FilterFn[]): filter is [FilterFn, Filter
 // TODO@wzhudev: this is not ideal
 function generateCustomFilterFn(filter: ICustomFilter): FilterFn {
     const compare = filter.val;
+
+    if (filter.compareAsText && typeof compare === 'string' &&
+        (!filter.operator || filter.operator === CustomFilterOperator.NOT_EQUALS)) {
+        const pattern = regexp.createFromWildcard(compare);
+        const negate = filter.operator === CustomFilterOperator.NOT_EQUALS;
+        return (value) => {
+            const matches = value == null ? compare === '' : pattern.test(String(value));
+            return negate ? !matches : matches;
+        };
+    }
 
     if (filter.operator === CustomFilterOperator.NOT_EQUALS && typeof compare === 'string' && !ensureNumeric(compare)) {
         return createTextNotEqualsFilter(compare);

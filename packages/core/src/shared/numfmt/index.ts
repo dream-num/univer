@@ -25,6 +25,7 @@ export {
     DEFAULT_NUMBER_FORMAT,
     DEFAULT_TEXT_FORMAT,
     DEFAULT_TEXT_FORMAT_EXCEL,
+    getNumfmtCurrencySymbol,
     getNumfmtLocaleTag,
     getNumfmtParseValueFilter,
     isDefaultFormat,

@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-import { numfmt } from '@univerjs/core';
+import { getNumfmtCurrencySymbol } from '@univerjs/core';
 
-export const getCurrencyType = numfmt.getCurrencySymbol;
+export const getCurrencyType = getNumfmtCurrencySymbol;

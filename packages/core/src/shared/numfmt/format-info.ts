@@ -35,11 +35,14 @@ import {
 import { currencySymbolFromLiteral } from './currency-symbols';
 
 export function hasCurrencyToken(part: FormatSection, currencyId?: string | null): boolean {
-    return part.tokens.some((token) => (
-        token.type === 'string' &&
-        typeof token.value === 'string' &&
-        (currencyId ? token.value === currencyId : token.currency || currencySymbolFromLiteral(token.value) !== undefined)
-    ));
+    let afterDigits = false;
+    for (const token of part.tokens) {
+        if (token.type === 'int') afterDigits = true;
+        if (token.type === 'string' && typeof token.value === 'string') {
+            if (currencyId ? token.value === currencyId : token.currency || currencySymbolFromLiteral(token.value, afterDigits)) return true;
+        }
+    }
+    return false;
 }
 
 function isParsedSection(part: FormatSection | undefined): part is ParsedFormatSection {

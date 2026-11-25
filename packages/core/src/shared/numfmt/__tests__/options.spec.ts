@@ -23,8 +23,9 @@ import { expect } from 'vitest';
 import { getCurrencySymbolByLocale } from '../../../services/locale/currency-symbol';
 import { DateSystem } from '../../../types/enum/date-system';
 import { LOCALE_META } from '../../../types/enum/locale-type';
-import { format, getCurrencySymbol, getFormatInfo } from '../api';
+import { format, getFormatInfo } from '../api';
 import { currencySymbols } from '../currency-symbols';
+import { getNumfmtCurrencySymbol } from '../utils';
 import { getTimeZoneName, numfmtTest } from './test-utils';
 
 /* global process */
@@ -122,12 +123,15 @@ numfmtTest('uses the same currency tokens for classification, selection and mone
     for (const symbol of currencySymbols) {
         const pattern = `"${symbol}"#,##0`;
         expect(getFormatInfo(pattern).type, symbol).toBe('currency');
-        expect(getCurrencySymbol(pattern), symbol).toBe(symbol);
+        expect(getNumfmtCurrencySymbol(pattern), symbol).toBe(symbol);
         t.format(pattern, 123456789, `${symbol}123,456,789`, { region: 'ml-IN' });
     }
+    expect(getNumfmtCurrencySymbol('0.00,"K"')).toBeUndefined();
+    expect(getFormatInfo('#,##0"L"').type).toBe('grouped');
+    expect(getFormatInfo('#,##0[$L]').type).toBe('currency');
     t.format('0" hours"', 12, '12 hours');
     expect(getFormatInfo('#,##0" Reports"').type).toBe('grouped');
-    expect(getCurrencySymbol('[$-409]#,##0;[Red]-#,##0')).toBeUndefined();
+    expect(getNumfmtCurrencySymbol('[$-409]#,##0;[Red]-#,##0')).toBeUndefined();
     t.format('[$ABC-409]#,##0', 123456789, 'ABC123,456,789', { region: 'ml-IN' });
     expect(getFormatInfo('"Rp"#,##0', { currency: 'USD' }).type).toBe('grouped');
     expect(getFormatInfo('"Rp"#,##0').type).toBe('currency');
@@ -143,10 +147,21 @@ numfmtTest('keeps grouping for equivalent regional tags and scripts', (t) => {
 
 numfmtTest('uses regional currency symbols including language and script variants', () => {
     for (const [region, expected] of [
-        ['de-AT', '€'], ['en-IE', '€'], ['fr-BE', '€'], ['pt-PT', '€'],
-        ['de-CH', 'CHF'], ['th-TH', '฿'], ['hu-HU', 'Ft'], ['da-DK', 'kr.'],
-        ['en-HK', '$'], ['zhHK', 'HK$'], ['zh-Hans-HK', '$'], ['bs-Cyrl-BA', 'КМ'],
-        ['en-IN-u-nu-latn', '₹'], ['es-419', 'XDR'], ['en-AQ', '¤'],
+        ['de-AT', '€'],
+        ['en-IE', '€'],
+        ['fr-BE', '€'],
+        ['pt-PT', '€'],
+        ['de-CH', 'CHF'],
+        ['th-TH', '฿'],
+        ['hu-HU', 'Ft'],
+        ['da-DK', 'kr.'],
+        ['en-HK', '$'],
+        ['zhHK', 'HK$'],
+        ['zh-Hans-HK', '$'],
+        ['bs-Cyrl-BA', 'КМ'],
+        ['en-IN-u-nu-latn', '₹'],
+        ['es-419', 'XDR'],
+        ['en-AQ', '¤'],
     ]) {
         expect(getCurrencySymbolByLocale(region), region).toBe(expected);
     }

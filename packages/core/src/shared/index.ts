@@ -42,6 +42,7 @@ export {
     excelDateTimePartsToSerial,
     excelSerialToDateTimeParts,
     getDateSystemMaxSerial,
+    getNumfmtCurrencySymbol,
     getNumfmtLocaleTag,
     getNumfmtNumberGrouping,
     getNumfmtParseValueFilter,

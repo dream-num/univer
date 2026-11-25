@@ -16,7 +16,7 @@
 
 // Windows GetLocaleInfoEx(LOCALE_SCURRENCY), without user overrides. Territory defaults
 // are shared across languages unless a specific BCP 47 tag selects another symbol.
-// CLDR territory-currency data supplies inhabited territories without an NLS locale.
+// CLDR territory-currency data supplies territories without an NLS locale.
 const currencyRegions: ReadonlyArray<readonly [string, string]> = [
     ['XDR', '001 150 419'],
     ['EC$', '029'],
@@ -170,16 +170,49 @@ for (const [symbol, regions] of currencyRegions) {
 
 // Keep the existing picker order, then include every regional display symbol.
 export const currencySymbols = [...new Set([
-    'Rp', 'zł', 'NT$', 'R$', 'HK$', '$', '£', '¥',
-    '¤', '֏', '؋', '৳', '฿', '៛', '₡', '₦', '₩', '₪', '₫', '€',
-    '₭', '₮', '₱', '₲', '₴', '₸', '₹', '₺', '₼', '₽', '₾', '₿', '﷼',
+    'Rp',
+    'zł',
+    'NT$',
+    'R$',
+    'HK$',
+    '$',
+    '£',
+    '¥',
+    '¤',
+    '֏',
+    '؋',
+    '৳',
+    '฿',
+    '៛',
+    '₡',
+    '₦',
+    '₩',
+    '₪',
+    '₫',
+    '€',
+    '₭',
+    '₮',
+    '₱',
+    '₲',
+    '₴',
+    '₸',
+    '₹',
+    '₺',
+    '₼',
+    '₽',
+    '₾',
+    '₿',
+    '﷼',
     ...regionCurrencySymbols.values(),
 ])];
 
 const knownSymbols = new Set(currencySymbols);
 
-export function currencySymbolFromLiteral(value: string): string | undefined {
+export function currencySymbolFromLiteral(value: string, afterDigits: boolean): string | undefined {
     const literal = value.trim();
+    // A single letter after the digits is also a unit or a scale (e.g. 0.00,"K").
+    // An explicit [$K] currency token remains unambiguous in either position.
+    if (afterDigits && /^[a-z]$/i.test(literal)) return;
     if (knownSymbols.has(literal)) return literal;
     return literal.match(/\p{Sc}/u)?.[0];
 }

@@ -20,9 +20,9 @@ import type { IUniverUIConfig } from '@univerjs/ui';
 import {
     dateKit,
     generateRandomId,
+    getRegionTag,
     ICommandService,
     isSafeUrl,
-    getRegionTag,
     LocaleService,
     RegionService,
     UserManagerService,

@@ -69,7 +69,8 @@ FULL_TO_HALF.set('\u309C', '\uFF9F');
 export function usesEastAsianCharacterWidth(region: string | undefined): boolean {
     const locale = region && getRegionLocale(region);
     if (!locale) return false;
-    return locale.language === 'ja' || locale.language === 'ko' || locale.language === 'zh';
+    if (locale.language === 'zh') return locale.region === 'CN' || locale.region === 'TW' || locale.region === 'HK';
+    return (locale.language === 'ja' && locale.region === 'JP') || (locale.language === 'ko' && locale.region === 'KR');
 }
 
 export function toHalfWidth(text: string): string {

@@ -495,7 +495,8 @@ export class TextX {
                                 update.fallbackNextRangeId = nextRangeId;
                                 bookmarkOrders ??= action.bookmarkOrders = [];
                                 if (originalOrderIndex === undefined) {
-                                    originalOrder ??= ranges.map((item) => item.rangeId);
+                                    // Managed bookmarks have their own stable ordering.
+                                    originalOrder ??= ranges.filter((item) => !isManagedBookmark(item)).map((item) => item.rangeId);
                                     originalOrderIndex = bookmarkOrders.push(originalOrder) - 1;
                                 }
                                 update.fallbackOrderIndex = originalOrderIndex;

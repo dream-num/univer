@@ -235,7 +235,7 @@ describe('test TextX methods and branches', () => {
         expect(TextX.apply(Tools.deepClone(before), TextX.compose(paste, moveAfterPaste))).toEqual(expected);
     });
 
-    it('deduplicates equal bookmark orders when composing separately recorded moves', () => {
+    it.each([false, true])('deduplicates bookmark orders when composing separate moves (adds managed bookmarks: %s)', (addManaged) => {
         const count = 250;
         const before: IDocumentData = {
             id: 'doc',
@@ -247,8 +247,13 @@ describe('test TextX methods and branches', () => {
         };
         const jsonX = JSONX.getInstance();
         let current = Tools.deepClone(before);
-        const edits = before.body!.customRanges!.map(({ rangeId }) => {
-            const edit = jsonX.editOp(updateBookmarks([{ rangeId, range: bookmarkAt(rangeId, 5) }]));
+        const edits = before.body!.customRanges!.map(({ rangeId }, index) => {
+            const updates = [{ rangeId, range: bookmarkAt(rangeId, 5) }];
+            if (addManaged) {
+                const managedId = createBookmarkRangeId(String(index));
+                updates.push({ rangeId: managedId, range: bookmarkAt(managedId, 5) });
+            }
+            const edit = jsonX.editOp(updateBookmarks(updates));
             JSONX.invertWithDoc(edit, current);
             const transported = JSON.parse(JSON.stringify(edit)) as typeof edit;
             current = JSONX.apply(current, transported) as unknown as IDocumentData;
@@ -256,7 +261,7 @@ describe('test TextX methods and branches', () => {
         });
         const composed = edits.reduce((combined, edit) => JSONX.compose(combined, edit));
         const wire = JSON.stringify(composed);
-        expect(wire.length).toBeLessThan(count * 400);
+        expect(wire.length).toBeLessThan(count * (addManaged ? 750 : 400));
         expect(JSONX.apply(Tools.deepClone(before), JSON.parse(wire))).toEqual(current);
         expect(JSONX.apply(current, JSONX.invertWithDoc(JSON.parse(wire), before))).toEqual(before);
     });

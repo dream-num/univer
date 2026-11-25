@@ -228,6 +228,74 @@ describe('custom-range hit testing with real document layout', () => {
         return { model, render, manager, skeleton, documents, viewport, scrollBar, service };
     }
 
+    it('hits a single link without scanning the long document after resize or edit', () => {
+        const dataStream = `First link\r${'Paragraph\r'.repeat(4_000)}\n`;
+        const snapshot: IDocumentData = {
+            id: 'sparse-hover-range',
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream.matchAll(/\r/g), (match, index) => ({ startIndex: match.index, paragraphId: `p${index}` })),
+                sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: 'body' }],
+                customRanges: [{ startIndex: 0, endIndex: 9, rangeId: 'first-link', rangeType: CustomRangeType.HYPERLINK }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.MODERN,
+                pageSize: { width: 320, height: Number.POSITIVE_INFINITY },
+                marginTop: 8,
+                marginLeft: 12,
+            },
+        };
+        const univer = new Univer();
+        try {
+            const { documents, model, manager, render, skeleton, service } = createBufferedRangeTestBed(univer, snapshot);
+            const [rect] = service.getCustomRangeBounds()[0].rects;
+            const offsetX = (rect.left + rect.right) / 2;
+            const offsetY = (rect.top + rect.bottom) / 2;
+            const expectLocalHit = () => {
+                const column = skeleton.getSkeletonData()!.pages[0].sections[0].columns[0];
+                const lines = column.lines;
+                expect(lines.length).toBeGreaterThan(4_000);
+                let lineReads = 0;
+                column.lines = new Proxy(lines, {
+                    get(target, property, receiver) {
+                        if (typeof property === 'string' && /^\d+$/.test(property)) {
+                            lineReads++;
+                        }
+                        return Reflect.get(target, property, receiver);
+                    },
+                });
+                try {
+                    expect(service.isPointerOnInteractiveRange(offsetX, offsetY)).toBe(true);
+                    // Resolving a first-line link only needs the nearby layout lines.
+                    expect(lineReads).toBeLessThan(32);
+                } finally {
+                    column.lines = lines;
+                }
+            };
+
+            render.engine.resizeBySize(300, 200);
+            expectLocalHit();
+
+            const edit = new TextX();
+            edit.push({ t: TextXActionType.RETAIN, len: dataStream.length - 3 });
+            edit.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: 'X' } });
+            model.apply(JSONX.getInstance().editOp(edit.serialize(), ['body']));
+            manager.getViewModel().reset(model);
+            skeleton.makeDirty(true);
+            manager.recalculate();
+            expectLocalHit();
+
+            const clicked: string[] = [];
+            service.clickCustomRanges$.subscribe(({ range }) => clicked.push(range.rangeId));
+            const event = { offsetX, offsetY, buttons: 0, button: 0, target: documents, timeStamp: 100 } as unknown as IPointerEvent;
+            documents.onPointerDown$.emitEvent(event);
+            render.scene.onPointerUp$.emitEvent({ ...event, timeStamp: 180 });
+            expect(clicked).toEqual(['first-link']);
+        } finally {
+            univer.dispose();
+        }
+    });
+
     it.each([
         { endIndex: 12 },
         { startIndex: 12 },
@@ -607,12 +675,21 @@ describe('custom-range hit testing with real document layout', () => {
         }
     });
 
-    it.each([undefined, 'tbRlV'] as const)('keeps hover and clicks aligned after horizontal table scrolling (direction: %s)', (textDirection) => {
+    it.each([
+        [undefined, false],
+        [undefined, true],
+        ['tbRlV', false],
+        ['tbRlV', true],
+    ] as const)('keeps hover and clicks aligned after table scrolling (direction: %s, body link: %s)', (textDirection, hasBodyLink) => {
         vi.useFakeTimers();
         const stream = genEmptyTable(1, 2).dataStream.replace('\r', 'First link\r');
         const rowEnd = stream.lastIndexOf('\r');
         const tableStream = `${stream.slice(0, rowEnd)}Second link${stream.slice(rowEnd)}`;
         const bodyLink = 'Body link';
+        const linkLabels = ['First link', 'Second link'];
+        if (hasBodyLink) {
+            linkLabels.push(bodyLink);
+        }
         const dataStream = `${tableStream}\r${bodyLink}\r\n`;
         const table = { ...genTableSource(1, 2, 160), tableId: 'table' };
         for (const cell of table.tableRows[0].tableCells) {
@@ -625,7 +702,7 @@ describe('custom-range hit testing with real document layout', () => {
                 paragraphs: Array.from(dataStream.matchAll(/\r/g), (match, index) => ({ startIndex: match.index, paragraphId: `p-${index}` })),
                 sectionBreaks: Array.from(dataStream.matchAll(/\n/g), (match, index) => ({ startIndex: match.index, sectionId: `s-${index}` })),
                 tables: [{ startIndex: 0, endIndex: tableStream.length, tableId: 'table' }],
-                customRanges: ['First link', 'Second link', bodyLink].map((label) => ({
+                customRanges: linkLabels.map((label) => ({
                     startIndex: dataStream.indexOf(label),
                     endIndex: dataStream.indexOf(label) + label.length - 1,
                     rangeId: label,

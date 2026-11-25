@@ -375,6 +375,7 @@ interface ITableCellGeometryEntry {
 }
 
 const HOVER_SCROLL_BUFFER_RATIO = 0.5;
+const DIRECT_CUSTOM_RANGE_HIT_LIMIT = 2;
 const TABLE_BLOCK_MENU_HOVER_GUTTER_LEFT = 72;
 const TABLE_BLOCK_MENU_HOVER_GUTTER_TOP = 42;
 
@@ -847,7 +848,15 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         }
 
         const ranges = unit.getBody()?.customRanges;
-        return ranges?.length ? this._hitCustomRangeBounds(point, this._getBufferedRangeBounds(page, ranges, top, bottom)) : [];
+        if (!ranges?.length) {
+            return [];
+        }
+
+        // Building the viewport index scans the layout. For sparse ranges, cache their exact bounds directly.
+        const bounds = ranges.length <= DIRECT_CUSTOM_RANGE_HIT_LIMIT
+            ? this._getAllCustomRangeBounds()
+            : this._getBufferedRangeBounds(page, ranges, top, bottom);
+        return this._hitCustomRangeBounds(point, bounds);
     }
 
     private _getBufferedRangeBounds(

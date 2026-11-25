@@ -135,6 +135,7 @@ export class LambdaValueObjectObject extends BaseValueObject {
             if (token === DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER) {
                 const lambdaParameter = (item as LambdaParameterNode).getLambdaParameter();
                 const value = this._lambdaPrivacyValueMap.get(lambdaParameter);
+                (item as LambdaParameterNode).setRuntimeArgument(value != null);
                 if (value) {
                     (item as LambdaParameterNode).setValue(value);
                 } else {

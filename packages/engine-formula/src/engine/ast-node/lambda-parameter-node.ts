@@ -15,7 +15,6 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-
 import type { LambdaPrivacyVarType } from './base-ast-node';
 import { ErrorType } from '../../basics/error-type';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../../basics/token-type';
@@ -24,6 +23,7 @@ import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
+import { NullNode } from './null-node';
 
 function getRootLexerNode(node: Nullable<BaseAstNode>): Nullable<BaseAstNode> {
     if (!node) {
@@ -45,6 +45,23 @@ function getRootLexerNode(node: Nullable<BaseAstNode>): Nullable<BaseAstNode> {
 }
 
 export class LambdaParameterNode extends BaseAstNode {
+    private _runtimeArgument = false;
+
+    setRuntimeArgument(value: boolean) {
+        this._runtimeArgument = value;
+    }
+
+    isOmitted(): boolean {
+        if (this._runtimeArgument) {
+            return false;
+        }
+        const source = this._currentLambdaPrivacyVar.get(this._lambdaParameter);
+        if (source instanceof LambdaParameterNode) {
+            return source.isOmitted();
+        }
+        return source instanceof NullNode;
+    }
+
     constructor(
         token: string,
         private _lambdaParameter: string,

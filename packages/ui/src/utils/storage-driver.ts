@@ -21,6 +21,7 @@ const DB_VERSION = 1;
 interface IStorageDriver {
     getItem<T>(key: string): Promise<T | null>;
     setItem<T>(key: string, value: T): Promise<T>;
+    updateItem<T>(key: string, update: (value: T | null) => T | undefined): Promise<boolean>;
     removeItem(key: string): Promise<void>;
     clear(): Promise<void>;
     key(index: number): Promise<string | null>;
@@ -44,9 +45,12 @@ class IndexedDBDriver implements IStorageDriver {
         });
     }
 
+    open(): Promise<IDBDatabase> {
+        return this._db ??= this._init();
+    }
+
     private _store(mode: IDBTransactionMode): Promise<IDBObjectStore> {
-        this._db ??= this._init();
-        return this._db.then((db) => {
+        return this.open().then((db) => {
             const tx = db.transaction(STORE_NAME, mode);
             return tx.objectStore(STORE_NAME);
         });
@@ -67,6 +71,29 @@ class IndexedDBDriver implements IStorageDriver {
             const req = store.put(value, key);
             req.onsuccess = () => resolve(value);
             req.onerror = () => reject(req.error);
+        });
+    }
+
+    async updateItem<T>(key: string, update: (value: T | null) => T | undefined): Promise<boolean> {
+        const store = await this._store('readwrite');
+        return new Promise((resolve, reject) => {
+            const transaction = store.transaction;
+            let written = false;
+            transaction.oncomplete = () => resolve(written);
+            transaction.onabort = () => reject(transaction.error ?? new Error('Storage update aborted'));
+            const request = store.get(key);
+            request.onsuccess = () => {
+                try {
+                    const next = update(request.result ?? null);
+                    if (next !== undefined) {
+                        store.put(next, key);
+                        written = true;
+                    }
+                } catch (error) {
+                    reject(error);
+                    transaction.abort();
+                }
+            };
         });
     }
 
@@ -162,6 +189,23 @@ class LocalStorageDriver implements IStorageDriver {
         return value;
     }
 
+    async updateItem<T>(key: string, update: (value: T | null) => T | undefined): Promise<boolean> {
+        const locks = globalThis.navigator?.locks;
+        if (!locks) {
+            throw new Error('Atomic storage updates require IndexedDB or Web Locks');
+        }
+        const storageKey = this._key(key);
+        return locks.request(storageKey, () => {
+            const raw = localStorage.getItem(storageKey);
+            const next = update(raw === null ? null : JSON.parse(raw));
+            if (next === undefined) {
+                return false;
+            }
+            localStorage.setItem(storageKey, JSON.stringify(next));
+            return true;
+        });
+    }
+
     async removeItem(key: string): Promise<void> {
         localStorage.removeItem(this._key(key));
     }
@@ -209,7 +253,7 @@ class FallbackStorageDriver implements IStorageDriver {
     private _fallbackEnabled = false;
 
     constructor(
-        private readonly _primary: IStorageDriver,
+        private readonly _primary: IndexedDBDriver,
         private readonly _fallback: IStorageDriver
     ) {}
 
@@ -232,6 +276,19 @@ class FallbackStorageDriver implements IStorageDriver {
 
     setItem<T>(key: string, value: T): Promise<T> {
         return this._run(() => this._primary.setItem(key, value), () => this._fallback.setItem(key, value));
+    }
+
+    async updateItem<T>(key: string, update: (value: T | null) => T | undefined): Promise<boolean> {
+        if (!this._fallbackEnabled) {
+            try {
+                await this._primary.open();
+            } catch {
+                this._fallbackEnabled = true;
+            }
+        }
+        // A failed transaction or callback must not be rerun against a different store.
+        const driver = this._fallbackEnabled ? this._fallback : this._primary;
+        return driver.updateItem(key, update);
     }
 
     removeItem(key: string): Promise<void> {

@@ -119,6 +119,35 @@ describe('browserStorage (LocalStorageDriver fallback)', () => {
             }
         });
 
+        it('uses the cross-client lock for fallback updates and preserves a rejected write', async () => {
+            const navigator = globalThis.navigator;
+            const request = vi.fn(async (_key: string, write: () => boolean) => write());
+            vi.stubGlobal('navigator', { locks: { request } });
+            try {
+                await browserStorage.setItem('source', 'original');
+                expect(await browserStorage.updateItem<string>('source', (value) =>
+                    value === 'original' ? 'updated' : undefined)).toBe(true);
+                expect(await browserStorage.updateItem<string>('source', (value) =>
+                    value === 'original' ? 'stale' : undefined)).toBe(false);
+                expect(await browserStorage.getItem('source')).toBe('updated');
+                expect(request).toHaveBeenCalledWith(`${STORAGE_PREFIX}source`, expect.any(Function));
+            } finally {
+                vi.stubGlobal('navigator', navigator);
+            }
+        });
+
+        it('rejects a fallback update without cross-client locking', async () => {
+            const navigator = globalThis.navigator;
+            vi.stubGlobal('navigator', {});
+            try {
+                await browserStorage.setItem('source', 'original');
+                await expect(browserStorage.updateItem('source', () => 'unsafe')).rejects.toThrow('Atomic storage updates');
+                expect(await browserStorage.getItem('source')).toBe('original');
+            } finally {
+                vi.stubGlobal('navigator', navigator);
+            }
+        });
+
         it('should store and retrieve a string', async () => {
             await browserStorage.setItem('str', 'hello');
             const value = await browserStorage.getItem<string>('str');

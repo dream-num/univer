@@ -66,6 +66,68 @@ describe('RTree integration', () => {
         }
     });
 
+    it('preserves dependency order for a range crossing cells with a shared column', () => {
+        const tree = new RTree(true);
+        const query = (startRow: number, endRow = startRow) => ({
+            unitId: 'unit',
+            sheetId: 'sheet',
+            range: { startRow, endRow, startColumn: 4, endColumn: 4 },
+        });
+        tree.bulkInsert(Array.from({ length: 70 }, (_, id) => ({ ...query(id), id })));
+        tree.insert({ ...query(18), id: 'second' });
+        tree.openKdTree();
+
+        const search = query(14, 21);
+        const expected = [21, 20, 19, 18, 'second', 17, 16, 15, 14];
+        expect(Array.from(tree.searchGenerator(search))).toEqual(expected);
+        expect(Array.from(tree.bulkSearch([search], new Set([18])))).toEqual([21, 20, 19, 'second', 17, 16, 15, 14]);
+        tree.closeKdTree();
+        tree.openKdTree();
+        expect(Array.from(tree.searchGenerator(search))).toEqual(expected);
+        tree.dispose();
+    });
+
+    it('keeps new coordinates out of open searches while reflecting ID changes at indexed cells', () => {
+        const tree = new RTree(true);
+        const cell = (column: number, id: string): IRTreeItem => ({
+            unitId: 'unit',
+            sheetId: 'sheet',
+            id,
+            range: { startRow: 0, endRow: 0, startColumn: column, endColumn: column },
+        });
+        const query = { unitId: 'unit', sheetId: 'sheet', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 2 } };
+        tree.bulkInsert([cell(0, 'first'), cell(2, 'removed')]);
+        tree.openKdTree();
+
+        const pending = tree.searchGenerator(query);
+        expect(pending.next().value).toBe('first');
+        tree.remove(cell(2, 'removed'));
+        tree.bulkInsert([cell(2, 'live'), cell(1, 'new')]);
+        expect(Array.from(pending)).toEqual(['removed']);
+        expect(Array.from(tree.searchGenerator(query))).toEqual(['first', 'live']);
+        tree.openKdTree();
+        expect(Array.from(tree.searchGenerator(query))).toEqual(['first', 'live', 'new']);
+        tree.dispose();
+    });
+
+    it('keeps numeric ID identity and insertion order when a cached cell gains or loses dependencies', () => {
+        const tree = new RTree(true);
+        const query = { unitId: 'unit', sheetId: 'sheet', range: { startRow: 3, endRow: 3, startColumn: 1, endColumn: 1 } };
+        tree.insert({ ...query, id: -0 });
+        tree.openKdTree();
+        expect(Array.from(tree.searchGenerator(query))).toEqual([0]);
+
+        for (const id of [Number.NaN, 0, Number.NaN, '0']) {
+            tree.insert({ ...query, id });
+        }
+        expect(Array.from(tree.searchGenerator(query))).toEqual([0, Number.NaN, '0']);
+        tree.remove({ ...query, id: Number.NaN });
+        tree.remove({ ...query, id: -0 });
+        tree.insert({ ...query, id: 0 });
+        expect(Array.from(tree.searchGenerator(query))).toEqual(['0', 0]);
+        tree.dispose();
+    });
+
     it('removes cached points without deleting overlapping ranges with the same ID', () => {
         const tree = new RTree(true);
         const point = (row: number, id = 'same'): IRTreeItem => ({

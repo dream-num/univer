@@ -24,7 +24,7 @@ function exchange<T>(items: T[], a: number, b: number) {
 
 // A rank partition also determines the relative order of equal coordinates in a saved tree.
 // Use the Floyd–Rivest sample window before partitioning large intervals.
-function partitionAt<T>(items: T[], rank: number, first: number, last: number, compare: Compare<T>) {
+export function partitionAt<T>(items: T[], rank: number, first: number, last: number, compare: Compare<T>) {
     let begin = first;
     let end = last;
     while (begin < end) {

@@ -33,6 +33,15 @@ export interface IUniverEngineFormulaConfig {
      */
     intervalCount?: number;
 
+    /**
+     * Maximum capacity of the AST LRU cache in FormulaCacheService. Default is 5000.
+     */
+    astCacheSize?: number;
+
+    /**
+     * Maximum capacity of the lexer tree LRU cache in FormulaCacheService. Default is 2000.
+     */
+    lexerTreeCacheSize?: number;
 }
 
 export const defaultPluginConfig: IUniverEngineFormulaConfig = {};

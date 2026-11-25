@@ -824,6 +824,10 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
             this._reusableRanges = new WeakMap();
         }
 
+        if (treeList.length > 0) {
+            this._astTreeBuilder.cacheService.ensureAstCapacity(treeList.length);
+        }
+
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
 

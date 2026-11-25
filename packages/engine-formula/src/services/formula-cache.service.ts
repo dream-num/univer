@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, LRUMap } from '@univerjs/core';
+import { Disposable, IConfigService, LRUMap, Optional } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
+import type { IUniverEngineFormulaConfig } from '../config/config';
 import type { LexerNode } from '../engine/analysis/lexer-node';
 import type { AstRootNode } from '../engine/ast-node/ast-root-node';
 import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
@@ -24,6 +25,7 @@ import { FormulaAstLRU } from '../basics/cache-lru';
 import { normalizeFunctionToken } from '../basics/function';
 import { InvertedIndexCache } from '../basics/inverted-index-cache';
 import { prefixToken } from '../basics/token';
+import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../config/config';
 
 function usesFunction(node: BaseAstNode | LexerNode, names: Set<string>): boolean {
     let token = node.getToken().trim().toUpperCase();
@@ -57,14 +59,64 @@ export class FormulaCalculationCache extends Disposable {
     }
 }
 
+export const DEFAULT_FORMULA_AST_CACHE_LIMIT = 5000;
+export const DEFAULT_FORMULA_LEXER_TREE_CACHE_LIMIT = 2000;
+
 /** One owner per Univer injector; no dependency on the parser, calculator or function registry. */
 export class FormulaCacheService extends Disposable {
-    private readonly _asts = new LRUMap<string, { unitId: string; node: AstRootNode }>(5000);
-    private readonly _lexerTrees = new LRUMap<string, { unitId?: string | null; node: LexerNode }>(2000);
+    private readonly _asts: LRUMap<string, { unitId: string; node: AstRootNode }>;
+    private readonly _lexerTrees: LRUMap<string, { unitId?: string | null; node: LexerNode }>;
     private readonly _calculations = new Set<FormulaCalculationCache>();
+
+    constructor(
+        @Optional(IConfigService) private readonly _configService?: IConfigService
+    ) {
+        super();
+
+        const config = this._configService?.getConfig<IUniverEngineFormulaConfig>(ENGINE_FORMULA_PLUGIN_CONFIG_KEY);
+        const astLimit = config?.astCacheSize ?? DEFAULT_FORMULA_AST_CACHE_LIMIT;
+        const lexerLimit = config?.lexerTreeCacheSize ?? DEFAULT_FORMULA_LEXER_TREE_CACHE_LIMIT;
+
+        this._asts = new LRUMap<string, { unitId: string; node: AstRootNode }>(astLimit);
+        this._lexerTrees = new LRUMap<string, { unitId?: string | null; node: LexerNode }>(lexerLimit);
+    }
 
     get closed(): boolean {
         return this._disposed;
+    }
+
+    get astLimit(): number {
+        return this._asts.limit;
+    }
+
+    get lexerTreeLimit(): number {
+        return this._lexerTrees.limit;
+    }
+
+    setAstLimit(limit: number): void {
+        this._asts.limit = limit;
+        while (this._asts.size > this._asts.limit) {
+            this._asts.shift();
+        }
+    }
+
+    setLexerTreeLimit(limit: number): void {
+        this._lexerTrees.limit = limit;
+        while (this._lexerTrees.size > this._lexerTrees.limit) {
+            this._lexerTrees.shift();
+        }
+    }
+
+    ensureAstCapacity(requiredCapacity: number): void {
+        if (requiredCapacity > this._asts.limit) {
+            this._asts.limit = requiredCapacity;
+        }
+    }
+
+    ensureLexerTreeCapacity(requiredCapacity: number): void {
+        if (requiredCapacity > this._lexerTrees.limit) {
+            this._lexerTrees.limit = requiredCapacity;
+        }
     }
 
     getAst(key: string): AstRootNode | undefined {

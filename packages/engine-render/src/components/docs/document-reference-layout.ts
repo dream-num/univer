@@ -44,6 +44,7 @@ export function registerDocumentReferenceLayoutResolver(model: DocumentDataModel
     });
 }
 
+/** Reuse the registered reference resolver when laying out an isolated copy of the document. */
 export function getDocumentReferenceLayoutResolver(model: DocumentDataModel): IDocumentReferenceLayoutResolver | undefined {
     return resolvers.get(model);
 }

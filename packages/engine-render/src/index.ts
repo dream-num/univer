@@ -70,7 +70,8 @@ export type {
     IDocumentLayoutTextRun,
     IDocumentLayoutTextStyle,
 } from './components/docs/document-layout-presentation';
-export { hasDocumentReferenceLayout, registerDocumentReferenceLayoutResolver } from './components/docs/document-reference-layout';
+export type { IDocumentReferenceLayoutPage, IDocumentReferenceLayoutResolver } from './components/docs/document-reference-layout';
+export { getDocumentReferenceLayoutResolver, hasDocumentReferenceLayout, registerDocumentReferenceLayoutResolver } from './components/docs/document-reference-layout';
 export type { DocumentHeaderFooterReferenceResolver, IDocumentHeaderFooterReferencePage } from './components/docs/header-footer-reference';
 export { getDocumentHeaderFooterReferenceResolver, hasDocumentHeaderFooterReferenceLayout, registerDocumentHeaderFooterReferenceResolver } from './components/docs/header-footer-reference';
 export { resolveDocumentParagraphNumbering } from './components/docs/layout/block/paragraph/linebreaking';

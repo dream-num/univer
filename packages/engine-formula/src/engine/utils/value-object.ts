@@ -239,6 +239,9 @@ export function calculateMaxDimensions(variants: BaseValueObject[]) {
     return { maxRowLength, maxColumnLength };
 }
 
+// SUMIFS, AVERAGEIFS, MINIFS and MAXIFS accept a target followed by up to 127 range/criteria pairs.
+export const TARGET_AND_CRITERIA_RANGE_ARGUMENT_INDEXES = [0, ...Array.from({ length: 127 }, (_, index) => 2 * index + 1)];
+
 /**
  * Parse the paired range and criteria in functions like COUNTIFS, SUMIFS, etc.
  * @param variants - The range and criteria pairs

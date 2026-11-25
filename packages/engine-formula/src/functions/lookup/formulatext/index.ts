@@ -30,6 +30,8 @@ export class Formulatext extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override lazyIfReferenceArrayArgumentIndexes = [0];
+
     override needsFormulaDataModel = true;
 
     override calculate(reference: FunctionVariantType) {

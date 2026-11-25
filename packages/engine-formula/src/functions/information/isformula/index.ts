@@ -29,6 +29,8 @@ export class Isformula extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override lazyIfReferenceArrayArgumentIndexes = [0];
+
     override calculate(reference: FunctionVariantType): BaseValueObject {
         if (reference.isError()) {
             return reference as ErrorValueObject;

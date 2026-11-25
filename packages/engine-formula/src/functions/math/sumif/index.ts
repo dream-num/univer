@@ -32,6 +32,8 @@ export class Sumif extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override lazyIfReferenceArrayArgumentIndexes = [0, 2];
+
     override calculate(range: FunctionVariantType, criteria: FunctionVariantType, sumRange?: FunctionVariantType): BaseValueObject {
         if (range.isError()) {
             return range as BaseValueObject;

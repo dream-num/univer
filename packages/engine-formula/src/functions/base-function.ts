@@ -115,10 +115,11 @@ export class BaseFunction {
     bindCalculationTimestamp?(getTimestamp: () => number): void;
 
     /**
-     * Arguments that preserve a selected lazy IF branch as a reference array.
+     * Arguments that accept a reference from explicit implicit intersection (@).
      */
     implicitIntersectionReferenceArguments: readonly number[] = [];
 
+    /** Arguments that preserve a selected lazy IF branch as a reference array. */
     lazyIfReferenceArrayArgumentIndexes: readonly number[] = [];
 
     /**

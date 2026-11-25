@@ -30,6 +30,8 @@ export class Column extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override lazyIfReferenceArrayArgumentIndexes = [0];
+
     override calculate(
         referenceInput?: FunctionVariantType
     ) {

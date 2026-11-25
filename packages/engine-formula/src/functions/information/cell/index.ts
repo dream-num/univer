@@ -28,6 +28,8 @@ import { BaseFunction } from '../../base-function';
 export class Cell extends BaseFunction {
     override needsReferenceObject = true;
 
+    override lazyIfReferenceArrayArgumentIndexes = [1];
+
     override minParams = 2;
 
     override maxParams = 2;

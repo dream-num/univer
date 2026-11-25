@@ -28,6 +28,8 @@ export class Areas extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override lazyIfReferenceArrayArgumentIndexes = [0];
+
     override calculate(reference: FunctionVariantType) {
         if (reference.isError()) {
             return reference as ErrorValueObject;

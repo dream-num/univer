@@ -30,6 +30,8 @@ export class Averageif extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override lazyIfReferenceArrayArgumentIndexes = [0, 2];
+
     override calculate(range: FunctionVariantType, criteria: FunctionVariantType, averageRange?: FunctionVariantType): BaseValueObject {
         if (!range.isReferenceObject() || (averageRange && !averageRange.isReferenceObject())) {
             return ErrorValueObject.create(ErrorType.VALUE);

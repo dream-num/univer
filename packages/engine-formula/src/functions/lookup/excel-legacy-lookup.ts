@@ -37,6 +37,8 @@ abstract class ExcelLegacyLookup extends BaseFunction {
 
     override maxParams = 4;
 
+    override lazyIfReferenceArrayArgumentIndexes = [1];
+
     protected abstract readonly _horizontal: boolean;
 
     override calculate(lookupValue: BaseValueObject, table: BaseValueObject, resultIndex: BaseValueObject, matchMode?: BaseValueObject): BaseValueObject {

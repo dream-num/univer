@@ -24,7 +24,12 @@ import {
     LocaleType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import {
+    excelLegacyLookupFunctions,
+    excelReferenceInformationFunctions,
+    SetFormulaCalculationStartMutation,
+    UniverFormulaEnginePlugin,
+} from '@univerjs/engine-formula';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { UniverSheetsFormulaPlugin } from '../../plugin';
 import { createFormulaTestBed } from '../../services/__tests__/util';
@@ -74,7 +79,10 @@ describe('standalone Sheet formula calculation trigger', () => {
         vi.restoreAllMocks();
     });
 
-    it('keeps the selected IF range for lookup arguments on cold start and after edits', async () => {
+    it.each([false, true])('keeps the selected IF range for lookup arguments on cold start and after edits (Excel overrides: %s)', async (excelOverrides) => {
+        if (excelOverrides) {
+            univer.registerPlugin(UniverFormulaEnginePlugin, { function: excelLegacyLookupFunctions });
+        }
         univer.registerPlugin(UniverSheetsFormulaPlugin);
         const api = FUniver.newAPI(univer);
         const data = createWorkbookData();
@@ -104,6 +112,90 @@ describe('standalone Sheet formula calculation trigger', () => {
         sheet.getRange('C6').setValue(61);
         await edited;
         expect(results.getValues()).toEqual([[61], [61], [61], [61], [3], [2], [61]]);
+    });
+
+    it.each([false, true])('uses the selected IF reference for dimensions, coordinates and sheet metadata after a branch change (Excel overrides: %s)', async (excelOverrides) => {
+        if (excelOverrides) {
+            univer.registerPlugin(UniverFormulaEnginePlugin, { function: excelReferenceInformationFunctions });
+        }
+        univer.registerPlugin(UniverSheetsFormulaPlugin);
+        const api = FUniver.newAPI(univer);
+        const data = createWorkbookData();
+        const selected = 'IF(B1,B2:C4,C5:E6)';
+        data.sheets['sheet-1']!.cellData = {
+            0: {
+                1: { v: 1 },
+                7: { f: `=ROWS(${selected})` },
+                8: { f: `=COLUMNS(${selected})` },
+                9: { f: `=INDEX(ROW(${selected}),1)` },
+                10: { f: `=INDEX(COLUMN(${selected}),1)` },
+                11: { f: `=AREAS(${selected})` },
+                12: { f: `=INDEX(FORMULATEXT(${selected}),1,1)` },
+                13: { f: `=SHEET(${selected})` },
+                14: { f: `=SHEETS(${selected})` },
+                15: { f: `=CELL("row",${selected})` },
+                16: { f: `=--INDEX(ISFORMULA(${selected}),1,1)` },
+                17: { f: `=SUM(OFFSET(${selected},0,0))` },
+            },
+            1: { 1: { f: '=1+1' } },
+            4: { 2: { f: '=2+2' } },
+        };
+        const sheet = api.createWorkbook(data).getActiveSheet();
+        const results = sheet.getRange('H1:R1');
+        const initial = api.getFormula().onCalculationResultApplied(10_000);
+        univer.__getInjector().get(LifecycleService).stage = LifecycleStages.Rendered;
+        await initial;
+        expect(results.getValues()).toEqual([[3, 2, 2, 2, 1, '=1+1', 1, 1, 2, 1, 2]]);
+
+        const switched = api.getFormula().onCalculationResultApplied(10_000);
+        sheet.getRange('B1').setValue(0);
+        await switched;
+        expect(results.getValues()).toEqual([[2, 3, 5, 3, 1, '=2+2', 1, 1, 5, 1, 4]]);
+
+        const edited = api.getFormula().onCalculationResultApplied(10_000);
+        sheet.getRange('C5').setValue(8);
+        await edited;
+        expect(results.getValues()).toEqual([[2, 3, 5, 3, 1, '#N/A', 1, 1, 5, 0, 8]]);
+    });
+
+    it('preserves range arguments in conditional aggregates on cold start and after edits', async () => {
+        univer.registerPlugin(UniverSheetsFormulaPlugin);
+        const api = FUniver.newAPI(univer);
+        const data = createWorkbookData();
+        const selected = 'IF(B1,B2:B4,C2:C4)';
+        const formulas = [
+            `=COUNTIF(${selected},">2")`,
+            `=SUMIF(${selected},">2",${selected})`,
+            `=AVERAGEIF(${selected},">2",${selected})`,
+            `=COUNTIFS(${selected},">2",${selected},"<10")`,
+            `=SUMIFS(${selected},${selected},">2",${selected},"<10")`,
+            `=AVERAGEIFS(${selected},${selected},">2")`,
+            `=MINIFS(${selected},${selected},">2")`,
+            `=MAXIFS(${selected},${selected},">2")`,
+            `=SUBTOTAL(9,${selected})`,
+        ];
+        data.sheets['sheet-1']!.cellData = {
+            0: { 1: { v: 1 }, ...Object.fromEntries(formulas.map((f, index) => [index + 4, { f }])) },
+            1: { 1: { v: 1 }, 2: { v: 4 } },
+            2: { 1: { v: 3 }, 2: { v: 6 } },
+            3: { 1: { v: 5 }, 2: { v: 12 } },
+        };
+        const sheet = api.createWorkbook(data).getActiveSheet();
+        const results = sheet.getRange('E1:M1');
+        const initial = api.getFormula().onCalculationResultApplied(10_000);
+        univer.__getInjector().get(LifecycleService).stage = LifecycleStages.Rendered;
+        await initial;
+        expect(results.getValues()).toEqual([[2, 8, 4, 2, 8, 4, 3, 5, 9]]);
+
+        const switched = api.getFormula().onCalculationResultApplied(10_000);
+        sheet.getRange('B1').setValue(0);
+        await switched;
+        expect(results.getValues()).toEqual([[3, 22, 22 / 3, 2, 10, 22 / 3, 4, 12, 22]]);
+
+        const edited = api.getFormula().onCalculationResultApplied(10_000);
+        sheet.getRange('C4').setValue(8);
+        await edited;
+        expect(results.getValues()).toEqual([[3, 18, 6, 3, 18, 6, 4, 8, 18]]);
     });
 
     it('calculates on cold start and recalculates after value and formula edits', async () => {

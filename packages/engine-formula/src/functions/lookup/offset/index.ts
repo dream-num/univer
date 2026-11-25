@@ -33,6 +33,8 @@ export class Offset extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override lazyIfReferenceArrayArgumentIndexes = [0];
+
     override preservesReferenceInRangeEndpointArgument(argumentIndex: number): boolean {
         return argumentIndex === 0;
     }

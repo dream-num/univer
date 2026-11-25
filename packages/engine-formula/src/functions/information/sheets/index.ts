@@ -31,6 +31,8 @@ export class Sheets extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override lazyIfReferenceArrayArgumentIndexes = [0];
+
     override calculate(reference?: FunctionVariantType): BaseValueObject {
         if (reference == null) {
             return NumberValueObject.create(this.getSheetsInfo().sheetOrder.length);

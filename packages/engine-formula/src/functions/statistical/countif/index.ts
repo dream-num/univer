@@ -32,6 +32,8 @@ export class Countif extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override lazyIfReferenceArrayArgumentIndexes = [0];
+
     override calculate(range: FunctionVariantType, criteria: FunctionVariantType): BaseValueObject {
         if (!range.isReferenceObject() || (range instanceof MultiAreaReferenceObject && !range.isArrayOfReferences())) {
             return ErrorValueObject.create(ErrorType.VALUE);

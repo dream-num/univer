@@ -82,6 +82,7 @@ import {
     applySheetDrawingPlacement,
     drawingPositionToTransform,
     getSheetDrawingPlacement,
+    GroupSheetDrawingCommand,
     InsertSheetDrawingCommand,
     ISheetDrawingService,
     SetDrawingArrangeCommand,
@@ -91,12 +92,11 @@ import {
     transformDrawingsToChartSheet,
     transformToAxisAlignPosition,
     transformToDrawingPosition,
+    UngroupSheetDrawingCommand,
 } from '@univerjs/sheets-drawing';
 import { SHEET_VIEW_KEY, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
-import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
-import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { getWorksheetBackgroundImageScale } from '../utils/worksheet-background-image';
 
 /**
@@ -813,7 +813,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }));
     }
 
-    private _getAnchorByParam(param: IDrawingParam, isCreate: boolean): Nullable<ISheetDrawingPosition> {
+    private _getAnchorByParam(param: IDrawingParam): Nullable<ISheetDrawingPosition> {
         const { unitId, subUnitId, drawingId, transform } = param;
         const skeleton = this._sheetSkeletonService.getSkeleton(unitId, subUnitId);
         if (!transform || !skeleton) {
@@ -821,29 +821,20 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }
 
         const sheetDrawing = this._sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
-
-        let sheetDrawingTransform = sheetDrawing?.transform;
-        if (isCreate) {
-            sheetDrawingTransform = {};
-        }
-
-        if (!isCreate && (!sheetDrawing || sheetDrawing.unitId !== this._context.unitId)) {
+        if (!sheetDrawing || sheetDrawing.unitId !== this._context.unitId) {
             return null;
         }
 
-        return transformToAxisAlignPosition({ ...sheetDrawingTransform, ...transform }, skeleton);
+        return transformToAxisAlignPosition({ ...sheetDrawing.transform, ...transform }, skeleton);
     }
 
     private _groupDrawingListener() {
         this.disposeWithMe(this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
             const grpParams = [];
             for (const param of params) {
-                const parent = param.parent;
-                const grpSheetTransform = this._getAnchorByParam(parent, true);
-
                 const children = [];
                 for (const child of param.children) {
-                    const childSheetTransformInfo = this._getAnchorByParam(child, false);
+                    const childSheetTransformInfo = this._getAnchorByParam(child);
                     if (childSheetTransformInfo != null) {
                         children.push({
                             ...child,
@@ -852,10 +843,10 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                     }
                 }
 
+                // GroupSheetDrawingCommand derives the new parent's cell markers.
                 const grpParam = {
-                    parent: { ...parent, axisAlignSheetTransform: grpSheetTransform ?? undefined },
+                    parent: param.parent,
                     children,
-
                 };
                 grpParams.push(grpParam);
             }
@@ -872,7 +863,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 const { children } = param;
                 const childParams = [];
                 for (const child of children) {
-                    const childSheetTransform = this._getAnchorByParam(child, false);
+                    const childSheetTransform = this._getAnchorByParam(child);
                     if (childSheetTransform != null) {
                         childParams.push({
                             ...child,

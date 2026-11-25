@@ -21,8 +21,10 @@ import {
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
-import { ClearSheetDrawingTransformerOperation, DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import { ungroupToGroup } from './utils';
+import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
+import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
+import { ungroupToGroup } from './drawing-group-params';
 
 /**
  * The command to insert new defined name

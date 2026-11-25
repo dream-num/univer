@@ -66,8 +66,6 @@ import {
 import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { createAbsoluteChart, createChartDrawingTestBed } from '../../__tests__/chart-drawing-test-bed';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
-import { GroupSheetDrawingCommand } from '../../commands/commands/group-sheet-drawing.command';
-import { UngroupSheetDrawingCommand } from '../../commands/commands/ungroup-sheet-drawing.command';
 import { SheetDrawingUpdateController } from '../sheet-drawing-update.controller';
 
 describe('SheetDrawingUpdateController', () => {
@@ -172,8 +170,6 @@ describe('SheetDrawingUpdateController', () => {
 it('keeps real GRID transform, arrange, grouping and focus event consumers coherent without persisting derived group flags', async () => {
     const bed = createChartDrawingTestBed();
     bed.activate('grid');
-    bed.commandService.registerCommand(GroupSheetDrawingCommand);
-    bed.commandService.registerCommand(UngroupSheetDrawingCommand);
     const first = createAbsoluteChart('first', 'grid');
     const second = createAbsoluteChart('second', 'grid');
     expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [first, second] })).toBe(true);

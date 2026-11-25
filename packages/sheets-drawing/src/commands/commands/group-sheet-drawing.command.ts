@@ -16,22 +16,15 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
-import {
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-} from '@univerjs/core';
-import {
-    ClearSheetDrawingTransformerOperation,
-    DrawingApplyType,
-    ISheetDrawingService,
-    SetDrawingApplyMutation,
-} from '@univerjs/sheets-drawing';
-import { groupToUngroup } from './utils';
+import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { SheetSkeletonService } from '@univerjs/sheets';
+import type { ISheetDrawing } from '../../services/sheet-drawing.service';
+import { transformToAxisAlignPosition } from '../../basics/transform-position';
+import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
+import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
+import { groupToUngroup } from './drawing-group-params';
 
-/**
- * The command to insert new defined name
- */
 export const GroupSheetDrawingCommand: ICommand = {
     id: 'sheet.command.group-sheet-image',
     type: CommandType.COMMAND,
@@ -39,19 +32,37 @@ export const GroupSheetDrawingCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const sheetDrawingService = accessor.get(ISheetDrawingService);
+        const sheetSkeletonService = accessor.get(SheetSkeletonService);
 
         if (!params) return false;
 
+        // A new top-level group's bounds come from its children, so its cell
+        // markers are derived here rather than trusted from the caller.
+        const groupParams: IDrawingGroupUpdateParam[] = [];
+        for (const group of params) {
+            const { parent } = group;
+            if (parent.groupId || !parent.transform) {
+                groupParams.push(group);
+                continue;
+            }
+            const skeleton = sheetSkeletonService.ensureSkeleton(parent.unitId, parent.subUnitId);
+            if (!skeleton) return false;
+            const anchoredParent: ISheetDrawing = {
+                ...parent,
+                axisAlignSheetTransform: transformToAxisAlignPosition(parent.transform, skeleton),
+            };
+            groupParams.push({ ...group, parent: anchoredParent });
+        }
+
         const unitIds: string[] = [];
-        params.forEach(({ parent, children }) => {
+        groupParams.forEach(({ parent, children }) => {
             unitIds.push(parent.unitId);
             children.forEach((child) => {
                 unitIds.push(child.unitId);
             });
         });
 
-        // execute do mutations and add undo mutations to undo stack if completed
-        const jsonOp = sheetDrawingService.getGroupDrawingOp(params) as IDrawingJsonUndo1;
+        const jsonOp = sheetDrawingService.getGroupDrawingOp(groupParams) as IDrawingJsonUndo1;
 
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 

@@ -15,12 +15,11 @@
  */
 
 import type { DrawingTypeEnum, IDrawingParam, IRotationSkewFlipTransform, Serializable } from '@univerjs/core';
-import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1, IImageData, IUnitDrawingService } from '@univerjs/drawing';
+import type { IDrawingJsonUndo1, IImageData, IUnitDrawingService } from '@univerjs/drawing';
 import type { ISheetOverGridPosition } from '@univerjs/sheets';
 import { createIdentifier, Optional } from '@univerjs/core';
 import { UnitDrawingService } from '@univerjs/drawing';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { transformToAxisAlignPosition } from '../basics/transform-position';
 import { normalizeSheetDrawing } from './sheet-drawing-placement';
 
 export enum SheetDrawingAnchorType {
@@ -95,21 +94,6 @@ export type ISheetUpdateDrawing = ISheetImage | ISheetShape;
 export class SheetDrawingService extends UnitDrawingService<ISheetDrawing> {
     constructor(@Optional(SheetSkeletonService) private readonly _sheetSkeletonService?: SheetSkeletonService) {
         super();
-    }
-
-    override getGroupDrawingOp(groups: IDrawingGroupUpdateParam[]): IDrawingJsonUndo1 {
-        return super.getGroupDrawingOp(groups.map((group) => {
-            const { parent } = group;
-            if (parent.groupId || !parent.transform) return group;
-
-            const skeleton = this._sheetSkeletonService?.ensureSkeleton(parent.unitId, parent.subUnitId);
-            if (!skeleton) return group;
-
-            return {
-                ...group,
-                parent: { ...parent, axisAlignSheetTransform: transformToAxisAlignPosition(parent.transform, skeleton) },
-            };
-        }));
     }
 
     override getBatchAddOp(drawings: ISheetDrawing[]) {

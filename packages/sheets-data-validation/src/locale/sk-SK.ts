@@ -136,6 +136,11 @@ const locale: typeof enUS = {
             title: 'Začiarkavacie políčko',
             error: 'Obsah tejto bunky porušuje pravidlo overenia',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'Rozsah je chránený a nemáte oprávnenie nastavovať štýly. Ak chcete nastavovať štýly, kontaktujte autora.',
+            },
+        },
     },
 };
 

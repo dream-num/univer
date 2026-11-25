@@ -80,6 +80,7 @@ import {
     SetWorksheetColumnCountCommand,
     SetWorksheetColumnCountMutation,
     SetWorksheetColWidthMutation,
+    SetWorksheetDefaultStyleCommand,
     SetWorksheetDefaultStyleMutation,
     SetWorksheetHideCommand,
     SetWorksheetHideMutation,
@@ -123,6 +124,7 @@ describe('Test FWorksheet', () => {
         commandService.registerCommand(ClearSelectionAllCommand);
         commandService.registerCommand(ClearSelectionContentCommand);
         commandService.registerCommand(ClearSelectionFormatCommand);
+        commandService.registerCommand(SetWorksheetDefaultStyleCommand);
         commandService.registerCommand(SetWorksheetDefaultStyleMutation);
         commandService.registerCommand(SetWorksheetRowCountCommand);
         commandService.registerCommand(SetWorksheetRowCountMutation);

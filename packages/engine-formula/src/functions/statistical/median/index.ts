@@ -46,7 +46,7 @@ export class Median extends BaseFunction {
                         return false;
                     }
 
-                    if (valueObject?.isNull() || valueObject?.isBoolean()) {
+                    if (valueObject?.isNull() || valueObject?.isBoolean() || valueObject?.isString()) {
                         return true;
                     }
 

@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         message: {
             refError: 'Ungültiger Bereich',
         },
+        permission: {
+            editErr: 'Der Bereich ist geschützt, und Sie haben keine Bearbeitungsberechtigung. Um zu bearbeiten, wenden Sie sich bitte an den Ersteller.',
+        },
     },
 };
 

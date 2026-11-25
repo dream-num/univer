@@ -24,6 +24,11 @@ const locale: typeof enUS = {
             mark: 'Dấu',
             rank: 'Hạng',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền thiết lập kiểu. Nếu cần thiết lập kiểu, vui lòng liên hệ với người tạo.',
+            },
+        },
     },
 };
 

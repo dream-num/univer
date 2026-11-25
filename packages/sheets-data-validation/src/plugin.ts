@@ -15,7 +15,6 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsDataValidationConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -30,6 +29,7 @@ import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import type { IUniverSheetsDataValidationConfig } from './config/config';
 import pkg from '../package.json';
 import {
     AddSheetDataValidationCommand,
@@ -44,6 +44,7 @@ import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 import { defaultPluginConfig, SHEETS_DATA_VALIDATION_PLUGIN_CONFIG_KEY } from './config/config';
 import { DataValidationFormulaRefRangeController } from './controllers/dv-formula-ref-range.controller';
 import { DataValidationFormulaController } from './controllers/dv-formula.controller';
+import { DataValidationPermissionController } from './controllers/dv-permission.controller';
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
 import { SheetDataValidationSheetController } from './controllers/dv-sheet.controller';
 import { DataValidationController } from './controllers/dv.controller';
@@ -92,6 +93,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [SheetsDataValidationValidatorService],
             [SheetDataValidationModel],
             [DataValidationController],
+            [DataValidationPermissionController],
             [DataValidationFormulaController],
             [SheetDataValidationSheetController],
             [DataValidationRefRangeController],
@@ -115,6 +117,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
         this._injector.get(DataValidationCacheService);
         this._injector.get(SheetsDataValidationValidatorService);
         this._injector.get(DataValidationController);
+        this._injector.get(DataValidationPermissionController);
         this._injector.get(DataValidationFormulaRefRangeController);
         this._injector.get(DataValidationRefRangeController);
     }

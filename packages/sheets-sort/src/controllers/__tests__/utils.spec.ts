@@ -15,9 +15,10 @@
  */
 
 import type { ICellData } from '@univerjs/core';
-import { CellValueType } from '@univerjs/core';
+import { CellValueType, LocaleType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { SortType } from '../../services/interface';
+import { createRegionTextComparer } from '../text-comparer';
 import { compareCells, getSortRank, SortRank } from '../utils';
 
 const cell = (v: ICellData['v'], t?: CellValueType): ICellData => ({ v, t });
@@ -95,5 +96,31 @@ describe('compareCells', () => {
                 expect(Math.sign(ascending(a, b)) + Math.sign(ascending(b, a))).toBe(0);
             });
         });
+    });
+});
+
+describe('compareCells text order', () => {
+    const sorted = (values: string[], type = SortType.ASC) => values
+        .map((value) => cell(value, CellValueType.STRING))
+        .sort((a, b) => compareCells(type, a, b))
+        .map((textCell) => textCell.v);
+
+    it('sorts accented letters beside their base letter', () => {
+        expect(sorted(['zoe', 'éclair', 'ángel', 'bob', 'abc'])).toEqual(['abc', 'ángel', 'bob', 'éclair', 'zoe']);
+        expect(sorted(['zoe', 'éclair', 'ángel', 'bob', 'abc'], SortType.DESC)).toEqual(['zoe', 'éclair', 'bob', 'ángel', 'abc']);
+    });
+
+    it('ignores case according to the configured region', () => {
+        const english = createRegionTextComparer(LocaleType.EN_US).compare;
+        const turkish = createRegionTextComparer('tr-TR').compare;
+
+        expect(english('I', 'i')).toBe(0);
+        expect(turkish('I', 'ı')).toBe(0);
+        expect(turkish('I', 'i')).toBeLessThan(0);
+    });
+
+    it('uses the text comparer it is given', () => {
+        const reversed = (a: string, b: string) => b.localeCompare(a);
+        expect(compareCells(SortType.ASC, cell('a', CellValueType.STRING), cell('b', CellValueType.STRING), reversed)).toBeGreaterThan(0);
     });
 });

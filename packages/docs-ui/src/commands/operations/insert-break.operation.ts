@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, SectionType } from '@univerjs/core';
+import type { DocumentDataModel, ICommand } from '@univerjs/core';
 import {
     CommandType,
     createSectionId,
     DocumentFlavor,
     ICommandService,
     IUniverInstanceService,
+    SectionType,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
@@ -85,4 +86,23 @@ export const InsertDocumentSectionBreakOperation: ICommand<IInsertDocumentSectio
             nextSectionType: params.sectionType,
         });
     },
+};
+
+function createSectionBreakMenuOperation(id: string, sectionType: SectionType): ICommand {
+    return {
+        id,
+        type: CommandType.OPERATION,
+        handler: (accessor) => accessor.get(ICommandService).syncExecuteCommand(
+            InsertDocumentSectionBreakOperation.id,
+            { sectionType }
+        ),
+    };
+}
+
+export const DOCUMENT_SECTION_BREAK_MENU_OPERATIONS = {
+    nextPage: createSectionBreakMenuOperation('doc.menu.section-break.next-page', SectionType.NEXT_PAGE),
+    continuous: createSectionBreakMenuOperation('doc.menu.section-break.continuous', SectionType.CONTINUOUS),
+    nextColumn: createSectionBreakMenuOperation('doc.menu.section-break.next-column', SectionType.NEXT_COLUMN),
+    evenPage: createSectionBreakMenuOperation('doc.menu.section-break.even-page', SectionType.EVEN_PAGE),
+    oddPage: createSectionBreakMenuOperation('doc.menu.section-break.odd-page', SectionType.ODD_PAGE),
 };

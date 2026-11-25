@@ -2627,7 +2627,7 @@ function _updateAndPositionTable(
         return false;
     }
 
-    const { tableId, table } = firstUnPositionedTable;
+    const { tableId, table, tableNode } = firstUnPositionedTable;
     const { tableSource } = table;
 
     if (firstUnPositionedTable.isSlideTable === false || tableSource.textWrap === TableTextWrapType.NONE) {
@@ -2687,19 +2687,24 @@ function _updateAndPositionTable(
         top < 0;
     const fitsPhysicalPage = usesPhysicalPageBounds &&
         top + height <= page.pageHeight - page.marginTop + LINE_LAYOUT_OVERFLOW_TOLERANCE;
-    const wordCompatibilityMode = Number(ctx.dataModel?.documentStyle.compatibilitySettings?.compatibilityMode);
-    // Before Word 2013, floating tables remain intact even when they extend
-    // beyond the page. Inline tables and explicitly authored breaks still paginate.
-    const legacyFloatingTable = tableSource.textWrap === TableTextWrapType.WRAP &&
-        wordCompatibilityMode >= 11 && wordCompatibilityMode < 15;
+    const documentStyle = ctx.dataModel?.documentStyle;
+    const wordCompatibilityMode = Number(documentStyle?.compatibilitySettings?.compatibilityMode);
+    const legacyWordLayout = wordCompatibilityMode >= 11 && wordCompatibilityMode < 15;
+    const floating = tableSource.textWrap === TableTextWrapType.WRAP;
+    // Keep an already split Word table on its anchor page when there is room
+    // for its first rows. Choose the row break using the current layout.
+    const renderedTableBreak = floating && legacyWordLayout &&
+        ctx.viewModel.getSelfOrHeaderFooterViewModel(page.segmentId).getBody()?.renderedPageBreaks?.some((index) => !tableNode.exclude(index)) === true;
+    const keepFloatingTableTogether = floating &&
+        documentStyle?.compatibilityFlags?.doNotBreakWrappedTables === BooleanNumber.TRUE;
     if (
         (tableSource.textWrap === TableTextWrapType.NONE ||
             (page.type === DocumentSkeletonPageType.BODY &&
                 isTraditionalDocumentCompatibility(sectionBreakConfig.documentCompatibilityPolicy))) &&
-        ((localTop + height > section.height && !fitsPhysicalPage && !legacyFloatingTable) || table.hasPageBreak === true) &&
+        ((localTop + height > section.height && !fitsPhysicalPage && !keepFloatingTableTogether) || table.hasPageBreak === true) &&
         firstUnPositionedTable.isSlideTable === false
     ) {
-        if (tableSource.textWrap === TableTextWrapType.WRAP &&
+        if (floating && !renderedTableBreak &&
             (verticalPosition?.relativeFrom === ObjectRelativeFromV.PARAGRAPH ||
                 verticalPosition?.relativeFrom === ObjectRelativeFromV.LINE) &&
             table.hasPageBreak !== true && column.lines.length > 0) {
@@ -2719,9 +2724,7 @@ function _updateAndPositionTable(
             : section.height - localTop;
         const tableLayoutPage = usesPhysicalPageBounds ? { ...page, marginTop: 0, marginBottom: 0 } : page;
         // TODO: handle nested table.
-        const { segmentId } = page;
-        const viewModel = ctx.viewModel.getSelfOrHeaderFooterViewModel(segmentId);
-        const tableNode = firstUnPositionedTable.tableNode;
+        const viewModel = ctx.viewModel.getSelfOrHeaderFooterViewModel(page.segmentId);
 
         // Slicing reuses the measured paragraphs and their bullet cache. Keep the
         // corresponding list counters so numbering also continues after the table.

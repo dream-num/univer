@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
-import AsyncLock from 'async-lock';
+import type enUS from './en-US';
 
-export { AsyncLock };
+const locale: typeof enUS = {
+    'sheets-drawing': {
+        permission: {
+            editErr: 'この範囲は保護されており、編集権限がありません。編集するには作成者に連絡してください。',
+        },
+    },
+};
+
+export default locale;

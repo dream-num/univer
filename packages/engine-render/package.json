@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/engine-render",
-    "version": "1.5.2",
+    "version": "1.6.1",
     "private": false,
     "description": "Canvas rendering engine for Univer documents, sheets, and slides.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -75,7 +75,6 @@
     },
     "dependencies": {
         "@floating-ui/dom": "^1.8.0",
-        "@floating-ui/utils": "^0.2.12",
         "@univerjs/core": "workspace:*",
         "@univerjs/icons-svg": "1.50.0",
         "franc-min": "^6.2.0"

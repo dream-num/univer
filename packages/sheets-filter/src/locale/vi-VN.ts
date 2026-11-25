@@ -24,6 +24,9 @@ const locale: typeof enUS = {
         msg: {
             'filter-header-forbidden': 'Không thể di chuyển hàng đầu lọc',
         },
+        permission: {
+            filterErr: 'Phạm vi được bảo vệ và bạn không có quyền lọc. Để lọc, vui lòng liên hệ với người tạo.',
+        },
     },
 };
 

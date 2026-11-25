@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { NullValueObject } from '../../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { Acos } from '../../../math/acos';
 import { FUNCTION_NAMES_MATH } from '../../../math/function-names';
 import { getObjectValue } from '../../../util';
@@ -58,6 +58,34 @@ describe('Test correl function', () => {
             });
             const result = testFunction.calculate(array1, array2);
             expect(getObjectValue(result, true)).toBe(0.835533437354);
+        });
+
+        it('Text in a range is ignored', () => {
+            const array1 = ArrayValueObject.create({
+                calculateValueList: [
+                    [NumberValueObject.create(1)],
+                    [NumberValueObject.create(2)],
+                    [NumberValueObject.create(3)],
+                    [StringValueObject.create('10')],
+                ],
+                rowCount: 4,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const array2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[2], [4], [6], [1]]),
+                rowCount: 4,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(array1, array2);
+            expect(getObjectValue(result)).toBe(1);
         });
 
         it('Value length is equal to 1', () => {

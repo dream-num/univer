@@ -136,6 +136,11 @@ const locale: typeof enUS = {
             title: 'Caixa de seleção',
             error: 'O conteúdo desta célula viola sua regra de validação',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'O intervalo está protegido e você não tem permissão para definir estilos. Para definir estilos, entre em contato com o criador.',
+            },
+        },
     },
 };
 

@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         message: {
             refError: 'Intervalo Inválido',
         },
+        permission: {
+            editErr: 'O intervalo está protegido e você não tem permissão de edição. Para editar, entre em contato com o criador.',
+        },
     },
 };
 

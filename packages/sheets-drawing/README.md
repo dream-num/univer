@@ -10,7 +10,7 @@
 
 | Package | UMD global | CSS | Locales | Facade entry | Worker entry |
 | --- | --- | :---: | :---: | :---: | :---: |
-| `@univerjs/sheets-drawing` | `UniverSheetsDrawing` | No | No | Yes | No |
+| `@univerjs/sheets-drawing` | `UniverSheetsDrawing` | No | Yes | Yes | No |
 
 ## Installation
 

@@ -59,7 +59,7 @@ export const ColorPicker = (props: IConditionalColorPickerProps) => {
         ? (
             <DropdownComponent
                 overlay={(
-                    <div className="univer-rounded-lg univer-p-4">
+                    <div className="univer-p-2">
                         <PickerComponent value={color} onChange={onChange} />
                     </div>
                 )}

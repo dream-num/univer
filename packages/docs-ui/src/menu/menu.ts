@@ -32,7 +32,6 @@ import {
     NamedStyleType,
     PresetListType,
     resolveDocumentParagraphBullet,
-    SectionType,
     ThemeService,
     Tools,
     UniverInstanceType,
@@ -92,8 +91,8 @@ import { SetParagraphNamedStyleCommand } from '../commands/commands/set-heading.
 import { CreateDocTableCommand } from '../commands/commands/table/doc-table-create.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import {
+    DOCUMENT_SECTION_BREAK_MENU_OPERATIONS,
     InsertDocumentColumnBreakOperation,
-    InsertDocumentSectionBreakOperation,
 } from '../commands/operations/insert-break.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
 import { getCommandSkeleton } from '../commands/util';
@@ -1084,11 +1083,6 @@ export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 }
 
 export const DOC_BREAKS_MENU_ID = 'doc.menu.breaks';
-export const DOC_SECTION_BREAK_NEXT_PAGE_MENU_ID = 'doc.menu.section-break.next-page';
-export const DOC_SECTION_BREAK_CONTINUOUS_MENU_ID = 'doc.menu.section-break.continuous';
-export const DOC_SECTION_BREAK_NEXT_COLUMN_MENU_ID = 'doc.menu.section-break.next-column';
-export const DOC_SECTION_BREAK_EVEN_PAGE_MENU_ID = 'doc.menu.section-break.even-page';
-export const DOC_SECTION_BREAK_ODD_PAGE_MENU_ID = 'doc.menu.section-break.odd-page';
 
 export function BreaksMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
@@ -1114,16 +1108,9 @@ export function InsertColumnBreakMenuFactory(accessor: IAccessor): IMenuButtonIt
     };
 }
 
-function createSectionBreakMenuItem(
-    accessor: IAccessor,
-    id: string,
-    title: LocaleKey,
-    sectionType: SectionType
-): IMenuButtonItem<LocaleKey> {
+function createSectionBreakMenuItem(accessor: IAccessor, id: string, title: LocaleKey): IMenuButtonItem<LocaleKey> {
     return {
         id,
-        commandId: InsertDocumentSectionBreakOperation.id,
-        params: { sectionType },
         type: MenuItemType.BUTTON,
         title,
         disabled$: disableMenuWhenNoDocRange(accessor),
@@ -1131,23 +1118,23 @@ function createSectionBreakMenuItem(
 }
 
 export function InsertNextPageSectionBreakMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
-    return createSectionBreakMenuItem(accessor, DOC_SECTION_BREAK_NEXT_PAGE_MENU_ID, 'docs-ui.toolbar.sectionBreakNextPage', SectionType.NEXT_PAGE);
+    return createSectionBreakMenuItem(accessor, DOCUMENT_SECTION_BREAK_MENU_OPERATIONS.nextPage.id, 'docs-ui.toolbar.sectionBreakNextPage');
 }
 
 export function InsertContinuousSectionBreakMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
-    return createSectionBreakMenuItem(accessor, DOC_SECTION_BREAK_CONTINUOUS_MENU_ID, 'docs-ui.toolbar.sectionBreakContinuous', SectionType.CONTINUOUS);
+    return createSectionBreakMenuItem(accessor, DOCUMENT_SECTION_BREAK_MENU_OPERATIONS.continuous.id, 'docs-ui.toolbar.sectionBreakContinuous');
 }
 
 export function InsertNextColumnSectionBreakMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
-    return createSectionBreakMenuItem(accessor, DOC_SECTION_BREAK_NEXT_COLUMN_MENU_ID, 'docs-ui.toolbar.sectionBreakNextColumn', SectionType.NEXT_COLUMN);
+    return createSectionBreakMenuItem(accessor, DOCUMENT_SECTION_BREAK_MENU_OPERATIONS.nextColumn.id, 'docs-ui.toolbar.sectionBreakNextColumn');
 }
 
 export function InsertEvenPageSectionBreakMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
-    return createSectionBreakMenuItem(accessor, DOC_SECTION_BREAK_EVEN_PAGE_MENU_ID, 'docs-ui.toolbar.sectionBreakEvenPage', SectionType.EVEN_PAGE);
+    return createSectionBreakMenuItem(accessor, DOCUMENT_SECTION_BREAK_MENU_OPERATIONS.evenPage.id, 'docs-ui.toolbar.sectionBreakEvenPage');
 }
 
 export function InsertOddPageSectionBreakMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
-    return createSectionBreakMenuItem(accessor, DOC_SECTION_BREAK_ODD_PAGE_MENU_ID, 'docs-ui.toolbar.sectionBreakOddPage', SectionType.ODD_PAGE);
+    return createSectionBreakMenuItem(accessor, DOCUMENT_SECTION_BREAK_MENU_OPERATIONS.oddPage.id, 'docs-ui.toolbar.sectionBreakOddPage');
 }
 
 export const TableIcon = 'GridIcon';

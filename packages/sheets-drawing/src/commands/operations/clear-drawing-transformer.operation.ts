@@ -15,17 +15,18 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import { CommandType, Quantity } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
 export const ClearSheetDrawingTransformerOperation: IMutation<string[]> = {
     id: 'sheet.operation.clear-drawing-transformer',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const renderManagerService = accessor.get(IRenderManagerService);
+        // Headless and Facade-only setups have no renderer to refresh.
+        const renderManagerService = accessor.get(IRenderManagerService, Quantity.OPTIONAL);
 
         params.forEach((unitId) => {
-            renderManagerService.getRenderUnitById(unitId)?.scene.getTransformer()?.debounceRefreshControls();
+            renderManagerService?.getRenderUnitById(unitId)?.scene.getTransformer()?.debounceRefreshControls();
         });
 
         return true;

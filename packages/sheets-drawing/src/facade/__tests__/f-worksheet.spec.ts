@@ -18,13 +18,16 @@ import type {
     Injector,
     Workbook,
 } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
 import type { FWorkbook } from '@univerjs/sheets/facade';
 import {
     DrawingTypeEnum,
     ICommandService,
     ImageSourceType,
     IUniverInstanceService,
+    LocaleType,
     RedoCommand,
+    SheetTypes,
     UndoCommand,
     Univer,
     UniverInstanceType,
@@ -36,6 +39,8 @@ import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
 import { transformToAxisAlignPosition } from '../../basics/transform-position';
 import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
+import { SetSheetDrawingCommand } from '../../commands/commands/set-sheet-drawing.command';
+import { DrawingApplyType, SetDrawingApplyMutation } from '../../commands/mutations/set-drawing-apply.mutation';
 import { resolveSheetDrawingRotateEnabled } from '../../common/rotate-enabled';
 import { getSheetDrawingPlacement } from '../../services/sheet-drawing-placement';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
@@ -78,8 +83,8 @@ describe('FWorksheetDrawingMixin group drawings', () => {
 
     it('groups drawings and exposes parent and child relationships', () => {
         const drawings = [
-            createDrawing('drawing-1', 10),
-            createDrawing('drawing-2', 80),
+            { ...createDrawing('drawing-1', 350), transform: { left: 350, top: 320, width: 40, height: 30 } },
+            { ...createDrawing('drawing-2', 470), transform: { left: 470, top: 350, width: 40, height: 30 } },
         ];
         const commandService = injector.get(ICommandService);
         const sheetDrawingService = injector.get(ISheetDrawingService);
@@ -91,6 +96,10 @@ describe('FWorksheetDrawingMixin group drawings', () => {
         const groupDrawing = sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'group-1' });
 
         expect(groupId).toBe('group-1');
+        expect(groupDrawing?.axisAlignSheetTransform).toEqual({
+            from: { row: 12, rowOffset: 12, column: 3, columnOffset: 40 },
+            to: { row: 15, rowOffset: 0, column: 5, columnOffset: 24 },
+        });
         expect(groupDrawing?.drawingType).toBe(DrawingTypeEnum.DRAWING_GROUP);
         expect(Object.prototype.hasOwnProperty.call(groupDrawing?.transform ?? {}, 'rotateEnabled')).toBe(false);
         expect(fWorksheet.isDrawingGrouped('drawing-1')).toBe(true);
@@ -150,6 +159,65 @@ describe('FWorksheetDrawingMixin group drawings', () => {
         expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'group-1' })?.drawingType)
             .toBe(DrawingTypeEnum.DRAWING_GROUP);
         expect(fWorksheet.isDrawingGrouped('drawing-1')).toBe(true);
+    });
+
+    it('derives released child markers when ungrouping a moved group, through undo and redo', async () => {
+        const commandService = injector.get(ICommandService);
+        const sheetDrawingService = injector.get(ISheetDrawingService);
+        const skeleton = injector.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const fWorksheet = createFacade(injector);
+        const getChild = () => sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-1' })!;
+
+        expect(commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [createDrawing('drawing-1', 10), createDrawing('drawing-2', 80)],
+        })).toBe(true);
+        expect(fWorksheet.groupDrawings(['drawing-1', 'drawing-2'], 'group-1')).toBe('group-1');
+        const groupTransform = sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'group-1' })!.transform!;
+        expect(await commandService.executeCommand(SetSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [{ unitId: 'test', subUnitId: 'sheet1', drawingId: 'group-1', transform: { ...groupTransform, left: groupTransform.left! + 500, top: groupTransform.top! + 200 } }],
+        })).toBe(true);
+
+        expect(fWorksheet.ungroupDrawings(['group-1'])).toBe(true);
+        const released = getChild();
+        expect(released.transform).toMatchObject({ left: 510, top: 220 });
+        expect(released.axisAlignSheetTransform).toEqual(transformToAxisAlignPosition(released.transform!, skeleton));
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(fWorksheet.isDrawingGrouped('drawing-1')).toBe(true);
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getChild().axisAlignSheetTransform).toEqual(released.axisAlignSheetTransform);
+    });
+
+    it('restores a nested group with its outer group and child types when undoing an ungroup', async () => {
+        const commandService = injector.get(ICommandService);
+        const sheetDrawingService = injector.get(ISheetDrawingService);
+        const fWorksheet = createFacade(injector);
+
+        expect(commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [createDrawing('drawing-1', 10), createDrawing('drawing-2', 80), createDrawing('drawing-3', 150)],
+        })).toBe(true);
+        expect(fWorksheet.groupDrawings(['drawing-1', 'drawing-2'], 'inner')).toBe('inner');
+        expect(fWorksheet.groupDrawings(['inner', 'drawing-3'], 'outer')).toBe('outer');
+        expect(fWorksheet.ungroupDrawings(['inner'])).toBe(true);
+
+        const applied: IDrawingGroupUpdateParam[][] = [];
+        const listener = commandService.onCommandExecuted(({ id, params }) => {
+            if (id === SetDrawingApplyMutation.id && (params as { type: DrawingApplyType }).type === DrawingApplyType.GROUP) {
+                applied.push((params as { objects: IDrawingGroupUpdateParam[] }).objects);
+            }
+        });
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        listener.dispose();
+
+        // The renderer attaches the restored group to `parent.groupId`.
+        expect(applied).toHaveLength(1);
+        expect(applied[0][0].parent).toMatchObject({ drawingId: 'inner', groupId: 'outer' });
+        expect(applied[0][0].children.map((child) => child.drawingType)).toEqual([DrawingTypeEnum.DRAWING_SHAPE, DrawingTypeEnum.DRAWING_SHAPE]);
+        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'inner' })?.groupId).toBe('outer');
+        expect(fWorksheet.getDrawingParentGroup('drawing-1')?.drawingId).toBe('inner');
     });
 
     it('does not group with duplicate drawing ids or an existing group id', () => {
@@ -415,6 +483,52 @@ describe('FWorksheetDrawingMixin group drawings', () => {
     });
 });
 
+describe('FWorksheetDrawingMixin group drawings on a Chart Sheet', () => {
+    it('groups and ungroups absolute drawings without a grid skeleton, through undo and redo', async () => {
+        const testBed = createSheetsDrawingTestBed({
+            id: 'test',
+            name: '',
+            appVersion: 'test',
+            locale: LocaleType.EN_US,
+            styles: {},
+            sheetOrder: ['chart'],
+            sheets: { chart: { id: 'chart', name: 'Chart', type: SheetTypes.CHART } },
+        });
+        const { injector, commandService } = testBed;
+        const sheetDrawingService = injector.get(ISheetDrawingService);
+        const fWorksheet = createFacade(injector, 'chart');
+        const drawings = [createDrawing('drawing-1', 10), createDrawing('drawing-2', 80)]
+            .map((drawing) => ({ ...drawing, subUnitId: 'chart', anchorType: SheetDrawingAnchorType.None }));
+        const getGroup = () => sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'chart', drawingId: 'group-1' });
+
+        expect(injector.get(SheetSkeletonService).ensureSkeleton('test', 'chart')).toBeUndefined();
+        expect(commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings })).toBe(true);
+
+        expect(fWorksheet.groupDrawings(['drawing-1', 'drawing-2'], 'group-1')).toBe('group-1');
+        expect(getGroup()).toMatchObject({
+            anchorType: SheetDrawingAnchorType.None,
+            transform: { left: 10, top: 20, width: 110, height: 30 },
+            axisAlignSheetTransform: {
+                from: { row: 0, column: 0, columnOffset: 10, rowOffset: 20 },
+                to: { row: 0, column: 0, columnOffset: 120, rowOffset: 50 },
+            },
+        });
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getGroup()).toBeUndefined();
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(fWorksheet.isDrawingGrouped('drawing-1')).toBe(true);
+
+        expect(fWorksheet.ungroupDrawings(['group-1'])).toBe(true);
+        expect(getGroup()).toBeUndefined();
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(fWorksheet.isDrawingGrouped('drawing-2')).toBe(true);
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(fWorksheet.isDrawingGrouped('drawing-2')).toBe(false);
+
+        testBed.univer.dispose();
+    });
+});
+
 describe('FWorksheetDrawingMixin background image', () => {
     let univer: Univer;
     let injector: Injector;
@@ -443,9 +557,9 @@ describe('FWorksheetDrawingMixin background image', () => {
     });
 });
 
-function createFacade(injector: Injector): FWorksheetDrawingMixin {
+function createFacade(injector: Injector, subUnitId = 'sheet1'): FWorksheetDrawingMixin {
     const workbook = injector.get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-    const worksheet = workbook.getSheetBySheetId('sheet1')!;
+    const worksheet = workbook.getSheetBySheetId(subUnitId)!;
     return injector.createInstance(FWorksheetDrawingMixin, { getId: () => 'test' } as FWorkbook, workbook, worksheet);
 }
 

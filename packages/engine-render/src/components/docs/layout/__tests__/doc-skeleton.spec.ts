@@ -3676,7 +3676,9 @@ describe('doc skeleton', () => {
         const univer = new Univer();
         const localeService = univer.__getInjector().get(LocaleService);
         const T = DataStreamTreeTokenType;
-        const cellText = 'A long table cell keeps flowing across physical pages. '.repeat(80);
+        const tableId = 'body-table';
+        // Traditional layout treats unmarked column breaks as soft line breaks.
+        const cellText = Array.from({ length: 12 }, (_, index) => `Table cell line ${index + 1}.`).join(T.COLUMN_BREAK);
         const tableStream = [
             T.TABLE_START,
             T.TABLE_ROW_START,
@@ -3696,18 +3698,26 @@ describe('doc skeleton', () => {
             body: {
                 dataStream,
                 paragraphs: [
-                    { startIndex: cellParagraphIndex, paragraphId: 'cell-paragraph' },
+                    {
+                        startIndex: cellParagraphIndex,
+                        paragraphId: 'cell-paragraph',
+                        paragraphStyle: {
+                            spacingRule: SpacingRule.EXACT,
+                            lineSpacing: 20,
+                            snapToGrid: BooleanNumber.FALSE,
+                        },
+                    },
                     { startIndex: dataStream.length - 2, paragraphId: 'trailing-paragraph' },
                 ],
                 sectionBreaks: [
                     { sectionId: 'cell-section', startIndex: cellParagraphIndex + 1 },
                     { sectionId: 'body-section', startIndex: dataStream.length - 1 },
                 ],
-                tables: [{ startIndex: 0, endIndex: tableStream.length, tableId: 'body-table' }],
+                tables: [{ startIndex: 0, endIndex: tableStream.length, tableId }],
             },
             tableSource: {
-                'body-table': {
-                    tableId: 'body-table',
+                [tableId]: {
+                    tableId,
                     align: TableAlignmentType.CENTER,
                     indent: { v: 0 },
                     textWrap: TableTextWrapType.NONE,
@@ -3738,9 +3748,29 @@ describe('doc skeleton', () => {
             },
         };
 
-        expectIncrementalSkeletonToEqualSynchronous(snapshot, localeService, Math.floor(cellText.length / 2));
+        const synchronous = DocumentSkeleton.create(
+            new DocumentViewModel(new DocumentDataModel(structuredClone(snapshot))),
+            localeService
+        );
+        const incremental = DocumentSkeleton.create(
+            new DocumentViewModel(new DocumentDataModel(structuredClone(snapshot))),
+            localeService
+        );
+        try {
+            synchronous.calculate();
+            const expected = synchronous.getSkeletonData()!;
+            const tablePages = expected.pages.filter((page) =>
+                [...page.skeTables.values()].some((table) => table.tableSource.tableId === tableId)
+            );
+            expect(tablePages.length).toBeGreaterThan(1);
 
-        univer.dispose();
+            completeIncrementalLayout(incremental, Math.floor(cellText.length / 2));
+            expect(normalizeSkeleton(incremental.getSkeletonData())).toEqual(normalizeSkeleton(expected));
+        } finally {
+            incremental.dispose();
+            synchronous.dispose();
+            univer.dispose();
+        }
     });
 
     it('publishes a traditional first-open layout one stable page at a time', () => {

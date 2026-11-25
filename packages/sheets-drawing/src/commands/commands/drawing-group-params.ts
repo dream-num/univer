@@ -26,7 +26,7 @@ import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/she
 
 /**
  * Derives the cell markers of a drawing that is top-level after the command.
- * Chart Sheets have no grid, so their drawings are placed absolutely.
+ * Absolute drawings, and every drawing on a Chart Sheet, keep None placement.
  * Returns null when a grid worksheet cannot be laid out.
  */
 export function anchorTopLevelDrawing(accessor: IAccessor, drawing: IDrawingParam): Nullable<IDrawingParam> {
@@ -36,11 +36,13 @@ export function anchorTopLevelDrawing(accessor: IAccessor, drawing: IDrawingPara
         ?.getSheetBySheetId(subUnitId);
     if (!worksheet) return null;
 
-    // Group update params may carry a partial transform that is merged onto the stored drawing.
+    // Group update params may carry a partial transform or omit the anchor
+    // type; both fall back to the stored drawing.
     const stored = accessor.get(ISheetDrawingService).getDrawingByParam(drawing);
     const transform = { ...stored?.transform, ...drawing.transform };
+    const anchorType = (drawing as Partial<ISheetDrawing>).anchorType ?? stored?.anchorType;
 
-    if (worksheet.getConfig().type === SheetTypes.CHART) {
+    if (worksheet.getConfig().type === SheetTypes.CHART || anchorType === SheetDrawingAnchorType.None) {
         const absolute = { ...drawing, transform, anchorType: SheetDrawingAnchorType.None } as ISheetDrawing;
         return applySheetDrawingPlacement(absolute, getSheetDrawingPlacement(absolute));
     }
@@ -48,7 +50,7 @@ export function anchorTopLevelDrawing(accessor: IAccessor, drawing: IDrawingPara
     const skeleton = accessor.get(SheetSkeletonService).ensureSkeleton(unitId, subUnitId);
     if (!skeleton) return null;
 
-    return { ...drawing, axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton) } as IDrawingParam;
+    return { ...drawing, transform, axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton) } as IDrawingParam;
 }
 
 export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {

@@ -266,6 +266,31 @@ describe('test TextX methods and branches', () => {
         expect(JSONX.apply(current, JSONX.invertWithDoc(JSON.parse(wire), before))).toEqual(before);
     });
 
+    it('reuses encoded order entries in later merges and prunes a superseded prefix', () => {
+        const orders: NonNullable<IRetainAction['bookmarkOrders']> = [
+            ['a', 'b', 'c', 'd'],
+            { segments: [[0, 2], 'd', 'c'] },
+        ];
+        const packed: IRetainAction = {
+            t: TextXActionType.RETAIN,
+            len: 0,
+            bookmarkOrders: orders,
+            rangeUpdates: [
+                { rangeId: 'a', range: bookmarkAt('a', 4), fallbackNextRangeId: 'b', fallbackOrderIndex: 0 },
+                { rangeId: 'b', range: bookmarkAt('b', 4), fallbackNextRangeId: 'c', fallbackOrderIndex: 1 },
+            ],
+        };
+        const paragraph: TextXAction[] = [{ t: TextXActionType.INSERT, len: 1, body: { dataStream: 'A' } }];
+        const composed = TextX.compose([packed], paragraph);
+        const retained = composed.find((action): action is IRetainAction => action.t === TextXActionType.RETAIN && !!action.bookmarkOrders);
+        expect(retained?.bookmarkOrders?.[1]).toBe(orders[1]);
+
+        const next = TextX.compose(composed, updateBookmarks([{ rangeId: 'a', range: null }]));
+        const remaining = next.find((action): action is IRetainAction => action.t === TextXActionType.RETAIN && !!action.bookmarkOrders);
+        expect(remaining?.bookmarkOrders).toEqual([['a', 'b', 'd', 'c']]);
+        expect(remaining?.rangeUpdates?.find((update) => update.rangeId === 'b')?.fallbackOrderIndex).toBe(0);
+    });
+
     it.each([false, true])('keeps 500 bookmark moves alternating with REF fields compact (later section: %s)', { timeout: 60_000 }, (laterSection) => {
         const count = 500;
         const before: IDocumentData = {

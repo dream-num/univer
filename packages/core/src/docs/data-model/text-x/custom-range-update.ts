@@ -26,7 +26,17 @@ import { deleteCustomRanges, insertCustomRanges } from './apply-utils/common';
 import { updateAttribute } from './apply-utils/update-apply';
 import { getBodySliceForSplitTextXAction } from './utils';
 
-type IRangeUpdate = Omit<NonNullable<IRetainAction['rangeUpdates']>[number], 'fallbackOrderIndex'> & { fallbackOrder?: string[] };
+interface IBookmarkOrderRef {
+    table: BookmarkOrder[];
+    index: number;
+}
+
+type IRangeUpdate = Omit<NonNullable<IRetainAction['rangeUpdates']>[number], 'fallbackOrderIndex'> & {
+    fallbackOrder?: IBookmarkOrderRef;
+};
+
+// Only the newest materialized order is needed when appending the next edit.
+const orderTails = new WeakMap<BookmarkOrder[], { index: number; order: string[] }>();
 
 export function getChangedPropertyPaths(before: unknown, after: unknown, path: string[] = []): string[][] {
     if (Tools.diffValue(before, after)) {
@@ -131,22 +141,27 @@ export function transformRangeUpdate(
     return propertyPaths.length ? [{ ...update, propertyPaths }] : [];
 }
 
-function decodeBookmarkOrders(entries: BookmarkOrder[]): string[][] {
+function decodeBookmarkOrders(entries: BookmarkOrder[], expand = true): string[][] {
     if (!Array.isArray(entries)) {
         throw new TypeError('Invalid bookmark order table.');
     }
     const orders: string[][] = [];
+    let previousLength: number | undefined;
     for (const entry of entries) {
         const previous = orders[orders.length - 1];
         if (!Array.isArray(entry)) {
-            if (!previous || !entry || !Array.isArray(entry.segments)) {
+            if (previousLength === undefined || !entry || !Array.isArray(entry.segments)) {
                 throw new Error('Invalid bookmark order segments.');
             }
             let copied = 0;
+            let inserted = 0;
             const order: string[] = [];
             for (const segment of entry.segments) {
                 if (typeof segment === 'string') {
-                    order.push(segment);
+                    inserted++;
+                    if (expand) {
+                        order.push(segment);
+                    }
                     continue;
                 }
                 if (!Array.isArray(segment) || segment.length !== 2) {
@@ -154,32 +169,43 @@ function decodeBookmarkOrders(entries: BookmarkOrder[]): string[][] {
                 }
                 const [start, count] = segment;
                 if (!Number.isInteger(start) || !Number.isInteger(count) || start < 0 || count < 1 ||
-                    start + count > previous.length || copied + count > previous.length) {
+                    start + count > previousLength || copied + count > previousLength) {
                     throw new Error('Invalid bookmark order segment bounds.');
                 }
                 copied += count;
-                for (let index = start; index < start + count; index++) {
-                    order.push(previous[index]);
+                if (expand) {
+                    for (let index = start; index < start + count; index++) {
+                        order.push(previous[index]);
+                    }
                 }
             }
-            orders.push(order);
+            if (expand) {
+                orders.push(order);
+            }
+            previousLength = copied + inserted;
             continue;
         }
         if (typeof entry[0] !== 'number') {
             if (entry.some((id) => typeof id !== 'string')) {
                 throw new Error('Invalid bookmark order table.');
             }
-            orders.push(entry as string[]);
+            if (expand) {
+                orders.push(entry as string[]);
+            }
+            previousLength = entry.length;
             continue;
         }
         const [prefixCount, suffixCount, inserted] = entry;
-        if (!previous || entry.length !== 3 || typeof prefixCount !== 'number' || typeof suffixCount !== 'number' ||
+        if (previousLength === undefined || entry.length !== 3 || typeof prefixCount !== 'number' || typeof suffixCount !== 'number' ||
             !Number.isInteger(prefixCount) || !Number.isInteger(suffixCount) ||
-            prefixCount < 0 || suffixCount < 0 || prefixCount + suffixCount > previous.length ||
+            prefixCount < 0 || suffixCount < 0 || prefixCount + suffixCount > previousLength ||
             !Array.isArray(inserted) || inserted.some((id) => typeof id !== 'string')) {
             throw new Error('Invalid bookmark order splice.');
         }
-        orders.push(previous.slice(0, prefixCount).concat(inserted, previous.slice(previous.length - suffixCount)));
+        if (expand) {
+            orders.push(previous.slice(0, prefixCount).concat(inserted, previous.slice(previous.length - suffixCount)));
+        }
+        previousLength = prefixCount + suffixCount + inserted.length;
     }
     return orders;
 }
@@ -243,23 +269,27 @@ function encodeBookmarkOrder(order: string[], previous: string[] | undefined, fu
 
 export function getRangeUpdates(actions: TextXAction[]): IRangeUpdate[] {
     const updates = new Map<string, IRangeUpdate>();
-    let orders: string[][] | undefined;
+    let orderTable: BookmarkOrder[] | undefined;
     for (const action of actions) {
         if (action.t !== TextXActionType.RETAIN) {
             continue;
         }
         if (action.bookmarkOrders !== undefined) {
-            orders = decodeBookmarkOrders(action.bookmarkOrders);
+            orderTable = action.bookmarkOrders;
+            decodeBookmarkOrders(orderTable, false);
         }
         for (const { fallbackOrderIndex, ...update } of action.rangeUpdates ?? []) {
-            const fallbackOrder = fallbackOrderIndex === undefined ? undefined : orders?.[fallbackOrderIndex];
-            if (fallbackOrderIndex !== undefined && (!Number.isInteger(fallbackOrderIndex) || !fallbackOrder)) {
-                throw new Error('Invalid bookmark order reference.');
+            let fallbackOrder: IRangeUpdate['fallbackOrder'];
+            if (fallbackOrderIndex !== undefined) {
+                if (!orderTable || !Number.isInteger(fallbackOrderIndex) || fallbackOrderIndex < 0 || fallbackOrderIndex >= orderTable.length) {
+                    throw new Error('Invalid bookmark order reference.');
+                }
+                fallbackOrder = { table: orderTable, index: fallbackOrderIndex };
             }
             updates.set(update.rangeId, composeRangeUpdate(updates.get(update.rangeId), { ...update, fallbackOrder }));
         }
     }
-    // The shared orders are immutable during apply and transform.
+    // Order references stay compact until an edit needs to resolve one.
     return [...updates.values()].map(({ fallbackOrder, ...update }) => ({ ...Tools.deepClone(update), fallbackOrder }));
 }
 
@@ -283,34 +313,87 @@ export function withoutRangeUpdates(actions: TextXAction[]): TextXAction[] {
     });
 }
 
+function materializeBookmarkOrder(
+    source: IBookmarkOrderRef,
+    decoded: Map<BookmarkOrder[], string[][]>
+): string[] {
+    const tail = orderTails.get(source.table);
+    if (tail?.index === source.index) {
+        return tail.order;
+    }
+    let orders = decoded.get(source.table);
+    if (!orders) {
+        orders = decodeBookmarkOrders(source.table);
+        decoded.set(source.table, orders);
+    }
+    return orders[source.index];
+}
+
+function getRetainedOrderPrefix(updates: IRangeUpdate[]): IBookmarkOrderRef | undefined {
+    const firstOrder = updates.find(({ fallbackOrder }) => fallbackOrder !== undefined)?.fallbackOrder;
+    if (!firstOrder) {
+        return;
+    }
+    const { table } = firstOrder;
+    const retained = new Set<number>();
+    let index = -1;
+    for (const { fallbackOrder } of updates) {
+        if (fallbackOrder?.table === table) {
+            retained.add(fallbackOrder.index);
+            index = Math.max(index, fallbackOrder.index);
+        }
+    }
+    // Dependencies can refer to earlier entries. Retain a contiguous prefix only,
+    // so superseded orders are reclaimed when a move creates a gap in the table.
+    if (retained.size === index + 1) {
+        return { table, index };
+    }
+}
+
 export function appendRangeUpdates(actions: TextXAction[], updates: IRangeUpdate[] | undefined): TextXAction[] {
     if (!updates?.length) {
         return actions;
     }
-    const bookmarkOrders: BookmarkOrder[] = [];
+    const prefix = getRetainedOrderPrefix(updates);
+    const bookmarkOrders = prefix ? prefix.table.slice(0, prefix.index + 1) : [];
     let previousOrder: string[] | undefined;
+    const decoded = new Map<BookmarkOrder[], string[][]>();
     const indices = new Map<string[], number>();
     const equalOrders = new Map<string, number>();
     const rangeUpdates = updates.map(({ fallbackOrder, ...update }) => {
         if (!fallbackOrder) {
             return update;
         }
-        let fallbackOrderIndex = indices.get(fallbackOrder);
+        if (prefix && fallbackOrder.table === prefix.table && fallbackOrder.index <= prefix.index) {
+            return { ...update, fallbackOrderIndex: fallbackOrder.index };
+        }
+        const order = materializeBookmarkOrder(fallbackOrder, decoded);
+        let fallbackOrderIndex = indices.get(order);
         if (fallbackOrderIndex === undefined) {
-            const key = JSON.stringify(fallbackOrder);
+            if (previousOrder === undefined && prefix) {
+                previousOrder = materializeBookmarkOrder(prefix, decoded);
+                equalOrders.set(JSON.stringify(previousOrder), prefix.index);
+            }
+            const key = JSON.stringify(order);
             fallbackOrderIndex = equalOrders.get(key);
             if (fallbackOrderIndex === undefined) {
-                fallbackOrderIndex = bookmarkOrders.push(encodeBookmarkOrder(fallbackOrder, previousOrder, key.length)) - 1;
-                previousOrder = fallbackOrder;
+                fallbackOrderIndex = bookmarkOrders.push(encodeBookmarkOrder(order, previousOrder, key.length)) - 1;
+                previousOrder = order;
                 equalOrders.set(key, fallbackOrderIndex);
             }
-            indices.set(fallbackOrder, fallbackOrderIndex);
+            indices.set(order, fallbackOrderIndex);
         }
         return { ...update, fallbackOrderIndex };
     });
     const action: IRetainAction = { t: TextXActionType.RETAIN, len: 0, rangeUpdates };
     if (bookmarkOrders.length) {
         action.bookmarkOrders = bookmarkOrders;
+        const tail = prefix && orderTails.get(prefix.table);
+        if (previousOrder) {
+            orderTails.set(bookmarkOrders, { index: bookmarkOrders.length - 1, order: previousOrder });
+        } else if (tail && tail.index === prefix?.index) {
+            orderTails.set(bookmarkOrders, tail);
+        }
     }
     return [...actions, action];
 }
@@ -365,6 +448,7 @@ function getRangeUpdateApplyOrder(updates: IRangeUpdate[]): IRangeUpdate[] {
 }
 
 function applyRangeUpdateBatch(ranges: ICustomRange[], updates: IRangeUpdate[]): void {
+    const decoded = new Map<BookmarkOrder[], string[][]>();
     for (const { rangeId, range, nextRangeId, fallbackNextRangeId, fallbackOrder, propertyPaths } of getRangeUpdateApplyOrder(updates)) {
         const index = ranges.findIndex((item) => item.rangeId === rangeId);
         if (range && propertyPaths) {
@@ -385,11 +469,12 @@ function applyRangeUpdateBatch(ranges: ICustomRange[], updates: IRangeUpdate[]):
             } else {
                 let anchor = fallbackNextRangeId == null ? -1 : ranges.findIndex((item) => item.rangeId === fallbackNextRangeId);
                 if (anchor < 0 && fallbackOrder && typeof fallbackNextRangeId === 'string') {
-                    const first = fallbackOrder.indexOf(fallbackNextRangeId);
+                    const order = materializeBookmarkOrder(fallbackOrder, decoded);
+                    const first = order.indexOf(fallbackNextRangeId);
                     if (first >= 0) {
                         const positions = new Map(ranges.map((item, index) => [item.rangeId, index]));
-                        for (let offset = first + 1; offset < fallbackOrder.length; offset++) {
-                            const position = positions.get(fallbackOrder[offset]);
+                        for (let offset = first + 1; offset < order.length; offset++) {
+                            const position = positions.get(order[offset]);
                             if (position !== undefined) {
                                 anchor = position;
                                 break;
@@ -409,7 +494,8 @@ function orderRangesAtInsertion(ranges: ICustomRange[], positioned: IRangeUpdate
     const positions = new Map(positioned.map(({ rangeId, bookmarkOrderPosition }) => [rangeId, bookmarkOrderPosition!]));
     const positionOf = (range: ICustomRange) => positions.get(range.rangeId) ?? range.startIndex;
     ranges.sort((left, right) => positionOf(left) - positionOf(right));
-    const orders = new Map<number, string[]>();
+    const orders = new Map<number, IBookmarkOrderRef>();
+    const decoded = new Map<BookmarkOrder[], string[][]>();
     for (const { bookmarkOrderPosition, fallbackOrder } of positioned) {
         if (fallbackOrder) {
             // Later moves to the same position include the order established by earlier inserts.
@@ -423,8 +509,9 @@ function orderRangesAtInsertion(ranges: ICustomRange[], positioned: IRangeUpdate
         while (end < ranges.length && positionOf(ranges[end]) === position) {
             end++;
         }
-        const order = orders.get(position);
-        if (order && end - start > 1) {
+        const reference = orders.get(position);
+        if (reference && end - start > 1) {
+            const order = materializeBookmarkOrder(reference, decoded);
             let rank = ranks.get(order);
             if (!rank) {
                 rank = new Map(order.map((id, index) => [id, index]));

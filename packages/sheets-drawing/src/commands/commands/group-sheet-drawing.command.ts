@@ -17,13 +17,10 @@
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
-import { SheetSkeletonService } from '@univerjs/sheets';
-import type { ISheetDrawing } from '../../services/sheet-drawing.service';
-import { transformToAxisAlignPosition } from '../../basics/transform-position';
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
-import { groupToUngroup } from './drawing-group-params';
+import { anchorTopLevelDrawing, groupToUngroup } from './drawing-group-params';
 
 export const GroupSheetDrawingCommand: ICommand = {
     id: 'sheet.command.group-sheet-image',
@@ -32,7 +29,6 @@ export const GroupSheetDrawingCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const sheetDrawingService = accessor.get(ISheetDrawingService);
-        const sheetSkeletonService = accessor.get(SheetSkeletonService);
 
         if (!params) return false;
 
@@ -45,12 +41,8 @@ export const GroupSheetDrawingCommand: ICommand = {
                 groupParams.push(group);
                 continue;
             }
-            const skeleton = sheetSkeletonService.ensureSkeleton(parent.unitId, parent.subUnitId);
-            if (!skeleton) return false;
-            const anchoredParent: ISheetDrawing = {
-                ...parent,
-                axisAlignSheetTransform: transformToAxisAlignPosition(parent.transform, skeleton),
-            };
+            const anchoredParent = anchorTopLevelDrawing(accessor, parent);
+            if (!anchoredParent) return false;
             groupParams.push({ ...group, parent: anchoredParent });
         }
 

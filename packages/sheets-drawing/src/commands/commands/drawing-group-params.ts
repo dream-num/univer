@@ -14,26 +14,55 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
+import type { IAccessor, IDrawingParam, Nullable, Workbook } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
-import { DrawingTypeEnum } from '@univerjs/core';
+import { DrawingTypeEnum, IUniverInstanceService, SheetTypes, UniverInstanceType } from '@univerjs/core';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
+import { SheetSkeletonService } from '@univerjs/sheets';
+import type { ISheetDrawing } from '../../services/sheet-drawing.service';
+import { transformToAxisAlignPosition } from '../../basics/transform-position';
+import { applySheetDrawingPlacement, getSheetDrawingPlacement } from '../../services/sheet-drawing-placement';
+import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
+
+/**
+ * Derives the cell markers of a drawing that is top-level after the command.
+ * Chart Sheets have no grid, so their drawings are placed absolutely.
+ * Returns null when a grid worksheet cannot be laid out.
+ */
+export function anchorTopLevelDrawing(accessor: IAccessor, drawing: IDrawingParam): Nullable<IDrawingParam> {
+    const { unitId, subUnitId } = drawing;
+    const worksheet = accessor.get(IUniverInstanceService)
+        .getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+        ?.getSheetBySheetId(subUnitId);
+    if (!worksheet) return null;
+
+    // Group update params may carry a partial transform that is merged onto the stored drawing.
+    const stored = accessor.get(ISheetDrawingService).getDrawingByParam(drawing);
+    const transform = { ...stored?.transform, ...drawing.transform };
+
+    if (worksheet.getConfig().type === SheetTypes.CHART) {
+        const absolute = { ...drawing, transform, anchorType: SheetDrawingAnchorType.None } as ISheetDrawing;
+        return applySheetDrawingPlacement(absolute, getSheetDrawingPlacement(absolute));
+    }
+
+    const skeleton = accessor.get(SheetSkeletonService).ensureSkeleton(unitId, subUnitId);
+    if (!skeleton) return null;
+
+    return { ...drawing, axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton) } as IDrawingParam;
+}
 
 export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
     const newGroupParams: IDrawingGroupUpdateParam[] = [];
 
     ungroupParams.forEach((ungroupParam) => {
         const { parent, children } = ungroupParam;
-        const { unitId, subUnitId, drawingId: groupId } = parent;
+        const { drawingId: groupId } = parent;
         const groupTransform = getGroupState(0, 0, children.map((o) => o.transform || {}));
 
         const newChildren = children.map((drawing) => {
             const transform = drawing.transform || { left: 0, top: 0 };
-            const { unitId, subUnitId, drawingId } = drawing;
             return {
-                unitId,
-                subUnitId,
-                drawingId,
+                ...drawing,
                 transform: {
                     ...transform,
                     left: transform.left!,
@@ -44,9 +73,7 @@ export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
         }) as IDrawingParam[];
 
         const groupParam = {
-            unitId,
-            subUnitId,
-            drawingId: groupId,
+            ...parent,
             drawingType: DrawingTypeEnum.DRAWING_GROUP,
             groupBaseBound: { ...parent.groupBaseBound },
             transform: groupTransform,
@@ -66,27 +93,22 @@ export function groupToUngroup(groupParams: IDrawingGroupUpdateParam[]) {
 
     groupParams.forEach((groupParam) => {
         const { parent, children } = groupParam;
-        const { unitId, subUnitId, drawingId: groupId, transform: groupTransform = { width: 0, height: 0 } } = parent;
+        const { transform: groupTransform = { width: 0, height: 0 } } = parent;
         if (groupTransform == null) {
             return;
         }
         const newChildren = children.map((object) => {
             const { transform } = object;
-            const { unitId, subUnitId, drawingId } = object;
             const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, groupTransform.width || 0, groupTransform.height || 0, parent.groupBaseBound);
             return {
-                unitId,
-                subUnitId,
-                drawingId,
+                ...object,
                 transform: newTransform,
                 groupId: undefined,
             };
         }) as IDrawingParam[];
 
         const ungroupParam = {
-            unitId,
-            subUnitId,
-            drawingId: groupId,
+            ...parent,
             drawingType: DrawingTypeEnum.DRAWING_GROUP,
             transform: {
                 left: 0,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand, IDrawingParam } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
 import {
     CommandType,
@@ -24,7 +24,7 @@ import {
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
-import { ungroupToGroup } from './drawing-group-params';
+import { anchorTopLevelDrawing, ungroupToGroup } from './drawing-group-params';
 
 /**
  * The command to insert new defined name
@@ -39,8 +39,25 @@ export const UngroupSheetDrawingCommand: ICommand = {
 
         if (!params) return false;
 
+        // Children of a top-level group become top-level, so their cell
+        // markers are derived here from their released transforms.
+        const ungroupParams: IDrawingGroupUpdateParam[] = [];
+        for (const group of params) {
+            if (group.parent.groupId) {
+                ungroupParams.push(group);
+                continue;
+            }
+            const children: IDrawingParam[] = [];
+            for (const child of group.children) {
+                const anchoredChild = child.transform ? anchorTopLevelDrawing(accessor, child) : child;
+                if (!anchoredChild) return false;
+                children.push(anchoredChild);
+            }
+            ungroupParams.push({ ...group, children });
+        }
+
         const unitIds: string[] = [];
-        params.forEach(({ parent, children }) => {
+        ungroupParams.forEach(({ parent, children }) => {
             unitIds.push(parent.unitId);
             children.forEach((child) => {
                 unitIds.push(child.unitId);
@@ -48,7 +65,7 @@ export const UngroupSheetDrawingCommand: ICommand = {
         });
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const jsonOp = sheetDrawingService.getUngroupDrawingOp(params) as IDrawingJsonUndo1;
+        const jsonOp = sheetDrawingService.getUngroupDrawingOp(ungroupParams) as IDrawingJsonUndo1;
 
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 

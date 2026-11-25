@@ -92,7 +92,7 @@ describe('drawing group params', () => {
         ] as never);
 
         expect(ungrouped).toHaveLength(1);
-        expect(ungrouped[0].parent).toEqual({
+        expect(ungrouped[0].parent).toMatchObject({
             unitId: 'book-1',
             subUnitId: 'sheet-1',
             drawingId: 'group-1',
@@ -111,5 +111,32 @@ describe('drawing group params', () => {
             },
             groupId: undefined,
         });
+    });
+
+    it('keeps nested group and child metadata in both directions', () => {
+        const parent = {
+            unitId: 'book-1',
+            subUnitId: 'sheet-1',
+            drawingId: 'inner',
+            drawingType: DrawingTypeEnum.DRAWING_GROUP,
+            groupId: 'outer',
+            transform: { left: 0, top: 0, width: 10, height: 10 },
+            groupBaseBound: { left: 0, top: 0, width: 10, height: 10 },
+        };
+        const child = {
+            unitId: 'book-1',
+            subUnitId: 'sheet-1',
+            drawingId: 'shape-1',
+            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            transform: { left: 1, top: 2, width: 3, height: 4 },
+        };
+
+        const [grouped] = ungroupToGroup([{ parent, children: [child] }] as never);
+        expect(grouped.parent).toMatchObject({ drawingId: 'inner', groupId: 'outer' });
+        expect(grouped.children[0]).toMatchObject({ drawingType: DrawingTypeEnum.DRAWING_SHAPE, groupId: 'inner' });
+
+        const [ungrouped] = groupToUngroup([{ parent, children: [{ ...child, groupId: 'inner' }] }] as never);
+        expect(ungrouped.parent).toMatchObject({ drawingId: 'inner', groupId: 'outer' });
+        expect(ungrouped.children[0]).toMatchObject({ drawingType: DrawingTypeEnum.DRAWING_SHAPE, groupId: undefined });
     });
 });

@@ -199,6 +199,43 @@ it('keeps real GRID transform, arrange, grouping and focus event consumers coher
     expect(bed.drawings.getDrawingByParam(search)!.groupId).toBeUndefined();
 });
 
+it('groups, moves and ungroups Chart Sheet drawings from feature events without a grid, through undo and redo', async () => {
+    const bed = createChartDrawingTestBed();
+    const first = createAbsoluteChart('first', 'chart');
+    const second = { ...createAbsoluteChart('second', 'chart'), transform: { ...createAbsoluteChart().transform, left: 400 } };
+    expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [first, second] })).toBe(true);
+    expect(bed.skeletons.ensureSkeleton('test', 'chart')).toBeUndefined();
+    const groupSearch = { unitId: 'test', subUnitId: 'chart', drawingId: 'group' };
+    const children = [first, second].map((child) => bed.drawings.getDrawingByParam({ ...groupSearch, drawingId: child.drawingId })!);
+    const parent = { ...groupSearch, drawingType: DrawingTypeEnum.DRAWING_GROUP, transform: { left: 150, top: 120, width: 450, height: 140 } };
+
+    bed.drawingManager.featurePluginGroupUpdateNotification([{ parent, children: children.map((child) => ({ ...child, groupId: 'group' })) }]);
+    await Promise.resolve();
+    expect(bed.drawings.getDrawingsByGroup(groupSearch).map((drawing) => drawing.drawingId).sort()).toEqual(['first', 'second']);
+    expect(bed.drawings.getDrawingByParam(groupSearch)!.anchorType).toBe(SheetDrawingAnchorType.None);
+
+    // Dragging the group on a Chart Sheet must persist without a grid.
+    bed.drawingManager.featurePluginUpdateNotification([{ ...groupSearch, drawingType: DrawingTypeEnum.DRAWING_GROUP, transform: { left: 250, top: 170 } }]);
+    await Promise.resolve();
+    const group = bed.drawings.getDrawingByParam(groupSearch)!;
+    expect(group.transform).toMatchObject({ left: 250, top: 170 });
+
+    bed.drawingManager.featurePluginUngroupUpdateNotification([{
+        parent: group,
+        children: children.map((child) => ({ ...child, transform: { ...child.transform, left: child.transform!.left! + 100, top: child.transform!.top! + 50 }, groupId: undefined })),
+    }]);
+    await Promise.resolve();
+    expect(bed.drawings.getDrawingByParam(groupSearch)).toBeUndefined();
+    const released = bed.drawings.getDrawingByParam({ ...groupSearch, drawingId: 'second' })!;
+    expect(released).toMatchObject({ anchorType: SheetDrawingAnchorType.None, transform: { left: 500, top: 170 } });
+    expect(released.axisAlignSheetTransform.from).toEqual({ row: 0, column: 0, columnOffset: 500, rowOffset: 170 });
+
+    expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingsByGroup(groupSearch)).toHaveLength(2);
+    expect(await bed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam({ ...groupSearch, drawingId: 'first' })!.groupId).toBeUndefined();
+});
+
 it('commits actual None feature updates through both stores, full save/reopen and undo/redo without a grid', async () => {
     const bed = createChartDrawingTestBed(undefined, createAbsoluteChart());
     const search = { unitId: 'test', subUnitId: 'chart', drawingId: 'child' };

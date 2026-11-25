@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getRegionTag, LocaleType } from '@univerjs/core';
+import { getRegionLocale, getRegionTag, LocaleType } from '@univerjs/core';
 
 interface IDateFormatProfile {
     dates: readonly string[];
@@ -83,7 +83,8 @@ const DATE_FORMAT_PROFILES: Record<LocaleType, IDateFormatProfile> = {
 const builtInRegions = new Map(Object.values(LocaleType).map((locale) => [getRegionTag(locale).toLowerCase(), locale]));
 
 export function getDateFormatLocale(region: string): LocaleType | undefined {
-    return builtInRegions.get(getRegionTag(region).toLowerCase());
+    const locale = getRegionLocale(region);
+    return locale && builtInRegions.get(locale.baseName.toLowerCase());
 }
 
 function getDateProfile(region: string): IDateFormatProfile {
@@ -113,7 +114,7 @@ export function getDefaultDateFormat(region: string): string {
     return preferredDate(getDateProfile(region));
 }
 
-export function getDateFormatPatterns(region: string): string[] {
+export function getDateFormatPatterns(region: string, regionalDefault: boolean = !getDateFormatLocale(region)): string[] {
     const profile = getDateProfile(region);
     const clockPatterns = ['hh:mm', 'h:mm', 'h:mm:ss'];
     const timePatterns = clockPatterns.map((pattern) => profile.periodBeforeTime
@@ -121,7 +122,7 @@ export function getDateFormatPatterns(region: string): string[] {
         : `${pattern} AM/PM`);
 
     return [...new Set([
-        preferredDate(profile),
+        regionalDefault ? preferredDate(profile) : 'yyyy-MM-dd',
         'yyyy-MM-dd',
         ...profile.dates,
         'h:mm:ss',

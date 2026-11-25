@@ -140,7 +140,7 @@ export function FactoryMobileOtherMenuItem(
         }),
         get mobileNumberFormat() {
             const region = regionService.getCurrentRegion();
-            return createMobileNumberFormatMenuConfig(getCurrencySymbolByLocale(region), region);
+            return createMobileNumberFormatMenuConfig(getCurrencySymbolByLocale(region), regionService.getExplicitRegion());
         },
     };
 }

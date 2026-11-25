@@ -30,11 +30,11 @@ export const isDatePanel = (pattern: string) => {
 export function DatePanel(props: IBusinessComponentProps) {
     const { onActionChange, onChange, defaultPattern } = props;
     const localeService = useDependency(LocaleService);
-    useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
+    const locale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
     const regionService = useDependency(RegionService);
-    const region = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
+    const region = useObservable(regionService.explicitRegion$, regionService.getExplicitRegion());
     const [selected, setSuffix] = useState(defaultPattern);
-    const options = useMemo(() => getDateFormatOptions(region, selected), [region, selected]);
+    const options = useMemo(() => getDateFormatOptions(locale, selected, region), [locale, region, selected]);
     const suffix = selected || options[0].value;
 
     useLayoutEffect(() => {

@@ -15,7 +15,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 import { Inject } from '../../common/di';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { LocaleService } from '../locale/locale.service';
@@ -23,6 +23,7 @@ import { LocaleService } from '../locale/locale.service';
 export class RegionService extends Disposable {
     private readonly _currentRegion$: BehaviorSubject<string>;
     readonly currentRegion$: Observable<string>;
+    readonly explicitRegion$: Observable<string | undefined>;
 
     private _hasExplicitRegion = false;
 
@@ -31,6 +32,7 @@ export class RegionService extends Disposable {
 
         this._currentRegion$ = new BehaviorSubject<string>(this._localeService.getCurrentLocale());
         this.currentRegion$ = this._currentRegion$.asObservable();
+        this.explicitRegion$ = this.currentRegion$.pipe(map(() => this.getExplicitRegion()), distinctUntilChanged());
 
         this.disposeWithMe(this._localeService.currentLocale$.subscribe((locale) => {
             if (!this._hasExplicitRegion && locale !== this._currentRegion$.value) {
@@ -43,6 +45,10 @@ export class RegionService extends Disposable {
     setRegion(region: string): void {
         this._hasExplicitRegion = true;
         this._currentRegion$.next(region);
+    }
+
+    getExplicitRegion(): string | undefined {
+        return this._hasExplicitRegion ? this.getCurrentRegion() : undefined;
     }
 
     getCurrentRegion(): string {

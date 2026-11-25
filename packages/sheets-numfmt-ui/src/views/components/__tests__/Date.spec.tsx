@@ -94,8 +94,11 @@ describe('DatePanel', () => {
             </RediContext.Provider>
         ));
 
+        expect(onActionChange.mock.lastCall![0]()).toBe('yyyy-MM-dd');
         if (explicitRegion) {
-            act(() => injector.get(RegionService).setRegion('enIN' as LocaleType));
+            act(() => injector.get(RegionService).setRegion(LocaleType.EN_US));
+            expect(onActionChange.mock.lastCall![0]()).toBe('m/d/yyyy');
+            act(() => injector.get(RegionService).setRegion('enIN'));
             expect(container.querySelector('li a')?.textContent?.trim()).toBe('05/08/1930');
             expect(onActionChange.mock.lastCall![0]()).toBe('dd/mm/yyyy');
         }

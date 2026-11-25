@@ -32,9 +32,9 @@ export function CustomFormat(props: IBusinessComponentProps) {
     const userHabitController = useDependency(UserHabitController);
     const localStorageService = useDependency(ILocalStorageService);
     const localeService = useDependency(LocaleService);
-    useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
+    const locale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
     const regionService = useDependency(RegionService);
-    const region = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
+    const region = useObservable(regionService.explicitRegion$, regionService.getExplicitRegion());
 
     const [pattern, setPattern] = useState(defaultPattern);
     useLayoutEffect(() => {
@@ -54,8 +54,8 @@ export function CustomFormat(props: IBusinessComponentProps) {
 
         localStorageService.getItem<string[]>(historyPatternKey).then((historyList) => {
             const list = [
-                ...CURRENCYFORMAT.map((item) => item.suffix(getCurrencySymbolByLocale(region))),
-                ...getDateFormatOptions(region).map((item) => item.value),
+                ...CURRENCYFORMAT.map((item) => item.suffix(getCurrencySymbolByLocale(region ?? locale))),
+                ...getDateFormatOptions(locale, undefined, region).map((item) => item.value),
                 ...NUMBERFORMAT.map((item) => item.suffix),
                 ...(historyList ?? []),
             ];
@@ -69,7 +69,7 @@ export function CustomFormat(props: IBusinessComponentProps) {
         return () => {
             cancelled = true;
         };
-    }, [region, localStorageService, userHabitController]);
+    }, [locale, region, localStorageService, userHabitController]);
 
     const handleClick = (p: string) => {
         setPattern(p);

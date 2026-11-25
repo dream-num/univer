@@ -86,7 +86,7 @@ describe('CustomFormat', () => {
         expect(onChange).not.toHaveBeenCalled();
         expect(await storage.getItem('numfmt_custom_pattern')).toEqual([historicPattern]);
 
-        await act(async () => injector.get(RegionService).setRegion('enIN' as LocaleType));
+        await act(async () => injector.get(RegionService).setRegion('enIN'));
         expect(container.textContent).toContain('dd/mm/yyyy');
         expect(container.textContent).toContain('₹');
         expect(container.querySelector('input')?.value).toBe(historicPattern);

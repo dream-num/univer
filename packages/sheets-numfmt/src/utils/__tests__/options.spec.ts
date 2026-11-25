@@ -47,6 +47,14 @@ describe('getDateFormatOptions', () => {
         }
     });
 
+    it('preserves the existing first preset until a region is explicitly selected', () => {
+        expect(getDateFormatOptions(LocaleType.EN_US)[0].value).toBe('yyyy-MM-dd');
+        expect(getDateFormatOptions(LocaleType.EN_US, undefined, 'en-US')[0].value).toBe('m/d/yyyy');
+        const belgian = getDateFormatOptions(LocaleType.EN_US, undefined, 'fr-BE');
+        expect(belgian[0].value).toBe('dd/mm/yyyy');
+        expect(belgian.find(({ value }) => value === 'd mmmm')?.label).toBe('5 août');
+    });
+
     it('does not offer Chinese literals in English presets', () => {
         for (const option of getDateFormatOptions(LocaleType.EN_US)) {
             expect(option.label).not.toMatch(/[年月日]|上午|下午/);

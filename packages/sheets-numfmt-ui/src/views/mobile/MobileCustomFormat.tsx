@@ -29,17 +29,17 @@ export interface IMobileCustomFormatProps {
 export function MobileCustomFormat(props: IMobileCustomFormatProps) {
     const { patterns, onConfirm } = props;
     const localeService = useDependency(LocaleService);
-    useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
+    const locale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
     const regionService = useDependency(RegionService);
-    const region = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
+    const region = useObservable(regionService.explicitRegion$, regionService.getExplicitRegion());
     const [pattern, setPattern] = useState('');
     const title = localeService.t<LocaleKey>('sheets-numfmt-ui.customFormat');
     // Menu configuration outlives locale changes; resolve date presets when the editor renders.
     const options = useMemo(() => [...new Set([
         ...patterns,
-        ...getDateFormatOptions(region).map((item) => item.value),
+        ...getDateFormatOptions(locale, undefined, region).map((item) => item.value),
         ...(pattern ? [pattern] : []),
-    ])].map((value) => ({ label: value, value })), [region, pattern, patterns]);
+    ])].map((value) => ({ label: value, value })), [locale, region, pattern, patterns]);
 
     return (
         <div

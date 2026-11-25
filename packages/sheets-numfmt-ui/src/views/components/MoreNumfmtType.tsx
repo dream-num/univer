@@ -48,7 +48,8 @@ export function Options() {
     const layoutService = useDependency(ILayoutService);
     const sheetsNumfmtCellContentController = useDependency(SheetsNumfmtCellContentController);
     const direction = useObservable(localeService.direction$, localeService.getDirection());
-    const region = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
+    const locale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
+    const region = useObservable(regionService.explicitRegion$, regionService.getExplicitRegion());
 
     const selectionManagerService = useDependency(SheetsSelectionsService);
     const setNumfmt = (pattern: string | null) => {
@@ -72,9 +73,9 @@ export function Options() {
     };
 
     const menuOptions = useMemo(() => {
-        const currencySymbol = getCurrencySymbolByLocale(region);
+        const currencySymbol = getCurrencySymbolByLocale(region ?? locale);
         return MENU_OPTIONS(currencySymbol, region);
-    }, [region]);
+    }, [locale, region]);
 
     const handleClick = (index: number) => {
         if (index === 0) {

@@ -25,7 +25,7 @@ import {
     SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { HeaderMenuResizeShape } from '../../../views/header-resize-shape';
 import type { ITestEvent } from './render-test-bed';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
@@ -165,108 +165,47 @@ describe('HeaderResizeRenderController', () => {
         expect(columnResizeRect.size).toBeCloseTo(20 * 0.7);
     });
 
-    // https://github.com/dream-num/univer/issues/5483
-    describe('when the scene is scaled', () => {
-        function setup(scale: number) {
-            const testBed = createRenderTestBed();
-            const { context, injector, scene } = testBed;
-            scene.scale(scale, scale);
-
-            const commandService = injector.get(ICommandService);
-            const executeSpy = vi.spyOn(commandService, 'executeCommand').mockResolvedValue(true as any);
-
-            const controller = injector.createInstance(HeaderResizeRenderController, context as any);
-            controller.interceptor.intercept(controller.interceptor.getInterceptPoints().HEADER_RESIZE_PERMISSION_CHECK, {
-                handler: () => true,
-            });
-
-            return { testBed, context, controller, executeSpy };
+    it.each([
+        // At 50%, the starting scene offsets exceed the canvas dimensions in screen pixels (#5483).
+        { type: RANGE_TYPE.COLUMN, zoom: 0.5, index: 9, from: 498, to: 523, before: 100, after: 146 },
+        { type: RANGE_TYPE.ROW, zoom: 0.5, index: 40, from: 409, to: 429, before: 20, after: 56 },
+        // At 200%, the visible right and bottom edges in scene units are 395 and 295, respectively.
+        { type: RANGE_TYPE.COLUMN, zoom: 2, index: 1, from: 399, to: 1000, before: 100, after: 295 },
+        { type: RANGE_TYPE.ROW, zoom: 2, index: 1, from: 79, to: 1000, before: 20, after: 275 },
+        // At 100%, an edge past the visible area should keep its size when dragged farther out.
+        { type: RANGE_TYPE.COLUMN, zoom: 1, index: 7, from: 799, to: 850, before: 100, after: 100 },
+    ])('resizes at $zoom× from $from to $to', ({ type, zoom, index, from, to, before, after }) => {
+        const { context, injector, scene, sheet } = testBed;
+        const worksheet = sheet.getActiveSheet()!;
+        const isRow = type === RANGE_TYPE.ROW;
+        if (isRow) {
+            worksheet.getRowManager().setRowHeight(index, before);
+        } else {
+            worksheet.getColumnManager().setColumnWidth(index, before);
         }
+        scene.scale(zoom, zoom);
 
-        it('resizes a column whose scene offset exceeds the canvas width when zoomed out', () => {
-            const { testBed, context, controller, executeSpy } = setup(0.5);
-
-            // At 50% zoom, screen x 498 maps to scene x 996, the right edge of column 9 (scene x 900-1000),
-            // which lies beyond the 800px canvas width in scene units.
-            const columnHeader = context.components.get(SHEET_VIEW_KEY.COLUMN) as any;
-            columnHeader.onPointerMove$.emit({ offsetX: 498, offsetY: 10, button: 0 }, {});
-
-            const columnResizeRect = (controller as any)._columnResizeRect;
-            columnResizeRect.onPointerDown$.emitEvent({ offsetX: 498, offsetY: 10, button: 0 } as any);
-            (context.scene as any).onPointerMove$.emit({ offsetX: 523, offsetY: 10, button: 0 }, {});
-            (context.scene as any).onPointerUp$.emit({ offsetX: 523, offsetY: 10, button: 0 }, {});
-
-            // Dragging 25 screen px = 50 scene px, minus half of the scaled thumb (4 / 0.5 / 2).
-            expect(executeSpy).toHaveBeenCalledWith(DeltaColumnWidthCommand.id, {
-                deltaX: 46,
-                anchorCol: 9,
-            });
-
-            testBed.univer.dispose();
+        const controller = injector.get(HeaderResizeRenderController);
+        cleanups.push(() => controller.dispose());
+        controller.interceptor.intercept(controller.interceptor.getInterceptPoints().HEADER_RESIZE_PERMISSION_CHECK, {
+            handler: () => true,
         });
 
-        it('resizes a row whose scene offset exceeds the canvas height when zoomed out', () => {
-            const { testBed, context, controller, executeSpy } = setup(0.5);
+        const header = context.components.get(isRow ? SHEET_VIEW_KEY.ROW : SHEET_VIEW_KEY.COLUMN) as unknown as {
+            onPointerMove$: ITestEvent<Partial<IMouseEvent>, object>;
+        };
+        const shapes = controller as unknown as {
+            _rowResizeRect: HeaderMenuResizeShape;
+            _columnResizeRect: HeaderMenuResizeShape;
+        };
+        const shape = isRow ? shapes._rowResizeRect : shapes._columnResizeRect;
+        const start = isRow ? { offsetX: 10, offsetY: from, button: 0 } : { offsetX: from, offsetY: 10, button: 0 };
+        const end = isRow ? { offsetX: 10, offsetY: to, button: 0 } : { offsetX: to, offsetY: 10, button: 0 };
+        header.onPointerMove$.emit(start, {});
+        shape.onPointerDown$.emitEvent(start as IMouseEvent);
+        scene.onPointerMove$.emit(end, { stopPropagation: () => undefined });
+        scene.onPointerUp$.emit(end, { stopPropagation: () => undefined });
 
-            // Screen y 409 maps to scene y 818, the bottom edge of row 40 (scene y 800-820).
-            const rowHeader = context.components.get(SHEET_VIEW_KEY.ROW) as any;
-            rowHeader.onPointerMove$.emit({ offsetX: 10, offsetY: 409, button: 0 }, {});
-
-            const rowResizeRect = (controller as any)._rowResizeRect;
-            rowResizeRect.onPointerDown$.emitEvent({ offsetX: 10, offsetY: 409, button: 0 } as any);
-            (context.scene as any).onPointerMove$.emit({ offsetX: 10, offsetY: 429, button: 0 }, {});
-            (context.scene as any).onPointerUp$.emit({ offsetX: 10, offsetY: 429, button: 0 }, {});
-
-            expect(executeSpy).toHaveBeenCalledWith(DeltaRowHeightCommand.id, {
-                deltaY: 36,
-                anchorRow: 40,
-            });
-
-            testBed.univer.dispose();
-        });
-
-        it('clamps the column resize to the visible area in scene units when zoomed in', () => {
-            const { testBed, context, controller, executeSpy } = setup(2);
-
-            // Screen x 399 maps to scene x 199.5, the right edge of column 1 (scene x 100-200).
-            const columnHeader = context.components.get(SHEET_VIEW_KEY.COLUMN) as any;
-            columnHeader.onPointerMove$.emit({ offsetX: 399, offsetY: 10, button: 0 }, {});
-
-            const columnResizeRect = (controller as any)._columnResizeRect;
-            columnResizeRect.onPointerDown$.emitEvent({ offsetX: 399, offsetY: 10, button: 0 } as any);
-            // Drag past the canvas edge.
-            (context.scene as any).onPointerMove$.emit({ offsetX: 1000, offsetY: 10, button: 0 }, {});
-            (context.scene as any).onPointerUp$.emit({ offsetX: 1000, offsetY: 10, button: 0 }, {});
-
-            // The visible right edge is (800 - 10) / 2 = 395 in scene units, so the delta is capped at 395 - 100.
-            expect(executeSpy).toHaveBeenCalledWith(DeltaColumnWidthCommand.id, {
-                deltaX: 295,
-                anchorCol: 1,
-            });
-
-            testBed.univer.dispose();
-        });
-
-        it('clamps the row resize to the visible area in scene units when zoomed in', () => {
-            const { testBed, context, controller, executeSpy } = setup(2);
-
-            // Screen y 79 maps to scene y 39.5, the bottom edge of row 1 (scene y 20-40).
-            const rowHeader = context.components.get(SHEET_VIEW_KEY.ROW) as any;
-            rowHeader.onPointerMove$.emit({ offsetX: 10, offsetY: 79, button: 0 }, {});
-
-            const rowResizeRect = (controller as any)._rowResizeRect;
-            rowResizeRect.onPointerDown$.emitEvent({ offsetX: 10, offsetY: 79, button: 0 } as any);
-            // Drag past the canvas edge.
-            (context.scene as any).onPointerMove$.emit({ offsetX: 10, offsetY: 1000, button: 0 }, {});
-            (context.scene as any).onPointerUp$.emit({ offsetX: 10, offsetY: 1000, button: 0 }, {});
-
-            // The visible bottom edge is (600 - 10) / 2 = 295 in scene units, so the delta is capped at 295 - 20.
-            expect(executeSpy).toHaveBeenCalledWith(DeltaRowHeightCommand.id, {
-                deltaY: 275,
-                anchorRow: 1,
-            });
-
-            testBed.univer.dispose();
-        });
+        expect(isRow ? worksheet.getRowHeight(index) : worksheet.getColumnWidth(index)).toBe(after);
     });
 });

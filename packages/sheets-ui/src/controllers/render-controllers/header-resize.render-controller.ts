@@ -38,6 +38,7 @@ import {
     Inject,
     InterceptorManager,
     RANGE_TYPE,
+    Tools,
 } from '@univerjs/core';
 import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import {
@@ -419,12 +420,13 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                     const visibleSceneBottom = (canvasMaxHeight - scrollBarHorizontalHeight) / scaleY + scrollXY.y;
                     const visibleSceneRight = (canvasMaxWidth - scrollBarVerticalWidth) / scaleX + scrollXY.x;
 
+                    // Keep the growth limit at zero for an edge that is already outside the viewport.
                     if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                        if (moveChangeY > visibleSceneBottom - cell.startY) {
-                            moveChangeY = visibleSceneBottom - cell.startY;
-                        }
-
-                        moveChangeY = Math.max(moveChangeY, -(cell.endY - cell.startY));
+                        moveChangeY = Tools.clamp(
+                            moveChangeY,
+                            cell.startY - cell.endY,
+                            Math.max(0, visibleSceneBottom - cell.endY)
+                        );
 
                         if (isStartMove) {
                             this._resizeHelperShape?.transformByState({
@@ -440,11 +442,11 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                             scene.setCursor(CURSOR_TYPE.ROW_RESIZE);
                         }
                     } else {
-                        if (moveChangeX > visibleSceneRight - cell.startX) {
-                            moveChangeX = visibleSceneRight - cell.startX;
-                        }
-
-                        moveChangeX = Math.max(moveChangeX, -(cell.endX - cell.startX));
+                        moveChangeX = Tools.clamp(
+                            moveChangeX,
+                            cell.startX - cell.endX,
+                            Math.max(0, visibleSceneRight - cell.endX)
+                        );
 
                         if (isStartMove) {
                             this._resizeHelperShape?.transformByState({

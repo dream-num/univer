@@ -33,6 +33,8 @@ export interface IDocPrintContext {
     engine: Engine;
     root: HTMLElement;
     skeleton: DocumentSkeleton;
+    /** Physical origin of the projected page in the isolated print scene. */
+    pageOrigin?: { left: number; top: number };
 }
 
 export interface IDocPrintDomtContext extends IDocPrintContext {
@@ -41,6 +43,7 @@ export interface IDocPrintDomtContext extends IDocPrintContext {
 }
 export interface IDocPrintComponentContext extends IDocPrintContext {
     documents: Documents;
+    waitForResource?(resource: Promise<unknown>): void;
 }
 
 export interface IDocPrintPreparationContext {
@@ -52,6 +55,21 @@ const PRINTING_COMPONENT_COLLECT = createInterceptorKey<undefined, IDocPrintComp
 const PRINTING_DOM_COLLECT = createInterceptorKey<DisposableCollection, IDocPrintDomtContext>('PRINTING_DOM_COLLECT');
 
 export class DocPrintInterceptorService extends Disposable {
+    private _pageDrawingResolver?: (context: IDocPrintContext) => readonly IDrawingParam[] | undefined;
+
+    registerPrintPageDrawingResolver(resolver: (context: IDocPrintContext) => readonly IDrawingParam[] | undefined): () => void {
+        this._pageDrawingResolver = resolver;
+        return () => {
+            if (this._pageDrawingResolver === resolver) {
+                this._pageDrawingResolver = undefined;
+            }
+        };
+    }
+
+    getPrintPageDrawings(context: IDocPrintContext): readonly IDrawingParam[] | undefined {
+        return context.pageOrigin ? this._pageDrawingResolver?.(context) : undefined;
+    }
+
     getDrawingForPrint<T extends IDrawingParam>(skeleton: DocumentSkeleton, drawing: T): T {
         const model = skeleton.getViewModel().getDataModel();
         let drawings = model.getDrawings();
@@ -145,6 +163,7 @@ export class DocPrintInterceptorService extends Disposable {
     }
 
     override dispose(): void {
+        this._pageDrawingResolver = undefined;
         this._printPreparationHandlers.clear();
         super.dispose();
     }

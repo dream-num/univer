@@ -47,6 +47,7 @@ export function registerDocumentHeaderFooterReferenceResolver(model: DocumentDat
     });
 }
 
+/** Read the host's resolver when projecting the same document into a separate rendering layout. */
 export function getDocumentHeaderFooterReferenceResolver(model: DocumentDataModel): DocumentHeaderFooterReferenceResolver | undefined {
     return resolvers.get(model)?.resolver;
 }

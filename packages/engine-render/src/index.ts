@@ -72,7 +72,7 @@ export type {
 } from './components/docs/document-layout-presentation';
 export { hasDocumentReferenceLayout, registerDocumentReferenceLayoutResolver } from './components/docs/document-reference-layout';
 export type { DocumentHeaderFooterReferenceResolver, IDocumentHeaderFooterReferencePage } from './components/docs/header-footer-reference';
-export { hasDocumentHeaderFooterReferenceLayout, registerDocumentHeaderFooterReferenceResolver } from './components/docs/header-footer-reference';
+export { getDocumentHeaderFooterReferenceResolver, hasDocumentHeaderFooterReferenceLayout, registerDocumentHeaderFooterReferenceResolver } from './components/docs/header-footer-reference';
 export { resolveDocumentParagraphNumbering } from './components/docs/layout/block/paragraph/linebreaking';
 export { getTableIdAndSliceIndex } from './components/docs/layout/block/table';
 export {

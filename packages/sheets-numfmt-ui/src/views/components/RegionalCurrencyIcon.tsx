@@ -24,7 +24,17 @@ export function RegionalCurrencyIcon({ className, style, onClick }: IIconProps) 
     const symbol = getCurrencySymbolByLocale(region);
     return (
         <svg aria-hidden="true" width="1em" height="1em" viewBox="0 0 16 16" className={className} style={style} onClick={onClick}>
-            <text x="8" y="13" textAnchor="middle" fontSize={symbol.length > 1 ? 9 : 14} fill="currentColor">{symbol}</text>
+            <text
+                x="8"
+                y="13"
+                textAnchor="middle"
+                fontSize={symbol.length > 1 ? 9 : 14}
+                textLength={symbol.length > 2 ? 14 : undefined}
+                lengthAdjust="spacingAndGlyphs"
+                fill="currentColor"
+            >
+                {symbol}
+            </text>
         </svg>
     );
 }

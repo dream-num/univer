@@ -134,6 +134,9 @@ describe('SheetNumfmtPanel', () => {
         roots.push(root);
         act(() => root.render(<RediContext.Provider value={{ injector }}><Icon /></RediContext.Provider>));
         expect(target.textContent).toBe('₹');
+        await act(async () => region.setRegion('de-CH'));
+        expect(target.textContent).toBe('CHF');
+        expect(target.querySelector('text')?.getAttribute('textLength')).toBe('14');
         await confirmPanel(container);
         expect(onChange.mock.lastCall?.[0].value).toContain('€');
     });

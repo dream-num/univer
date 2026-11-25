@@ -80,8 +80,45 @@ const DATE_FORMAT_PROFILES: Record<LocaleType, IDateFormatProfile> = {
     },
 };
 
+const DATE_ORDER_SAMPLE = new Date(2000, 0, 2);
+
+/**
+ * The profile for a region without one above, such as `enIN` or `enGB`, picked by the date order the
+ * runtime's CLDR data (`Intl`) gives for it. A region the runtime has no data for gets ISO dates, not the
+ * runtime's own default locale.
+ */
+function getRegionDateProfile(region: string): IDateFormatProfile {
+    const tag = region.replace(/^([a-z]{2,3})([A-Z]{2})$/, '$1-$2');
+    try {
+        if (Intl.DateTimeFormat.supportedLocalesOf(tag).length === 0) {
+            return ISO_DATE_PROFILE;
+        }
+        const parts = new Intl.DateTimeFormat(tag, { year: 'numeric', month: '2-digit', day: '2-digit' })
+            .formatToParts(DATE_ORDER_SAMPLE);
+        const order = parts
+            .filter((part) => part.type === 'day' || part.type === 'month' || part.type === 'year')
+            .map((part) => part.type[0])
+            .join('');
+        if (order === 'mdy') {
+            return MDY_DATE_PROFILE;
+        }
+        if (order === 'dmy') {
+            return parts.some((part) => part.type === 'literal' && part.value.trim() === '.')
+                ? DMY_DOT_DATE_PROFILE
+                : DMY_DATE_PROFILE;
+        }
+    } catch {
+        // Not a BCP 47 language tag.
+    }
+    return ISO_DATE_PROFILE;
+}
+
+/**
+ * The date and time presets for a region (`RegionService`), which follows the UI locale unless the host sets
+ * its own, such as `enIN` for English with day-first dates.
+ */
 export function getDateFormatPatterns(locale: LocaleType): string[] {
-    const profile = DATE_FORMAT_PROFILES[locale] ?? ISO_DATE_PROFILE;
+    const profile = DATE_FORMAT_PROFILES[locale] ?? getRegionDateProfile(locale);
     const clockPatterns = ['hh:mm', 'h:mm', 'h:mm:ss'];
     const timePatterns = clockPatterns.map((pattern) => profile.periodBeforeTime
         ? `AM/PM ${pattern}`

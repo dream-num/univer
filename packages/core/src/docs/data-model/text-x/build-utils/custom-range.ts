@@ -15,9 +15,11 @@
  */
 
 import type { ITextRange } from '../../../../sheets/typedef';
-import type { CustomRangeType, ICustomRange, IDocumentBody } from '../../../../types/interfaces';
+import type { ICustomRange, IDocumentBody } from '../../../../types/interfaces';
 import { Tools } from '../../../../shared';
 import { generateRandomId } from '../../../../shared/random-id';
+import { CustomRangeType } from '../../../../types/interfaces';
+import { createBookmarkRangeId } from '../../../bookmark-id';
 import {
     containsInteriorInsertionOffset,
     getCustomRangeInterval,
@@ -63,9 +65,10 @@ export function getCustomRangesInterestsWithSelection(range: ITextRange, customR
 }
 
 export function copyCustomRange(range: ICustomRange) {
+    const id = generateRandomId();
     return {
         ...Tools.deepClone(range),
-        rangeId: generateRandomId(),
+        rangeId: range.rangeType === CustomRangeType.BOOKMARK ? createBookmarkRangeId(id) : id,
     };
 }
 
@@ -98,17 +101,11 @@ export function getIntersectingCustomRanges(startIndex: number, endIndex: number
 
     for (let i = 0, len = customRanges.length; i < len; i++) {
         const customRange = customRanges[i];
-        // intersect
         if (
             (rangeType === undefined || customRange.rangeType === rangeType) &&
             intersectsOperationalIntervals(queryInterval, getCustomRangeInterval(customRange))
         ) {
             relativeCustomRanges.push({ ...customRange });
-        }
-
-        // optimize
-        if (customRange.startIndex > endIndex) {
-            break;
         }
     }
 
@@ -117,8 +114,11 @@ export function getIntersectingCustomRanges(startIndex: number, endIndex: number
 
 export function getSelectionForAddCustomRange(range: ITextRange, body: IDocumentBody) {
     const ranges = getIntersectingCustomRanges(range.startOffset, range.collapsed ? range.startOffset : range.endOffset - 1, body.customRanges ?? []);
-    const startOffset = Math.min(range.startOffset, (ranges[0]?.startIndex ?? Infinity));
-    const endOffset = Math.max(range.endOffset, (ranges[ranges.length - 1]?.endIndex ?? -Infinity) + 1);
+    let { startOffset, endOffset } = range;
+    for (const customRange of ranges) {
+        startOffset = Math.min(startOffset, customRange.startIndex);
+        endOffset = Math.max(endOffset, customRange.endIndex + 1);
+    }
 
     return {
         startOffset,

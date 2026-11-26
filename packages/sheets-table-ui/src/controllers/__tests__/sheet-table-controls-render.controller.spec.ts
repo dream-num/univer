@@ -93,7 +93,7 @@ afterEach(() => {
 });
 
 function createTestBed(hasSkeleton = true, controllerType = SheetTableControlsRenderController) {
-    // happy-dom has no native canvas; scene ordering and hit testing stay real.
+    // jsdom has no native canvas; scene ordering and hit testing stay real.
     const context2d = new Proxy({
         canvas: document.createElement('canvas'),
         getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),

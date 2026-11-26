@@ -30,7 +30,7 @@ describe('FBlob', () => {
         await expect(copy.getDataAsString()).resolves.toBe('hello');
         expect(asJson.getContentType()).toBe('application/json');
         await expect(asJson.getDataAsString()).resolves.toBe('hello');
-        await expect(asJson.getBytes()).resolves.toEqual(new TextEncoder().encode('hello'));
+        await expect(asJson.getBytes()).resolves.toEqual(Uint8Array.of(104, 101, 108, 108, 111));
     });
 
     it('should support byte and string setters plus charset decoding and null guards', async () => {

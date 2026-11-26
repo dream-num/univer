@@ -1027,7 +1027,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             overflow: hidden;
         `;
 
-        this._input.contentEditable = 'true';
+        this._input.setAttribute('contenteditable', 'true');
 
         // TODO: to be removed
         this._input.dataset.uComp = 'editor';

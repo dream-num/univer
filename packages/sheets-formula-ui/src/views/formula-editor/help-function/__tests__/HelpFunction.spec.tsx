@@ -376,6 +376,7 @@ describe('HelpFunction', () => {
         await showHelpForSum(editor);
 
         expect(document.body.textContent).toContain('SUM(number1,[number2,...])');
+        await waitForPopupLayout();
         // Editor top is 20 and a single line is 24px high, so the card sits below y = 44 (+1 gap).
         expect(getHelpPopupTop()).toBe('45px');
 

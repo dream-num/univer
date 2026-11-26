@@ -47,8 +47,8 @@ describe('ConditionalFormattingRulePreview', () => {
         );
 
         const preview = container.firstElementChild as HTMLElement;
-        expect(preview.style.backgroundColor).toBe('#ff0000');
-        expect(preview.style.color).toBe('#0000ff');
+        expect(preview.style.backgroundColor).toBe('rgb(255, 0, 0)');
+        expect(preview.style.color).toBe('rgb(0, 0, 255)');
         expect(preview.style.textDecoration).toBe('underline line-through');
     });
 
@@ -71,7 +71,7 @@ describe('ConditionalFormattingRulePreview', () => {
         );
 
         const bars = Array.from(container.firstElementChild!.children) as HTMLElement[];
-        expect(bars.map((bar) => bar.style.background)).toEqual(['#ff0000', '#00ff00']);
+        expect(bars.map((bar) => bar.style.background)).toEqual(['rgb(255, 0, 0)', 'rgb(0, 255, 0)']);
     });
 
     it('previews the configured color scale endpoints', () => {
@@ -119,7 +119,7 @@ describe('ConditionalFormattingRulePreview', () => {
         );
 
         const icons = Array.from(container.querySelectorAll('svg'));
-        expect(icons.map((icon) => icon.style.color)).toEqual(['#FE4B4B', '#999999']);
+        expect(icons.map((icon) => icon.style.color)).toEqual(['rgb(254, 75, 75)', 'rgb(153, 153, 153)']);
         expect(icons[0].classList.contains('univerjs-icon-arrow-down-icon')).toBe(true);
         expect(icons[1].classList.contains('univerjs-icon-arrow-up-icon')).toBe(true);
     });

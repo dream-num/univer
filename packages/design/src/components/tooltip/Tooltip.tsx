@@ -15,8 +15,9 @@
  */
 
 import type { ReactElement, ReactNode } from 'react';
-import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { focusClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
@@ -31,7 +32,7 @@ export interface ITooltipProps {
     className?: string;
     /**
      * Whether the tooltip is a child of the trigger element
-     * @default false
+     * @default true
      */
     asChild?: boolean;
     /**
@@ -58,6 +59,23 @@ export interface ITooltipProps {
      * Callback when the visibility of the tooltip changes
      */
     onVisibleChange?: (visible: boolean) => void;
+    /**
+     * Delay in milliseconds before showing the tooltip
+     * @default 0
+     */
+    openDelay?: number;
+    /**
+     * Delay in milliseconds before hiding the tooltip
+     * @default 0
+     */
+    closeDelay?: number;
+}
+
+interface ITooltipPosition {
+    top: number;
+    left: number;
+    arrowOffset: number;
+    placement: NonNullable<ITooltipProps['placement']>;
 }
 
 export function Tooltip(props: ITooltipProps) {
@@ -70,9 +88,12 @@ export function Tooltip(props: ITooltipProps) {
         showIfEllipsis = false,
         visible: controlledVisible,
         onVisibleChange,
+        openDelay = 0,
+        closeDelay = 0,
     } = props;
 
     const { direction } = useContext(ConfigContext);
+    const tooltipId = useId();
 
     // Internal state for uncontrolled mode
     const [uncontrolledVisible, setUncontrolledVisible] = useState(false);
@@ -84,33 +105,68 @@ export function Tooltip(props: ITooltipProps) {
     const triggerRef = useRef<HTMLElement | null>(null);
     const tooltipRef = useRef<HTMLDivElement | null>(null);
     const arrowRef = useRef<HTMLDivElement | null>(null);
+    const openTimerRef = useRef<number | null>(null);
+    const closeTimerRef = useRef<number | null>(null);
 
-    const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
-    const [currentPlacement, setCurrentPlacement] = useState(placement);
+    const [position, setPosition] = useState<ITooltipPosition | null>(null);
+
+    const clearTimers = useCallback(() => {
+        if (openTimerRef.current !== null) {
+            window.clearTimeout(openTimerRef.current);
+            openTimerRef.current = null;
+        }
+        if (closeTimerRef.current !== null) {
+            window.clearTimeout(closeTimerRef.current);
+            closeTimerRef.current = null;
+        }
+    }, []);
+
+    useEffect(() => clearTimers, [clearTimers]);
 
     function isContentOverflowing(element: HTMLElement): boolean {
         return Math.abs(element.scrollWidth - element.clientWidth) > 1;
     }
 
-    function showTooltip() {
-        if (isControlled) {
-            onVisibleChange?.(true);
-        } else {
-            setUncontrolledVisible(true);
+    function canShowTooltip(): boolean {
+        if (showIfEllipsis && triggerRef.current) {
+            return isContentOverflowing(triggerRef.current);
         }
+        return true;
     }
 
-    function hideTooltip() {
+    const setTooltipVisible = useCallback((nextVisible: boolean) => {
         if (isControlled) {
-            onVisibleChange?.(false);
+            onVisibleChange?.(nextVisible);
         } else {
-            setUncontrolledVisible(false);
+            setUncontrolledVisible(nextVisible);
         }
-    }
+    }, [isControlled, onVisibleChange]);
 
-    // compute position when visible changes
-    useLayoutEffect(() => {
-        if (!visible) return;
+    const showTooltip = useCallback((immediate = false) => {
+        clearTimers();
+        if (immediate || openDelay <= 0) {
+            setTooltipVisible(true);
+        } else {
+            openTimerRef.current = window.setTimeout(() => {
+                openTimerRef.current = null;
+                setTooltipVisible(true);
+            }, openDelay);
+        }
+    }, [clearTimers, openDelay, setTooltipVisible]);
+
+    const hideTooltip = useCallback((immediate = false) => {
+        clearTimers();
+        if (immediate || closeDelay <= 0) {
+            setTooltipVisible(false);
+        } else {
+            closeTimerRef.current = window.setTimeout(() => {
+                closeTimerRef.current = null;
+                setTooltipVisible(false);
+            }, closeDelay);
+        }
+    }, [clearTimers, closeDelay, setTooltipVisible]);
+
+    const updatePosition = useCallback(() => {
         const trigger = triggerRef.current;
         const tip = tooltipRef.current;
         if (!trigger || !tip) return;
@@ -124,28 +180,34 @@ export function Tooltip(props: ITooltipProps) {
 
         const placements = [placement, 'bottom', 'top', 'right', 'left'] as const;
 
-        let chosen: typeof placement = placement;
+        let chosen: NonNullable<ITooltipProps['placement']> = placement;
         let top = 0;
         let left = 0;
+        let found = false;
 
-        const computeFor = (p: typeof placement) => {
-            let t = 0;
-            let l = 0;
+        const computeFor = (p: NonNullable<ITooltipProps['placement']>) => {
             if (p === 'bottom') {
-                t = triggerRect.bottom + offset;
-                l = triggerRect.left + triggerRect.width / 2 - tipRect.width / 2;
-            } else if (p === 'top') {
-                t = triggerRect.top - tipRect.height - offset;
-                l = triggerRect.left + triggerRect.width / 2 - tipRect.width / 2;
-            } else if (p === 'left') {
-                t = triggerRect.top + triggerRect.height / 2 - tipRect.height / 2;
-                l = triggerRect.left - tipRect.width - offset;
-            } else {
-                // right
-                t = triggerRect.top + triggerRect.height / 2 - tipRect.height / 2;
-                l = triggerRect.right + offset;
+                return {
+                    t: triggerRect.bottom + offset,
+                    l: triggerRect.left + triggerRect.width / 2 - tipRect.width / 2,
+                };
             }
-            return { t, l };
+            if (p === 'top') {
+                return {
+                    t: triggerRect.top - tipRect.height - offset,
+                    l: triggerRect.left + triggerRect.width / 2 - tipRect.width / 2,
+                };
+            }
+            if (p === 'left') {
+                return {
+                    t: triggerRect.top + triggerRect.height / 2 - tipRect.height / 2,
+                    l: triggerRect.left - tipRect.width - offset,
+                };
+            }
+            return {
+                t: triggerRect.top + triggerRect.height / 2 - tipRect.height / 2,
+                l: triggerRect.right + offset,
+            };
         };
 
         for (const p of placements) {
@@ -156,71 +218,81 @@ export function Tooltip(props: ITooltipProps) {
                 chosen = p;
                 top = t;
                 left = l;
+                found = true;
                 break;
             }
         }
 
-        // fallback to preferred placement computation if none fully fits
-        if (!top && !left) {
+        // fallback to preferred placement computation clamped within viewport if none fully fits
+        if (!found) {
             const c = computeFor(placement);
-            top = Math.min(Math.max(0, c.t), viewportHeight - tipRect.height);
-            left = Math.min(Math.max(0, c.l), viewportWidth - tipRect.width);
+            top = Math.min(Math.max(0, c.t), Math.max(0, viewportHeight - tipRect.height));
+            left = Math.min(Math.max(0, c.l), Math.max(0, viewportWidth - tipRect.width));
         }
 
-        setCurrentPlacement(chosen);
-        setCoords({ top: Math.round(top + window.scrollY), left: Math.round(left + window.scrollX) });
-    }, [visible, placement]);
+        let arrowOffset: number;
+        if (chosen === 'top' || chosen === 'bottom') {
+            const triggerCenterX = triggerRect.left + triggerRect.width / 2;
+            const rawOffset = triggerCenterX - left;
+            const minEdge = Math.min(10, tipRect.width / 2);
+            arrowOffset = Math.round(Math.min(Math.max(rawOffset, minEdge), Math.max(minEdge, tipRect.width - minEdge)));
+        } else {
+            const triggerCenterY = triggerRect.top + triggerRect.height / 2;
+            const rawOffset = triggerCenterY - top;
+            const minEdge = Math.min(10, tipRect.height / 2);
+            arrowOffset = Math.round(Math.min(Math.max(rawOffset, minEdge), Math.max(minEdge, tipRect.height - minEdge)));
+        }
 
-    // update position on scroll/resize while visible
+        setPosition({
+            top: Math.round(top + window.scrollY),
+            left: Math.round(left + window.scrollX),
+            arrowOffset,
+            placement: chosen,
+        });
+    }, [placement]);
+
+    // compute position when visible changes
+    useLayoutEffect(() => {
+        if (!visible) return;
+        updatePosition();
+    }, [visible, updatePosition]);
+
+    // update position on scroll/resize and dismiss on Escape while visible
     useEffect(() => {
         if (!visible) return;
-        const handler = () => {
-            if (!triggerRef.current || !tooltipRef.current) return;
-            // trigger a layout effect recompute by toggling a state - here simply call the same logic by forcing effect run
-            // easiest: call the layout effect by updating a small state; but we'll just recompute coords directly here
-            const triggerRect = triggerRef.current.getBoundingClientRect();
-            const tipRect = tooltipRef.current.getBoundingClientRect();
-            const offset = 8;
 
-            let top = 0;
-            let left = 0;
-            if (currentPlacement === 'bottom') {
-                top = triggerRect.bottom + offset;
-                left = triggerRect.left + triggerRect.width / 2 - tipRect.width / 2;
-            } else if (currentPlacement === 'top') {
-                top = triggerRect.top - tipRect.height - offset;
-                left = triggerRect.left + triggerRect.width / 2 - tipRect.width / 2;
-            } else if (currentPlacement === 'left') {
-                top = triggerRect.top + triggerRect.height / 2 - tipRect.height / 2;
-                left = triggerRect.left - tipRect.width - offset;
-            } else {
-                top = triggerRect.top + triggerRect.height / 2 - tipRect.height / 2;
-                left = triggerRect.right + offset;
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && !event.isComposing) {
+                hideTooltip(true);
             }
-
-            setCoords({ top: Math.round(top + window.scrollY), left: Math.round(left + window.scrollX) });
         };
 
-        window.addEventListener('scroll', handler, true);
-        window.addEventListener('resize', handler);
+        window.addEventListener('scroll', updatePosition, true);
+        window.addEventListener('resize', updatePosition);
+        document.addEventListener('keydown', handleKeyDown);
         return () => {
-            window.removeEventListener('scroll', handler, true);
-            window.removeEventListener('resize', handler);
+            window.removeEventListener('scroll', updatePosition, true);
+            window.removeEventListener('resize', updatePosition);
+            document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [visible, currentPlacement]);
+    }, [visible, updatePosition, hideTooltip]);
 
     // build trigger element: wrap children in an element that holds ref and handlers.
     // Note: we always wrap rather than attempting to forward refs into arbitrary child components.
     const commonProps = {
-        ref: (node: HTMLElement | null) => (triggerRef.current = node),
+        ref: (node: HTMLElement | null) => {
+            triggerRef.current = node;
+        },
+        'aria-describedby': visible && title ? tooltipId : undefined,
         onMouseEnter: () => {
-            if (showIfEllipsis && triggerRef.current) {
-                if (!isContentOverflowing(triggerRef.current)) return;
-            }
+            if (!canShowTooltip()) return;
             showTooltip();
         },
         onMouseLeave: () => hideTooltip(),
-        onFocus: () => showTooltip(),
+        onFocus: () => {
+            if (!canShowTooltip()) return;
+            showTooltip();
+        },
         onBlur: () => hideTooltip(),
     } as React.HTMLAttributes<HTMLElement> & { ref?: (node: HTMLElement | null) => void };
 
@@ -231,10 +303,13 @@ export function Tooltip(props: ITooltipProps) {
             </span>
         )
         : (
-            <button type="button" {...commonProps}>
+            <button type="button" className={focusClassName} {...commonProps}>
                 {children}
             </button>
         );
+
+    const activePlacement = position?.placement ?? placement;
+    const arrowOffset = position?.arrowOffset;
 
     // tooltip node
     let tooltipNode: ReactElement | null = null;
@@ -242,35 +317,53 @@ export function Tooltip(props: ITooltipProps) {
         tooltipNode = createPortal(
             <div
                 ref={tooltipRef}
+                id={tooltipId}
                 dir={direction}
                 role="tooltip"
                 className={clsx(`
                   univer-animate-in univer-fade-in-0 univer-zoom-in-95 univer-pointer-events-auto univer-absolute
-                  univer-z-[1081] univer-box-border univer-w-fit univer-max-w-sm univer-text-balance univer-rounded-lg
-                  univer-bg-gray-700 univer-px-2.5 univer-py-2 univer-text-xs univer-font-medium univer-text-gray-0
-                  univer-shadow-lg univer-drop-shadow-sm
+                  univer-z-[1081] univer-box-border univer-w-fit univer-max-w-sm univer-text-balance univer-rounded-md
+                  univer-bg-gray-800 univer-px-2.5 univer-py-1.5 univer-text-xs univer-font-medium univer-text-gray-0
+                  univer-shadow-md
+                  motion-reduce:univer-animate-none
                   dark:!univer-bg-gray-100 dark:!univer-text-gray-900
                 `, className)}
                 style={{
-                    top: coords?.top ?? -9999,
-                    left: coords?.left ?? -9999,
+                    top: position?.top ?? -9999,
+                    left: position?.left ?? -9999,
                 }}
-                onMouseEnter={() => showTooltip()}
+                onMouseEnter={() => showTooltip(true)}
                 onMouseLeave={() => hideTooltip()}
             >
                 <div className="univer-break-words">{title}</div>
                 <div
                     ref={arrowRef}
-                    className={`
-                      univer-absolute univer-size-2.5 univer-rotate-45 univer-rounded-sm univer-bg-gray-700
+                    aria-hidden="true"
+                    className="
+                      univer-absolute univer-size-2 univer-rotate-45 univer-rounded-sm univer-bg-gray-800
                       dark:!univer-bg-gray-100
-                    `}
+                    "
                     style={{
-                        // position arrow based on placement
-                        ...(currentPlacement === 'bottom' && { top: -5, left: '50%', transform: 'translateX(-50%) rotate(45deg)' }),
-                        ...(currentPlacement === 'top' && { bottom: -5, left: '50%', transform: 'translateX(-50%) rotate(45deg)' }),
-                        ...(currentPlacement === 'left' && { right: -5, top: '50%', transform: 'translateY(-50%) rotate(45deg)' }),
-                        ...(currentPlacement === 'right' && { left: -5, top: '50%', transform: 'translateY(-50%) rotate(45deg)' }),
+                        ...(activePlacement === 'bottom' && {
+                            top: -4,
+                            left: arrowOffset !== undefined ? `${arrowOffset}px` : '50%',
+                            transform: 'translateX(-50%) rotate(45deg)',
+                        }),
+                        ...(activePlacement === 'top' && {
+                            bottom: -4,
+                            left: arrowOffset !== undefined ? `${arrowOffset}px` : '50%',
+                            transform: 'translateX(-50%) rotate(45deg)',
+                        }),
+                        ...(activePlacement === 'left' && {
+                            right: -4,
+                            top: arrowOffset !== undefined ? `${arrowOffset}px` : '50%',
+                            transform: 'translateY(-50%) rotate(45deg)',
+                        }),
+                        ...(activePlacement === 'right' && {
+                            left: -4,
+                            top: arrowOffset !== undefined ? `${arrowOffset}px` : '50%',
+                            transform: 'translateY(-50%) rotate(45deg)',
+                        }),
                     }}
                 />
             </div>,

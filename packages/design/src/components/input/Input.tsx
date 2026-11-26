@@ -31,6 +31,7 @@ export const inputVariants = cva(
       univer-box-border univer-w-full univer-rounded-md univer-bg-gray-0 univer-text-gray-900 univer-transition-colors
       univer-duration-200
       placeholder:univer-text-gray-500
+      motion-reduce:univer-transition-none
       dark:!univer-bg-gray-700 dark:!univer-text-gray-0
       dark:placeholder:univer-text-gray-300
     `,
@@ -90,52 +91,71 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
     }, ref) => {
         const { direction, locale } = useContext(ConfigContext);
         const invalid = useContext(FormLayoutContext);
+        const inputRef = useRef<HTMLInputElement>(null);
+
+        const mergedRef = (node: HTMLInputElement | null) => {
+            if (ref) {
+                if (typeof ref === 'function') {
+                    ref(node);
+                } else {
+                    ref.current = node;
+                }
+            }
+            inputRef.current = node;
+        };
 
         const handleClear = (e: React.MouseEvent) => {
             e.stopPropagation();
             onChange?.('');
+            inputRef.current?.focus();
         };
 
         const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             onChange?.(e.target.value);
         };
 
-        const hasSlotContent = (allowClear && value && !disabled) || slot;
+        const showClearButton = Boolean(allowClear && value && !disabled);
+        const hasSlotContent = showClearButton || Boolean(slot);
 
-        const [paddingRight, setPaddingRight] = useState(0);
+        const [slotPadding, setSlotPadding] = useState(0);
         const slotRef = useRef<HTMLDivElement>(null);
 
         useEffect(() => {
-            let observer: MutationObserver | null = null;
-            if (slot && slotRef.current) {
-                observer = new MutationObserver(() => {
-                    if (slotRef.current) {
-                        setPaddingRight(slotRef.current.offsetWidth + 4 * 2);
-                    }
-                });
-
-                observer.observe(slotRef.current, { childList: true, subtree: true });
-
-                setPaddingRight(slotRef.current.offsetWidth + 4 * 2);
+            if (!slot || !slotRef.current) {
+                return;
             }
 
-            return () => observer?.disconnect();
+            const slotEl = slotRef.current;
+            const updatePadding = () => {
+                const width = slotEl.offsetWidth;
+                setSlotPadding(width > 0 ? width + 12 : 0);
+            };
+
+            const mutationObserver = new MutationObserver(updatePadding);
+            mutationObserver.observe(slotEl, { childList: true, subtree: true });
+
+            const resizeObserver = typeof ResizeObserver !== 'undefined'
+                ? new ResizeObserver(updatePadding)
+                : null;
+            resizeObserver?.observe(slotEl);
+
+            updatePadding();
+
+            return () => {
+                mutationObserver.disconnect();
+                resizeObserver?.disconnect();
+            };
         }, [slot]);
 
-        let trailingPadding = 0;
-        if (slot) {
-            trailingPadding = paddingRight;
-        } else if (allowClear) {
-            trailingPadding = 26;
-        }
         const paddingSide = direction === 'rtl' ? 'paddingLeft' : 'paddingRight';
-        const mergedInputStyle = direction === 'rtl' && trailingPadding === 0
-            ? inputStyle
-            : { ...inputStyle, [paddingSide]: trailingPadding };
+        const mergedInputStyle = slot && slotPadding > 0
+            ? { [paddingSide]: slotPadding, ...inputStyle }
+            : inputStyle;
 
         return (
             <div
                 data-u-comp="input"
+                dir={direction}
                 className={clsx(
                     'univer-relative univer-inline-flex univer-w-full univer-items-center univer-rounded-md',
                     disabled && 'univer-cursor-not-allowed',
@@ -144,17 +164,24 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                 style={style}
             >
                 <input
-                    ref={ref}
+                    ref={mergedRef}
                     type={type}
                     className={clsx(
                         inputVariants({ size }),
                         borderClassName,
                         inputStateClassName,
+                        !disabled && `
+                          hover:univer-border-gray-300
+                          dark:hover:!univer-border-gray-500
+                        `,
                         disabled && `
                           univer-cursor-not-allowed univer-bg-gray-50 univer-text-gray-400
-                          dark:!univer-text-gray-500
+                          dark:!univer-bg-gray-800 dark:!univer-text-gray-500
                         `,
-                        (allowClear && !slot) && (direction === 'rtl' ? 'univer-pl-8' : 'univer-pr-8'),
+                        allowClear && !slot && `
+                          univer-pr-8
+                          rtl:univer-pl-8 rtl:univer-pr-2
+                        `,
                         inputClass
                     )}
                     placeholder={placeholder}
@@ -172,24 +199,31 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                 />
                 {hasSlotContent && (
                     <div
-                        className={clsx(
-                            'univer-absolute univer-flex univer-items-center univer-gap-1 univer-rounded-full',
-                            direction === 'rtl' ? 'univer-left-2' : 'univer-right-2'
-                        )}
+                        className={`
+                          univer-absolute univer-right-2 univer-flex univer-items-center univer-gap-1
+                          univer-rounded-full
+                          rtl:univer-left-2 rtl:univer-right-auto
+                        `}
                         ref={slotRef}
                     >
                         {slot}
-                        {allowClear && value && !disabled && (
+                        {showClearButton && (
                             <button
                                 type="button"
                                 aria-label={locale?.Accessibility.clearInput}
+                                onMouseDown={(e) => e.preventDefault()}
                                 onClick={handleClear}
                                 className={`
                                   univer-flex univer-size-4 univer-cursor-pointer univer-items-center
-                                  univer-rounded-full univer-border-none univer-bg-transparent univer-p-1
-                                  univer-text-gray-400 univer-outline-none univer-transition-colors univer-duration-200
-                                  hover:univer-text-gray-500
+                                  univer-justify-center univer-rounded-full univer-border-none univer-bg-transparent
+                                  univer-p-0 univer-text-gray-500 univer-outline-none univer-transition-colors
+                                  univer-duration-200
+                                  hover:univer-bg-gray-100 hover:univer-text-gray-900
                                   focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600
+                                  motion-reduce:univer-transition-none
+                                  dark:!univer-text-gray-300
+                                  dark:hover:!univer-bg-gray-600 dark:hover:!univer-text-gray-0
+                                  dark:focus-visible:!univer-ring-primary-300
                                 `}
                             >
                                 <CloseIcon aria-hidden="true" className="univer-size-3" />
@@ -201,3 +235,5 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
         );
     }
 );
+
+Input.displayName = 'Input';

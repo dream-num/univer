@@ -59,6 +59,19 @@ describe('Test mround function', () => {
             expect(result.getValue()).toBe(ErrorType.VALUE);
         });
 
+        it('Value is formatted number string', () => {
+            expect(testFunction.calculate(StringValueObject.create('1,000'), NumberValueObject.create(3)).getValue()).toBe(999);
+            expect(testFunction.calculate(StringValueObject.create('$5'), NumberValueObject.create(2)).getValue()).toBe(6);
+            expect(testFunction.calculate(NumberValueObject.create(7), StringValueObject.create('50%')).getValue()).toBe(7);
+        });
+
+        it('Value is string that is not a number in a spreadsheet', () => {
+            for (const text of ['0x10', '0b11', 'Infinity', '', ' ']) {
+                expect(testFunction.calculate(StringValueObject.create(text), NumberValueObject.create(1)).getValue()).toBe(ErrorType.VALUE);
+                expect(testFunction.calculate(NumberValueObject.create(1), StringValueObject.create(text)).getValue()).toBe(ErrorType.VALUE);
+            }
+        });
+
         it('Value is boolean', () => {
             const number = NumberValueObject.create(2.15);
             const multiple = BooleanValueObject.create(true);

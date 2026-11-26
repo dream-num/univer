@@ -49,6 +49,20 @@ describe('Test randbetween function', () => {
             expect(result.getValue()).toBe(ErrorType.VALUE);
         });
 
+        it('Value is formatted number string', () => {
+            const bottom = StringValueObject.create('1,000');
+            const top = StringValueObject.create('$1,000');
+            const result = testFunction.calculate(bottom, top);
+            expect(result.getValue()).toBe(1000);
+        });
+
+        it('Value is string that is not a number in a spreadsheet', () => {
+            for (const text of ['0x10', '0b11', 'Infinity', '', ' ']) {
+                expect(testFunction.calculate(StringValueObject.create(text), NumberValueObject.create(100)).getValue()).toBe(ErrorType.VALUE);
+                expect(testFunction.calculate(NumberValueObject.create(1), StringValueObject.create(text)).getValue()).toBe(ErrorType.VALUE);
+            }
+        });
+
         it('Value is boolean', () => {
             const bottom = BooleanValueObject.create(true);
             const top = NumberValueObject.create(3);

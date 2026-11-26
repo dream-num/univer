@@ -18,7 +18,7 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
+import { checkVariantsErrorIsArrayOrBoolean, checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -45,7 +45,13 @@ export class Quotient extends BaseFunction {
             return errorObject as ErrorValueObject;
         }
 
-        const [numeratorObject, denominatorObject] = variants as BaseValueObject[];
+        const { isError: isStringError, errorObject: stringErrorObject, variants: numberVariants } = checkVariantsErrorIsStringToNumber(...(variants as BaseValueObject[]));
+
+        if (isStringError) {
+            return stringErrorObject as ErrorValueObject;
+        }
+
+        const [numeratorObject, denominatorObject] = numberVariants as BaseValueObject[];
 
         const numeratorValue = +numeratorObject.getValue();
         const denominatorValue = +denominatorObject.getValue();

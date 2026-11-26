@@ -66,6 +66,19 @@ describe('Test quotient function', () => {
             expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
+        it('Value is formatted number string', () => {
+            expect(getObjectValue(testFunction.calculate(StringValueObject.create('1,000'), NumberValueObject.create(3)))).toBe(333);
+            expect(getObjectValue(testFunction.calculate(StringValueObject.create('$5'), NumberValueObject.create(2)))).toBe(2);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(7), StringValueObject.create('50%')))).toBe(14);
+        });
+
+        it('Value is string that is not a number in a spreadsheet', () => {
+            for (const text of ['0x10', '0b11', 'Infinity', '', ' ']) {
+                expect(getObjectValue(testFunction.calculate(StringValueObject.create(text), NumberValueObject.create(1)))).toBe(ErrorType.VALUE);
+                expect(getObjectValue(testFunction.calculate(NumberValueObject.create(1), StringValueObject.create(text)))).toBe(ErrorType.VALUE);
+            }
+        });
+
         it('Value is boolean', () => {
             const numerator = BooleanValueObject.create(true);
             const denominator = NumberValueObject.create(2);
@@ -103,7 +116,7 @@ describe('Test quotient function', () => {
             const denominator = NumberValueObject.create(2);
             const result = testFunction.calculate(numerator, denominator);
             expect(getObjectValue(result)).toStrictEqual([
-                [0, 0, 0, ErrorType.VALUE, ErrorType.VALUE, 0],
+                [0, ErrorType.VALUE, 0, ErrorType.VALUE, ErrorType.VALUE, 0],
                 [0, 50, 1, ErrorType.VALUE, -1, ErrorType.NAME],
             ]);
         });

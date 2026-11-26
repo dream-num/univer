@@ -534,3 +534,204 @@ register(['XLOOKUP'], (index) => index >= 1 && index <= 3);
 export function excelArgumentAcceptsRange(name: IFunctionNames, index: number, count: number): boolean | undefined {
     return excelArguments.get(name)?.(index, count);
 }
+
+export type ArgumentArrayContext = 'array' | 'scalar' | 'inherit';
+
+const nestedContexts = new Map<IFunctionNames, readonly ArgumentArrayContext[]>();
+
+// Excel distinguishes accepting a reference from evaluating a nested expression as an array.
+// The last position repeats for variadic functions. Scalar value arguments normally inherit
+// the surrounding array context, while reference arguments consume the reference directly.
+function registerNestedContext(names: string[], ...positions: ArgumentArrayContext[]): void {
+    for (const name of names) nestedContexts.set(name, positions);
+}
+
+registerNestedContext([
+    'CHISQ.TEST',
+    'CHITEST',
+    'COLUMNS',
+    'CORREL',
+    'COVAR',
+    'COVARIANCE.P',
+    'COVARIANCE.S',
+    'F.TEST',
+    'FREQUENCY',
+    'FTEST',
+    'HSTACK',
+    'INTERCEPT',
+    'MDETERM',
+    'MINVERSE',
+    'MMULT',
+    'MODE',
+    'MODE.MULT',
+    'MODE.SNGL',
+    'PEARSON',
+    'ROWS',
+    'RSQ',
+    'SHEETS',
+    'SLOPE',
+    'STEYX',
+    'SUMPRODUCT',
+    'SUMX2MY2',
+    'SUMX2PY2',
+    'SUMXMY2',
+    'VSTACK',
+], 'array');
+registerNestedContext(['PIVOTBY'], 'array', 'array', 'array', 'array', 'scalar', 'scalar', 'array', 'scalar', 'array', 'array', 'scalar');
+registerNestedContext(['GROWTH', 'SORT', 'TREND'], 'array', 'array', 'array', 'scalar');
+registerNestedContext(['GROUPBY'], 'array', 'array', 'array', 'scalar', 'scalar', 'array', 'array', 'scalar');
+registerNestedContext(['FORECAST.ETS.SEASONALITY', 'FORECAST.ETS.STAT', 'PROB', 'T.TEST', 'TTEST'], 'array', 'array', 'inherit');
+registerNestedContext(['FILTER', 'LINEST', 'LOGEST'], 'array', 'array', 'scalar');
+registerNestedContext(['ARRAYTOTEXT', 'IRR', 'MIRR', 'TRIMRANGE'], 'array', 'inherit');
+registerNestedContext([
+    'BYCOL',
+    'BYROW',
+    'CHOOSECOLS',
+    'CHOOSEROWS',
+    'DROP',
+    'EXPAND',
+    'INDEX',
+    'MAP',
+    'TAKE',
+    'TOCOL',
+    'TOROW',
+    'UNIQUE',
+    'WRAPCOLS',
+    'WRAPROWS',
+], 'array', 'scalar');
+registerNestedContext([
+    'ACCRINT',
+    'ACCRINTM',
+    'AMORDEGRC',
+    'AMORLINC',
+    'BESSELI',
+    'BESSELJ',
+    'BESSELK',
+    'BESSELY',
+    'BIN2DEC',
+    'BIN2HEX',
+    'BIN2OCT',
+    'COMPLEX',
+    'CONVERT',
+    'COUPDAYBS',
+    'COUPDAYS',
+    'COUPDAYSNC',
+    'COUPNCD',
+    'COUPNUM',
+    'COUPPCD',
+    'CUMIPMT',
+    'CUMPRINC',
+    'DEC2BIN',
+    'DEC2HEX',
+    'DEC2OCT',
+    'DELTA',
+    'DISC',
+    'DOLLARDE',
+    'DOLLARFR',
+    'DURATION',
+    'EDATE',
+    'EFFECT',
+    'EOMONTH',
+    'ERF',
+    'ERF.PRECISE',
+    'ERFC',
+    'ERFC.PRECISE',
+    'FACTDOUBLE',
+    'GESTEP',
+    'GETPIVOTDATA',
+    'HEX2BIN',
+    'HEX2DEC',
+    'HEX2OCT',
+    'IMABS',
+    'IMAGINARY',
+    'IMARGUMENT',
+    'IMCONJUGATE',
+    'IMCOS',
+    'IMCOSH',
+    'IMCOT',
+    'IMCSC',
+    'IMCSCH',
+    'IMDIV',
+    'IMEXP',
+    'IMLN',
+    'IMLOG10',
+    'IMLOG2',
+    'IMPOWER',
+    'IMREAL',
+    'IMSEC',
+    'IMSECH',
+    'IMSIN',
+    'IMSINH',
+    'IMSQRT',
+    'IMSUB',
+    'IMTAN',
+    'INTRATE',
+    'ISEVEN',
+    'ISODD',
+    'MDURATION',
+    'MROUND',
+    'N',
+    'NOMINAL',
+    'OCT2BIN',
+    'OCT2DEC',
+    'OCT2HEX',
+    'ODDFPRICE',
+    'ODDFYIELD',
+    'ODDLPRICE',
+    'ODDLYIELD',
+    'PRICE',
+    'PRICEDISC',
+    'PRICEMAT',
+    'QUOTIENT',
+    'RANDBETWEEN',
+    'RECEIVED',
+    'SQRTPI',
+    'T',
+    'TBILLEQ',
+    'TBILLPRICE',
+    'TBILLYIELD',
+    'WEEKNUM',
+    'YEARFRAC',
+    'YIELD',
+    'YIELDDISC',
+    'YIELDMAT',
+], 'inherit');
+registerNestedContext(['FORECAST', 'FORECAST.LINEAR', 'LOOKUP'], 'inherit', 'array');
+registerNestedContext(['FORECAST.ETS', 'FORECAST.ETS.CONFINT'], 'inherit', 'array', 'array', 'inherit');
+registerNestedContext(['XMATCH'], 'inherit', 'array', 'inherit');
+registerNestedContext(['AGGREGATE'], 'inherit', 'inherit', 'array', 'inherit');
+registerNestedContext(['NETWORKDAYS.INTL', 'SERIESSUM', 'WORKDAY.INTL'], 'inherit', 'inherit', 'inherit', 'scalar');
+registerNestedContext(['NETWORKDAYS', 'WORKDAY'], 'inherit', 'inherit', 'scalar');
+registerNestedContext(['FVSCHEDULE', 'XNPV'], 'inherit', 'scalar');
+registerNestedContext(['MATCH', 'TEXTAFTER', 'TEXTBEFORE'], 'inherit', 'scalar', 'inherit');
+registerNestedContext([
+    'CELL',
+    'CHOOSE',
+    'FILTERXML',
+    'HLOOKUP',
+    'HYPERLINK',
+    'IFERROR',
+    'IFNA',
+    'IFS',
+    'MAKEARRAY',
+    'MUNIT',
+    'RANDARRAY',
+    'REGEXEXTRACT',
+    'SEQUENCE',
+    'SINGLE',
+    'SWITCH',
+    'TEXTSPLIT',
+    'TRANSPOSE',
+    'TYPE',
+    'VLOOKUP',
+], 'scalar');
+registerNestedContext(['XLOOKUP'], 'scalar', 'array', 'array', 'scalar');
+registerNestedContext(['REDUCE', 'SCAN'], 'scalar', 'array', 'scalar');
+registerNestedContext(['XIRR'], 'scalar', 'scalar', 'inherit');
+
+export function getNestedArgumentArrayContext(name: IFunctionNames, index: number, count: number): ArgumentArrayContext {
+    if (name === 'SORTBY') return index === 0 || index % 2 === 1 ? 'array' : 'scalar';
+    const positions = nestedContexts.get(name);
+    if (positions) return positions[Math.min(index, positions.length - 1)];
+    return excelArgumentAcceptsRange(name, index, count) ? 'scalar' : 'inherit';
+}

@@ -271,6 +271,56 @@ describe('standalone Sheet formula calculation trigger', () => {
         }
     });
 
+    it('keeps bound references and applies the enclosing argument context to nested formulas', async () => {
+        univer.registerPlugin(UniverSheetsFormulaPlugin);
+        const api = FUniver.newAPI(univer);
+        const data = createWorkbookData();
+        const ref = 'IF(B1,B2:B4,B5:B7)';
+        const formulas = [
+            `=LET(x,${ref},SUM(x))`,
+            `=LAMBDA(x,SUM(x))(${ref})`,
+            `=SUMPRODUCT(ABS(${ref}))`,
+            `=SUM(ABS(${ref}))`,
+            `=SUMPRODUCT(ROUND(ABS(${ref}),0))`,
+            `=SUMPRODUCT(SUM(ABS(${ref})))`,
+            `=INDEX(ABS(${ref}),2)`,
+            `=SUM(FLATTEN(${ref}))`,
+            `=SUM(ARRAY_CONSTRAIN(${ref},3,1))`,
+            `=REVIEW_RANGE_SUM(${ref})`,
+            `=LET(x,${ref},ABS(x))`,
+            `=SUM(LET(x,${ref},x))`,
+        ];
+        const cells = data.sheets['sheet-1']!.cellData!;
+        for (const [row, value] of [1, 2, 3, 4, 10, 20, 30].entries()) {
+            cells[row] = { 1: { v: value } };
+        }
+        for (const row of [2, 7]) {
+            for (const [index, formula] of formulas.entries()) (cells[row] ??= {})[9 + index] = { f: formula };
+        }
+        data.sheets['sheet-1']!.columnCount = 24;
+        const sheet = api.createWorkbook(data).getActiveSheet();
+        const custom = api.getFormula().registerFunction('REVIEW_RANGE_SUM', (value) =>
+            Array.isArray(value) ? value.flat().reduce<number>((sum, cell) => sum + Number(cell), 0) : Number(value));
+        try {
+            const initial = api.getFormula().onCalculationResultApplied(10_000);
+            univer.__getInjector().get(LifecycleService).stage = LifecycleStages.Rendered;
+            await initial;
+            const expected = (sum: number, scalar: number | string, second: number) =>
+                [[sum, sum, sum, scalar, sum, scalar, second, sum, sum, sum, scalar, sum]];
+            expect(sheet.getRange('J3:U3').getValues()).toEqual(expected(9, 3, 3));
+            expect(sheet.getRange('J8:U8').getValues()).toEqual(expected(9, '#VALUE!', 3));
+            for (const [address, value, sum, second] of [['B1', 0, 60, 20], ['B6', 44, 84, 44]] as const) {
+                const applied = api.getFormula().onCalculationResultApplied(10_000);
+                sheet.getRange(address).setValue(value);
+                await applied;
+                expect(sheet.getRange('J3:U3').getValues()).toEqual(expected(sum, '#VALUE!', second));
+                expect(sheet.getRange('J8:U8').getValues()).toEqual(expected(sum, '#VALUE!', second));
+            }
+        } finally {
+            custom.dispose();
+        }
+    });
+
     it('takes one value per INDEX selector in explicitly dynamic formulas', async () => {
         univer.registerPlugin(UniverSheetsFormulaPlugin);
         const api = FUniver.newAPI(univer);

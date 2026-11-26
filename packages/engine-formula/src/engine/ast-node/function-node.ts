@@ -17,6 +17,7 @@
 import type { ICellData, IRange } from '@univerjs/core';
 
 import type { BaseFunction } from '../../functions/base-function';
+import type { ArgumentArrayContext } from '../../functions/implicit-intersection-arguments';
 import type { LexerNode } from '../analysis/lexer-node';
 import type {
     AsyncArrayObject,
@@ -33,8 +34,8 @@ import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { normalizeFunctionToken } from '../../basics/function';
 import { matchToken } from '../../basics/token';
-import { excelArgumentAcceptsRange } from '../../functions/implicit-intersection-arguments';
 import { COLUMN_LIKE_FUNCTION_NAMES } from '../../functions/column-like-functions';
+import { excelArgumentAcceptsRange, getNestedArgumentArrayContext } from '../../functions/implicit-intersection-arguments';
 import { If } from '../../functions/logical/if';
 import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
 import { Indirect } from '../../functions/lookup/indirect';
@@ -159,11 +160,16 @@ export class FunctionNode extends BaseAstNode {
         if (executor.evaluatesIfArgumentsAsArrays) return true;
         const args = this.getChildren();
         const index = args.indexOf(child);
-        if (!executor.isCustom()) {
-            const acceptsRange = excelArgumentAcceptsRange(executor.name, index, args.length);
-            if (acceptsRange !== undefined) return acceptsRange;
-        }
+        const acceptsRange = excelArgumentAcceptsRange(executor.name, index, args.length);
+        if (acceptsRange === undefined && !(executor instanceof If)) return true;
+        if (!executor.isCustom() && acceptsRange !== undefined) return acceptsRange;
         return executor.lazyIfReferenceArrayArgumentIndexes.includes(index);
+    }
+
+    getNestedArgumentArrayContext(child: BaseAstNode): ArgumentArrayContext {
+        const children = this.getChildren();
+        if (this._functionExecutor.isCustom()) return 'scalar';
+        return getNestedArgumentArrayContext(this._functionExecutor.name, children.indexOf(child), children.length);
     }
 
     override preservesReferenceInRangeEndpoint(child: BaseAstNode): boolean {

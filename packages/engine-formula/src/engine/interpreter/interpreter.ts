@@ -171,6 +171,7 @@ export class Interpreter extends Disposable {
             node.execute(dateSystem);
         }
 
+        this._intersectBoundReference(node);
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
@@ -208,6 +209,7 @@ export class Interpreter extends Disposable {
         }
 
         node.execute(dateSystem);
+        this._intersectBoundReference(node);
 
         return AstNodePromiseType.SUCCESS;
     }
@@ -453,22 +455,37 @@ export class Interpreter extends Disposable {
         let child: BaseAstNode = node;
         let parent = child.getParent();
 
+        let nested = false;
         while (parent != null) {
-            if (parent.nodeType === NodeType.UNION || parent.getToken() === operatorToken.INTERSECTION) {
-                return true;
+            if (parent.nodeType === NodeType.UNION || parent.getToken() === operatorToken.INTERSECTION) return true;
+            if (parent instanceof FunctionNode) {
+                if (!nested && parent.preservesLazyIfReferenceArray(child)) return true;
+                if (!parent.preservesReferenceInRangeEndpoint(child) || nested) {
+                    const context = parent.getNestedArgumentArrayContext(child);
+                    if (context === 'array') return true;
+                    if (context === 'scalar') return false;
+                    nested = true;
+                }
+            } else if (parent.nodeType === NodeType.LAMBDA) {
+                // LET values and LAMBDA arguments remain references until the body consumes them.
+                const children = parent.getChildren();
+                if (children[children.length - 1] !== child) return true;
             }
-            if (parent.nodeType === NodeType.FUNCTION) {
-                if (parent.preservesLazyIfReferenceArray(child)) return true;
-                if (!parent.preservesReferenceInRangeEndpoint(child)) return false;
-            } else if (parent.nodeType === NodeType.LAMBDA && !parent.preservesReferenceInRangeEndpoint(child)) {
-                return false;
-            }
-
             child = parent;
             parent = parent.getParent();
         }
 
         return false;
+    }
+
+    private _intersectBoundReference(node: BaseAstNode): void {
+        if (node.nodeType !== NodeType.LAMBDA_PARAMETER) return;
+        const value = node.getValue();
+        if (!value?.isReferenceObject()) return;
+        const reference = value as BaseReferenceObject;
+        if ((reference.getRowCount() > 1 || reference.getColumnCount() > 1) && !this._preserveLazyIfSelectedReferenceArray(node)) {
+            node.setValue(reference.getImplicitIntersectionValue(this._runtimeService.currentRow || 0, this._runtimeService.currentColumn || 0));
+        }
     }
 
     private _implicitLazyIfArrayValue(array: ArrayValueObject): FunctionVariantType {

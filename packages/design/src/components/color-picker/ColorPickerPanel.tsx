@@ -35,16 +35,26 @@ export function ColorPickerPanel({ value = '#000000', confirmText, onConfirm }: 
     const color = hsvToHex(...hsv);
 
     return (
-        <div data-u-comp="color-picker-panel" className="univer-grid univer-gap-4">
-            <div className="univer-h-44 univer-overflow-hidden univer-rounded-lg">
+        <div
+            data-u-comp="color-picker-panel"
+            className="univer-grid univer-gap-4"
+            onKeyDown={(event) => {
+                if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {
+                    event.preventDefault();
+                    onConfirm?.(color);
+                }
+            }}
+        >
+            <div className="univer-h-44 univer-rounded-lg">
                 <ColorSpectrum hsv={hsv} onChange={(h, s, v) => setHsv([h, s, v])} />
             </div>
             <div className="univer-flex univer-items-center univer-gap-3">
                 <span
+                    aria-hidden="true"
                     className="
-                      univer-size-10 univer-shrink-0 univer-rounded-lg univer-border univer-border-solid
-                      univer-border-gray-200
-                      dark:!univer-border-gray-600
+                      univer-size-10 univer-shrink-0 univer-rounded-lg univer-ring-1 univer-ring-inset
+                      univer-ring-black/10
+                      dark:!univer-ring-white/15
                     "
                     style={{ backgroundColor: color }}
                 />

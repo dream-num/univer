@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import type { KeyboardEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { hsvToRgb } from './color-conversion';
+import { focusClassName } from '../../helper/class-utilities';
+import { clsx } from '../../helper/clsx';
+import { CHECKERBOARD_BACKGROUND_STYLE, hsvToRgb } from './color-conversion';
 
 interface IAlphaSliderProps {
     hsv: [number, number, number];
@@ -34,7 +37,7 @@ export function AlphaSlider({ hsv, alpha, onChange, onChanged }: IAlphaSliderPro
         const slider = sliderRef.current;
         if (!slider) return;
 
-        const thumbSize = thumbRef.current?.clientWidth ?? 0;
+        const thumbSize = thumbRef.current?.clientWidth || 16;
 
         const rect = slider.getBoundingClientRect();
         const maxX = rect.width - thumbSize;
@@ -43,12 +46,13 @@ export function AlphaSlider({ hsv, alpha, onChange, onChanged }: IAlphaSliderPro
             return;
         }
 
-        const x = Math.max(0, Math.min(clientX - rect.left, maxX));
-        onChange(Math.round(x / maxX * 100) / 100);
+        const x = Math.max(0, Math.min(clientX - rect.left - thumbSize / 2, maxX));
+        onChange(Math.round((x / maxX) * 100) / 100);
     }, [onChange]);
 
     const handlePointerMove = useCallback((e: PointerEvent) => {
         if (!isDragging) return;
+        e.stopPropagation();
         calculateAlpha(e.clientX);
     }, [isDragging, calculateAlpha]);
 
@@ -66,68 +70,106 @@ export function AlphaSlider({ hsv, alpha, onChange, onChanged }: IAlphaSliderPro
             window.addEventListener('pointermove', handlePointerMove);
             window.addEventListener('pointerup', handlePointerUp);
             window.addEventListener('mouseup', handlePointerUp);
+            window.addEventListener('pointercancel', handlePointerUp);
         }
 
         return () => {
             window.removeEventListener('pointermove', handlePointerMove);
             window.removeEventListener('pointerup', handlePointerUp);
             window.removeEventListener('mouseup', handlePointerUp);
+            window.removeEventListener('pointercancel', handlePointerUp);
         };
     }, [isDragging, handlePointerMove, handlePointerUp]);
 
-    const getThumbPosition = () => {
-        const safeAlpha = Math.min(Math.max(alpha * 100, 0), 100);
-        const thumbSize = thumbRef.current?.clientWidth ?? 0;
-        const sliderWidth = sliderRef.current?.clientWidth ?? 0;
-        const thumbOffsetPercent = sliderWidth > 0 ? (thumbSize / sliderWidth) * 100 : 0;
+    const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+        const step = e.shiftKey ? 0.1 : 0.01;
+        const current = alphaRef.current;
+        let nextAlpha = current;
 
-        return `${(safeAlpha / 100) * (100 - thumbOffsetPercent)}%`;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+            nextAlpha = Math.min(1, Math.round((current + step) * 100) / 100);
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+            nextAlpha = Math.max(0, Math.round((current - step) * 100) / 100);
+        } else if (e.key === 'Home') {
+            nextAlpha = 0;
+        } else if (e.key === 'End') {
+            nextAlpha = 1;
+        } else {
+            return;
+        }
+
+        e.preventDefault();
+        onChange(nextAlpha);
+        onChanged?.(nextAlpha);
     };
 
+    const safeAlpha = Math.min(Math.max(alpha, 0), 1);
     const color = hsvToRgb(...hsv);
 
     return (
-        <div data-u-comp="color-picker-alpha-slider" className="univer-relative univer-w-full univer-select-none">
+        <div
+            data-u-comp="color-picker-alpha-slider"
+            className="univer-relative univer-w-full univer-touch-none univer-select-none"
+        >
             {/* Chessboard background */}
             <div
-                className="univer-absolute univer-inset-0 univer-rounded-full"
-                style={{
-                    backgroundImage: 'linear-gradient(45deg, #E3E5EA 25%, transparent 25%), linear-gradient(-45deg, #E3E5EA 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #E3E5EA 75%), linear-gradient(-45deg, transparent 75%, #E3E5EA 75%)',
-                    backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0',
-                    backgroundSize: '8px 8px',
-                }}
+                className="
+                  univer-absolute univer-inset-0 univer-rounded-full univer-bg-gray-0
+                  dark:!univer-bg-gray-700
+                "
+                style={CHECKERBOARD_BACKGROUND_STYLE}
             />
             {/* Slider */}
             <div
                 ref={sliderRef}
                 data-u-comp="color-picker-alpha-slider-track"
-                className={`
-                  univer-relative univer-h-2 univer-w-full univer-cursor-pointer univer-rounded-full univer-shadow-inner
-                `}
+                role="slider"
+                tabIndex={0}
+                aria-label="Alpha"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(safeAlpha * 100)}
+                className={clsx(
+                    `
+                      univer-relative univer-h-3 univer-w-full univer-cursor-pointer univer-rounded-full univer-ring-1
+                      univer-ring-inset univer-ring-black/10
+                      dark:!univer-ring-white/10
+                    `,
+                    focusClassName
+                )}
                 style={{
                     background: `linear-gradient(to right, transparent, rgb(${color.join(',')}))`,
                 }}
                 onPointerDown={(e) => {
+                    e.stopPropagation();
                     setIsDragging(true);
                     calculateAlpha(e.clientX);
                 }}
+                onKeyDown={handleKeyDown}
             >
                 {/* Indicator */}
                 <div
                     ref={thumbRef}
                     data-u-comp="color-picker-alpha-slider-thumb"
                     className={`
-                      univer-absolute univer-top-1/2 univer-box-border univer-size-2 univer-rounded-full
-                      univer-bg-transparent univer-shadow-md univer-ring-2 univer-ring-gray-0
-                      univer-transition-transform univer-duration-75 univer-will-change-transform
+                      univer-pointer-events-none univer-absolute univer-top-1/2 univer-box-border univer-size-4
+                      univer-overflow-hidden univer-rounded-full univer-border-2 univer-border-solid
+                      univer-border-gray-0 univer-bg-gray-0
+                      univer-shadow-[0_0_0_1px_rgba(0,0,0,0.25),0_1px_3px_rgba(0,0,0,0.28)] univer-will-change-transform
                     `}
                     style={{
-                        left: getThumbPosition(),
-                        transform: 'translateY(-50%)',
-                        transition: isDragging ? 'none' : 'all 0.1s ease-out',
+                        left: `calc(8px + (100% - 16px) * ${safeAlpha})`,
+                        transform: isDragging ? 'translate(-50%, -50%) scale(1.1)' : 'translate(-50%, -50%)',
+                        transition: isDragging ? 'none' : 'left 0.08s ease-out, transform 0.12s ease-out',
+                        ...CHECKERBOARD_BACKGROUND_STYLE,
                     }}
-                />
+                >
+                    <span
+                        className="univer-block univer-size-full"
+                        style={{ backgroundColor: `rgba(${color.join(',')}, ${safeAlpha})` }}
+                    />
+                </div>
             </div>
         </div>
     );
-};
+}

@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+export const CHECKERBOARD_BACKGROUND_STYLE = {
+    backgroundImage:
+        'linear-gradient(45deg, #E3E5EA 25%, transparent 25%), linear-gradient(-45deg, #E3E5EA 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #E3E5EA 75%), linear-gradient(-45deg, transparent 75%, #E3E5EA 75%)',
+    backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0',
+    backgroundSize: '8px 8px',
+} as const;
+
 export const hsvToRgb = (h: number, s: number, v: number): [number, number, number] => {
     h = h % 360; // Normalize hue to [0, 360)
     s = s / 100; // Normalize saturation to [0, 1]
@@ -119,6 +126,21 @@ export const hsvToHex = (h: number, s: number, v: number): string => {
 export const hsvToRgba = (h: number, s: number, v: number, a: number): string => {
     const [r, g, b] = hsvToRgb(h, s, v);
     return `rgba(${r}, ${g}, ${b}, ${a})`;
+};
+
+export const isLightColor = (hex: string): boolean => {
+    const normalized = hex.replace(/^#/, '');
+    const expanded = normalized.length === 3
+        ? normalized.split('').map((c) => c + c).join('')
+        : normalized;
+    if (!/^[0-9A-Fa-f]{6}$/.test(expanded)) {
+        return false;
+    }
+    const r = Number.parseInt(expanded.slice(0, 2), 16);
+    const g = Number.parseInt(expanded.slice(2, 4), 16);
+    const b = Number.parseInt(expanded.slice(4, 6), 16);
+    // Perceived brightness (YIQ)
+    return (r * 299 + g * 587 + b * 114) / 1000 > 175;
 };
 
 export const parseRgba = (rgba: string): [number, number, number, number] => {

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import { CheckMarkIcon } from '@univerjs/icons';
 import { clsx } from '../../helper/clsx';
+import { isLightColor } from './color-conversion';
 import { colorPresets } from './presets';
 
 export interface IMobileColorPresetsProps {
@@ -23,39 +25,58 @@ export interface IMobileColorPresetsProps {
 }
 
 export function MobileColorPresets({ value = '', onSelect }: IMobileColorPresetsProps) {
+    const normalizedValue = value.toUpperCase();
+
     return (
         <div
             className="univer-grid univer-gap-2"
             style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(40px, 1fr))' }}
         >
-            {colorPresets.flat().map((color) => (
-                <button
-                    key={color}
-                    type="button"
-                    aria-label={color}
-                    aria-pressed={color.toUpperCase() === value.toUpperCase()}
-                    className={clsx(`
-                      univer-box-border univer-flex univer-size-10 univer-cursor-pointer univer-items-center
-                      univer-justify-center univer-justify-self-center univer-rounded-lg univer-border
-                      univer-border-solid univer-border-transparent univer-bg-transparent univer-transition-colors
-                      active:univer-bg-gray-100
-                      dark:active:!univer-bg-gray-700
-                    `, {
-                        'univer-ring-2 univer-ring-primary-600 univer-ring-offset-2 univer-ring-offset-gray-0 dark:!univer-ring-primary-400 dark:!univer-ring-offset-gray-800': color.toUpperCase() === value.toUpperCase(),
-                    })}
-                    onClick={() => onSelect(color)}
-                >
-                    <span
+            {colorPresets.flat().map((color) => {
+                const selected = color.toUpperCase() === normalizedValue;
+                const lightSwatch = isLightColor(color);
+
+                return (
+                    <button
+                        key={color}
+                        type="button"
+                        aria-label={color}
+                        aria-pressed={selected}
                         className={clsx(`
-                          univer-aspect-square univer-w-8 univer-shrink-0 univer-rounded-md univer-border
-                          univer-border-solid univer-border-transparent
+                          univer-box-border univer-flex univer-size-10 univer-cursor-pointer univer-items-center
+                          univer-justify-center univer-justify-self-center univer-rounded-lg univer-border
+                          univer-border-solid univer-border-transparent univer-bg-transparent
+                          univer-transition-transform
+                          active:univer-scale-95 active:univer-bg-gray-100
+                          dark:active:!univer-bg-gray-700
                         `, {
-                            '!univer-border-gray-200 dark:!univer-border-gray-600': color === '#FFFFFF',
+                            'univer-ring-2 univer-ring-primary-600 univer-ring-offset-2 univer-ring-offset-gray-0 dark:!univer-ring-primary-400 dark:!univer-ring-offset-gray-800': selected,
                         })}
-                        style={{ backgroundColor: color }}
-                    />
-                </button>
-            ))}
+                        onClick={() => onSelect(color)}
+                    >
+                        <span
+                            className={`
+                              univer-flex univer-aspect-square univer-w-8 univer-shrink-0 univer-items-center
+                              univer-justify-center univer-rounded-md univer-border univer-border-solid
+                              univer-border-black/10
+                              dark:!univer-border-white/15
+                            `}
+                            style={{ backgroundColor: color }}
+                        >
+                            {selected && (
+                                <CheckMarkIcon
+                                    aria-hidden="true"
+                                    preserveStrokeWidth
+                                    className={clsx(
+                                        'univer-size-4 univer-shrink-0',
+                                        lightSwatch ? 'univer-text-gray-900' : 'univer-text-gray-0'
+                                    )}
+                                />
+                            )}
+                        </span>
+                    </button>
+                );
+            })}
         </div>
     );
 }

@@ -249,7 +249,7 @@ export class Background extends SheetExtension {
 
         if (!isMerged && !isMergedMainCell) {
             // getRowVisible can take a lot of time, sometimes over 20+ms, this return condition should put in the last.
-            const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
+            const visibleRow = spreadsheetSkeleton.getRowVisible(row);
             if (!visibleRow) return true;
 
             const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
@@ -258,7 +258,7 @@ export class Background extends SheetExtension {
             let isAllRowHidden = true;
 
             for (let r = mergeInfo.startRow; r <= mergeInfo.endRow; r++) {
-                const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(r);
+                const visibleRow = spreadsheetSkeleton.getRowVisible(r);
                 if (visibleRow) {
                     isAllRowHidden = false;
                     break;

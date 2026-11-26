@@ -53,6 +53,7 @@ import { getPrimaryForRange } from '../../commands/commands/utils/selection-util
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { SetWorksheetRowAutoHeightMutation } from '../../commands/mutations/set-worksheet-row-height.mutation';
 import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
+import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import AutoFillRules from './rules';
 import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_HOOK_TYPE } from './type';
 
@@ -172,6 +173,12 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         this._isFillingStyle = true;
     }
 
+    private _getSkeletonService(): SheetSkeletonService | undefined {
+        if (this._injector.has(SheetSkeletonService)) {
+            return this._injector.get(SheetSkeletonService);
+        }
+    }
+
     private _getOneByPriority(items: ISheetAutoFillHook[]) {
         if (items.length <= 0) {
             return [];
@@ -189,6 +196,10 @@ export class AutoFillService extends Disposable implements IAutoFillService {
 
     // eslint-disable-next-line max-lines-per-function, complexity
     async triggerAutoFill(unitId: string, subUnitId: string, source: IRange, selection: IRange, manualApplyType?: AUTO_FILL_APPLY_TYPE) {
+        const skeletons = this._getSkeletonService();
+        if (skeletons?.isDisplayProjectionPending(unitId, subUnitId)) {
+            return false;
+        }
         // if source range === dest range, do nothing;
         if (
             source.startColumn === selection.startColumn &&
@@ -256,10 +267,12 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         this.setShowMenu(false);
         this.direction = direction;
 
-        const autoFillSource = this._injector.invoke((accessor: IAccessor) => rangeToDiscreteRange(source, accessor, unitId, subUnitId));
-        const autoFillTarget = this._injector.invoke((accessor: IAccessor) => rangeToDiscreteRange(target, accessor, unitId, subUnitId));
+        const displaySkeleton = skeletons?.getDisplaySkeleton(unitId, subUnitId);
+        const isRowFiltered = displaySkeleton ? (row: number) => displaySkeleton.getRowFiltered(row) : undefined;
+        const autoFillSource = this._injector.invoke((accessor: IAccessor) => rangeToDiscreteRange(source, accessor, unitId, subUnitId, isRowFiltered));
+        const autoFillTarget = this._injector.invoke((accessor: IAccessor) => rangeToDiscreteRange(target, accessor, unitId, subUnitId, isRowFiltered));
 
-        if (!autoFillSource || !autoFillTarget) {
+        if (!autoFillSource?.rows.length || !autoFillTarget?.rows.length) {
             return false;
         }
 
@@ -423,6 +436,9 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         const { source, target, unitId = activeUnitId, subUnitId = activeSubUnitId } = this.autoFillLocation || {};
 
         if (!source || !target || !unitId || !subUnitId) {
+            return false;
+        }
+        if (this._getSkeletonService()?.isDisplayProjectionPending(unitId, subUnitId)) {
             return false;
         }
 

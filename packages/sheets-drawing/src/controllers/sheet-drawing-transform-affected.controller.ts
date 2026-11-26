@@ -307,6 +307,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         const { unitId, subUnitId } = plan;
         const redos: IMutationInfo[] = [...feature.preRedos];
         const undos: IMutationInfo[] = [...feature.preUndos];
+        const rollbackMutations = feature.rollbackMutations.slice(0, feature.preRedos.length);
         const updates = [...plan.updates.values()].filter(({ drawingId }) => !plan.deletes.has(drawingId));
         const reference = this._getStructuralReference(plan.command, plan.skeleton);
 
@@ -340,6 +341,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 : undefined;
             redos.push({ id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.UPDATE, ...(reference ? { reference } : {}) } });
             undos.push({ id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.UPDATE, ...(inverseReference ? { reference: inverseReference } : {}) } });
+            rollbackMutations.push([undos[undos.length - 1]]);
         }
 
         if (plan.deletes.size) {
@@ -347,16 +349,26 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             const { undo, redo, objects } = this._sheetDrawingService.getBatchRemoveOp(drawings) as IDrawingJsonUndo1;
             redos.push({ id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.REMOVE } });
             undos.push({ id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.INSERT } });
+            rollbackMutations.push([undos[undos.length - 1]]);
         }
 
         redos.push(...feature.redos);
         undos.push(...feature.undos);
+        rollbackMutations.push(...feature.rollbackMutations.slice(feature.preRedos.length));
         if (updates.length || plan.deletes.size || feature.preRedos.length || feature.redos.length || feature.preUndos.length || feature.undos.length) {
             redos.push({ id: ClearSheetDrawingTransformerOperation.id, params: [unitId] });
             undos.push({ id: ClearSheetDrawingTransformerOperation.id, params: [unitId] });
+            rollbackMutations.push([undos[undos.length - 1]]);
         }
 
-        return { redos, undos };
+        return {
+            redos,
+            undos,
+            undoAfterBase: true,
+            rollbackMutations: feature.rollbackMutations.length === feature.preRedos.length + feature.redos.length
+                ? rollbackMutations
+                : [],
+        };
     }
 
     private _getStructuralReference(command: ICommandInfo, skeleton: SpreadsheetSkeleton): ISetDrawingApplyMutationParams['reference'] {

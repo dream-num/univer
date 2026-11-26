@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICellWithCoord, ICustomRange, IDocDrawingBase, IParagraph, IPosition, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    ICellWithCoord,
+    ICustomRange,
+    IDocDrawingBase,
+    IParagraph,
+    IPosition,
+    Nullable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import type {
     IBoundRectNoAngle,
     IDocumentSkeletonDrawing,
@@ -289,7 +298,7 @@ export class HoverManagerService extends Disposable {
         }));
     }
 
-    private _getCalcDeps(unitId: string) {
+    private _getCalcDeps(unitId: string, renderId?: string) {
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return null;
@@ -300,8 +309,8 @@ export class HoverManagerService extends Disposable {
             return null;
         }
 
-        const currentRender = this._renderManagerService.getRenderUnitById(workbook.getUnitId());
-        if (!currentRender) return null;
+        const currentRender = this._renderManagerService.getRenderUnitById(renderId ?? workbook.getUnitId());
+        if (!currentRender || (renderId && currentRender.unitId !== unitId)) return null;
         const skeletonParam = currentRender.with(SheetSkeletonManagerService).getSkeletonParam(worksheet.getSheetId());
         if (!skeletonParam) return null;
 
@@ -391,8 +400,8 @@ export class HoverManagerService extends Disposable {
         };
     }
 
-    private _calcActiveRowHeader(unitId: string, offsetX: number, offsetY: number) {
-        const deps = this._getCalcDeps(unitId);
+    private _calcActiveRowHeader(unitId: string, offsetX: number, offsetY: number, renderId?: string) {
+        const deps = this._getCalcDeps(unitId, renderId);
         if (!deps) {
             return;
         }
@@ -411,8 +420,8 @@ export class HoverManagerService extends Disposable {
         return { unitId, index, subUnitId: worksheet.getSheetId() };
     }
 
-    private _calcActiveColHeader(unitId: string, offsetX: number, offsetY: number) {
-        const deps = this._getCalcDeps(unitId);
+    private _calcActiveColHeader(unitId: string, offsetX: number, offsetY: number, renderId?: string) {
+        const deps = this._getCalcDeps(unitId, renderId);
         if (!deps) {
             return;
         }
@@ -431,8 +440,8 @@ export class HoverManagerService extends Disposable {
         return { unitId, index, subUnitId: worksheet.getSheetId() };
     }
 
-    triggerPointerDown(unitId: string, event: IPointerEvent | IMouseEvent) {
-        const deps = this._getCalcDeps(unitId);
+    triggerPointerDown(unitId: string, event: IPointerEvent | IMouseEvent, renderId?: string) {
+        const deps = this._getCalcDeps(unitId, renderId);
         if (!deps) {
             return;
         }
@@ -450,8 +459,8 @@ export class HoverManagerService extends Disposable {
         }
     }
 
-    triggerPointerUp(unitId: string, event: IPointerEvent | IMouseEvent) {
-        const deps = this._getCalcDeps(unitId);
+    triggerPointerUp(unitId: string, event: IPointerEvent | IMouseEvent, renderId?: string) {
+        const deps = this._getCalcDeps(unitId, renderId);
         if (!deps) {
             return;
         }
@@ -467,8 +476,8 @@ export class HoverManagerService extends Disposable {
         }
     }
 
-    triggerMouseMove(unitId: string, event: IPointerEvent | IMouseEvent) {
-        const deps = this._getCalcDeps(unitId);
+    triggerMouseMove(unitId: string, event: IPointerEvent | IMouseEvent, renderId?: string) {
+        const deps = this._getCalcDeps(unitId, renderId);
         if (!deps) {
             return;
         }
@@ -498,8 +507,8 @@ export class HoverManagerService extends Disposable {
      * @param offsetX
      * @param offsetY
      */
-    triggerClick(unitId: string, offsetX: number, offsetY: number) {
-        const deps = this._getCalcDeps(unitId);
+    triggerClick(unitId: string, offsetX: number, offsetY: number, renderId?: string) {
+        const deps = this._getCalcDeps(unitId, renderId);
         if (!deps) {
             return;
         }
@@ -513,8 +522,8 @@ export class HoverManagerService extends Disposable {
         }
     }
 
-    triggerDbClick(unitId: string, event: IPointerEvent | IMouseEvent) {
-        const deps = this._getCalcDeps(unitId);
+    triggerDbClick(unitId: string, event: IPointerEvent | IMouseEvent, renderId?: string) {
+        const deps = this._getCalcDeps(unitId, renderId);
         if (!deps) {
             return;
         }
@@ -538,51 +547,51 @@ export class HoverManagerService extends Disposable {
         this._currentCell$.next(null);
     }
 
-    triggerRowHeaderClick(unitId: string, offsetX: number, offsetY: number) {
-        const pos = this._calcActiveRowHeader(unitId, offsetX, offsetY);
+    triggerRowHeaderClick(unitId: string, offsetX: number, offsetY: number, renderId?: string) {
+        const pos = this._calcActiveRowHeader(unitId, offsetX, offsetY, renderId);
         pos && this._currentRowHeaderClick$.next(pos);
     }
 
-    triggerColHeaderClick(unitId: string, offsetX: number, offsetY: number) {
-        const pos = this._calcActiveColHeader(unitId, offsetX, offsetY);
+    triggerColHeaderClick(unitId: string, offsetX: number, offsetY: number, renderId?: string) {
+        const pos = this._calcActiveColHeader(unitId, offsetX, offsetY, renderId);
         pos && this._currentColHeaderClick$.next(pos);
     }
 
-    triggerRowHeaderDbClick(unitId: string, offsetX: number, offsetY: number) {
-        const pos = this._calcActiveRowHeader(unitId, offsetX, offsetY);
+    triggerRowHeaderDbClick(unitId: string, offsetX: number, offsetY: number, renderId?: string) {
+        const pos = this._calcActiveRowHeader(unitId, offsetX, offsetY, renderId);
         pos && this._currentRowHeaderDbClick$.next(pos);
     }
 
-    triggerColHeaderDbClick(unitId: string, offsetX: number, offsetY: number) {
-        const pos = this._calcActiveColHeader(unitId, offsetX, offsetY);
+    triggerColHeaderDbClick(unitId: string, offsetX: number, offsetY: number, renderId?: string) {
+        const pos = this._calcActiveColHeader(unitId, offsetX, offsetY, renderId);
         pos && this._currentColHeaderDbClick$.next(pos);
     }
 
-    triggerRowHeaderMouseMove(unitId: string, offsetX: number, offsetY: number) {
-        this._currentHoveredRowHeader$.next(this._calcActiveRowHeader(unitId, offsetX, offsetY));
+    triggerRowHeaderMouseMove(unitId: string, offsetX: number, offsetY: number, renderId?: string) {
+        this._currentHoveredRowHeader$.next(this._calcActiveRowHeader(unitId, offsetX, offsetY, renderId));
     }
 
-    triggerColHeaderMouseMove(unitId: string, offsetX: number, offsetY: number) {
-        this._currentHoveredColHeader$.next(this._calcActiveColHeader(unitId, offsetX, offsetY));
+    triggerColHeaderMouseMove(unitId: string, offsetX: number, offsetY: number, renderId?: string) {
+        this._currentHoveredColHeader$.next(this._calcActiveColHeader(unitId, offsetX, offsetY, renderId));
     }
 
-    triggerRowHeaderPoniterDown(unitId: string, offsetX: number, offsetY: number) {
-        const pos = this._calcActiveRowHeader(unitId, offsetX, offsetY);
+    triggerRowHeaderPoniterDown(unitId: string, offsetX: number, offsetY: number, renderId?: string) {
+        const pos = this._calcActiveRowHeader(unitId, offsetX, offsetY, renderId);
         pos && this._currentRowHeaderPointerDown$.next(pos);
     }
 
-    triggerColHeaderPoniterDown(unitId: string, offsetX: number, offsetY: number) {
-        const pos = this._calcActiveColHeader(unitId, offsetX, offsetY);
+    triggerColHeaderPoniterDown(unitId: string, offsetX: number, offsetY: number, renderId?: string) {
+        const pos = this._calcActiveColHeader(unitId, offsetX, offsetY, renderId);
         pos && this._currentColHeaderPointerDown$.next(pos);
     }
 
-    triggerRowHeaderPoniterUp(unitId: string, offsetX: number, offsetY: number) {
-        const pos = this._calcActiveRowHeader(unitId, offsetX, offsetY);
+    triggerRowHeaderPoniterUp(unitId: string, offsetX: number, offsetY: number, renderId?: string) {
+        const pos = this._calcActiveRowHeader(unitId, offsetX, offsetY, renderId);
         pos && this._currentRowHeaderPointerUp$.next(pos);
     }
 
-    triggerColHeaderPoniterUp(unitId: string, offsetX: number, offsetY: number) {
-        const pos = this._calcActiveColHeader(unitId, offsetX, offsetY);
+    triggerColHeaderPoniterUp(unitId: string, offsetX: number, offsetY: number, renderId?: string) {
+        const pos = this._calcActiveColHeader(unitId, offsetX, offsetY, renderId);
         pos && this._currentColHeaderPointerUp$.next(pos);
     }
 }

@@ -192,7 +192,7 @@ describe('MobileHoverRenderController', () => {
         onPointerUp$.emitEvent(pointer(46, 20, 2));
 
         expect(hoverManagerService.triggerClick).toHaveBeenCalledTimes(2);
-        expect(hoverManagerService.triggerDbClick).toHaveBeenCalledExactlyOnceWith('unit-1', pointer(46, 20, 2));
+        expect(hoverManagerService.triggerDbClick).toHaveBeenCalledExactlyOnceWith('unit-1', pointer(46, 20, 2), undefined);
 
         controller.dispose();
     });
@@ -229,7 +229,7 @@ describe('MobileHoverRenderController', () => {
         const event = { ...pointer(20, 20), deviceType: DeviceType.Mouse };
         const result = onDblclick$.emitEvent(event);
 
-        expect(hoverManagerService.triggerDbClick).toHaveBeenCalledExactlyOnceWith('unit-1', event);
+        expect(hoverManagerService.triggerDbClick).toHaveBeenCalledExactlyOnceWith('unit-1', event, undefined);
         expect(laterObserver).not.toHaveBeenCalled();
         expect(result.stopPropagation).toBe(true);
 

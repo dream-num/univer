@@ -33,7 +33,7 @@ import {
     RightInsertColumnDoubleIcon,
 } from '@univerjs/icons';
 import { WorkbookEditablePermission } from '@univerjs/sheets';
-import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
+import { SheetsSortService, SortRangeCommand, SortType } from '@univerjs/sheets-sort';
 import {
     SetSheetTableSortStateCommand,
     SheetsTableSortStateEnum,
@@ -43,7 +43,8 @@ import {
     TableDateCompareTypeEnum,
     TableManager,
 } from '@univerjs/sheets-table';
-import { MobileDrawer, useDependency } from '@univerjs/ui';
+import { SheetsUIPart } from '@univerjs/sheets-ui';
+import { ComponentContainer, MobileDrawer, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ITableFilterPanelInfo } from '../../controllers/sheet-table-component.controller';
@@ -80,12 +81,15 @@ interface IMobileSheetTableFilterPanelContentProps {
 
 function MobileSheetTableFilterPanelContent(props: IMobileSheetTableFilterPanelContentProps) {
     const { tableFilterPanelInfo } = props;
+    const filterPanelEmbedPointPart = useComponentsOfPart(SheetsUIPart.FILTER_PANEL_EMBED_POINT);
     const localeService = useDependency(LocaleService);
     const tableUiService = useDependency(SheetsTableUiService);
     const tableManager = useDependency(TableManager);
     const commandService = useDependency(ICommandService);
     const permissionService = useDependency(IPermissionService);
     const undoRedoService = useDependency(IUndoRedoService);
+    const sortService = useDependency(SheetsSortService);
+    useObservable(sortService.sortGuardsChanged$);
     const sheetsTableComponentController = useDependency(SheetsTableMobileComponentController);
     const [detailFilterBy, setDetailFilterBy] = useState<FilterByEnum | null>(null);
     const [drawerSnap, setDrawerSnap] = useState<MobileDrawerSnap>('expanded');
@@ -115,6 +119,7 @@ function MobileSheetTableFilterPanelContent(props: IMobileSheetTableFilterPanelC
         () => tableUiService.getTableFilterColors(unitId, subUnitId, tableId, columnIndex)
     );
     const tableRange = currentTable.getRange();
+    const canSort = sortService.canSort({ unitId, subUnitId, range: currentTable.getTableFilterRange() });
     const canDeleteColumn = tableRange.endColumn > tableRange.startColumn;
     const absoluteColumn = tableFilterPanelInfo.column;
     const editable = permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value;
@@ -345,6 +350,10 @@ function MobileSheetTableFilterPanelContent(props: IMobileSheetTableFilterPanelC
     return (
         <>
             <div className="univer-flex univer-flex-col univer-gap-2">
+                <ComponentContainer
+                    components={filterPanelEmbedPointPart}
+                    sharedProps={{ range: tableRange, colIndex: absoluteColumn, unitId, subUnitId, tableId, onClose: closePanel }}
+                />
                 {editable && (
                     <>
                         <MobileActionRow
@@ -370,12 +379,14 @@ function MobileSheetTableFilterPanelContent(props: IMobileSheetTableFilterPanelC
                             variant="subtle"
                             icon={<AscendingIcon />}
                             title={localeService.t<LocaleKey>('sheets-table-ui.sort.sort-asc')}
+                            disabled={!canSort}
                             onClick={() => applySort(true).catch(() => undefined)}
                         />
                         <MobileActionRow
                             variant="subtle"
                             icon={<DescendingIcon />}
                             title={localeService.t<LocaleKey>('sheets-table-ui.sort.sort-desc')}
+                            disabled={!canSort}
                             onClick={() => applySort(false).catch(() => undefined)}
                         />
                     </>

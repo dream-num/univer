@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { IMutation, IWorkbookData, Workbook } from '@univerjs/core';
 import {
+    CommandType,
     ICommandService,
     Inject,
     Injector,
+    IUndoRedoService,
     IUniverInstanceService,
     LocaleType,
     Plugin,
@@ -26,7 +28,14 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { MarkDirtyFilterChangeMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    InsertRowMutation,
+    MarkDirtyFilterChangeMutation,
+    RemoveRowMutation,
+    SetWorksheetNameMutation,
+    SheetInterceptorService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsFilterService } from '../../../services/sheet-filter.service';
 import {
@@ -88,6 +97,7 @@ class SheetsFilterCommandTestPlugin extends Plugin {
 
     override onStarting(): void {
         this._injector.add([SheetsFilterService]);
+        this._injector.add([SheetInterceptorService]);
         this._injector.add([SheetsSelectionsService]);
     }
 }
@@ -256,6 +266,152 @@ describe('sheet filter commands', () => {
         sheetsFilterService.beginInitialFilterCatchUp(unitId);
         expect(await commandService.executeCommand(RemoveSheetFilterCommand.id, { unitId, subUnitId })).toBe(true);
         expect(sheetsFilterService.isInitialFilterCatchUp(unitId)).toBe(false);
+    });
+
+    it.each([
+        { beforeRemoval: true, throws: false },
+        { beforeRemoval: true, throws: true },
+        { beforeRemoval: false, throws: false },
+        { beforeRemoval: false, throws: true },
+    ])('rolls back companion failures without publishing or taking over filters: %j', async ({ beforeRemoval, throws }) => {
+        const target = { unitId, subUnitId };
+        const range = { startRow: 0, startColumn: 0, endRow: 3, endColumn: 0 };
+        await commandService.executeCommand(SetSheetFilterRangeCommand.id, { ...target, range });
+        await commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+            ...target,
+            col: 0,
+            criteria: { colId: 0, filters: { filters: ['Apple'] } },
+        });
+        const previousFilter = sheetsFilterService.getFilterModel(unitId, subUnitId)!.serialize();
+        const undoRedo = univer.__getInjector().get(IUndoRedoService);
+        const previousUndo = undoRedo.pitchTopUndoElement();
+        const failure: IMutation<typeof target> = {
+            id: 'test.mutation.fail-filter-removal',
+            type: CommandType.MUTATION,
+            handler: () => {
+                if (throws) {
+                    throw new Error('Companion failed');
+                }
+                return false;
+            },
+        };
+        commandService.registerCommand(failure);
+        commandService.registerCommand(SetWorksheetNameMutation);
+        const rename = { id: SetWorksheetNameMutation.id, params: { ...target, name: 'Temporary' } };
+        const fail = { id: failure.id, params: target };
+        univer.__getInjector().get(SheetInterceptorService).interceptCommand({
+            getMutations: ({ id }) => id === RemoveSheetFilterCommand.id
+                ? {
+                    preRedos: beforeRemoval ? [rename, fail] : [rename],
+                    redos: beforeRemoval ? [] : [fail],
+                    undos: [{ id: SetWorksheetNameMutation.id, params: { ...target, name: 'Sheet 1' } }],
+                    rollbackMutations: [[{ id: SetWorksheetNameMutation.id, params: { ...target, name: 'Sheet 1' } }], []],
+                }
+                : { redos: [], undos: [] },
+        });
+        const published: string[] = [];
+        const listener = commandService.onMutationExecutedForCollab(({ id }, options) => {
+            if (!options?.onlyLocal) {
+                published.push(id);
+            }
+        });
+        sheetsFilterService.beginInitialFilterCatchUp(unitId);
+        try {
+            expect(await commandService.executeCommand(RemoveSheetFilterCommand.id, target)).toBe(false);
+            expect(workbook.getSheetBySheetId(subUnitId)!.getName()).toBe('Sheet 1');
+            expect(sheetsFilterService.getFilterModel(unitId, subUnitId)!.serialize()).toEqual(previousFilter);
+            expect(undoRedo.pitchTopUndoElement()).toBe(previousUndo);
+            expect(sheetsFilterService.isInitialFilterCatchUp(unitId)).toBe(true);
+            expect(published).toEqual([]);
+        } finally {
+            listener.dispose();
+        }
+    });
+
+    it.each([true, false])('does not undo a later hook that never ran (pre: %s)', async (pre) => {
+        const target = { unitId, subUnitId };
+        const range = { startRow: 0, startColumn: 0, endRow: 3, endColumn: 0 };
+        await commandService.executeCommand(SetSheetFilterRangeCommand.id, { ...target, range });
+        const worksheet = workbook.getSheetBySheetId(subUnitId)!;
+        const rowCount = worksheet.getRowCount();
+        const before = [0, 1, 2, 3].map((row) => worksheet.getCellRaw(row, 0)?.v);
+        commandService.registerCommand(InsertRowMutation);
+        commandService.registerCommand(RemoveRowMutation);
+        commandService.registerCommand(SetWorksheetNameMutation);
+        const failure = { id: 'test.mutation.stop-filter-removal', type: CommandType.MUTATION, handler: () => false };
+        commandService.registerCommand(failure);
+        const interceptors = univer.__getInjector().get(SheetInterceptorService);
+        const rename = { id: SetWorksheetNameMutation.id, params: { ...target, name: 'Temporary' } };
+        interceptors.interceptCommand({
+            getMutations: ({ id }) => id === RemoveSheetFilterCommand.id
+                ? {
+                    preRedos: pre ? [rename, { id: failure.id, params: target }] : [],
+                    redos: pre ? [] : [rename, { id: failure.id, params: target }],
+                    undos: [{ id: SetWorksheetNameMutation.id, params: { ...target, name: worksheet.getName() } }],
+                    rollbackMutations: [[{ id: SetWorksheetNameMutation.id, params: { ...target, name: 'Sheet 1' } }], []],
+                }
+                : { redos: [], undos: [] },
+        });
+        const rowParams = { ...target, range: { startRow: 2, endRow: 2, startColumn: 0, endColumn: 0 } };
+        interceptors.interceptCommand({
+            getMutations: ({ id }) => id === RemoveSheetFilterCommand.id
+                ? {
+                    preRedos: pre ? [{ id: InsertRowMutation.id, params: rowParams }] : [],
+                    redos: pre ? [] : [{ id: InsertRowMutation.id, params: rowParams }],
+                    undos: [{ id: RemoveRowMutation.id, params: rowParams }],
+                }
+                : { redos: [], undos: [] },
+        });
+
+        expect(await commandService.executeCommand(RemoveSheetFilterCommand.id, target)).toBe(false);
+        expect(worksheet.getRowCount()).toBe(rowCount);
+        expect([0, 1, 2, 3].map((row) => worksheet.getCellRaw(row, 0)?.v)).toEqual(before);
+        expect(worksheet.getName()).toBe('Sheet 1');
+        expect(sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange()).toEqual(range);
+    });
+
+    it.each([false, true])('safely aborts a partially executed cross-phase hook (paired: %s)', async (paired) => {
+        const target = { unitId, subUnitId };
+        await commandService.executeCommand(SetSheetFilterRangeCommand.id, {
+            ...target,
+            range: { startRow: 0, startColumn: 0, endRow: 3, endColumn: 0 },
+        });
+        const worksheet = workbook.getSheetBySheetId(subUnitId)!;
+        const rowCount = worksheet.getRowCount();
+        commandService.registerCommand(InsertRowMutation);
+        commandService.registerCommand(RemoveRowMutation);
+        commandService.registerCommand(SetWorksheetNameMutation);
+        const fail = { id: 'test.mutation.fail-between-hook-phases', type: CommandType.MUTATION, handler: () => false };
+        commandService.registerCommand(fail);
+        const interceptors = univer.__getInjector().get(SheetInterceptorService);
+        const rowParams = { ...target, range: { startRow: 2, endRow: 2, startColumn: 0, endColumn: 0 } };
+        interceptors.interceptCommand({
+            getMutations: ({ id }) => id === RemoveSheetFilterCommand.id
+                ? {
+                    preRedos: [{ id: SetWorksheetNameMutation.id, params: { ...target, name: 'Temporary' } }],
+                    redos: [{ id: InsertRowMutation.id, params: rowParams }],
+                    undos: [
+                        { id: RemoveRowMutation.id, params: rowParams },
+                        { id: SetWorksheetNameMutation.id, params: { ...target, name: 'Sheet 1' } },
+                    ],
+                    ...(paired
+                        ? { rollbackMutations: [
+                            [{ id: SetWorksheetNameMutation.id, params: { ...target, name: 'Sheet 1' } }],
+                            [{ id: RemoveRowMutation.id, params: rowParams }],
+                        ] }
+                        : {}),
+                }
+                : { redos: [], undos: [] },
+        });
+        interceptors.interceptCommand({
+            getMutations: ({ id }) => id === RemoveSheetFilterCommand.id
+                ? { preRedos: [{ id: fail.id, params: target }], redos: [], undos: [] }
+                : { redos: [], undos: [] },
+        });
+        expect(await commandService.executeCommand(RemoveSheetFilterCommand.id, target)).toBe(false);
+        expect(worksheet.getRowCount()).toBe(rowCount);
+        expect(worksheet.getName()).toBe('Sheet 1');
+        expect(worksheet.getCellRaw(2, 0)?.v).toBe('Banana');
     });
 
     it('removes an existing filter model from the worksheet', async () => {

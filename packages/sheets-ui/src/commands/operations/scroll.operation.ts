@@ -15,10 +15,9 @@
  */
 
 import type { IOperation } from '@univerjs/core';
-import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
-
 import { CommandType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { getFocusedRenderForUnit, IRenderManagerService } from '@univerjs/engine-render';
+import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 
 export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
@@ -33,13 +32,13 @@ export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
         // freeze is handled by set-scroll.command.ts
         const { unitId, sheetId, offsetX = 0, offsetY = 0, sheetViewStartColumn, sheetViewStartRow, duration, screenRatioX, screenRatioY } = params;
         const renderManagerService = accessor.get(IRenderManagerService);
-        const scrollManagerService = renderManagerService.getRenderUnitById(unitId)!.with(SheetScrollManagerService);
-        const renderUnit = renderManagerService.getRenderUnitById(unitId);
+        const renderUnit = getFocusedRenderForUnit(renderManagerService, unitId);
 
         if (!renderUnit) {
             return false;
         }
 
+        const scrollManagerService = renderUnit.with(SheetScrollManagerService);
         const engine = renderUnit.engine;
         const canvasWidth = engine.width;
         const canvasHeight = engine.height;

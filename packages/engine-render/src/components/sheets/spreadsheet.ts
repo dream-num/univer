@@ -120,7 +120,7 @@ function scanSparseExtensionFeatures(
             markers?: unknown;
             selectionProtection?: unknown[];
         }>;
-        const cell = cachedCell ?? (worksheet.getCell(row, col) as typeof cachedCell);
+        const cell = cachedCell ?? (spreadsheetSkeleton.getCell(row, col) as typeof cachedCell);
         if (!cell) {
             return;
         }
@@ -140,7 +140,7 @@ function scanSparseExtensionFeatures(
 
     for (const range of ranges) {
         for (let row = range.startRow; row <= range.endRow; row++) {
-            if (!worksheet.getRowVisible(row)) {
+            if (!spreadsheetSkeleton.getRowVisible(row)) {
                 continue;
             }
             for (let col = range.startColumn; col <= range.endColumn; col++) {
@@ -154,14 +154,14 @@ function scanSparseExtensionFeatures(
         }
         for (const merge of worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn)) {
             if (merge.startRow >= range.startRow && merge.startColumn >= range.startColumn
-                && worksheet.getRowVisible(merge.startRow) && worksheet.getColVisible(merge.startColumn)) {
+                && spreadsheetSkeleton.getRowVisible(merge.startRow) && worksheet.getColVisible(merge.startColumn)) {
                 continue;
             }
             let row = Math.max(range.startRow, merge.startRow);
             let col = Math.max(range.startColumn, merge.startColumn);
             const endRow = Math.min(range.endRow, merge.endRow);
             const endColumn = Math.min(range.endColumn, merge.endColumn);
-            while (row <= endRow && !worksheet.getRowVisible(row)) {
+            while (row <= endRow && !spreadsheetSkeleton.getRowVisible(row)) {
                 row++;
             }
             while (col <= endColumn && !worksheet.getColVisible(col)) {
@@ -467,7 +467,7 @@ export class Spreadsheet extends SheetComponent {
      */
     override draw(ctx: UniverRenderingContext2D, viewportInfo: IViewportInfo, isMergeRepair = false, textClipBound?: IBoundRectNoAngle) {
         const spreadsheetSkeleton = this.getSkeleton();
-        if (!spreadsheetSkeleton) {
+        if (!spreadsheetSkeleton || spreadsheetSkeleton.getDisplayProjection()?.placeholder) {
             return;
         }
         const hasMergeData = spreadsheetSkeleton.worksheet.getMergeData().length > 0;
@@ -1508,7 +1508,7 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
 
-        const { rowColumnSegment, overflowCache, showGridlines, gridlinesColor, worksheet } = spreadsheetSkeleton;
+        const { rowColumnSegment, overflowCache, showGridlines, gridlinesColor } = spreadsheetSkeleton;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
         if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE || this._forceDisableGridlines) {
             return;
@@ -1572,7 +1572,7 @@ export class Spreadsheet extends SheetComponent {
         let lastRowPosition = startY;
         for (let r = rowStart; r <= rowEnd; r++) {
             if (hasMergeData) {
-                if (worksheet.getRowVisible(r) === false) {
+                if (spreadsheetSkeleton.getRowVisible(r) === false) {
                     if (mergeVisibleRangeStartRow < r) {
                         mergeVisibleRanges.push({
                             startRow: mergeVisibleRangeStartRow,

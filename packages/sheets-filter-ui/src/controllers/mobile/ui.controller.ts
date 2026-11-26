@@ -31,6 +31,7 @@ import {
     ChangeFilterByOperation,
     CloseFilterPanelOperation,
     OpenFilterPanelOperation,
+    RequestOpenFilterPanelOperation,
 } from '../../commands/operations/sheets-filter.operation';
 import { MobileSheetsFilterPanel } from '../../views/mobile/MobileSheetsFilterPanel';
 import { SheetsFilterRenderController } from '../../views/render-modules/sheets-filter.render-controller';
@@ -51,6 +52,7 @@ export class SheetsFilterUIMobileController extends RxDisposable {
         [
             ChangeFilterByOperation,
             OpenFilterPanelOperation,
+            RequestOpenFilterPanelOperation,
             CloseFilterPanelOperation,
         ].forEach((command) => {
             this.disposeWithMe(commandService.registerCommand(command));

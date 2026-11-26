@@ -1012,6 +1012,21 @@ describe('spreadsheet integration', () => {
         noSkeletonSpreadsheet.dispose();
     });
 
+    it('suppresses worksheet drawing while its projection is a placeholder', () => {
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        const viewportInfo = createViewportInfo(scene, cacheCanvas);
+        const font = new Font();
+        const draw = vi.spyOn(font, 'draw');
+        spreadsheet.register(font);
+        spreadsheet.draw(mainCanvas.getContext(), viewportInfo);
+        expect(draw).toHaveBeenCalled();
+        draw.mockClear();
+
+        skeleton.setProjection({ placeholder: true, isRowFiltered: () => true, getCell: () => null });
+        spreadsheet.draw(mainCanvas.getContext(), viewportInfo);
+        expect(draw).not.toHaveBeenCalled();
+    });
+
     it('repaints text across the cleared incremental scroll bound', () => {
         const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
         const context = mainCanvas.getContext();

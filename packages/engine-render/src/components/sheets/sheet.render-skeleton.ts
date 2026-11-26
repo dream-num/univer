@@ -650,7 +650,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             const expandStartCol = Math.max(0, visibleStartColumn - EXPAND_SIZE_FOR_RENDER_OVERFLOW);
             const expandEndCol = Math.min(columnWidthAccumulation.length - 1, visibleEndColumn + EXPAND_SIZE_FOR_RENDER_OVERFLOW);
             for (let r = visibleStartRow; r <= visibleEndRow; r++) {
-                if (this.worksheet.getRowVisible(r) === false) {
+                if (this.getRowVisible(r) === false) {
                     if (mergeVisibleRangeStartRow < r) {
                         mergeVisibleRanges.push({
                             startRow: mergeVisibleRangeStartRow,
@@ -696,7 +696,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     if (shouldUseIncrementalStyleRange) {
                         pushRowRange(this._incrementalFontRenderRanges, r, c, c);
                     }
-                    const cell = this.worksheet.getCell(r, c);
+                    const cell = this.getCell(r, c);
                     if (!isCellCoverable(cell) || (hasMergeData && this.intersectMergeRange(r, c))) {
                         break;
                     }
@@ -709,7 +709,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     if (shouldUseIncrementalStyleRange) {
                         pushRowRange(this._incrementalFontRenderRanges, r, c, c);
                     }
-                    const cell = this.worksheet.getCell(r, c);
+                    const cell = this.getCell(r, c);
                     if (!isCellCoverable(cell) || (hasMergeData && this.intersectMergeRange(r, c))) {
                         break;
                     }
@@ -833,7 +833,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         // TODO@weird94: in future, we should use `getCellRaw` instead of `getCell` to improve performance.
-        const cell = this.worksheet.getCell(row, col);
+        const cell = this.getCell(row, col);
         const style = this.worksheet.getComposedCellStyleByCellData(row, col, cell);
 
         if (cell?.interceptorAutoHeight) {
@@ -1042,8 +1042,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             const row = rowIdxArr[i];
             const { isMerged, isMergedMainCell } = worksheet.getCellInfoInMergeData(row, colIndex);
             if (isMerged && !isMergedMainCell) continue;
-            if (!this.worksheet.getRowVisible(row)) continue;
-            const cell = worksheet.getCell(row, colIndex);
+            if (!this.getRowVisible(row)) continue;
+            const cell = this.getCell(row, colIndex);
             if (!cell) continue;
 
             // for cell with paragraph, only check ±1000 rows around visible area, continue the loop if out of range
@@ -1234,7 +1234,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         const cachedAdjacentCell = this._stylesCache.fontMatrix.getValue(row, adjacentColumn)?.cellData;
-        const adjacentCell = cachedAdjacentCell ?? this.worksheet.getCell(row, adjacentColumn);
+        const adjacentCell = cachedAdjacentCell ?? this.getCell(row, adjacentColumn);
         return !isCellCoverable(adjacentCell) || (hasMergeData && this.intersectMergeRange(row, adjacentColumn));
     }
 
@@ -1799,7 +1799,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             isMergedMainCell = mergeInfo.isMergedMainCell;
         }
 
-        const rowVisible = options.rowVisible ?? this.worksheet.getRowVisible(row);
+        const rowVisible = options.rowVisible ?? this.getRowVisible(row);
         const hidden = this.worksheet.getColVisible(col) === false || rowVisible === false;
 
         // hidden and not in mergeRange return.
@@ -1813,7 +1813,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             }
         }
 
-        const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
+        const cell = this.getCell(row, col) || this.worksheet.getCellRaw(row, col);
         const style = this.worksheet.getComposedCellStyleByCellData(row, col, cell);
         // Empty merge anchors still own borders contributed by other members.
         if (!mergeRange && isNullCell(cell) && Object.keys(style).length === 0) {
@@ -1873,7 +1873,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 row = i;
             }
 
-            const cell = this.worksheet.getCell(row, column);
+            const cell = this.getCell(row, column);
             if (!cell) {
                 isAddBorders = false;
                 break;
@@ -1977,7 +1977,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     getHiddenRowsInRange(range: IRowRange) {
         const hiddenRows = [];
         for (let i = range.startRow; i <= range.endRow; i++) {
-            if (!this.worksheet.getRowVisible(i)) {
+            if (!this.getRowVisible(i)) {
                 hiddenRows.push(i);
             }
         }

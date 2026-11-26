@@ -25,12 +25,30 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FilterColumn, FilterModel, generateFilterFn } from '../filter-model';
 import { CustomFilterOperator } from '../types';
 
 describe('Test filter model and related utils', () => {
     describe('Test "FilterFn"s', () => {
+        it.each([undefined, CustomFilterOperator.EQUAL])('honors text equality with operator %s', (operator) => {
+            const text = generateFilterFn({ colId: 0, customFilters: {
+                customFilters: [{ operator, val: '01', compareAsText: true }],
+            } });
+            expect(['01', '1', 1].map((value) => text(value))).toEqual([true, false, false]);
+        });
+
+        it('preserves explicit text comparison without changing numeric inequality', () => {
+            const numeric = generateFilterFn({ colId: 0, customFilters: {
+                customFilters: [{ operator: CustomFilterOperator.NOT_EQUALS, val: '01' }],
+            } });
+            const text = generateFilterFn({ colId: 0, customFilters: {
+                customFilters: [{ operator: CustomFilterOperator.NOT_EQUALS, val: '01', compareAsText: true }],
+            } });
+            expect(['1', '01', 'Other', 1].map((value) => numeric(value))).toEqual([true, true, true, false]);
+            expect(['1', '01', 'Other', 1].map((value) => text(value))).toEqual([true, false, true, true]);
+        });
+
         it('should AND work', () => {
             // equivalent to "between"
             const fn = generateFilterFn({
@@ -150,6 +168,30 @@ describe('Test filter model and related utils', () => {
         let filterColumn: FilterColumn;
         let get: Injector['get'];
 
+        it('reuses column results only before the excluded filter column', () => {
+            const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
+            const sheet = workbook.getSheetBySheetId('sheet1')!;
+            const model = FilterModel.deserialize('test', 'sheet1', sheet, {
+                ref: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 1 },
+                filterColumns: [
+                    { colId: 0, filters: { filters: ['nonempty'] } },
+                    { colId: 1, filters: { filters: ['123'] } },
+                ],
+            });
+            try {
+                const cachedRows = new Map(model.getAllFilterColumns().map(([column, filter]) => [column, filter.filteredOutRows!]));
+                const firstCalc = vi.spyOn(model.getFilterColumn(0)!, 'calc');
+                const secondCalc = vi.spyOn(model.getFilterColumn(1)!, 'calc');
+                expect(model.getFilteredOutRowsExceptCol(1, cachedRows)).toEqual(new Set([1, 2]));
+                expect(firstCalc).not.toHaveBeenCalled();
+                expect(secondCalc).not.toHaveBeenCalled();
+                expect(model.getFilteredOutRowsExceptCol(0, cachedRows)).toEqual(new Set([2]));
+                expect(secondCalc).toHaveBeenCalledOnce();
+            } finally {
+                model.dispose();
+            }
+        });
+
         beforeEach(() => {
             const testBed = createFilterModelTestBed({
                 id: 'test',
@@ -183,7 +225,7 @@ describe('Test filter model and related utils', () => {
 
         afterEach(() => {
             univer.dispose();
-            filterColumn.dispose();
+            filterColumn?.dispose();
         });
 
         it('should not calc when filter fn or range is not set', () => {

@@ -35,13 +35,11 @@ import {
     WorksheetEditPermission,
     WorksheetViewPermission,
 } from '@univerjs/sheets';
-import { ISheetDrawingService } from '@univerjs/sheets-drawing';
+import { GroupSheetDrawingCommand, ISheetDrawingService, UngroupSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { combineLatest, distinctUntilChanged, EMPTY, map, switchMap, tap } from 'rxjs';
 import type { IFlipSheetDrawingCommandParams } from '../commands/commands/flip-drawings.command';
 import type { LocaleKey } from '../locale/types';
 import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
-import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
-import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 
 const drawingObjectTypes = [
     ObjectType.IMAGE, // floating image

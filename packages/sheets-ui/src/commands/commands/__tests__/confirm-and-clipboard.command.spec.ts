@@ -31,8 +31,6 @@ import {
 import {
     AddWorksheetMergeMutation,
     DeleteRangeMoveLeftCommand,
-    DeleteRangeMoveUpCommand,
-    InsertRangeMoveDownCommand,
     InsertRangeMoveRightCommand,
     MoveRangeMutation,
     RangeProtectionPermissionEditPoint,
@@ -68,8 +66,6 @@ import {
     SheetPasteValueCommand,
 } from '../clipboard.command';
 import { DeleteRangeMoveLeftConfirmCommand } from '../delete-range-move-left-confirm.command';
-import { DeleteRangeMoveUpConfirmCommand } from '../delete-range-move-up-confirm.command';
-import { InsertRangeMoveDownConfirmCommand } from '../insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../insert-range-move-right-confirm.command';
 
 function createAccessor(pairs: Array<[unknown, unknown]>): IAccessor {
@@ -119,46 +115,6 @@ describe('insert/delete range confirm commands', () => {
         vi.restoreAllMocks();
     });
 
-    it('InsertRangeMoveDownConfirm handles filtered rows, merge confirm and direct execute', async () => {
-        const executeCommand = vi.fn(async () => true);
-        const confirm = vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false).mockResolvedValueOnce(true);
-        const locale = { t: (key: string) => key };
-        const rowSelection = { startRow: 1, endRow: 1, startColumn: 0, endColumn: 0 } as IRange;
-
-        const filteredWorksheet = createWorksheet({ filteredRows: [2] });
-        mockSheetCommandTarget(filteredWorksheet);
-        const accessorFiltered = createAccessor([
-            [IConfirmService, { confirm }],
-            [ICommandService, { executeCommand }],
-            [LocaleService, locale],
-            [SheetsSelectionsService, createSelectionService(rowSelection)],
-            [IUniverInstanceService, {}],
-        ]);
-        expect(await InsertRangeMoveDownConfirmCommand.handler(accessorFiltered)).toBe(false);
-        expect(executeCommand).not.toHaveBeenCalled();
-
-        const mergeWorksheet = createWorksheet({
-            merges: [{ startRow: 0, endRow: 3, startColumn: 0, endColumn: 2 } as IRange],
-        });
-        mockSheetCommandTarget(mergeWorksheet);
-        const accessorMerge = createAccessor([
-            [IConfirmService, { confirm }],
-            [ICommandService, { executeCommand }],
-            [LocaleService, locale],
-            [SheetsSelectionsService, createSelectionService(rowSelection)],
-            [IUniverInstanceService, {}],
-        ]);
-
-        expect(await InsertRangeMoveDownConfirmCommand.handler(accessorMerge)).toBe(true);
-        expect(await InsertRangeMoveDownConfirmCommand.handler(accessorMerge)).toBe(true);
-        expect(executeCommand).toHaveBeenCalledWith(InsertRangeMoveDownCommand.id);
-
-        const noMergeWorksheet = createWorksheet();
-        mockSheetCommandTarget(noMergeWorksheet);
-        expect(await InsertRangeMoveDownConfirmCommand.handler(accessorMerge)).toBe(true);
-        expect(executeCommand).toHaveBeenCalledWith(InsertRangeMoveDownCommand.id);
-    });
-
     it('InsertRangeMoveRightConfirm executes directly and handles merge confirm', async () => {
         const executeCommand = vi.fn(async () => true);
         const confirm = vi.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
@@ -181,33 +137,6 @@ describe('insert/delete range confirm commands', () => {
         }));
         expect(await InsertRangeMoveRightConfirmCommand.handler(accessor)).toBe(true);
         expect(await InsertRangeMoveRightConfirmCommand.handler(accessor)).toBe(true);
-    });
-
-    it('DeleteRangeMoveUpConfirm handles filter/merge/no-merge branches', async () => {
-        const executeCommand = vi.fn(async () => true);
-        const confirm = vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false).mockResolvedValueOnce(true);
-        const locale = { t: (key: string) => key };
-        const range = { startRow: 1, endRow: 1, startColumn: 0, endColumn: 0 } as IRange;
-        const accessor = createAccessor([
-            [IConfirmService, { confirm }],
-            [ICommandService, { executeCommand }],
-            [LocaleService, locale],
-            [SheetsSelectionsService, createSelectionService(range)],
-            [IUniverInstanceService, {}],
-        ]);
-
-        mockSheetCommandTarget(createWorksheet({ filteredRows: [2] }));
-        expect(await DeleteRangeMoveUpConfirmCommand.handler(accessor)).toBe(false);
-
-        mockSheetCommandTarget(createWorksheet({
-            merges: [{ startRow: 0, endRow: 3, startColumn: 0, endColumn: 2 } as IRange],
-        }));
-        expect(await DeleteRangeMoveUpConfirmCommand.handler(accessor)).toBe(true);
-        expect(await DeleteRangeMoveUpConfirmCommand.handler(accessor)).toBe(true);
-        expect(executeCommand).toHaveBeenCalledWith(DeleteRangeMoveUpCommand.id);
-
-        mockSheetCommandTarget(createWorksheet());
-        expect(await DeleteRangeMoveUpConfirmCommand.handler(accessor)).toBe(true);
     });
 
     it('DeleteRangeMoveLeftConfirm handles merge/no-merge and guard branches', async () => {

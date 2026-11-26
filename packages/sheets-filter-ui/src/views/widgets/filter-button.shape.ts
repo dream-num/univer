@@ -15,10 +15,20 @@
  */
 
 import type { IMouseEvent, IPointerEvent, IShapeProps, UniverRenderingContext2D } from '@univerjs/engine-render';
-import { ICommandService, IContextService, Inject, ThemeService } from '@univerjs/core';
-import { Shape } from '@univerjs/engine-render';
-import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
-import { FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
+import {
+    ICommandService,
+    IContextService,
+    Inject,
+    IUniverInstanceService,
+    ThemeService,
+    Workbook,
+} from '@univerjs/core';
+import { getFocusedRenderForUnit, IRenderManagerService, Shape } from '@univerjs/engine-render';
+import type { IRequestOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
+import {
+    FILTER_PANEL_OPENED_KEY,
+    RequestOpenFilterPanelOperation,
+} from '../../commands/operations/sheets-filter.operation';
 import { drawFilterButton } from './drawings';
 
 export const FILTER_ICON_SIZE = 16;
@@ -40,13 +50,16 @@ export class SheetsFilterButtonShape extends Shape<ISheetsFilterButtonShapeProps
     private _filterParams?: { col: number; unitId: string; subUnitId: string; hasCriteria: boolean };
 
     private _hovered = false;
+    private _openTimer: ReturnType<typeof setTimeout> | undefined;
 
     constructor(
         key: string,
         props: ISheetsFilterButtonShapeProps,
         @IContextService private readonly _contextService: IContextService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super(key, props);
 
@@ -56,6 +69,12 @@ export class SheetsFilterButtonShape extends Shape<ISheetsFilterButtonShapeProps
         this.onPointerDown$.subscribeEvent((evt) => this.onPointerDown(evt));
         this.onPointerEnter$.subscribeEvent(() => this.onPointerEnter());
         this.onPointerLeave$.subscribeEvent(() => this.onPointerLeave());
+    }
+
+    override dispose(): void {
+        clearTimeout(this._openTimer);
+        this._openTimer = undefined;
+        super.dispose();
     }
 
     setShapeProps(props: Partial<ISheetsFilterButtonShapeProps>): void {
@@ -104,22 +123,36 @@ export class SheetsFilterButtonShape extends Shape<ISheetsFilterButtonShapeProps
 
     onPointerDown(evt: IPointerEvent | IMouseEvent): void {
         // Right click not trigger this event.
-        if (evt.button === 2) {
+        if (evt.button === 2 || this._disposed) {
             return;
         }
 
-        const { col, unitId, subUnitId } = this._filterParams!;
+        const filterParams = this._filterParams!;
+        const { col, unitId, subUnitId } = filterParams;
         const opened = this._contextService.getContextValue(FILTER_PANEL_OPENED_KEY);
-        if (opened || !this._commandService.hasCommand(OpenFilterPanelOperation.id)) {
+        if (opened || !this._commandService.hasCommand(RequestOpenFilterPanelOperation.id)) {
             return;
         }
 
-        setTimeout(() => {
-            this._commandService.executeCommand(OpenFilterPanelOperation.id, {
+        const scene = this.getScene();
+        clearTimeout(this._openTimer);
+        this._openTimer = setTimeout(() => {
+            this._openTimer = undefined;
+            const unit = this._univerInstanceService.getFocusedUnit();
+            const render = getFocusedRenderForUnit(this._renderManagerService, unitId);
+            if (this._disposed || this._filterParams !== filterParams || (scene && (
+                !(unit instanceof Workbook) || unit.getUnitId() !== unitId
+                || unit.getActiveSheet()?.getSheetId() !== subUnitId || this.getScene() !== scene
+                || render?.scene !== scene
+            ))) {
+                return;
+            }
+            return this._commandService.executeCommand(RequestOpenFilterPanelOperation.id, {
                 unitId,
                 subUnitId,
                 col,
-            } as IOpenFilterPanelOperationParams);
+                renderId: render?.renderId ?? unitId,
+            } as IRequestOpenFilterPanelOperationParams);
         }, 200);
     }
 

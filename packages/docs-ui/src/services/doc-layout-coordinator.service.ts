@@ -926,6 +926,10 @@ export class DocLayoutCoordinatorService extends Disposable {
                         if (!scheduledLayout.preserveCompletedLayout) {
                             scheduledLayout.callbacks.onProgress(result.progress, result.publication);
                         }
+                        if (this._scheduledLayout !== scheduledLayout) {
+                            settle(false);
+                            return;
+                        }
                         if (result.progress.complete) {
                             this._scheduledLayout = null;
                             scheduledLayout.callbacks.onComplete?.(result.progress);

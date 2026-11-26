@@ -2676,7 +2676,7 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
-    it('commits a Worker continuation after its section is absent from the retained Main interaction window', () => {
+    it('publishes new sections beyond the retained Main interaction window before completion', () => {
         const univer = new Univer();
         const content = `Modern paragraph across imported pages.${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.PAGE_BREAK}`.repeat(40);
         const model = createDocumentModelWithStyle(content, {});
@@ -2694,14 +2694,22 @@ describe('doc skeleton', () => {
             }
             expect(mainProgress.didPublishAnchor).toBe(true);
             const retainedPage = main.getSkeletonData()!.pages[0];
-            const protectedEnd = retainedPage.sections[0].columns[0].lines[0].ed;
+            const initialSectionCount = retainedPage.sections.length;
+            const protectedLine = retainedPage.sections[0].columns[0].lines[0];
+            const protectedEnd = protectedLine.ed;
+            const protectedGeometry = {
+                st: protectedLine.st,
+                ed: protectedLine.ed,
+                top: protectedLine.top,
+                lineHeight: protectedLine.lineHeight,
+            };
             main.beginExternalLayout({
                 reason: 'edit',
                 protectedRange: { mode: 'continuous', startOffset: 0, endOffset: protectedEnd },
             });
             const workerGeneration = worker.startIncrementalLayout({ reason: 'initial' });
             let snapshot: ReturnType<typeof serializeDocumentSkeletonContinuousBlock>['snapshot'] | null = null;
-            let sawMissingBoundary = false;
+            let publishedNewSection = false;
             let complete = false;
             for (let step = 0; step < 1000; step++) {
                 const progress = worker.stepIncrementalLayout(workerGeneration, 0);
@@ -2711,9 +2719,6 @@ describe('doc skeleton', () => {
                 const data = worker.getSkeletonData()!;
                 const serialized = serializeDocumentSkeletonContinuousBlock(data.pages[0], snapshot);
                 snapshot = serialized.snapshot;
-                const mainSection = main.getSkeletonData()!.pages[0].sections[serialized.block.flow.sectionIndex];
-                const missingBoundary = mainSection?.columns[serialized.block.flow.columnIndex] == null;
-                sawMissingBoundary ||= missingBoundary && !progress.complete;
                 expect(() => main.applyLayoutPublication({
                     kind: 'block',
                     left: data.left,
@@ -2724,13 +2729,17 @@ describe('doc skeleton', () => {
                     resources: { reset: step === 0, skeHeaders: [], skeFooters: [], skeListLevel: null, drawingAnchor: null },
                 }, progress)).not.toThrow();
                 if (!progress.complete) {
-                    expect(main.getSkeletonData()!.pages[0]).toBe(retainedPage);
+                    const visible = main.getSkeletonData()!.pages[0];
+                    expect(visible.sections[0].columns[0].lines[0]).toMatchObject(protectedGeometry);
+                    publishedNewSection ||= visible.sections.slice(initialSectionCount).some((section) =>
+                        section.columns.some((column) => column.lines.some((line) => line.ed > protectedEnd))
+                    );
                 } else {
                     complete = true;
                     break;
                 }
             }
-            expect(sawMissingBoundary).toBe(true);
+            expect(publishedNewSection).toBe(true);
             expect(complete).toBe(true);
             expect(serializeDocumentSkeletonPage(main.getSkeletonData()!.pages[0]))
                 .toEqual(serializeDocumentSkeletonPage(worker.getSkeletonData()!.pages[0]));
@@ -3667,7 +3676,9 @@ describe('doc skeleton', () => {
         const univer = new Univer();
         const localeService = univer.__getInjector().get(LocaleService);
         const T = DataStreamTreeTokenType;
-        const cellText = 'A long table cell keeps flowing across physical pages. '.repeat(80);
+        const tableId = 'body-table';
+        // Traditional layout treats unmarked column breaks as soft line breaks.
+        const cellText = Array.from({ length: 12 }, (_, index) => `Table cell line ${index + 1}.`).join(T.COLUMN_BREAK);
         const tableStream = [
             T.TABLE_START,
             T.TABLE_ROW_START,
@@ -3687,18 +3698,26 @@ describe('doc skeleton', () => {
             body: {
                 dataStream,
                 paragraphs: [
-                    { startIndex: cellParagraphIndex, paragraphId: 'cell-paragraph' },
+                    {
+                        startIndex: cellParagraphIndex,
+                        paragraphId: 'cell-paragraph',
+                        paragraphStyle: {
+                            spacingRule: SpacingRule.EXACT,
+                            lineSpacing: 20,
+                            snapToGrid: BooleanNumber.FALSE,
+                        },
+                    },
                     { startIndex: dataStream.length - 2, paragraphId: 'trailing-paragraph' },
                 ],
                 sectionBreaks: [
                     { sectionId: 'cell-section', startIndex: cellParagraphIndex + 1 },
                     { sectionId: 'body-section', startIndex: dataStream.length - 1 },
                 ],
-                tables: [{ startIndex: 0, endIndex: tableStream.length, tableId: 'body-table' }],
+                tables: [{ startIndex: 0, endIndex: tableStream.length, tableId }],
             },
             tableSource: {
-                'body-table': {
-                    tableId: 'body-table',
+                [tableId]: {
+                    tableId,
                     align: TableAlignmentType.CENTER,
                     indent: { v: 0 },
                     textWrap: TableTextWrapType.NONE,
@@ -3729,9 +3748,29 @@ describe('doc skeleton', () => {
             },
         };
 
-        expectIncrementalSkeletonToEqualSynchronous(snapshot, localeService, Math.floor(cellText.length / 2));
+        const synchronous = DocumentSkeleton.create(
+            new DocumentViewModel(new DocumentDataModel(structuredClone(snapshot))),
+            localeService
+        );
+        const incremental = DocumentSkeleton.create(
+            new DocumentViewModel(new DocumentDataModel(structuredClone(snapshot))),
+            localeService
+        );
+        try {
+            synchronous.calculate();
+            const expected = synchronous.getSkeletonData()!;
+            const tablePages = expected.pages.filter((page) =>
+                [...page.skeTables.values()].some((table) => table.tableSource.tableId === tableId)
+            );
+            expect(tablePages.length).toBeGreaterThan(1);
 
-        univer.dispose();
+            completeIncrementalLayout(incremental, Math.floor(cellText.length / 2));
+            expect(normalizeSkeleton(incremental.getSkeletonData())).toEqual(normalizeSkeleton(expected));
+        } finally {
+            incremental.dispose();
+            synchronous.dispose();
+            univer.dispose();
+        }
     });
 
     it('publishes a traditional first-open layout one stable page at a time', () => {

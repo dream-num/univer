@@ -34,6 +34,7 @@ import type {
     IMoveRangeCommandParams,
     IMoveRowsCommandParams,
     IRemoveColMutationParams,
+    IRemoveRowColCommandInterceptParams,
     IRemoveRowsMutationParams,
     IRemoveSheetCommandParams,
     ISetRangeValuesMutationParams,
@@ -214,7 +215,7 @@ export class SheetsFilterController extends Disposable {
                     return this.handleRemoveColCommand(params.range, unitId, subUnitId);
                 }
                 case RemoveRowCommand.id: {
-                    const params = config.params as IRemoveRowsMutationParams;
+                    const params = config.params as IRemoveRowColCommandInterceptParams;
                     return this._handleRemoveRowCommand(params, unitId, subUnitId);
                 }
                 case EffectRefRangId.MoveColsCommandId: {
@@ -637,7 +638,7 @@ export class SheetsFilterController extends Disposable {
         };
     }
 
-    private _handleRemoveRowCommand(config: IRemoveRowsMutationParams, unitId: string, subUnitId: string) {
+    private _handleRemoveRowCommand(config: IRemoveRowsMutationParams & { ranges?: IRange[] }, unitId: string, subUnitId: string) {
         const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
         if (!filterModel) {
             return this._handleNull();
@@ -646,6 +647,9 @@ export class SheetsFilterController extends Disposable {
         const filterRange = filterModel.getRange();
         const { startRow, endRow } = filterRange;
         const { startRow: removeStartRow, endRow: removeEndRow } = config.range;
+        const removedRanges = config.ranges ?? [config.range];
+        const removedBefore = removedRanges.reduce((total, range) =>
+            total + Math.max(0, Math.min(range.endRow, startRow - 1) - range.startRow + 1), 0);
         if (removeStartRow > endRow) {
             return this._handleNull();
         }
@@ -657,8 +661,8 @@ export class SheetsFilterController extends Disposable {
                     params: {
                         range: {
                             ...filterRange,
-                            startRow: startRow - (removeEndRow - removeStartRow + 1),
-                            endRow: endRow - (removeEndRow - removeStartRow + 1),
+                            startRow: startRow - removedBefore,
+                            endRow: endRow - removedBefore,
                         },
                         unitId,
                         subUnitId,
@@ -670,11 +674,12 @@ export class SheetsFilterController extends Disposable {
         const undos: IMutationInfo[] = [];
         const filterColumn = filterModel.getAllFilterColumns();
 
-        const filterHeaderIsRemoved = startRow <= removeEndRow && startRow >= removeStartRow;
+        const filterHeaderIsRemoved = removedRanges.some((range) => startRow <= range.endRow && startRow >= range.startRow);
 
         undos.push({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
 
-        const count = Math.min(removeEndRow, endRow) - Math.max(removeStartRow, startRow) + 1;
+        const count = removedRanges.reduce((total, range) =>
+            total + Math.max(0, Math.min(range.endRow, endRow) - Math.max(range.startRow, startRow) + 1), 0);
         if (count === endRow - startRow + 1 || filterHeaderIsRemoved) {
             const removeFilterRangeMutationParams: ISheetCommandSharedParams = {
                 unitId,
@@ -697,9 +702,9 @@ export class SheetsFilterController extends Disposable {
             if (!worksheet) {
                 return this._handleNull();
             }
-            const hiddenRowCount = this._getFilteredRowCount(worksheet, removeStartRow, removeEndRow);
-            const afterStartRow = Math.min(startRow, removeStartRow);
-            const afterEndRow = afterStartRow + (endRow - startRow) - count + hiddenRowCount;
+            const hiddenRowCount = config.ranges ? 0 : this._getFilteredRowCount(worksheet, removeStartRow, removeEndRow);
+            const afterStartRow = startRow - removedBefore;
+            const afterEndRow = endRow - removedBefore - count + hiddenRowCount;
             const setFilterRangeMutationParams: ISetSheetsFilterRangeMutationParams = {
                 unitId,
                 subUnitId,

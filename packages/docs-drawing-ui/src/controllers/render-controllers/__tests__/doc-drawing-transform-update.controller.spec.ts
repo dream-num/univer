@@ -772,6 +772,11 @@ describe('DocDrawingTransformUpdateController', () => {
         firstPageDrawings.set('late-drawing', {});
 
         expect(tracker.shouldRefresh(skeleton, progress(2))).toBe(true);
+
+        // The next visible layout can reposition an already published drawing.
+        firstPageDrawings.set('late-drawing', { aTop: 80 });
+        expect(tracker.shouldRefresh(skeleton, { ...progress(2), didPublishEmbeddedGeometry: true })).toBe(true);
+        expect(tracker.shouldRefresh(skeleton, progress(2))).toBe(false);
     });
 
     it.each(['column', 'footnote', 'header', 'footer'])('refreshes when a published %s contains drawings', (scope) => {

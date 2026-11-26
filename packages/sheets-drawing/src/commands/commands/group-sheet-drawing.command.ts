@@ -16,19 +16,14 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
-import {
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-} from '@univerjs/core';
-import { ClearSheetDrawingTransformerOperation, DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import { ungroupToGroup } from './utils';
+import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
+import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
+import { anchorTopLevelDrawing, groupToUngroup } from './drawing-group-params';
 
-/**
- * The command to insert new defined name
- */
-export const UngroupSheetDrawingCommand: ICommand = {
-    id: 'sheet.command.ungroup-sheet-image',
+export const GroupSheetDrawingCommand: ICommand = {
+    id: 'sheet.command.group-sheet-image',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params?: IDrawingGroupUpdateParam[]) => {
         const commandService = accessor.get(ICommandService);
@@ -37,30 +32,43 @@ export const UngroupSheetDrawingCommand: ICommand = {
 
         if (!params) return false;
 
+        // A new top-level group's bounds come from its children, so its cell
+        // markers are derived here rather than trusted from the caller.
+        const groupParams: IDrawingGroupUpdateParam[] = [];
+        for (const group of params) {
+            const { parent } = group;
+            if (parent.groupId || !parent.transform) {
+                groupParams.push(group);
+                continue;
+            }
+            const anchoredParent = anchorTopLevelDrawing(accessor, parent);
+            if (!anchoredParent) return false;
+            groupParams.push({ ...group, parent: anchoredParent });
+        }
+
         const unitIds: string[] = [];
-        params.forEach(({ parent, children }) => {
+        groupParams.forEach(({ parent, children }) => {
             unitIds.push(parent.unitId);
             children.forEach((child) => {
                 unitIds.push(child.unitId);
             });
         });
 
-        // execute do mutations and add undo mutations to undo stack if completed
-        const jsonOp = sheetDrawingService.getUngroupDrawingOp(params) as IDrawingJsonUndo1;
+        const jsonOp = sheetDrawingService.getGroupDrawingOp(groupParams) as IDrawingJsonUndo1;
 
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
-        const result = commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { op: redo, unitId, subUnitId, objects, type: DrawingApplyType.UNGROUP });
+        const result = commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { op: redo, unitId, subUnitId, objects, type: DrawingApplyType.GROUP });
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    { id: SetDrawingApplyMutation.id, params: { op: undo, unitId, subUnitId, objects: ungroupToGroup(objects as IDrawingGroupUpdateParam[]), type: DrawingApplyType.GROUP } },
+                    { id: SetDrawingApplyMutation.id, params: { op: undo, unitId, subUnitId, objects: groupToUngroup(objects as IDrawingGroupUpdateParam[]), type: DrawingApplyType.UNGROUP } },
                     { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
                 redoMutations: [
-                    { id: SetDrawingApplyMutation.id, params: { op: redo, unitId, subUnitId, objects, type: DrawingApplyType.UNGROUP } },
+                    { id: SetDrawingApplyMutation.id, params: { op: redo, unitId, subUnitId, objects, type: DrawingApplyType.GROUP } },
                     { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
             });

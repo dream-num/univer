@@ -16,6 +16,7 @@
 
 import type { Injector, IRange, Univer, Workbook } from '@univerjs/core';
 import { BooleanNumber, Direction, ICommandService, RedoCommand, UndoCommand } from '@univerjs/core';
+import { IRenderManagerService, Spreadsheet } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { IAutoFillRule } from '../type';
 import { createTestBase, TEST_WORKBOOK_DATA_DEMO } from '../../__tests__/util';
@@ -23,6 +24,7 @@ import { SetRangeValuesMutation } from '../../../commands/mutations/set-range-va
 import { SetWorksheetRowAutoHeightMutation } from '../../../commands/mutations/set-worksheet-row-height.mutation';
 import { SetSelectionsOperation } from '../../../commands/operations/selection.operation';
 import { AutoFillController } from '../../../controllers/auto-fill.controller';
+import { SheetSkeletonService } from '../../../skeleton/skeleton.service';
 import { SheetsSelectionsService } from '../../selections/selection.service';
 import { AutoFillService, IAutoFillService } from '../auto-fill.service';
 import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_DATA_TYPE, AUTO_FILL_HOOK_TYPE } from '../type';
@@ -54,6 +56,7 @@ describe('AutoFillService', () => {
             [SheetsSelectionsService],
             [IAutoFillService, { useClass: AutoFillService }],
             [AutoFillController],
+            [SheetSkeletonService],
         ]);
 
         univer = testBed.univer;
@@ -207,6 +210,27 @@ describe('AutoFillService', () => {
         expect(result).toBe(true);
         expect(service.direction).toBe(Direction.DOWN);
         expect(service.autoFillLocation?.unitId).toBe(unitId);
+    });
+
+    it('resolves fill source and destination using the same display projection', async () => {
+        const service = get(IAutoFillService);
+        const worksheet = workbook.getActiveSheet()!;
+        const skeleton = get(SheetSkeletonService).createRenderSkeleton(worksheet, workbook.getStyles());
+        skeleton.setProjection({ isRowFiltered: (row) => row === 1 || row === 4, getCell: () => undefined });
+        const display = new Spreadsheet('test', skeleton);
+        univer.__getInjector().add([IRenderManagerService, { useValue: {
+            getRenderUnitById: () => ({ mainComponent: display }),
+        } as never }]);
+        try {
+            const source = { startRow: 0, endRow: 2, startColumn: 0, endColumn: 0 };
+            const target = { ...source, endRow: 5 };
+            expect(await service.triggerAutoFill(unitId, subUnitId, source, target, AUTO_FILL_APPLY_TYPE.COPY)).toBe(true);
+            expect(service.autoFillLocation?.source.rows).toEqual([0, 2]);
+            expect(service.autoFillLocation?.target.rows).toEqual([3, 5]);
+        } finally {
+            display.dispose();
+            skeleton.dispose();
+        }
     });
 
     it('keeps destination row heights and grows auto-sized rows to fit the tallest filled cell', async () => {

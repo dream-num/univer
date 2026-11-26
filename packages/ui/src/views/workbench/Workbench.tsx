@@ -208,8 +208,8 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
 
                             <section
                                 className={clsx(`
-                                  univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
-                                  univer-overflow-hidden univer-bg-gray-0
+                                  univer-relative univer-grid univer-flex-1 univer-grid-cols-[minmax(0,1fr)]
+                                  univer-grid-rows-[auto_1fr] univer-overflow-hidden univer-bg-gray-0
                                   dark:!univer-bg-gray-800
                                 `, borderBottomClassName)}
                             >

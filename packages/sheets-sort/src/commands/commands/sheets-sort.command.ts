@@ -51,12 +51,16 @@ export const SortRangeCommand: ICommand = {
     id: 'sheet.command.sort-range',
     type: CommandType.COMMAND,
 
-    handler: (accessor: IAccessor, params: ISortRangeCommandParams) => {
-        const { range, orderRules, hasTitle, unitId, subUnitId } = params;
+    handler: (accessor: IAccessor, params: ISortRangeCommandParams, options) => {
+        const { range, orderRules, hasTitle } = params;
         const sortService = accessor.get(SheetsSortService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const { worksheet } = getSheetCommandTarget(univerInstanceService, params) || {};
-        if (!worksheet) {
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) {
+            return false;
+        }
+        const { worksheet, unitId, subUnitId } = target;
+        if (!options?.fromFacade && !sortService.canSort({ unitId, subUnitId, range }, true)) {
             return false;
         }
 

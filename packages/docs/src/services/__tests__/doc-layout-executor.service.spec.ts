@@ -211,6 +211,16 @@ describe('DocLayoutExecutorService', () => {
             reason: 'initial',
             budgetMs: 32,
         });
+        await service.startLayout(
+            { ...createMountIdentity(), unitId: 'modern-doc' },
+            { reason: 'edit', acknowledgedLayoutVersion: 'previous-complete-layout' },
+            32
+        );
+        expect(executor.startLayout).toHaveBeenLastCalledWith(expect.objectContaining({
+            unitId: 'modern-doc',
+            supportsAppliedLayoutVersion: true,
+            acknowledgedLayoutVersion: 'previous-complete-layout',
+        }));
         expect(await service.startLayout(
             { ...createMountIdentity(), unitId: 'editor-doc' },
             { reason: 'initial' },

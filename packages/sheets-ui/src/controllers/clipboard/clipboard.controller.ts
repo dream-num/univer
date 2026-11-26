@@ -25,6 +25,7 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
+import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
@@ -58,7 +59,7 @@ import {
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { convertBodyToHtml, DocSelectionRenderService } from '@univerjs/docs-ui';
-import { IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
+import { getFocusedRenderForUnit, IRenderManagerService } from '@univerjs/engine-render';
 import {
     AddWorksheetMergeCommand,
     InsertColMutation,
@@ -296,14 +297,21 @@ export class SheetClipboardController extends RxDisposable {
     private _initCopyingHooks(): ISheetClipboardHook {
         const self = this;
         let currentSheet: Worksheet | null = null;
+        let currentSkeleton: SpreadsheetSkeleton | undefined;
         return {
             id: PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY,
             isDefaultHook: true,
             onBeforeCopy(unitId, subUnitId) {
                 currentSheet = self._getWorksheet(unitId, subUnitId);
+                const manager = getFocusedRenderForUnit(self._renderManagerService, unitId)?.with(SheetSkeletonManagerService);
+                currentSkeleton = manager?.hasProjection(subUnitId) ? manager.getSkeleton(subUnitId) ?? undefined : undefined;
             },
             onCopyCellContent(row: number, col: number): string {
-                const cell = currentSheet!.getCell(row, col);
+                const merge = currentSheet!.getMergedCell(row, col);
+                if (merge && (merge.startRow !== row || merge.startColumn !== col)) {
+                    return '';
+                }
+                const cell = currentSkeleton ? currentSkeleton.getCell(row, col) : currentSheet!.getCell(row, col);
 
                 if (cell?.p?.body?.paragraphs || cell?.p?.body?.textRuns) {
                     return convertBodyToHtml(cell.p);
@@ -374,13 +382,14 @@ export class SheetClipboardController extends RxDisposable {
             },
             onCopyRow(row: number) {
                 const sheet = currentSheet!;
-                const height = sheet.getRowHeight(row);
+                const height = currentSkeleton ? sheet.getRowManager().getRowHeight(row) : sheet.getRowHeight(row);
                 return {
                     style: `height: ${height}px;`,
                 };
             },
             onAfterCopy() {
                 currentSheet = null;
+                currentSkeleton = undefined;
             },
             getFilteredOutRows(unitId: string, subUnitId: string, range: IRange) {
                 const worksheet = self._getWorksheet(unitId, subUnitId);
@@ -549,12 +558,9 @@ export class SheetClipboardController extends RxDisposable {
     }
 
     private _generateDocumentDataModelSnapshot(snapshot: Partial<IDocumentData>) {
-        const currentSkeleton = withCurrentTypeOfRenderer(
-            UniverInstanceType.UNIVER_SHEET,
-            SheetSkeletonManagerService,
-            this._instanceService,
-            this._renderManagerService
-        )?.getCurrentParam();
+        const workbook = this._instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const render = workbook && getFocusedRenderForUnit(this._renderManagerService, workbook.getUnitId());
+        const currentSkeleton = render?.with(SheetSkeletonManagerService).getCurrentParam();
 
         if (currentSkeleton == null) {
             return null;

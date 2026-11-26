@@ -463,7 +463,7 @@ export class Interpreter extends Disposable {
             if (parent instanceof FunctionNode) {
                 if (!nested && parent.preservesLazyIfReferenceArray(child)) return true;
                 if (!parent.preservesReferenceInRangeEndpoint(child) || nested) {
-                    const context = parent.getNestedArgumentArrayContext(child);
+                    const context = parent.getNestedArgumentArrayContext(child, nested || node.nodeType === NodeType.LAMBDA_PARAMETER);
                     if (context === 'array') return true;
                     if (context === 'scalar') return false;
                     nested = true;

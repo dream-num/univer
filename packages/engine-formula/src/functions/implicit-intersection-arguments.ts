@@ -733,5 +733,7 @@ export function getNestedArgumentArrayContext(name: IFunctionNames, index: numbe
     if (name === 'SORTBY') return index === 0 || index % 2 === 1 ? 'array' : 'scalar';
     const positions = nestedContexts.get(name);
     if (positions) return positions[Math.min(index, positions.length - 1)];
-    return excelArgumentAcceptsRange(name, index, count) ? 'scalar' : 'inherit';
+    const acceptsRange = excelArgumentAcceptsRange(name, index, count);
+    if (acceptsRange === undefined) return 'array';
+    return acceptsRange ? 'scalar' : 'inherit';
 }

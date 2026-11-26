@@ -42,9 +42,10 @@ import {
     Univer,
     VerticalAlignmentType,
 } from '@univerjs/core';
-import { cpuUsage, memoryUsage, stdout } from 'node:process';
+import { memoryUsage, stdout } from 'node:process';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { IDocumentSkeletonPage, IDocumentSkeletonTable } from '../basics/i-document-skeleton-cached';
+import type { IDocumentLayoutProgress } from '../components/docs/layout/document-layout-types';
 import { createParagraphLayoutTestBed } from '../components/docs/layout/block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import { DocumentSkeleton } from '../components/docs/layout/doc-skeleton';
 import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
@@ -100,6 +101,22 @@ function normalizeSkeleton(value: unknown): unknown {
 function percentile(samples: number[], ratio: number): number {
     const sorted = [...samples].sort((a, b) => a - b);
     return sorted[Math.min(sorted.length - 1, Math.ceil(sorted.length * ratio) - 1)] ?? 0;
+}
+
+function measurePatchTransfer(
+    skeleton: DocumentSkeleton,
+    publication: NonNullable<LayoutPublication>,
+    progress: IDocumentLayoutProgress
+): number {
+    // Process-wide CPU includes background work. Use elapsed time when the thread CPU clock is unavailable.
+    const elapsedStart = performance.now();
+    const cpuStart = process.threadCpuUsage?.();
+    skeleton.applyLayoutPublication(structuredClone(publication), progress);
+    if (cpuStart == null) {
+        return performance.now() - elapsedStart;
+    }
+    const { user, system } = process.threadCpuUsage(cpuStart);
+    return (user + system) / 1_000;
 }
 
 function expectBoundedPatchTransfer(samples: number[]): void {
@@ -715,11 +732,7 @@ describe('worker document layout session', () => {
         let result = session.step(generation, 0);
         publications.push(result.publication);
         if (result.publication != null) {
-            const transferStart = cpuUsage();
-            const transferredPublication = structuredClone(result.publication);
-            targetSkeleton.applyLayoutPublication(transferredPublication, result.progress);
-            const transferCpu = cpuUsage(transferStart);
-            transferDurations.push((transferCpu.user + transferCpu.system) / 1_000);
+            transferDurations.push(measurePatchTransfer(targetSkeleton, result.publication, result.progress));
             if (result.progress.didPublishAnchor && !result.progress.complete) {
                 const partialSkeleton = targetSkeleton.getSkeletonData();
                 if (partialSkeleton == null) {
@@ -733,11 +746,7 @@ describe('worker document layout session', () => {
             result = session.step(generation, 0);
             publications.push(result.publication);
             if (result.publication != null) {
-                const transferStart = cpuUsage();
-                const transferredPublication = structuredClone(result.publication);
-                targetSkeleton.applyLayoutPublication(transferredPublication, result.progress);
-                const transferCpu = cpuUsage(transferStart);
-                transferDurations.push((transferCpu.user + transferCpu.system) / 1_000);
+                transferDurations.push(measurePatchTransfer(targetSkeleton, result.publication, result.progress));
                 if (result.progress.didPublishAnchor && !result.progress.complete) {
                     const partialSkeleton = targetSkeleton.getSkeletonData();
                     if (partialSkeleton == null) {
@@ -3188,11 +3197,7 @@ describe('worker document layout session', () => {
                 if (result.publication.kind === 'block') {
                     blockLineCounts.push(result.publication.block.flow.lines.length);
                 }
-                const transferStart = cpuUsage();
-                const transferredPublication = structuredClone(result.publication);
-                targetSkeleton.applyLayoutPublication(transferredPublication, result.progress);
-                const transferCpu = cpuUsage(transferStart);
-                transferDurations.push((transferCpu.user + transferCpu.system) / 1_000);
+                transferDurations.push(measurePatchTransfer(targetSkeleton, result.publication, result.progress));
             }
             if (result.progress.complete) {
                 break;
@@ -3368,11 +3373,7 @@ describe('worker document layout session', () => {
                 if (editResult.publication.kind === 'block' && firstEditBlockLineIndex == null) {
                     firstEditBlockLineIndex = editResult.publication.block.flow.lineIndex;
                 }
-                const transferStart = cpuUsage();
-                const transferredPublication = structuredClone(editResult.publication);
-                targetSkeleton.applyLayoutPublication(transferredPublication, editResult.progress);
-                const transferCpu = cpuUsage(transferStart);
-                editTransferDurations.push((transferCpu.user + transferCpu.system) / 1_000);
+                editTransferDurations.push(measurePatchTransfer(targetSkeleton, editResult.publication, editResult.progress));
                 if (!editResult.progress.complete) {
                     expect(targetSkeleton.getSkeletonData()?.pages[0]).toBe(protectedContinuousPage);
                 }

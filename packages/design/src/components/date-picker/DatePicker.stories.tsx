@@ -16,6 +16,7 @@
 
 import type { Meta } from '@storybook/react';
 import { useState } from 'react';
+import { FormLayout } from '../form-layout/FormLayout';
 import { DatePicker } from './DatePicker';
 
 const meta: Meta<typeof DatePicker> = {
@@ -31,10 +32,27 @@ export default meta;
 
 export const DatePickerBasic = {
     render() {
+        const [value, setValue] = useState<Date | undefined>(new Date());
+
+        return (
+            <div className="univer-flex univer-flex-col univer-gap-3">
+                <DatePicker className="univer-w-44" value={value} onValueChange={setValue} />
+                <DatePicker className="univer-w-52" showTime value={value} onValueChange={setValue} />
+                <DatePicker className="univer-w-44" placeholder="Select date" onValueChange={setValue} />
+                <DatePicker className="univer-w-44" disabled value={value} />
+            </div>
+        );
+    },
+};
+
+export const DatePickerInvalid = {
+    render() {
         const [value, setValue] = useState(new Date());
 
         return (
-            <DatePicker value={value} onValueChange={setValue} />
+            <FormLayout label="Start date" error="Please choose a valid date">
+                <DatePicker className="univer-w-44" value={value} onValueChange={setValue} />
+            </FormLayout>
         );
     },
 };

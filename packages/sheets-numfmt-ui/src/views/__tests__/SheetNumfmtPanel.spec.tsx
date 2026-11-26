@@ -92,10 +92,11 @@ async function confirmPanel(container: HTMLElement, label = 'Confirm') {
 
 describe('SheetNumfmtPanel', () => {
     it.each([
-        ['Currency', undefined, '₹'],
-        ['Accounting', undefined, '₹'],
-        ['Currency', '€', '€'],
-    ])('confirms %s using the regional default or saved choice %s', async (category, saved, expected) => {
+        ['Currency', undefined, '₹', undefined],
+        ['Accounting', undefined, '₹', undefined],
+        ['Currency', '€', '€', undefined],
+        ['Currency', undefined, 'CHF', 'de-CH'],
+    ])('confirms %s using the regional default or saved choice %s', async (category, saved, expected, nextRegion) => {
         const { container, injector, onChange } = await renderPanel({ defaultValue: 100000, defaultPattern: '', row: 0, col: 0 });
         if (saved) await injector.get(ILocalStorageService).setItem('userHabitController_numfmtCurrency', [saved]);
         await act(async () => injector.get(RegionService).setRegion('enIN'));
@@ -107,6 +108,12 @@ describe('SheetNumfmtPanel', () => {
         const option = Array.from(document.querySelectorAll<HTMLElement>('[role="menuitemradio"]')).find((item) => item.textContent?.trim() === category);
         expect(option).toBeDefined();
         await act(async () => option!.click());
+        if (nextRegion) {
+            const styles = container.querySelectorAll<HTMLAnchorElement>('li > a');
+            expect(styles.length).toBeGreaterThan(1);
+            await act(async () => styles[1].click());
+            await act(async () => injector.get(RegionService).setRegion(nextRegion));
+        }
         await confirmPanel(container);
         expect(onChange.mock.lastCall?.[0].value).toContain(expected);
     });

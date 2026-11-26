@@ -35,15 +35,17 @@ export const getDateFormatOptions = (locale?: string, currentPattern?: string, r
     }
 
     const effectiveRegion = region ?? locale;
-    const formatLocale = getDateFormatLocale(effectiveRegion);
-    const numfmtLocale = formatLocale ? getNumfmtLocaleTag(formatLocale) : getRegionLocale(effectiveRegion)?.language ?? 'en';
-    const patterns = getDateFormatPatterns(effectiveRegion, region !== undefined || !formatLocale);
+    const regionTag = region && getRegionLocale(region)?.baseName;
+    const patterns = getDateFormatPatterns(effectiveRegion, region !== undefined || !getDateFormatLocale(effectiveRegion)).map((pattern) =>
+        regionTag && /mmm|ddd|am\/pm/i.test(pattern) ? `[$-${regionTag}]${pattern}` : pattern);
     if (currentPattern && !patterns.includes(currentPattern)) {
         patterns.unshift(currentPattern);
     }
 
+    const workbookLocale = getDateFormatLocale(locale);
+    const previewLocale = workbookLocale ? getNumfmtLocaleTag(workbookLocale) : getRegionLocale(locale)?.language;
     return patterns.map((pattern) => ({
-        label: numfmt.format(pattern, DATE_FORMAT_PREVIEW_VALUE, { locale: numfmtLocale }),
+        label: numfmt.format(pattern, DATE_FORMAT_PREVIEW_VALUE, { locale: previewLocale ?? 'en' }),
         value: pattern,
     }));
 };

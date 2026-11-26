@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Observable } from 'rxjs';
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuSelectorItem } from '@univerjs/ui';
 import {
@@ -113,9 +114,13 @@ export function createMobileNumberFormatMenuConfig(currencySymbol: string, regio
 
 export function FactoryMobileOtherMenuItem(
     accessor: IAccessor
-): IMenuSelectorItem<LocaleKey, string> & { mobileNumberFormat: IMobileNumberFormatMenuConfig } {
+): IMenuSelectorItem<LocaleKey, string> & { mobileNumberFormat: IMobileNumberFormatMenuConfig; mobileNumberFormat$: Observable<IMobileNumberFormatMenuConfig> } {
     const localeService = accessor.get(LocaleService);
     const regionService = accessor.get(RegionService);
+    const readConfig = () => createMobileNumberFormatMenuConfig(
+        getCurrencySymbolByLocale(regionService.getCurrentRegion()),
+        regionService.getExplicitRegion()
+    );
     const value$ = combineLatest([
         getCurrentNumfmtPattern$(accessor),
         regionService.currentRegion$,
@@ -138,9 +143,9 @@ export function FactoryMobileOtherMenuItem(
             worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         }),
+        mobileNumberFormat$: regionService.currentRegion$.pipe(map(readConfig)),
         get mobileNumberFormat() {
-            const region = regionService.getCurrentRegion();
-            return createMobileNumberFormatMenuConfig(getCurrencySymbolByLocale(region), regionService.getExplicitRegion());
+            return readConfig();
         },
     };
 }

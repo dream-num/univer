@@ -52,7 +52,10 @@ describe('getDateFormatOptions', () => {
         expect(getDateFormatOptions(LocaleType.EN_US, undefined, 'en-US')[0].value).toBe('m/d/yyyy');
         const belgian = getDateFormatOptions(LocaleType.EN_US, undefined, 'fr-BE');
         expect(belgian[0].value).toBe('dd/mm/yyyy');
-        expect(belgian.find(({ value }) => value === 'd mmmm')?.label).toBe('5 août');
+        const namedMonth = belgian.find(({ value }) => value === '[$-fr-BE]d mmmm');
+        expect(namedMonth?.label).toBe('5 août');
+        expect(numfmt.format(namedMonth!.value, 11175, { locale: 'en' })).toBe(namedMonth!.label);
+        expect(getDateFormatOptions(LocaleType.EN_US, 'd mmmm', 'fr-BE')[0]).toEqual({ label: '5 August', value: 'd mmmm' });
     });
 
     it('does not offer Chinese literals in English presets', () => {

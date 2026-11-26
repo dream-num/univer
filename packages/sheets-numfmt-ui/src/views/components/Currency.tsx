@@ -41,8 +41,10 @@ export function CurrencyPanel(props: IBusinessComponentProps) {
     const suffix = selectedCurrency ?? userHabitCurrency[0];
     const [decimal, setDecimal] = useState(() => getDecimalFromPattern(props.defaultPattern || '', 2));
     const negativeOptions = useMemo(() => getCurrencyFormatOptions(suffix), [suffix]);
-    const [selectedPattern, setPattern] = useState<string>();
-    const pattern = selectedPattern ?? negativeOptions.find((item) => isPatternEqualWithoutDecimal(item.value, props.defaultPattern))?.value ?? negativeOptions[0].value;
+    const [selectedStyle, setStyle] = useState<number>();
+    const pattern = selectedStyle === undefined
+        ? negativeOptions.find((item) => isPatternEqualWithoutDecimal(item.value, props.defaultPattern))?.value ?? negativeOptions[0].value
+        : negativeOptions[selectedStyle].value;
     const options = useMemo(() => userHabitCurrency.map((key) => ({ label: key, value: key })), [userHabitCurrency]);
 
     useLayoutEffect(() => {
@@ -55,7 +57,7 @@ export function CurrencyPanel(props: IBusinessComponentProps) {
         }
         setSuffix(value);
         const pattern = getCurrencyFormatOptions(value)[0].value;
-        setPattern(pattern);
+        setStyle(0);
         onValueChange(setPatternDecimal(pattern, decimal));
     };
 
@@ -63,7 +65,9 @@ export function CurrencyPanel(props: IBusinessComponentProps) {
         if (value === undefined) {
             return;
         }
-        setPattern(value);
+        const index = negativeOptions.findIndex((option) => option.value === value);
+        if (index < 0) return;
+        setStyle(index);
         onValueChange(setPatternDecimal(value, decimal));
     };
 

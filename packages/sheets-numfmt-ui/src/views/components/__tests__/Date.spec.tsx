@@ -118,6 +118,6 @@ describe('DatePanel', () => {
         expect(container.textContent).toContain('下午 1:30');
         expect(onActionChange.mock.lastCall![0]()).toBe(selectedPattern);
         expect(onChange).toHaveBeenCalledTimes(1);
-        expect(container.querySelector('li a.univer-bg-gray-200')?.textContent).toContain('1:30 下午');
+        expect(container.querySelector('li a.univer-bg-gray-200')?.textContent).toContain(explicitRegion ? '1:30 PM' : '1:30 下午');
     });
 });

@@ -14,15 +14,46 @@
  * limitations under the License.
  */
 
+import type { VariantProps } from 'class-variance-authority';
 import type { ChangeEvent, ComponentProps } from 'react';
+import { cva } from 'class-variance-authority';
 import { forwardRef, useContext, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 import { borderClassName, inputStateClassName, scrollbarClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { FormLayoutContext } from '../form-layout/FormLayout';
 
-interface ITextareaProps extends ComponentProps<'textarea'> {
+const textareaVariants = cva(
+    `
+      univer-box-border univer-flex univer-w-full univer-resize univer-rounded-md univer-bg-gray-0 univer-text-gray-900
+      univer-transition-[border-color,color,box-shadow] univer-duration-200
+      placeholder:univer-text-gray-500
+      enabled:hover:univer-border-gray-300
+      disabled:univer-cursor-not-allowed disabled:univer-bg-gray-50 disabled:univer-text-gray-400
+      disabled:univer-opacity-50
+      motion-reduce:univer-transition-none
+      dark:!univer-bg-gray-700 dark:!univer-text-gray-0
+      dark:placeholder:univer-text-gray-300
+      dark:enabled:hover:!univer-border-gray-500
+      dark:disabled:!univer-bg-gray-800 dark:disabled:!univer-text-gray-500
+    `,
+    {
+        variants: {
+            size: {
+                mini: 'univer-px-2 univer-py-1 univer-text-xs',
+                small: 'univer-p-2 univer-text-sm',
+                middle: 'univer-px-2.5 univer-py-2 univer-text-sm',
+                large: 'univer-p-2.5 univer-text-base',
+            },
+        },
+        defaultVariants: {
+            size: 'small',
+        },
+    }
+);
+
+export interface ITextareaProps extends Omit<ComponentProps<'textarea'>, 'size'>, VariantProps<typeof textareaVariants> {
     className?: string;
-    size?: 'small' | 'large';
+    size?: 'mini' | 'small' | 'middle' | 'large';
     onResize?: (width: number, height: number) => void;
     onValueChange?: (value: string) => void;
 }
@@ -31,7 +62,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, ITextareaProps>((props, 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lastSizeRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
 
-    const { className, size = 'small', onResize, onValueChange, ...restProps } = props;
+    const { className, size = 'small', onResize, onValueChange, onChange, ...restProps } = props;
     const invalid = useContext(FormLayoutContext);
 
     useImperativeHandle(ref, () => textareaRef.current as HTMLTextAreaElement, []);
@@ -63,8 +94,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, ITextareaProps>((props, 
     }, [onResize]);
 
     function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
-        const value = event.target.value;
-        onValueChange?.(value);
+        onChange?.(event);
+        onValueChange?.(event.target.value);
     }
 
     return (
@@ -73,22 +104,14 @@ export const Textarea = forwardRef<HTMLTextAreaElement, ITextareaProps>((props, 
             data-u-comp="textarea"
             data-slot="textarea"
             className={clsx(
-                `
-                  univer-box-border univer-flex univer-w-full univer-resize univer-rounded-md univer-bg-gray-0
-                  univer-p-2 univer-text-sm univer-text-gray-900 univer-transition-[color,box-shadow]
-                  placeholder:univer-text-gray-500
-                  disabled:univer-cursor-not-allowed disabled:univer-opacity-50
-                  dark:!univer-bg-gray-700 dark:!univer-text-gray-0
-                  dark:placeholder:univer-text-gray-300
-                `,
                 borderClassName,
+                textareaVariants({ size }),
                 inputStateClassName,
                 scrollbarClassName,
-                size === 'large' && 'univer-text-base',
                 className
             )}
-            onChange={handleChange}
             {...restProps}
+            onChange={handleChange}
             aria-invalid={restProps['aria-invalid'] ?? (invalid || undefined)}
         />
     );

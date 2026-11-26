@@ -33,6 +33,7 @@ import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { normalizeFunctionToken } from '../../basics/function';
 import { matchToken } from '../../basics/token';
+import { excelArgumentAcceptsRange } from '../../functions/implicit-intersection-arguments';
 import { COLUMN_LIKE_FUNCTION_NAMES } from '../../functions/column-like-functions';
 import { If } from '../../functions/logical/if';
 import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
@@ -154,8 +155,15 @@ export class FunctionNode extends BaseAstNode {
     }
 
     override preservesLazyIfReferenceArray(child: BaseAstNode): boolean {
-        return this._functionExecutor.evaluatesIfArgumentsAsArrays === true ||
-            this._functionExecutor.lazyIfReferenceArrayArgumentIndexes.includes(this.getChildren().indexOf(child));
+        const executor = this._functionExecutor;
+        if (executor.evaluatesIfArgumentsAsArrays) return true;
+        const args = this.getChildren();
+        const index = args.indexOf(child);
+        if (!executor.isCustom()) {
+            const acceptsRange = excelArgumentAcceptsRange(executor.name, index, args.length);
+            if (acceptsRange !== undefined) return acceptsRange;
+        }
+        return executor.lazyIfReferenceArrayArgumentIndexes.includes(index);
     }
 
     override preservesReferenceInRangeEndpoint(child: BaseAstNode): boolean {
@@ -164,7 +172,8 @@ export class FunctionNode extends BaseAstNode {
         return this.getToken() === FUNCTION_NAMES_META.CUBE ||
             this._functionExecutor.preservesReferenceInRangeEndpointArgument?.(index, args.length) === true ||
             (this._functionExecutor instanceof If && index > 0) ||
-            this.preservesLazyIfReferenceArray(child);
+            this._functionExecutor.evaluatesIfArgumentsAsArrays === true ||
+            this._functionExecutor.lazyIfReferenceArrayArgumentIndexes.includes(index);
     }
 
     override async executeAsync(dateSystem: DateSystem = DateSystem.Date1900) {

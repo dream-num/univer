@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Univer } from '@univerjs/core';
+import type { ICellData, IWorkbookData, Univer } from '@univerjs/core';
 import {
     BooleanNumber,
     FormulaType,
@@ -198,6 +198,77 @@ describe('standalone Sheet formula calculation trigger', () => {
         sheet.getRange('C4').setValue(8);
         await edited;
         expect(results.getValues()).toEqual([[3, 18, 6, 3, 18, 6, 4, 8, 18]]);
+    });
+
+    it('passes selected IF ranges to each consumer at the expected argument position', async () => {
+        univer.registerPlugin(UniverSheetsFormulaPlugin);
+        const api = FUniver.newAPI(univer);
+        const data = createWorkbookData();
+        const selected = 'IF(B1,B2:B4,B5:B7)';
+        const formulas = [
+            `=REDUCE(0,${selected},LAMBDA(a,b,a+b))`,
+            `=SUM(SORT(${selected}))`,
+            `=SUM(TAKE(${selected},2))`,
+            `=SUM(DROP(${selected},1))`,
+            `=SUM(FREQUENCY(${selected},C2:C3))`,
+            '=DCOUNT(IF(B1,A10:B12,D10:E12),2,G10:G11)',
+            `=ABS(${selected})`,
+            `=INDEX(B2:B6,${selected})`,
+        ];
+        const cells: Record<number, Record<number, ICellData>> = {
+            0: { 1: { v: 1 } },
+            1: { 1: { v: 2 }, 2: { v: 3 } },
+            2: { 1: { v: 3 }, 2: { v: 5 } },
+            3: { 1: { v: 4 } },
+            4: { 1: { v: 10 } },
+            5: { 1: { v: 20 } },
+            6: { 1: { v: 30 } },
+            7: {},
+            9: { 0: { v: 'K' }, 1: { v: 'V' }, 3: { v: 'K' }, 4: { v: 'V' }, 6: { v: 'K' } },
+            10: { 0: { v: 'a' }, 1: { v: 10 }, 3: { v: 'a' }, 4: { v: 10 }, 6: { v: 'a' } },
+            11: { 0: { v: 'a' }, 1: { v: 20 }, 3: { v: 'b' }, 4: { v: 20 } },
+        };
+        for (const row of [0, 2, 7]) {
+            formulas.forEach((f, index) => {
+                cells[row][9 + index] = { f };
+            });
+        }
+        data.sheets['sheet-1']!.cellData = cells;
+        const sheet = api.createWorkbook(data).getActiveSheet();
+        const initial = api.getFormula().onCalculationResultApplied(10_000);
+        univer.__getInjector().get(LifecycleService).stage = LifecycleStages.Rendered;
+        await initial;
+        for (const row of [1, 3, 8]) {
+            expect(sheet.getRange(`J${row}:Q${row}`).getValues()[0])
+                .toEqual([9, 9, 5, 7, 3, 2, ...(row === 3 ? [3, 4] : ['#VALUE!', '#VALUE!'])]);
+        }
+        const edited = api.getFormula().onCalculationResultApplied(10_000);
+        sheet.getRange('B1').setValue(0);
+        await edited;
+        for (const row of [1, 3, 8]) {
+            expect(sheet.getRange(`J${row}:Q${row}`).getValues()[0]).toEqual([60, 60, 30, 50, 3, 1, '#VALUE!', '#VALUE!']);
+        }
+    });
+
+    it('keeps scalar IF arguments for a custom executor under an Excel function name', async () => {
+        univer.registerPlugin(UniverSheetsFormulaPlugin);
+        const api = FUniver.newAPI(univer);
+        const data = createWorkbookData();
+        data.sheets['sheet-1']!.cellData = {
+            0: { 1: { v: 2 } },
+            1: { 0: { f: '=SORT(IF(TRUE,B1:B3,B1))' }, 1: { v: 3 } },
+            2: { 1: { v: 4 } },
+        };
+        const sheet = api.createWorkbook(data).getActiveSheet();
+        const custom = api.getFormula().registerFunction('SORT', (value) => Array.isArray(value) ? -1 : Number(value));
+        try {
+            const initial = api.getFormula().onCalculationResultApplied(10_000);
+            univer.__getInjector().get(LifecycleService).stage = LifecycleStages.Rendered;
+            await initial;
+            expect(sheet.getRange('A2').getValue()).toBe(3);
+        } finally {
+            custom.dispose();
+        }
     });
 
     it('takes one value per INDEX selector in explicitly dynamic formulas', async () => {

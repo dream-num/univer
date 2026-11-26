@@ -19,7 +19,7 @@ import { CFRuleType, CFValueType } from '@univerjs/sheets-conditional-formatting
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DataBarStyleEditor } from '../DataBar';
 import { createEditorTestBed, createRuleInterceptorManager, submitRule } from './rule-editor-test-utils';
 
@@ -76,6 +76,8 @@ describe('DataBarStyleEditor', () => {
         root = createRoot(container);
         const interceptorManager = createRuleInterceptorManager();
 
+        const onChange = vi.fn();
+
         await act(async () => {
             root!.render(
                 <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
@@ -92,7 +94,7 @@ describe('DataBarStyleEditor', () => {
                                 nativeColor: '#f8696b',
                             },
                         }}
-                        onChange={() => undefined}
+                        onChange={onChange}
                     />
                 </RediContext.Provider>
             );
@@ -110,5 +112,12 @@ describe('DataBarStyleEditor', () => {
                 nativeColor: '#f8696b',
             },
         });
+        const label = container.querySelector<HTMLInputElement>('input[type="checkbox"]')!.labels![0];
+        expect(label.textContent?.trim()).toBeTruthy();
+        act(() => label.click());
+        expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({
+            isShowValue: true,
+            config: expect.objectContaining({ isGradient: true }),
+        }));
     });
 });

@@ -653,19 +653,15 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                   rtl:univer-flex-row-reverse rtl:univer-justify-end
                 "
             >
-                <div
-                    data-u-comp="cf-icon-set-option-row"
-                    className="univer-flex univer-items-center univer-text-xs"
-                >
-                    <Checkbox onChange={reverseIcon} />
-                    {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.reverseIconOrder')}
+                <div data-u-comp="cf-icon-set-option-row" className="univer-flex">
+                    <Checkbox className="univer-text-xs" onChange={reverseIcon}>
+                        {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.reverseIconOrder')}
+                    </Checkbox>
                 </div>
-                <div
-                    data-u-comp="cf-icon-set-option-row"
-                    className="univer-flex univer-items-center univer-text-xs"
-                >
-                    <Checkbox checked={!isShowValue} onChange={(v) => { setIsShowValue(!v); }} />
-                    {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.onlyShowIcon')}
+                <div data-u-comp="cf-icon-set-option-row" className="univer-flex">
+                    <Checkbox className="univer-text-xs" checked={!isShowValue} onChange={(v) => { setIsShowValue(!v); }}>
+                        {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.onlyShowIcon')}
+                    </Checkbox>
                 </div>
             </div>
             <IconSetRuleEdit

@@ -15,7 +15,7 @@
  */
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Radio } from '../Radio';
 
 afterEach(cleanup);
@@ -46,5 +46,17 @@ describe('Radio', () => {
         const $input = container.querySelector('input');
 
         expect($input?.checked).toBe(true);
+    });
+
+    it('omits empty label span, forwards aria-label, and blocks disabled changes', () => {
+        const onChange = vi.fn();
+        const { container, getByRole } = render(<Radio aria-label="Standalone radio" value="a" disabled onChange={onChange} />);
+        const input = getByRole('radio', { name: 'Standalone radio' }) as HTMLInputElement;
+
+        expect(container.querySelector('[data-u-comp="radio"]')?.children).toHaveLength(1);
+        expect(input.disabled).toBe(true);
+
+        fireEvent.click(input);
+        expect(onChange).not.toHaveBeenCalled();
     });
 });

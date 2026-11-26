@@ -16,9 +16,10 @@
 
 import type { ReactNode } from 'react';
 import { DownIcon } from '@univerjs/icons';
-import { useState } from 'react';
+import { useContext, useId, useState } from 'react';
 import { focusClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 
 interface IAccordionItem {
     id?: string;
@@ -36,8 +37,10 @@ export interface IAccordionProps {
 
 export function Accordion(props: IAccordionProps) {
     const { className, defaultOpenIndex = null, items, onOpenIndexChange } = props;
+    const { direction } = useContext(ConfigContext);
+    const accordionId = useId();
     const [innerOpenIndex, setInnerOpenIndex] = useState<number | null>(defaultOpenIndex);
-    const openIndex = props.openIndex ?? innerOpenIndex;
+    const openIndex = props.openIndex !== undefined ? props.openIndex : innerOpenIndex;
 
     const toggleItem = (index: number) => {
         const nextOpenIndex = openIndex === index ? null : index;
@@ -47,50 +50,89 @@ export function Accordion(props: IAccordionProps) {
         onOpenIndexChange?.(nextOpenIndex);
     };
 
+    const resolvedItems = items.map((item, index) => {
+        const itemKey = item.id ?? `item-${index}`;
+        return {
+            item,
+            index,
+            itemKey,
+            triggerId: `${accordionId}-trigger-${itemKey}`,
+            panelId: `${accordionId}-panel-${itemKey}`,
+        };
+    });
+
     return (
         <div
             data-u-comp="accordion"
+            dir={direction}
             className={clsx(`
               univer-divide-x-0 univer-divide-y univer-divide-solid univer-divide-gray-200
               dark:!univer-divide-gray-600
             `, className)}
         >
-            {items.map((item, index) => (
-                <div key={item.id ?? index}>
-                    <button
-                        className={clsx(focusClassName, `
-                          univer-box-border univer-flex univer-w-full univer-cursor-pointer univer-items-center
-                          univer-gap-1.5 univer-border-none univer-bg-transparent univer-p-4 univer-text-left
-                          univer-text-gray-700
-                          hover:univer-text-gray-900
-                          dark:!univer-text-gray-200
-                          dark:hover:!univer-text-gray-0
-                        `)}
-                        type="button"
-                        onClick={() => toggleItem(index)}
-                    >
-                        <DownIcon
-                            aria-hidden="true"
-                            className={clsx('univer-size-2.5 univer-flex-shrink-0 univer-transition-transform', {
-                                '-univer-rotate-90 rtl:univer-rotate-90': openIndex !== index,
-                                'univer-rotate-0': openIndex === index,
+            {resolvedItems.map(({ item, index, itemKey, triggerId, panelId }) => {
+                const isOpen = openIndex === index;
+
+                return (
+                    <div key={itemKey}>
+                        <button
+                            id={triggerId}
+                            className={clsx(focusClassName, `
+                              univer-box-border univer-flex univer-w-full univer-cursor-pointer univer-items-center
+                              univer-gap-2 univer-rounded univer-border-none univer-bg-transparent univer-px-3
+                              univer-py-2.5 univer-text-start univer-text-sm univer-text-gray-700
+                              univer-transition-colors univer-duration-200
+                              hover:univer-bg-gray-100 hover:univer-text-gray-900
+                              motion-reduce:univer-transition-none
+                              dark:!univer-text-gray-200
+                              dark:hover:!univer-bg-gray-600 dark:hover:!univer-text-gray-0
+                            `)}
+                            type="button"
+                            aria-expanded={isOpen}
+                            aria-controls={panelId}
+                            onClick={() => toggleItem(index)}
+                        >
+                            <DownIcon
+                                aria-hidden="true"
+                                className={clsx(`
+                                  univer-size-2.5 univer-flex-shrink-0 univer-text-gray-500 univer-transition-transform
+                                  univer-duration-200
+                                  motion-reduce:univer-transition-none
+                                  dark:!univer-text-gray-300
+                                `, {
+                                    '-univer-rotate-90 rtl:univer-rotate-90': !isOpen,
+                                    'univer-rotate-0': isOpen,
+                                })}
+                            />
+                            <span className="univer-font-medium">{item.label}</span>
+                        </button>
+                        <div
+                            id={panelId}
+                            role="region"
+                            aria-labelledby={triggerId}
+                            aria-hidden={!isOpen}
+                            className={clsx(`
+                              univer-overflow-hidden univer-transition-[max-height,opacity] univer-duration-200
+                              univer-ease-in-out
+                              motion-reduce:univer-transition-none
+                            `, {
+                                'univer-max-h-screen univer-opacity-100': isOpen,
+                                'univer-max-h-0 univer-opacity-0': !isOpen,
                             })}
-                        />
-                        <span className="univer-font-medium">{item.label}</span>
-                    </button>
-                    <div
-                        className={clsx(`
-                          univer-overflow-hidden univer-transition-[max-height,opacity] univer-duration-500
-                          univer-ease-in-out
-                        `, {
-                            'univer-max-h-screen': openIndex === index,
-                            'univer-max-h-0': openIndex !== index,
-                        })}
-                    >
-                        <div className="univer-box-border univer-px-4 univer-py-1.5">{item.children}</div>
+                        >
+                            <div
+                                className="
+                                  univer-box-border univer-px-3 univer-pb-3 univer-pt-1.5 univer-text-sm
+                                  univer-text-gray-900
+                                  dark:!univer-text-gray-0
+                                "
+                            >
+                                {item.children}
+                            </div>
+                        </div>
                     </div>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 }

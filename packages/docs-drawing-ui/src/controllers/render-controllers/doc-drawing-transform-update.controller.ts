@@ -180,7 +180,7 @@ export function getDocsOverlayRuntimeDrawing(
 
 export type DocumentDrawingPublicationProgress = Pick<
     IDocumentLayoutProgress,
-    'generation' | 'didPublish' | 'complete' | 'publishedPageCount' | 'reason' | 'didPublishAnchor'
+    'generation' | 'didPublish' | 'complete' | 'publishedPageCount' | 'reason' | 'didPublishAnchor' | 'didPublishEmbeddedGeometry'
 >;
 
 interface IDocumentDrawingPublicationNestedPage {
@@ -248,9 +248,11 @@ export class DocDrawingPublicationTracker {
         const drawingOccurrenceCount = countPublishedDrawingOccurrences(skeletonData, publishedPageCount);
         const didDrawingOccurrencesChange = !(isNewGeneration && progress.reason === 'edit') &&
             drawingOccurrenceCount !== this._drawingOccurrenceCount;
+        const didReplaceDrawingGeometry = progress.didPublishEmbeddedGeometry === true &&
+            (drawingOccurrenceCount > 0 || this._drawingOccurrenceCount > 0);
         this._drawingOccurrenceCount = drawingOccurrenceCount;
 
-        if (progress.complete || progress.didPublishAnchor || didDrawingOccurrencesChange) {
+        if (progress.complete || progress.didPublishAnchor || didDrawingOccurrencesChange || didReplaceDrawingGeometry) {
             return true;
         }
         if (isNewGeneration && progress.reason === 'edit') {

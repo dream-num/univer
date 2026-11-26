@@ -24,11 +24,14 @@ import {
     DisposableCollection,
     DocumentDataModel,
     DocumentFlavor,
+    DrawingTypeEnum,
     PositionedObjectLayoutType,
     PRESET_LIST_TYPE,
     resolveDocumentParagraphStyle,
     SectionType,
     Skeleton,
+    TableTextWrapType,
+    VerticalAlign,
 } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import type {
@@ -58,7 +61,7 @@ import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../../basics/
 import type { IDocsCustomBlockRenderViewport } from '../custom-block-render-viewport';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { ISlicedTableSkeletonBuildState, ITableSkeletonBuildState } from './block/table';
-import type { IDocumentSkeletonPagePatch } from './document-layout-page-patch';
+import type { IDocumentSkeletonFlowCursor, IDocumentSkeletonPagePatch, IDocumentSkeletonTablePatch } from './document-layout-page-patch';
 import type {
     IDocumentLayoutBlockGeometryPublication,
     IDocumentLayoutDrawingAnchorPublication,
@@ -102,10 +105,17 @@ import {
     stepTableSkeletonBuild,
     stepTableSkeletonsBuild,
 } from './block/table';
+import { ContinuousLayoutPublicationScheduler } from './continuous-layout-publication-scheduler';
 import {
     applyDocumentSkeletonContinuousBlock,
+    attachContinuousLayoutGeometry,
+    compareFlowCursors,
+    compareLayoutGeometry,
+    forkContinuousLayoutSkeleton,
     hydrateDocumentSkeletonPage,
     hydrateDocumentSkeletonPageMaterializationPlaceholder,
+    serializeContinuousFlow,
+    serializeDocumentSkeletonLine,
     serializeDocumentSkeletonPage,
 } from './document-layout-page-patch';
 import { DocumentEndnoteLayout, getEndnoteFlowBottom } from './endnote-layout';
@@ -114,6 +124,7 @@ import { getHeaderFooterReferenceOffsetMap } from './header-footer-reference-pro
 import { Hyphen } from './hyphenation/hyphen';
 import { Lang } from './hyphenation/lang';
 import { LanguageDetector } from './hyphenation/language-detector';
+import { getBoundingBox, getDrawingWrapPolygonPoints, getPlainTextLineInkBounds, getTableWrapBounds, usesDrawingBoundsForTextWrap } from './model/line';
 import { createSkeletonPage, getNextSkeletonPageNumber } from './model/page';
 import { createSkeletonSection } from './model/section';
 import { formatNoteNumber, resolveNoteReferences } from './note-numbering';
@@ -134,6 +145,461 @@ import {
 } from './tools';
 
 const INTERACTION_PAGE_WINDOW_SIZE = 5;
+
+function findUnprotectedFlowCursor(
+    page: IDocumentSkeletonPage,
+    from: IDocumentSkeletonFlowCursor,
+    protectedEndOffset: number
+): IDocumentSkeletonFlowCursor | null {
+    for (let sectionIndex = from.sectionIndex; sectionIndex < page.sections.length; sectionIndex++) {
+        const { columns } = page.sections[sectionIndex];
+        const firstColumn = sectionIndex === from.sectionIndex ? from.columnIndex : 0;
+        for (let columnIndex = firstColumn; columnIndex < columns.length; columnIndex++) {
+            const { lines } = columns[columnIndex];
+            let lineIndex = sectionIndex === from.sectionIndex && columnIndex === from.columnIndex ? from.lineIndex : 0;
+            while (lineIndex < lines.length && lines[lineIndex].st <= protectedEndOffset) {
+                lineIndex++;
+            }
+            if (lineIndex < lines.length) {
+                return { sectionIndex, columnIndex, lineIndex };
+            }
+        }
+    }
+    return null;
+}
+
+function findRetainedFlowLine(page: IDocumentSkeletonPage, startOffset: number): IDocumentSkeletonFlowCursor | null {
+    for (let sectionIndex = page.sections.length - 1; sectionIndex >= 0; sectionIndex--) {
+        const { columns } = page.sections[sectionIndex];
+        for (let columnIndex = columns.length - 1; columnIndex >= 0; columnIndex--) {
+            const { lines } = columns[columnIndex];
+            if (lines.length === 0 || lines[0].st >= startOffset) {
+                continue;
+            }
+            let low = 0;
+            let high = lines.length;
+            while (low < high) {
+                const middle = Math.floor((low + high) / 2);
+                if (lines[middle].st < startOffset) {
+                    low = middle + 1;
+                } else {
+                    high = middle;
+                }
+            }
+            return { sectionIndex, columnIndex, lineIndex: low - 1 };
+        }
+    }
+    return null;
+}
+
+function hasSameBoundaryContent(main: IDocumentSkeletonLine, worker: IDocumentSkeletonLine): boolean {
+    // Laying out the next section can finish the preceding paragraph's trailing
+    // space. Its ink and logical range stay intact at the cross-section splice.
+    const { lineHeight: mainHeight, marginBottom: mainSpace = 0, ...mainContent } = serializeDocumentSkeletonLine(main);
+    const { lineHeight: workerHeight, marginBottom: workerSpace = 0, ...workerContent } = serializeDocumentSkeletonLine(worker);
+    return isSameLayoutMetric(mainHeight - mainSpace, workerHeight - workerSpace) &&
+        compareLayoutGeometry(mainContent, workerContent);
+}
+
+function findPendingFlowLine(
+    page: IDocumentSkeletonPage,
+    offset: number,
+    protectedEndOffset: number
+): IDocumentSkeletonFlowCursor | null {
+    for (let sectionIndex = 0; sectionIndex < page.sections.length; sectionIndex++) {
+        const { columns } = page.sections[sectionIndex];
+        for (let columnIndex = 0; columnIndex < columns.length; columnIndex++) {
+            const { lines } = columns[columnIndex];
+            if (lines.length === 0 || lines[lines.length - 1].ed < offset || lines[lines.length - 1].st <= protectedEndOffset) {
+                continue;
+            }
+            const lineIndex = lines.findIndex((line) => line.ed >= offset && line.st > protectedEndOffset);
+            if (lineIndex >= 0) {
+                return { sectionIndex, columnIndex, lineIndex };
+            }
+        }
+    }
+    return null;
+}
+
+function createExternalLayoutSkeleton(publication: IDocumentLayoutGeometryPublication): IDocumentSkeletonCached {
+    return {
+        pages: [],
+        left: publication.left,
+        top: publication.top,
+        st: publication.st,
+        ...(publication.ed == null ? {} : { ed: publication.ed }),
+        skeHeaders: new Map(),
+        skeFooters: new Map(),
+    };
+}
+
+function updateExternalLayoutExtent(
+    skeleton: IDocumentSkeletonCached,
+    publication: IDocumentLayoutGeometryPublication
+): void {
+    skeleton.left = publication.left;
+    skeleton.top = publication.top;
+    skeleton.st = publication.st;
+    if (publication.ed == null) {
+        delete skeleton.ed;
+    } else {
+        skeleton.ed = publication.ed;
+    }
+}
+
+function hasCompatibleForegroundPage(
+    foreground: IDocumentSkeletonCached,
+    page: IDocumentSkeletonPage,
+    draft: IDocumentSkeletonCached,
+    workerPage: IDocumentSkeletonPage
+): boolean {
+    if (foreground.left !== draft.left || foreground.top !== draft.top || foreground.st !== draft.st ||
+        page.headerId !== workerPage.headerId || page.footerId !== workerPage.footerId ||
+        page.headerLayoutKey !== workerPage.headerLayoutKey || page.footerLayoutKey !== workerPage.footerLayoutKey ||
+        page.pageWidth !== workerPage.pageWidth || page.pageHeight !== workerPage.pageHeight ||
+        page.marginLeft !== workerPage.marginLeft || page.marginRight !== workerPage.marginRight ||
+        page.marginTop !== workerPage.marginTop || page.marginBottom !== workerPage.marginBottom ||
+        page.originMarginTop !== workerPage.originMarginTop || page.originMarginBottom !== workerPage.originMarginBottom ||
+        page.pageOrient !== workerPage.pageOrient || page.pageNumber !== workerPage.pageNumber ||
+        page.angle !== workerPage.angle || page.verticalAlign !== workerPage.verticalAlign || page.left !== workerPage.left ||
+        !compareLayoutGeometry(page.renderConfig, workerPage.renderConfig)) {
+        return false;
+    }
+    const headerKey = page.headerLayoutKey ?? page.pageWidth;
+    const footerKey = page.footerLayoutKey ?? page.pageWidth;
+    return compareLayoutGeometry(foreground.skeHeaders.get(page.headerId)?.get(headerKey), draft.skeHeaders.get(page.headerId)?.get(headerKey)) &&
+        compareLayoutGeometry(foreground.skeFooters.get(page.footerId)?.get(footerKey), draft.skeFooters.get(page.footerId)?.get(footerKey));
+}
+
+function getFlowSuffixTop(page: IDocumentSkeletonPage, sectionIndex: number, columnIndex: number, lineIndex: number): number {
+    let top = Number.POSITIVE_INFINITY;
+    // The replaced tail can continue in another column further up the page.
+    for (let section = sectionIndex; section < page.sections.length; section++) {
+        const { top: sectionTop, columns } = page.sections[section];
+        for (let column = section === sectionIndex ? columnIndex : 0; column < columns.length; column++) {
+            const first = columns[column].lines[section === sectionIndex && column === columnIndex ? lineIndex : 0];
+            if (first != null) {
+                const marginTop = first.marginTop ?? 0;
+                const offset = Math.min(0, marginTop, marginTop + (first.paddingTop ?? 0));
+                top = Math.min(top, sectionTop + first.top + offset);
+            }
+        }
+    }
+    return top;
+}
+
+function getFlowPrefixBottom(page: IDocumentSkeletonPage, sectionIndex: number, columnIndex: number, lineIndex: number): number {
+    let bottom = 0;
+    for (let index = 0; index < sectionIndex; index++) {
+        const section = page.sections[index];
+        bottom = Math.max(bottom, section.top + section.height);
+    }
+    const section = page.sections[sectionIndex];
+    // Earlier columns are retained in full, and may end below the splice.
+    for (let index = 0; index <= columnIndex; index++) {
+        const lines = section.columns[index].lines;
+        const last = lines[(index === columnIndex ? lineIndex : lines.length) - 1];
+        if (last != null) {
+            const margin = Math.max(0, last.marginTop, last.marginTop + last.paddingTop);
+            bottom = Math.max(bottom, section.top + last.top + last.lineHeight + margin);
+        }
+    }
+    return bottom;
+}
+
+function indexDrawingAnchorOffsets(body: IDocumentBody | undefined): Map<string, number | undefined> {
+    const offsets = new Map<string, number | undefined>();
+    if (body != null) {
+        for (const { blockId, startIndex } of body.customBlocks ?? []) {
+            const valid = !offsets.has(blockId) && body.dataStream[startIndex] === DataStreamTreeTokenType.CUSTOM_BLOCK;
+            offsets.set(blockId, valid ? startIndex : undefined);
+        }
+    }
+    return offsets;
+}
+
+function indexVisibleDrawingAnchorOffsets(page: IDocumentSkeletonPage): Map<string, number | undefined> {
+    const offsets = new Map<string, number | undefined>();
+    if (page.skeDrawings.size === 0) {
+        return offsets;
+    }
+    for (const section of page.sections) {
+        for (const column of section.columns) {
+            for (const line of column.lines) {
+                for (const divide of line.divides) {
+                    let offset = divide.st;
+                    for (const glyph of divide.glyphGroup) {
+                        const id = glyph.drawingId;
+                        if (id && glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && page.skeDrawings.has(id)) {
+                            offsets.set(id, offsets.has(id) ? undefined : offset);
+                        }
+                        offset += glyph.glyphType === GlyphType.LIST ? 0 : glyph.count;
+                    }
+                }
+            }
+        }
+    }
+    return offsets;
+}
+
+function flowIntersectsTableWrap(
+    page: IDocumentSkeletonPage,
+    cursor: IDocumentSkeletonFlowCursor,
+    inTail: boolean,
+    bounds: ReturnType<typeof getTableWrapBounds>
+): boolean {
+    for (let sectionIndex = inTail ? cursor.sectionIndex : 0;
+        sectionIndex < (inTail ? page.sections.length : cursor.sectionIndex + 1); sectionIndex++) {
+        const section = page.sections[sectionIndex];
+        const sameSection = sectionIndex === cursor.sectionIndex;
+        for (let columnIndex = inTail && sameSection ? cursor.columnIndex : 0;
+            columnIndex < (!inTail && sameSection ? cursor.columnIndex + 1 : section.columns.length); columnIndex++) {
+            const { left, width, lines } = section.columns[columnIndex];
+            if (bounds.right <= left || bounds.left >= left + width) {
+                continue;
+            }
+            const splitColumn = sameSection && columnIndex === cursor.columnIndex;
+            const firstIndex = inTail && splitColumn ? cursor.lineIndex : 0;
+            const end = !inTail && splitColumn ? cursor.lineIndex : lines.length;
+            if (firstIndex >= end) {
+                continue;
+            }
+            const first = lines[firstIndex];
+            const last = lines[end - 1];
+            const top = section.top + first.top + Math.min(0, first.marginTop, first.marginTop + first.paddingTop);
+            const bottom = section.top + last.top + last.lineHeight + Math.max(0, last.marginTop, last.marginTop + last.paddingTop);
+            if (bounds.top < bottom && bounds.bottom > top) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function getColumnGroupVerticalBounds(
+    group: IDocumentSkeletonColumnGroup,
+    page: IDocumentSkeletonPage
+): { top: number; bottom: number } | undefined {
+    let top = group.top;
+    let bottom = top + group.height;
+    if (group.columnGroupSource.clipContent !== BooleanNumber.FALSE) {
+        return { top, bottom };
+    }
+    const config = page.renderConfig;
+    if (config?.centerAngle || config?.vertexAngle || config?.stackedText ||
+        config?.useCustomGlyphRenderer === BooleanNumber.TRUE || config?.paintTextOutline === BooleanNumber.TRUE ||
+        (config?.verticalAlign != null && config.verticalAlign !== VerticalAlign.TOP)) {
+        return;
+    }
+
+    for (const column of group.columns) {
+        const nestedPage = column.page;
+        if (nestedPage.cellTextDirection === 'tbRlV' || nestedPage.skeTables.size > 0 ||
+            nestedPage.skeDrawings.size > 0 || nestedPage.skeColumnGroups.size > 0) {
+            return;
+        }
+
+        const columnTop = group.top + column.top + nestedPage.marginTop;
+        for (const section of nestedPage.sections) {
+            for (const nestedColumn of section.columns) {
+                for (const line of nestedColumn.lines) {
+                    if (line.type !== LineType.PARAGRAPH || line.bullet || line.backgroundColor || line.paragraphBorders ||
+                        line.borderTop || line.borderBottom || line.borderLeft || line.borderRight || line.borderBetween ||
+                        line.divides.some((divide) => divide.glyphGroup.some((glyph) => glyph.ts?.bg || glyph.featureId || glyph.fieldLayoutContent != null))) {
+                        return;
+                    }
+
+                    // Match the nested-page text origin, including line margins and padding.
+                    const lineTop = columnTop + section.top + line.top + line.marginTop + line.paddingTop;
+                    const ink = getPlainTextLineInkBounds(line, lineTop);
+                    if (ink == null) {
+                        return;
+                    }
+                    top = Math.min(top, ink.top);
+                    bottom = Math.max(bottom, ink.bottom);
+                }
+            }
+        }
+    }
+    return { top, bottom };
+}
+
+function getDrawingVerticalBounds(
+    drawing: IDocumentSkeletonDrawing,
+    page: IDocumentSkeletonPage
+): { top: number; bottom: number } | null {
+    const { aTop, aLeft, height, width, angle, drawingOrigin } = drawing;
+    // Layout bounds do not cover transforms or child overflow for these objects.
+    if (drawingOrigin.drawingType === DrawingTypeEnum.DRAWING_GROUP || drawingOrigin.isMultiTransform === BooleanNumber.TRUE ||
+        drawing.customBlockRenderViewport != null || height < 0 || width < 0 || !Number.isFinite(angle)) {
+        return null;
+    }
+    const bounds = angle ? getBoundingBox(angle, aLeft, width, aTop, height) : { top: aTop, height };
+    const boxTop = bounds.top ?? aTop;
+    let top = boxTop - Math.max(0, drawingOrigin.effectExtent?.top ?? 0) - Math.max(0, drawingOrigin.distT ?? 0);
+    let bottom = boxTop + (bounds.height ?? height) +
+        Math.max(0, drawingOrigin.effectExtent?.bottom ?? 0) + Math.max(0, drawingOrigin.distB ?? 0);
+    if (drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_POLYGON && drawingOrigin.lineTo != null) {
+        const polygonTopOffset = drawing.wrapPolygonTopOffset ?? 0;
+        let leftmost = 0;
+        let rightmost = 0;
+        if (angle !== 0) {
+            // Rotation makes a vertex's Y linear in the column's X origin.
+            // The two extreme column origins bound the wrap in every column.
+            leftmost = drawing.columnLeft;
+            rightmost = drawing.columnLeft;
+            for (const section of page.sections) {
+                for (const column of section.columns) {
+                    leftmost = Math.min(leftmost, column.left);
+                    rightmost = Math.max(rightmost, column.left);
+                }
+            }
+        }
+        const columnOrigins = leftmost === rightmost ? [leftmost] : [leftmost, rightmost];
+        for (const columnLeft of columnOrigins) {
+            for (const { x, y } of getDrawingWrapPolygonPoints(drawing, columnLeft) ?? []) {
+                if (!Number.isFinite(x)) {
+                    return null;
+                }
+                top = Math.min(top, y + polygonTopOffset);
+                bottom = Math.max(bottom, y + polygonTopOffset);
+            }
+        }
+    }
+    return Number.isFinite(top) && Number.isFinite(bottom) ? { top, bottom } : null;
+}
+
+function mergeForegroundObjects<T>(
+    foreground: Map<string, T>,
+    worker: ReadonlyMap<string, T>,
+    isInTail: (object: T, id: string, incoming: boolean) => boolean | null,
+    equivalent?: (visible: T, incoming: T) => boolean
+): Map<string, T> | null {
+    let merged = foreground;
+    for (const [id, object] of foreground) {
+        const inTail = isInTail(object, id, false);
+        if (inTail == null) {
+            return null;
+        }
+        if (inTail) {
+            if (merged === foreground) {
+                merged = new Map(foreground);
+            }
+            merged.delete(id);
+        }
+    }
+    for (const [id, object] of worker) {
+        const inTail = isInTail(object, id, true);
+        if (inTail == null) {
+            return null;
+        }
+        if (inTail) {
+            // The same object must not move from the retained side into the
+            // incoming side of a partial splice (or the other way round).
+            if (merged.has(id)) {
+                return null;
+            }
+            if (merged === foreground) {
+                merged = new Map(foreground);
+            }
+            const previous = foreground.get(id);
+            merged.set(id, previous != null && equivalent?.(previous, object) ? previous : object);
+        } else if (foreground.has(id) && !merged.has(id)) {
+            return null;
+        }
+    }
+    if (merged !== foreground && merged.size === foreground.size) {
+        const previous = foreground.entries();
+        for (const [id, object] of merged) {
+            const entry = previous.next().value;
+            if (entry?.[0] !== id || entry[1] !== object) {
+                return merged;
+            }
+        }
+        return foreground;
+    }
+    return merged;
+}
+
+function mergeProtectedForegroundGeometry(
+    page: IDocumentSkeletonPage,
+    workerPage: IDocumentSkeletonPage,
+    startOffset: number,
+    startTop: number,
+    mainTail: IDocumentSkeletonFlowCursor,
+    workerTail: IDocumentSkeletonFlowCursor,
+    visibleAnchors: ReadonlyMap<string, number | undefined>,
+    workerAnchors: ReadonlyMap<string, number | undefined>
+): Pick<IDocumentSkeletonPage, 'skeTables' | 'skeColumnGroups' | 'skeDrawings'> | null {
+    const sameTable = (visible: IDocumentSkeletonTable, incoming: IDocumentSkeletonTable) =>
+        compareLayoutGeometry(visible, incoming, visible.parent, incoming.parent);
+    const skeTables = mergeForegroundObjects(page.skeTables, workerPage.skeTables, (table, id, incoming) => {
+        const inTail = table.st >= startOffset;
+        if (!inTail && table.ed >= startOffset) {
+            return null;
+        }
+        if (table.tableSource.textWrap !== TableTextWrapType.WRAP) {
+            return inTail;
+        }
+        const bounds = getTableWrapBounds(table);
+        if (!flowIntersectsTableWrap(page, mainTail, !inTail, bounds) &&
+            !flowIntersectsTableWrap(workerPage, workerTail, !inTail, bounds)) {
+            return inTail;
+        }
+        const counterpart = (incoming ? page : workerPage).skeTables.get(id);
+        return counterpart != null && sameTable(incoming ? counterpart : table, incoming ? table : counterpart)
+            ? inTail
+            : null;
+    }, sameTable);
+    if (skeTables == null) {
+        return null;
+    }
+    let retainedBottom: number | undefined;
+    const getRetainedBottom = () => retainedBottom ??= Math.max(
+        getFlowPrefixBottom(page, mainTail.sectionIndex, mainTail.columnIndex, mainTail.lineIndex),
+        getFlowPrefixBottom(workerPage, workerTail.sectionIndex, workerTail.columnIndex, workerTail.lineIndex)
+    );
+    const skeColumnGroups = mergeForegroundObjects(page.skeColumnGroups, workerPage.skeColumnGroups, (group, _id, incoming) => {
+        const inTail = group.st >= startOffset;
+        if (!inTail && group.ed >= startOffset) {
+            return null;
+        }
+        const bounds = getColumnGroupVerticalBounds(group, incoming ? workerPage : page);
+        if (bounds == null || (inTail ? bounds.top < getRetainedBottom() : bounds.bottom >= startTop)) {
+            return null;
+        }
+        return inTail;
+    });
+    if (skeColumnGroups == null) {
+        return null;
+    }
+    const skeDrawings = mergeForegroundObjects(page.skeDrawings, workerPage.skeDrawings, (drawing, id, incoming) => {
+        // The retained glyph can refer to an older stream offset after an edit.
+        const anchorOffset = (incoming ? workerAnchors : visibleAnchors).get(id);
+        if (anchorOffset == null) {
+            return null;
+        }
+        const layout = drawing.drawingOrigin.layoutType;
+        const inTail = anchorOffset >= startOffset;
+        if (inTail && (layout === PositionedObjectLayoutType.INLINE || layout === PositionedObjectLayoutType.WRAP_NONE)) {
+            return true;
+        }
+        const bounds = getDrawingVerticalBounds(drawing, incoming ? workerPage : page);
+        if (bounds == null) {
+            return null;
+        }
+        if (inTail ? bounds.top > getRetainedBottom() : bounds.bottom < startTop) {
+            return inTail && layout !== PositionedObjectLayoutType.WRAP_POLYGON && !usesDrawingBoundsForTextWrap(layout) ? null : inTail;
+        }
+        const otherAnchor = (incoming ? visibleAnchors : workerAnchors).get(id);
+        const counterpart = (incoming ? page : workerPage).skeDrawings.get(id);
+        const sameWrap = otherAnchor != null && (otherAnchor >= startOffset) === inTail &&
+            usesDrawingBoundsForTextWrap(layout) && compareLayoutGeometry(drawing, counterpart);
+        return sameWrap ? inTail : null;
+    }, compareLayoutGeometry);
+    return skeDrawings == null ? null : { skeTables, skeColumnGroups, skeDrawings };
+}
 
 function getEffectiveSectionType(sectionType: SectionType | undefined): SectionType {
     return sectionType == null || sectionType === SectionType.SECTION_TYPE_UNSPECIFIED
@@ -354,6 +820,21 @@ export interface IDocumentCustomBlockPresentationRefreshResult {
     requiresLayout: boolean;
 }
 
+interface IDocumentSkeletonOptions {
+    isolateIncrementalPublications?: boolean;
+    batchContinuousPublications?: boolean;
+    onContinuousLayoutInvalidated?: (offset: number) => void;
+    lineGap?: number;
+}
+
+interface IProtectedContinuousWorkerLayout {
+    baseline?: IDocumentSkeletonCached;
+    draft: IDocumentSkeletonCached;
+    pendingForegroundOffset?: number;
+    didRewindProtectedFlow?: boolean;
+    visibleDrawingAnchors?: Map<string, number | undefined>;
+}
+
 interface IIncrementalLayoutState {
     generation: number;
     reason: DocumentLayoutReason;
@@ -388,6 +869,7 @@ interface IIncrementalLayoutState {
     stablePageCount: number;
     finalizedPageCount: number;
     anchorPublished: boolean;
+    continuousPublicationScheduler: ContinuousLayoutPublicationScheduler | null;
     lastPublishedPageCount: number;
     lastPublishedBlockCount: number;
     publicationRevision: number;
@@ -846,6 +1328,10 @@ function mergeContinuousDuplicatePages(pages: IDocumentSkeletonPage[], mergeAll 
 
         page.skeDrawings?.forEach((drawing, drawingId) => {
             drawing.aTop += topOffset;
+            if (drawing.drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_POLYGON && drawing.drawingOrigin.lineTo != null) {
+                // The authored vertices stay in fragment coordinates after the drawing box moves.
+                drawing.wrapPolygonTopOffset = (drawing.wrapPolygonTopOffset ?? 0) + topOffset;
+            }
             previousPage.skeDrawings.set(drawingId, drawing);
         });
 
@@ -1263,9 +1749,13 @@ export class DocumentSkeleton extends Skeleton {
         publishedPageIndexes: Set<number>;
     }> = null;
 
+    private _externalContinuousTablePatches?: WeakMap<IDocumentSkeletonTable, IDocumentSkeletonTablePatch>;
+
+    private _appliedContinuousWorkerLayout: { version: string; skeleton: IDocumentSkeletonCached } | null = null;
     private _externalProtectedContinuousLayout: Nullable<{
         range: Extract<IDocumentLayoutProtectedRange, { mode: 'continuous' }>;
-        pendingPublications: IDocumentLayoutBlockGeometryPublication[];
+        drawingAnchorOffsets: ReadonlyMap<string, number | undefined>;
+        workerLayout?: IProtectedContinuousWorkerLayout;
     }> = null;
 
     private _topLevelBlockSections: DataStreamTreeNode[] | null = null;
@@ -1273,6 +1763,10 @@ export class DocumentSkeleton extends Skeleton {
     private _topLevelBlocks: ITopLevelBlockEntry[] = [];
 
     private readonly _isolateIncrementalPublications: boolean;
+
+    private readonly _batchContinuousPublications: boolean;
+
+    private readonly _onContinuousLayoutInvalidated?: (offset: number) => void;
 
     private _modernPageWidth: number | undefined;
 
@@ -1283,17 +1777,19 @@ export class DocumentSkeleton extends Skeleton {
     constructor(
         private _docViewModel: DocumentViewModel,
         localeService: LocaleService,
-        options: { isolateIncrementalPublications?: boolean; lineGap?: number } = {}
+        options: IDocumentSkeletonOptions = {}
     ) {
         super(localeService);
         this._isolateIncrementalPublications = options.isolateIncrementalPublications !== false;
+        this._batchContinuousPublications = options.batchContinuousPublications === true;
+        this._onContinuousLayoutInvalidated = options.onContinuousLayoutInvalidated;
         this._lineGap = options.lineGap ?? 0;
     }
 
     static create(
         docViewModel: DocumentViewModel,
         localeService: LocaleService,
-        options?: { isolateIncrementalPublications?: boolean; lineGap?: number }
+        options?: IDocumentSkeletonOptions
     ) {
         return new DocumentSkeleton(docViewModel, localeService, options);
     }
@@ -1306,11 +1802,13 @@ export class DocumentSkeleton extends Skeleton {
         this._skeletonData = null;
         this._referenceLayoutSnapshot = undefined;
         this._lastCompleteSkeletonData = null;
+        this._appliedContinuousWorkerLayout = null;
         this._completedPageCount = undefined;
         this._pendingInvalidationAnchor = null;
         this._externalLayoutProgress = null;
         this._externalProtectedPages = null;
         this._externalProtectedContinuousLayout = null;
+        this._externalContinuousTablePatches = undefined;
         this._topLevelBlockSections = null;
         this._topLevelBlocks = [];
         this._docViewModel.dispose();
@@ -1336,6 +1834,7 @@ export class DocumentSkeleton extends Skeleton {
         this._externalLayoutProgress = null;
         this._externalProtectedPages = null;
         this._externalProtectedContinuousLayout = null;
+        this._externalContinuousTablePatches = undefined;
         let ctx = this._prepareLayoutContext();
         while (true) {
             this._skeletonData = this._createSkeleton(ctx, bounds);
@@ -1462,6 +1961,7 @@ export class DocumentSkeleton extends Skeleton {
         this._externalLayoutProgress = null;
         this._externalProtectedPages = null;
         this._externalProtectedContinuousLayout = null;
+        this._externalContinuousTablePatches = undefined;
 
         const generation = ++this._layoutGeneration;
         const reason = layoutOptions?.reason ?? (layoutOptions?.anchor == null ? 'initial' : 'edit');
@@ -1557,6 +2057,9 @@ export class DocumentSkeleton extends Skeleton {
             stablePageCount: Math.max(0, incrementalStart.ctx.skeleton.pages.length - 1),
             finalizedPageCount: Math.max(0, incrementalStart.ctx.skeleton.pages.length - 1),
             anchorPublished: false,
+            continuousPublicationScheduler: mode === 'continuous' && this._batchContinuousPublications
+                ? new ContinuousLayoutPublicationScheduler()
+                : null,
             lastPublishedPageCount: incrementalStart.ctx.skeleton.pages.length > 0
                 ? Math.max(0, incrementalStart.ctx.skeleton.pages.length - 1)
                 : 0,
@@ -2008,20 +2511,31 @@ export class DocumentSkeleton extends Skeleton {
             return null;
         }
 
-        const retainedLines = previousColumn.lines
-            .filter((line) => line.ed < anchorBlock.startIndex)
-            .map((line) => cloneLineFlowForPublish(line));
-        if (retainedLines.length === 0) {
+        const prefixLines: IDocumentSkeletonLine[] = [];
+        let retainedEnd = -1;
+        for (const line of previousColumn.lines) {
+            if (line.ed >= anchorBlock.startIndex) {
+                break;
+            }
+            if (!this._isContinuousPrefixGapCollapsed(retainedEnd + 1, line.st)) {
+                return null;
+            }
+            prefixLines.push(line);
+            retainedEnd = Math.max(retainedEnd, line.ed);
+        }
+        // An interrupted first layout may have a published prefix that ends
+        // before the edit. Resuming at the edit would skip the unpublished gap.
+        if (prefixLines.length === 0 || !this._isContinuousPrefixGapCollapsed(retainedEnd + 1, anchorBlock.startIndex)) {
             return null;
         }
 
+        const retainedLines = prefixLines.map((line) => cloneLineFlowForPublish(line));
         const lastRetainedLine = retainedLines[retainedLines.length - 1];
         // The following paragraph applied its collapsed top/bottom spacing to this
         // line during the previous layout. Undo that one boundary contribution so
         // laying the anchor paragraph applies it exactly once again.
         lastRetainedLine.lineHeight = Math.max(0, lastRetainedLine.lineHeight - lastRetainedLine.marginBottom);
         lastRetainedLine.marginBottom = 0;
-        const retainedEnd = retainedLines[retainedLines.length - 1].ed;
         const retainedHeight = retainedLines.reduce(
             (height, line) => Math.max(height, line.top + line.lineHeight),
             0
@@ -2074,6 +2588,18 @@ export class DocumentSkeleton extends Skeleton {
             processedBlockCount: anchorBlockIndex,
             interactionPageTail: null,
         };
+    }
+
+    private _isContinuousPrefixGapCollapsed(start: number, end: number): boolean {
+        let offset = start;
+        while (offset < end) {
+            const hidden = this._docViewModel.getCollapsedHeadingAtOffset(offset);
+            if (hidden == null) {
+                return false;
+            }
+            offset = hidden.endOffset;
+        }
+        return true;
     }
 
     private _findBodyPageIndex(pages: IDocumentSkeletonPage[], charIndex: number): number {
@@ -2163,12 +2689,16 @@ export class DocumentSkeleton extends Skeleton {
     }
 
     /**
-     * Publishes at most one page that a previous layout slice has already
-     * completed. It never advances shaping or pagination work.
+     * Publishes one completed page or a ready batch of continuous layout.
+     * It never advances shaping or pagination work.
      */
     publishIncrementalLayoutBacklog(generation: number): IDocumentLayoutProgress {
         const state = this._activeLayout;
-        if (state?.generation === generation && state.mode === 'continuous') {
+        if (
+            state?.generation === generation &&
+            state.mode === 'continuous' &&
+            state.continuousPublicationScheduler == null
+        ) {
             const progress = this._getLayoutProgress(state);
             this._layoutProgress$.next(progress);
             return progress;
@@ -2218,7 +2748,11 @@ export class DocumentSkeleton extends Skeleton {
             while (!state.complete && !state.cancelled) {
                 const blockStartedAt = getLayoutNow();
                 this._advanceIncrementalLayout(state);
-                const blockDuration = getLayoutNow() - blockStartedAt;
+                const blockFinishedAt = getLayoutNow();
+                if (state.processedBlockCount > state.lastPublishedBlockCount) {
+                    state.continuousPublicationScheduler?.markPending(blockFinishedAt);
+                }
+                const blockDuration = blockFinishedAt - blockStartedAt;
                 state.maxBlockDuration = Math.max(state.maxBlockDuration, blockDuration);
                 blocksProcessed++;
                 if (state.pendingHyphenation != null) {
@@ -2276,14 +2810,15 @@ export class DocumentSkeleton extends Skeleton {
                 Math.max(0, pageCount - 1),
                 state.interactionPageComplete ? state.priorityPageIndex + 1 : 0
             );
-        const hasStablePageToPublish = stableComputedPageCount > state.lastPublishedPageCount;
+        // Continuous layout merges its internal page fragments into a single published page.
+        const hasStablePageToPublish = state.mode === 'paginated' &&
+            stableComputedPageCount > state.lastPublishedPageCount;
         const hasStableBlockToPublish = state.mode === 'continuous' &&
             state.processedBlockCount > state.lastPublishedBlockCount;
         const suppressPreAnchorPublication =
             state.reason === 'edit' &&
             state.priorityAnchor != null &&
             !state.anchorPublished;
-        const canPublish = shouldPublishPriority || hasStablePageToPublish || hasStableBlockToPublish || state.complete;
         const publishedPageCount = state.mode === 'continuous'
             ? pageCount
             : state.complete
@@ -2299,10 +2834,12 @@ export class DocumentSkeleton extends Skeleton {
         let didPublishAnchor = false;
         if (
             !state.cancelled &&
-            canPublish &&
             // Page-field retries are provisional until pagination and printed labels converge.
             (state.ctx.fieldCountCandidates == null || state.complete) &&
-            (!suppressPreAnchorPublication || shouldPublishPriority || state.complete)
+            (!suppressPreAnchorPublication || shouldPublishPriority || state.complete) &&
+            (shouldPublishPriority || state.complete || hasStablePageToPublish || (
+                hasStableBlockToPublish && this._isContinuousPublicationReady(state)
+            ))
         ) {
             if (state.mode === 'paginated') {
                 this._finalizePaginatedPagesForPublication(state, publishedPageCount);
@@ -2330,6 +2867,7 @@ export class DocumentSkeleton extends Skeleton {
                 ? Math.min(1, publishedPageCount)
                 : publishedPageCount;
             state.lastPublishedBlockCount = state.processedBlockCount;
+            state.continuousPublicationScheduler?.reset();
         }
 
         const progress = this._getLayoutProgress(state, didPublish, didPublishAnchor);
@@ -2340,6 +2878,13 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         return progress;
+    }
+
+    private _isContinuousPublicationReady(state: IIncrementalLayoutState): boolean {
+        const scheduler = state.continuousPublicationScheduler;
+        // The initial output starts rendering immediately. Only later stable blocks are batched.
+        return scheduler == null || state.publicationRevision === 0 ||
+            scheduler.isReady(state.processedBlockCount - state.lastPublishedBlockCount, getLayoutNow());
     }
 
     private _createPublishablePartialSkeleton(
@@ -2645,10 +3190,11 @@ export class DocumentSkeleton extends Skeleton {
                 publishedPageIndexes: new Set(),
             };
         }
+        this._externalContinuousTablePatches = undefined;
         this._externalProtectedContinuousLayout = protectedRange?.mode === 'continuous'
             ? {
                 range: protectedRange,
-                pendingPublications: [],
+                drawingAnchorOffsets: indexDrawingAnchorOffsets(this._docViewModel.getBody()),
             }
             : null;
         const dataModel = this.getViewModel().getDataModel();
@@ -2689,6 +3235,7 @@ export class DocumentSkeleton extends Skeleton {
         this._externalLayoutProgress = null;
         this._externalProtectedPages = null;
         this._externalProtectedContinuousLayout = null;
+        this._externalContinuousTablePatches = undefined;
     }
 
     /**
@@ -2775,10 +3322,17 @@ export class DocumentSkeleton extends Skeleton {
             };
         }
         if (updates.length > 0) {
+            if (this._appliedContinuousWorkerLayout?.skeleton === skeletonData) {
+                this._appliedContinuousWorkerLayout = null;
+            }
             this._dirty$.next(true);
         }
 
         return { didRefresh: updates.length > 0, requiresLayout };
+    }
+
+    getAppliedContinuousLayoutVersion(): string | undefined {
+        return this._appliedContinuousWorkerLayout?.version;
     }
 
     applyLayoutPublication(
@@ -2786,77 +3340,86 @@ export class DocumentSkeleton extends Skeleton {
         progress: IDocumentLayoutProgress,
         materializedPageRange?: IDocumentLayoutPageRange
     ): IDocumentLayoutApplyResult {
-        const skeletonData: IDocumentSkeletonCached = this._skeletonData ?? {
-            pages: [],
-            left: publication.left,
-            top: publication.top,
-            st: publication.st,
-            ...(publication.ed == null ? {} : { ed: publication.ed }),
-            skeHeaders: new Map(),
-            skeFooters: new Map(),
-        };
         const protectedContinuousLayout = publication.kind === 'block'
             ? this._externalProtectedContinuousLayout
             : null;
-        if (publication.kind === 'block' && protectedContinuousLayout != null) {
-            // Flow patches are deltas, but embedded objects are a full snapshot
-            // on every publication. Retaining every table snapshot while Main's
-            // interaction window is protected grows quadratically with layout
-            // progress. Only the final snapshot is needed when replaying deltas.
-            protectedContinuousLayout.pendingPublications.push(progress.complete
-                ? publication
-                : {
-                    ...publication,
-                    block: {
-                        ...publication.block,
-                        skeTables: [],
-                        skeDrawings: [],
-                        skeColumnGroups: [],
-                    },
-                });
+        const baseVersion = publication.kind === 'block' ? publication.block.baseLayoutVersion : undefined;
+        const applied = this._appliedContinuousWorkerLayout;
+        if (baseVersion != null && applied?.version !== baseVersion) {
+            this._appliedContinuousWorkerLayout = null;
+            return { didReplaceProtectedPages: false, requiresFullPublication: true };
         }
-        const commitsProtectedContinuousLayout = progress.complete && protectedContinuousLayout != null;
-        const publicationToApply = publication.kind === 'block' && protectedContinuousLayout != null && !commitsProtectedContinuousLayout
-            ? this._resolveProtectedContinuousPublication(skeletonData, publication, protectedContinuousLayout.range.endOffset)
-            : publication;
 
-        if (publicationToApply == null) {
-            if (progress.complete) {
-                setPageParent(skeletonData.pages, skeletonData);
-                this._lastCompleteSkeletonData = skeletonData;
-                this._completedHeadingCollapseSignature = this._getHeadingCollapseSignature();
-                this._completedPageCount = skeletonData?.pages.length;
-                this._pendingInvalidationAnchor = null;
-                this._externalProtectedContinuousLayout = null;
+        if (publication.kind === 'block' && publication.block.tableOrder == null && !progress.complete) {
+            this._externalContinuousTablePatches ??= new WeakMap();
+        }
+        const tablePatches = this._externalContinuousTablePatches;
+        let stagedWorkerLayout = protectedContinuousLayout?.workerLayout;
+        if (protectedContinuousLayout != null && publication.kind === 'block') {
+            const { pageIndex } = publication.block;
+            if (stagedWorkerLayout == null) {
+                const baseline = baseVersion == null ? undefined : applied?.skeleton;
+                if (baseVersion != null && baseline?.pages[pageIndex] == null) {
+                    return { didReplaceProtectedPages: false, requiresFullPublication: true };
+                }
+                stagedWorkerLayout = {
+                    baseline,
+                    draft: baseline == null ? createExternalLayoutSkeleton(publication) : forkContinuousLayoutSkeleton(baseline, pageIndex),
+                };
+                protectedContinuousLayout.workerLayout = stagedWorkerLayout;
             }
-            this._externalLayoutProgress = progress.complete ? null : progress;
-            this._layoutProgress$.next(progress);
-            return { didReplaceProtectedPages: false };
-        }
-
-        skeletonData.left = publicationToApply.left;
-        skeletonData.top = publicationToApply.top;
-        skeletonData.st = publicationToApply.st;
-        if (publicationToApply.ed == null) {
-            delete skeletonData.ed;
-        } else {
-            skeletonData.ed = publicationToApply.ed;
-        }
-        if (publicationToApply.kind === 'block') {
-            const publications = commitsProtectedContinuousLayout
-                ? protectedContinuousLayout.pendingPublications
-                : [publicationToApply];
-            for (const pendingPublication of publications) {
-                this._applyExternalLayoutResources(skeletonData, pendingPublication.resources);
-                applyDocumentSkeletonContinuousBlock(
-                    skeletonData,
-                    pendingPublication.block,
-                    this._docViewModel.getSnapshot()
+            const { draft, baseline } = stagedWorkerLayout;
+            if (baseline != null && applied?.skeleton !== baseline) {
+                protectedContinuousLayout.workerLayout = undefined;
+                return { didReplaceProtectedPages: false, requiresFullPublication: true };
+            }
+            updateExternalLayoutExtent(draft, publication);
+            this._applyExternalLayoutResources(draft, publication.resources);
+            const page = applyDocumentSkeletonContinuousBlock(draft, publication.block, this._docViewModel.getSnapshot(), {
+                staging: true,
+                tablePatches,
+            });
+            if (!progress.complete) {
+                const foregroundUpdate = this._publishProtectedWorkerFlow(
+                    publication,
+                    page,
+                    stagedWorkerLayout,
+                    protectedContinuousLayout.range.endOffset,
+                    protectedContinuousLayout.drawingAnchorOffsets
                 );
+                const visibleProgress = foregroundUpdate?.didPublishEmbeddedGeometry
+                    ? { ...progress, didPublishEmbeddedGeometry: true }
+                    : progress;
+                this._externalLayoutProgress = visibleProgress;
+                if (foregroundUpdate != null) {
+                    this._publishedHeadingCollapseSignature = this._getHeadingCollapseSignature();
+                    this._dirty$.next(true);
+                }
+                this._layoutProgress$.next(visibleProgress);
+                return { didReplaceProtectedPages: false };
+            }
+            attachContinuousLayoutGeometry(page);
+        }
+
+        const skeletonData = stagedWorkerLayout?.draft ??
+            (baseVersion == null ? this._skeletonData : applied?.skeleton) ??
+            createExternalLayoutSkeleton(publication);
+        if (applied?.skeleton === skeletonData) {
+            // Consuming the complete layout for a patch invalidates its old version.
+            this._appliedContinuousWorkerLayout = null;
+            if (!progress.complete && this._lastCompleteSkeletonData === skeletonData) {
+                this._lastCompleteSkeletonData = null;
+            }
+        }
+        updateExternalLayoutExtent(skeletonData, publication);
+        if (publication.kind === 'block') {
+            if (stagedWorkerLayout == null) {
+                this._applyExternalLayoutResources(skeletonData, publication.resources);
+                applyDocumentSkeletonContinuousBlock(skeletonData, publication.block, this._docViewModel.getSnapshot(), { tablePatches });
             }
         } else {
-            this._applyExternalLayoutResources(skeletonData, publicationToApply.resources);
-            for (const pagePublication of publicationToApply.pages) {
+            this._applyExternalLayoutResources(skeletonData, publication.resources);
+            for (const pagePublication of publication.pages) {
                 const protectedPages = this._externalProtectedPages;
                 const protectedPage = protectedPages?.pages.get(pagePublication.pageIndex);
                 protectedPages?.publishedPageIndexes.add(pagePublication.pageIndex);
@@ -2905,7 +3468,7 @@ export class DocumentSkeleton extends Skeleton {
                 this._compactMaterializedPages(skeletonData, materializedPageRange);
             }
         }
-        if (publicationToApply.kind === 'page' && progress.didPublishAnchor && !progress.complete) {
+        if (publication.kind === 'page' && progress.didPublishAnchor && !progress.complete) {
             const placeholderPages: IDocumentSkeletonPage[] = [];
             for (let pageIndex = progress.publishedPageCount; pageIndex < skeletonData.pages.length; pageIndex++) {
                 const currentPage = skeletonData.pages[pageIndex];
@@ -2930,7 +3493,7 @@ export class DocumentSkeleton extends Skeleton {
         const protectedPages = this._externalProtectedPages;
         const didReplaceProtectedPages = progress.complete && (
             protectedPages?.divergenceStartPageIndex != null ||
-            (commitsProtectedContinuousLayout && protectedContinuousLayout.pendingPublications.length > 0)
+            stagedWorkerLayout != null
         );
         if (progress.complete) {
             if (protectedPages?.divergenceStartPageIndex != null) {
@@ -2952,9 +3515,9 @@ export class DocumentSkeleton extends Skeleton {
                 }
             }
             skeletonData.pages.length = progress.pageCount;
-            if (publicationToApply.resources.skeListLevel != null) {
+            if (publication.resources.skeListLevel != null) {
                 skeletonData.skeListLevel = new Map(
-                    publicationToApply.resources.skeListLevel.map(([listId, levels]) => [
+                    publication.resources.skeListLevel.map(([listId, levels]) => [
                         listId,
                         Array.from(
                             levels,
@@ -2963,18 +3526,23 @@ export class DocumentSkeleton extends Skeleton {
                     ])
                 );
             }
-            if (publicationToApply.resources.drawingAnchor != null) {
+            if (publication.resources.drawingAnchor != null) {
                 skeletonData.drawingAnchor = hydrateDrawingAnchors(
-                    publicationToApply.resources.drawingAnchor
+                    publication.resources.drawingAnchor
                 );
             }
             setPageParent(skeletonData.pages, skeletonData);
+            const completedVersion = publication.kind === 'block' ? publication.block.completedLayoutVersion : undefined;
+            this._appliedContinuousWorkerLayout = completedVersion == null
+                ? null
+                : { version: completedVersion, skeleton: skeletonData };
             this._lastCompleteSkeletonData = skeletonData;
             this._completedHeadingCollapseSignature = this._getHeadingCollapseSignature();
             this._completedPageCount = skeletonData?.pages.length;
             this._pendingInvalidationAnchor = null;
             this._externalProtectedPages = null;
             this._externalProtectedContinuousLayout = null;
+            this._externalContinuousTablePatches = undefined;
         }
 
         this._skeletonData = skeletonData;
@@ -3064,75 +3632,120 @@ export class DocumentSkeleton extends Skeleton {
         }
     }
 
-    private _resolveProtectedContinuousPublication(
-        skeletonData: IDocumentSkeletonCached,
+    private _publishProtectedWorkerFlow(
         publication: IDocumentLayoutBlockGeometryPublication,
-        protectedEndOffset: number
-    ): IDocumentLayoutBlockGeometryPublication | null {
-        const { flow } = publication.block;
-        const firstUnprotectedLineOffset = flow.lines.findIndex((line) => line.st > protectedEndOffset);
-        if (firstUnprotectedLineOffset < 0) {
+        workerPage: IDocumentSkeletonPage,
+        workerLayout: IProtectedContinuousWorkerLayout,
+        protectedEndOffset: number,
+        drawingAnchorOffsets: ReadonlyMap<string, number | undefined>
+    ): Pick<IDocumentLayoutProgress, 'didPublishEmbeddedGeometry'> | null {
+        const foreground = this._skeletonData;
+        const { pageIndex, flow, rewoundFrom } = publication.block;
+        if (rewoundFrom != null && rewoundFrom <= protectedEndOffset) {
+            // The local interaction window can now have different earlier lines
+            // even if the single seam line still matches.
+            workerLayout.didRewindProtectedFlow = true;
+        }
+        if (workerLayout.didRewindProtectedFlow) {
+            return null;
+        }
+        const packetCursor = findUnprotectedFlowCursor(workerPage, flow, protectedEndOffset);
+        const pendingCursor = workerLayout.pendingForegroundOffset == null
+            ? null
+            : findPendingFlowLine(workerPage, workerLayout.pendingForegroundOffset, protectedEndOffset);
+        const cursor = packetCursor == null || (pendingCursor != null && compareFlowCursors(pendingCursor, packetCursor) < 0)
+            ? pendingCursor
+            : packetCursor;
+        if (cursor == null) {
+            return null;
+        }
+        const firstLine = workerPage.sections[cursor.sectionIndex].columns[cursor.columnIndex].lines[cursor.lineIndex];
+        const start = firstLine.st;
+        // Retain a logical position, since a later Worker patch can repaginate the draft.
+        workerLayout.pendingForegroundOffset = Math.min(workerLayout.pendingForegroundOffset ?? start, start);
+
+        const page = foreground?.pages[pageIndex];
+        const baselinePage = workerLayout.baseline?.pages[pageIndex];
+        if (foreground == null || page == null || page === baselinePage ||
+            !hasCompatibleForegroundPage(foreground, page, workerLayout.draft, workerPage)) {
             return null;
         }
 
-        const existingColumn = skeletonData.pages[publication.block.pageIndex]
-            ?.sections[flow.sectionIndex]
-            ?.columns[flow.columnIndex];
-        if (existingColumn == null) {
-            // A retained folded window can omit sections restored by this generation.
-            // Commit the queued canonical Worker geometry together when it completes.
+        const workerRetained = cursor.lineIndex > 0
+            ? { ...cursor, lineIndex: cursor.lineIndex - 1 }
+            : findRetainedFlowLine(workerPage, start);
+        const mainRetained = findRetainedFlowLine(page, start);
+        if (workerRetained == null || mainRetained == null) {
+            return null;
+        }
+        const section = page.sections[mainRetained.sectionIndex];
+        const column = section.columns[mainRetained.columnIndex];
+        const baselineSection = baselinePage?.sections[mainRetained.sectionIndex];
+        const workerSection = workerPage.sections[workerRetained.sectionIndex];
+        const workerColumn = workerSection.columns[workerRetained.columnIndex];
+        const mainBoundary = column.lines[mainRetained.lineIndex];
+        const workerBoundary = workerColumn.lines[workerRetained.lineIndex];
+        const crossesSection = cursor.sectionIndex !== workerRetained.sectionIndex ||
+            firstLine.divides.some((divide) => divide.glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.PAGE_BREAK));
+        const hasCompatibleHeight = mainBoundary.lineHeight === workerBoundary.lineHeight ||
+            (crossesSection && hasSameBoundaryContent(mainBoundary, workerBoundary));
+        if (section === baselineSection || column === baselineSection?.columns[mainRetained.columnIndex] ||
+            section.top !== workerSection.top || column.left !== workerColumn.left || column.width !== workerColumn.width ||
+            mainBoundary.st !== workerBoundary.st || mainBoundary.ed !== workerBoundary.ed ||
+            mainBoundary.top !== workerBoundary.top || !hasCompatibleHeight ||
+            mainBoundary.width !== workerBoundary.width) {
             return null;
         }
 
-        const firstUnprotectedLine = flow.lines[firstUnprotectedLineOffset];
-        const matchingTailLineIndex = existingColumn.lines.findIndex(
-            (line) => line.st >= firstUnprotectedLine.st
+        const mainTail = { ...mainRetained, lineIndex: mainRetained.lineIndex + 1 };
+        const workerTail = { ...workerRetained, lineIndex: workerRetained.lineIndex + 1 };
+        const top = Math.min(
+            getFlowSuffixTop(page, mainTail.sectionIndex, mainTail.columnIndex, mainTail.lineIndex),
+            getFlowSuffixTop(workerPage, workerTail.sectionIndex, workerTail.columnIndex, workerTail.lineIndex)
         );
-        const targetLineIndex = matchingTailLineIndex < 0
-            ? existingColumn.lines.length
-            : matchingTailLineIndex;
-
-        if (firstUnprotectedLineOffset > 0) {
-            const mainBoundaryLine = existingColumn.lines[targetLineIndex - 1];
-            const workerBoundaryLine = flow.lines[firstUnprotectedLineOffset - 1];
-            if (
-                mainBoundaryLine == null ||
-                mainBoundaryLine.st !== workerBoundaryLine.st ||
-                mainBoundaryLine.ed !== workerBoundaryLine.ed
-            ) {
-                // Async Custom Block measurement can change wrapping while the
-                // Worker is already computing the suffix. A different logical
-                // boundary cannot be spliced safely, so retain Main's interaction
-                // window and apply the queued canonical Worker result at completion.
-                return null;
-            }
-            if (
-                mainBoundaryLine.top !== workerBoundaryLine.top ||
-                mainBoundaryLine.lineHeight !== workerBoundaryLine.lineHeight ||
-                mainBoundaryLine.width !== workerBoundaryLine.width
-            ) {
-                // A Custom Block, font, or host viewport can finish measuring
-                // after Main publishes the interaction window but before Worker
-                // captures its geometry. The continuation identity still matches,
-                // while every coordinate after it belongs to a different layout.
-                // Keep Main visible and commit the canonical Worker result only
-                // after completion instead of translating a partial collection of
-                // lines, tables, drawings, and column groups independently.
-                return null;
+        if (!Number.isFinite(top)) {
+            return null;
+        }
+        const visibleAnchors = workerLayout.visibleDrawingAnchors ??= indexVisibleDrawingAnchorOffsets(page);
+        const foregroundGeometry = mergeProtectedForegroundGeometry(
+            page,
+            workerPage,
+            start,
+            top,
+            mainTail,
+            workerTail,
+            visibleAnchors,
+            drawingAnchorOffsets
+        );
+        if (foregroundGeometry == null) {
+            return null;
+        }
+        const didPublishEmbeddedGeometry = foregroundGeometry.skeDrawings !== page.skeDrawings ||
+            foregroundGeometry.skeTables !== page.skeTables || foregroundGeometry.skeColumnGroups !== page.skeColumnGroups;
+        const startsInPacket = workerTail.sectionIndex === flow.sectionIndex && workerTail.columnIndex === flow.columnIndex &&
+            workerTail.lineIndex >= flow.lineIndex;
+        const replacement = startsInPacket
+            ? { ...flow, lines: flow.lines.slice(workerTail.lineIndex - flow.lineIndex) }
+            : serializeContinuousFlow(workerPage, workerTail);
+        applyDocumentSkeletonContinuousBlock(
+            foreground,
+            { ...publication.block, flow: { ...replacement, ...mainTail } },
+            this._docViewModel.getSnapshot(),
+            { foregroundGeometry }
+        );
+        for (const id of visibleAnchors.keys()) {
+            if (!page.skeDrawings.has(id)) {
+                visibleAnchors.delete(id);
             }
         }
-
-        return {
-            ...publication,
-            block: {
-                ...publication.block,
-                flow: {
-                    ...flow,
-                    lineIndex: targetLineIndex,
-                    lines: flow.lines.slice(firstUnprotectedLineOffset),
-                },
-            },
-        };
+        for (const id of page.skeDrawings.keys()) {
+            const offset = drawingAnchorOffsets.get(id);
+            if (offset != null && offset >= start) {
+                visibleAnchors.set(id, offset);
+            }
+        }
+        workerLayout.pendingForegroundOffset = undefined;
+        return { didPublishEmbeddedGeometry };
     }
 
     /**
@@ -5219,6 +5832,10 @@ export class DocumentSkeleton extends Skeleton {
             .slice(0, sectionIndex)
             .reduce((count, item) => count + item.children.length, 0);
 
+        if (state.mode === 'continuous') {
+            this._onContinuousLayoutInvalidated?.(section?.children[paragraphIndex]?.startIndex ?? 0);
+        }
+
         // A float can invalidate a paragraph on an earlier page, outside the
         // single block passed to dealWithSection in this scheduler slice.
         rollbackSectionPages(layoutAnchor, ctx.skeleton.pages);
@@ -5247,6 +5864,7 @@ export class DocumentSkeleton extends Skeleton {
         state.finalizedPageCount = Math.min(state.finalizedPageCount, stablePrefixCount);
         state.lastPublishedPageCount = Math.min(state.lastPublishedPageCount, stablePrefixCount);
         state.lastPublishedBlockCount = Math.min(state.lastPublishedBlockCount, state.processedBlockCount);
+        state.continuousPublicationScheduler?.reset();
         if (state.priorityPageIndex >= stablePrefixCount) {
             state.anchorPublished = false;
         }
@@ -5309,6 +5927,7 @@ export class DocumentSkeleton extends Skeleton {
             state.finalizedPageCount = 0;
             state.lastPublishedPageCount = 0;
             state.lastPublishedBlockCount = 0;
+            state.continuousPublicationScheduler?.reset();
             state.anchorPublished = false;
             state.reuseUnaffectedTail = false;
             state.reusedTail = false;

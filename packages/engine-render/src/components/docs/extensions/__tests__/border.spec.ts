@@ -71,7 +71,7 @@ describe('docs border extension', () => {
         expect(ctx.save).not.toHaveBeenCalled();
     });
 
-    it('draws each span border and reuses cached line style/color until cleared', () => {
+    it('reuses a span border style only within the saved Canvas state', () => {
         const extension = new Border();
         extension.extensionOffset = { spanStartPoint: Vector2.create(5, 7) } as any;
         const ctx = createCtx();
@@ -102,10 +102,7 @@ describe('docs border extension', () => {
         expect(ctx.setLineWidthByPrecision).toHaveBeenCalledWith(2);
         expect(ctx.strokeStyle).toBe('rgb(0,0,0)');
 
-        extension.clearCache();
-        extension.draw(ctx, { scaleX: 1, scaleY: 1 }, createGlyph({
-            t: { s: BorderStyleTypes.THIN, cl: { rgb: '#333333' } },
-        }));
+        extension.draw(ctx, { scaleX: 1, scaleY: 1 }, createGlyph({ t: borderData.r }));
 
         expect(setLineTypeMock).toHaveBeenCalledTimes(3);
         expect(ctx.restore).toHaveBeenCalledTimes(2);

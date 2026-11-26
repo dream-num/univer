@@ -2676,7 +2676,7 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
-    it('commits a Worker continuation after its section is absent from the retained Main interaction window', () => {
+    it('publishes new sections beyond the retained Main interaction window before completion', () => {
         const univer = new Univer();
         const content = `Modern paragraph across imported pages.${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.PAGE_BREAK}`.repeat(40);
         const model = createDocumentModelWithStyle(content, {});
@@ -2694,14 +2694,22 @@ describe('doc skeleton', () => {
             }
             expect(mainProgress.didPublishAnchor).toBe(true);
             const retainedPage = main.getSkeletonData()!.pages[0];
-            const protectedEnd = retainedPage.sections[0].columns[0].lines[0].ed;
+            const initialSectionCount = retainedPage.sections.length;
+            const protectedLine = retainedPage.sections[0].columns[0].lines[0];
+            const protectedEnd = protectedLine.ed;
+            const protectedGeometry = {
+                st: protectedLine.st,
+                ed: protectedLine.ed,
+                top: protectedLine.top,
+                lineHeight: protectedLine.lineHeight,
+            };
             main.beginExternalLayout({
                 reason: 'edit',
                 protectedRange: { mode: 'continuous', startOffset: 0, endOffset: protectedEnd },
             });
             const workerGeneration = worker.startIncrementalLayout({ reason: 'initial' });
             let snapshot: ReturnType<typeof serializeDocumentSkeletonContinuousBlock>['snapshot'] | null = null;
-            let sawMissingBoundary = false;
+            let publishedNewSection = false;
             let complete = false;
             for (let step = 0; step < 1000; step++) {
                 const progress = worker.stepIncrementalLayout(workerGeneration, 0);
@@ -2711,9 +2719,6 @@ describe('doc skeleton', () => {
                 const data = worker.getSkeletonData()!;
                 const serialized = serializeDocumentSkeletonContinuousBlock(data.pages[0], snapshot);
                 snapshot = serialized.snapshot;
-                const mainSection = main.getSkeletonData()!.pages[0].sections[serialized.block.flow.sectionIndex];
-                const missingBoundary = mainSection?.columns[serialized.block.flow.columnIndex] == null;
-                sawMissingBoundary ||= missingBoundary && !progress.complete;
                 expect(() => main.applyLayoutPublication({
                     kind: 'block',
                     left: data.left,
@@ -2724,13 +2729,17 @@ describe('doc skeleton', () => {
                     resources: { reset: step === 0, skeHeaders: [], skeFooters: [], skeListLevel: null, drawingAnchor: null },
                 }, progress)).not.toThrow();
                 if (!progress.complete) {
-                    expect(main.getSkeletonData()!.pages[0]).toBe(retainedPage);
+                    const visible = main.getSkeletonData()!.pages[0];
+                    expect(visible.sections[0].columns[0].lines[0]).toMatchObject(protectedGeometry);
+                    publishedNewSection ||= visible.sections.slice(initialSectionCount).some((section) =>
+                        section.columns.some((column) => column.lines.some((line) => line.ed > protectedEnd))
+                    );
                 } else {
                     complete = true;
                     break;
                 }
             }
-            expect(sawMissingBoundary).toBe(true);
+            expect(publishedNewSection).toBe(true);
             expect(complete).toBe(true);
             expect(serializeDocumentSkeletonPage(main.getSkeletonData()!.pages[0]))
                 .toEqual(serializeDocumentSkeletonPage(worker.getSkeletonData()!.pages[0]));

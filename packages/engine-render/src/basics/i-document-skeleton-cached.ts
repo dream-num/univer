@@ -390,6 +390,7 @@ export interface IDocumentSkeletonDrawing {
     angle: number; // rotation
     initialState: boolean; // whether initialized
     drawingOrigin: IDocDrawingBase;
+    wrapPolygonTopOffset?: number; // Original fragment's top in the merged page.
     columnLeft: number;
     blockAnchorLeft?: number; // Paragraph indent used by floating column anchors.
     normalizeTraditionalColumnAnchor?: boolean; // Preserve the legacy paragraph/column origin when editing positions.

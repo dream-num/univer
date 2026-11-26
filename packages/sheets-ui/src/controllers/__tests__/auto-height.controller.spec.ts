@@ -48,7 +48,7 @@ describe('AutoHeightController', () => {
     let univer: Univer;
 
     beforeEach(() => {
-        // Happy DOM has no canvas backend; the render and skeleton services remain real.
+        // jsdom has no canvas backend; the render and skeleton services remain real.
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
             return { canvas: this, setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D;
         });

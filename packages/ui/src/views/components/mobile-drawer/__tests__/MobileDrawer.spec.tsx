@@ -158,9 +158,9 @@ describe('mobile drawer snap behavior', () => {
         expect(drawer?.style.bottom).toBe('');
         expect(drawer?.style.height).toBe('40vh');
         expect(drawer?.style.maxHeight).toBe('');
-        expect(screen.getByText('Drawer content').style.paddingBottom).toContain('+ 320px');
+        expect(screen.getByText('Drawer content').style.paddingBottom).toContain('320px');
         expect(screen.getByRole('button', { name: 'Floating action' }).parentElement?.style.bottom)
-            .toBe('calc(40vh + 12px)');
+            .toBe('calc(12px + 40vh)');
     });
 
     it('supports expand, collapse, restore, and close gestures', () => {

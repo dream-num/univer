@@ -138,8 +138,8 @@ describe('HtmlToUSMService', () => {
 
         expect(cellMatrix.getValue(0, 0)?.s).toStrictEqual({
             bd: {
-                l: { cl: { rgb: '#000000' }, s: 1 },
-                t: { cl: { rgb: '#000000' }, s: 1 },
+                l: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
+                t: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
             },
         });
     });

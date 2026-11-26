@@ -281,7 +281,7 @@ describe('SheetSelectionRenderService pointer gestures with real render provider
 
     beforeEach(() => {
         vi.useFakeTimers();
-        // Happy DOM lacks a canvas backend; selection, render, and shortcut services remain real.
+        // jsdom lacks a canvas backend; selection, render, and shortcut services remain real.
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
             return { canvas: this, setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D;
         });

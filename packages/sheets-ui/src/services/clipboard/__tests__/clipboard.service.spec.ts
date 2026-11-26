@@ -267,7 +267,7 @@ describe('Test clipboard', () => {
     it.each(['focus switch', 'unit switch', 'pending projection', 'changed projection', 'disposed pane', 'optional pending', 'optional changed', 'optional disposed', 'optional focus', 'optional recalc'] as const)(
         'keeps a delayed paste bound to its initiating pane after a %s',
         async (change) => {
-            // Happy DOM has no canvas backend. Both renderers and their skeleton managers are real.
+            // jsdom has no canvas backend. Both renderers and their skeleton managers are real.
             const canvasContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
                 return {
                     canvas: this,

@@ -314,7 +314,7 @@ describe('editing after navigating multiple ranges', () => {
     let univer: Univer;
 
     beforeEach(() => {
-        // Happy DOM has no canvas backend; selection, editing, and permission logic remain real.
+        // jsdom has no canvas backend; selection, editing, and permission logic remain real.
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
             return {
                 canvas: this,

@@ -488,7 +488,6 @@ describe('DocLinkPopup', () => {
         root = createRoot(container);
         act(() => root!.render(<RediContext.Provider value={{ injector: currentTestBed!.injector }}>{mobile ? <MobileDocLinkPopup /> : <DocLinkPopup />}</RediContext.Provider>));
 
-        vi.spyOn(navigator, 'clipboard', 'get').mockReturnValue(undefined as never);
         const snapshot = structuredClone(currentTestBed.doc.getSnapshot());
         const copied: string[] = [];
         const execCommand = vi.fn((command: string) => {

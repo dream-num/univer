@@ -54,6 +54,6 @@ describe('SelectList', () => {
 
     it('should apply color style', () => {
         const { getByText } = render(<SelectList value="b" options={options} onChange={() => {}} />);
-        expect(getByText('B')).toHaveStyle({ color: 'red' });
+        expect(getByText('B')).toHaveStyle({ color: 'rgb(255, 0, 0)' });
     });
 });

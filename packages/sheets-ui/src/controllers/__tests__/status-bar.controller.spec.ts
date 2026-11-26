@@ -192,7 +192,7 @@ describe('StatusBarController', () => {
 
     it('recalculates the existing selection from visible rows and projected formula values', () => {
         get(StatusBarController);
-        // Happy DOM does not implement a canvas backend.
+        // jsdom does not implement a canvas backend.
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
             return { canvas: this, setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D;
         });

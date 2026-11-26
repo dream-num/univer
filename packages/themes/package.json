@@ -62,6 +62,6 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "tsrs": "7.1.0-beta.tsrs2"
+        "tsrs": "7.1.0-beta.tsrs5"
     }
 }

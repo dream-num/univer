@@ -76,7 +76,7 @@
     "dependencies": {
         "@floating-ui/dom": "^1.8.0",
         "@univerjs/core": "workspace:*",
-        "@univerjs/icons-svg": "1.50.0",
+        "@univerjs/icons-svg": "1.50.1",
         "franc-min": "^6.2.0"
     },
     "devDependencies": {
@@ -85,7 +85,7 @@
         "rollup-plugin-polyfill-node": "^0.13.0",
         "rxjs": "7.8.2",
         "tsdown": "^0.23.7",
-        "tsrs": "7.1.0-beta.tsrs2",
+        "tsrs": "7.1.0-beta.tsrs5",
         "vitest": "^5.1.1"
     }
 }

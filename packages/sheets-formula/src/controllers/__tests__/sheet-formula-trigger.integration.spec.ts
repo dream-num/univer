@@ -16,6 +16,8 @@
 
 import type { IWorkbookData, Univer } from '@univerjs/core';
 import {
+    BooleanNumber,
+    FormulaType,
     ICommandService,
     isNodeEnv,
     LifecycleService,
@@ -196,6 +198,35 @@ describe('standalone Sheet formula calculation trigger', () => {
         sheet.getRange('C4').setValue(8);
         await edited;
         expect(results.getValues()).toEqual([[3, 18, 6, 3, 18, 6, 4, 8, 18]]);
+    });
+
+    it('takes one value per INDEX selector in explicitly dynamic formulas', async () => {
+        univer.registerPlugin(UniverSheetsFormulaPlugin);
+        const api = FUniver.newAPI(univer);
+        const data = createWorkbookData();
+        const f = '=SUM(--ISNUMBER(INDEX({11;22},{-0.5;2})))+A1';
+        data.sheets['sheet-1']!.cellData = {
+            0: {
+                0: { v: 1 },
+                1: { f, ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE, ref: 'B1' },
+                2: { f },
+                3: { f: '=SUM(INDEX({11,12;21,22},{0;2},1))+A1', ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE, ref: 'D1' },
+                4: { f: '=SUM(INDEX({11,12;21,22},1,{0,2}))+A1', ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE, ref: 'E1' },
+                5: { f: '=SUM(INDEX({11;22},{0}))+A1', ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE, ref: 'F1' },
+                6: { f: '=SUM(INDEX({11;22},0))+A1', ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE, ref: 'G1' },
+            },
+        };
+        const sheet = api.createWorkbook(data).getActiveSheet();
+        const results = sheet.getRange('B1:G1');
+        const initial = api.getFormula().onCalculationResultApplied(10_000);
+        univer.__getInjector().get(LifecycleService).stage = LifecycleStages.Rendered;
+        await initial;
+        expect(results.getValues()).toEqual([[2, 1, 33, 24, 12, 34]]);
+
+        const edited = api.getFormula().onCalculationResultApplied(10_000);
+        sheet.getRange('A1').setValue(2);
+        await edited;
+        expect(results.getValues()).toEqual([[3, 2, 34, 25, 13, 35]]);
     });
 
     it('calculates on cold start and recalculates after value and formula edits', async () => {

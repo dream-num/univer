@@ -113,6 +113,7 @@ export class BaseFunction {
 
     bindCalculationRegion?(getRegion: () => LocaleType): void;
     bindCalculationTimestamp?(getTimestamp: () => number): void;
+    bindExplicitDynamicArrayFormula?(isExplicit: () => boolean): void;
 
     /**
      * Arguments that accept a reference from explicit implicit intersection (@).

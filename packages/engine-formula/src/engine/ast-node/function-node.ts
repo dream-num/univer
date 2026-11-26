@@ -81,6 +81,10 @@ export class FunctionNode extends BaseAstNode {
         }
         this._functionExecutor.bindCalculationRegion?.(() => _currentConfigService.getCalculationRegion());
         this._functionExecutor.bindCalculationTimestamp?.(() => _currentConfigService.getCalculationTimestamp?.() ?? Date.now());
+        this._functionExecutor.bindExplicitDynamicArrayFormula?.(() => {
+            const { currentUnitId, currentSubUnitId, currentRow, currentColumn } = _runtimeService;
+            return isExplicitDynamicArrayFormula(_currentConfigService, currentUnitId, currentSubUnitId, currentRow, currentColumn);
+        });
 
         if (this._functionExecutor.needsFormulaDataModel) {
             this._functionExecutor.setFormulaDataModel(this._formulaDataModel);

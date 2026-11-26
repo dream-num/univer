@@ -45,6 +45,12 @@ export class Index extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    private _isExplicitDynamicArray?: () => boolean;
+
+    override bindExplicitDynamicArrayFormula(isExplicit: () => boolean): void {
+        this._isExplicitDynamicArray = isExplicit;
+    }
+
     override preservesReferenceInRangeEndpointArgument(argumentIndex: number): boolean {
         return argumentIndex === 0;
     }
@@ -116,7 +122,10 @@ export class Index extends BaseFunction {
         // Otherwise, filter the results from the reference according to the specified rowNum/columnNum/areaNum, take the upper left corner cell value of each result array, and then form an array with maxRowLength row number and maxColumnLength column number.
         const referenceGrid = reference instanceof MultiAreaReferenceObject && reference.isArrayOfReferences();
         const hasArraySelector = rowNum.isArray() || columnNum?.isArray() || areaNum?.isArray();
-        if (maxRowLength === 1 && maxColumnLength === 1 && !(referenceGrid && hasArraySelector)) {
+        const singleSelector = maxRowLength === 1 && maxColumnLength === 1;
+        // A one-element array selector still selects one cell in a marked dynamic formula.
+        const explicitArraySelector = (!singleSelector || hasArraySelector) && this._isExplicitDynamicArray?.();
+        if (singleSelector && !(referenceGrid && hasArraySelector) && !explicitArraySelector) {
             return this._handleSingleObject(
                 reference,
                 _rowNum.isArray()
@@ -166,6 +175,9 @@ export class Index extends BaseFunction {
                     return (result as BaseReferenceObject).getCellByPosition();
                 }
 
+                if (explicitArraySelector && result.isArray()) {
+                    return (result as ArrayValueObject).get(0, 0) ?? ErrorValueObject.create(ErrorType.REF);
+                }
                 return result as BaseValueObject;
             });
         }

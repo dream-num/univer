@@ -19,6 +19,7 @@
 
 import type { ResolvedFormatOptions } from './types';
 import { DateSystem } from '../../types/enum/date-system';
+import { getNumberGrouping } from './grouping';
 
 export const defaultOptions: Readonly<ResolvedFormatOptions> = {
     // Overflow error string
@@ -45,7 +46,7 @@ export const defaultOptions: Readonly<ResolvedFormatOptions> = {
     // Don't adjust dates to UTC when converting them to serial time
     ignoreTimezone: false,
     // Integer digit grouping
-    grouping: [3, 3],
+    grouping: getNumberGrouping(),
     // resolve indexed colors to hex
     indexColors: true,
     // Skip-next signifier character

@@ -52,7 +52,7 @@ export class PrefixNode extends BaseAstNode {
         return NodeType.PREFIX;
     }
 
-    override execute(dateSystem: DateSystem = DateSystem.Date1900) {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900, readRegion?: () => string) {
         this._referenceRanges = null;
         const children = this.getChildren();
         let value = children[0].getValue();
@@ -65,16 +65,16 @@ export class PrefixNode extends BaseAstNode {
 
         if (this._operatorString === prefixToken.MINUS) {
             if (value.isReferenceObject()) {
-                const array = (value as BaseReferenceObject).withDateSystem(dateSystem).toArrayValueObject();
+                const array = (value as BaseReferenceObject).withDateSystem(dateSystem, readRegion).toArrayValueObject();
                 value = array.getRowCount() === 1 && array.getColumnCount() === 1 ? array.getFirstCell() : array;
             }
             result = this._functionExecutor!.calculate(
                 NumberValueObject.create(0),
-                (value as BaseValueObject).withDateSystem(dateSystem)
+                (value as BaseValueObject).withDateSystem(dateSystem, readRegion)
             ) as FunctionVariantType;
         } else if (this._operatorString === prefixToken.PLUS) {
             if (value.isReferenceObject()) {
-                const reference = (value as BaseReferenceObject).withDateSystem(dateSystem);
+                const reference = (value as BaseReferenceObject).withDateSystem(dateSystem, readRegion);
                 if (reference.getRowCount() === 1 && reference.getColumnCount() === 1) {
                     const { startRow, startColumn } = reference.getRangePosition();
                     result = reference.isCellBlank(startRow, startColumn) ? NullValueObject.create() : reference.getFirstCell();
@@ -89,7 +89,7 @@ export class PrefixNode extends BaseAstNode {
         } else {
             result = ErrorValueObject.create(ErrorType.VALUE);
         }
-        this.setValue(result.withDateSystem(dateSystem));
+        this.setValue(result.withDateSystem(dateSystem, readRegion));
     }
 
     private _handlerAT(value: FunctionVariantType) {

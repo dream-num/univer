@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { IUser, LocaleType, UniverInstanceType } from '@univerjs/core';
+import type { IUser, UniverInstanceType } from '@univerjs/core';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import {
     dateKit,
     generateRandomId,
+    getRegionTag,
     ICommandService,
     isSafeUrl,
-    LOCALE_META,
     LocaleService,
     RegionService,
     UserManagerService,
@@ -134,9 +134,9 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const avatarFallback = uiConfig?.avatarFallback;
     const currentRegion = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
     const direction = useObservable(localeService.direction$, localeService.getDirection());
-    function formatCommentDateTime(value: string, region: LocaleType): string {
+    function formatCommentDateTime(value: string, region: string): string {
         const date = dateKit(value);
-        const regionTag = LOCALE_META[region].tag;
+        const regionTag = getRegionTag(region);
 
         return date.formatIntl(regionTag, {
             year: 'numeric',

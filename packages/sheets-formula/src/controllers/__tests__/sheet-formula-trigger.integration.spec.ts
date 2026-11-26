@@ -17,6 +17,7 @@
 import type { ICellData, IWorkbookData, Univer } from '@univerjs/core';
 import {
     BooleanNumber,
+    CellValueType,
     FormulaType,
     ICommandService,
     isNodeEnv,
@@ -29,10 +30,13 @@ import { FUniver } from '@univerjs/core/facade';
 import {
     excelLegacyLookupFunctions,
     excelReferenceInformationFunctions,
+    excelTextSerializationFunctions,
+    IFormulaRuntimeService,
     SetFormulaCalculationStartMutation,
     UniverFormulaEnginePlugin,
 } from '@univerjs/engine-formula';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { CalculationMode } from '../../config/config';
 import { UniverSheetsFormulaPlugin } from '../../plugin';
 import { createFormulaTestBed } from '../../services/__tests__/util';
 import '@univerjs/engine-formula/facade';
@@ -387,6 +391,107 @@ describe('standalone Sheet formula calculation trigger', () => {
         await formulaEditResultApplied;
         expect(output.getValue()).toBe(9);
         expect(calculationStarts).toBe(3);
+    });
+
+    it('learns region reads once for cached formulas and follows edits and their dependents', async () => {
+        univer.registerPlugin(UniverSheetsFormulaPlugin, { initialFormulaComputing: CalculationMode.WHEN_EMPTY });
+        const api = FUniver.newAPI(univer);
+        const data = createWorkbookData();
+        data.sheets['sheet-1']!.cellData = { 0: {
+            0: { v: '1,00,001', t: CellValueType.STRING },
+            1: { f: '=A1+0', v: '#VALUE!' },
+            2: { f: '=IFERROR(B1+1,-1)', v: -1 },
+            3: { f: '=E1+0', v: 10 },
+            4: { v: 10 },
+            5: { f: '=2+3', v: 5 },
+            6: { f: '=1+1' },
+            7: { f: '=LET(x,100001,TEXT(x,"#,##0"))', v: '100,001' },
+            8: { f: '=LAMBDA(x,TEXT(x,"#,##0"))(100001)', v: '100,001' },
+            9: { f: '=LET(x,3,x)', v: 3 },
+        } };
+        const sheet = api.createWorkbook(data).getActiveSheet();
+        const injector = univer.__getInjector();
+        const runtime = injector.get(IFormulaRuntimeService);
+        const calculated = new Set<number>();
+        const setRuntimeData = runtime.setRuntimeData.bind(runtime);
+        vi.spyOn(runtime, 'setRuntimeData').mockImplementation((value) => {
+            calculated.add(runtime.currentColumn);
+            return setRuntimeData(value);
+        });
+        const initial = api.getFormula().onCalculationResultApplied(10_000);
+        injector.get(LifecycleService).stage = LifecycleStages.Rendered;
+        await initial;
+        expect([...calculated]).toEqual([6]);
+
+        const switchRegion = async (region: string) => {
+            calculated.clear();
+            const applied = api.getFormula().onCalculationResultApplied(10_000);
+            api.setRegion(region);
+            await applied;
+            return [...calculated].sort();
+        };
+        expect(await switchRegion('en-IN')).toEqual([1, 2, 3, 7, 8]);
+        expect(sheet.getRange('H1:I1').getValues()).toEqual([['1,00,001', '1,00,001']]);
+        expect(sheet.getRange('B1:C1').getValues()).toEqual([[100001, 100002]]);
+        expect(await switchRegion('enUS')).toEqual([1, 2, 7, 8]);
+        expect(sheet.getRange('B1:C1').getValues()).toEqual([['#VALUE!', -1]]);
+
+        const edit = api.getFormula().onCalculationResultApplied(10_000);
+        sheet.getRange('B1').setFormula('=E1+1');
+        sheet.getRange('G1').setFormula('=TEXT(100001,"#,##0")');
+        await edit;
+        expect(await switchRegion('en-IN')).toEqual([6, 7, 8]);
+        expect(sheet.getRange('G1').getValue()).toBe('1,00,001');
+    });
+
+    it.each([false, true])('uses the calculation region for numeric text (Excel overrides: %s)', async (excelOverrides) => {
+        const injector = univer.__getInjector();
+        if (excelOverrides) {
+            univer.registerPlugin(UniverFormulaEnginePlugin, { function: excelTextSerializationFunctions });
+        }
+        univer.registerPlugin(UniverSheetsFormulaPlugin);
+
+        const api = FUniver.newAPI(univer);
+        api.setRegion('en-IN');
+        const data = createWorkbookData();
+        Object.assign(data.sheets['sheet-1']!.cellData![0], {
+            0: { v: 100000 },
+            1: { f: '=TEXT(A1,"#,##0")' },
+            2: { f: '=FIXED(A1,2)' },
+            3: { f: '=FIXED(A1,2,TRUE)' },
+            4: { f: '=DOLLAR(A1,2)' },
+            5: { f: '=VALUE(B1)' },
+            6: { f: '=--B1' },
+            7: { f: '=--"1,00,001"' },
+            8: { f: '=IFERROR(H1+1,-1)' },
+            9: { f: '=VALUE("1,2,3")' },
+            10: { f: '=VALUE("1234,5678")' },
+            11: { f: '=VALUE("0,123")' },
+            12: { f: '=VALUE("12,34,567%")' },
+            13: { f: '=VALUE("12,34,567e2")' },
+            14: { f: '=TEXT(B1,"0.0")' },
+            15: { f: '=TEXT("1,00,001","0.0")' },
+            16: { f: '=TEXT("1,2,3","0.0")' },
+        });
+        const sheet = api.createWorkbook(data).getActiveSheet();
+
+        const initialResult = api.getFormula().onCalculationResultApplied(10_000);
+        injector.get(LifecycleService).stage = LifecycleStages.Rendered;
+        await initialResult;
+        expect(sheet.getRange('B1:E1').getValues()).toEqual([['1,00,000', '1,00,000.00', '100000.00', '₹1,00,000.00']]);
+
+        expect(sheet.getRange('O1:Q1').getValues()).toEqual([['100000.0', '100001.0', '1,2,3']]);
+        expect(sheet.getRange('F1:N1').getValues()).toEqual([[100000, 100000, 100001, 100002, '#VALUE!', 12345678, '#VALUE!', 12345.67, 123456700]]);
+
+        const switched = api.getFormula().onCalculationResultApplied(10_000);
+        api.setRegion('enUS');
+        await switched;
+        expect(sheet.getRange('O1:Q1').getValues()).toEqual([['100000.0', '1,00,001', '1,2,3']]);
+        expect(sheet.getRange('B1:I1').getValues()).toEqual([['100,000', '100,000.00', '100000.00', '$100,000.00', 100000, 100000, '#VALUE!', -1]]);
+        const editResult = api.getFormula().onCalculationResultApplied(10_000);
+        sheet.getRange('A1').setValue(100001);
+        await editResult;
+        expect(sheet.getRange('B1:E1').getValues()).toEqual([['100,001', '100,001.00', '100001.00', '$100,001.00']]);
     });
 });
 

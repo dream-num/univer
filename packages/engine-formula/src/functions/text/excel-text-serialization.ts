@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { LocaleType } from '@univerjs/core';
 import type { IUniverEngineFormulaConfig } from '../../config/config';
 import type { BaseReferenceObject } from '../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../engine/value-object/array-value-object';
@@ -276,11 +275,11 @@ abstract class ExcelCharacterWidth extends BaseFunction {
     override minParams = 1;
     override maxParams = 1;
 
-    private _getRegion?: () => LocaleType;
+    private _getRegion?: () => string;
 
     protected abstract _convertWidth(text: string): string;
 
-    override bindCalculationRegion(getRegion: () => LocaleType): void {
+    override bindCalculationRegion(getRegion: () => string): void {
         this._getRegion = getRegion;
     }
 

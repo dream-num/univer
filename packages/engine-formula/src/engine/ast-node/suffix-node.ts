@@ -43,7 +43,7 @@ export class SuffixNode extends BaseAstNode {
         return NodeType.SUFFIX;
     }
 
-    override execute(dateSystem: DateSystem = DateSystem.Date1900) {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900, readRegion?: () => string) {
         const children = this.getChildren();
         let value = children[0]?.getValue();
         let result: FunctionVariantType;
@@ -54,10 +54,10 @@ export class SuffixNode extends BaseAstNode {
 
         if (this._operatorString === suffixToken.PERCENTAGE) {
             if (value.isReferenceObject()) {
-                value = (value as BaseReferenceObject).withDateSystem(dateSystem).toArrayValueObject();
+                value = (value as BaseReferenceObject).withDateSystem(dateSystem, readRegion).toArrayValueObject();
             }
             result = this._functionExecutor.calculate(
-                (value as BaseValueObject).withDateSystem(dateSystem),
+                (value as BaseValueObject).withDateSystem(dateSystem, readRegion),
                 NumberValueObject.create(100)
             ) as FunctionVariantType;
 
@@ -71,7 +71,7 @@ export class SuffixNode extends BaseAstNode {
         } else {
             result = ErrorValueObject.create(ErrorType.VALUE);
         }
-        this.setValue(result.withDateSystem(dateSystem));
+        this.setValue(result.withDateSystem(dateSystem, readRegion));
     }
 
     private _handlerPound(value: FunctionVariantType): FunctionVariantType {

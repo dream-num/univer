@@ -32,6 +32,7 @@ import {
     LocaleService,
     ObjectMatrix,
     Range,
+    RegionService,
     ThemeService,
     Tools,
     UniverInstanceType,
@@ -68,6 +69,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
         @Inject(ICommandService) private _commandService: ICommandService,
         @Inject(INumfmtService) private _numfmtService: INumfmtService,
         @Inject(LocaleService) private _localeService: LocaleService,
+        @Inject(RegionService) private _regionService: RegionService,
         @IConfigService private readonly _configService: IConfigService
     ) {
         super();
@@ -82,8 +84,12 @@ export class SheetsNumfmtCellContentController extends Disposable {
         return this._locale$.getValue() ?? getNumfmtLocaleTag(workbook?.getSnapshot().locale ?? this._localeService.getCurrentLocale());
     }
 
+    public get region() {
+        return this._regionService.getCurrentRegion();
+    }
+
     private _initInterceptorCellContent() {
-        this.disposeWithMe(merge(this._locale$, this._localeService.currentLocale$).subscribe(() => {
+        this.disposeWithMe(merge(this._locale$, this._localeService.currentLocale$, this._regionService.currentRegion$).subscribe(() => {
             this._renderCache.reset();
         }));
 
@@ -170,7 +176,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
             return { ...formattedCell, ...cache.result };
         }
 
-        const info = getPatternPreviewIgnoreGeneral(pattern as string, Number(cell.v), locale, dateSystem);
+        const info = getPatternPreviewIgnoreGeneral(pattern as string, Number(cell.v), locale, dateSystem, this.region);
         const res: ICellDataForSheetInterceptor = { v: info.result, t: CellValueType.NUMBER };
         if (info.result === '') {
             res.coverable = false;

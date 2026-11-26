@@ -93,7 +93,7 @@ export class BaseValueObject extends ObjectClassType {
     }
 
     /** Bind the current calculation context in place before the value is used. */
-    withDateSystem(dateSystem: DateSystem): this {
+    withDateSystem(dateSystem: DateSystem, _readRegion?: () => string): this {
         this._dateSystem = dateSystem;
         return this;
     }

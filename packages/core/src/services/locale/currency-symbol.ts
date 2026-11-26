@@ -14,30 +14,19 @@
  * limitations under the License.
  */
 
-import { LocaleType } from '../../types/enum/locale-type';
+import { regionCurrencySymbols } from '../../shared/numfmt/currency-symbols';
+import { getRegionLocale } from '../../types/enum/locale-type';
 
-const localeCurrencySymbolMap = new Map<LocaleType, string>([
-    [LocaleType.EN_US, '$'],
-    [LocaleType.RU_RU, '₽'],
-    [LocaleType.VI_VN, '₫'],
-    [LocaleType.ZH_CN, '¥'],
-    [LocaleType.ZH_TW, 'NT$'],
-    [LocaleType.ZH_HK, 'HK$'],
-    [LocaleType.FR_FR, '€'],
-    [LocaleType.FA_IR, '﷼'],
-    [LocaleType.KO_KR, '₩'],
-    [LocaleType.ES_ES, '€'],
-    [LocaleType.CA_ES, '€'],
-    [LocaleType.SK_SK, '€'],
-    [LocaleType.JA_JP, '¥'],
-    [LocaleType.PT_BR, 'R$'],
-    [LocaleType.DE_DE, '€'],
-    [LocaleType.IT_IT, '€'],
-    [LocaleType.ID_ID, 'Rp'],
-    [LocaleType.PL_PL, 'zł'],
-    [LocaleType.AR_SA, '﷼'],
-]);
+let lastRegion: string | undefined;
+let lastSymbol = '$';
 
-export function getCurrencySymbolByLocale(locale: LocaleType): string {
-    return localeCurrencySymbolMap.get(locale) || '$';
+export function getCurrencySymbolByLocale(region: string): string {
+    if (region !== lastRegion) {
+        const locale = getRegionLocale(region)?.maximize();
+        lastSymbol = locale
+            ? regionCurrencySymbols.get(locale.baseName) ?? regionCurrencySymbols.get(locale.region ?? '') ?? '¤'
+            : '$';
+        lastRegion = region;
+    }
+    return lastSymbol;
 }

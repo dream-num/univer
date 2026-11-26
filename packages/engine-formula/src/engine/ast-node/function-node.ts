@@ -97,6 +97,10 @@ export class FunctionNode extends BaseAstNode {
         }
     }
 
+    override mayReadCalculationRegion(): boolean {
+        return Boolean(this._functionExecutor.bindCalculationRegion) || super.mayReadCalculationRegion();
+    }
+
     override get nodeType() {
         return NodeType.FUNCTION;
     }
@@ -186,14 +190,14 @@ export class FunctionNode extends BaseAstNode {
             this._functionExecutor.lazyIfReferenceArrayArgumentIndexes.includes(index);
     }
 
-    override async executeAsync(dateSystem: DateSystem = DateSystem.Date1900) {
+    override async executeAsync(dateSystem: DateSystem = DateSystem.Date1900, readRegion?: () => string) {
         const children = this.getChildren();
 
         this._compatibility();
 
         const resultVariant = this._calculateReferenceEndpoint(children) ?? (this._functionExecutor.needsAstChildren
             ? this._calculateAst(children, dateSystem)
-            : await this._calculateAsync(this._collectVariants(children, dateSystem), dateSystem));
+            : await this._calculateAsync(this._collectVariants(children, dateSystem, readRegion), dateSystem));
         let result: FunctionVariantType;
 
         if (resultVariant.isAsyncObject() || resultVariant.isAsyncArrayObject()) {
@@ -202,7 +206,7 @@ export class FunctionNode extends BaseAstNode {
             result = resultVariant as FunctionVariantType;
         }
 
-        result = this._normalizeTopLevelLegacyArrayResult(result).withDateSystem(dateSystem) as FunctionVariantType;
+        result = this._normalizeTopLevelLegacyArrayResult(result).withDateSystem(dateSystem, readRegion) as FunctionVariantType;
 
         this._setEmbeddedArrayFormulaToResult(result);
 
@@ -214,16 +218,16 @@ export class FunctionNode extends BaseAstNode {
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
-    override execute(dateSystem: DateSystem = DateSystem.Date1900) {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900, readRegion?: () => string) {
         const children = this.getChildren();
 
         this._compatibility();
 
         const resultVariant = (this._calculateReferenceEndpoint(children) ?? (this._functionExecutor.needsAstChildren
             ? this._calculateAst(children, dateSystem)
-            : this._calculate(this._collectVariants(children, dateSystem), dateSystem))) as FunctionVariantType;
+            : this._calculate(this._collectVariants(children, dateSystem, readRegion), dateSystem))) as FunctionVariantType;
 
-        const result = this._normalizeTopLevelLegacyArrayResult(resultVariant).withDateSystem(dateSystem) as FunctionVariantType;
+        const result = this._normalizeTopLevelLegacyArrayResult(resultVariant).withDateSystem(dateSystem, readRegion) as FunctionVariantType;
 
         this._setEmbeddedArrayFormulaToResult(result);
 
@@ -257,12 +261,12 @@ export class FunctionNode extends BaseAstNode {
         return calculate.call(this._functionExecutor, variants);
     }
 
-    private _collectVariants(children: BaseAstNode[], dateSystem: DateSystem): BaseValueObject[] {
+    private _collectVariants(children: BaseAstNode[], dateSystem: DateSystem, readRegion?: () => string): BaseValueObject[] {
         const variants: BaseValueObject[] = [];
         const childrenCount = children.length;
 
         for (let i = 0; i < childrenCount; i++) {
-            const object = this._getChildVariant(children[i], dateSystem);
+            const object = this._getChildVariant(children[i], dateSystem, readRegion);
 
             if (object == null) {
                 continue;
@@ -274,7 +278,7 @@ export class FunctionNode extends BaseAstNode {
         return variants;
     }
 
-    private _getChildVariant(child: BaseAstNode, dateSystem: DateSystem): FunctionVariantType | undefined {
+    private _getChildVariant(child: BaseAstNode, dateSystem: DateSystem, readRegion?: () => string): FunctionVariantType | undefined {
         const object = child.getValue();
 
         if (object == null) {
@@ -298,10 +302,10 @@ export class FunctionNode extends BaseAstNode {
         // In the SUBTOTAL function, we need to get rowData information, we can only use ReferenceObject
         if (object.isReferenceObject() && !this._functionExecutor.needsReferenceObject) {
             // Array converted from reference object needs to be marked
-            return (object as BaseReferenceObject).withDateSystem(dateSystem).toArrayValueObject();
+            return (object as BaseReferenceObject).withDateSystem(dateSystem, readRegion).toArrayValueObject();
         }
 
-        return object.withDateSystem(dateSystem);
+        return object.withDateSystem(dateSystem, readRegion);
     }
 
     isAffectedBySheetMetadata(sheetOrderChanged: boolean, sheetSizeChanged: boolean): boolean {

@@ -86,7 +86,7 @@ export interface ICalculateFormulaService {
     execute(formulaDatasetConfig: IFormulaDatasetConfig): Promise<void>;
     stopFormulaExecution(): void;
     calculate(formulaString: string, transformSuffix?: boolean, unitId?: string): void;
-    executeFormulas(formulas: IFormulaStringMap, rowData?: IUnitRowData): Promise<IFormulaExecuteResultMap>;
+    executeFormulas(formulas: IFormulaStringMap, rowData?: IUnitRowData, region?: string): Promise<IFormulaExecuteResultMap>;
     getAllDependencyJson(rowData?: IUnitRowData): Promise<IFormulaDependencyTreeJson[]>;
     getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number, rowData?: IUnitRowData): Promise<IFormulaDependencyTreeFullJson | undefined>;
     getRangeDependents(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]>;
@@ -671,6 +671,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 };
                 let value: FunctionVariantType;
 
+                const readsBefore = this._currentConfigService.calculationRegionReadCount;
                 if (interpreter.checkAsyncNode(nodeData.node)) {
                     value = await interpreter.executeAsync(nodeData);
                 } else {
@@ -682,6 +683,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                     return;
                 }
 
+                this._formulaDependencyGenerator.recordCalculationRegionRead?.(tree.treeId, this._currentConfigService.calculationRegionReadCount !== readsBefore);
                 if (tree.formulaId != null) {
                     this._runtimeService.setRuntimeOtherData(tree.formulaId, tree.refOffsetX, tree.refOffsetY, value);
                 } else {
@@ -708,14 +710,12 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         return this._runtimeService.getAllRuntimeData();
     }
 
-    async executeFormulas(formulas: IFormulaStringMap, rowData?: IUnitRowData) {
+    async executeFormulas(formulas: IFormulaStringMap, rowData?: IUnitRowData, region?: string) {
         if (this._disposed) {
             return Object.create(null) as IFormulaExecuteResultMap;
         }
         try {
-            this._currentConfigService.loadDataLite(
-                rowData
-            );
+            this._currentConfigService.loadDataLite(rowData, region);
 
             const unitData = this._currentConfigService.getUnitData();
 

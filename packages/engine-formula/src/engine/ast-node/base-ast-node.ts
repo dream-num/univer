@@ -98,6 +98,26 @@ export class BaseAstNode {
         return undefined;
     }
 
+    /** A cached formula may not have been executed since opening the workbook. */
+    mayReadCalculationRegion(): boolean {
+        switch (this.nodeType) {
+            case NodeType.LAMBDA:
+            case NodeType.LAMBDA_PARAMETER:
+            case NodeType.UNION:
+            case NodeType.ROOT:
+                return Boolean(this._definedNames?.length) || this._children.some((child) => child.mayReadCalculationRegion());
+            case NodeType.OPERATOR:
+            case NodeType.PREFIX:
+            case NodeType.SUFFIX:
+            case NodeType.FUNCTION:
+                return this._children.some((child) => child.nodeType === NodeType.VALUE
+                    ? child.getToken().includes('"')
+                    : child.nodeType !== NodeType.NULL && child.nodeType !== NodeType.ERROR);
+            default:
+                return Boolean(this._definedNames?.length);
+        }
+    }
+
     isForcedCalculateFunction() {
         return this._isForcedCalculateFunction;
     }
@@ -177,7 +197,7 @@ export class BaseAstNode {
         this._calculateState = true;
     }
 
-    execute(_dateSystem?: DateSystem) {
+    execute(_dateSystem?: DateSystem, _readRegion?: () => string) {
         /* abstract */
     }
 
@@ -185,7 +205,7 @@ export class BaseAstNode {
         /* abstract */
     }
 
-    async executeAsync(_dateSystem?: DateSystem): Promise<AstNodePromiseType> {
+    async executeAsync(_dateSystem?: DateSystem, _readRegion?: () => string): Promise<AstNodePromiseType> {
         /* abstract */
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }

@@ -65,6 +65,7 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     private _dateSystem = DateSystem.Date1900;
+    private _readRegion?: () => string;
 
     private _forcedSheetId: Nullable<string> = '';
 
@@ -181,7 +182,8 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._dateSystem;
     }
 
-    withDateSystem(dateSystem: DateSystem): this {
+    withDateSystem(dateSystem: DateSystem, readRegion?: () => string): this {
+        this._readRegion = readRegion;
         this._dateSystem = dateSystem;
         return this;
     }
@@ -516,20 +518,21 @@ export class BaseReferenceObject extends ObjectClassType {
             const pattern = this._getPatternByCell(cell);
 
             if (isTextFormat(pattern)) {
-                return StringValueObject.create(value.toString()).withDateSystem(this._dateSystem);
+                return StringValueObject.create(value.toString()).withDateSystem(this._dateSystem, this._readRegion);
             }
 
             return createNumberValueObjectByRawValue(value, pattern).withDateSystem(this._dateSystem);
         }
         if (cellValueType === CellValueType.STRING || cellValueType === CellValueType.FORCE_STRING) {
             // A1 is `"test"`, =A1 also needs to get `"test"`
-            return StringValueObject.create(value.toString()).withDateSystem(this._dateSystem);
+            return StringValueObject.create(value.toString()).withDateSystem(this._dateSystem, this._readRegion);
         }
         if (cellValueType === CellValueType.BOOLEAN) {
             return createBooleanValueObjectByRawValue(value);
         }
 
-        return ValueObjectFactory.create(value, false, this._dateSystem);
+        const result = ValueObjectFactory.create(value, false, this._dateSystem);
+        return result.isString() ? result.withDateSystem(this._dateSystem, this._readRegion) : result;
     }
 
     private _getPatternByCell(cell: ICellData) {

@@ -111,7 +111,7 @@ export class BaseFunction {
     calculateReferenceEndpoint?(variants: FunctionVariantType[]): FunctionVariantType;
     preservesReferenceInRangeEndpointArgument?(argumentIndex: number, argumentCount: number): boolean;
 
-    bindCalculationRegion?(getRegion: () => LocaleType): void;
+    bindCalculationRegion?(getRegion: () => string): void;
     bindCalculationTimestamp?(getTimestamp: () => number): void;
     bindExplicitDynamicArrayFormula?(isExplicit: () => boolean): void;
 

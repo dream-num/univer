@@ -38,12 +38,12 @@ export class ValueNode extends BaseAstNode {
         return NodeType.VALUE;
     }
 
-    override execute(dateSystem: DateSystem = DateSystem.Date1900): void {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900, readRegion?: () => string): void {
         const token = this.getToken();
         const tokenTrim = token.trim();
         if (tokenTrim.startsWith('"') && tokenTrim.endsWith('"')) {
             this.setValue(
-                StringValueObject.create(tokenTrim.slice(1, -1).replace(/""/g, '"')).withDateSystem(dateSystem)
+                StringValueObject.create(tokenTrim.slice(1, -1).replace(/""/g, '"')).withDateSystem(dateSystem, readRegion)
             );
             return;
         }

@@ -15,9 +15,9 @@
  */
 
 import type { IRTreeItem, IUnitRange, Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable, ObjectMatrix, RTree } from '@univerjs/core';
 import type { AstRootNode } from '../engine/ast-node';
 import type { FormulaDependencyTree, IFormulaDependencyTree } from '../engine/dependency/dependency-tree';
+import { createIdentifier, Disposable, ObjectMatrix, RTree } from '@univerjs/core';
 
 export interface IDependencyManagerService {
     dispose(): void;
@@ -49,6 +49,7 @@ export interface IDependencyManagerService {
     hasDependencyRTreeCache(treeId: number): boolean;
     searchDependency(search: IUnitRange[], exceptTreeIds?: Set<number>): Set<number>;
 
+    readonly calculationRegionReads?: Map<number, boolean>;
     getLastTreeId(): number;
 
     getTreeById(treeId: number): Nullable<IFormulaDependencyTree>;
@@ -245,6 +246,7 @@ export class DependencyManagerBaseService extends Disposable implements IDepende
  * thereby completing the calculation of the entire dependency tree.
  */
 export class DependencyManagerService extends DependencyManagerBaseService implements IDependencyManagerService {
+    readonly calculationRegionReads = new Map<number, boolean>();
     protected _allTreeMap: Map<number, IRTreeItem[]> = new Map();
 
     protected override _dependencyRTreeCache: RTree = new RTree(true); // true: open kd-tree search state
@@ -278,6 +280,7 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
         this._featureFormulaData.clear();
         this._formulaData.clear();
         this._dependencyRTreeCache.clear();
+        this.calculationRegionReads.clear();
         this._allTreeMap.clear();
         this._restDependencyTreeId();
 
@@ -532,6 +535,7 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
     private _removeDependencyRTreeCaches(treeIds: number[]) {
         const searchRanges: IRTreeItem[] = [];
         for (const treeId of treeIds) {
+            this.calculationRegionReads.delete(treeId);
             const bounds = this._allTreeMap.get(treeId);
             if (!bounds) {
                 continue;

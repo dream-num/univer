@@ -15,22 +15,21 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { LocaleType } from '../../types/enum/locale-type';
 import { BehaviorSubject } from 'rxjs';
 import { Inject } from '../../common/di';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { LocaleService } from '../locale/locale.service';
 
 export class RegionService extends Disposable {
-    private readonly _currentRegion$: BehaviorSubject<LocaleType>;
-    readonly currentRegion$: Observable<LocaleType>;
+    private readonly _currentRegion$: BehaviorSubject<string>;
+    readonly currentRegion$: Observable<string>;
 
     private _hasExplicitRegion = false;
 
     constructor(@Inject(LocaleService) private readonly _localeService: LocaleService) {
         super();
 
-        this._currentRegion$ = new BehaviorSubject<LocaleType>(this._localeService.getCurrentLocale());
+        this._currentRegion$ = new BehaviorSubject<string>(this._localeService.getCurrentLocale());
         this.currentRegion$ = this._currentRegion$.asObservable();
 
         this.disposeWithMe(this._localeService.currentLocale$.subscribe((locale) => {
@@ -41,12 +40,12 @@ export class RegionService extends Disposable {
         this.disposeWithMe(toDisposable(() => this._currentRegion$.complete()));
     }
 
-    setRegion(region: LocaleType): void {
+    setRegion(region: string): void {
         this._hasExplicitRegion = true;
         this._currentRegion$.next(region);
     }
 
-    getCurrentRegion(): LocaleType {
+    getCurrentRegion(): string {
         return this._currentRegion$.value;
     }
 }

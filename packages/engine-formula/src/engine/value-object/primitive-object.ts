@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DateSystem, excelDateSerial, getNumfmtParseValueFilter, isRealNum, numfmt, Tools } from '@univerjs/core';
+import { DateSystem, excelDateSerial, getNumfmtNumberGrouping, getNumfmtParseValueFilter, isRealNum, numfmt, Tools } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
@@ -32,7 +32,20 @@ export type PrimitiveValueType = string | boolean | number | null;
 export type FormulaFunctionValueType = PrimitiveValueType | PrimitiveValueType[][] | BaseValueObject;
 export type FormulaFunctionResultValueType = PrimitiveValueType | PrimitiveValueType[][];
 
-function parseFormulaNumericText(rawValue: string): { v: number; z?: string } | ErrorValueObject | null {
+function isValidGroupedMantissa(mantissa: string, readRegion?: () => string): boolean {
+    const parts = mantissa.split('.');
+    if (parts.length > 2 || (parts.length === 2 && !/^\d*$/.test(parts[1]))) return false;
+    const groups = parts[0].split(',');
+    if (!/[1-9]/.test(groups[0]) || groups[groups.length - 1].length < 3) return false;
+    let shortest = 3;
+    for (let index = 1; index < groups.length - 1; index++) {
+        shortest = Math.min(shortest, groups[index].length);
+    }
+    // Wider groups are accepted. Only two-digit interior groups distinguish regions.
+    return shortest >= 3 || (shortest === 2 && getNumfmtNumberGrouping(readRegion?.())[1] === 2);
+}
+
+export function parseFormulaNumericText(rawValue: string, readRegion?: () => string): { v: number; z?: string } | ErrorValueObject | null {
     const match = rawValue.match(/([0-9.,]+)(?:[eE]([+-]?[0-9]+))?/);
     if (!match) return null;
     const mantissa = match[1];
@@ -49,11 +62,11 @@ function parseFormulaNumericText(rawValue: string): { v: number; z?: string } | 
     const start = match.index!;
     const validation = rawValue.slice(0, start) + probe + rawValue.slice(start + match[0].length);
     if (/[0-9][eE][+-]?[0-9]/.test(validation)) return null;
-    const parsed = numfmt.parseNumber(validation);
+    const parsed = numfmt.parseNumber(validation) ?? (mantissa.includes(',') ? numfmt.parseNumber(rawValue.slice(0, start) + probe.replace(/,/g, '') + rawValue.slice(start + match[0].length)) : null);
     if (!parsed) return null;
     const percentCount = (rawValue.match(/%/g) ?? []).length;
     const validMantissa = mantissa.includes(',')
-        ? /^[0-9]{1,3}(?:,[0-9]{3})+(?:\.[0-9]*)?$/.test(mantissa)
+        ? isValidGroupedMantissa(mantissa, readRegion)
         : /^(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)$/.test(mantissa);
     if (!validMantissa || percentCount > 1) return ErrorValueObject.create(ErrorType.VALUE);
     const [integer, fraction = ''] = mantissa.replace(/,/g, '').split('.');
@@ -1485,6 +1498,13 @@ const STRING_CACHE_LRU_COUNT = 100000;
 
 export const StringValueObjectCache = new FormulaAstLRU<StringValueObject>(STRING_CACHE_LRU_COUNT);
 export class StringValueObject extends BaseValueObject {
+    private _readRegion?: () => string;
+
+    override withDateSystem(dateSystem: DateSystem, readRegion?: () => string): this {
+        this._readRegion = this._value.includes(',') ? readRegion : undefined;
+        return super.withDateSystem(dateSystem);
+    }
+
     private _value: string;
     private _isHyperlink: boolean = false;
     private _hyperlinkUrl: string = '';
@@ -1492,7 +1512,9 @@ export class StringValueObject extends BaseValueObject {
     private _imageInfo: IStringValueObjectOptions['imageInfo'];
 
     static create(value: string, options?: IStringValueObjectOptions) {
-        const cached = StringValueObjectCache.get(value);
+        // Grouped numeric text carries its evaluator's region reader. Keep it local to that evaluator.
+        const cacheable = !value.includes(',');
+        const cached = cacheable && StringValueObjectCache.get(value);
         if (cached && options && this.checkCacheByOptions(cached, options)) {
             return cached;
         }
@@ -1505,7 +1527,7 @@ export class StringValueObject extends BaseValueObject {
             instance._isImage = options.isImage;
             instance._imageInfo = options.imageInfo;
         }
-        StringValueObjectCache.set(value, instance);
+        if (cacheable) StringValueObjectCache.set(value, instance);
         return instance;
     }
 
@@ -1673,7 +1695,7 @@ export class StringValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const numeric = parseFormulaNumericText(rawValue);
+        const numeric = parseFormulaNumericText(rawValue, this._readRegion);
         if (numeric instanceof ErrorValueObject) return numeric;
         const parseData = numeric ?? getNumfmtParseValueFilter(rawValue, { dateSystem: this.getDateSystem() });
 

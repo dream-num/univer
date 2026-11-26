@@ -15,7 +15,7 @@
  */
 
 import type { LambdaPrivacyVarType } from '../ast-node/base-ast-node';
-import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../../basics/token-type';
+import { DEFAULT_TOKEN_LET_FUNCTION_NAME, DEFAULT_TOKEN_TYPE_LAMBDA_CALL, DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER, DEFAULT_TOKEN_TYPE_PARAMETER } from '../../basics/token-type';
 import { LexerNode } from '../analysis/lexer-node';
 import { isFirstChildParameter } from './function-definition';
 
@@ -27,13 +27,42 @@ export function updateLambdaStatement(
     const children = functionStatementNode.getChildren();
     const childrenCount = children.length;
     const firstChild = children[0];
+    const isLet = functionStatementNode.getToken().trim().toUpperCase() === DEFAULT_TOKEN_LET_FUNCTION_NAME;
     for (let i = 0; i < childrenCount; i++) {
         const node = children[i];
+        if (isLet && i % 2 === 0 && i < childrenCount - 1) {
+            continue;
+        }
         if (isFirstChildParameter(firstChild) && i !== 0) {
             continue;
         }
         if (node instanceof LexerNode) {
             updateLambdaStatement(node, lambdaId, currentLambdaPrivacyVar);
+            const firstArgument = node.getChildren()[0];
+            const isScopedCall = node.getToken() === DEFAULT_TOKEN_TYPE_LAMBDA_CALL && node.getLambdaId() != null;
+            const hasArguments = firstArgument instanceof LexerNode && firstArgument.getToken() === DEFAULT_TOKEN_TYPE_PARAMETER;
+            if (isScopedCall || hasArguments || firstArgument === undefined) {
+                const scopedCallee = isScopedCall && firstArgument instanceof LexerNode ? firstArgument.getChildren()[0] : undefined;
+                const token = (scopedCallee instanceof LexerNode ? scopedCallee.getLambdaParameter() : node.getToken().trim()).toUpperCase();
+                const binding = [...currentLambdaPrivacyVar.keys()].find((name) => name.toUpperCase() === token);
+                if (binding === undefined) {
+                    continue;
+                }
+                const callee = scopedCallee instanceof LexerNode ? scopedCallee : new LexerNode();
+                callee.setToken(DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER);
+                callee.setLambdaId(lambdaId);
+                callee.setLambdaPrivacyVar(currentLambdaPrivacyVar);
+                callee.setLambdaParameter(binding);
+                if (!isScopedCall) {
+                    const calleeParameter = new LexerNode();
+                    calleeParameter.setToken(DEFAULT_TOKEN_TYPE_PARAMETER);
+                    callee.changeToParent(calleeParameter);
+                    node.setToken(DEFAULT_TOKEN_TYPE_LAMBDA_CALL);
+                    node.setLambdaId(lambdaId);
+                    node.addChildrenFirst(calleeParameter);
+                    calleeParameter.setParent(node);
+                }
+            }
         } else {
             const token = node.trim();
             if (currentLambdaPrivacyVar.has(token)) {

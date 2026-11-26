@@ -19,6 +19,11 @@ import { describe, expect, it } from 'vitest';
 import { getCurrencyFormat, getCurrencySymbolIconByLocale } from '../currency-symbols';
 
 describe('currency symbols', () => {
+    it.each(['en-IN', 'mlIN', 'hi-Deva-IN', 'pa-Guru-IN-u-nu-latn'])('uses the Indian currency for %s', (region) => {
+        expect(getCurrencySymbolIconByLocale(region)).toMatchObject({ symbol: '₹', icon: 'RegionalCurrencyIcon' });
+        expect(getCurrencyFormat(region)).toContain('"₹"#,##0.00');
+    });
+
     it('currency symbol helpers', () => {
         expect(getCurrencySymbolIconByLocale(LocaleType.FR_FR)).toEqual({
             icon: 'EuroIcon',
@@ -39,7 +44,7 @@ describe('currency symbols', () => {
         ].map((locale) => getCurrencySymbolIconByLocale(locale).icon)).toEqual([
             'DongIcon',
             'RialIcon',
-            'DollarIcon',
+            'RegionalCurrencyIcon',
             'RupiahIcon',
             'ZlotyIcon',
         ]);

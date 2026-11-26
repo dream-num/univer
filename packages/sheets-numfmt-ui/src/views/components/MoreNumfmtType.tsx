@@ -48,7 +48,8 @@ export function Options() {
     const layoutService = useDependency(ILayoutService);
     const sheetsNumfmtCellContentController = useDependency(SheetsNumfmtCellContentController);
     const direction = useObservable(localeService.direction$, localeService.getDirection());
-    const region = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
+    const locale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
+    const region = useObservable(regionService.explicitRegion$, regionService.getExplicitRegion());
 
     const selectionManagerService = useDependency(SheetsSelectionsService);
     const setNumfmt = (pattern: string | null) => {
@@ -72,9 +73,9 @@ export function Options() {
     };
 
     const menuOptions = useMemo(() => {
-        const currencySymbol = getCurrencySymbolByLocale(region);
-        return MENU_OPTIONS(currencySymbol);
-    }, [region]);
+        const currencySymbol = getCurrencySymbolByLocale(region ?? locale);
+        return MENU_OPTIONS(currencySymbol, region);
+    }, [locale, region]);
 
     const handleClick = (index: number) => {
         if (index === 0) {
@@ -89,14 +90,20 @@ export function Options() {
         }
     };
 
-    const defaultValue = 1220;
-
     return (
         <div dir={direction} className="univer-grid univer-gap-1 univer-p-1.5">
             {menuOptions.map((item, index) => {
                 if (item === '|') {
                     return <Separator key={index} />;
                 }
+
+                const preview = item.pattern && getPatternPreview(
+                    item.pattern,
+                    item.pattern.includes('#,##0') ? 123456 : 1220,
+                    sheetsNumfmtCellContentController.locale,
+                    undefined,
+                    region
+                ).result.trim();
 
                 return (
                     <div
@@ -117,7 +124,7 @@ export function Options() {
                               dark:!univer-text-gray-400
                             `}
                         >
-                            {item.pattern ? getPatternPreview(item.pattern || '', defaultValue, sheetsNumfmtCellContentController.locale, undefined, region).result.trim() : ''}
+                            {preview}
                         </span>
                     </div>
                 );

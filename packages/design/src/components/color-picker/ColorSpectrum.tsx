@@ -153,7 +153,6 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
             top: `${100 - hsv[2]}%`,
             backgroundColor: currentColor,
             transform: isDragging ? 'translate(-50%, -50%) scale(1.1)' : 'translate(-50%, -50%)',
-            transition: isDragging ? 'none' : 'left 0.08s ease-out, top 0.08s ease-out, transform 0.12s ease-out',
         };
     };
 
@@ -166,10 +165,10 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
             className={clsx(
                 `
                   univer-relative univer-size-full univer-touch-none univer-select-none univer-overflow-hidden
-                  univer-rounded-lg
-                  after:univer-pointer-events-none after:univer-absolute after:univer-inset-0 after:univer-rounded-lg
-                  after:univer-ring-1 after:univer-ring-inset after:univer-ring-black/10
-                  dark:after:!univer-ring-white/10
+                  univer-rounded-md
+                  after:univer-pointer-events-none after:univer-absolute after:univer-inset-0 after:univer-rounded-md
+                  after:univer-ring-1 after:univer-ring-inset after:univer-ring-gray-200
+                  dark:after:!univer-ring-gray-600
                 `,
                 focusClassName
             )}
@@ -184,11 +183,16 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
 
             {/* Indicator */}
             <div
-                className={`
-                  univer-pointer-events-none univer-absolute univer-left-0 univer-top-0 univer-box-border univer-size-4
-                  univer-rounded-full univer-border-2 univer-border-solid univer-border-gray-0
-                  univer-shadow-[0_0_0_1px_rgba(0,0,0,0.35),0_2px_6px_rgba(0,0,0,0.28)] univer-will-change-transform
-                `}
+                className={clsx(
+                    `
+                      univer-pointer-events-none univer-absolute univer-left-0 univer-top-0 univer-box-border
+                      univer-size-4 univer-rounded-full univer-border-2 univer-border-solid univer-border-gray-0
+                      univer-shadow-md univer-ring-1 univer-ring-gray-400 univer-will-change-transform
+                      motion-reduce:univer-transition-none
+                      dark:!univer-ring-gray-900
+                    `,
+                    !isDragging && 'univer-transition-[left,top,transform] univer-duration-100'
+                )}
                 style={getIndicatorStyles()}
             />
         </div>

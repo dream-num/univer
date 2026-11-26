@@ -76,7 +76,7 @@ const SIZE_STYLES: Record<InputNumberSize, {
         inputControlsAndClearPadding: 'univer-pr-14 rtl:univer-pl-14 rtl:univer-pr-2',
         clearPositionWithControls: 'univer-right-8 rtl:univer-left-8 rtl:univer-right-auto',
         clearPositionOnly: 'univer-right-2 rtl:univer-left-2 rtl:univer-right-auto',
-        controlsContainer: 'univer-inset-y-[3px] univer-right-[3px] univer-w-6 rtl:univer-left-[3px] rtl:univer-right-auto',
+        controlsContainer: 'univer-inset-y-0.5 univer-right-0.5 univer-w-6 rtl:univer-left-0.5 rtl:univer-right-auto',
         icon: 'univer-size-3.5',
     },
     middle: {
@@ -85,14 +85,14 @@ const SIZE_STYLES: Record<InputNumberSize, {
         inputControlsAndClearPadding: 'univer-pr-16 rtl:univer-pl-16 rtl:univer-pr-3',
         clearPositionWithControls: 'univer-right-9 rtl:univer-left-9 rtl:univer-right-auto',
         clearPositionOnly: 'univer-right-2.5 rtl:univer-left-2.5 rtl:univer-right-auto',
-        controlsContainer: 'univer-inset-y-[3px] univer-right-[3px] univer-w-7 rtl:univer-left-[3px] rtl:univer-right-auto',
+        controlsContainer: 'univer-inset-y-1 univer-right-1 univer-w-7 rtl:univer-left-1 rtl:univer-right-auto',
         icon: 'univer-size-4',
     },
     large: {
         inputControlsPadding: 'univer-pr-11 rtl:univer-pl-11 rtl:univer-pr-4',
         inputClearPadding: 'univer-pr-10 rtl:univer-pl-10 rtl:univer-pr-4',
-        inputControlsAndClearPadding: 'univer-pr-[68px] rtl:univer-pl-[68px] rtl:univer-pr-4',
-        clearPositionWithControls: 'univer-right-11 rtl:univer-left-11 rtl:univer-right-auto',
+        inputControlsAndClearPadding: 'univer-pr-16 rtl:univer-pl-16 rtl:univer-pr-4',
+        clearPositionWithControls: 'univer-right-10 rtl:univer-left-10 rtl:univer-right-auto',
         clearPositionOnly: 'univer-right-3 rtl:univer-left-3 rtl:univer-right-auto',
         controlsContainer: 'univer-inset-y-1 univer-right-1 univer-w-8 rtl:univer-left-1 rtl:univer-right-auto',
         icon: 'univer-size-4',
@@ -648,7 +648,8 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                                     `
                                       univer-box-border univer-flex univer-min-h-0 univer-flex-1 univer-select-none
                                       univer-items-center univer-justify-center univer-border-none univer-bg-transparent
-                                      univer-p-0 univer-leading-none univer-transition-colors univer-duration-150
+                                      univer-p-0 univer-leading-none univer-transition-colors univer-duration-200
+                                      motion-reduce:univer-transition-none
                                     `,
                                     incrementDisabled
                                         ? `
@@ -691,7 +692,8 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                                     `
                                       univer-box-border univer-flex univer-min-h-0 univer-flex-1 univer-select-none
                                       univer-items-center univer-justify-center univer-border-none univer-bg-transparent
-                                      univer-p-0 univer-leading-none univer-transition-colors univer-duration-150
+                                      univer-p-0 univer-leading-none univer-transition-colors univer-duration-200
+                                      motion-reduce:univer-transition-none
                                     `,
                                     decrementDisabled
                                         ? `

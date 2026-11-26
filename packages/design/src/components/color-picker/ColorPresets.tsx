@@ -16,7 +16,7 @@
 
 import { CheckMarkIcon } from '@univerjs/icons';
 import { useCallback } from 'react';
-import { focusClassName } from '../../helper/class-utilities';
+import { borderClassName, focusClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { hexToHsv, hsvToHex, isLightColor } from './color-conversion';
 import { colorPresets } from './presets';
@@ -71,12 +71,12 @@ export function ColorPresets({ hsv, onChange }: IColorPresetsProps) {
                                     className={clsx(
                                         `
                                           univer-relative univer-box-border univer-flex univer-size-6
-                                          univer-items-center univer-justify-center univer-rounded-[5px] univer-border
-                                          univer-border-solid univer-border-black/10 univer-transition-transform
-                                          univer-duration-150
+                                          univer-items-center univer-justify-center univer-rounded
+                                          univer-transition-transform univer-duration-200
                                           group-hover:univer-scale-110
-                                          dark:!univer-border-white/15
+                                          motion-reduce:univer-transform-none motion-reduce:univer-transition-none
                                         `,
+                                        borderClassName,
                                         selected && `
                                           univer-ring-2 univer-ring-primary-600 univer-ring-offset-1
                                           univer-ring-offset-gray-0

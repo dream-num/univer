@@ -16,7 +16,7 @@
 
 export const CHECKERBOARD_BACKGROUND_STYLE = {
     backgroundImage:
-        'linear-gradient(45deg, #E3E5EA 25%, transparent 25%), linear-gradient(-45deg, #E3E5EA 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #E3E5EA 75%), linear-gradient(-45deg, transparent 75%, #E3E5EA 75%)',
+        'linear-gradient(45deg, var(--univer-gray-200) 25%, transparent 25%), linear-gradient(-45deg, var(--univer-gray-200) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--univer-gray-200) 75%), linear-gradient(-45deg, transparent 75%, var(--univer-gray-200) 75%)',
     backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0',
     backgroundSize: '8px 8px',
 } as const;

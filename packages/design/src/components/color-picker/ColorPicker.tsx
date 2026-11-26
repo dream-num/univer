@@ -16,6 +16,8 @@
 
 import { ColorWheelMultiIcon, MoreRightIcon } from '@univerjs/icons';
 import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { borderClassName } from '../../helper/class-utilities';
+import { clsx } from '../../helper/clsx';
 import { isBrowser } from '../../helper/is-browser';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -129,17 +131,20 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
                             }
                         }}
                     >
-                        <div className="univer-h-40 univer-rounded-lg">
+                        <div className="univer-h-40 univer-rounded-md">
                             <ColorSpectrum hsv={hsv} onChange={handleColorChange} />
                         </div>
                         <div className="univer-flex univer-items-center univer-gap-3">
                             <span
                                 aria-hidden="true"
-                                className="
-                                  univer-relative univer-size-9 univer-shrink-0 univer-overflow-hidden univer-rounded-md
-                                  univer-bg-gray-0 univer-ring-1 univer-ring-inset univer-ring-black/10
-                                  dark:!univer-bg-gray-700 dark:!univer-ring-white/15
-                                "
+                                className={clsx(
+                                    `
+                                      univer-relative univer-box-border univer-size-9 univer-shrink-0
+                                      univer-overflow-hidden univer-rounded-md univer-bg-gray-0
+                                      dark:!univer-bg-gray-700
+                                    `,
+                                    borderClassName
+                                )}
                                 style={CHECKERBOARD_BACKGROUND_STYLE}
                             >
                                 <span
@@ -164,7 +169,7 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
                         <footer
                             className="
                               univer-flex univer-justify-end univer-gap-2 univer-border-0 univer-border-t
-                              univer-border-solid univer-border-gray-100 univer-pt-2.5
+                              univer-border-solid univer-border-gray-200 univer-pt-2.5
                               dark:!univer-border-gray-600
                             "
                         >
@@ -187,13 +192,13 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
                         />
                         <div
                             className="
-                              univer-border-0 univer-border-t univer-border-solid univer-border-gray-100 univer-pt-2
+                              univer-border-0 univer-border-t univer-border-solid univer-border-gray-200 univer-pt-2
                               dark:!univer-border-gray-600
                             "
                         >
                             <Button
                                 ref={moreButtonRef}
-                                variant="ghost"
+                                variant="text"
                                 className="
                                   univer-w-full univer-justify-between univer-px-2 univer-font-normal
                                   hover:univer-bg-gray-100
@@ -214,11 +219,14 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
                                 >
                                     {selectedColor && (
                                         <span
-                                            className="
-                                              univer-relative univer-size-4 univer-overflow-hidden univer-rounded
-                                              univer-bg-gray-0 univer-ring-1 univer-ring-inset univer-ring-black/10
-                                              dark:!univer-bg-gray-700 dark:!univer-ring-white/15
-                                            "
+                                            className={clsx(
+                                                `
+                                                  univer-relative univer-box-border univer-size-4 univer-overflow-hidden
+                                                  univer-rounded univer-bg-gray-0
+                                                  dark:!univer-bg-gray-700
+                                                `,
+                                                borderClassName
+                                            )}
                                             style={CHECKERBOARD_BACKGROUND_STYLE}
                                         >
                                             <span
@@ -230,8 +238,9 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
                                     <MoreRightIcon
                                         preserveStrokeWidth
                                         className="
-                                          univer-size-3.5 univer-text-gray-400
+                                          univer-size-3.5 univer-text-gray-500
                                           rtl:univer-rotate-180
+                                          dark:!univer-text-gray-300
                                         "
                                     />
                                 </span>

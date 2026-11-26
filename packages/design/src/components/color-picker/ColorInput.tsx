@@ -38,9 +38,8 @@ interface IColorChannelInputProps {
 }
 
 const CHANNEL_LABEL_CLASS = `
-  univer-select-none univer-text-center univer-text-[11px] univer-font-medium univer-leading-none
-  univer-tracking-wide univer-text-gray-400
-  dark:!univer-text-gray-400
+  univer-select-none univer-text-center univer-text-xs univer-font-medium univer-leading-none univer-text-gray-500
+  dark:!univer-text-gray-300
 `;
 
 function HexInput({ hsv, size, onChange }: IColorChannelInputProps) {
@@ -90,7 +89,7 @@ function HexInput({ hsv, size, onChange }: IColorChannelInputProps) {
                     size={size}
                     className="univer-min-w-0"
                     inputClass={`
-                      !univer-pl-5 !univer-pr-1.5 univer-font-mono univer-tabular-nums univer-uppercase
+                      !univer-pl-5 !univer-pr-1.5 univer-tabular-nums univer-uppercase
                       rtl:!univer-pl-1.5 rtl:!univer-pr-5
                     `}
                     value={inputValue}
@@ -118,8 +117,9 @@ function HexInput({ hsv, size, onChange }: IColorChannelInputProps) {
                     aria-hidden="true"
                     className={`
                       univer-pointer-events-none univer-absolute univer-left-2 univer-top-1/2 -univer-translate-y-1/2
-                      univer-select-none univer-font-mono univer-text-xs univer-text-gray-400
+                      univer-select-none univer-text-xs univer-text-gray-500
                       rtl:univer-left-auto rtl:univer-right-2
+                      dark:!univer-text-gray-300
                     `}
                 >
                     #

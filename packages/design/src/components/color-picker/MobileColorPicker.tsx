@@ -17,6 +17,8 @@
 import { ColorWheelMultiIcon } from '@univerjs/icons';
 import { memo, useCallback, useContext, useEffect, useState } from 'react';
 import type { IColorPickerProps } from './ColorPicker';
+import { borderClassName } from '../../helper/class-utilities';
+import { clsx } from '../../helper/clsx';
 import { isBrowser } from '../../helper/is-browser';
 import { MobileActionRowGroup } from '../action-row/MobileActionRowGroup';
 import { Button } from '../button/Button';
@@ -145,18 +147,21 @@ export function MobileColorPicker({ format = 'hex', value, onChange }: IMobileCo
                 onOpenChange={setVisible}
             >
                 <div data-u-comp="mobile-color-picker-custom" className="univer-grid univer-w-full univer-gap-3">
-                    <div className="univer-h-44 univer-w-full univer-rounded-lg">
+                    <div className="univer-h-44 univer-w-full univer-rounded-md">
                         <MemoizedColorSpectrum hsv={hsv} onChange={handleColorChange} />
                     </div>
 
                     <div className="univer-flex univer-items-center univer-gap-3">
                         <div
                             aria-hidden="true"
-                            className="
-                              univer-relative univer-size-9 univer-flex-shrink-0 univer-overflow-hidden
-                              univer-rounded-md univer-bg-gray-0 univer-ring-1 univer-ring-inset univer-ring-black/10
-                              dark:!univer-bg-gray-700 dark:!univer-ring-white/15
-                            "
+                            className={clsx(
+                                `
+                                  univer-relative univer-box-border univer-size-9 univer-flex-shrink-0
+                                  univer-overflow-hidden univer-rounded-md univer-bg-gray-0
+                                  dark:!univer-bg-gray-700
+                                `,
+                                borderClassName
+                            )}
                             style={CHECKERBOARD_BACKGROUND_STYLE}
                         >
                             <span

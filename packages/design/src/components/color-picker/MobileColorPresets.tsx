@@ -15,6 +15,7 @@
  */
 
 import { CheckMarkIcon } from '@univerjs/icons';
+import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { isLightColor } from './color-conversion';
 import { colorPresets } from './presets';
@@ -48,19 +49,21 @@ export function MobileColorPresets({ value = '', onSelect }: IMobileColorPresets
                           univer-border-solid univer-border-transparent univer-bg-transparent
                           univer-transition-transform
                           active:univer-scale-95 active:univer-bg-gray-100
+                          motion-reduce:univer-transform-none motion-reduce:univer-transition-none
                           dark:active:!univer-bg-gray-700
                         `, {
-                            'univer-ring-2 univer-ring-primary-600 univer-ring-offset-2 univer-ring-offset-gray-0 dark:!univer-ring-primary-400 dark:!univer-ring-offset-gray-800': selected,
+                            'univer-ring-2 univer-ring-primary-600 univer-ring-offset-2 univer-ring-offset-gray-0 dark:!univer-ring-primary-300 dark:!univer-ring-offset-gray-800': selected,
                         })}
                         onClick={() => onSelect(color)}
                     >
                         <span
-                            className={`
-                              univer-flex univer-aspect-square univer-w-8 univer-shrink-0 univer-items-center
-                              univer-justify-center univer-rounded-md univer-border univer-border-solid
-                              univer-border-black/10
-                              dark:!univer-border-white/15
-                            `}
+                            className={clsx(
+                                `
+                                  univer-flex univer-aspect-square univer-w-8 univer-shrink-0 univer-items-center
+                                  univer-justify-center univer-rounded-md
+                                `,
+                                borderClassName
+                            )}
                             style={{ backgroundColor: color }}
                         >
                             {selected && (

@@ -132,8 +132,8 @@ export function AlphaSlider({ hsv, alpha, onChange, onChanged }: IAlphaSliderPro
                 className={clsx(
                     `
                       univer-relative univer-h-3 univer-w-full univer-cursor-pointer univer-rounded-full univer-ring-1
-                      univer-ring-inset univer-ring-black/10
-                      dark:!univer-ring-white/10
+                      univer-ring-inset univer-ring-gray-200
+                      dark:!univer-ring-gray-600
                     `,
                     focusClassName
                 )}
@@ -151,16 +151,20 @@ export function AlphaSlider({ hsv, alpha, onChange, onChanged }: IAlphaSliderPro
                 <div
                     ref={thumbRef}
                     data-u-comp="color-picker-alpha-slider-thumb"
-                    className={`
-                      univer-pointer-events-none univer-absolute univer-top-1/2 univer-box-border univer-size-4
-                      univer-overflow-hidden univer-rounded-full univer-border-2 univer-border-solid
-                      univer-border-gray-0 univer-bg-gray-0
-                      univer-shadow-[0_0_0_1px_rgba(0,0,0,0.25),0_1px_3px_rgba(0,0,0,0.28)] univer-will-change-transform
-                    `}
+                    className={clsx(
+                        `
+                          univer-pointer-events-none univer-absolute univer-top-1/2 univer-box-border univer-size-4
+                          univer-overflow-hidden univer-rounded-full univer-border-2 univer-border-solid
+                          univer-border-gray-0 univer-bg-gray-0 univer-shadow-md univer-ring-1 univer-ring-gray-400
+                          univer-will-change-transform
+                          motion-reduce:univer-transition-none
+                          dark:!univer-ring-gray-900
+                        `,
+                        !isDragging && 'univer-transition-[left,transform] univer-duration-100'
+                    )}
                     style={{
                         left: `calc(8px + (100% - 16px) * ${safeAlpha})`,
                         transform: isDragging ? 'translate(-50%, -50%) scale(1.1)' : 'translate(-50%, -50%)',
-                        transition: isDragging ? 'none' : 'left 0.08s ease-out, transform 0.12s ease-out',
                         ...CHECKERBOARD_BACKGROUND_STYLE,
                     }}
                 >

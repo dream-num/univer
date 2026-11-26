@@ -100,7 +100,7 @@
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "rxjs": "7.8.2",
-        "tsrs": "7.1.0-beta.tsrs2",
+        "tsrs": "7.1.0-beta.tsrs5",
         "vitest": "^5.1.1"
     }
 }

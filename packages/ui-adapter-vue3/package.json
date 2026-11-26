@@ -72,7 +72,7 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "tsrs": "7.1.0-beta.tsrs2",
+        "tsrs": "7.1.0-beta.tsrs5",
         "vitest": "^5.1.1",
         "vue": "^3.5.45"
     }

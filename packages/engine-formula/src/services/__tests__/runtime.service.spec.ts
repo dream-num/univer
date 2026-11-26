@@ -32,7 +32,7 @@ import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import { ErrorType } from '../../basics/error-type';
 import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { createNewArray } from '../../engine/utils/array-object';
-import { NullValueObject, NumberValueObject, StringValueObject } from '../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject, OmittedValueObject, StringValueObject } from '../../engine/value-object/primitive-object';
 import { FormulaDataModel } from '../../models/formula-data.model';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../current-data.service';
 import { FormulaCacheService } from '../formula-cache.service';
@@ -227,6 +227,18 @@ describe('FormulaRuntimeService', () => {
             expect(index.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows).toEqual([2, 4]);
         } finally {
             index.clear();
+            injector.dispose();
+        }
+    });
+
+    it('writes an omitted LAMBDA argument result as 0, as Excel does', () => {
+        const { injector, runtime } = createRuntimeService();
+        try {
+            runtime.setCurrent(2, 3, 20, 20, 'sheet', 'unit');
+            runtime.setRuntimeData(OmittedValueObject.create());
+            expect(runtime.getUnitData().unit?.sheet?.getValue(2, 3)?.v).toBe(0);
+        } finally {
+            runtime.getCalculationCache()?.invertedIndex.clear();
             injector.dispose();
         }
     });

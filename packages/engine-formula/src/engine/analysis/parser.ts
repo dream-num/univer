@@ -15,8 +15,8 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { LambdaNode } from '../ast-node/lambda-node';
 import { Disposable, Inject, sortRules } from '@univerjs/core';
+import type { LambdaNode } from '../ast-node/lambda-node';
 import { ErrorType } from '../../basics/error-type';
 import {
     DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
@@ -120,6 +120,9 @@ export class AstTreeBuilder extends Disposable {
 
                 const parentChildren = parentAstNode.getChildren();
                 const valueNode = parentChildren[i];
+                if (valueNode instanceof NullNode) {
+                    valueNode.setOmittedLambdaArgument();
+                }
                 if (valueNode != null) {
                     currentLambdaPrivacyVar.set(currentLambdaPrivacyVarKeys[i], valueNode);
                 }

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import { NullValueObject } from '../value-object/primitive-object';
+import { NullValueObject, OmittedValueObject } from '../value-object/primitive-object';
 import { BaseAstNode } from './base-ast-node';
 import { NodeType } from './node-type';
 
 export class NullNode extends BaseAstNode {
+    private _isOmittedLambdaArgument = false;
+
     constructor(private _operatorString: string) {
         super(_operatorString);
     }
@@ -27,7 +29,14 @@ export class NullNode extends BaseAstNode {
         return NodeType.NULL;
     }
 
+    /**
+     * Marks this node as an empty argument of a LAMBDA call, so ISOMITTED returns TRUE for it.
+     */
+    setOmittedLambdaArgument() {
+        this._isOmittedLambdaArgument = true;
+    }
+
     override execute() {
-        this.setValue(NullValueObject.create());
+        this.setValue(this._isOmittedLambdaArgument ? OmittedValueObject.create() : NullValueObject.create());
     }
 }

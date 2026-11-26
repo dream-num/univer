@@ -15,6 +15,7 @@
  */
 
 import type { DateSystem, Nullable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { LambdaNode } from '../ast-node/lambda-node';
 import type { ReferenceNode } from '../ast-node/reference-node';
@@ -23,7 +24,6 @@ import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
 import type { PreCalculateNodeType } from '../utils/node-type';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
-import { Disposable } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME } from '../../basics/token-type';
@@ -31,7 +31,7 @@ import { IFormulaCurrentConfigService } from '../../services/current-data.servic
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { NodeType } from '../ast-node/node-type';
 import { ErrorValueObject } from '../value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
+import { BooleanValueObject, NumberValueObject, OmittedValueObject } from '../value-object/primitive-object';
 
 type InterpreterRuntimeService = Pick<
     IFormulaRuntimeService,
@@ -380,7 +380,8 @@ export class Interpreter extends Disposable {
 
         if (!value.isReferenceObject()) {
             const baseValue = value as BaseValueObject;
-            return baseValue.isNull() ? NumberValueObject.create(0) : baseValue;
+            // Keep an omitted LAMBDA argument so ISOMITTED can still see it, as Excel does.
+            return baseValue.isNull() && !(baseValue instanceof OmittedValueObject) ? NumberValueObject.create(0) : baseValue;
         }
 
         const reference = value as BaseReferenceObject;
@@ -413,7 +414,8 @@ export class Interpreter extends Disposable {
 
         if (!value.isArray()) {
             const baseValue = value as BaseValueObject;
-            return baseValue.isNull() ? NumberValueObject.create(0) : baseValue;
+            // Keep an omitted LAMBDA argument so ISOMITTED can still see it, as Excel does.
+            return baseValue.isNull() && !(baseValue instanceof OmittedValueObject) ? NumberValueObject.create(0) : baseValue;
         }
 
         return value;

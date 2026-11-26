@@ -20,7 +20,7 @@ import { BooleanValue } from '../../../basics/common';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NumberValueObject, OmittedValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class If extends BaseFunction {
@@ -101,7 +101,8 @@ export class If extends BaseFunction {
     }
 
     private _coerceSelectedValue(value: BaseValueObject): BaseValueObject {
-        return value.isNull() ? NumberValueObject.create(0) : value;
+        // Keep an omitted LAMBDA argument so ISOMITTED can still see it, as Excel does.
+        return value.isNull() && !(value instanceof OmittedValueObject) ? NumberValueObject.create(0) : value;
     }
 
     private _coerceLogicalTest(logicalTest: BaseValueObject): BaseValueObject {

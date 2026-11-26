@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-import { NotImplementedFunction } from '../../not-implemented-function';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { BooleanValueObject, OmittedValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
-export class Isomitted extends NotImplementedFunction {
+/**
+ * Returns TRUE when a LAMBDA argument was left empty in the call, such as `y` in `=LAMBDA(x,y,ISOMITTED(y))(1,)`.
+ * A blank cell or an empty string is a supplied value, so it returns FALSE.
+ */
+export class Isomitted extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
 
-    // TODO: Implement omitted-argument metadata propagation for LAMBDA evaluation.
+    override calculate(argument: BaseValueObject) {
+        return BooleanValueObject.create(argument instanceof OmittedValueObject);
+    }
 }

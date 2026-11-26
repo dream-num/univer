@@ -405,6 +405,9 @@ describe('standalone Sheet formula calculation trigger', () => {
             4: { v: 10 },
             5: { f: '=2+3', v: 5 },
             6: { f: '=1+1' },
+            7: { f: '=LET(x,100001,TEXT(x,"#,##0"))', v: '100,001' },
+            8: { f: '=LAMBDA(x,TEXT(x,"#,##0"))(100001)', v: '100,001' },
+            9: { f: '=LET(x,3,x)', v: 3 },
         } };
         const sheet = api.createWorkbook(data).getActiveSheet();
         const injector = univer.__getInjector();
@@ -427,16 +430,17 @@ describe('standalone Sheet formula calculation trigger', () => {
             await applied;
             return [...calculated].sort();
         };
-        expect(await switchRegion('en-IN')).toEqual([1, 2, 3]);
+        expect(await switchRegion('en-IN')).toEqual([1, 2, 3, 7, 8]);
+        expect(sheet.getRange('H1:I1').getValues()).toEqual([['1,00,001', '1,00,001']]);
         expect(sheet.getRange('B1:C1').getValues()).toEqual([[100001, 100002]]);
-        expect(await switchRegion('enUS')).toEqual([1, 2]);
+        expect(await switchRegion('enUS')).toEqual([1, 2, 7, 8]);
         expect(sheet.getRange('B1:C1').getValues()).toEqual([['#VALUE!', -1]]);
 
         const edit = api.getFormula().onCalculationResultApplied(10_000);
         sheet.getRange('B1').setFormula('=E1+1');
         sheet.getRange('G1').setFormula('=TEXT(100001,"#,##0")');
         await edit;
-        expect(await switchRegion('en-IN')).toEqual([6]);
+        expect(await switchRegion('en-IN')).toEqual([6, 7, 8]);
         expect(sheet.getRange('G1').getValue()).toBe('1,00,001');
     });
 
@@ -465,6 +469,9 @@ describe('standalone Sheet formula calculation trigger', () => {
             11: { f: '=VALUE("0,123")' },
             12: { f: '=VALUE("12,34,567%")' },
             13: { f: '=VALUE("12,34,567e2")' },
+            14: { f: '=TEXT(B1,"0.0")' },
+            15: { f: '=TEXT("1,00,001","0.0")' },
+            16: { f: '=TEXT("1,2,3","0.0")' },
         });
         const sheet = api.createWorkbook(data).getActiveSheet();
 
@@ -473,11 +480,13 @@ describe('standalone Sheet formula calculation trigger', () => {
         await initialResult;
         expect(sheet.getRange('B1:E1').getValues()).toEqual([['1,00,000', '1,00,000.00', '100000.00', '₹1,00,000.00']]);
 
+        expect(sheet.getRange('O1:Q1').getValues()).toEqual([['100000.0', '100001.0', '1,2,3']]);
         expect(sheet.getRange('F1:N1').getValues()).toEqual([[100000, 100000, 100001, 100002, '#VALUE!', 12345678, '#VALUE!', 12345.67, 123456700]]);
 
         const switched = api.getFormula().onCalculationResultApplied(10_000);
         api.setRegion('enUS');
         await switched;
+        expect(sheet.getRange('O1:Q1').getValues()).toEqual([['100000.0', '1,00,001', '1,2,3']]);
         expect(sheet.getRange('B1:I1').getValues()).toEqual([['100,000', '100,000.00', '100000.00', '$100,000.00', 100000, 100000, '#VALUE!', -1]]);
         const editResult = api.getFormula().onCalculationResultApplied(10_000);
         sheet.getRange('A1').setValue(100001);

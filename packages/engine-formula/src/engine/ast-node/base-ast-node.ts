@@ -101,8 +101,11 @@ export class BaseAstNode {
     /** A cached formula may not have been executed since opening the workbook. */
     mayReadCalculationRegion(): boolean {
         switch (this.nodeType) {
+            case NodeType.LAMBDA:
+            case NodeType.LAMBDA_PARAMETER:
+            case NodeType.UNION:
             case NodeType.ROOT:
-                return this._children.some((child) => child.mayReadCalculationRegion());
+                return Boolean(this._definedNames?.length) || this._children.some((child) => child.mayReadCalculationRegion());
             case NodeType.OPERATOR:
             case NodeType.PREFIX:
             case NodeType.SUFFIX:

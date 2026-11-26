@@ -15,7 +15,7 @@
  */
 
 import type { BaseValueObject } from '../../engine/value-object/base-value-object';
-import { DateSystem, excelSerialToDateTimeParts, getNumfmtParseValueFilter, isRealNum, numfmt } from '@univerjs/core';
+import { DateSystem, excelSerialToDateTimeParts, numfmt } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { ErrorValueObject } from '../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../engine/value-object/primitive-object';
@@ -34,16 +34,6 @@ const JAPANESE_ERAS = [
 ];
 const JAPANESE_FORMAT = /\[\$-0*(?:411|ja-JP)\]/i;
 const OVERFLOW = '\0';
-
-function excelFormatInput(value: BaseValueObject): string | number {
-    if (value.isNull()) return 0;
-    if (value.isBoolean()) return value.getValue() ? 'TRUE' : 'FALSE';
-    if (value.isNumber()) return Number(value.getValue());
-    const raw = String(value.getValue());
-    if (isRealNum(raw)) return Number(raw);
-    const parsed = getNumfmtParseValueFilter(raw, { dateSystem: value.getDateSystem() });
-    return typeof parsed?.v === 'number' ? parsed.v : raw;
-}
 
 function formatLiteralDigits(code: string, value: number, region?: string): string | undefined {
     const match = /^([1-9][1-9,]*)(0*)(?:\.(0*)([1-9][0-9]*)?)?$/.exec(code);
@@ -134,7 +124,7 @@ export class ExcelText extends Text {
         if (cell.isError()) return cell;
         if (codeValue.isError()) return codeValue;
         if (codeValue.isBoolean()) return ErrorValueObject.create(ErrorType.VALUE);
-        const value = excelFormatInput(cell);
+        const value = this.getFormatInput(cell);
         const code = codeValue.isNull() ? '' : String(codeValue.getValue());
         if (code === '') return this._result(typeof value === 'string' ? value : value < 0 ? '-' : '');
         if (!isValidTextFormat(code)) return ErrorValueObject.create(ErrorType.VALUE);

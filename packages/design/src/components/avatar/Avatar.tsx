@@ -17,14 +17,15 @@
 import type { VariantProps } from 'class-variance-authority';
 import type { CSSProperties, ReactNode } from 'react';
 import { cva } from 'class-variance-authority';
+import { useState } from 'react';
 import { clsx } from '../../helper/clsx';
 
 type ImageFit = 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
 
 const avatarVariants = cva(
     `
-      univer-relative univer-inline-block univer-overflow-hidden univer-whitespace-nowrap univer-bg-gray-200
-      univer-text-center univer-align-middle univer-text-gray-700
+      univer-relative univer-inline-block univer-select-none univer-overflow-hidden univer-whitespace-nowrap
+      univer-bg-gray-200 univer-text-center univer-align-middle univer-font-medium univer-text-gray-700
       dark:!univer-bg-gray-700 dark:!univer-text-gray-100
     `,
     {
@@ -38,8 +39,8 @@ const avatarVariants = cva(
                 square: 'univer-rounded',
             },
             size: {
-                middle: 'univer-size-9 univer-leading-9',
-                small: 'univer-size-7 univer-leading-7',
+                middle: 'univer-size-9 univer-text-sm univer-leading-9',
+                small: 'univer-size-7 univer-text-xs univer-leading-7',
             },
         },
         defaultVariants: {
@@ -103,6 +104,9 @@ export function Avatar(props: IAvatarProps) {
         onLoad,
     } = props;
 
+    const [failedSrc, setFailedSrc] = useState<string | null>(null);
+    const showImage = Boolean(src) && failedSrc !== src;
+
     const sizeStyle =
         typeof size === 'number'
             ? {
@@ -112,33 +116,36 @@ export function Avatar(props: IAvatarProps) {
             }
             : {};
 
-    const fitStyle = { objectFit: fit };
-
     return (
         <span
+            data-u-comp="avatar"
             className={clsx(avatarVariants({
                 shape,
                 size: typeof size === 'number' ? 'middle' : size,
             }), {
-                'univer-bg-transparent': src,
+                'univer-bg-transparent dark:!univer-bg-transparent': showImage,
             }, className)}
             style={{
                 ...sizeStyle,
                 ...style,
-                ...(src && fitStyle),
             }}
         >
-            {src && (
-                <img
-                    className="univer-block univer-size-full"
-                    src={src}
-                    title={title}
-                    alt={alt}
-                    onError={onError}
-                    onLoad={onLoad}
-                />
-            )}
-            {children}
+            {showImage
+                ? (
+                    <img
+                        className="univer-block univer-size-full"
+                        style={{ objectFit: fit }}
+                        src={src}
+                        title={title}
+                        alt={alt}
+                        onError={() => {
+                            setFailedSrc(src ?? null);
+                            onError?.();
+                        }}
+                        onLoad={onLoad}
+                    />
+                )
+                : children}
         </span>
     );
 }

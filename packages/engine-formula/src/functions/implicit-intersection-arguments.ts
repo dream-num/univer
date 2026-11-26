@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import type { IFunctionNames } from '../basics/function';
+
 type AcceptsRange = (index: number, count: number) => boolean;
 
-const excelArguments = new Map<string, AcceptsRange>();
+const excelArguments = new Map<IFunctionNames, AcceptsRange>();
 
 function register(names: string[], acceptsRange: AcceptsRange): void {
     for (const name of names) {
@@ -529,6 +531,6 @@ register(['SWITCH'], (index, count) => index > 1 && (index % 2 === 0 || index ==
 register(['TEXTJOIN'], (index) => index !== 1);
 register(['XLOOKUP'], (index) => index >= 1 && index <= 3);
 
-export function excelArgumentAcceptsRange(name: string, index: number, count: number): boolean | undefined {
+export function excelArgumentAcceptsRange(name: IFunctionNames, index: number, count: number): boolean | undefined {
     return excelArguments.get(name)?.(index, count);
 }

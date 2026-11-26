@@ -22,7 +22,7 @@ import { getCurrencyType, getDecimalFromPattern, setPatternDecimal } from '@univ
 import { useDependency } from '@univerjs/ui';
 import { useContext, useMemo, useState } from 'react';
 import { UserHabitCurrencyContext } from '../../controllers/user-habit.controller';
-import { useCurrencyPattern } from '../hooks/use-currency-pattern';
+import { usePanelPattern } from '../hooks/use-panel-pattern';
 
 export const isAccountingPanel = (pattern: string) => {
     const type = getCurrencyType(pattern);
@@ -34,14 +34,14 @@ export function AccountingPanel(props: IBusinessComponentProps) {
 
     const [decimal, setDecimal] = useState(() => getDecimalFromPattern(defaultPattern || '', 2));
     const userHabitCurrency = useContext(UserHabitCurrencyContext);
-    const [selectedCurrency, setSuffix] = useState(() => getCurrencyType(defaultPattern));
+    const [selectedCurrency, setSelectedCurrency] = useState(() => getCurrencyType(defaultPattern));
     const suffix = selectedCurrency ?? userHabitCurrency[0];
     const options = useMemo(() => userHabitCurrency.map((key) => ({ label: key, value: key })), [userHabitCurrency]);
 
     const localeService = useDependency(LocaleService);
 
     const pattern = setPatternDecimal(`_("${suffix}"* #,##0${decimal > 0 ? '.0' : ''}_)`, decimal);
-    useCurrencyPattern(pattern, props);
+    usePanelPattern(pattern, props);
 
     return (
         <div>
@@ -71,7 +71,7 @@ export function AccountingPanel(props: IBusinessComponentProps) {
                         <Select
                             options={options}
                             value={suffix}
-                            onChange={setSuffix}
+                            onChange={setSelectedCurrency}
                         />
                     </div>
                 </div>

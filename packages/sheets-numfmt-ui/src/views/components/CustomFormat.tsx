@@ -38,13 +38,12 @@ export function CustomFormat(props: IBusinessComponentProps) {
 
     const [pattern, setPattern] = useState(defaultPattern);
     useLayoutEffect(() => {
-        onActionChange(() => {
+        onActionChange(() => pattern, () => {
             userHabitController.markHabit(key, pattern);
             localStorageService.getItem<string[]>(historyPatternKey).then((list = []) => {
                 const _list = [...new Set([pattern, ...(list || [])])].splice(0, 10).filter((e) => !!e);
                 return localStorageService.setItem(historyPatternKey, _list);
             }).catch(console.error);
-            return pattern;
         });
     }, [localStorageService, onActionChange, pattern, userHabitController]);
     const [options, setOptions] = useState<(string | number)[]>([]);

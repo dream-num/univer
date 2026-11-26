@@ -80,7 +80,18 @@ async function renderPanel(value: ISheetNumfmtPanelProps['value']) {
     return { container, injector, localeService, onChange, rerender };
 }
 
-async function confirmPanel(container: HTMLElement, label = 'Confirm') {
+async function selectCategory(container: HTMLElement, category: string) {
+    const trigger = container.querySelector<HTMLButtonElement>('[data-u-comp="select"]')!;
+    trigger.focus();
+    await act(async () => {
+        trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    });
+    const option = Array.from(document.querySelectorAll<HTMLElement>('[role="menuitemradio"]')).find((item) => item.textContent?.trim() === category);
+    expect(option).toBeDefined();
+    await act(async () => option!.click());
+}
+
+async function clickPanelButton(container: HTMLElement, label = 'Confirm') {
     const button = Array.from(container.querySelectorAll('button')).find((element) =>
         element.textContent?.trim() === label);
     if (!button) {
@@ -97,18 +108,11 @@ describe('SheetNumfmtPanel', () => {
         ['Currency', '€', '€', undefined],
         ['Currency', undefined, 'CHF', 'de-CH'],
         ['Accounting', undefined, 'CHF', 'de-CH'],
-    ])('confirms %s using the regional default or saved choice %s', async (category, saved, expected, nextRegion) => {
+    ] as const)('confirms %s using the regional default or saved choice %s', async (category, saved, expected, nextRegion) => {
         const { container, injector, onChange } = await renderPanel({ defaultValue: 100000, defaultPattern: '', row: 0, col: 0 });
         if (saved) await injector.get(ILocalStorageService).setItem('userHabitController_numfmtCurrency', [saved]);
         await act(async () => injector.get(RegionService).setRegion('enIN'));
-        const trigger = container.querySelector<HTMLButtonElement>('[data-u-comp="select"]')!;
-        trigger.focus();
-        await act(async () => {
-            trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-        });
-        const option = Array.from(document.querySelectorAll<HTMLElement>('[role="menuitemradio"]')).find((item) => item.textContent?.trim() === category);
-        expect(option).toBeDefined();
-        await act(async () => option!.click());
+        await selectCategory(container, category);
         if (nextRegion && category === 'Currency') {
             const styles = container.querySelectorAll<HTMLAnchorElement>('li > a');
             expect(styles.length).toBeGreaterThan(1);
@@ -120,10 +124,10 @@ describe('SheetNumfmtPanel', () => {
             expect(onChange).toHaveBeenCalledTimes(1);
             const preview = onChange.mock.lastCall?.[0];
             expect(preview).toEqual({ type: 'change', value: expect.stringContaining(expected) });
-            await confirmPanel(container);
+            await clickPanelButton(container);
             expect(onChange.mock.lastCall?.[0]).toEqual({ type: 'confirm', value: preview?.value });
         } else {
-            await confirmPanel(container);
+            await clickPanelButton(container);
         }
         expect(onChange.mock.lastCall?.[0].value).toContain(expected);
     });
@@ -154,8 +158,22 @@ describe('SheetNumfmtPanel', () => {
         await act(async () => region.setRegion('de-CH'));
         expect(target.textContent).toBe('CHF');
         expect(target.querySelector('text')?.getAttribute('textLength')).toBe('14');
-        await confirmPanel(container);
+        await clickPanelButton(container);
         expect(onChange.mock.lastCall?.[0].value).toContain('€');
+    });
+
+    it.each(['', '#,##0.00'])('previews and confirms the regional date when switching from %j', async (defaultPattern) => {
+        const { container, injector, onChange } = await renderPanel({ defaultValue: 45292, defaultPattern, row: 0, col: 0 });
+        const region = injector.get(RegionService);
+        await act(async () => region.setRegion('en-US'));
+        await selectCategory(container, 'Date');
+        expect(onChange).toHaveBeenLastCalledWith({ type: 'change', value: 'm/d/yyyy' });
+
+        onChange.mockClear();
+        await act(async () => region.setRegion('de-CH'));
+        expect(onChange).toHaveBeenCalledExactlyOnceWith({ type: 'change', value: 'dd.mm.yyyy' });
+        await clickPanelButton(container);
+        expect(onChange).toHaveBeenLastCalledWith({ type: 'confirm', value: 'dd.mm.yyyy' });
     });
 
     it('keeps the active category and selected date format when its labels are translated', async () => {
@@ -178,8 +196,26 @@ describe('SheetNumfmtPanel', () => {
             .toContain(localeService.t('sheets-numfmt-ui.date'));
         expect(container.textContent).toContain('1930年08月05日');
         expect(onChange).toHaveBeenCalledTimes(1);
-        await confirmPanel(container, localeService.t('sheets-numfmt-ui.confirm'));
+        await clickPanelButton(container, localeService.t('sheets-numfmt-ui.confirm'));
         expect(onChange).toHaveBeenLastCalledWith({ type: 'confirm', value: selectedPattern });
+    });
+
+    it.each(['Cancel', 'General', 'Custom Format'])('records custom format history only on confirmation (%s)', async (action) => {
+        const pattern = 'h:mm';
+        const previous = '0.00 "kg"';
+        const { container, injector, onChange } = await renderPanel({ defaultValue: 0.5, defaultPattern: pattern, row: 0, col: 0 });
+        const storage = injector.get(ILocalStorageService);
+        await storage.setItem('numfmt_custom_pattern', [previous]);
+        await storage.setItem('userHabitController_customFormat', [previous]);
+
+        await selectCategory(container, 'Custom Format');
+        expect(onChange).toHaveBeenLastCalledWith({ type: 'change', value: pattern });
+        expect(await storage.getItem('numfmt_custom_pattern')).toEqual([previous]);
+        if (action === 'General') await selectCategory(container, 'General');
+        await clickPanelButton(container, action === 'Cancel' ? 'Cancel' : 'Confirm');
+        const history = action === 'Custom Format' ? [pattern, previous] : [previous];
+        expect(await storage.getItem('numfmt_custom_pattern')).toEqual(history);
+        expect(await storage.getItem('userHabitController_customFormat')).toEqual(history);
     });
 
     it('preserves a custom format when reopening and confirming without edits', async () => {
@@ -191,7 +227,7 @@ describe('SheetNumfmtPanel', () => {
             col: 3,
         });
 
-        await confirmPanel(container);
+        await clickPanelButton(container);
 
         expect(onChange).toHaveBeenCalledExactlyOnceWith({ type: 'confirm', value: pattern });
         expect(container.querySelector('[data-u-comp="select"]')?.textContent).toBe('Custom Format');
@@ -208,7 +244,7 @@ describe('SheetNumfmtPanel', () => {
         const pattern = '#,##0 "km/h"';
 
         await rerender({ defaultValue: 5800, defaultPattern: pattern, row: 3, col: 3 });
-        await confirmPanel(container);
+        await clickPanelButton(container);
 
         expect(onChange).toHaveBeenCalledExactlyOnceWith({ type: 'confirm', value: pattern });
         expect(container.querySelector<HTMLInputElement>('input[placeholder="Custom Format"]')?.value).toBe(pattern);
@@ -225,7 +261,7 @@ describe('SheetNumfmtPanel', () => {
             col: 3,
         });
 
-        await confirmPanel(container);
+        await clickPanelButton(container);
 
         expect(onChange).toHaveBeenCalledExactlyOnceWith({ type: 'confirm', value: pattern });
         expect(container.querySelector('[data-u-comp="select"]')?.textContent).toBe(category);

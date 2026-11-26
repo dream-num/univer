@@ -17,12 +17,12 @@
 import type { IBusinessComponentProps } from '../components/interface';
 import { useLayoutEffect, useRef } from 'react';
 
-export function useCurrencyPattern(pattern: string, { onChange, onActionChange }: IBusinessComponentProps): void {
-    const previous = useRef(pattern);
+export function usePanelPattern(pattern: string, { onChange, onActionChange }: IBusinessComponentProps): void {
+    const previousPatternRef = useRef(pattern);
     useLayoutEffect(() => {
         onActionChange(() => pattern);
-        if (previous.current !== pattern) {
-            previous.current = pattern;
+        if (previousPatternRef.current !== pattern) {
+            previousPatternRef.current = pattern;
             onChange(pattern);
         }
     }, [onActionChange, onChange, pattern]);

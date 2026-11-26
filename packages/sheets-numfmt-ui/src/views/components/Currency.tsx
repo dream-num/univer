@@ -27,7 +27,7 @@ import {
 import { useDependency } from '@univerjs/ui';
 import { useContext, useMemo, useState } from 'react';
 import { UserHabitCurrencyContext } from '../../controllers/user-habit.controller';
-import { useCurrencyPattern } from '../hooks/use-currency-pattern';
+import { usePanelPattern } from '../hooks/use-panel-pattern';
 
 export const isCurrencyPanel = (pattern: string) => {
     const type = getCurrencyType(pattern);
@@ -37,33 +37,33 @@ export const isCurrencyPanel = (pattern: string) => {
 export function CurrencyPanel(props: IBusinessComponentProps) {
     const localeService = useDependency(LocaleService);
     const userHabitCurrency = useContext(UserHabitCurrencyContext);
-    const [selectedCurrency, setSuffix] = useState(() => getCurrencyType(props.defaultPattern));
+    const [selectedCurrency, setSelectedCurrency] = useState(() => getCurrencyType(props.defaultPattern));
     const suffix = selectedCurrency ?? userHabitCurrency[0];
     const [decimal, setDecimal] = useState(() => getDecimalFromPattern(props.defaultPattern || '', 2));
     const negativeOptions = useMemo(() => getCurrencyFormatOptions(suffix), [suffix]);
-    const [selectedStyle, setStyle] = useState<number>();
+    const [selectedStyle, setSelectedStyle] = useState<number>();
     const pattern = selectedStyle === undefined
         ? negativeOptions.find((item) => isPatternEqualWithoutDecimal(item.value, props.defaultPattern))?.value ?? negativeOptions[0].value
         : negativeOptions[selectedStyle].value;
     const options = useMemo(() => userHabitCurrency.map((key) => ({ label: key, value: key })), [userHabitCurrency]);
 
-    useCurrencyPattern(setPatternDecimal(pattern, decimal), props);
+    usePanelPattern(setPatternDecimal(pattern, decimal), props);
 
     const onSelect = (value: string) => {
         if (value === undefined) {
             return;
         }
-        setSuffix(value);
-        setStyle(0);
+        setSelectedCurrency(value);
+        setSelectedStyle(0);
     };
 
-    const onChange = (value: any) => {
-        if (value === undefined) {
+    const onChange = (value: string | string[] | undefined) => {
+        if (typeof value !== 'string') {
             return;
         }
         const index = negativeOptions.findIndex((option) => option.value === value);
         if (index < 0) return;
-        setStyle(index);
+        setSelectedStyle(index);
     };
 
     const onDecimalChange = (v: number | null) => {

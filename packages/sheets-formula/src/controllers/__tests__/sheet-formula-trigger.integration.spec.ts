@@ -256,16 +256,17 @@ describe('standalone Sheet formula calculation trigger', () => {
         const data = createWorkbookData();
         data.sheets['sheet-1']!.cellData = {
             0: { 1: { v: 2 } },
-            1: { 0: { f: '=SORT(IF(TRUE,B1:B3,B1))' }, 1: { v: 3 } },
+            1: { 0: { f: '=SORT(IF(TRUE,B1:B3,B1))' }, 1: { v: 3 }, 2: { f: '=LET(x,B1:B3,SORT(x))' } },
             2: { 1: { v: 4 } },
         };
         const sheet = api.createWorkbook(data).getActiveSheet();
-        const custom = api.getFormula().registerFunction('SORT', (value) => Array.isArray(value) ? -1 : Number(value));
+        const custom = api.getFormula().registerFunction('SORT', (value) => Array.isArray(value) ? value.flat().reduce<number>((sum, cell) => sum + Number(cell), 0) : Number(value));
         try {
             const initial = api.getFormula().onCalculationResultApplied(10_000);
             univer.__getInjector().get(LifecycleService).stage = LifecycleStages.Rendered;
             await initial;
             expect(sheet.getRange('A2').getValue()).toBe(3);
+            expect(sheet.getRange('C2').getValue()).toBe(9);
         } finally {
             custom.dispose();
         }
@@ -289,6 +290,8 @@ describe('standalone Sheet formula calculation trigger', () => {
             `=REVIEW_RANGE_SUM(${ref})`,
             `=LET(x,${ref},ABS(x))`,
             `=SUM(LET(x,${ref},x))`,
+            `=SUM(FLATTEN(ABS(${ref})))`,
+            `=REVIEW_RANGE_SUM(ABS(${ref}))`,
         ];
         const cells = data.sheets['sheet-1']!.cellData!;
         for (const [row, value] of [1, 2, 3, 4, 10, 20, 30].entries()) {
@@ -306,15 +309,15 @@ describe('standalone Sheet formula calculation trigger', () => {
             univer.__getInjector().get(LifecycleService).stage = LifecycleStages.Rendered;
             await initial;
             const expected = (sum: number, scalar: number | string, second: number) =>
-                [[sum, sum, sum, scalar, sum, scalar, second, sum, sum, sum, scalar, sum]];
-            expect(sheet.getRange('J3:U3').getValues()).toEqual(expected(9, 3, 3));
-            expect(sheet.getRange('J8:U8').getValues()).toEqual(expected(9, '#VALUE!', 3));
+                [[sum, sum, sum, scalar, sum, scalar, second, sum, sum, sum, scalar, sum, sum, sum]];
+            expect(sheet.getRange('J3:W3').getValues()).toEqual(expected(9, 3, 3));
+            expect(sheet.getRange('J8:W8').getValues()).toEqual(expected(9, '#VALUE!', 3));
             for (const [address, value, sum, second] of [['B1', 0, 60, 20], ['B6', 44, 84, 44]] as const) {
                 const applied = api.getFormula().onCalculationResultApplied(10_000);
                 sheet.getRange(address).setValue(value);
                 await applied;
-                expect(sheet.getRange('J3:U3').getValues()).toEqual(expected(sum, '#VALUE!', second));
-                expect(sheet.getRange('J8:U8').getValues()).toEqual(expected(sum, '#VALUE!', second));
+                expect(sheet.getRange('J3:W3').getValues()).toEqual(expected(sum, '#VALUE!', second));
+                expect(sheet.getRange('J8:W8').getValues()).toEqual(expected(sum, '#VALUE!', second));
             }
         } finally {
             custom.dispose();

@@ -170,9 +170,9 @@ export class FunctionNode extends BaseAstNode {
         return executor.lazyIfReferenceArrayArgumentIndexes.includes(index);
     }
 
-    getNestedArgumentArrayContext(child: BaseAstNode): ArgumentArrayContext {
+    getNestedArgumentArrayContext(child: BaseAstNode, nestedOrBound: boolean): ArgumentArrayContext {
         const children = this.getChildren();
-        if (this._functionExecutor.isCustom()) return 'scalar';
+        if (this._functionExecutor.isCustom()) return nestedOrBound ? 'array' : 'scalar';
         return getNestedArgumentArrayContext(this._functionExecutor.name, children.indexOf(child), children.length);
     }
 

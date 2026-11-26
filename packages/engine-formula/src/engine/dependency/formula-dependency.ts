@@ -86,6 +86,7 @@ export function generateRandomDependencyTreeId(dependencyManagerService: IDepend
 export interface IFormulaDependencyGenerator {
     /** Keep structural dirty information available when a calculation is interrupted. */
     finishReferenceContext?(completed: boolean): void;
+    recordCalculationRegionRead?(treeId: number, read: boolean): void;
     generate(isCalculateTreeModel?: boolean): Promise<IFormulaDependencyTree[]>;
     getAllDependencyJson(): Promise<IFormulaDependencyTreeJson[]>;
     getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeFullJson | undefined>;
@@ -760,6 +761,10 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
     private _storeReusableRanges(node: BaseAstNode, rangeList: IUnitRange[]) {
         this._reusableRanges.set(node, [...rangeList]);
+    }
+
+    recordCalculationRegionRead(treeId: number, read: boolean): void {
+        this._dependencyManagerService.calculationRegionReads?.set(treeId, read);
     }
 
     finishReferenceContext(completed: boolean): void {
@@ -1437,8 +1442,14 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         const unitId = tree.unitId;
         const subUnitId = tree.subUnitId;
 
+        const dirtyData = this._currentConfigService.getDirtyData();
+        if (dirtyData.dirtyCalculationRegion &&
+            (this._dependencyManagerService.calculationRegionReads?.get(tree.treeId) ?? node.mayReadCalculationRegion())) {
+            return true;
+        }
+
         // The base engine retains workbook-wide invalidation without a cycle-group selector.
-        if (this._currentConfigService.getDirtyData().dirtyIterationUnits?.includes(unitId)) {
+        if (dirtyData.dirtyIterationUnits?.includes(unitId)) {
             return true;
         }
 

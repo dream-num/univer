@@ -671,6 +671,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 };
                 let value: FunctionVariantType;
 
+                const readsBefore = this._currentConfigService.calculationRegionReadCount;
                 if (interpreter.checkAsyncNode(nodeData.node)) {
                     value = await interpreter.executeAsync(nodeData);
                 } else {
@@ -682,6 +683,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                     return;
                 }
 
+                this._formulaDependencyGenerator.recordCalculationRegionRead?.(tree.treeId, this._currentConfigService.calculationRegionReadCount !== readsBefore);
                 if (tree.formulaId != null) {
                     this._runtimeService.setRuntimeOtherData(tree.formulaId, tree.refOffsetX, tree.refOffsetY, value);
                 } else {

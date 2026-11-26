@@ -460,8 +460,7 @@ describe('ArrayFormulaCellInterceptorController with remote calculation', () => 
         const sheet = testBed.sheet.getSheetBySheetId(subUnitId)!;
         expect(sheet.getCellRaw(0, 1)?.v).toBe('1,00,000');
 
-        api.setRegion('enUS');
-        await calculateInWorker(startOnMain);
+        await calculateInWorker(() => api.setRegion('enUS'));
         expect(sheet.getCellRaw(0, 1)?.v).toBe('100,000');
 
         api.setRegion('bn-BD');

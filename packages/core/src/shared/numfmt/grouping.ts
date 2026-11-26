@@ -17,87 +17,65 @@
 import type { NumberGrouping } from './types';
 import { getRegionLocale } from '../../types/enum/locale-type';
 
-interface IRegionGrouping {
-    readonly number: NumberGrouping;
-    readonly currency: NumberGrouping;
-}
-
 const standard = [3, 3] as const;
-const twoDigitGroups = [3, 2] as const;
-const standardGrouping = { number: standard, currency: standard };
-const pairedGrouping = { number: twoDigitGroups, currency: twoDigitGroups };
-const standardCurrencyGrouping = { number: twoDigitGroups, currency: standard };
+const paired = [3, 2] as const;
 
-// Defaults from Windows GetLocaleInfoEx (LOCALE_SGROUPING and LOCALE_SMONGROUPING).
-// Only profiles that differ from the standard three-digit grouping are listed.
-const regionGrouping = new Map<string, IRegionGrouping>([
-    ['as', pairedGrouping],
-    ['as-in', pairedGrouping],
-    ['bn', pairedGrouping],
-    ['bn-bd', pairedGrouping],
-    ['bn-in', pairedGrouping],
-    ['brx', pairedGrouping],
-    ['brx-in', pairedGrouping],
-    ['ccp', pairedGrouping],
-    ['ccp-cakm', pairedGrouping],
-    ['ccp-cakm-bd', pairedGrouping],
-    ['ccp-cakm-in', pairedGrouping],
-    ['dz', pairedGrouping],
-    ['dz-bt', pairedGrouping],
-    ['en-in', pairedGrouping],
-    ['gu', pairedGrouping],
-    ['gu-in', pairedGrouping],
-    ['hi', pairedGrouping],
-    ['hi-in', pairedGrouping],
-    ['hi-latn', pairedGrouping],
-    ['hi-latn-in', pairedGrouping],
-    ['ml', standardCurrencyGrouping],
-    ['ml-in', standardCurrencyGrouping],
-    ['mr', standardCurrencyGrouping],
-    ['mr-in', standardCurrencyGrouping],
-    ['ne', pairedGrouping],
-    ['ne-in', pairedGrouping],
-    ['ne-np', pairedGrouping],
-    ['or', standardCurrencyGrouping],
-    ['or-in', standardCurrencyGrouping],
-    ['pa', pairedGrouping],
-    ['pa-guru', pairedGrouping],
-    ['pa-in', pairedGrouping],
-    ['sa', pairedGrouping],
-    ['sa-in', pairedGrouping],
-    ['ta', pairedGrouping],
-    ['ta-in', pairedGrouping],
-    ['ta-lk', pairedGrouping],
-    ['te', pairedGrouping],
-    ['te-in', pairedGrouping],
+// Excel uses the Windows monetary grouping for both number and currency formats.
+// Profiles that use the default three-digit grouping need no entry.
+const pairedRegions = new Set([
+    'as',
+    'as-in',
+    'bn',
+    'bn-bd',
+    'bn-in',
+    'brx',
+    'brx-in',
+    'ccp',
+    'ccp-cakm',
+    'ccp-cakm-bd',
+    'ccp-cakm-in',
+    'dz',
+    'dz-bt',
+    'en-in',
+    'gu',
+    'gu-in',
+    'hi',
+    'hi-in',
+    'hi-latn',
+    'hi-latn-in',
+    'ne',
+    'ne-in',
+    'ne-np',
+    'pa',
+    'pa-guru',
+    'pa-in',
+    'sa',
+    'sa-in',
+    'ta',
+    'ta-in',
+    'ta-lk',
+    'te',
+    'te-in',
 ]);
 
-function resolveRegionGrouping(region?: string): IRegionGrouping {
+function resolveNumberGrouping(region?: string): typeof standard | typeof paired {
     const locale = region && getRegionLocale(region);
-    if (!locale) return standardGrouping;
-    const exact = regionGrouping.get(locale.baseName.toLowerCase());
-    if (exact) return exact;
-    if (locale.script && locale.region) {
-        return regionGrouping.get(`${locale.language}-${locale.region.toLowerCase()}`) ?? standardGrouping;
-    }
-    return standardGrouping;
+    if (!locale) return standard;
+    if (pairedRegions.has(locale.baseName.toLowerCase())) return paired;
+    if (locale.script && locale.region && pairedRegions.has(`${locale.language}-${locale.region.toLowerCase()}`)) return paired;
+    return standard;
 }
 
-// A workbook formats many cells with the same region. Bound the cache to that one region.
+// A workbook formats many cells with the same region.
 let lastRegion: string | undefined;
-let lastGrouping: IRegionGrouping = standardGrouping;
+let lastGrouping: typeof standard | typeof paired = standard;
 
-export function getRegionGrouping(region?: string): IRegionGrouping {
-    if (region !== lastRegion) {
-        lastGrouping = resolveRegionGrouping(region);
+export function getNumberGrouping(region?: string): readonly [number, number] {
+    if (lastRegion !== region) {
+        lastGrouping = resolveNumberGrouping(region);
         lastRegion = region;
     }
     return lastGrouping;
-}
-
-export function getNumberGrouping(region?: string, currency = false): NumberGrouping {
-    const grouping = getRegionGrouping(region);
-    return currency ? grouping.currency : grouping.number;
 }
 
 // The tuple predates explicit grouping sequences. It repeats the second size,

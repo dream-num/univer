@@ -15,12 +15,13 @@
  */
 
 import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, Optional, Rectangle, RegionService } from '@univerjs/core';
 import type { IDirtyUnitFeatureMap } from '../basics/common';
 import type {
     ISetFormulaCalculationNotificationMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import type { IFormulaDirtyData } from './current-data.service';
+import { Disposable, getRegionLocale, ICommandService, Optional, Rectangle, RegionService } from '@univerjs/core';
+import { distinctUntilChanged, map, skip } from 'rxjs';
 import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
@@ -67,6 +68,18 @@ export class FormulaCalculationTriggerService extends Disposable {
         }
 
         this._started = true;
+        if (this._regionService) {
+            this.disposeWithMe(this._regionService.currentRegion$.pipe(
+                map((region) => getRegionLocale(region)?.baseName ?? region),
+                distinctUntilChanged(),
+                skip(1)
+            ).subscribe(() => {
+                if (this._suppressed) return;
+                this._pendingDirtyData.dirtyCalculationRegion = true;
+                this._hasPendingCalculation = true;
+                this._scheduleFlush();
+            }));
+        }
         this._scheduleFlush();
     }
 
@@ -237,6 +250,7 @@ export function mergeDirtyData(left: Partial<IFormulaDirtyData>, right: Partial<
 
 // The accumulator owns its nested maps; command payloads and running sessions stay unchanged.
 function appendDirtyData(target: IFormulaDirtyData, source: Partial<IFormulaDirtyData>, rangeKeys: Set<string>): void {
+    if (source.dirtyCalculationRegion) target.dirtyCalculationRegion = true;
     if (source.dirtyIterationUnits?.length) {
         target.dirtyIterationUnits = Array.from(new Set([...(target.dirtyIterationUnits ?? []), ...source.dirtyIterationUnits]));
     }
@@ -283,7 +297,7 @@ function mergeDirtyUnitNestedMap(target: IDirtyUnitFeatureMap, right?: IDirtyUni
 }
 
 function hasDirtyData(dirtyData: IFormulaDirtyData): boolean {
-    return dirtyData.forceCalculation ||
+    return dirtyData.forceCalculation || dirtyData.dirtyCalculationRegion ||
         Boolean(dirtyData.dirtyIterationUnits?.length) ||
         Boolean(dirtyData.dirtyReferenceUnits?.length) ||
         dirtyData.dirtyRanges.length > 0 ||
@@ -306,7 +320,7 @@ function hasNestedValue(value: unknown): boolean {
 }
 
 function dirtyDataIntersects(left: IFormulaDirtyData, right: IFormulaDirtyData): boolean {
-    if (left.forceCalculation || right.forceCalculation || left.dirtyReferenceUnits?.length || right.dirtyReferenceUnits?.length || left.dirtyIterationUnits?.length || right.dirtyIterationUnits?.length) {
+    if (left.dirtyCalculationRegion || right.dirtyCalculationRegion || left.forceCalculation || right.forceCalculation || left.dirtyReferenceUnits?.length || right.dirtyReferenceUnits?.length || left.dirtyIterationUnits?.length || right.dirtyIterationUnits?.length) {
         return true;
     }
 

@@ -125,7 +125,7 @@ export class OperatorNode extends BaseAstNode {
         }
     }
 
-    override execute(dateSystem: DateSystem = DateSystem.Date1900) {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900, readRegion?: () => string) {
         const children = this.getChildren();
         if (this._functionExecutor.name === FUNCTION_NAMES_META.COMPARE) {
             (this._functionExecutor as Compare).setCompareType(this.getToken() as compareToken);
@@ -160,8 +160,8 @@ export class OperatorNode extends BaseAstNode {
             object2 = this._referenceToOperatorValue(object2 as BaseReferenceObject);
         }
 
-        object1 = object1.withDateSystem(dateSystem);
-        object2 = object2.withDateSystem(dateSystem);
+        object1 = object1.withDateSystem(dateSystem, readRegion);
+        object2 = object2.withDateSystem(dateSystem, readRegion);
         let result: FunctionVariantType;
         if (object1.isError() && object2.isArray()) {
             result = (object2 as ArrayValueObject).mapValue(() => object1 as BaseValueObject);
@@ -183,7 +183,7 @@ export class OperatorNode extends BaseAstNode {
 
         this._setEmbeddedArrayFormulaToResult(result);
 
-        this.setValue(result.withDateSystem(dateSystem));
+        this.setValue(result.withDateSystem(dateSystem, readRegion));
     }
 
     private _calculateOperator(left: BaseValueObject, right: BaseValueObject): FunctionVariantType {

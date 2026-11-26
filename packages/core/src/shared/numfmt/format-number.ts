@@ -26,7 +26,6 @@ import type {
 } from './types';
 import { indexColors, TOKEN_TEXT } from './constants';
 import { decimalFromNumber } from './decimal';
-import { hasCurrencyToken } from './format-info';
 import { defaultLocale, getLocale } from './locale';
 import { parseFormatSection } from './parse-format-section';
 import { runPart } from './run-part';
@@ -140,8 +139,5 @@ export function formatValue(
 
     if (!part) return options.overflow;
 
-    const formatOptions = options.currencyGrouping && isParsedSection(part) && part.grouping && hasCurrencyToken(part)
-        ? { ...options, grouping: options.currencyGrouping }
-        : options;
-    return runPart(value, part, formatOptions, locale, decimalValue);
+    return runPart(value, part, options, locale, decimalValue);
 }

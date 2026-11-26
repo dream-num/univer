@@ -110,13 +110,15 @@ numfmtTest('preserves number grouping and currency for built-in locale IDs and t
     }
 });
 
-numfmtTest('region grouping can differ between numbers and currency', (t) => {
-    t.format('#,##0', 1234567890, '1,23,45,67,890', { region: 'bn-BD' });
-    t.format('#,##0', 1234567890, '1,23,45,67,890', { region: 'ml-IN' });
-    t.format('#,##0', 1234567890, '1,23,45,67,890', { region: 'mlIN' });
-    t.format('"₹"#,##0', 1234567890, '₹1,234,567,890', { region: 'ml-IN' });
-    t.format('"₹"#,##0', 1234567890, '₹1,23,45,67,890', { region: 'hi-IN' });
-    t.format('#,##0;"₹"#,##0', -1234567890, '₹1,234,567,890', { region: 'mr-IN' });
+numfmtTest('uses Excel monetary grouping for both numbers and currency', (t) => {
+    for (const region of ['ml-IN', 'mlIN', 'mr-IN', 'or-IN']) {
+        t.format('#,##0', 1234567890, '1,234,567,890', { region });
+        t.format('"₹"#,##0', 1234567890, '₹1,234,567,890', { region });
+    }
+    for (const region of ['bn-BD', 'hi-IN', 'enIN']) {
+        t.format('#,##0', 1234567890, '1,23,45,67,890', { region });
+        t.format('"₹"#,##0', 1234567890, '₹1,23,45,67,890', { region });
+    }
 });
 
 numfmtTest('uses the same currency tokens for classification, selection and monetary grouping', (t) => {

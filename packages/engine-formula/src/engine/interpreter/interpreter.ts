@@ -49,6 +49,8 @@ export class Interpreter extends Disposable {
         super();
     }
 
+    private readonly _readRegion = (): string => this._currentConfigService.getCalculationRegion();
+
     async executeAsync(nodeData: IExecuteAstNodeData): Promise<FunctionVariantType> {
         // if (!this._interpreterCalculateProps) {
         //     return ErrorValueObject.create(ErrorType.ERROR);
@@ -166,9 +168,9 @@ export class Interpreter extends Disposable {
         }
 
         if (node.isAsync()) {
-            await node.executeAsync(dateSystem);
+            await node.executeAsync(dateSystem, this._readRegion);
         } else {
-            node.execute(dateSystem);
+            node.execute(dateSystem, this._readRegion);
         }
 
         this._intersectBoundReference(node);
@@ -208,7 +210,7 @@ export class Interpreter extends Disposable {
             (node as ReferenceNode).setRefOffset(refOffsetX, refOffsetY);
         }
 
-        node.execute(dateSystem);
+        node.execute(dateSystem, this._readRegion);
         this._intersectBoundReference(node);
 
         return AstNodePromiseType.SUCCESS;

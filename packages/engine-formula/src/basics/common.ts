@@ -262,6 +262,7 @@ export interface IFormulaDatasetConfig {
     /** Sheet metadata changed; rebind and calculate affected references without forcing all formulas. */
     dirtyReferenceUnits?: string[];
     /** Recalculate iteration-sensitive groups and their dependents in these workbooks. */
+    dirtyCalculationRegion?: boolean;
     dirtyIterationUnits?: string[];
     /** Snapshot replay limits calculation to affected cycles and their required precedents. */
     calculateCircularOnly?: boolean;

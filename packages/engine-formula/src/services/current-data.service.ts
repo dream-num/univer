@@ -15,18 +15,6 @@
  */
 
 import type { BaseDataModel, ITableSnapshot, IUnitRange, IWorkbookCalculationSettings, LocaleType, Nullable, Workbook } from '@univerjs/core';
-import {
-    createIdentifier,
-    DateSystem,
-    Disposable,
-    Inject,
-    IUniverInstanceService,
-    LocaleService,
-    ObjectMatrix,
-    Optional,
-    RegionService,
-    UniverInstanceType,
-} from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IDirtyUnitDefinedNameMap,
@@ -47,6 +35,18 @@ import type {
     IUnitStylesData,
 } from '../basics/common';
 import type { IFormulaDataSnapshot } from '../models/formula-data-snapshot';
+import {
+    createIdentifier,
+    DateSystem,
+    Disposable,
+    Inject,
+    IUniverInstanceService,
+    LocaleService,
+    ObjectMatrix,
+    Optional,
+    RegionService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { convertUnitDataToRuntime, copyUnitData } from '../basics/runtime';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { ISheetRowFilteredService } from './sheet-row-filtered.service';
@@ -63,6 +63,7 @@ export function hasDeferredFormulaDataSnapshot(service: unknown): boolean {
 
 export interface IFormulaDirtyData {
     dirtyReferenceUnits?: string[];
+    dirtyCalculationRegion?: boolean;
     dirtyIterationUnits?: string[];
     forceCalculation: boolean;
     dirtyRanges: IUnitRange[];
@@ -144,6 +145,7 @@ export interface IFormulaCurrentConfigService {
     getClearDependencyTreeCache(): IDirtyUnitSheetNameMap;
 
     getLocale(): LocaleType;
+    readonly calculationRegionReadCount: number;
     getCalculationRegion(): string;
     getDateSystem(unitId?: string): DateSystem;
 
@@ -163,6 +165,7 @@ export interface IFormulaCurrentConfigService {
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
     private _dirtyReferenceUnits: string[] = [];
+    private _dirtyCalculationRegion = false;
     private _dirtyIterationUnits: string[] = [];
     private _unitData: IUnitData = Object.create(null);
 
@@ -358,7 +361,14 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._localeService.getCurrentLocale();
     }
 
+    private _calculationRegionReadCount = 0;
+
+    get calculationRegionReadCount(): number {
+        return this._calculationRegionReadCount;
+    }
+
     getCalculationRegion(): string {
+        this._calculationRegionReadCount++;
         return this._calculationRegion ?? this._regionService?.getCurrentRegion() ?? this.getLocale();
     }
 
@@ -457,6 +467,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._formulaDataSnapshot = snapshot;
         if (snapshot) DEFERRED_FORMULA_DATA_SNAPSHOTS.add(this);
         else DEFERRED_FORMULA_DATA_SNAPSHOTS.delete(this);
+        this._dirtyCalculationRegion = Boolean(config.dirtyCalculationRegion);
         this._dirtyIterationUnits = config.dirtyIterationUnits ?? [];
         this._dirtyReferenceUnits = config.dirtyReferenceUnits ?? [];
 
@@ -512,6 +523,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     // Feature callbacks expose no formula metadata; keep their conservative invalidation local.
     getDirtyData(forFeatureCalculation = false): IFormulaDirtyData {
         return {
+            ...(this._dirtyCalculationRegion && { dirtyCalculationRegion: true }),
             dirtyIterationUnits: this._dirtyIterationUnits,
             dirtyReferenceUnits: this._dirtyReferenceUnits,
             forceCalculation: this._forceCalculate || (forFeatureCalculation && this._dirtyReferenceUnits.length > 0),
@@ -527,6 +539,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     loadDirtyRangesAndExcludedCell(dirtyRanges: IUnitRange[], excludedCell?: IUnitExcludedCell) {
+        this._dirtyCalculationRegion = false;
         this._dirtyIterationUnits = [];
         this._dirtyReferenceUnits = [];
         this._dirtyRanges = dirtyRanges;

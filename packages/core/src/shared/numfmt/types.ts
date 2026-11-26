@@ -104,7 +104,6 @@ export interface ResolvedFormatOptions {
     locale: string;
     ignoreTimezone: boolean;
     grouping: NumberGrouping;
-    currencyGrouping?: NumberGrouping;
     indexColors: boolean;
     skipChar: string | boolean;
     fillChar: string | boolean;

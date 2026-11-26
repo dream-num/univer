@@ -1073,11 +1073,11 @@ export class ArrayValueObject extends BaseValueObject {
         return accumulatorAll;
     }
 
-    override withDateSystem(dateSystem: DateSystem): this {
+    override withDateSystem(dateSystem: DateSystem, readRegion?: () => string): this {
         super.withDateSystem(dateSystem);
         // Child values read their own date system during parsing and formatting.
-        this._values.forEach((row) => row.forEach((valueObject) => valueObject?.withDateSystem(dateSystem)));
-        this._defaultValue?.withDateSystem(dateSystem);
+        this._values.forEach((row) => row.forEach((valueObject) => valueObject?.withDateSystem(dateSystem, readRegion)));
+        this._defaultValue?.withDateSystem(dateSystem, readRegion);
         return this;
     }
 

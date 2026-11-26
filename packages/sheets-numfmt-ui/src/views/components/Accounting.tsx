@@ -20,8 +20,9 @@ import { LocaleService } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { getCurrencyType, getDecimalFromPattern, setPatternDecimal } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import { useContext, useLayoutEffect, useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { UserHabitCurrencyContext } from '../../controllers/user-habit.controller';
+import { useCurrencyPattern } from '../hooks/use-currency-pattern';
 
 export const isAccountingPanel = (pattern: string) => {
     const type = getCurrencyType(pattern);
@@ -29,7 +30,7 @@ export const isAccountingPanel = (pattern: string) => {
 };
 
 export function AccountingPanel(props: IBusinessComponentProps) {
-    const { defaultPattern, onActionChange, onChange } = props;
+    const { defaultPattern } = props;
 
     const [decimal, setDecimal] = useState(() => getDecimalFromPattern(defaultPattern || '', 2));
     const userHabitCurrency = useContext(UserHabitCurrencyContext);
@@ -39,20 +40,8 @@ export function AccountingPanel(props: IBusinessComponentProps) {
 
     const localeService = useDependency(LocaleService);
 
-    useLayoutEffect(() => {
-        onActionChange(() => setPatternDecimal(`_("${suffix}"* #,##0${decimal > 0 ? '.0' : ''}_)`, decimal));
-    }, [decimal, onActionChange, suffix]);
-
-    const handleSelect = (v: string) => {
-        setSuffix(v);
-        onChange(setPatternDecimal(`_("${v}"* #,##0${decimal > 0 ? '.0' : ''}_)`, decimal));
-    };
-
-    const handleDecimalChange = (v: number | null) => {
-        const decimal = v || 0;
-        setDecimal(decimal);
-        onChange(setPatternDecimal(`_("${suffix}"* #,##0${decimal > 0 ? '.0' : ''}_)`, decimal));
-    };
+    const pattern = setPatternDecimal(`_("${suffix}"* #,##0${decimal > 0 ? '.0' : ''}_)`, decimal);
+    useCurrencyPattern(pattern, props);
 
     return (
         <div>
@@ -69,7 +58,7 @@ export function AccountingPanel(props: IBusinessComponentProps) {
                             precision={0}
                             max={20}
                             min={0}
-                            onChange={handleDecimalChange}
+                            onChange={(value) => setDecimal(value || 0)}
                         />
                     </div>
                 </div>
@@ -82,7 +71,7 @@ export function AccountingPanel(props: IBusinessComponentProps) {
                         <Select
                             options={options}
                             value={suffix}
-                            onChange={handleSelect}
+                            onChange={setSuffix}
                         />
                     </div>
                 </div>

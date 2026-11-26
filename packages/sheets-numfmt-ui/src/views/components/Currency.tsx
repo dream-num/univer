@@ -25,8 +25,9 @@ import {
     setPatternDecimal,
 } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import { useContext, useLayoutEffect, useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { UserHabitCurrencyContext } from '../../controllers/user-habit.controller';
+import { useCurrencyPattern } from '../hooks/use-currency-pattern';
 
 export const isCurrencyPanel = (pattern: string) => {
     const type = getCurrencyType(pattern);
@@ -34,7 +35,6 @@ export const isCurrencyPanel = (pattern: string) => {
 };
 
 export function CurrencyPanel(props: IBusinessComponentProps) {
-    const { onActionChange, onChange: onValueChange } = props;
     const localeService = useDependency(LocaleService);
     const userHabitCurrency = useContext(UserHabitCurrencyContext);
     const [selectedCurrency, setSuffix] = useState(() => getCurrencyType(props.defaultPattern));
@@ -47,18 +47,14 @@ export function CurrencyPanel(props: IBusinessComponentProps) {
         : negativeOptions[selectedStyle].value;
     const options = useMemo(() => userHabitCurrency.map((key) => ({ label: key, value: key })), [userHabitCurrency]);
 
-    useLayoutEffect(() => {
-        onActionChange(() => setPatternDecimal(pattern, decimal));
-    }, [decimal, onActionChange, pattern]);
+    useCurrencyPattern(setPatternDecimal(pattern, decimal), props);
 
     const onSelect = (value: string) => {
         if (value === undefined) {
             return;
         }
         setSuffix(value);
-        const pattern = getCurrencyFormatOptions(value)[0].value;
         setStyle(0);
-        onValueChange(setPatternDecimal(pattern, decimal));
     };
 
     const onChange = (value: any) => {
@@ -68,12 +64,10 @@ export function CurrencyPanel(props: IBusinessComponentProps) {
         const index = negativeOptions.findIndex((option) => option.value === value);
         if (index < 0) return;
         setStyle(index);
-        onValueChange(setPatternDecimal(value, decimal));
     };
 
     const onDecimalChange = (v: number | null) => {
         setDecimal(v || 0);
-        onValueChange(setPatternDecimal(pattern, v || 0));
     };
 
     return (

@@ -112,14 +112,14 @@ describe('HoverRenderController', () => {
         validViewportScrollInfo$.next();
 
         expect(controller.active).toBe(false);
-        expect(hoverManagerService.triggerMouseMove).toHaveBeenCalledWith('unit-1', { offsetX: 10, offsetY: 20 });
-        expect(hoverManagerService.triggerPointerDown).toHaveBeenCalledWith('unit-1', { offsetX: 11, offsetY: 21 });
-        expect(hoverManagerService.triggerPointerUp).toHaveBeenCalledWith('unit-1', { offsetX: 12, offsetY: 22 });
-        expect(hoverManagerService.triggerClick).toHaveBeenCalledWith('unit-1', 13, 23);
-        expect(hoverManagerService.triggerDbClick).toHaveBeenCalledWith('unit-1', { offsetX: 14, offsetY: 24 });
-        expect(hoverManagerService.triggerRowHeaderPoniterUp).toHaveBeenCalledWith('unit-1', 1, 2);
-        expect(hoverManagerService.triggerRowHeaderClick).toHaveBeenCalledWith('unit-1', 1, 2);
-        expect(hoverManagerService.triggerColHeaderDbClick).toHaveBeenCalledWith('unit-1', 3, 4);
+        expect(hoverManagerService.triggerMouseMove).toHaveBeenCalledWith('unit-1', { offsetX: 10, offsetY: 20 }, undefined);
+        expect(hoverManagerService.triggerPointerDown).toHaveBeenCalledWith('unit-1', { offsetX: 11, offsetY: 21 }, undefined);
+        expect(hoverManagerService.triggerPointerUp).toHaveBeenCalledWith('unit-1', { offsetX: 12, offsetY: 22 }, undefined);
+        expect(hoverManagerService.triggerClick).toHaveBeenCalledWith('unit-1', 13, 23, undefined);
+        expect(hoverManagerService.triggerDbClick).toHaveBeenCalledWith('unit-1', { offsetX: 14, offsetY: 24 }, undefined);
+        expect(hoverManagerService.triggerRowHeaderPoniterUp).toHaveBeenCalledWith('unit-1', 1, 2, undefined);
+        expect(hoverManagerService.triggerRowHeaderClick).toHaveBeenCalledWith('unit-1', 1, 2, undefined);
+        expect(hoverManagerService.triggerColHeaderDbClick).toHaveBeenCalledWith('unit-1', 3, 4, undefined);
         expect(hoverManagerService.triggerScroll).toHaveBeenCalled();
 
         controller.dispose();

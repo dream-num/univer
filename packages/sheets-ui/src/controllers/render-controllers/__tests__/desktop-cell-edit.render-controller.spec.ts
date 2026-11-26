@@ -207,6 +207,7 @@ function createController(options?: {
         isChildUnitInActiveSession: vi.fn(() => options?.isEmbedActiveSession ?? false),
     } as unknown as EmbedRuntimeFocusCoordinator;
     const sheetSkeletonManagerService = {
+        projectionChanged$: new Subject<string>(),
         getSkeletonParam: vi.fn(() => ({
             skeleton: {
                 getCellWithCoordByIndex: vi.fn(() => ({

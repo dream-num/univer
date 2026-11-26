@@ -18,6 +18,7 @@ import type { IDocumentBody, IParagraphStyle, IScale, ITable } from '@univerjs/c
 import {
     BaselineOffset,
     BooleanNumber,
+    BorderStyleTypes,
     ColumnSeparatorType,
     createDocumentModelWithStyle,
     createIdentifier,
@@ -28,6 +29,7 @@ import {
     DocumentFlavor,
     HorizontalAlign,
     Injector,
+    JSONX,
     LocaleService,
     LocaleType,
     ObjectRelativeFromH,
@@ -62,12 +64,14 @@ import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
 import { Image } from '../../../shape/image';
 import { Path } from '../../../shape/path';
 import { Rect } from '../../../shape/rect';
+import { ScrollBar } from '../../../shape/scroll-bar';
 import { Viewport } from '../../../viewport';
 import { SheetCellDocumentViewModel } from '../../sheets/sheet-cell-document-view-model';
 import { DocBackground } from '../doc-background';
 import { docExtension, DOCS_EXTENSION_TYPE } from '../doc-extension';
 import { Documents, drawSectionColumnSeparators } from '../document';
 import { registerDocumentLayoutPresentation } from '../document-layout-presentation';
+import { Border } from '../extensions/border';
 import { createParagraphLayoutTestBed } from '../layout/block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import wordParagraphSeparators from '../layout/block/paragraph/__tests__/fixtures/word-paragraph-separator-spacing.json';
 import { DocumentSkeleton } from '../layout/doc-skeleton';
@@ -3872,6 +3876,430 @@ describe('documents render', () => {
         expect(fillRect).toHaveBeenCalled();
 
         documents.dispose();
+    });
+
+    function createContinuousTableFixture(frameOwner?: 'table' | 'row', frameEdge: 'top' | 'bottom' = 'bottom', includeThirdTable = false) {
+        const T = DataStreamTreeTokenType;
+        const wrapTable = (text: string) => `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}\r\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const gap = 'gap\r'.repeat(70);
+        const tableIds = includeThirdTable ? ['first', 'second', 'third'] : ['first', 'second'];
+        let dataStream = '';
+        const tables = tableIds.map((tableId, index) => {
+            if (index > 0) {
+                dataStream += gap;
+            }
+            const startIndex = dataStream.length;
+            dataStream += wrapTable('ABC'[index]);
+            return { tableId, startIndex, endIndex: dataStream.length };
+        });
+        dataStream += '\r\n';
+        const bottomBorder = { width: { v: 20 }, color: { rgb: '#a02030' } };
+        const frameBorder = { width: { v: frameEdge === 'top' ? 160 : 40 }, color: { rgb: '#dc4444' } };
+        const cellBorder = { width: { v: 1 }, color: { rgb: '#000000' } };
+        const tableSource = Object.fromEntries(tableIds.map((tableId): [string, ITable] => [tableId, {
+            tableId,
+            align: TableAlignmentType.START,
+            indent: { v: 0 },
+            textWrap: TableTextWrapType.NONE,
+            size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
+            position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+            dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+            cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+            ...(tableId === 'first' && frameOwner ? { cellSpacing: { v: 2 } } : {}),
+            ...(tableId === 'first' && frameOwner === 'table' ? { borderDefaults: { [frameEdge]: frameBorder } } : {}),
+            tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
+            tableRows: [{
+                trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } },
+                ...(tableId === 'first' && frameOwner === 'row' ? { borderDefaults: { [frameEdge]: frameBorder } } : {}),
+                tableCells: [tableId === 'first'
+                    ? {
+                        ...(frameOwner ? { borderTop: cellBorder, borderBottom: cellBorder } : { borderBottom: bottomBorder }),
+                    }
+                    : {}],
+            }],
+        }]));
+        const bed = createParagraphLayoutTestBed('', {
+            body: {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index!, paragraphId: `p-${index}` })),
+                sectionBreaks: [...dataStream.matchAll(/\n/g)].map((match, index) => ({ startIndex: match.index!, sectionId: `s-${index}` })),
+                tables,
+            },
+            tableSource,
+            documentStyle: { documentFlavor: DocumentFlavor.MODERN },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        skeleton.calculate();
+        const documents = Documents.create('continuous-scroll-tables', skeleton);
+        scene.addObject(documents, 1);
+        documents.transformByState({ top: 36 });
+        scene.transformByState({ height: 10_000 });
+        const viewport = scene.getMainViewport();
+        const scrollbar = new ScrollBar(viewport);
+        const page = skeleton.getSkeletonData()!.pages[0];
+        const [firstTable, secondTable] = [...page.skeTables.values()];
+        return {
+            documents,
+            viewport,
+            page,
+            firstTable,
+            secondTable,
+            bottomBorder,
+            frameBorder,
+            dispose: () => {
+                scrollbar.dispose();
+                documents.dispose();
+                skeleton.dispose();
+                bed.viewModel.dispose();
+                bed.dataModel.dispose();
+            },
+        };
+    }
+
+    it('reuses custom range intersections when redrawing 160 offscreen tables with links', () => {
+        const T = DataStreamTreeTokenType;
+        const count = 160;
+        const tableText = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}L\r\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const tableParagraph = `${tableText}\r`;
+        const dataStream = `${tableParagraph.repeat(count)}${'gap\r'.repeat(40)}\n`;
+        const tables = Array.from({ length: count }, (_, index) => ({
+            tableId: `linked-table-${index}`,
+            startIndex: index * tableParagraph.length,
+            endIndex: index * tableParagraph.length + tableText.length,
+        }));
+        const tableWidth = { type: TableSizeType.SPECIFIED, width: { v: 160 } };
+        const bed = createParagraphLayoutTestBed('', {
+            body: {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index, paragraphId: `p-${index}` })),
+                sectionBreaks: [...dataStream.matchAll(/\n/g)].map((match, index) => ({ startIndex: match.index, sectionId: `s-${index}` })),
+                tables,
+                customRanges: tables.map(({ tableId, startIndex }) => ({
+                    rangeId: tableId,
+                    startIndex: startIndex + tableText.indexOf('L'),
+                    endIndex: startIndex + tableText.indexOf('L'),
+                    rangeType: CustomRangeType.HYPERLINK,
+                })),
+            },
+            tableSource: Object.fromEntries(tables.map(({ tableId }): [string, ITable] => [tableId, {
+                tableId,
+                align: TableAlignmentType.START,
+                indent: { v: 0 },
+                textWrap: TableTextWrapType.NONE,
+                position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                size: tableWidth,
+                tableColumns: [{ size: tableWidth }],
+                tableRows: [{ trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } }, tableCells: [{}] }],
+            }])),
+            documentStyle: { documentFlavor: DocumentFlavor.MODERN },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        const documents = Documents.create('linked-offscreen-tables', skeleton);
+        scene.addObject(documents, 1);
+        const viewport = scene.getMainViewport();
+        const scrollbar = new ScrollBar(viewport);
+        const ctx = canvas.getContext();
+        const paint = vi.spyOn(ctx, 'fillText');
+
+        try {
+            skeleton.calculate();
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const lastTable = [...page.skeTables.values()].at(-1)!;
+            const scrollY = page.marginTop + lastTable.top + lastTable.height + 32;
+            scene.transformByState({ height: scrollY + 2 * viewport.height! });
+            viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: scrollY });
+            expect(viewport.viewportScrollY).toBeCloseTo(scrollY, 0);
+
+            const ranges = bed.dataModel.getBody()!.customRanges!;
+            let startReads = 0;
+            for (const range of ranges) {
+                const { startIndex } = range;
+                Object.defineProperty(range, 'startIndex', {
+                    configurable: true,
+                    enumerable: true,
+                    get: () => {
+                        startReads++;
+                        return startIndex;
+                    },
+                });
+            }
+
+            const redraw = () => {
+                startReads = 0;
+                paint.mockClear();
+                viewport.render(ctx, [documents]);
+                return {
+                    linkPaints: paint.mock.calls.filter(([text]) => text === 'L').length,
+                    startReads,
+                };
+            };
+            redraw();
+            const warmFrames = Array.from({ length: 3 }, redraw);
+            expect(warmFrames.map(({ linkPaints }) => linkPaints)).toEqual([count, count, count]);
+            expect(warmFrames.map((frame) => frame.startReads)).toEqual([0, 0, 0]);
+
+            // Only the changed range metadata should affect the existing table geometry.
+            const firstLink = { ...ranges[0] };
+            bed.dataModel.apply(JSONX.getInstance().removeOp(['body', 'customRanges', 0], firstLink));
+            expect(redraw().linkPaints).toBe(count - 1);
+            bed.dataModel.apply(JSONX.getInstance().insertOp(['body', 'customRanges', 0], firstLink));
+            expect(redraw().linkPaints).toBe(count);
+        } finally {
+            scrollbar.dispose();
+            documents.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it('uses the actual Canvas clip despite stale viewport bounds and preserves border overflow', () => {
+        const { documents, viewport, page, firstTable, secondTable, bottomBorder, dispose } = createContinuousTableFixture();
+        const ctx = canvas.getContext();
+        const text = vi.spyOn(ctx, 'fillText');
+        try {
+            viewport.render(ctx, [documents]);
+            // The Canvas clips at the new scroll position even if the caller reused old bounds.
+            const previousBounds = viewport.calcViewportInfo();
+            viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: secondTable.top });
+            text.mockClear();
+            viewport.render(ctx, [documents], false, previousBounds);
+            expect(text.mock.calls.map(([value]) => value).filter((value) => value === 'A' || value === 'B')).toEqual(['B']);
+
+            const strokes: Array<string | CanvasGradient | CanvasPattern> = [];
+            const stroke = ctx.stroke.bind(ctx);
+            vi.spyOn(ctx, 'stroke').mockImplementation(() => {
+                strokes.push(ctx.strokeStyle);
+                stroke();
+            });
+            const cellBottom = documents.top + page.marginTop + firstTable.top + firstTable.rows[0].cells[0].pageHeight;
+            viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: cellBottom + bottomBorder.width.v / 4 });
+            viewport.render(ctx, [documents]);
+            expect(strokes).toContain(bottomBorder.color.rgb);
+
+            viewport.closeClip();
+            text.mockClear();
+            viewport.render(ctx, [documents]);
+            expect(text.mock.calls.map(([value]) => value).filter((value) => value === 'A' || value === 'B')).toEqual(['A', 'B']);
+        } finally {
+            dispose();
+        }
+    });
+
+    it.each(['table', 'row'] as const)('draws a thick %s frame that reaches a zoomed viewport', (frameOwner) => {
+        const { documents, viewport, page, firstTable, frameBorder, dispose } = createContinuousTableFixture(frameOwner);
+        try {
+            scene.transformByState({ scaleX: 0.5, scaleY: 0.5 });
+            const ctx = canvas.getContext();
+            const strokes: Array<string | CanvasGradient | CanvasPattern> = [];
+            const stroke = ctx.stroke.bind(ctx);
+            vi.spyOn(ctx, 'stroke').mockImplementation(() => {
+                strokes.push(ctx.strokeStyle);
+                stroke();
+            });
+            const tableBottom = documents.top + page.marginTop + firstTable.top + firstTable.height;
+            viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: tableBottom + 10 });
+            viewport.render(ctx, [documents]);
+            expect(strokes).toContain(frameBorder.color.rgb);
+        } finally {
+            dispose();
+        }
+    });
+
+    it('draws the top frame past the table bottom at 200% zoom', () => {
+        const { documents, viewport, page, firstTable, frameBorder, dispose } = createContinuousTableFixture('table', 'top');
+        try {
+            scene.transformByState({ scaleX: 2, scaleY: 2 });
+            const ctx = canvas.getContext();
+            const strokes: Array<string | CanvasGradient | CanvasPattern> = [];
+            const stroke = ctx.stroke.bind(ctx);
+            vi.spyOn(ctx, 'stroke').mockImplementation(() => {
+                strokes.push(ctx.strokeStyle);
+                stroke();
+            });
+            const tableBottom = documents.top + page.marginTop + firstTable.top + firstTable.height;
+            const renderAt = (top: number) => {
+                strokes.length = 0;
+                viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: top });
+                viewport.render(ctx, [documents]);
+            };
+            renderAt(tableBottom + 45);
+            expect(strokes.filter((color) => color === frameBorder.color.rgb)).toHaveLength(1);
+            renderAt(tableBottom + frameBorder.width.v);
+            expect(strokes).not.toContain(frameBorder.color.rgb);
+        } finally {
+            dispose();
+        }
+    });
+
+    it('delivers clipped table glyphs to independently registered extensions', () => {
+        const { documents, viewport, dispose } = createContinuousTableFixture();
+        const text: string[] = [];
+        class TableGlyphExtension extends docExtension {
+            override uKey = 'TableGlyphExtension';
+            override draw(_ctx: UniverRenderingContext, _scale: IScale, glyph: IDocumentSkeletonGlyph) {
+                if (glyph.content === 'A' || glyph.content === 'B') {
+                    text.push(glyph.content);
+                }
+            }
+        }
+        const injector = new Injector([[TableGlyphExtension]]);
+        const extension = documents.register(injector.get(TableGlyphExtension));
+        try {
+            viewport.render(canvas.getContext(), [documents]);
+            expect(text).toEqual(['A', 'B']);
+        } finally {
+            extension.dispose();
+            injector.dispose();
+            dispose();
+        }
+    });
+
+    it('preserves the visible text border when an intervening table is clipped', () => {
+        const { documents, viewport, page, dispose } = createContinuousTableFixture(undefined, 'bottom', true);
+        const tables = [...page.skeTables.values()];
+        const blue = { s: BorderStyleTypes.MEDIUM_DASHED, cl: { rgb: '#2244ee' } };
+        const red = { s: BorderStyleTypes.THIN, cl: { rgb: '#cc2222' } };
+        try {
+            const lines = tables.map((table) => table.rows[0].cells[0].sections[0].columns[0].lines[0]);
+            for (const [index, line] of lines.entries()) {
+                const glyph = line.divides.flatMap((divide) => divide.glyphGroup).find((glyph) => glyph.content === 'ABC'[index])!;
+                glyph.ts = { ...glyph.ts, bd: { t: index === 1 ? red : blue } };
+            }
+            const model = documents.getSkeleton()!.getViewModel().getDataModel();
+            model.apply(JSONX.getInstance().insertOp(['body', 'customRanges'], [{
+                rangeId: 'keep-first-table',
+                rangeType: CustomRangeType.HYPERLINK,
+                startIndex: lines[0].st,
+                endIndex: lines[0].ed,
+            }]));
+
+            const ctx = canvas.getContext();
+            const drawBorder = Border.prototype.draw;
+            const stroke = ctx.stroke.bind(ctx);
+            const strokes: Array<{ glyph: string; style: CanvasRenderingContext2D['strokeStyle']; width: number; dash: number[] }> = [];
+            let currentGlyph: string | undefined;
+            vi.spyOn(Border.prototype, 'draw').mockImplementation(function (this: Border, context, scale, glyph) {
+                currentGlyph = glyph.content;
+                try {
+                    drawBorder.call(this, context, scale, glyph);
+                } finally {
+                    currentGlyph = undefined;
+                }
+            });
+            vi.spyOn(ctx, 'stroke').mockImplementation(() => {
+                if (currentGlyph === 'A' || currentGlyph === 'B' || currentGlyph === 'C') {
+                    strokes.push({ glyph: currentGlyph, style: ctx.strokeStyle, width: ctx.lineWidth, dash: ctx.getLineDash() });
+                }
+                stroke();
+            });
+            viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: tables[2].top });
+            viewport.render(ctx, [documents]);
+
+            expect(strokes).toEqual([
+                { glyph: 'A', style: '#2244ee', width: 2, dash: [3, 3] },
+                { glyph: 'C', style: '#2244ee', width: 2, dash: [3, 3] },
+            ]);
+        } finally {
+            dispose();
+        }
+    });
+
+    it('draws declared offscreen table glyphs while skipping ordinary offscreen tables on a jump and return', () => {
+        const { documents, viewport, page, secondTable, dispose } = createContinuousTableFixture(undefined, 'bottom', true);
+        const thirdTable = [...page.skeTables.values()][2];
+        const text: string[] = [];
+        let hasKnownRanges = true;
+        class ScopedTableExtension extends docExtension {
+            override uKey = 'ScopedTableExtension';
+            private _ranges?: [number, number][];
+
+            override clearCache() {
+                const line = secondTable.rows[0].cells[0].sections[0].columns[0].lines[0];
+                this._ranges = hasKnownRanges ? [[line.st, line.ed]] : undefined;
+            }
+
+            getOffscreenTablePaintRanges() {
+                return this._ranges;
+            }
+
+            override draw(_ctx: UniverRenderingContext, _scale: IScale, glyph: IDocumentSkeletonGlyph) {
+                if (glyph.content === 'A' || glyph.content === 'B' || glyph.content === 'C') {
+                    text.push(glyph.content);
+                }
+            }
+        }
+        const injector = new Injector([[ScopedTableExtension]]);
+        const registration = documents.register(injector.get(ScopedTableExtension));
+        const renderAt = (scrollY: number) => {
+            text.length = 0;
+            viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: scrollY });
+            viewport.render(canvas.getContext(), [documents]);
+            return text.join('');
+        };
+        try {
+            expect(renderAt(0)).toBe('AB');
+            expect(renderAt(thirdTable.top)).toBe('BC');
+            expect(renderAt(0)).toBe('AB');
+
+            hasKnownRanges = false;
+            expect(renderAt(0)).toBe('ABC');
+        } finally {
+            registration.dispose();
+            injector.dispose();
+            dispose();
+        }
+    });
+
+    it('keeps legal offscreen formula glyphs when an earlier legacy range lacks an end index', () => {
+        const { documents, viewport, page, dispose } = createContinuousTableFixture(undefined, 'bottom', true);
+        const formulaTable = [...page.skeTables.values()][2];
+        const [paragraph] = formulaTable.rows[0].cells[0].sections[0].columns[0].lines;
+        const formulaRange = {
+            rangeId: 'offscreen-formula',
+            rangeType: CustomRangeType.CUSTOM,
+            wholeEntity: true,
+            startIndex: paragraph.st,
+            endIndex: paragraph.ed,
+        };
+        const legacyLink = { rangeId: 'legacy-link', rangeType: CustomRangeType.HYPERLINK, startIndex: 0 };
+        const model = documents.getSkeleton()!.getViewModel().getDataModel();
+        const json = JSONX.getInstance();
+        model.apply(json.insertOp(['body', 'customRanges'], [formulaRange]));
+
+        const text: string[] = [];
+        class FormulaGlyphExtension extends docExtension {
+            override uKey = 'FormulaGlyphExtension';
+
+            getOffscreenTablePaintRanges(): readonly [] {
+                return [];
+            }
+
+            override draw(_ctx: UniverRenderingContext, _scale: IScale, glyph: IDocumentSkeletonGlyph) {
+                if (glyph.content === 'A' || glyph.content === 'B' || glyph.content === 'C') {
+                    text.push(glyph.content);
+                }
+            }
+        }
+        const injector = new Injector([[FormulaGlyphExtension]]);
+        const registration = documents.register(injector.get(FormulaGlyphExtension));
+        const render = () => {
+            text.length = 0;
+            viewport.render(canvas.getContext(), [documents]);
+            return text.join('');
+        };
+        try {
+            expect(render()).toBe('AC');
+            model.apply(json.insertOp(['body', 'customRanges', 0], legacyLink));
+            expect(render()).toBe('ABC');
+            model.apply(json.removeOp(['body', 'customRanges', 0], legacyLink));
+            expect(render()).toBe('AC');
+        } finally {
+            registration.dispose();
+            injector.dispose();
+            dispose();
+        }
     });
 
     it('visits only viewport-adjacent lines when imported modern geometry keeps a finite page height', () => {

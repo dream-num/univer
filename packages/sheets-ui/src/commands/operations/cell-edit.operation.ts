@@ -15,10 +15,10 @@
  */
 
 import type { IOperation, Workbook } from '@univerjs/core';
+import { CommandType, ICommandService, IConfigService, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { SheetSkeletonService } from '@univerjs/sheets';
 import type { IUniverSheetsUIConfig } from '../../config/config';
-
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import { CommandType, ICommandService, IConfigService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
@@ -36,17 +36,24 @@ export const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisible
             return false;
         }
 
-        const { unitId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return false;
         }
+        const unitId = params.unitId ?? workbook.getUnitId();
+        if (params.visible) {
+            const injector = accessor.get(Injector);
+            if (injector.has(SheetSkeletonService)) {
+                const target = unitId === workbook.getUnitId() ? workbook : univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+                const sheetId = target?.getActiveSheet()?.getSheetId();
+                if (sheetId && injector.get(SheetSkeletonService).isDisplayProjectionPending(unitId, sheetId)) {
+                    return false;
+                }
+            }
+        }
         const editorBridgeService = accessor.get(IEditorBridgeService);
-        editorBridgeService.changeVisible({
-            ...params,
-            unitId: unitId ?? workbook.getUnitId(),
-        });
+        editorBridgeService.changeVisible({ ...params, unitId });
 
         return true;
     },

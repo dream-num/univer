@@ -977,7 +977,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         refreshCompleteSelection: boolean,
         preserveInactiveViewportAnchor: boolean,
         layoutRequestId: number | undefined,
-        deferCompleteDuringInteraction: boolean
+        deferCompleteDuringInteraction: boolean,
+        retryFullWorkerPublication?: () => void
     ): DocLayoutCoordinatorCallbacks {
         const isInitialLayout = options.reason === 'initial';
         return {
@@ -992,7 +993,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 refreshCompleteSelection,
                 preserveInactiveViewportAnchor,
                 layoutRequestId,
-                deferCompleteDuringInteraction
+                deferCompleteDuringInteraction,
+                retryFullWorkerPublication
             ),
         };
     }
@@ -1008,7 +1010,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         refreshCompleteSelection: boolean,
         preserveInactiveViewportAnchor: boolean,
         layoutRequestId: number | undefined,
-        deferCompleteDuringInteraction: boolean
+        deferCompleteDuringInteraction: boolean,
+        retryFullWorkerPublication?: () => void
     ): void {
         if (!progress.didPublish) {
             return;
@@ -1033,7 +1036,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                     refreshCompleteSelection,
                     preserveInactiveViewportAnchor,
                     layoutRequestId,
-                    false
+                    false,
+                    retryFullWorkerPublication
                 ),
                 true
             );
@@ -1046,6 +1050,10 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             preserveInactiveViewportAnchor
         );
         const applyResult = this._applyLayoutPublication(unitId, skeleton, publication, progress);
+        if (applyResult?.requiresFullPublication) {
+            retryFullWorkerPublication?.();
+            return;
+        }
 
         const editorRenderConfig = this._editorService.getEditorRenderConfig(unitId);
         if (editorRenderConfig && !editorRenderConfig.scrollBar) {
@@ -1138,17 +1146,46 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         mainThreadCallbacks: DocLayoutCoordinatorCallbacks,
         preserveInactiveViewportAnchor: boolean,
         allowRecovery = true,
-        preserveCompletedLayout = false
+        preserveCompletedLayout = false,
+        forceFullPublication = false
     ): void {
         if (layoutRequestId !== this._layoutRequestId) {
             return;
         }
 
+        const acknowledgedLayoutVersion = this._context.unit.documentStyle.documentFlavor === DocumentFlavor.MODERN
+            ? skeleton.getAppliedContinuousLayoutVersion()
+            : undefined;
+        const canUseAppliedBase = !forceFullPublication;
+        const retryFullWorkerPublication = () => {
+            this._layoutCoordinator.cancel();
+            this._queueWorkerHandoff(layoutRequestId, () => this._scheduleWorkerLayout(
+                layoutRequestId,
+                unitId,
+                skeleton,
+                options,
+                workerOptions,
+                protectedRange,
+                mainThreadCallbacks,
+                preserveInactiveViewportAnchor,
+                allowRecovery,
+                preserveCompletedLayout,
+                true
+            ));
+        };
         this._layoutCoordinator.scheduleWorker(
             unitId,
             skeleton,
             this._docLayoutExecutorService,
-            workerOptions,
+            {
+                ...workerOptions,
+                ...(acknowledgedLayoutVersion == null
+                    ? {}
+                    : {
+                        acknowledgedLayoutVersion,
+                        ...(canUseAppliedBase ? { appliedLayoutVersion: acknowledgedLayoutVersion } : {}),
+                    }),
+            },
             protectedRange,
             {
                 ...this._createLayoutCallbacks(
@@ -1159,7 +1196,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                     false,
                     preserveInactiveViewportAnchor,
                     layoutRequestId,
-                    true
+                    true,
+                    retryFullWorkerPublication
                 ),
                 onComplete: () => {
                     if (layoutRequestId === this._layoutRequestId) {

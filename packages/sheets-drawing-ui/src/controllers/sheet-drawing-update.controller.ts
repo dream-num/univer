@@ -16,7 +16,6 @@
 
 import type {
     IAccessor,
-    IDrawingParam,
     IImageIoServiceParam,
     IRange,
     Nullable,
@@ -82,6 +81,7 @@ import {
     applySheetDrawingPlacement,
     drawingPositionToTransform,
     getSheetDrawingPlacement,
+    GroupSheetDrawingCommand,
     InsertSheetDrawingCommand,
     ISheetDrawingService,
     SetDrawingArrangeCommand,
@@ -91,12 +91,11 @@ import {
     transformDrawingsToChartSheet,
     transformToAxisAlignPosition,
     transformToDrawingPosition,
+    UngroupSheetDrawingCommand,
 } from '@univerjs/sheets-drawing';
 import { SHEET_VIEW_KEY, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
-import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
-import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { getWorksheetBackgroundImageScale } from '../utils/worksheet-background-image';
 
 /**
@@ -813,79 +812,23 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }));
     }
 
-    private _getAnchorByParam(param: IDrawingParam, isCreate: boolean): Nullable<ISheetDrawingPosition> {
-        const { unitId, subUnitId, drawingId, transform } = param;
-        const skeleton = this._sheetSkeletonService.getSkeleton(unitId, subUnitId);
-        if (!transform || !skeleton) {
-            return null;
-        }
-
-        const sheetDrawing = this._sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
-
-        let sheetDrawingTransform = sheetDrawing?.transform;
-        if (isCreate) {
-            sheetDrawingTransform = {};
-        }
-
-        if (!isCreate && (!sheetDrawing || sheetDrawing.unitId !== this._context.unitId)) {
-            return null;
-        }
-
-        return transformToAxisAlignPosition({ ...sheetDrawingTransform, ...transform }, skeleton);
-    }
-
     private _groupDrawingListener() {
+        // This controller exists once per rendered workbook; the commands
+        // derive the cell markers, and grouping does not move the children.
         this.disposeWithMe(this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
-            const grpParams = [];
-            for (const param of params) {
-                const parent = param.parent;
-                const grpSheetTransform = this._getAnchorByParam(parent, true);
-
-                const children = [];
-                for (const child of param.children) {
-                    const childSheetTransformInfo = this._getAnchorByParam(child, false);
-                    if (childSheetTransformInfo != null) {
-                        children.push({
-                            ...child,
-                            axisAlignSheetTransform: childSheetTransformInfo,
-                        });
-                    }
-                }
-
-                const grpParam = {
-                    parent: { ...parent, axisAlignSheetTransform: grpSheetTransform ?? undefined },
-                    children,
-
-                };
-                grpParams.push(grpParam);
-            }
+            const grpParams = params.filter(({ parent }) => parent.unitId === this._context.unitId);
             if (grpParams.length > 0) {
                 this._commandService.executeCommand(GroupSheetDrawingCommand.id, grpParams);
-                const { unitId, subUnitId, drawingId } = params[0].parent;
+                const { unitId, subUnitId, drawingId } = grpParams[0].parent;
                 this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, [{ unitId, subUnitId, drawingId }]);
             }
         }));
 
         this.disposeWithMe(this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {
-            const unGroupParams = [];
-            for (const param of params) {
-                const { children } = param;
-                const childParams = [];
-                for (const child of children) {
-                    const childSheetTransform = this._getAnchorByParam(child, false);
-                    if (childSheetTransform != null) {
-                        childParams.push({
-                            ...child,
-                            axisAlignSheetTransform: childSheetTransform,
-                        });
-                    }
-                }
-                unGroupParams.push({
-                    ...param,
-                    children: childParams,
-                });
+            const ungroupParams = params.filter(({ parent }) => parent.unitId === this._context.unitId);
+            if (ungroupParams.length > 0) {
+                this._commandService.executeCommand(UngroupSheetDrawingCommand.id, ungroupParams);
             }
-            this._commandService.executeCommand(UngroupSheetDrawingCommand.id, unGroupParams);
         }));
     }
 

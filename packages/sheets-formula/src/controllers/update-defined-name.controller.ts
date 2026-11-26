@@ -16,8 +16,6 @@
 
 import type { IMutationInfo, Nullable, Workbook } from '@univerjs/core';
 import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
-import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 import {
     Disposable,
     Inject,
@@ -26,6 +24,8 @@ import {
 } from '@univerjs/core';
 import { deserializeRangeWithSheetWithCache, ErrorType, generateStringWithSequence, IDefinedNamesService, LexerTreeBuilder, refactorFormulaUnitQualifier, sequenceNodeType, serializeRangeToRefString, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import { RemoveDefinedNameCommand, SetDefinedNameCommand, SheetInterceptorService } from '@univerjs/sheets';
+import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
+import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 import { FormulaReferenceMoveType, updateRefOffset } from './utils/ref-range-formula';
 import { getNewRangeByMoveParam } from './utils/ref-range-move';
 import { getReferenceMoveParams } from './utils/ref-range-param';
@@ -220,6 +220,7 @@ export class UpdateDefinedNameController extends Disposable {
         return {
             redos: redoMutations,
             undos: undoMutations,
+            rollbackMutations: undoMutations.map((undo) => [undo]),
         };
     }
 

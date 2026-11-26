@@ -21,12 +21,14 @@ import { Disposable, ICommandService, Inject, IResourceManagerService, IUniverIn
 import { getOrCreateDrawingCopyPlan, IDrawingManagerService } from '@univerjs/drawing';
 import { CopySheetCommand, RemoveSheetCommand, SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
 import type { ISheetDrawing } from '../services/sheet-drawing.service';
+import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { SetSheetDrawingPlacementCommand } from '../commands/commands/set-sheet-drawing-placement.command';
 import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
 import { SetWorksheetBackgroundImageCommand } from '../commands/commands/set-worksheet-background-image.command';
+import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 import { SetWorksheetBackgroundImageMutation } from '../commands/mutations/set-worksheet-background-image.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
@@ -84,6 +86,8 @@ export class SheetsDrawingLoadController extends Disposable {
             SetDrawingArrangeCommand,
             SetSheetDrawingPlacementCommand,
             SetWorksheetBackgroundImageCommand,
+            GroupSheetDrawingCommand,
+            UngroupSheetDrawingCommand,
             ClearSheetDrawingTransformerOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }

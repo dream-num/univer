@@ -17,12 +17,10 @@
 import './global.css';
 
 export { DeleteDrawingsCommand } from './commands/commands/delete-drawings.command';
-export { GroupSheetDrawingCommand } from './commands/commands/group-sheet-drawing.command';
 export { InsertFloatImageCommand } from './commands/commands/insert-image.command';
 export type { IInsertImageCommandParams } from './commands/commands/insert-image.command';
 export { MoveDrawingsCommand } from './commands/commands/move-drawings.command';
 export { SaveCellImagesCommand } from './commands/commands/save-cell-images.command';
-export { UngroupSheetDrawingCommand } from './commands/commands/ungroup-sheet-drawing.command';
 export {
     AddWorksheetBackgroundImageCommand,
     DeleteWorksheetBackgroundImageCommand,
@@ -53,3 +51,5 @@ export { SHEET_CHART_RENDER_OBJECT_CONFIG } from './services/sheet-chart-render-
 export { SheetDrawingHitTestService } from './services/sheet-drawing-hit-test.service';
 export type { ISheetDrawingDoubleClickEvent, ISheetDrawingHitTestResult } from './services/sheet-drawing-hit-test.service';
 export { SheetDrawingAnchor } from './views/sheet-image-panel/SheetDrawingAnchor';
+// Re-exported for imports that predate the move to @univerjs/sheets-drawing.
+export { GroupSheetDrawingCommand, UngroupSheetDrawingCommand } from '@univerjs/sheets-drawing';

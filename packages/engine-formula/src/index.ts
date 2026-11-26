@@ -399,6 +399,7 @@ export type {
 } from './services/formula/register-function.service';
 export { generateParam, getFunctionName } from './services/formula/utils';
 export { FunctionService } from './services/function.service';
+export type { IFunctionRegistration } from './services/function.service';
 export { IFunctionService } from './services/function.service';
 export { GlobalComputingStatusService } from './services/global-computing-status.service';
 export {

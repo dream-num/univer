@@ -102,6 +102,10 @@ export class BaseAstNode {
         return this._isForcedCalculateFunction;
     }
 
+    needsFilteredOutRows() {
+        return false;
+    }
+
     setAsync() {
         this._async = true;
     }

@@ -30,6 +30,25 @@ import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 univer.registerPlugin(UniverFormulaEnginePlugin);
 ```
 
+Plugin integrations can resolve `IFunctionService` through DI to register functions with factories. Each factory must return a fresh executor and can resolve services from the target calculation context.
+
+```ts
+import { CustomFunction, IFunctionService } from '@univerjs/engine-formula';
+
+function registerDouble(functions: IFunctionService) {
+    return functions.registerFunctionFactories({
+        name: 'DOUBLE',
+        create: () => {
+            const executor = new CustomFunction('DOUBLE');
+            executor.calculateCustom = value => Number(value) * 2;
+            return executor;
+        },
+    });
+}
+```
+
+Dispose the returned registration when its owner is disposed. A replaced registration's disposable does not remove its replacement. Existing Facade callback registration and configured function classes retain their factories automatically.
+
 ### Worker usage
 
 On the main thread, import `UniverFormulaEnginePlugin` from `@univerjs/engine-formula`. Set `notExecuteFormula: true` to delegate calculation to the worker.
@@ -47,6 +66,8 @@ univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: false });
 - Load the locale resources from `@univerjs/engine-formula/locale/<language>` for each language enabled by your application.
 - Import `@univerjs/engine-formula/facade` when using this package through Univer Facade APIs.
 - Custom calculation engines must await `FormulaResultService` before emitting completion. Subclasses of `CalculateFormulaService` must pass this service to the base constructor.
+- `getFunctionRegistrations()` returns a complete registry bootstrap for `functionRegistry` in a separate runtime. This option replaces default function initialization, so an empty registry stays empty. Legacy `registerExecutors()` remains available for local instances, but recreating those instances requires factory registration.
+- Factories and callbacks are process-local code. Register them in the worker that executes formulas; they are not serialized over RPC or stored in workbook resources.
 
 ## Resources
 

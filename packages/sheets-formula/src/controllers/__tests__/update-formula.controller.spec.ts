@@ -29,7 +29,26 @@ import {
     SetTriggerFormulaCalculationStartMutation,
     UniverFormulaEnginePlugin,
 } from '@univerjs/engine-formula';
-import { InsertSheetMutation, MoveRangeCommand, MoveRangeMutation, RemoveDefinedNameCommand, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetStyleCommand, SetWorksheetNameCommand, SheetInterceptorService, UniverSheetsPlugin } from '@univerjs/sheets';
+import {
+    InsertRowMutation,
+    InsertSheetMutation,
+    MoveRangeCommand,
+    MoveRangeMutation,
+    RemoveDefinedNameCommand,
+    RemoveRowByRangeCommand,
+    RemoveRowCommand,
+    RemoveRowMutation,
+    RemoveSheetCommand,
+    RemoveSheetMutation,
+    SetDefinedNameCommand,
+    SetRangeValuesCommand,
+    SetRangeValuesMutation,
+    SetSelectionsOperation,
+    SetStyleCommand,
+    SetWorksheetNameCommand,
+    SheetInterceptorService,
+    UniverSheetsPlugin,
+} from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
@@ -170,6 +189,27 @@ describe('UpdateFormulaController', () => {
     afterEach(() => {
         vi.restoreAllMocks();
         testBed?.univer.dispose();
+    });
+
+    it('deletes a row referenced by formulas on two sheets and restores references on undo', async () => {
+        for (const command of [RemoveRowCommand, RemoveRowByRangeCommand, RemoveRowMutation, InsertRowMutation]) {
+            commandService.registerCommand(command);
+        }
+        const workbook = testBed.injector.get(IUniverInstanceService).getUnit<Workbook>('test')!;
+        const first = workbook.getSheetBySheetId('sheet1')!;
+        const second = workbook.getSheetBySheetId('sheet2')!;
+        expect(await commandService.executeCommand(RemoveRowCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 19 },
+        })).toBe(true);
+        expect(first.getCellRaw(4, 2)?.f).toBe('=SUM(A1:B1)');
+        expect(second.getCellRaw(0, 0)?.f).toBe('=Sheet1!A1:B1');
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(first.getCellRaw(5, 2)?.f).toBe('=SUM(A1:B2)');
+        expect(second.getCellRaw(0, 0)?.f).toBe('=Sheet1!A1:B2');
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(second.getCellRaw(0, 0)?.f).toBe('=Sheet1!A1:B1');
     });
 
     it('does not schedule workbook-added calculation in no-calculation mode', () => {

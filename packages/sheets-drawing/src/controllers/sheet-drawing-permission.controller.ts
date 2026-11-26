@@ -15,6 +15,7 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
 import { Disposable, ICommandService, Inject, LocaleService } from '@univerjs/core';
 import { SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import type { IInsertSheetDrawingCommandParams } from '../commands/commands/insert-sheet-drawing.command';
@@ -22,11 +23,13 @@ import type { IRemoveSheetDrawingCommandParams } from '../commands/commands/remo
 import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
 import type { ISetDrawingCommandParams } from '../commands/commands/set-sheet-drawing.command';
 import type { LocaleKey } from '../locale/types';
+import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { SetSheetDrawingPlacementCommand } from '../commands/commands/set-sheet-drawing-placement.command';
 import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
+import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 
 /**
  * Runs in the base package so drawing commands are checked in headless/Facade usage. Commands
@@ -58,6 +61,8 @@ export class SheetDrawingPermissionController extends Disposable {
                     const target = getPlacementCommandTarget(command.params);
                     unitId = target.unitId;
                     subUnitId = target.subUnitId;
+                } else if (command.id === GroupSheetDrawingCommand.id || command.id === UngroupSheetDrawingCommand.id) {
+                    ({ unitId, subUnitId } = getGroupCommandTarget(command.params as IDrawingGroupUpdateParam[] | undefined));
                 } else if (command.id === SetDrawingArrangeCommand.id) {
                     const params = command.params as ISetDrawingArrangeCommandParams | undefined;
                     unitId = params?.unitId;
@@ -80,6 +85,14 @@ export class SheetDrawingPermissionController extends Disposable {
             })
         );
     }
+}
+
+function getGroupCommandTarget(params: IDrawingGroupUpdateParam[] | undefined): {
+    unitId?: string;
+    subUnitId?: string;
+} {
+    const parent = params?.[0]?.parent;
+    return { unitId: parent?.unitId, subUnitId: parent?.subUnitId };
 }
 
 function getPlacementCommandTarget(params: object | undefined): {

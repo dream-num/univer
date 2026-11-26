@@ -303,11 +303,11 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         } = params;
         const isSync = Boolean(paramsIsSync || options?.fromCollab || options?.fromChangeset);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const renderManagerService = accessor.get(IRenderManagerService);
+        const renderManagerService = accessor.has(IRenderManagerService) ? accessor.get(IRenderManagerService) : undefined;
         const docStateEmitService = accessor.get(DocStateEmitService);
 
         const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        const documentViewModel = renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService).getViewModel();
+        const documentViewModel = renderManagerService?.getRenderUnitById(unitId)?.with(DocSkeletonManagerService).getViewModel();
         if (documentDataModel == null) {
             throw new Error(`DocumentDataModel not found for unitId: ${unitId}`);
         }

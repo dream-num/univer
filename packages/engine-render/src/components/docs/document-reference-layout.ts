@@ -33,23 +33,25 @@ export interface IDocumentReferenceLayoutResolver {
     project(document: IDocumentData, pages: IDocumentReferenceLayoutPage[]): IDocumentData | undefined;
 }
 
-const resolvers = new WeakMap<DocumentDataModel, IDocumentReferenceLayoutResolver>();
+const resolvers = new WeakMap<DocumentDataModel, { resolver: IDocumentReferenceLayoutResolver }>();
 
 export function registerDocumentReferenceLayoutResolver(model: DocumentDataModel, resolver: IDocumentReferenceLayoutResolver): IDisposable {
-    resolvers.set(model, resolver);
+    const registration = { resolver };
+    resolvers.set(model, registration);
     return toDisposable(() => {
-        if (resolvers.get(model) === resolver) {
+        if (resolvers.get(model) === registration) {
             resolvers.delete(model);
         }
     });
 }
 
+/** Reuse the registered reference resolver when laying out an isolated copy of the document. */
 export function getDocumentReferenceLayoutResolver(model: DocumentDataModel): IDocumentReferenceLayoutResolver | undefined {
-    return resolvers.get(model);
+    return resolvers.get(model)?.resolver;
 }
 
 export function hasDocumentReferenceLayout(model: DocumentDataModel): boolean {
-    const resolver = resolvers.get(model);
+    const resolver = getDocumentReferenceLayoutResolver(model);
     if (!resolver) {
         return false;
     }

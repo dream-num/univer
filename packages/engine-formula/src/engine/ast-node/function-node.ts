@@ -155,6 +155,10 @@ export class FunctionNode extends BaseAstNode {
         return reference.isCell() ? reference : this._functionExecutor.createReferenceObject(reference, range);
     }
 
+    override needsFilteredOutRows() {
+        return this._functionExecutor.needsFilteredOutRows;
+    }
+
     override preservesLazyIfReferenceArray(child: BaseAstNode): boolean {
         const executor = this._functionExecutor;
         if (executor.evaluatesIfArgumentsAsArrays) return true;

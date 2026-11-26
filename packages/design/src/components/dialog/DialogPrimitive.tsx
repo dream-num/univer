@@ -18,7 +18,7 @@ import type { ComponentPropsWithoutRef, ComponentRef, HTMLAttributes } from 'rea
 import { Close, Content, Description, Overlay, Portal, Root, Title, Trigger } from '@radix-ui/react-dialog';
 import { CloseIcon } from '@univerjs/icons';
 import { forwardRef, useContext } from 'react';
-import { borderClassName } from '../../helper/class-utilities';
+import { borderClassName, focusClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
@@ -36,11 +36,13 @@ const DialogOverlay = forwardRef<
 >(({ className, ...props }, ref) => (
     <Overlay
         ref={ref}
+        data-slot="dialog-overlay"
         className={clsx(
             `
               data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
               data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
-              univer-fixed univer-inset-0 univer-z-[1080] univer-bg-[rgba(0,0,0,0.8)]
+              univer-fixed univer-inset-0 univer-z-[1080] univer-bg-gray-1000 univer-opacity-50
+              motion-reduce:univer-animate-none
             `,
             className
         )}
@@ -70,15 +72,16 @@ const DialogContent = forwardRef<
                     `
                       data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
                       data-[state=open]:univer-zoom-in-95 data-[state=open]:univer-slide-in-from-left-1/2
-                      data-[state=open]:univer-slide-in-from-top-[48%]
+                      data-[state=open]:univer-slide-in-from-top-1/2
                       data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
                       data-[state=closed]:univer-zoom-out-95 data-[state=closed]:univer-slide-out-to-left-1/2
-                      data-[state=closed]:univer-slide-out-to-top-[48%]
+                      data-[state=closed]:univer-slide-out-to-top-1/2
                       univer-fixed univer-left-1/2 univer-top-1/2 univer-z-[1080] univer-box-border univer-grid
                       univer-w-full univer-max-w-lg -univer-translate-x-1/2 -univer-translate-y-1/2 univer-gap-4
-                      univer-bg-gray-0 univer-p-3 univer-text-gray-500 univer-shadow-md univer-duration-200
-                      sm:!univer-rounded-lg
-                      dark:!univer-bg-gray-700 dark:!univer-text-gray-400
+                      univer-rounded-lg univer-bg-gray-0 univer-p-3 univer-text-gray-900 univer-shadow-md
+                      univer-duration-200
+                      motion-reduce:univer-animate-none motion-reduce:univer-transition-none
+                      dark:!univer-bg-gray-700 dark:!univer-text-gray-0
                     `,
                     borderClassName,
                     className
@@ -89,14 +92,21 @@ const DialogContent = forwardRef<
                 {closable && (
                     <Close
                         data-slot="close"
-                        className={`
-                          univer-absolute univer-right-3 univer-top-3 univer-size-6 univer-cursor-pointer
-                          univer-rounded-sm univer-border-none univer-bg-transparent univer-p-0
-                          univer-transition-opacity
-                          hover:univer-opacity-100
-                          disabled:univer-pointer-events-none
-                          rtl:univer-left-3 rtl:univer-right-auto
-                        `}
+                        className={clsx(
+                            focusClassName,
+                            `
+                              univer-absolute univer-right-3 univer-top-3 univer-inline-flex univer-size-6
+                              univer-cursor-pointer univer-items-center univer-justify-center univer-rounded
+                              univer-border-none univer-bg-transparent univer-p-0 univer-text-gray-500
+                              univer-transition-colors univer-duration-200
+                              hover:univer-bg-gray-100 hover:univer-text-gray-900
+                              disabled:univer-pointer-events-none disabled:univer-opacity-50
+                              motion-reduce:univer-transition-none
+                              rtl:univer-left-3 rtl:univer-right-auto
+                              dark:!univer-text-gray-300
+                              dark:hover:!univer-bg-gray-600 dark:hover:!univer-text-gray-0
+                            `
+                        )}
                         onClick={(event) => {
                             if (onClickClose) {
                                 // The custom callback owns dismissal; skip Radix's second close.
@@ -105,7 +115,7 @@ const DialogContent = forwardRef<
                             }
                         }}
                     >
-                        <CloseIcon className="univer-size-4 univer-text-gray-400" />
+                        <CloseIcon aria-hidden="true" className="univer-size-4" />
                         <span className="univer-sr-only">{locale?.Accessibility.close}</span>
                     </Close>
                 )}
@@ -123,9 +133,8 @@ const DialogHeader = ({
         data-slot="dialog-header"
         className={clsx(
             `
-              univer-flex univer-flex-col univer-space-y-1.5 univer-text-center
-              sm:!univer-text-left
-              sm:rtl:!univer-text-right
+              univer-flex univer-flex-col univer-gap-1.5 univer-text-center
+              sm:!univer-text-start
             `,
             className
         )}
@@ -142,8 +151,8 @@ const DialogFooter = ({
         data-slot="dialog-footer"
         className={clsx(
             `
-              univer-flex univer-flex-col-reverse
-              sm:!univer-flex-row sm:!univer-justify-end sm:!univer-space-x-2
+              univer-flex univer-flex-col-reverse univer-gap-2
+              sm:!univer-flex-row sm:!univer-justify-end
             `,
             className
         )}

@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import type { CSSProperties, KeyboardEvent } from 'react';
 import { CheckMarkIcon } from '@univerjs/icons';
-import { borderClassName, scrollbarClassName } from '../../helper/class-utilities';
+import { useContext, useRef } from 'react';
+import { borderClassName, focusClassName, scrollbarClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 
 export interface ISelectListProps {
     /**
@@ -56,10 +59,16 @@ export interface ISelectListProps {
      * The className of the wrapper
      */
     className?: string;
+
+    style?: CSSProperties;
 }
 
+const EMPTY_OPTIONS: NonNullable<ISelectListProps['options']> = [];
+
 export function SelectList(props: ISelectListProps) {
-    const { value: _value, options = [], hideCheckMark = false, onChange, multiple, className, optionClassName } = props;
+    const { value: _value, options = EMPTY_OPTIONS, hideCheckMark = false, onChange, multiple, className, optionClassName, style } = props;
+    const { direction } = useContext(ConfigContext);
+    const optionListRef = useRef<Array<HTMLButtonElement | null>>([]);
 
     const value = Array.isArray(_value) ? _value : [_value];
 
@@ -74,49 +83,107 @@ export function SelectList(props: ISelectListProps) {
             }
         } else {
             if (index > -1) {
-                onChange(value.filter((i) => i === newValue));
+                onChange(value.filter((i) => i !== newValue));
             } else {
                 onChange([...value, newValue]);
             }
         }
     }
 
+    function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+        if (options.length === 0) {
+            return;
+        }
+
+        let nextIndex = -1;
+        if (event.key === 'ArrowDown') {
+            nextIndex = (index + 1) % options.length;
+        } else if (event.key === 'ArrowUp') {
+            nextIndex = (index - 1 + options.length) % options.length;
+        } else if (event.key === 'Home') {
+            nextIndex = 0;
+        } else if (event.key === 'End') {
+            nextIndex = options.length - 1;
+        } else {
+            return;
+        }
+
+        event.preventDefault();
+        optionListRef.current[nextIndex]?.focus();
+    }
+
     return (
         <ul
-            className={clsx(`
-              univer-m-0 univer-grid univer-max-h-80 univer-list-none univer-gap-1 univer-overflow-y-auto univer-rounded
-              univer-p-1.5
-            `, borderClassName, scrollbarClassName, className)}
+            data-u-comp="select-list"
+            dir={direction}
+            role="listbox"
+            aria-multiselectable={multiple || undefined}
+            className={clsx(
+                `
+                  univer-m-0 univer-grid univer-max-h-80 univer-list-none univer-gap-0.5 univer-overflow-y-auto
+                  univer-rounded-md univer-bg-gray-0 univer-p-1.5
+                  dark:!univer-bg-gray-700
+                `,
+                borderClassName,
+                scrollbarClassName,
+                className
+            )}
+            style={style}
         >
             {options.map((option, index) => {
-                const checked = value.indexOf(option.value) > -1;
+                const checked = value.includes(option.value);
                 return (
-                    <li key={index}>
-                        <a
-                            className={clsx(`
-                              univer-relative univer-block univer-cursor-pointer univer-select-none univer-rounded
-                              univer-py-1.5 univer-pl-8 univer-pr-2 univer-text-sm univer-text-gray-900
-                              univer-transition-colors
-                              hover:univer-bg-gray-100
-                              dark:!univer-text-gray-0
-                              dark:hover:!univer-bg-gray-600
-                            `, optionClassName, {
-                                'univer-bg-gray-200 dark:!univer-bg-gray-500': checked,
-                            })}
-                            onClick={() => handleSelect(option.value)}
-                        >
-                            {!hideCheckMark && (
-                                checked && (
-                                    <CheckMarkIcon
-                                        className={`
-                                          univer-absolute univer-left-0 univer-top-1/2 -univer-translate-y-1/2
-                                          univer-pl-2 univer-text-primary-600
-                                        `}
-                                    />
-                                )
+                    <li key={option.value} role="presentation">
+                        <button
+                            ref={(el) => {
+                                optionListRef.current[index] = el;
+                            }}
+                            type="button"
+                            role="option"
+                            aria-selected={checked}
+                            className={clsx(
+                                `
+                                  univer-relative univer-flex univer-w-full univer-cursor-pointer univer-select-none
+                                  univer-items-center univer-rounded univer-border-none univer-bg-transparent
+                                  univer-py-1.5 univer-text-start univer-text-sm univer-text-gray-900
+                                  univer-transition-colors univer-duration-200
+                                  hover:univer-bg-gray-100
+                                  motion-reduce:univer-transition-none
+                                  dark:!univer-text-gray-0
+                                  dark:hover:!univer-bg-gray-600
+                                `,
+                                focusClassName,
+                                hideCheckMark
+                                    ? 'univer-px-2'
+                                    : `
+                                      univer-pl-8 univer-pr-2
+                                      rtl:univer-pl-2 rtl:univer-pr-8
+                                    `,
+                                checked && `
+                                  univer-bg-primary-50 univer-font-medium
+                                  dark:!univer-bg-gray-600
+                                `,
+                                optionClassName
                             )}
-                            <span style={{ color: option.color }}>{option.label}</span>
-                        </a>
+                            onClick={() => handleSelect(option.value)}
+                            onKeyDown={(event) => handleKeyDown(event, index)}
+                        >
+                            {!hideCheckMark && checked && (
+                                <CheckMarkIcon
+                                    aria-hidden="true"
+                                    preserveStrokeWidth
+                                    className={`
+                                      univer-absolute univer-left-2 univer-top-1/2 univer-size-4 -univer-translate-y-1/2
+                                      univer-text-primary-600
+                                      rtl:univer-left-auto rtl:univer-right-2
+                                      dark:!univer-text-primary-300
+                                    `}
+                                />
+                            )}
+                            <span className="univer-truncate" style={{ color: option.color }}>
+                                {option.label}
+                            </span>
+                        </button>
                     </li>
                 );
             })}

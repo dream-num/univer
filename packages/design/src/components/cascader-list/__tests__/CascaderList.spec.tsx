@@ -72,4 +72,31 @@ describe('CascaderList', () => {
         fireEvent.click(getByText('B'));
         expect(onChange).toHaveBeenCalledWith(['b']);
     });
+
+    it('updates columns when options change and supports keyboard option navigation', () => {
+        const onChange = vi.fn();
+        const initialOptions = [
+            { label: 'A', value: 'a', children: [{ label: 'A-1', value: 'a-1' }] },
+            { label: 'B', value: 'b' },
+        ];
+        const updatedOptions = [
+            { label: 'A', value: 'a', children: [{ label: 'A-Updated', value: 'a-u' }] },
+            { label: 'B', value: 'b' },
+        ];
+
+        const { getByRole, getByText, rerender } = render(
+            <CascaderList value={['a']} options={initialOptions} onChange={onChange} />
+        );
+
+        const optionA = getByRole('option', { name: 'A' });
+        const optionB = getByRole('option', { name: 'B' });
+        expect(optionA.getAttribute('aria-selected')).toBe('true');
+
+        optionA.focus();
+        fireEvent.keyDown(optionA, { key: 'ArrowDown' });
+        expect(document.activeElement).toBe(optionB);
+
+        rerender(<CascaderList value={['a']} options={updatedOptions} onChange={onChange} />);
+        expect(getByText('A-Updated')).toBeTruthy();
+    });
 });

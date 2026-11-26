@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SelectList } from '../SelectList';
 import '@testing-library/jest-dom/vitest';
@@ -55,5 +55,28 @@ describe('SelectList', () => {
     it('should apply color style', () => {
         const { getByText } = render(<SelectList value="b" options={options} onChange={() => {}} />);
         expect(getByText('B')).toHaveStyle({ color: 'rgb(255, 0, 0)' });
+    });
+
+    it('deselects only the clicked option in multiple mode and supports keyboard navigation', () => {
+        const handleChange = vi.fn();
+        const { getByRole, getAllByRole } = render(
+            <SelectList value={['a', 'b']} options={options} onChange={handleChange} multiple />
+        );
+
+        expect(getByRole('listbox')).toHaveAttribute('aria-multiselectable', 'true');
+        const optionButtons = getAllByRole('option');
+        expect(optionButtons[0]).toHaveAttribute('aria-selected', 'true');
+        expect(optionButtons[1]).toHaveAttribute('aria-selected', 'true');
+        expect(optionButtons[2]).toHaveAttribute('aria-selected', 'false');
+
+        fireEvent.click(optionButtons[0]);
+        expect(handleChange).toHaveBeenCalledExactlyOnceWith(['b']);
+
+        optionButtons[0].focus();
+        fireEvent.keyDown(optionButtons[0], { key: 'ArrowDown' });
+        expect(optionButtons[1]).toHaveFocus();
+
+        fireEvent.keyDown(optionButtons[1], { key: 'End' });
+        expect(optionButtons[2]).toHaveFocus();
     });
 });

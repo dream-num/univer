@@ -151,6 +151,7 @@ const locale: typeof enUS = {
                 formulas: '数式',
                 rules: 'ルール',
                 organization: 'データ整理',
+                analysis: 'データ分析',
                 display: '表示',
                 visibility: '表示設定',
             },

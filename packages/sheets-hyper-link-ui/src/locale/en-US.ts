@@ -37,7 +37,7 @@ const locale = {
             add: 'Insert Link',
         },
         permission: {
-            hyperLinkErr: 'You do not have permission to insert a link.',
+            editErr: 'The range is protected, and you do not have edit permission. To edit, please contact the creator.',
         },
         message: {
             noSheet: 'Target sheet has been delete',

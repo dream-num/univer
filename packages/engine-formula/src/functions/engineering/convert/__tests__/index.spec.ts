@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../util';
@@ -27,6 +27,25 @@ describe('Test convert function', () => {
     const testFunction = new Convert(FUNCTION_NAMES_ENGINEERING.CONVERT);
 
     describe('Convert', () => {
+        it.each([
+            [72, 'Pica', 'in', 1],
+            [1, 'in2', 'cm2', 6.4516],
+            [1, 'km3', 'm3', 1e9],
+            [1, 'mK', 'K', 0.001],
+            [1, 'T', 'ga', 10000],
+            [1, 'kibyte', 'byte', 1024],
+            [1, 'kft', 'm', ErrorType.NA],
+            [1, 'kim', 'm', ErrorType.NA],
+            [1e300, 'm', 'ang', ErrorType.NUM],
+        ] as const)('matches Excel for CONVERT(%s, %s, %s)', (value, from, to, expected) => {
+            const result = testFunction.calculate(NumberValueObject.create(value), StringValueObject.create(from), StringValueObject.create(to));
+            if (typeof expected === 'number') {
+                expect(Number(result.getValue())).toBeCloseTo(expected, 12);
+            } else {
+                expect(result.getValue()).toBe(expected);
+            }
+        });
+
         it('Value is normal number', () => {
             const number = NumberValueObject.create(1);
             const fromUnit = StringValueObject.create('lbm');
@@ -83,23 +102,17 @@ describe('Test convert function', () => {
             expect(getObjectValue(result)).toBe(ErrorType.NA);
         });
 
-        it('Value is array', () => {
-            const number = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [1, ' ', 1.23, true, false, null],
-                    [0, '100', '2.34', 'test', -3, ErrorType.NAME],
-                ]),
-                rowCount: 2,
-                columnCount: 6,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const fromUnit = StringValueObject.create('lbm');
-            const toUnit = StringValueObject.create('kg');
-            const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+        it('broadcasts conversion arguments and keeps per-cell errors', () => {
+            const values = ArrayValueObject.create('{1;2}');
+            const sources = ArrayValueObject.create('{"m";"cm"}');
+            const targets = ArrayValueObject.create('{"cm","mm","s"}');
+            expect(getObjectValue(testFunction.calculate(values, sources, targets))).toEqual([
+                [100, 1000, ErrorType.NA],
+                [2, 20, ErrorType.NA],
+            ]);
+            expect(getObjectValue(testFunction.calculate(ArrayValueObject.create('{1,TRUE,"2","bad"}'), StringValueObject.create('m'), StringValueObject.create('cm')))).toEqual([
+                [100, ErrorType.VALUE, 200, ErrorType.VALUE],
+            ]);
         });
 
         it('Value with binary prefix', () => {

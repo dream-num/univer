@@ -28,6 +28,19 @@ export class Concatenate extends BaseFunction {
     override maxParams = 255;
 
     override calculate(...textValues: BaseValueObject[]) {
+        if (textValues.length > 0 && textValues.every((value) => !value.isArray())) {
+            let text = '';
+            for (const value of textValues) {
+                if (value.isError()) {
+                    return value;
+                }
+                if (!value.isNull()) {
+                    text += this._formatText(value.getValue());
+                }
+            }
+            return StringValueObject.create(text);
+        }
+
         let maxRowLength = 0;
         let maxColumnLength = 0;
 
@@ -70,8 +83,8 @@ export class Concatenate extends BaseFunction {
                     return textValueObject;
                 }
 
-                const resultValueObjectString = resultValueObject?.isNull() ? '' : formatValueForFormulaText(resultValueObject?.getValue() ?? null);
-                const textValueObjectString = textValueObject?.isNull() ? '' : formatValueForFormulaText(textValueObject?.getValue() ?? null);
+                const resultValueObjectString = resultValueObject?.isNull() ? '' : this._formatText(resultValueObject?.getValue() ?? null);
+                const textValueObjectString = textValueObject?.isNull() ? '' : this._formatText(textValueObject?.getValue() ?? null);
 
                 return StringValueObject.create(`${resultValueObjectString}${textValueObjectString}`);
             });
@@ -89,5 +102,9 @@ export class Concatenate extends BaseFunction {
         }
 
         return result;
+    }
+
+    protected _formatText(value: string | number | boolean | null): string {
+        return formatValueForFormulaText(value);
     }
 }

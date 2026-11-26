@@ -158,7 +158,7 @@ afterEach(() => {
 });
 
 describe('MobileHeaderResizeRenderController business methods', () => {
-    it.each(['row', 'column'] as const)('hides the %s handle and cancels a drag when edit permission is revoked', (axis) => {
+    it.each(['row', 'column'] as const)('hides the %s handle and cancels a drag only when the dimension style permission is revoked', (axis) => {
         const { controller, selections, permissions, scene, executeCommand } = createController();
         selections.setSelections([{
             range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 1, rangeType: axis === 'row' ? RANGE_TYPE.ROW : RANGE_TYPE.COLUMN },
@@ -170,20 +170,18 @@ describe('MobileHeaderResizeRenderController business methods', () => {
         handle.onPointerDown$.emitEvent(pointerEvent('pointerdown', 100, 100, 1));
         document.dispatchEvent(pointerEvent('pointermove', 110, 110, 1));
 
+        // Read-only and edit permissions do not gate row height or column width.
         permissions.updatePermissionPoint(new WorkbookEditablePermission('test').id, false);
-        expect(handle.visible).toBe(false);
-        expect(scene.enableObjectsEvent).toHaveBeenCalled();
-        document.dispatchEvent(pointerEvent('pointerup', 110, 110, 1));
-        expect(executeCommand).not.toHaveBeenCalled();
-
-        permissions.updatePermissionPoint(new WorkbookEditablePermission('test').id, true);
+        permissions.updatePermissionPoint(new WorksheetEditPermission('test', 'sheet-1').id, false);
         expect(handle.visible).toBe(true);
+
         const permission = axis === 'row'
             ? new WorksheetSetRowStylePermission('test', 'sheet-1')
             : new WorksheetSetColumnStylePermission('test', 'sheet-1');
         permissions.updatePermissionPoint(permission.id, false);
         expect(handle.visible).toBe(false);
-        handle.onPointerDown$.emitEvent(pointerEvent('pointerdown', 100, 100, 1));
+        expect(scene.enableObjectsEvent).toHaveBeenCalled();
+        document.dispatchEvent(pointerEvent('pointerup', 110, 110, 1));
         expect(executeCommand).not.toHaveBeenCalled();
     });
 

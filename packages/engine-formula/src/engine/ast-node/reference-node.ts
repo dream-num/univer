@@ -16,6 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
+import { UniverInstanceType } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import {
@@ -102,12 +103,18 @@ export class ReferenceNode extends BaseAstNode {
                 this.setValue(ErrorValueObject.create(ErrorType.REF));
                 return;
             }
-            referenceObject = new TableReferenceObject(
+            const tableReference = new TableReferenceObject(
                 this.getToken(),
                 tableData,
                 columnStruct,
                 this._superTableService.getTableOptionMap()
             );
+            const error = tableReference.getReferenceError(runtimeService.currentRow, resolution.unitType === UniverInstanceType.UNIVER_BASE);
+            if (error) {
+                this.setValue(ErrorValueObject.create(error));
+                return;
+            }
+            referenceObject = tableReference;
             referenceObject.setUnitQualifier(unitQualifier);
             referenceObject.setForcedUnitIdDirect(resolution.unitId);
         } else {

@@ -18,16 +18,16 @@ import type { CellValue, DateKit, IDisposable, IExcelDateTimeParts, Nullable, Wo
 import type { ISetRangeValuesCommandParams, ISheetLocation } from '@univerjs/sheets';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IDropdownParam, IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
-import type { IUniverSheetsDataValidationUIConfig } from '../config/config';
 import { CellValueType, DataValidationErrorStyle, DataValidationRenderMode, dateKit, DateSystem, Disposable, DisposableCollection, excelDateTimePartsToSerial, excelSerialToDateTimeParts, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, numfmt, UniverInstanceType } from '@univerjs/core';
 import { DataValidatorDropdownType, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { serializeListOptions, SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { deserializeListOptions, serializeListOptions, SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { getCellValueOrigin, getDataValidationCellValue, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { getPatternType } from '@univerjs/sheets-numfmt';
 import { IEditorBridgeService, ISheetCellDropdownManagerService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { KeyCode } from '@univerjs/ui';
 import { Subject } from 'rxjs';
+import type { IUniverSheetsDataValidationUIConfig } from '../config/config';
 import { OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
 import { SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import { DROP_DOWN_DEFAULT_COLOR } from '../const';
@@ -157,7 +157,15 @@ export class DataValidationDropdownManagerService extends Disposable {
             return;
         }
 
-        const rule = this._dataValidationModel.getRuleByLocation(workbook.getUnitId(), worksheet.getSheetId(), row, col);
+        // A merged cell keeps its validation rule on the merge main cell, while a selection that
+        // lands on a covered cell reports that covered cell as the primary one.
+        const mergeCell = worksheet.getMergedCell(row, col);
+        const rule = this._dataValidationModel.getRuleByLocation(
+            workbook.getUnitId(),
+            worksheet.getSheetId(),
+            mergeCell?.startRow ?? row,
+            mergeCell?.startColumn ?? col
+        );
         if (!rule) {
             return;
         }
@@ -434,6 +442,12 @@ export class DataValidationDropdownManagerService extends Disposable {
                 const showColor = rule?.renderMode === DataValidationRenderMode.CUSTOM || rule?.renderMode === undefined;
                 const list = (validator as ListValidator).getListWithColor(rule, unitId, subUnitId);
                 const cellStr = getDataValidationCellValue(worksheet.getCellRaw(row, col));
+                // List validation ignores case, so map a stored value back to the option's own label,
+                // otherwise the dropdown opens with nothing selected.
+                const toOptionLabel = (value: string) => list.find((item) => item.label.toLowerCase() === value.toLowerCase())?.label ?? value;
+                const defaultValue = multiple
+                    ? serializeListOptions(deserializeListOptions(cellStr).map(toOptionLabel))
+                    : toOptionLabel(cellStr);
 
                 const handleEdit = () => {
                     this._commandService.executeCommand(OpenValidationPanelOperation.id, {
@@ -455,7 +469,7 @@ export class DataValidationDropdownManagerService extends Disposable {
                         onChange: (newValue) => handleSave(newValue),
                         options,
                         onEdit: handleEdit,
-                        defaultValue: cellStr,
+                        defaultValue,
                         multiple,
                         showEdit: this._configService.getConfig<IUniverSheetsDataValidationUIConfig>(SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY)?.showEditOnDropdown ?? true,
                         showSearch: this._configService.getConfig<IUniverSheetsDataValidationUIConfig>(SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY)?.showSearchOnDropdown ?? true,

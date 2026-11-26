@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { NotImplementedFunction } from '../../not-implemented-function';
+import { EtsFunction } from '../forecast-ets/base';
 
-export class ForecastEtsStat extends NotImplementedFunction {
+export class ForecastEtsStat extends EtsFunction {
     override minParams = 3;
 
     override maxParams = 6;
 
-    // TODO: Implement ETS diagnostic statistics and Excel-compatible statistic types.
+    protected override readonly mode = 'statistic';
 }

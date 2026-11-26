@@ -39,7 +39,7 @@ const locale: typeof enUS = {
             add: 'Insérer un lien',
         },
         permission: {
-            hyperLinkErr: 'Vous n’avez pas l’autorisation d’insérer un lien.',
+            editErr: 'La plage est protégée, et vous n\'avez pas la permission de modifier. Pour modifier, veuillez contacter le créateur.',
         },
         message: {
             noSheet: 'La feuille cible a été supprimée',

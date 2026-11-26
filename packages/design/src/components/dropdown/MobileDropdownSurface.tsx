@@ -76,14 +76,6 @@ export function MobileDropdownSurface(props: {
                 onOpenAutoFocus={mobileOverlay?.contentProps.onOpenAutoFocus}
                 onCloseAutoFocus={mobileOverlay?.contentProps.onCloseAutoFocus}
             >
-                <div
-                    aria-hidden="true"
-                    className="
-                      univer-absolute univer-left-1/2 univer-top-3 univer-h-1 univer-w-10 -univer-translate-x-1/2
-                      univer-rounded-full univer-bg-gray-300
-                      dark:!univer-bg-gray-600
-                    "
-                />
                 <DialogTitle className="univer-sr-only">{locale?.Accessibility.menu}</DialogTitle>
                 <DialogDescription className="univer-hidden" />
                 {content}

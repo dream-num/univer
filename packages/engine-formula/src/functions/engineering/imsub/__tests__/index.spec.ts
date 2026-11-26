@@ -35,7 +35,7 @@ describe('Test imsub function', () => {
             const inumber3 = NumberValueObject.create(-238);
             const inumber4 = NumberValueObject.create(10);
             const result2 = testFunction.calculate(inumber3, inumber4);
-            expect(result2.getValue()).toBe(-248);
+            expect(result2.getValue()).toBe('-248');
         });
 
         it('Value is large numbers', () => {

@@ -105,4 +105,20 @@ describe('AlphaSlider', () => {
         const lastCall = onChanged.mock.calls[onChanged.mock.calls.length - 1];
         expect(lastCall[0]).toBeGreaterThan(0.3);
     });
+
+    it('supports keyboard navigation with arrows, Shift, Home and End', () => {
+        const onChange = vi.fn();
+        const onChanged = vi.fn();
+        const { getByRole } = render(<AlphaSlider hsv={[0, 100, 100]} alpha={0.5} onChange={onChange} onChanged={onChanged} />);
+        const slider = getByRole('slider', { name: 'Alpha' });
+
+        fireEvent.keyDown(slider, { key: 'ArrowRight', shiftKey: true });
+        expect(onChange).toHaveBeenLastCalledWith(0.6);
+
+        fireEvent.keyDown(slider, { key: 'Home' });
+        expect(onChange).toHaveBeenLastCalledWith(0);
+
+        fireEvent.keyDown(slider, { key: 'End' });
+        expect(onChange).toHaveBeenLastCalledWith(1);
+    });
 });

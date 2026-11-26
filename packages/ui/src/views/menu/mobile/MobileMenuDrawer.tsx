@@ -15,14 +15,14 @@
  */
 
 import type { ComponentProps } from 'react';
-import type { LocaleKey } from '../../../locale/types';
-import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import type { MobileDrawerSnap } from '../../components/mobile-drawer/MobileDrawer';
 import { LocaleService } from '@univerjs/core';
 import { clsx, ConfigContext, resetButtonClassName } from '@univerjs/design';
 import { CloseIcon, MoreLeftIcon } from '@univerjs/icons';
 import { useContext, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import type { LocaleKey } from '../../../locale/types';
+import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
+import type { MobileDrawerSnap } from '../../components/mobile-drawer/MobileDrawer';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { MobileDrawer } from '../../components/mobile-drawer/MobileDrawer';
@@ -85,7 +85,6 @@ function MobileMenuDrawerContent(props: IMobileMenuDrawerProps) {
                 onClose={onClose}
                 role="dialog"
                 ariaLabel={navigation?.title ?? title}
-                contentClassName="univer-px-3 univer-pb-3"
                 header={(
                     <div
                         className="

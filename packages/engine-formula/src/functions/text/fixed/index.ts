@@ -23,9 +23,9 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { round } from '../../../engine/utils/math-kit';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
-import { BaseFunction } from '../../base-function';
+import { RegionalNumberFormatFunction } from '../regional-number-format.function';
 
-export class Fixed extends BaseFunction {
+export class Fixed extends RegionalNumberFormatFunction {
     override minParams = 1;
 
     override maxParams = 3;
@@ -118,7 +118,7 @@ export class Fixed extends BaseFunction {
             pattern += `.${'0'.repeat(decimalsValue)}`;
         }
 
-        const result = getFormatPreview(pattern, numberValue);
+        const result = getFormatPreview(pattern, numberValue, undefined, this.getNumberFormatRegion());
 
         return StringValueObject.create(result);
     }

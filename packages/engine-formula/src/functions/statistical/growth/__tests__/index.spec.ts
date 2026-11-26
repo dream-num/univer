@@ -378,7 +378,11 @@ describe('Test growth function', () => {
                 column: 0,
             });
             const result3 = testFunction.calculate(knownYs2, undefined, undefined, constb2);
-            expect(getObjectValue(result3)).toBe(ErrorType.VALUE);
+            const errorsAndValues = getObjectValue(result3) as Array<Array<string | number>>;
+            expect(errorsAndValues[0][0]).toBe(ErrorType.VALUE);
+            expect(errorsAndValues[1][1]).toBe(ErrorType.NAME);
+            expect(errorsAndValues[0][1]).toBeCloseTo(32618.2037735398, 8);
+            expect(errorsAndValues[1][0]).toBeCloseTo(32618.2037735398, 8);
 
             const result4 = testFunction.calculate(knownYs2, undefined, undefined, constb);
             expect(getObjectValue(result4, true)).toStrictEqual([
@@ -566,7 +570,7 @@ describe('Test growth function', () => {
                 [27.2459520893],
                 [43.0060060724],
                 [67.8822509939],
-                [107.147824707257],
+                [107.147824707255],
             ]);
 
             const result4 = testFunction.calculate(knownYs2, knownXs2, newXs3, constb2);

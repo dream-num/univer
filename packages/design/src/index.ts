@@ -43,6 +43,8 @@ export type { IColorPickerProps } from './components/color-picker/ColorPicker';
 export { ColorPickerPanel } from './components/color-picker/ColorPickerPanel';
 export type { IColorPickerPanelProps } from './components/color-picker/ColorPickerPanel';
 export { ColorPresets } from './components/color-picker/ColorPresets';
+export { ColorSelect } from './components/color-picker/ColorSelect';
+export type { IColorSelectProps } from './components/color-picker/ColorSelect';
 export { MobileColorPicker } from './components/color-picker/MobileColorPicker';
 export type { IMobileColorPickerProps } from './components/color-picker/MobileColorPicker';
 export { MobileColorPresets } from './components/color-picker/MobileColorPresets';
@@ -80,6 +82,10 @@ export type { IDropdownProps } from './components/dropdown/Dropdown';
 export { MobileOverlayContext } from './components/dropdown/mobile-overlay-context';
 export { MobileDropdown } from './components/dropdown/MobileDropdown';
 export type { IMobileDropdownProps } from './components/dropdown/MobileDropdown';
+export { Field } from './components/field/Field';
+export type { IFieldControlProps, IFieldProps } from './components/field/Field';
+export { FieldGroup } from './components/field/FieldGroup';
+export type { IFieldGroupProps } from './components/field/FieldGroup';
 export { FormDualColumnLayout, FormLayout } from './components/form-layout';
 export type { IFormDualColumnLayoutProps, IFormLayoutProps } from './components/form-layout';
 export { Gallery } from './components/gallery/Gallery';
@@ -114,6 +120,8 @@ export { RadioGroup } from './components/radio-group/RadioGroup';
 export type { IRadioGroupProps } from './components/radio-group/RadioGroup';
 export { Radio } from './components/radio/Radio';
 export type { IRadioProps } from './components/radio/Radio';
+export { ResizeHandle } from './components/resize-handle/ResizeHandle';
+export type { IResizeHandleProps } from './components/resize-handle/ResizeHandle';
 export { Segmented } from './components/segmented/Segmented';
 export { SelectList } from './components/select-list/SelectList';
 export type { ISelectListProps } from './components/select-list/SelectList';
@@ -155,11 +163,12 @@ export {
 export { clsx } from './helper/clsx';
 export { isBrowser } from './helper/is-browser';
 export { render, unmount } from './helper/react-dom';
+
 export {
     resolveMobileKeyboardViewportLayout,
     revealFocusedElementInMobileViewport,
     useMobileKeyboardViewportLayout,
 } from './hooks/use-mobile-keyboard-viewport';
-export type { IMobileKeyboardViewportLayout } from './hooks/use-mobile-keyboard-viewport';
 
+export type { IMobileKeyboardViewportLayout } from './hooks/use-mobile-keyboard-viewport';
 export { cva } from 'class-variance-authority';

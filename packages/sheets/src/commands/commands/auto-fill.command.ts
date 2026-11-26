@@ -15,14 +15,15 @@
  */
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
+import { CommandType, ICommandService, Injector, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
-import { generateNullCellValue } from '../../basics/utils';
+import { generateNullCellValue, getVisibleRanges } from '../../basics/utils';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import { AUTO_FILL_APPLY_TYPE } from '../../services/auto-fill/type';
-import { SheetsSelectionsService } from '../../services/selections';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { getSheetCommandTarget } from './utils/target-util';
@@ -155,11 +156,20 @@ export const AutoClearContentCommand: ICommand = {
         const { unitId, subUnitId } = target;
         const { clearRange, selectionRange } = params;
         const { startColumn, startRow } = selectionRange;
+        const injector = accessor.get(Injector);
+        const skeletons = injector.has(SheetSkeletonService) ? injector.get(SheetSkeletonService) : undefined;
+        if (skeletons?.isDisplayProjectionPending(unitId, subUnitId)) {
+            return false;
+        }
+        const display = skeletons?.getDisplaySkeleton(unitId, subUnitId);
+        const ranges = display
+            ? getVisibleRanges([clearRange], accessor, unitId, subUnitId, (row) => display.getRowFiltered(row))
+            : [clearRange];
 
         const clearMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: generateNullCellValue([clearRange]),
+            cellValue: generateNullCellValue(ranges),
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,

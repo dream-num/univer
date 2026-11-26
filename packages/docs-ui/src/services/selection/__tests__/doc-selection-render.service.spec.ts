@@ -19,6 +19,7 @@
 import type { IDisposable, IDocumentData, ITextRangeParam } from '@univerjs/core';
 import type { Mock } from 'vitest';
 import {
+    awaitTime,
     createInternalEditorID,
     DataStreamTreeTokenType,
     DisposableCollection,
@@ -29,25 +30,44 @@ import {
     DocumentDataModel,
     DocumentFlavor,
     EventSubject,
+    ICommandService,
+    LocaleService,
+    LocaleType,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import {
+    DocLayoutExecutorService,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    DocStateEmitService,
+    InsertTextCommand,
+    RichTextEditingMutation,
+} from '@univerjs/docs';
+import {
+    CanvasColorService,
     DeviceType,
     GlyphType,
+    ICanvasColorService,
+    IRenderManagerService,
     NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
     PointerInput,
+    RenderManagerService,
     RenderUnit,
 } from '@univerjs/engine-render';
 import { DesktopLayoutService, ILayoutService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { IMEInputCommand } from '../../../commands/commands/ime-input.command';
+import { DocIMEInputController } from '../../../controllers/render-controllers/doc-ime-input.controller';
+import { DocInputController } from '../../../controllers/render-controllers/doc-input.controller';
 import {
     EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
     EmbedInteractionBoundaryService,
     EmbedRuntimeFocusCoordinator,
 } from '../../doc-embed-integration.service';
+import { DocIMEInputManagerService } from '../../doc-ime-input-manager.service';
+import { DocMenuStyleService } from '../../doc-menu-style.service';
 import { MobileDocSelectionRenderService } from '../../mobile/doc-selection-render.service';
 import { DocSelectionRenderService } from '../doc-selection-render.service';
 import { TextRange } from '../text-range';
@@ -414,6 +434,301 @@ function createRealSelectionRenderService(options: {
         univer,
     };
 }
+
+function createCompositionInputTestBed() {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    injector.add([DocSelectionManagerService]);
+    injector.add([DocLayoutExecutorService]);
+    injector.add([DocStateEmitService]);
+    injector.add([DocMenuStyleService]);
+    injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.EN_US]: {} });
+    localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
+    const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+        id: 'composition-input',
+        body: { dataStream: '\r\n', paragraphs: [{ paragraphId: 'composition-paragraph', startIndex: 0 }] },
+        documentStyle: {},
+    });
+    const renderManager = injector.get(IRenderManagerService);
+    const registrations = [
+        renderManager.registerRenderModule(UniverInstanceType.UNIVER_DOC, [DocSkeletonManagerService]),
+        renderManager.registerRenderModule(UniverInstanceType.UNIVER_DOC, [DocSelectionRenderService]),
+        renderManager.registerRenderModule(UniverInstanceType.UNIVER_DOC, [DocIMEInputManagerService]),
+        renderManager.registerRenderModule(UniverInstanceType.UNIVER_DOC, [DocIMEInputController]),
+        renderManager.registerRenderModule(UniverInstanceType.UNIVER_DOC, [DocInputController]),
+    ];
+    const render = renderManager.createRender(doc.getUnitId());
+    const service = render.with(DocSelectionRenderService);
+    const commands = injector.get(ICommandService);
+    for (const command of [IMEInputCommand, InsertTextCommand, RichTextEditingMutation]) {
+        registrations.push(commands.registerCommand(command));
+    }
+    const manager = injector.get(DocSelectionManagerService);
+    manager.__TEST_ONLY_setCurrentSelection({ unitId: doc.getUnitId(), subUnitId: doc.getUnitId() });
+    manager.__TEST_ONLY_add([{ startOffset: 0, endOffset: 0, collapsed: true, isActive: true }]);
+    render.with(DocSkeletonManagerService).getSkeleton().beginExternalLayout({ reason: 'edit' });
+
+    return {
+        doc,
+        input: service.inputElement,
+        dispatch(event: Event, content?: string) {
+            service.replaceDocRanges(manager.getSelectionInfo()!.textRanges);
+            if (content !== undefined) {
+                service.inputElement.textContent = content;
+            }
+            service.inputElement.dispatchEvent(event);
+        },
+        disposeRender() {
+            renderManager.removeRender(doc.getUnitId());
+        },
+        dispose() {
+            for (const registration of registrations) {
+                registration.dispose();
+            }
+            univer.dispose();
+        },
+    };
+}
+
+describe('DocSelectionRenderService composition input transactions', () => {
+    it.each(['中', '中文'])('commits a same-turn composition update and end as %s', async (finalText) => {
+        const bed = createCompositionInputTestBed();
+        try {
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new CompositionEvent('compositionupdate', { data: '中' }), '中');
+            bed.dispatch(new InputEvent('beforeinput', { inputType: 'insertCompositionText', data: finalText }));
+            bed.dispatch(new CompositionEvent('compositionend', { data: finalText }), finalText);
+            bed.dispatch(new InputEvent('input', { inputType: 'insertCompositionText', data: finalText }));
+            await awaitTime(0);
+
+            expect(bed.doc.getBody()?.dataStream).toBe(`${finalText}\r\n`);
+        } finally {
+            bed.dispose();
+        }
+    });
+
+    it('replaces successive composition updates delivered in the same turn', async () => {
+        const bed = createCompositionInputTestBed();
+        try {
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            for (const text of ['中', '中文', '中文']) {
+                bed.dispatch(new CompositionEvent('compositionupdate', { data: text }), text);
+            }
+            bed.dispatch(new CompositionEvent('compositionend', { data: '中文' }), '中文');
+            await awaitTime(0);
+
+            expect(bed.doc.getBody()?.dataStream).toBe('中文\r\n');
+        } finally {
+            bed.dispose();
+        }
+    });
+
+    it.each([
+        { previousFinal: '中文', expected: '中文新内容\r\n' },
+        { previousFinal: '', expected: '新内容\r\n' },
+    ])('keeps a new composition when the previous end "$previousFinal" is still settling', async ({ previousFinal, expected }) => {
+        const bed = createCompositionInputTestBed();
+        try {
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new CompositionEvent('compositionupdate', { data: '中' }), '中');
+            bed.dispatch(new CompositionEvent('compositionend', { data: previousFinal }), previousFinal);
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new CompositionEvent('compositionupdate', { data: '新' }), '新');
+            await awaitTime(0);
+            bed.dispatch(new CompositionEvent('compositionend', { data: '新内容' }), '新内容');
+            await awaitTime(0);
+
+            expect(bed.doc.getBody()?.dataStream).toBe(expected);
+        } finally {
+            bed.dispose();
+        }
+    });
+
+    it('commits Firefox composition once when its final input follows compositionend', async () => {
+        const bed = createCompositionInputTestBed();
+        try {
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new InputEvent('beforeinput', { inputType: 'insertCompositionText', data: '中文' }));
+            bed.dispatch(new CompositionEvent('compositionend', { data: '中文' }), '中文');
+            bed.dispatch(new InputEvent('input', { inputType: 'insertCompositionText', data: '中文' }), '中文');
+            await awaitTime(0);
+
+            expect(bed.doc.getBody()?.dataStream).toBe('中文\r\n');
+            expect(bed.input.textContent).toBe('');
+        } finally {
+            bed.dispose();
+        }
+    });
+
+    it('preserves composing DOM when input is delivered before compositionend', async () => {
+        const bed = createCompositionInputTestBed();
+        try {
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new CompositionEvent('compositionupdate', { data: '中文' }), '中文');
+            await awaitTime(0);
+            bed.dispatch(new InputEvent('beforeinput', { inputType: 'insertCompositionText', data: '中文' }));
+            bed.dispatch(new InputEvent('input', {
+                inputType: 'insertCompositionText',
+                data: '中文',
+                isComposing: true,
+            }), '中文');
+            expect(bed.input.textContent).toBe('中文');
+            bed.dispatch(new CompositionEvent('compositionend', { data: '中文' }));
+            await awaitTime(0);
+
+            expect(bed.doc.getBody()?.dataStream).toBe('中文\r\n');
+            expect(bed.input.textContent).toBe('');
+
+            bed.dispatch(new InputEvent('input', { inputType: 'insertCompositionText', data: '中文' }), '中文');
+            expect(bed.doc.getBody()?.dataStream).toBe('中文中文\r\n');
+        } finally {
+            bed.dispose();
+        }
+    });
+
+    it.each(['insertText', 'insertCompositionText'])('keeps identical text in a new %s transaction', async (inputType) => {
+        const bed = createCompositionInputTestBed();
+        try {
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new InputEvent('beforeinput', { inputType, data: '中文' }));
+            bed.dispatch(new CompositionEvent('compositionend', { data: '中文' }), '中文');
+            await awaitTime(0);
+
+            bed.dispatch(new InputEvent('beforeinput', { inputType, data: '中文' }));
+            bed.dispatch(new InputEvent('input', { inputType, data: '中文' }), '中文');
+
+            expect(bed.doc.getBody()?.dataStream).toBe('中文中文\r\n');
+            expect(bed.input.textContent).toBe('');
+        } finally {
+            bed.dispose();
+        }
+    });
+
+    it('keeps normal input when the browser does not deliver beforeinput', async () => {
+        const bed = createCompositionInputTestBed();
+        try {
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new CompositionEvent('compositionend', { data: '中文' }), '中文');
+            await awaitTime(0);
+            bed.dispatch(new InputEvent('input', { inputType: 'insertCompositionText', data: '中文' }), '中文');
+
+            expect(bed.doc.getBody()?.dataStream).toBe('中文中文\r\n');
+        } finally {
+            bed.dispose();
+        }
+    });
+
+    it('rolls back canceled composition and accepts identical text in the next input', async () => {
+        const bed = createCompositionInputTestBed();
+        try {
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new CompositionEvent('compositionupdate', { data: '中' }), '中');
+            await awaitTime(0);
+            bed.dispatch(new InputEvent('beforeinput', { inputType: 'insertCompositionText', data: '中' }));
+            bed.dispatch(new CompositionEvent('compositionend', { data: '' }), '');
+            await awaitTime(0);
+            expect(bed.doc.getBody()?.dataStream).toBe('\r\n');
+
+            bed.dispatch(new InputEvent('input', { inputType: 'insertCompositionText', data: '中' }), '中');
+
+            expect(bed.doc.getBody()?.dataStream).toBe('中\r\n');
+        } finally {
+            bed.dispose();
+        }
+    });
+
+    it('keeps different input text and consumes the previous composition transaction', async () => {
+        const bed = createCompositionInputTestBed();
+        try {
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new InputEvent('beforeinput', { inputType: 'insertCompositionText', data: '中' }));
+            bed.dispatch(new CompositionEvent('compositionend', { data: '中' }), '中');
+            await awaitTime(0);
+            bed.dispatch(new InputEvent('input', { inputType: 'insertCompositionText', data: '文' }), '文');
+            await awaitTime(0);
+            bed.dispatch(new InputEvent('input', { inputType: 'insertCompositionText', data: '中' }), '中');
+
+            expect(bed.doc.getBody()?.dataStream).toBe('中文中\r\n');
+        } finally {
+            bed.dispose();
+        }
+    });
+
+    it('keeps paste input with identical data and a different input type', async () => {
+        const bed = createCompositionInputTestBed();
+        try {
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new InputEvent('beforeinput', { inputType: 'insertCompositionText', data: '中文' }));
+            bed.dispatch(new CompositionEvent('compositionend', { data: '中文' }), '中文');
+            await awaitTime(0);
+            bed.dispatch(new InputEvent('input', { inputType: 'insertFromPaste', data: '中文' }), '中文');
+
+            expect(bed.doc.getBody()?.dataStream).toBe('中文中文\r\n');
+        } finally {
+            bed.dispose();
+        }
+    });
+
+    it.each(['deleteContentBackward', 'historyUndo', 'historyRedo'])(
+        'consumes the pending transaction when %s input intervenes',
+        async (inputType) => {
+            const bed = createCompositionInputTestBed();
+            try {
+                bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+                bed.dispatch(new InputEvent('beforeinput', { inputType: 'insertCompositionText', data: '中文' }));
+                bed.dispatch(new CompositionEvent('compositionend', { data: '中文' }), '中文');
+                await awaitTime(0);
+                bed.dispatch(new InputEvent('input', { inputType, data: null }), '');
+                bed.dispatch(new InputEvent('input', { inputType: 'insertCompositionText', data: '中文' }), '中文');
+
+                expect(bed.doc.getBody()?.dataStream).toBe('中文中文\r\n');
+            } finally {
+                bed.dispose();
+            }
+        }
+    );
+
+    it('clears an unconsumed input transaction when the next composition starts', async () => {
+        const bed = createCompositionInputTestBed();
+        try {
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new InputEvent('beforeinput', { inputType: 'insertCompositionText', data: '中文' }));
+            bed.dispatch(new CompositionEvent('compositionend', { data: '中文' }), '中文');
+            await awaitTime(0);
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new CompositionEvent('compositionend', { data: '中文' }), '中文');
+            await awaitTime(0);
+            bed.dispatch(new InputEvent('input', { inputType: 'insertCompositionText', data: '中文' }), '中文');
+
+            expect(bed.doc.getBody()?.dataStream).toBe('中文中文中文\r\n');
+        } finally {
+            bed.dispose();
+        }
+    });
+
+    it('cannot apply a trailing composition input after its render unit is disposed', async () => {
+        const bed = createCompositionInputTestBed();
+        try {
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new InputEvent('beforeinput', { inputType: 'insertCompositionText', data: '中文' }));
+            bed.dispatch(new CompositionEvent('compositionend', { data: '中文' }), '中文');
+            await awaitTime(0);
+            bed.disposeRender();
+            bed.input.textContent = '中文';
+            bed.input.dispatchEvent(new InputEvent('input', { inputType: 'insertCompositionText', data: '中文' }));
+
+            expect(bed.doc.getBody()?.dataStream).toBe('中文\r\n');
+            expect(bed.input.isConnected).toBe(false);
+        } finally {
+            bed.dispose();
+        }
+    });
+});
 
 describe('doc selection render service internals', () => {
     beforeEach(() => {

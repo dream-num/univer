@@ -15,7 +15,6 @@
  */
 
 import type { IAccessor, IObjectPermissionPolicy, IObjectPermissionTarget } from '@univerjs/core';
-import type { LocaleKey } from '../../locale/types';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -27,6 +26,7 @@ import { Button, Checkbox, Dialog, FormLayout, Radio, RadioGroup, StateIconButto
 import { ProtectIcon } from '@univerjs/icons';
 import { UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { useEffect, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { IDialogService } from '../../services/dialog/dialog.service';
 import { useDependency, useObservable } from '../../utils/di';
 import { ObjectPermissionMembers } from './ObjectPermissionMembers';
@@ -246,7 +246,8 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
                                 setPolicy({ ...policy, edit: value as IObjectPermissionPolicy['edit'] });
                                 setDirty(true);
                             }}
-                            className="univer-flex univer-flex-col univer-gap-2"
+                            direction="vertical"
+                            className="univer-gap-2"
                         >
                             {editOptions.map((value) => (
                                 <Radio key={value} value={value}>
@@ -259,6 +260,7 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
                         <ObjectPermissionMembers
                             key={`${unitId}/${objectType}/${objectId}/${currentUser.userID}`}
                             unitId={unitId}
+                            objectId={objectId}
                             value={policy.collaborators}
                             disabled={!canManage || !canView || loading || saving || conflict}
                             onChange={(collaborators) => {

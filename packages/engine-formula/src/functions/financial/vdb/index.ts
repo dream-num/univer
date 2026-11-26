@@ -17,7 +17,6 @@
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
-import { calculateDDB } from '../../../basics/financial';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { getCurrencyFormat } from '../../../engine/utils/numfmt-kit';
@@ -41,11 +40,7 @@ export class Vdb extends BaseFunction {
         factor?: BaseValueObject,
         noSwitch?: BaseValueObject
     ): BaseValueObject {
-        let _factor = factor ?? NumberValueObject.create(2);
-
-        if (_factor.isNull()) {
-            _factor = NumberValueObject.create(2);
-        }
+        const _factor = factor ?? NumberValueObject.create(2);
 
         let _noSwitch = noSwitch ?? BooleanValueObject.create(false);
 
@@ -111,7 +106,13 @@ export class Vdb extends BaseFunction {
             const startPeriodObject = startPeriodArray.get(rowIndex, columnIndex) as BaseValueObject;
             const endPeriodObject = endPeriodArray.get(rowIndex, columnIndex) as BaseValueObject;
             const factorObject = factorArray.get(rowIndex, columnIndex) as BaseValueObject;
-            const noSwitchObject = noSwitchArray.get(rowIndex, columnIndex) as BaseValueObject;
+            let noSwitchObject = noSwitchArray.get(rowIndex, columnIndex) as BaseValueObject;
+            if (noSwitchObject.isString()) {
+                const logical = String(noSwitchObject.getValue()).toUpperCase();
+                if (logical === 'TRUE' || logical === 'FALSE') {
+                    noSwitchObject = BooleanValueObject.create(logical === 'TRUE');
+                }
+            }
 
             const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(costObject, salvageObject, lifeObject, startPeriodObject, endPeriodObject, factorObject, noSwitchObject);
 
@@ -162,75 +163,43 @@ export class Vdb extends BaseFunction {
         return resultArray;
     }
 
-    private _getResult(cost: number, salvage: number, life: number, startPeriod: number, endPeriod: number, factor: number, noSwitch: number): number {
-        const start = Math.floor(startPeriod);
-        const end = Math.ceil(endPeriod);
-
-        let result = 0;
-
+    private _getResult(cost: number, salvage: number, life: number, start: number, end: number, factor: number, noSwitch: number): number {
+        if (start === end) return 0;
         if (cost < salvage) {
-            if (startPeriod >= 1 || noSwitch) {
-                return result;
-            }
-
-            const tempMinus = Math.abs(cost - salvage);
-            result = tempMinus * (endPeriod - startPeriod) > tempMinus ? tempMinus : tempMinus * (endPeriod - startPeriod);
-
-            return -result;
+            return noSwitch || start >= 1 ? 0 : (cost - salvage) * Math.min(end - start, 1);
         }
-
+        const rate = Math.min(1, factor / life);
         if (noSwitch) {
-            for (let i = start + 1; i <= end; i++) {
-                let ddb = calculateDDB(cost, salvage, life, i, factor);
-
-                if (i === start + 1) {
-                    ddb *= (Math.min(endPeriod, start + 1) - startPeriod);
-                } else if (i === end) {
-                    ddb *= (endPeriod + 1 - end);
-                }
-
-                result += ddb;
-            }
-        } else {
-            const _cost = cost - this._getVdb(cost, salvage, life, life, startPeriod, factor);
-            result = this._getVdb(_cost, salvage, life, life - startPeriod, endPeriod - startPeriod, factor);
+            const balanceAt = (age: number) => {
+                const whole = Math.floor(age);
+                const opening = cost * (1 - rate) ** whole;
+                const depreciation = Math.max(0, Math.min(opening * rate, opening - salvage));
+                return Math.max(salvage, opening) - depreciation * (age - whole);
+            };
+            return balanceAt(start) - balanceAt(end);
         }
 
-        return result;
+        const whole = Math.floor(start);
+        const balance = cost - switchedDepreciation(cost, salvage, life, whole, rate);
+        const partial = (start - whole) * Math.max(balance * rate, (balance - salvage) / (life - whole));
+        return switchedDepreciation(balance - partial, salvage, life - whole, end - start, rate);
     }
+}
 
-    private _getVdb(cost: number, salvage: number, life: number, startPeriod: number, endPeriod: number, factor: number): number {
-        const end = Math.ceil(endPeriod);
-
-        let result = 0;
-        let rest = cost - salvage;
-        let sln = 0;
-        let temp = 0;
-        let flag = false;
-
-        for (let i = 1; i <= end; i++) {
-            if (!flag) {
-                const ddb = calculateDDB(cost, salvage, life, i, factor);
-                sln = rest / (startPeriod - (i - 1));
-
-                if (sln > ddb) {
-                    temp = sln;
-                    flag = true;
-                } else {
-                    temp = ddb;
-                    rest -= ddb;
-                }
-            } else {
-                temp = sln;
-            }
-
-            if (i === end) {
-                temp *= (endPeriod + 1 - end);
-            }
-
-            result += temp;
+function switchedDepreciation(balance: number, salvage: number, remaining: number, duration: number, rate: number): number {
+    let book = balance;
+    let total = 0;
+    for (let age = 0; age < duration && book > salvage; age++) {
+        const left = book - salvage;
+        const linear = left / (remaining - age);
+        const declining = Math.min(left, book * rate);
+        if (linear > declining) {
+            return total + linear * (duration - age);
         }
-
-        return result;
+        const depreciation = declining * Math.min(duration - age, 1);
+        if (book - depreciation === book) break;
+        total += depreciation;
+        book -= depreciation;
     }
+    return total;
 }

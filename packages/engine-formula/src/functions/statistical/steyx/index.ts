@@ -23,6 +23,8 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Steyx extends BaseFunction {
+    protected readonly numbersOnly: boolean = false;
+
     override minParams = 2;
 
     override maxParams = 2;
@@ -75,7 +77,8 @@ export class Steyx extends BaseFunction {
             knownXs,
             knownYsRowCount * knownYsColumnCount,
             knownYsColumnCount,
-            knownXsColumnCount
+            knownXsColumnCount,
+            this.numbersOnly
         );
 
         if (isError) {

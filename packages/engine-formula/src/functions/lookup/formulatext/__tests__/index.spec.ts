@@ -170,6 +170,10 @@ describe('Test formulatext function', () => {
             expect(result).toBe(ErrorType.NA);
         });
 
+        it('propagates an invalid reference', () => {
+            expect(calculate('=FORMULATEXT(#REF!)')).toBe(ErrorType.REF);
+        });
+
         it('value is not reference', async () => {
             const result = await calculate('=FORMULATEXT("test")');
 

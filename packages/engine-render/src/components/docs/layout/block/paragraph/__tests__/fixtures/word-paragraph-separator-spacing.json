@@ -1,0 +1,394 @@
+{
+    "actualAuthoredWordControls": 34,
+    "actualGenuineCases": 0,
+    "actualWordObservationProofSha256": [
+        "403e945480cdeee029e13f90fbcc70c5b25e783b2a7da6b09de144e30675ea12",
+        "a052a108ff4d1565f38d4d63583285f40341cc7491ee012f5a0aaba63580a92f"
+    ],
+    "coordinateTolerancePixels": 0.06666666666666667,
+    "exactCases": [
+        {
+            "id": "001",
+            "control": {
+                "topPadding": 0,
+                "betweenPadding": 0,
+                "before": 0,
+                "after": 0,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 20.959999999999997,
+            "actualInputSha256": "3bbe63d0babfaca72323b735f4c369864c1f32780ce03604eb2d4a0826d76990",
+            "actualWordPdfSha256": "54f79b478181f6958b6f511f2acb53d22f453234a5459f48ab833e71d27c5e1c"
+        },
+        {
+            "id": "002",
+            "control": {
+                "topPadding": 0,
+                "betweenPadding": 0,
+                "before": 8,
+                "after": 8,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 28.959999999999997,
+            "actualInputSha256": "ab7f4a15cfbd4db9771d8382befd58fb73ab78ea51f14a117244f6bc3ad1689a",
+            "actualWordPdfSha256": "82aaf013751cf34112d36906387565677a528fb86fda71c64d29e6aed5afc218"
+        },
+        {
+            "id": "003",
+            "control": {
+                "topPadding": 0,
+                "betweenPadding": 0,
+                "before": 0,
+                "after": 8,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 28.959999999999997,
+            "actualInputSha256": "0d26dff749d7d9fb607474652bdeb1734eb5bf4a3656ce5a8d7ed28f17e95383",
+            "actualWordPdfSha256": "27a77634ac9acb8effc1d39a5597ed871270a47619c58b6b6e3ec05fbaf902b0"
+        },
+        {
+            "id": "004",
+            "control": {
+                "topPadding": 0,
+                "betweenPadding": 0,
+                "before": 8,
+                "after": 0,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 28.959999999999997,
+            "actualInputSha256": "9e9d5b7565c6b12846826e8012221bbfe27118710289e4cd51ee5e15cf2e3c87",
+            "actualWordPdfSha256": "0ca4a161dd3e6a41324365ad746d90bc4479cc85595f2817c9f2e68838355e08"
+        },
+        {
+            "id": "005",
+            "control": {
+                "topPadding": 0,
+                "betweenPadding": 4,
+                "before": 0,
+                "after": 0,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 28.959999999999997,
+            "actualInputSha256": "182010f699f59f350487ddb9a6c4da865f22ddb81b4a5c4d7793614af8d13216",
+            "actualWordPdfSha256": "110029a1c60cc8df62ab4b1de32c883cd31f3ea4adc1c9a54ef34aa050a5c6c9"
+        },
+        {
+            "id": "006",
+            "control": {
+                "topPadding": 0,
+                "betweenPadding": 4,
+                "before": 8,
+                "after": 8,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 36.96,
+            "actualInputSha256": "4afa60201720ca6eff98d4548f57f82fb19370327df49a97f35859bf507f1ce4",
+            "actualWordPdfSha256": "aa849b7c0215699713086482e15a0d9ac9a7a24172e1478e755f0729d3f3a9db"
+        },
+        {
+            "id": "007",
+            "control": {
+                "topPadding": 0,
+                "betweenPadding": 4,
+                "before": 0,
+                "after": 8,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 36.96,
+            "actualInputSha256": "6132e6c33b04cf4b5424ab15485a913be23516c034a32e750e20d82ae060dd0c",
+            "actualWordPdfSha256": "4b50c9c6abb51b5b3bce40f189bff9b692a44b6abc8c9343842269b21b0c2b2a"
+        },
+        {
+            "id": "008",
+            "control": {
+                "topPadding": 0,
+                "betweenPadding": 4,
+                "before": 8,
+                "after": 0,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 36.96,
+            "actualInputSha256": "037be25ed46aec822f83026c10634ed328af415148ef3738b3d375a1f072b924",
+            "actualWordPdfSha256": "0500418fd823589d41cdce3a8789142f6356200850d906e75091735f2b65957c"
+        },
+        {
+            "id": "009",
+            "control": {
+                "topPadding": 0,
+                "betweenPadding": 12,
+                "before": 0,
+                "after": 0,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 44.96,
+            "actualInputSha256": "32a92c784b448c80c6f098c09d08374ae30945ab49ea758aae1c0cc0cabc26da",
+            "actualWordPdfSha256": "bdc59dd72e8fb2cc3f98a4e3123224cc10812b058b27599dde84acec0167bde1"
+        },
+        {
+            "id": "010",
+            "control": {
+                "topPadding": 0,
+                "betweenPadding": 12,
+                "before": 8,
+                "after": 8,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 52.96,
+            "actualInputSha256": "65119960d86c9415f7f849a378bfa3f4ccdbc0be01ccc07b72560cb078e2c94e",
+            "actualWordPdfSha256": "248f495923f4b4374745703bb3af438704ac264098c8e857b26e40fd120559ae"
+        },
+        {
+            "id": "011",
+            "control": {
+                "topPadding": 0,
+                "betweenPadding": 12,
+                "before": 0,
+                "after": 8,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 52.96,
+            "actualInputSha256": "b7d302dd8f9eb0ef8a1bd19bb40bb119d1f9b25c27431a6f229b564bb514c4f3",
+            "actualWordPdfSha256": "b383a8eb81938ecc15773c77cdc7b1034b82c52b00e5b903411d450e44b8ff7f"
+        },
+        {
+            "id": "012",
+            "control": {
+                "topPadding": 0,
+                "betweenPadding": 12,
+                "before": 8,
+                "after": 0,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 52.96,
+            "actualInputSha256": "16cc133f9fde5d3b4d5b9fdb663b12752b633048656fb61638cb88c9f57716bb",
+            "actualWordPdfSha256": "aad1dd1f7b2af5ac8ff19c7a9edbd3cbe7675dc7cdfa26f59ad6d6459c0d48b6"
+        },
+        {
+            "id": "013",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 0,
+                "before": 0,
+                "after": 0,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 20.959999999999997,
+            "actualInputSha256": "4ff6c936cade4c30678057377fcaa4f96963ec3fa46f3cbfa1b53be0a777e7f3",
+            "actualWordPdfSha256": "1f4e450cf0230ccacb4b977ef370c664ef50765c7a112a837a01d8da3ea6816c"
+        },
+        {
+            "id": "014",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 0,
+                "before": 8,
+                "after": 8,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 28.959999999999997,
+            "actualInputSha256": "2c4e8dd41081129be1d34c69252913b8d2eee6625945aa450a5a2442696c10a6",
+            "actualWordPdfSha256": "2bce0b724b00ecb95b63930168b36fae9b4effe87e9b7d9a1b642dca16ca7fad"
+        },
+        {
+            "id": "015",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 0,
+                "before": 0,
+                "after": 8,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 28.959999999999997,
+            "actualInputSha256": "faa1d85e0ea3e31c903cd6e712ae19cdb47db9126de738fa26fb42394d15b531",
+            "actualWordPdfSha256": "e49eb4866d76da9006d287f95375d62a04cba246cdca00d8aa0145f64dc05eb8"
+        },
+        {
+            "id": "016",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 0,
+                "before": 8,
+                "after": 0,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 28.959999999999997,
+            "actualInputSha256": "8e8a8fb2aedddcb9e03bca2282565cba50ccc182a5726252373e7c5ce9172103",
+            "actualWordPdfSha256": "9d284d40bc46d07fed3742ff2f5e2b478de8b1ff46acba9eba74cfff6c44369b"
+        },
+        {
+            "id": "017",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 4,
+                "before": 0,
+                "after": 0,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 28.959999999999997,
+            "actualInputSha256": "4de2053666f38c1f24245f81b55de8c51d4514497b211f6e994a3d242534f268",
+            "actualWordPdfSha256": "6de4d88114410657cd265e0dc97140f86aa9a411a1a0cd7bd5fd251dcffd14d4"
+        },
+        {
+            "id": "018",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 4,
+                "before": 8,
+                "after": 8,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 36.96,
+            "actualInputSha256": "e42a5d66b036e59a11e3e0cead41ec7293e0005c0084d2d393f2ae4ca1fc079e",
+            "actualWordPdfSha256": "6902a78f40317fd6cf9e6c47c71e25de44e24fa6e06fa859f94672fd6d14e155"
+        },
+        {
+            "id": "019",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 4,
+                "before": 0,
+                "after": 8,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 36.96,
+            "actualInputSha256": "8d8e8cd6e819b5f17b8665c085a8bc0ace9854af7865a6ad1c29a44444b5601f",
+            "actualWordPdfSha256": "8541556d41cc83fa733929ce8e9f88bc72abcbe5504a2f8678564f5df48d6b70"
+        },
+        {
+            "id": "020",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 4,
+                "before": 8,
+                "after": 0,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 36.96,
+            "actualInputSha256": "fb0d99c46d32aeb5cd422dccf357c9cd94ad7fe24cd6a6cc71e1d029ccbec7bb",
+            "actualWordPdfSha256": "93ea5dfd0dd978a5bacb57dee5d4fdc4a7c8c6df50dc5cb099e823e20eccd7b4"
+        },
+        {
+            "id": "021",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 12,
+                "before": 0,
+                "after": 0,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 44.96,
+            "actualInputSha256": "46ef82d94ac1f007ebd1db361097e29f3e672e846031c18a2370092f20487cd2",
+            "actualWordPdfSha256": "2bed83ad8365da2ad392aab3ec7040cbaf49e814ab348ef19d1dc24d5fcc5589"
+        },
+        {
+            "id": "022",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 12,
+                "before": 8,
+                "after": 8,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 52.96,
+            "actualInputSha256": "bd7a132da4738a6765db44e8f8b21fdf45f06732994668dfb615cf62f2a0e6f3",
+            "actualWordPdfSha256": "1b2223ffc2b0603d782843349973b89c8f0dd1dda541be5e600fa807469ca0c5"
+        },
+        {
+            "id": "023",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 12,
+                "before": 0,
+                "after": 8,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 52.96,
+            "actualInputSha256": "0946a6b0ffb195b93a92cbb7de1e0dc2fb2eb75e1837fea6f472f70d0831883c",
+            "actualWordPdfSha256": "08dcded8ebd6a63e25911f90f8b16974fc7de9a46fcda407073ae12f0492a405"
+        },
+        {
+            "id": "024",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 12,
+                "before": 8,
+                "after": 0,
+                "exact": true
+            },
+            "actualWordBaselineDeltaPixels": 52.96,
+            "actualInputSha256": "0d906f1c4bb9aba7625137978cad24d7ed8fcab56d1991cd6e7b39ee305f31f5",
+            "actualWordPdfSha256": "77d7489b6791bbfbb0513fc70a660a535f8fe2388eee7d52d79a933d6ed6aadb"
+        }
+    ],
+    "compatibilityPairs": [
+        {
+            "id": "001-005",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 4,
+                "before": 8,
+                "after": 8,
+                "exact": false,
+                "flag": false,
+                "named": false,
+                "borders": true
+            },
+            "actualWordCompatibilityGapDifferencePixels": 8.0,
+            "actualWordFalsePdfSha256": "9b0fe533ece7f5a387eb5e97db14de73b4f10473e5f3e0b70491952f478fa37a",
+            "actualWordTruePdfSha256": "f75acebbeda4ba1fd672015c14e013828e00bd86291c5a1e5c965b0ac5877848"
+        },
+        {
+            "id": "002-006",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 4,
+                "before": 8,
+                "after": 8,
+                "exact": false,
+                "flag": false,
+                "named": true,
+                "borders": true
+            },
+            "actualWordCompatibilityGapDifferencePixels": 8.0,
+            "actualWordFalsePdfSha256": "ff1e5c39efbf8540db3a3a0fd0244e583a243759d9f1ccdaa8d2c1412713ee8a",
+            "actualWordTruePdfSha256": "db31a6e3e0455db689e5e544760913fa5031a43fad9071a7efff874285040bf9"
+        },
+        {
+            "id": "003-007",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 4,
+                "before": 8,
+                "after": 8,
+                "exact": false,
+                "flag": false,
+                "named": false,
+                "borders": false
+            },
+            "actualWordCompatibilityGapDifferencePixels": 8.0,
+            "actualWordFalsePdfSha256": "58cd4805a4e9e6310beea3c94d9aff940b7da46b91386ac37bd8ec1b53c9329b",
+            "actualWordTruePdfSha256": "53044a28d9a4578f82bdeb22368bf16cefb77cf5c69dd2b3ce16cb939a694e44"
+        },
+        {
+            "id": "004-008",
+            "control": {
+                "topPadding": 4,
+                "betweenPadding": 4,
+                "before": 8,
+                "after": 8,
+                "exact": false,
+                "flag": false,
+                "named": true,
+                "borders": false
+            },
+            "actualWordCompatibilityGapDifferencePixels": 8.0,
+            "actualWordFalsePdfSha256": "b98785ae5143ad3f9c62a73c442fc8e4d7dcb4dcfe24691c1223429fb34c9ad6",
+            "actualWordTruePdfSha256": "cdef98f9d5192ceeaf0bec15a144425cb063ec76eaa338874755af3b46671450"
+        }
+    ],
+    "actualWordSeparatorAfterSpacingShiftPixels": 8.000000000000007,
+    "actualWordSeparatorShiftPdfSha256": [
+        "54f79b478181f6958b6f511f2acb53d22f453234a5459f48ab833e71d27c5e1c",
+        "27a77634ac9acb8effc1d39a5597ed871270a47619c58b6b6e3ec05fbaf902b0"
+    ]
+}

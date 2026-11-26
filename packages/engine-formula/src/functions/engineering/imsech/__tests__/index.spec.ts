@@ -35,13 +35,13 @@ describe('Test imsech function', () => {
         it('Value is large numbers', () => {
             const inumber = NumberValueObject.create(25698432);
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(0);
+            expect(result.getValue()).toBe('0');
         });
 
         it('Value is number string', () => {
             const inumber = StringValueObject.create('1.5');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(0.425096034942281);
+            expect(result.getValue()).toBe('0.425096034942281');
         });
 
         it('Value is normal string', () => {
@@ -69,7 +69,7 @@ describe('Test imsech function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(1);
+            expect(result.getValue()).toBe('1');
         });
 
         it('Value is error', () => {

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IParagraph } from '../../../../../types/interfaces';
 import { describe, expect, it } from 'vitest';
+import type { IDocumentBody, IParagraph } from '../../../../../types/interfaces';
 import { HorizontalAlign } from '../../../../../types/enum';
-import { DocumentBlockRangeType } from '../../../../../types/interfaces';
+import { DocStyleType, DocumentBlockRangeType } from '../../../../../types/interfaces';
 import { DocumentDataModel } from '../../../document-data-model';
+import { resolveDocumentParagraphBullet } from '../../../paragraph-style';
 import { PresetListType } from '../../../preset-list-type';
 import { DataStreamTreeTokenType } from '../../../types';
 import { TextX } from '../../text-x';
@@ -91,6 +92,29 @@ function createDocModel() {
 }
 
 describe('paragraph build utils', () => {
+    it('toggles inherited numbering with undo and preserves live styles when changing levels', () => {
+        const doc = createDocModel();
+        const snapshot = doc.getSnapshot();
+        snapshot.styles = { numbered: { name: 'Numbered', type: DocStyleType.paragraph, bullet: { listId: 'counter', listType: PresetListType.ORDER_LIST, nestingLevel: 0 } } };
+        const body = doc.getBody()!;
+        const paragraph = body.paragraphs![2];
+        paragraph.styleId = 'numbered';
+        const action = TextX.makeInvertible(switchParagraphBullet({ paragraphs: [paragraph], listType: PresetListType.ORDER_LIST, document: doc }).serialize(), body);
+        TextX.apply(body, action);
+        expect(body.paragraphs![2]).toMatchObject({ styleId: 'numbered', bullet: null, paragraphId: paragraph.paragraphId });
+        expect(resolveDocumentParagraphBullet(snapshot, body.paragraphs![2])).toBeUndefined();
+        TextX.apply(body, TextX.invert(action));
+        expect(body.paragraphs![2].styleId).toBe('numbered');
+        expect(resolveDocumentParagraphBullet(snapshot, body.paragraphs![2])?.listId).toBe('counter');
+        TextX.apply(body, action);
+        expect(resolveDocumentParagraphBullet(snapshot, body.paragraphs![2])).toBeUndefined();
+        TextX.apply(body, TextX.invert(action));
+        TextX.apply(body, changeParagraphBulletNestLevel({ paragraphs: [body.paragraphs![2]], type: 1, document: doc }).serialize());
+        expect(body.paragraphs![2]).toMatchObject({ styleId: 'numbered', bullet: { nestingLevel: 1 } });
+        snapshot.styles.numbered.bullet = { listId: 'changed-parent', listType: PresetListType.ORDER_LIST, nestingLevel: 0 };
+        expect(resolveDocumentParagraphBullet(snapshot, body.paragraphs![2])).toMatchObject({ listId: 'changed-parent', nestingLevel: 1 });
+    });
+
     it('skips structural container sentinels when resolving paragraph content starts', () => {
         const T = DataStreamTreeTokenType;
         const cases = [

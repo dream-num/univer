@@ -16,6 +16,7 @@
 
 import type { IMutation, IRange, Nullable } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { FilterModel } from '../../models/filter-model';
 import type { IFilterColumn } from '../../models/types';
 import { CommandType } from '@univerjs/core';
 import {
@@ -26,13 +27,23 @@ import {
 } from '../../common/const';
 import { SheetsFilterService } from '../../services/sheet-filter.service';
 
+interface ISheetsFilterMutationResult extends ISheetCommandSharedParams {
+    filteredOutRows?: number[];
+    sheetFilterActive?: boolean;
+    removedFilterRange?: IRange;
+}
+
+function setFilterMutationResult(params: ISheetsFilterMutationResult, model?: FilterModel): void {
+    params.filteredOutRows = model ? Array.from(model.filteredOutRows) : [];
+    params.sheetFilterActive = model?.hasCriteria ?? false;
+}
+
 /**
  * Parameters of mutation {@link SetSheetsFilterRangeMutation}.
  * @property range - the range to be set as filter range.
  */
-export interface ISetSheetsFilterRangeMutationParams extends ISheetCommandSharedParams {
+export interface ISetSheetsFilterRangeMutationParams extends ISheetsFilterMutationResult {
     range: IRange;
-    filteredOutRows?: number[];
 }
 
 /**
@@ -52,7 +63,7 @@ export const SetSheetsFilterRangeMutation: IMutation<ISetSheetsFilterRangeMutati
         // check if the range is in bound?
         const filterModel = sheetsFilterService.ensureFilterModel(unitId, subUnitId);
         filterModel.setRange(range);
-        params.filteredOutRows = Array.from(filterModel.filteredOutRows);
+        setFilterMutationResult(params, filterModel);
 
         return true;
     },
@@ -64,11 +75,10 @@ export const SetSheetsFilterRangeMutation: IMutation<ISetSheetsFilterRangeMutati
  * @property {IFilterColumn | null} criteria - the filter criteria to set. If it is `null`, the criteria will be removed.
  * @property {boolean} [reCalc=true] - if it should trigger calculation on this `FilterColumn`.
  */
-export interface ISetSheetsFilterCriteriaMutationParams extends ISheetCommandSharedParams {
+export interface ISetSheetsFilterCriteriaMutationParams extends ISheetsFilterMutationResult {
     col: number;
     criteria: Nullable<IFilterColumn>;
     reCalc?: boolean;
-    filteredOutRows?: number[];
 }
 
 /**
@@ -85,7 +95,7 @@ export const SetSheetsFilterCriteriaMutation: IMutation<ISetSheetsFilterCriteria
         if (!filterModel) return false;
 
         filterModel.setCriteria(col, criteria, reCalc);
-        params.filteredOutRows = Array.from(filterModel.filteredOutRows);
+        setFilterMutationResult(params, filterModel);
         return true;
     },
 };
@@ -93,24 +103,28 @@ export const SetSheetsFilterCriteriaMutation: IMutation<ISetSheetsFilterCriteria
 /**
  * A {@link CommandType.MUTATION} to remove a {@link FilterModel} in a {@link Worksheet}.
  */
-export const RemoveSheetsFilterMutation: IMutation<ISheetCommandSharedParams> = {
+export const RemoveSheetsFilterMutation: IMutation<ISheetsFilterMutationResult> = {
     id: RemoveSheetsFilterMutationId,
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const { unitId, subUnitId } = params;
         const sheetsFilterService = accessor.get(SheetsFilterService);
+        const range = sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange();
         const removed = sheetsFilterService.removeFilterModel(unitId, subUnitId);
         if (removed) {
-            (params as ISheetCommandSharedParams & { filteredOutRows?: number[] }).filteredOutRows = [];
+            params.removedFilterRange = range;
+            setFilterMutationResult(params);
         }
-        return removed;
+        // Cleanup can race with worksheet disposal, which also removes the model. Treat an
+        // already-removed model as a successful, idempotent cleanup.
+        return true;
     },
 };
 
 /**
  * A {@link CommandType.MUTATION} to re-calculate a {@link FilterModel}.
  */
-export const ReCalcSheetsFilterMutation: IMutation<ISheetCommandSharedParams> = {
+export const ReCalcSheetsFilterMutation: IMutation<ISheetsFilterMutationResult> = {
     id: ReCalcSheetsFilterMutationId,
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
@@ -122,9 +136,7 @@ export const ReCalcSheetsFilterMutation: IMutation<ISheetCommandSharedParams> = 
         }
 
         filterModel.reCalc();
-        (params as ISheetCommandSharedParams & { filteredOutRows?: number[] }).filteredOutRows = Array.from(
-            filterModel.filteredOutRows
-        );
+        setFilterMutationResult(params, filterModel);
         return true;
     },
 };

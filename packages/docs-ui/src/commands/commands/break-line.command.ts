@@ -33,6 +33,7 @@ import {
     IUniverInstanceService,
     JSONX,
     PresetListType,
+    resolveDocumentParagraphBullet,
     TextX,
     TextXActionType,
     UniverInstanceType,
@@ -219,7 +220,8 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
         }
 
         const preserveEmptyParagraphStyle = collapsed && isAtParagraphEnd;
-        const resetParagraphType = prevParagraph?.bullet?.listType === PresetListType.CHECK_LIST_CHECKED ||
+        const previousBullet = prevParagraph && resolveDocumentParagraphBullet(docDataModel.getSnapshot(), prevParagraph);
+        const resetParagraphType = previousBullet?.listType === PresetListType.CHECK_LIST_CHECKED ||
             prevParagraph?.paragraphStyle?.headingId;
 
         if (prevParagraph && (preserveEmptyParagraphStyle || resetParagraphType)) {
@@ -249,6 +251,7 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
                             paragraphs: [
                                 {
                                     ...prevParagraph,
+                                    styleId: isAtParagraphEnd && prevParagraph.paragraphStyle?.headingId ? undefined : prevParagraph.styleId,
                                     paragraphStyle: {
                                         ...prevParagraph.paragraphStyle,
                                         ...isAtParagraphEnd

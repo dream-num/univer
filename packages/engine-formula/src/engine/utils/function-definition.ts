@@ -17,6 +17,18 @@
 import { DEFAULT_TOKEN_TYPE_LAMBDA_OMIT_PARAMETER, DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER } from '../../basics/token-type';
 import { LexerNode } from '../analysis/lexer-node';
 
+export function normalizeLambdaVariable(name: string): string {
+    return name.trim().toLowerCase().replace(/^_xl(?:pm|op)\./, '').replace(/^\[([^\]]+)\]$/, '$1').trim();
+}
+
+export function getLambdaParameterDeclaration(node: LexerNode | string): string | undefined {
+    if (typeof node === 'string') return node.trim() || undefined;
+    for (const child of node.getChildren()) {
+        const declaration = getLambdaParameterDeclaration(child);
+        if (declaration) return declaration;
+    }
+}
+
 export function isFirstChildParameter(lexerNode: LexerNode | string) {
     if (!(lexerNode instanceof LexerNode)) {
         return false;

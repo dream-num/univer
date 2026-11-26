@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -24,7 +25,17 @@ import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Factdouble } from '../index';
 
 describe('Test factdouble function', () => {
-    const testFunction = new Factdouble(FUNCTION_NAMES_MATH.FACTDOUBLE);
+    let injector: Injector;
+    let testFunction: Factdouble;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [Factdouble, { useFactory: () => injector.createInstance(Factdouble, FUNCTION_NAMES_MATH.FACTDOUBLE) }],
+        ]);
+        testFunction = injector.get(Factdouble);
+    });
+
+    afterEach(() => injector.dispose());
 
     describe('Factdouble', () => {
         it('Value is normal number', () => {
@@ -43,6 +54,8 @@ describe('Test factdouble function', () => {
             const number = NumberValueObject.create(-8);
             const result = testFunction.calculate(number);
             expect(getObjectValue(result)).toBe(ErrorType.NUM);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(-1)))).toBe(1);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(-1.9)))).toBe(ErrorType.NUM);
         });
 
         it('Value is number string', () => {
@@ -60,7 +73,7 @@ describe('Test factdouble function', () => {
         it('Value is boolean', () => {
             const number = BooleanValueObject.create(true);
             const result = testFunction.calculate(number);
-            expect(getObjectValue(result)).toBe(1);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
         it('Value is blank cell', () => {
             const number = NullValueObject.create();
@@ -77,7 +90,7 @@ describe('Test factdouble function', () => {
             const number = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false, null],
-                    [0, '100', '2.34', 'test', -3, ErrorType.NAME],
+                    [0, '6', '2.34', 'test', -3, ErrorType.NAME],
                 ]),
                 rowCount: 2,
                 columnCount: 6,
@@ -87,7 +100,10 @@ describe('Test factdouble function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(number);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual([
+                [1, ErrorType.VALUE, 1, ErrorType.VALUE, ErrorType.VALUE, 1],
+                [1, 48, 2, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
+            ]);
 
             const number2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

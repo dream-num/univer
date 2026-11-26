@@ -27,7 +27,7 @@ const locale: typeof enUS = {
             'smart-toggle-filter': 'Alternar Filtro',
         },
         permission: {
-            filterErr: 'Você não tem permissão para usar o filtro.',
+            filterErr: 'O intervalo está protegido e você não tem permissão para filtrar. Para filtrar, entre em contato com o criador.',
         },
         panel: {
             'clear-filter': 'Limpar Filtro',

@@ -53,19 +53,21 @@ export interface IRenderManagerService extends IDisposable {
      * @param unitId
      * @returns renderUnit:IRender
      */
-    createRender(unitId: string, createUnitOptions?: ICreateUnitOptions): IRender;
-    removeRender(unitId: string): void;
+    createRender(unitId: string, createUnitOptions?: ICreateUnitOptions, renderId?: string): IRender;
+    removeRender(renderId: string): void;
     /**
-     * Get RenderUnit By Id, RenderUnit implements IRender
-     * @param unitId
+     * Gets a renderer by its render ID. The primary renderer uses the unit ID.
      */
-    getRenderUnitById(unitId: string): Nullable<IRender>;
+    getRenderUnitById(renderId: string): Nullable<IRender>;
+    getFocusedRenderByUnitId?(unitId: string): Nullable<IRender>;
+    focusRender?(renderId: string): void;
     getAllRenderersOfType(type: UniverInstanceType): RenderUnit[];
     getRenderAll(): Map<string, IRender>;
     defaultEngine: Engine;
 
     created$: Observable<IRender>;
     disposed$: Observable<string>;
+    focusedRenderChanged$?: Observable<string>;
 
     has(unitId: string): boolean;
 
@@ -86,6 +88,10 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     private _defaultEngine!: Engine;
 
     private _renderMap: Map<string, IRender> = new Map();
+    private readonly _focusListeners = new Map<string, IDisposable>();
+    private readonly _focusedByUnit = new Map<string, string>();
+    private readonly _focusedRenderChanged$ = new Subject<string>();
+    readonly focusedRenderChanged$ = this._focusedRenderChanged$.asObservable();
 
     private readonly _renderCreated$ = new Subject<IRender>();
     readonly created$ = this._renderCreated$.asObservable();
@@ -115,11 +121,13 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     override dispose(): void {
         super.dispose();
 
-        this._renderMap.forEach((item) => this._disposeItem(item));
+        this._renderMap.forEach((item, id) => this._disposeItem(item, true, id));
         this._renderDependencies.clear();
         this._renderMap.clear();
         this._renderCreated$.complete();
         this._renderDisposed$.complete();
+        this._focusedByUnit.clear();
+        this._focusedRenderChanged$.complete();
     }
 
     registerRenderModules(type: UniverInstanceType, deps: Dependency[]): IDisposable {
@@ -197,9 +205,22 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @param unitId
      * @returns renderUnit:IRender
      */
-    createRender(unitId: string, createUnitOptions?: ICreateUnitOptions): IRender {
+    createRender(unitId: string, createUnitOptions?: ICreateUnitOptions, renderId = unitId): IRender {
+        if (renderId !== unitId && (
+            !this.getRenderUnitById(unitId) || this._univerInstanceService.getUnit(renderId) || this._renderMap.has(renderId)
+        )) {
+            throw new Error('A secondary renderer requires an existing primary renderer and a unique render ID.');
+        }
         const parentInjector = createUnitOptions?.renderParentInjector ?? this._injector;
-        const renderer = this._createRender(unitId, parentInjector.createInstance(Engine, unitId, undefined), createUnitOptions?.embeddedRender !== true, createUnitOptions, parentInjector);
+        const engine = parentInjector.createInstance(Engine, renderId, undefined);
+        const isMainScene = renderId === unitId && createUnitOptions?.embeddedRender !== true;
+        const renderer = this._createRender(unitId, engine, isMainScene, createUnitOptions, parentInjector, renderId);
+        if (renderer.type === UniverInstanceType.UNIVER_SHEET) {
+            const canvas = engine.getCanvasElement();
+            const focus = () => this.focusRender(renderId);
+            canvas.addEventListener('pointerdown', focus, true);
+            this._focusListeners.set(renderId, toDisposable(() => canvas.removeEventListener('pointerdown', focus, true)));
+        }
         this._renderCreated$.next(renderer);
         return renderer;
     }
@@ -234,8 +255,15 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @param isMainScene
      * @returns renderUnit:IRender
      */
-    protected _createRender(unitId: string, engine: Engine, isMainScene: boolean = true, createUnitOptions?: ICreateUnitOptions, parentInjector: Injector = this._injector): IRender {
-        const existItem = this.getRenderUnitById(unitId);
+    protected _createRender(
+        unitId: string,
+        engine: Engine,
+        isMainScene = true,
+        createUnitOptions?: ICreateUnitOptions,
+        parentInjector: Injector = this._injector,
+        renderId = unitId
+    ): IRender {
+        const existItem = this.getRenderUnitById(renderId);
         let shouldDestroyEngine = true;
 
         if (existItem != null) {
@@ -245,11 +273,11 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
             }
         }
 
-        this._disposeItem(existItem, shouldDestroyEngine);
+        this._disposeItem(existItem, shouldDestroyEngine, renderId);
 
         const { width, height } = DEFAULT_SCENE_SIZE;
 
-        const scene = new Scene(SCENE_NAMESPACE + unitId, engine, {
+        const scene = new Scene(SCENE_NAMESPACE + renderId, engine, {
             width,
             height,
         });
@@ -263,21 +291,22 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
 
             renderUnit = parentInjector.createInstance(RenderUnit, {
                 unit,
+                renderId,
                 engine,
                 scene,
                 isMainScene,
                 createUnitOptions,
             });
-            this._addRenderUnit(unitId, renderUnit);
+            this._addRenderUnit(renderId, renderUnit);
 
             try {
                 // init deps
                 this._tryAddRenderDependencies(renderUnit, ctorOfDeps);
             } catch (error) {
                 try {
-                    this._disposeItem(renderUnit);
+                    this._disposeItem(renderUnit, true, renderId);
                 } finally {
-                    this._renderMap.delete(unitId);
+                    this._renderMap.delete(renderId);
                 }
                 throw error;
             }
@@ -287,6 +316,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
                 isThumbNail: true,
                 type: UniverInstanceType.UNIVER_SLIDE,
                 unitId,
+                renderId,
                 engine,
                 scene,
                 mainComponent: null,
@@ -297,7 +327,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
                     return null;
                 },
             } as IRender;
-            this._addRenderUnit(unitId, renderUnit);
+            this._addRenderUnit(renderId, renderUnit);
         }
 
         return renderUnit;
@@ -311,13 +341,20 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         this._renderMap.set(unitId, renderUnit);
     }
 
-    removeRender(unitId: string): void {
-        const item = this._renderMap.get(unitId);
-        if (item != null) {
-            this._disposeItem(item);
+    removeRender(renderId: string): void {
+        const item = this._renderMap.get(renderId);
+        if (!item) {
+            return;
         }
-
-        this._renderMap.delete(unitId);
+        if (item.unitId === renderId) {
+            for (const [id, renderer] of this._renderMap) {
+                if (id !== renderId && renderer.unitId === renderId) {
+                    this.removeRender(id);
+                }
+            }
+        }
+        this._renderMap.delete(renderId);
+        this._disposeItem(item, true, renderId);
     }
 
     has(unitId: string): boolean {
@@ -328,16 +365,36 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return this._renderMap.get(unitId);
     }
 
+    getFocusedRenderByUnitId(unitId: string): Nullable<IRender> {
+        return this._renderMap.get(this._focusedByUnit.get(unitId) ?? unitId);
+    }
+
+    focusRender(renderId: string): void {
+        const render = this._renderMap.get(renderId);
+        if (render && (this._focusedByUnit.get(render.unitId) ?? render.unitId) !== renderId) {
+            this._focusedByUnit.set(render.unitId, renderId);
+            this._focusedRenderChanged$.next(render.unitId);
+        }
+    }
+
     getRenderAll(): Map<string, IRender> {
         return this._renderMap;
     }
 
-    private _disposeItem(item: Nullable<IRender>, shouldDestroyEngine: boolean = true): void {
+    private _disposeItem(item: Nullable<IRender>, shouldDestroyEngine: boolean, renderId: string): void {
         if (item == null) {
             return;
         }
 
         const { engine, scene, components } = item;
+        this._focusListeners.get(renderId)?.dispose();
+        this._focusListeners.delete(renderId);
+        if (this._focusedByUnit.get(item.unitId) === renderId) {
+            this._focusedByUnit.delete(item.unitId);
+            if (renderId !== item.unitId) {
+                this._focusedRenderChanged$.next(item.unitId);
+            }
+        }
 
         // `mainComponent` is one of the `components` so it does not to be disposed again
         components?.forEach((component) => component.dispose());
@@ -351,7 +408,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
             engine.dispose();
         }
 
-        this._renderDisposed$.next(item.unitId);
+        this._renderDisposed$.next(renderId);
     }
 }
 
@@ -391,6 +448,11 @@ export function getCurrentTypeOfRenderer(
     }
 
     return renderManageService.getRenderUnitById(currentUnit.getUnitId());
+}
+
+/** Resolves the renderer that last received input, or the primary renderer. */
+export function getFocusedRenderForUnit(renderManager: IRenderManagerService, unitId: string): Nullable<IRender> {
+    return renderManager.getFocusedRenderByUnitId?.(unitId) ?? renderManager.getRenderUnitById(unitId);
 }
 
 export function withCurrentTypeOfRenderer<T>(

@@ -16,8 +16,8 @@
 
 import type { ICommandInfo, IDisposable, IMutationInfo } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISheetDrawing } from './sheet-drawing.service';
 import { toDisposable } from '@univerjs/core';
+import type { ISheetDrawing } from './sheet-drawing.service';
 
 export interface ISheetDrawingTransformPlan {
     command: ICommandInfo;
@@ -35,6 +35,8 @@ export interface ISheetDrawingTransformExtensionResult {
     redos?: IMutationInfo[];
     preUndos?: IMutationInfo[];
     undos?: IMutationInfo[];
+    /** Inverses in [...preRedos, ...redos] order; required for multi-step structural deletion. */
+    rollbackMutations?: IMutationInfo[][];
 }
 
 export interface ISheetDrawingTransformExtension {
@@ -43,7 +45,7 @@ export interface ISheetDrawingTransformExtension {
 }
 
 function createEmptyResult(): Required<ISheetDrawingTransformExtensionResult> {
-    return { preRedos: [], redos: [], preUndos: [], undos: [] };
+    return { preRedos: [], redos: [], preUndos: [], undos: [], rollbackMutations: [] };
 }
 
 export class SheetDrawingTransformPlanService {
@@ -62,10 +64,23 @@ export class SheetDrawingTransformPlanService {
     }
 
     transform(plan: ISheetDrawingTransformPlan): Required<ISheetDrawingTransformExtensionResult> {
-        return this._extensions.reduce((all, extension) => {
+        const preRollbacks: IMutationInfo[][] = [];
+        const postRollbacks: IMutationInfo[][] = [];
+        let recoverable = true;
+        const result = this._extensions.reduce((all, extension) => {
             const next = extension.transform(plan);
             if (!next) {
                 return all;
+            }
+
+            const preCount = next.preRedos?.length ?? 0;
+            const count = preCount + (next.redos?.length ?? 0);
+            const rollback = next.rollbackMutations ?? (count === 1 ? [[...(next.preUndos ?? []), ...(next.undos ?? [])]] : []);
+            if (rollback.length !== count) {
+                recoverable = false;
+            } else {
+                preRollbacks.push(...rollback.slice(0, preCount));
+                postRollbacks.push(...rollback.slice(preCount));
             }
 
             all.preRedos.push(...(next.preRedos ?? []));
@@ -74,5 +89,7 @@ export class SheetDrawingTransformPlanService {
             all.undos.push(...(next.undos ?? []));
             return all;
         }, createEmptyResult());
+        result.rollbackMutations = recoverable ? [...preRollbacks, ...postRollbacks] : [];
+        return result;
     }
 }

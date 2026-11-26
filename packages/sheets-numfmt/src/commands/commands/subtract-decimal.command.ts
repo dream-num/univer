@@ -16,9 +16,9 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { INumfmtItemWithCache } from '@univerjs/sheets';
-import type { ISetNumfmtCommandParams } from './set-numfmt.command';
 import { CellValueType, CommandType, ICommandService, isDefaultFormat, IUniverInstanceService, Range } from '@univerjs/core';
 import { getSheetCommandTarget, INumfmtService, SheetsSelectionsService } from '@univerjs/sheets';
+import type { ISetNumfmtCommandParams } from './set-numfmt.command';
 import { getDecimalFromPattern, setPatternDecimal } from '../../utils/decimal';
 import { getScientificNotationFormatFromCell, isScientificNotationNumericCell } from '../../utils/scientific-notation';
 import { SetNumfmtCommand } from './set-numfmt.command';
@@ -85,15 +85,16 @@ export const SubtractDecimalCommand: ICommand = {
                         pattern: isScientificNotationNumericCell(cell) ? setPatternDecimal(getScientificNotationFormatFromCell(cell), decimals) : defaultPattern,
                     });
                 } else {
-                    const decimals = getDecimalFromPattern((numfmtValue as INumfmtItemWithCache).pattern);
-                    values.push({
-                        row,
-                        col,
-                        pattern: setPatternDecimal((numfmtValue as INumfmtItemWithCache).pattern, decimals - 1),
-                    });
+                    const pattern = (numfmtValue as INumfmtItemWithCache).pattern;
+                    const nextPattern = setPatternDecimal(pattern, getDecimalFromPattern(pattern) - 1);
+                    nextPattern !== pattern && values.push({ row, col, pattern: nextPattern });
                 }
             });
         });
+
+        if (!values.length) {
+            return false;
+        }
 
         const result = await commandService.executeCommand(SetNumfmtCommand.id, { values });
         return result;

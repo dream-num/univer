@@ -110,16 +110,13 @@ it.each([
     const expected = {
         anchorType: SheetDrawingAnchorType.None,
         transform: { left: 100, top: 200, width: 300, height: 400, angle: 35, flipX: true, flipY: true },
-        sheetTransform: {
+        axisAlignSheetTransform: {
             from: { row: 0, column: 0, rowOffset: 200, columnOffset: 100 },
             to: { row: 0, column: 0, rowOffset: 600, columnOffset: 400 },
-            angle: 35,
-            flipX: true,
-            flipY: true,
         },
     };
     expect(drawing()).toMatchObject(expected);
-    expect(drawing().axisAlignSheetTransform).toEqual(drawing().sheetTransform);
+    expect(drawing().sheetTransform).toBeUndefined();
     assertNoGrid();
     expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
     expect(drawing().transform).toEqual(initial.transform);
@@ -147,7 +144,7 @@ it('retains GRID Position and Both placement through undo and redo', async () =>
         drawingType: DrawingTypeEnum.DRAWING_IMAGE,
         imageSourceType: ImageSourceType.URL,
         source: 'https://example.com/grid.png',
-        sheetTransform: { from: marker, to: { ...marker, row: 3, column: 3 } },
+        transform: { left: 134, top: 44, width: 160, height: 40 },
         axisAlignSheetTransform: { from: marker, to: { ...marker, row: 3, column: 3 } },
     };
     expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [drawing] })).toBe(true);
@@ -188,7 +185,7 @@ it('retains GRID Position and Both placement through undo and redo', async () =>
     const search = { unitId: 'test', subUnitId: 'sheet1', drawingId: 'grid-drawing' };
     expect(bed.get(ISheetDrawingService).getDrawingByParam(search)).toMatchObject({
         anchorType: SheetDrawingAnchorType.Position,
-        sheetTransform: { from: marker },
+        axisAlignSheetTransform: { from: marker },
         transform: { width: 50, height: 60 },
     });
     expect(bed.get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 1, redos: 0 });
@@ -203,7 +200,7 @@ it('retains GRID Position and Both placement through undo and redo', async () =>
         } }],
     })).toBe(true);
     const updated = bed.get(ISheetDrawingService).getDrawingByParam(search)!;
-    expect(updated).toMatchObject({ anchorType: SheetDrawingAnchorType.Both, sheetTransform: { from: marker, to } });
+    expect(updated).toMatchObject({ anchorType: SheetDrawingAnchorType.Both, axisAlignSheetTransform: { from: marker, to } });
     expect(updated.transform!.width).toBeGreaterThan(50);
     expect(updated.transform!.height).toBeGreaterThan(60);
     expect(bed.get(SheetSkeletonService).getSkeleton('test', 'sheet1')).toBe(skeleton);

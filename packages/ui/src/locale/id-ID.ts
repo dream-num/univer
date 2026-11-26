@@ -151,6 +151,7 @@ const locale: typeof enUS = {
                 formulas: 'Rumus',
                 rules: 'Aturan',
                 organization: 'Penataan data',
+                analysis: 'Analisis data',
                 display: 'Tampilan',
                 visibility: 'Visibilitas',
             },

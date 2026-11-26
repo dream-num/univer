@@ -18,17 +18,22 @@ import type { IAccessor, Nullable } from '@univerjs/core';
 import type { ISheetNote } from '@univerjs/sheets-note';
 import type { IMenuButtonItem } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
-import type { LocaleKey } from '../locale/types';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import {
     SheetsSelectionsService,
     WorkbookEditablePermission,
     WorksheetEditPermission,
 } from '@univerjs/sheets';
-import { SheetDeleteNoteCommand, SheetsNoteModel, SheetToggleNotePopupCommand } from '@univerjs/sheets-note';
+import {
+    SHEET_NOTE_EDIT_PERMISSIONS,
+    SheetDeleteNoteCommand,
+    SheetsNoteModel,
+    SheetToggleNotePopupCommand,
+} from '@univerjs/sheets-note';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, distinctUntilChanged, map, merge, startWith } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import { AddNotePopupOperation } from '../commands/operations/add-note-popup.operation';
 
 export const SHEET_NOTE_CONTEXT_MENU_ID = 'sheet.menu.note';
@@ -65,10 +70,7 @@ export function sheetNoteContextMenuFactory(accessor: IAccessor): IMenuButtonIte
             getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
             getSelectedNote$(accessor),
         ]).pipe(map(([hidden, note]) => hidden || !!note)),
-        disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission],
-        }),
+        disabled$: getCurrentRangeDisable$(accessor, SHEET_NOTE_EDIT_PERMISSIONS),
         commandId: AddNotePopupOperation.id,
     };
 }
@@ -80,10 +82,7 @@ export function sheetDeleteNoteMenuFactory(accessor: IAccessor): IMenuButtonItem
         title: 'sheets-note-ui.rightClick.deleteNote',
         icon: 'DeleteNoteIcon',
         hidden$: getSelectedNote$(accessor).pipe(map((note) => !note), distinctUntilChanged()),
-        disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission],
-        }),
+        disabled$: getCurrentRangeDisable$(accessor, SHEET_NOTE_EDIT_PERMISSIONS),
     };
 }
 export function sheetNoteToggleMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
@@ -96,5 +95,9 @@ export function sheetNoteToggleMenuFactory(accessor: IAccessor): IMenuButtonItem
         icon: 'HideNoteIcon',
         activated$: selectedNote$.pipe(map((note) => note?.show === true), distinctUntilChanged()),
         hidden$: selectedNote$.pipe(map((note) => !note), distinctUntilChanged()),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+        }),
     };
 }

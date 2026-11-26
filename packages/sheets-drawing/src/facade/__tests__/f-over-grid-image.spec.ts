@@ -113,7 +113,7 @@ describe('FOverGridImage', () => {
         expect(getStoredImage('drawing-1').source).toBe('https://example.com/updated.png');
 
         expect(await fImage.setPositionAsync(4, 5, 6, 7)).toBe(true);
-        expect(getStoredImage('drawing-1').sheetTransform.from).toEqual(expect.objectContaining({
+        expect(getStoredImage('drawing-1').axisAlignSheetTransform.from).toEqual(expect.objectContaining({
             row: 4,
             column: 5,
             rowOffset: 6,
@@ -130,7 +130,7 @@ describe('FOverGridImage', () => {
         expect(getStoredImage('drawing-1').srcRect).toEqual({ top: 1, left: 2, bottom: 3, right: 4 });
 
         expect(fImage.setRotate(30)).toBe(true);
-        expect(getStoredImage('drawing-1').sheetTransform.angle).toBe(30);
+        expect(getStoredImage('drawing-1').transform?.angle).toBe(30);
 
         expect(fImage.setForward()).toBe(true);
         expect(fImage.setBackward()).toBe(true);

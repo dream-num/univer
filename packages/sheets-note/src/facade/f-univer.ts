@@ -15,12 +15,12 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { IUpdateNoteMutationParams } from '@univerjs/sheets-note';
-import type { ISheetNoteAddEventParams, ISheetNoteDeleteEventParams, ISheetNoteHideEventParams, ISheetNoteShowEventParams, ISheetNoteUpdateEventParams } from './f-event';
+import type { ISheetDeleteNoteCommandParams, IUpdateNoteMutationParams } from '@univerjs/sheets-note';
 import { CanceledError, ICommandService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetDeleteNoteCommand, SheetsNoteModel, SheetToggleNotePopupCommand, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
+import type { ISheetNoteAddEventParams, ISheetNoteDeleteEventParams, ISheetNoteHideEventParams, ISheetNoteShowEventParams, ISheetNoteUpdateEventParams } from './f-event';
 
 export class FUniverSheetsNoteMixin extends FUniver {
     // eslint-disable-next-line max-lines-per-function
@@ -167,7 +167,7 @@ export class FUniverSheetsNoteMixin extends FUniver {
                 () => commandService.beforeCommandExecuted((command) => {
                     if (command.id === SheetUpdateNoteCommand.id) {
                         const params = command.params as IUpdateNoteMutationParams;
-                        const target = this.getSheetCommandTarget(params);
+                        const target = this.getSheetCommandTarget({ unitId: params.unitId, subUnitId: params.sheetId });
                         if (!target) return;
 
                         const { workbook, worksheet, unitId, subUnitId } = target;
@@ -198,14 +198,22 @@ export class FUniverSheetsNoteMixin extends FUniver {
                 this.Event.BeforeSheetNoteDelete,
                 () => commandService.beforeCommandExecuted((command) => {
                     if (command.id === SheetDeleteNoteCommand.id) {
-                        const target = this.getSheetCommandTarget();
+                        const params = command.params as ISheetDeleteNoteCommandParams | undefined;
+                        const target = this.getSheetCommandTarget(params ? { unitId: params.unitId, subUnitId: params.sheetId } : {});
                         if (!target) return;
 
-                        const selection = injector.get(SheetsSelectionsService).getCurrentLastSelection();
-                        if (!selection?.primary) return;
-
                         const { workbook, worksheet, unitId, subUnitId } = target;
-                        const { actualRow: row, actualColumn: col } = selection.primary;
+                        let row: number;
+                        let col: number;
+
+                        if (params) {
+                            ({ row, col } = params);
+                        } else {
+                            const selection = injector.get(SheetsSelectionsService).getCurrentLastSelection();
+                            if (!selection?.primary) return;
+
+                            ({ actualRow: row, actualColumn: col } = selection.primary);
+                        }
 
                         const oldNote = injector.get(SheetsNoteModel).getNote(unitId, subUnitId, { row, col });
                         if (!oldNote) return;
@@ -233,7 +241,7 @@ export class FUniverSheetsNoteMixin extends FUniver {
                 () => commandService.beforeCommandExecuted((command) => {
                     if (command.id === SheetUpdateNoteCommand.id) {
                         const params = command.params as IUpdateNoteMutationParams;
-                        const target = this.getSheetCommandTarget(params);
+                        const target = this.getSheetCommandTarget({ unitId: params.unitId, subUnitId: params.sheetId });
                         if (!target) return;
 
                         const { workbook, worksheet, unitId, subUnitId } = target;

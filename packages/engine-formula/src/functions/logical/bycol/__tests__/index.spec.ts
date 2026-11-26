@@ -69,7 +69,7 @@ describe('Test bycol', () => {
             lexerNode = lexer.treeBuilder('=BYCOL(1,LAMBDA(x,x*2))');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
             result = await interpreter.executeAsync(generateExecuteAstNodeData(astNode as BaseAstNode));
-            expect(getObjectValue(result)).toStrictEqual(2);
+            expect(getObjectValue(result)).toStrictEqual([[2]]);
 
             lexerNode = lexer.treeBuilder('=BYCOL({1,2,3;4,5,6},LAMBDA(x,x*2))');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);

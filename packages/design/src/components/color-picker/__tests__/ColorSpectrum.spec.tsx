@@ -87,4 +87,35 @@ describe('ColorSpectrum', () => {
         expect(indicator.style.top).toBe('20%');
         expect(indicator.style.transform).toBe('translate(-50%, -50%)');
     });
+
+    it('tracks pointer dragging outside canvas edges and supports keyboard adjustments', () => {
+        const onChange = vi.fn();
+        const onChanged = vi.fn();
+        const { container } = render(<ColorSpectrum hsv={[120, 50, 50]} onChange={onChange} onChanged={onChanged} />);
+
+        const canvas = container.querySelector('[data-u-comp="color-picker-spectrum-canvas"]') as HTMLCanvasElement;
+        const wrapper = container.querySelector('[data-u-comp="color-picker-spectrum"]') as HTMLDivElement;
+        canvas.getBoundingClientRect = vi.fn(() => ({
+            left: 0,
+            top: 0,
+            width: 100,
+            height: 100,
+            right: 100,
+            bottom: 100,
+            x: 0,
+            y: 0,
+            toJSON: () => {},
+        }));
+
+        fireEvent.pointerDown(canvas, { clientX: 50, clientY: 50 });
+        fireEvent.pointerMove(window, { clientX: 150, clientY: -20 });
+        expect(onChange).toHaveBeenLastCalledWith(120, 100, 100);
+        fireEvent.pointerUp(window);
+
+        fireEvent.keyDown(wrapper, { key: 'ArrowRight', shiftKey: true });
+        expect(onChange).toHaveBeenLastCalledWith(120, 60, 50);
+
+        fireEvent.keyDown(wrapper, { key: 'ArrowDown' });
+        expect(onChange).toHaveBeenLastCalledWith(120, 50, 49);
+    });
 });

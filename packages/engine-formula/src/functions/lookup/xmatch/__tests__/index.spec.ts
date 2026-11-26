@@ -15,6 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
@@ -66,6 +67,138 @@ describe('Test xmatch', () => {
                 arrayValueObject1.slice(undefined, [1, 2])!
             );
             expect(resultObject.getValue()).toBe(2);
+        });
+
+        it('reads ? and * as ordinary characters in exact match mode', async () => {
+            const lookupArray = ArrayValueObject.create('{"ab";"a?";"banana";"b*"}');
+            const cases: [string, number | undefined, number | string][] = [
+                ['a?', undefined, 2],
+                ['A?', 0, 2],
+                ['b*', 0, 4],
+                ['c*', 0, ErrorType.NA],
+                ['a?', 2, 1],
+                ['b*', 2, 3],
+            ];
+            for (const [lookup, matchMode, expected] of cases) {
+                const resultObject = testFunction.calculate(
+                    StringValueObject.create(lookup),
+                    lookupArray,
+                    matchMode === undefined ? undefined : NumberValueObject.create(matchMode)
+                );
+                expect(resultObject.getValue()).toBe(expected);
+            }
+        });
+
+        it('reads ? and * as ordinary characters in the exact part of match modes -1 and 1', async () => {
+            const lookupArray = ArrayValueObject.create('{"ab";"a?";"banana";"b*"}');
+            const cases: [string, number, ArrayValueObject, number][] = [
+                ['a?', -1, lookupArray, 2],
+                ['a?', 1, lookupArray, 2],
+                ['B*', -1, lookupArray, 4],
+                ['b*', 1, lookupArray, 4],
+                // No literal "b*": "apple" is the next smaller item, and "banana" is not an exact match.
+                ['b*', -1, ArrayValueObject.create('{"apple";"banana"}'), 1],
+            ];
+            for (const [lookup, matchMode, lookups, expected] of cases) {
+                const resultObject = testFunction.calculate(
+                    StringValueObject.create(lookup),
+                    lookups,
+                    NumberValueObject.create(matchMode)
+                );
+                expect(resultObject.getValue()).toBe(expected);
+            }
+        });
+
+        it('orders the fallback candidates of match modes -1 and 1 by value', async () => {
+            const cases: [string, number, ArrayValueObject, number | string][] = [
+                // The nearest smaller or larger item by text order, not the first candidate found.
+                ['c', -1, ArrayValueObject.create('{"a";"b"}'), 2],
+                ['c', 1, ArrayValueObject.create('{"a";"b"}'), ErrorType.NA],
+                ['dog', -1, ArrayValueObject.create('{"ant";"cat"}'), 2],
+                // ? and * are ordinary characters, and "b!" < "b?" < "b0" in text order.
+                ['b?', -1, ArrayValueObject.create('{"b!";"b0"}'), 1],
+                ['b?', 1, ArrayValueObject.create('{"b!";"b0"}'), 2],
+                ['b?', -1, ArrayValueObject.create('{"b0";"b!"}'), 2],
+                ['b?', 1, ArrayValueObject.create('{"b0";"b1"}'), 1],
+                ['b?', -1, ArrayValueObject.create('{"b0";"b1"}'), ErrorType.NA],
+                ['c*', -1, ArrayValueObject.create('{"a";"b"}'), 2],
+                ['a*', -1, ArrayValueObject.create('{"ab";"zz"}'), ErrorType.NA],
+                ['a*c', -1, ArrayValueObject.create('{"abc";"abd"}'), ErrorType.NA],
+            ];
+            for (const [lookup, matchMode, lookups, expected] of cases) {
+                const resultObject = testFunction.calculate(
+                    StringValueObject.create(lookup),
+                    lookups,
+                    NumberValueObject.create(matchMode)
+                );
+                expect(resultObject.getValue()).toBe(expected);
+            }
+        });
+
+        it('reads a single wildcard character and a tilde literally, and keeps match mode 2 wildcards', async () => {
+            const literalCases: [string, string, number][] = [
+                ['?', '{"a";"?"}', 2],
+                ['*', '{"a";"*"}', 2],
+                ['~*', '{"*";"~*"}', 2],
+                ['a*', '{"ab";"a*"}', 2],
+            ];
+            for (const [lookup, lookups, expected] of literalCases) {
+                const resultObject = testFunction.calculate(
+                    StringValueObject.create(lookup),
+                    ArrayValueObject.create(lookups),
+                    NumberValueObject.create(0)
+                );
+                expect(resultObject.getValue()).toBe(expected);
+            }
+
+            // Match mode 2 still reads ? and * as wildcards, including the tilde escape.
+            const wildcardCases: [string, string, number][] = [
+                ['~*', '{"*"}', 1],
+                ['a*', '{"ab";"zz"}', 1],
+                ['b?', '{"b0";"b1"}', 1],
+            ];
+            for (const [lookup, lookups, expected] of wildcardCases) {
+                const resultObject = testFunction.calculate(
+                    StringValueObject.create(lookup),
+                    ArrayValueObject.create(lookups),
+                    NumberValueObject.create(2)
+                );
+                expect(resultObject.getValue()).toBe(expected);
+            }
+        });
+
+        it('keeps the first fallback candidate in the search direction', async () => {
+            const duplicateText = ArrayValueObject.create('{"b";"b"}');
+            const forward = testFunction.calculate(
+                StringValueObject.create('c'),
+                duplicateText,
+                NumberValueObject.create(-1)
+            );
+            expect(forward.getValue()).toBe(1);
+
+            const reverse = testFunction.calculate(
+                StringValueObject.create('c'),
+                duplicateText,
+                NumberValueObject.create(-1),
+                NumberValueObject.create(-1)
+            );
+            expect(reverse.getValue()).toBe(2);
+
+            const duplicateNumber = ArrayValueObject.create('{1;1}');
+            const numberForward = testFunction.calculate(
+                NumberValueObject.create(2),
+                duplicateNumber,
+                NumberValueObject.create(-1)
+            );
+            expect(numberForward.getValue()).toBe(1);
+
+            const numberReverse = testFunction.calculate(
+                NumberValueObject.create(2),
+                duplicateNumber,
+                NumberValueObject.create(-1),
+                NumberValueObject.create(-1)
+            );
+            expect(numberReverse.getValue()).toBe(2);
         });
 
         it('Search single string horizon', async () => {

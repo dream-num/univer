@@ -24,6 +24,9 @@ const locale: typeof enUS = {
         msg: {
             'filter-header-forbidden': 'Die Kopfzeile eines Filters kann nicht verschoben werden.',
         },
+        permission: {
+            filterErr: 'Der Bereich ist geschützt und Sie haben keine Berechtigung zum Filtern. Zum Filtern wenden Sie sich bitte an den Ersteller.',
+        },
     },
 };
 

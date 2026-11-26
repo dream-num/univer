@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ISheetDrawingTransformPlan } from '../sheet-drawing-transform-plan.service';
-import { describe, expect, it, vi } from 'vitest';
 import { SheetDrawingTransformPlanService } from '../sheet-drawing-transform-plan.service';
 
 describe('SheetDrawingTransformPlanService', () => {
+    let injector: Injector;
+    beforeEach(() => {
+        injector = new Injector([[SheetDrawingTransformPlanService]]);
+    });
+    afterEach(() => injector.dispose());
     it('runs extensions by priority and aggregates feature mutations', () => {
-        const service = new SheetDrawingTransformPlanService();
+        const service = injector.get(SheetDrawingTransformPlanService);
         const calls: string[] = [];
 
         service.register({
@@ -54,7 +60,7 @@ describe('SheetDrawingTransformPlanService', () => {
     });
 
     it('stops running an extension after disposal', () => {
-        const service = new SheetDrawingTransformPlanService();
+        const service = injector.get(SheetDrawingTransformPlanService);
         const transform = vi.fn(() => ({}));
         const disposable = service.register({ transform });
 

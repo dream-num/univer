@@ -381,6 +381,7 @@ const locale: typeof enUS = {
                 searchEmptyDescription: 'Versuchen Sie einen anderen Namen oder löschen Sie die Suche.',
                 commonErr: 'Der Bereich ist geschützt und Sie haben keine Berechtigung für diesen Vorgang. Um zu bearbeiten, kontaktieren Sie bitte den Ersteller.',
                 editErr: 'Der Bereich ist geschützt und Sie haben keine Bearbeitungsberechtigung. Um zu bearbeiten, kontaktieren Sie bitte den Ersteller.',
+                operatorSheetErr: 'Sie haben keine Berechtigung, das Arbeitsblatt zu bearbeiten. Um das Arbeitsblatt zu bearbeiten, wenden Sie sich bitte an den Ersteller.',
                 pasteErr: 'Der Bereich ist geschützt und Sie haben keine Einfügeberechtigung. Um einzufügen, kontaktieren Sie bitte den Ersteller.',
                 setStyleErr: 'Der Bereich ist geschützt und Sie haben keine Berechtigung zum Festlegen von Stilen. Um Stile festzulegen, kontaktieren Sie bitte den Ersteller.',
                 copyErr: 'Der Bereich ist geschützt und Sie haben keine Kopierberechtigung. Um zu kopieren, kontaktieren Sie bitte den Ersteller.',

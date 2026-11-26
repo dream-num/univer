@@ -17,14 +17,14 @@
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { IPopupWithExtraProps } from '@univerjs/ui';
 import type { ReactElement } from 'react';
-import type { IListDropdownProps } from '../ListDropDown';
-import type { IBaseDropdownProps } from '../type';
 import { Injector, LocaleService, ThemeService } from '@univerjs/core';
 import { serializeListOptions, SheetPermissionCheckController } from '@univerjs/sheets';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IListDropdownProps } from '../ListDropDown';
+import type { IBaseDropdownProps } from '../type';
 import { ListDropDown } from '../ListDropDown';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -179,6 +179,7 @@ describe('ListDropDown', () => {
         disposals.splice(0).forEach((dispose) => dispose());
         InteractionLog.reset();
         PermissionDecision.reset();
+        vi.restoreAllMocks();
     });
 
     it('reports multiple selections in option order and keeps the popup open when change is rejected', async () => {
@@ -213,6 +214,39 @@ describe('ListDropDown', () => {
 
         expect(InteractionLog.selectedValues).toEqual([['gamma']]);
         expect(InteractionLog.hideCount).toBe(1);
+    });
+
+    it('highlights a match with the same case folding as the filter', async () => {
+        const { container, unmount } = await renderWithDependencies(
+            <ListDropDown
+                popup={createPopup({
+                    showSearch: true,
+                    options: [
+                        { label: 'Alpha', value: 'alpha', color: '#ffffff' },
+                        { label: 'India', value: 'india', color: '#2b68ff' },
+                    ],
+                })}
+            />
+        );
+        disposals.push(unmount);
+
+        // Turkish casing: toLocaleLowerCase('I') is 'ı', so folding the label that way would
+        // highlight the lowercase 'i' later in "India" instead of the leading 'I'.
+        vi.spyOn(String.prototype, 'toLocaleLowerCase').mockImplementation(function (this: string) {
+            return this.replace(/I/g, 'ı').toLowerCase();
+        });
+
+        const input = container.querySelector('input')!;
+        const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+        await act(async () => {
+            setValue.call(input, 'i');
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
+        const highlighted = Array.from(container.querySelectorAll('.univer-font-semibold'))
+            .map((element) => element.textContent);
+
+        expect(highlighted).toEqual(['I']);
     });
 
     it('opens the list editor only when cell edit permission allows it', async () => {

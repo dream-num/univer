@@ -38,6 +38,8 @@ export interface IInterceptor<M, C> {
 }
 
 export interface ICellInterceptor<M, C> extends IInterceptor<M, C> {
+    /** Skip this interceptor when reading effective cell values. */
+    displayOnly?: boolean;
     /**
      * The effect of the interceptor handler.
      * If the effect is 'Style', the worksheet@getCellValueOnly will bypass this interceptor.

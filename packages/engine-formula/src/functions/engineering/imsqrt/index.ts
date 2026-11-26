@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { Complex } from '../../../basics/complex';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Imsqrt extends BaseFunction {
@@ -46,14 +45,10 @@ export class Imsqrt extends BaseFunction {
         }
 
         if (complex.getRealNum() === 0 && complex.getINum() === 0) {
-            return NumberValueObject.create(0);
+            return StringValueObject.create('0');
         }
 
         const result = complex.Sqrt();
-
-        if (typeof result === 'number' || isRealNum(result)) {
-            return NumberValueObject.create(+result);
-        }
 
         return StringValueObject.create(result);
     }

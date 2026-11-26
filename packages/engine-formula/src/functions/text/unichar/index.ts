@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import { DataStreamTreeTokenType } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { DataStreamTreeTokenType } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
+import { isNonCharacterCodePoint, isSurrogateCodePoint } from '../../../engine/utils/char-kit';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
@@ -70,12 +71,14 @@ export class Unichar extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        // for excel
-        if (numberValue === 1114111 || numberValue === 1114110) {
+        // Excel returns #N/A for code points that do not name a character: the
+        // surrogate block and the Unicode noncharacters.
+        if (isSurrogateCodePoint(numberValue) || isNonCharacterCodePoint(numberValue)) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        let result = String.fromCharCode(numberValue);
+        // fromCharCode would keep only the low 16 bits of a code point above U+FFFF.
+        let result = String.fromCodePoint(numberValue);
 
         // special case for some characters causing doc stream issues
         if (filterCodeArray.some((value) => value === result)) {

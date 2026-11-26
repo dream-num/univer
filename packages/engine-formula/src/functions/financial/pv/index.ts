@@ -17,6 +17,7 @@
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { calculateCompoundingTerm } from '../../../basics/financial';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { getCurrencyFormat } from '../../../engine/utils/numfmt-kit';
@@ -78,23 +79,10 @@ export class Pv extends BaseFunction {
             let typeValue = +_typeObject.getValue();
             typeValue = typeValue ? 1 : 0;
 
-            let term: number;
-            if (Number.isInteger(nperValue) && Math.abs(nperValue) <= 0x7FFF_FFFF) {
-                // Integer multiplication preserves the compounding factor in loan balances.
-                term = 1;
-                let factor = 1 + rateValue;
-                for (let periods = Math.abs(nperValue); periods > 0; periods = Math.floor(periods / 2)) {
-                    if (periods % 2 === 1) {
-                        term *= factor;
-                    }
-                    factor *= factor;
-                }
-                if (nperValue < 0) {
-                    term = 1 / term;
-                }
-            } else {
-                term = (1 + rateValue) ** nperValue;
-            }
+            const term = calculateCompoundingTerm(rateValue, nperValue);
+            const domainError = this._domainError(rateValue, nperValue, term);
+            if (domainError) return ErrorValueObject.create(domainError);
+
             const result = rateValue === 0
                 ? -pmtValue * nperValue - fvValue
                 : (((1 - term) / rateValue) * pmtValue * (1 + rateValue * typeValue) - fvValue) / term;
@@ -115,5 +103,9 @@ export class Pv extends BaseFunction {
         }
 
         return resultArray;
+    }
+
+    protected _domainError(_rate: number, _periods: number, _term: number): ErrorType | undefined {
+        return undefined;
     }
 }

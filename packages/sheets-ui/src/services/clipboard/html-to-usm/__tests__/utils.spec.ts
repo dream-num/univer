@@ -65,6 +65,17 @@ describe('parseToDom', () => {
 
         expect([...dom.querySelectorAll('td')].map((td) => td.textContent)).toEqual(['North East', 'South West']);
     });
+
+    it('strips HTML formatting indentation immediately following a <br> tag', () => {
+        const dom = parseToDom('<table><tbody><tr><td>line1<br>\r\n  line2</td></tr></tbody></table>');
+        const td = dom.querySelector('td')!;
+
+        expect([...td.childNodes].map((node) => (node.nodeType === Node.TEXT_NODE ? node.textContent : '<br>'))).toEqual([
+            'line1',
+            '<br>',
+            'line2',
+        ]);
+    });
 });
 
 describe('extractNodeStyle', () => {
@@ -124,6 +135,22 @@ describe('extractNodeStyle', () => {
         })).toEqual({
             ol: { s: BooleanNumber.TRUE },
         });
+    });
+
+    it('reads every line when a pasted text decoration names several lines', () => {
+        ['underline line-through', 'line-through underline'].forEach((textDecoration) => {
+            expect(extractNodeStyle(document.createElement('span'), { 'text-decoration': textDecoration })).toEqual({
+                ul: { s: BooleanNumber.TRUE },
+                st: { s: BooleanNumber.TRUE },
+            });
+        });
+
+        expect(extractNodeStyle(document.createElement('span'), { 'text-decoration-line': 'underline overline' })).toEqual({
+            ul: { s: BooleanNumber.TRUE },
+            ol: { s: BooleanNumber.TRUE },
+        });
+
+        expect(extractNodeStyle(document.createElement('span'), { 'text-decoration': 'none' })).toEqual({});
     });
 });
 

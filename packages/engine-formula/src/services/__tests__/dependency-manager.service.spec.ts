@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { RTree } from '@univerjs/core';
 import { Injector } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import type { AstRootNode } from '../../engine/ast-node';
@@ -110,6 +111,55 @@ describe('DependencyManagerService', () => {
         service.addDependencyRTreeCache(tree);
         expect(service.searchDependency(oldRange)).toEqual(new Set());
         expect(service.searchDependency(tree.rangeList)).toEqual(new Set([91]));
+    });
+
+    it('replaces overlapping ranges in one batch and leaves cached trees indexed', () => {
+        const service = createService();
+        const trees = Array.from({ length: 256 }, (_, index) => createTree(index + 1, 0, 0));
+        const oldRanges = trees[0].rangeList;
+        service.refreshDependencyRTreeCaches(trees);
+
+        const index = (service as unknown as { _dependencyRTreeCache: RTree })._dependencyRTreeCache;
+        const remove = vi.spyOn(index, 'bulkRemove');
+        const [cached, ...changed] = trees;
+        const newRanges = [{ ...oldRanges[0], range: { startRow: 10, endRow: 10, startColumn: 10, endColumn: 11 } }];
+        cached.isCache = true;
+        for (const tree of changed) {
+            tree.rangeList = newRanges;
+        }
+        service.refreshDependencyRTreeCaches(trees);
+
+        expect(remove).toHaveBeenCalledTimes(1);
+        expect(remove.mock.calls[0][0]).toHaveLength(changed.length);
+        expect(service.searchDependency(oldRanges)).toEqual(new Set([cached.treeId]));
+        expect(service.searchDependency(changed[0].rangeList)).toEqual(new Set(changed.map((tree) => tree.treeId)));
+        service.dispose();
+    });
+
+    it('removes all bounds of an edited formula across multiple workbooks', () => {
+        const service = createService();
+        const edited = createTree(1, 0, 0);
+        const kept = createTree(2, 10, 10);
+        const first = edited.rangeList[0];
+        const otherSheet = { ...first, sheetId: 'sheet-2' };
+        const otherUnit = { ...first, unitId: 'unit-2' };
+        const disjoint = { ...first, range: { startRow: 20, endRow: 20, startColumn: 21, endColumn: 21 } };
+        const previous = [first, disjoint, otherSheet, otherUnit];
+        edited.rangeList = previous;
+        kept.rangeList = [first];
+        service.refreshDependencyRTreeCaches([edited, kept]);
+        service.openKdTree();
+        expect(service.searchDependency(previous)).toEqual(new Set([1, 2]));
+        service.closeKdTree();
+
+        edited.rangeList = [{ ...first, sheetId: 'sheet-3' }];
+        kept.isCache = true;
+        service.refreshDependencyRTreeCaches([edited, kept]);
+        service.openKdTree();
+        expect(service.searchDependency(previous)).toEqual(new Set([2]));
+        expect(service.searchDependency(edited.rangeList)).toEqual(new Set([1]));
+        expect(first.range.endRow).toBe(0);
+        service.dispose();
     });
 
     it('does not search overlapping entries when indexing new trees', () => {

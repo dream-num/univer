@@ -228,4 +228,43 @@ describe('HtmlToUSMService', () => {
         expect(cellMatrix.getValue(0, 2)?.v).toBe('Next');
         expect(cellMatrix.getValue(1, 2)?.v).toBe('Below');
     });
+
+    it('preserves multiline paragraph structure when an Excel cell has inline or cell-level style', () => {
+        const converter = new HtmlToUSMService({
+            getCurrentSkeleton: () => ({ skeleton: {} } as ISheetSkeletonManagerParam),
+        });
+        const { cellMatrix } = converter.convert(`
+            <table>
+                <tr>
+                    <td><span style="color:red">line1<br>\r\n  line2</span></td>
+                    <td style="color:red">line1<br>\r\n  line2</td>
+                </tr>
+            </table>
+        `);
+
+        const spanCell = cellMatrix.getValue(0, 0);
+        expect(spanCell?.v).toBe('line1\rline2');
+        expect(spanCell?.p?.body?.dataStream).toBe('line1\rline2\r\n');
+        expect(spanCell?.p?.body?.paragraphs?.map((p) => p.startIndex)).toEqual([5, 11]);
+        expect(spanCell?.p?.body?.textRuns).toEqual([
+            { st: 0, ed: 5, ts: { cl: { rgb: 'rgb(255,0,0)' } } },
+            { st: 6, ed: 11, ts: { cl: { rgb: 'rgb(255,0,0)' } } },
+        ]);
+
+        const styledCell = cellMatrix.getValue(0, 1);
+        expect(styledCell?.v).toBe('line1\rline2');
+        expect(styledCell?.s).toEqual({ cl: { rgb: 'rgb(255,0,0)' } });
+        expect(styledCell?.p?.body?.dataStream).toBe('line1\rline2\r\n');
+        expect(styledCell?.p?.body?.paragraphs?.map((p) => p.startIndex)).toEqual([5, 11]);
+    });
+
+    it('parses multiline <br> cells cleanly even when no skeleton is active', () => {
+        const converter = new HtmlToUSMService({ getCurrentSkeleton: () => null });
+        const { cellMatrix } = converter.convert('<table><tr><td>line1<br>line2</td></tr></table>');
+
+        const cell = cellMatrix.getValue(0, 0);
+        expect(cell?.v).toBe('line1\rline2');
+        expect(cell?.p?.body?.dataStream).toBe('line1\rline2\r\n');
+        expect(cell?.p?.body?.paragraphs?.map((p) => p.startIndex)).toEqual([5, 11]);
+    });
 });

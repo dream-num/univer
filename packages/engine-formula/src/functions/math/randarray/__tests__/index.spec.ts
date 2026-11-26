@@ -180,7 +180,7 @@ describe('Test randarray function', () => {
         );
 
         functionService.registerExecutors(
-            new Randarray(FUNCTION_NAMES_MATH.RANDARRAY)
+            testBed.univer.__getInjector().createInstance(Randarray, FUNCTION_NAMES_MATH.RANDARRAY)
         );
 
         calculate = (formula: string) => {

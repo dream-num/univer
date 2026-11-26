@@ -18,11 +18,9 @@ import { DrawingTypeEnum } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { insertGroupObject } from '@univerjs/drawing-ui';
 import { DrawingGroupObject, Engine, Image, MAIN_VIEW_PORT_KEY, Rect, Scene, Vector2, Viewport } from '@univerjs/engine-render';
-import { ISheetDrawingService } from '@univerjs/sheets-drawing';
+import { GroupSheetDrawingCommand, ISheetDrawingService, UngroupSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../../__tests__/create-sheets-drawing-ui-test-bed';
-import { GroupSheetDrawingCommand } from '../group-sheet-drawing.command';
-import { UngroupSheetDrawingCommand } from '../ungroup-sheet-drawing.command';
 import { createSheetDrawing, insertDrawings } from './drawing-command-test-utils';
 
 describe('GroupSheetDrawingCommand', () => {
@@ -35,7 +33,6 @@ describe('GroupSheetDrawingCommand', () => {
         const scene = new Scene('group-scene', engine);
         const viewport = new Viewport(MAIN_VIEW_PORT_KEY, scene, { left: 0, top: 0, width: 800, height: 500, active: true });
         try {
-            testBed.commandService.registerCommand(GroupSheetDrawingCommand);
             const children = [createSheetDrawing('child-1', 0, 0), createSheetDrawing('child-2', 100, 80)];
             await insertDrawings(testBed, [createSheetDrawing('background', 0, 0), ...children]);
             const parent = {
@@ -84,8 +81,6 @@ describe('GroupSheetDrawingCommand', () => {
     it('groups two drawings and then ungroups them back to standalone drawings', async () => {
         const testBed = createSheetsDrawingUiTestBed();
         const sheetDrawingService = testBed.get(ISheetDrawingService);
-        testBed.commandService.registerCommand(GroupSheetDrawingCommand);
-        testBed.commandService.registerCommand(UngroupSheetDrawingCommand);
         await insertDrawings(testBed, [
             createSheetDrawing('child-1', 10, 20),
             createSheetDrawing('child-2', 40, 60),

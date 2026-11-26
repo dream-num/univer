@@ -64,6 +64,7 @@ import {
 import { createDateTimeEditPattern } from './date-time-edit-pattern';
 import { dateInfo, info, isDate, isPercent, isText } from './format-info';
 import { formatValue, formatColor as formatValueColor } from './format-number';
+import { getNumberGrouping } from './grouping';
 import { defaultOptions } from './options';
 import { parsePattern } from './parse-pattern';
 import { dateToSerial as handleDates } from './serial-date';
@@ -124,7 +125,11 @@ export function format(
     value: unknown,
     options: FormatOptions = {}
 ): string {
-    const resolvedOptions = Object.assign({}, defaultOptions, options) as ResolvedFormatOptions;
+    const resolvedOptions: ResolvedFormatOptions = {
+        ...defaultOptions,
+        ...options,
+        grouping: options.grouping ?? getNumberGrouping(options.region),
+    };
     const data = prepareFormatterData(pattern, resolvedOptions.throws);
     const normalizedValue = handleDates(value, resolvedOptions) ?? value;
     return formatValue(normalizedValue, data, resolvedOptions);
@@ -178,8 +183,9 @@ export function getFormatInfo(
     options: { currency?: string } = {}
 ): FormatInfo {
     const data = prepareFormatterData(pattern, false);
+    if (options.currency) return info(data.partitions, options.currency);
     if (!data.info) {
-        data.info = info(data.partitions, options?.currency);
+        data.info = info(data.partitions);
     }
     return data.info;
 }

@@ -15,15 +15,21 @@
  */
 
 import type { Dependency, IWorkbookData } from '@univerjs/core';
-import { LocaleService, LocaleType, LogLevel, Univer } from '@univerjs/core';
+import { ICommandService, LocaleService, LocaleType, LogLevel, RedoCommand, Tools, UndoCommand, Univer } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { ErrorType, IDefinedNamesService, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import {
+    InsertRowMutation,
     MoveRangeCommand,
     RemoveDefinedNameCommand,
+    RemoveRowByRangeCommand,
+    RemoveRowCommand,
+    RemoveRowMutation,
     RemoveSheetCommand,
     SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
     SetDefinedNameCommand,
+    SetRangeValuesMutation,
+    SetSelectionsOperation,
     SetWorksheetNameCommand,
     SheetInterceptorService,
 } from '@univerjs/sheets';
@@ -104,6 +110,29 @@ describe('UpdateDefinedNameController', () => {
 
     afterEach(() => {
         testBed?.univer.dispose();
+    });
+
+    it('deletes a row covered by two defined names and restores both on undo', async () => {
+        const commands = testBed.injector.get(ICommandService);
+        for (const command of [RemoveRowCommand, RemoveRowByRangeCommand, RemoveRowMutation, InsertRowMutation, SetRangeValuesMutation, SetSelectionsOperation, SetDefinedNameMutation]) {
+            commands.registerCommand(command);
+        }
+        const names = testBed.injector.get(IDefinedNamesService);
+        names.registerDefinedNames('test', Object.fromEntries(Object.values(names.getDefinedNameMap('test')!)
+            .map((item) => [item.id, item.id === 'rows-name' ? { ...item, formulaOrRefString: 'Sheet1!$C$1:$C$4' } : item])));
+        const before = Tools.deepClone(names.getDefinedNameMap('test'));
+        expect(await commands.executeCommand(RemoveRowCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 19 },
+        })).toBe(true);
+        const after = Tools.deepClone(names.getDefinedNameMap('test'));
+        expect(after?.['range-name'].formulaOrRefString).toBe('Sheet1!$A$1:$B$1');
+        expect(after?.['rows-name'].formulaOrRefString).toBe('Sheet1!$C$1:$C$3');
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(names.getDefinedNameMap('test')).toEqual(before);
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(names.getDefinedNameMap('test')).toEqual(after);
     });
 
     it('should ignore commands that are handled by UpdateFormulaController', () => {

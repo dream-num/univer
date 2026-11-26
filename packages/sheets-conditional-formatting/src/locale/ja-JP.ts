@@ -24,6 +24,11 @@ const locale: typeof enUS = {
             mark: 'インジケーター',
             rank: '評価',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'この範囲は保護されており、スタイルを変更する権限がありません。変更するには作成者に連絡してください。',
+            },
+        },
     },
 };
 

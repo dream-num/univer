@@ -34,7 +34,6 @@ import {
     SetWorksheetNameCommand,
 } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
-
 import { createFacadeTestBed } from '../../../facade/__tests__/create-test-bed';
 import { FormulaReferenceMoveType } from '../ref-range-formula';
 import { getReferenceMoveParams } from '../ref-range-param';
@@ -60,6 +59,24 @@ function createWorkbookData(): IWorkbookData {
 }
 
 describe('getReferenceMoveParams', () => {
+    it('keeps a pane-filtered row out of the formula reference removal even when the public filter differs', () => {
+        const testBed = createFacadeTestBed(createWorkbookData());
+        try {
+            const range = { startRow: 0, endRow: 2, startColumn: 0, endColumn: 7 };
+            expect(getReferenceMoveParams(testBed.sheet as Workbook, {
+                id: RemoveRowCommand.id,
+                params: {
+                    range,
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    ranges: [{ ...range, startRow: 2 }, { ...range, endRow: 0 }],
+                },
+            })).toMatchObject({ type: FormulaReferenceMoveType.RemoveRow, rangeFilteredRows: [1] });
+        } finally {
+            testBed.univer.dispose();
+        }
+    });
+
     afterEach(() => {
         // disposal is handled per test to keep workbook state isolated
     });

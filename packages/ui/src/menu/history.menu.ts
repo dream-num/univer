@@ -15,8 +15,6 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import type { LocaleKey } from '../locale/types';
-import type { IMenuButtonItem } from '../services/menu/menu';
 import {
     EDITOR_ACTIVATED,
     FOCUSING_FX_BAR_EDITOR,
@@ -26,8 +24,10 @@ import {
     RedoCommand,
     UndoCommand,
 } from '@univerjs/core';
-import { combineLatest, merge, of } from 'rxjs';
+import { combineLatest, startWith } from 'rxjs';
 import { map } from 'rxjs/operators';
+import type { LocaleKey } from '../locale/types';
+import type { IMenuButtonItem } from '../services/menu/menu';
 import { MenuItemType } from '../services/menu/menu';
 
 const undoRedoDisableFactory$ = (accessor: IAccessor, isUndo: boolean) => {
@@ -36,7 +36,7 @@ const undoRedoDisableFactory$ = (accessor: IAccessor, isUndo: boolean) => {
 
     return combineLatest([
         undoRedoService.undoRedoStatus$.pipe(map((v) => isUndo ? v.undos <= 0 : v.redos <= 0)),
-        merge([of({}), contextService.contextChanged$]),
+        contextService.contextChanged$.pipe(startWith(undefined)),
     ]).pipe(map(([undoDisable]) => {
         return undoDisable || contextService.getContextValue(EDITOR_ACTIVATED) || contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
     }));

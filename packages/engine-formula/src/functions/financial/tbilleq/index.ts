@@ -22,11 +22,20 @@ import { checkVariantsErrorIsNullorArrayOrBoolean } from '../../../engine/utils/
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { isExcelTBillPeriod } from '../tbill-period';
 
 export class Tbilleq extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 3;
+
+    protected _isPeriodValid(settlement: number, maturity: number, yearDays: number): boolean {
+        return Math.floor(maturity) - Math.floor(settlement) <= yearDays;
+    }
+
+    protected _fraction(days: number, serialZero: boolean, yearDays: number): number {
+        return days / (serialZero ? yearDays : 365);
+    }
 
     override calculate(settlement: BaseValueObject, maturity: BaseValueObject, discount: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsNullorArrayOrBoolean(settlement, maturity, discount);
@@ -72,7 +81,7 @@ export class Tbilleq extends BaseFunction {
         const yearDays = getDaysInYear(year);
 
         // if maturity is more than one year after settlement, TBILLEQ returns the #NUM! error value.
-        if (DSM > yearDays) {
+        if (!this._isPeriodValid(settlementSerialNumber, maturitySerialNumber, yearDays)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
@@ -81,7 +90,7 @@ export class Tbilleq extends BaseFunction {
 
         if (DSM > 182) {
             const tbillPrice = 100 * (1 - discountValue * DSM / 360);
-            const fraction = isSerialZero ? DSM / yearDays : DSM / 365;
+            const fraction = this._fraction(DSM, isSerialZero, yearDays);
 
             result = (-fraction + Math.sqrt(fraction * fraction - (fraction * 2 - 1) * (1 - 100 / tbillPrice))) / (fraction - 0.5);
 
@@ -95,5 +104,15 @@ export class Tbilleq extends BaseFunction {
         }
 
         return NumberValueObject.create(result);
+    }
+}
+
+export class ExcelTbilleq extends Tbilleq {
+    protected override _isPeriodValid(settlement: number, maturity: number): boolean {
+        return isExcelTBillPeriod(settlement, maturity, this.getDateSystem());
+    }
+
+    protected override _fraction(days: number): number {
+        return days / Math.max(365, days);
     }
 }

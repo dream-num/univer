@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDocumentData, Univer } from '@univerjs/core';
-import type { FDocument } from '../../facade/f-document';
+import type { ICommand, IDocumentData, TextXAction, Univer } from '@univerjs/core';
 import {
     CommandType,
+    CustomRangeType,
     DocumentFlavor,
     DrawingTypeEnum,
     ErrorService,
@@ -27,12 +27,14 @@ import {
     IUniverInstanceService,
     JSONX,
     RedoCommand,
+    TextX,
     TextXActionType,
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, onTestFinished } from 'vitest';
+import type { FDocument } from '../../facade/f-document';
 import { InsertTextCommand } from '../../commands/commands/core-editing.command';
 import { DeleteDocumentSectionBreakCommand } from '../../commands/commands/update-document-section.command';
 import { RichTextEditingMutation } from '../../commands/mutations/core-editing.mutation';
@@ -317,6 +319,111 @@ describe('DocPermissionController', () => {
         await paragraph.getPermission().setEditable(true);
         expect(get(ICommandService).syncExecuteCommand(UndoCommand.id)).toBe(true);
         expect(paragraph.getText()).toBe('One');
+    });
+
+    it('checks the actual custom range for property updates and both directions of history', async () => {
+        const commands = get(ICommandService);
+        const unitId = document.getId();
+        const range = {
+            rangeId: 'bookmark',
+            rangeType: CustomRangeType.BOOKMARK,
+            startIndex: 0,
+            endIndex: 2,
+            properties: { bookmarkId: 'Original' },
+        };
+        const editRange: ICommand<TextX> = {
+            id: 'doc.command.test-edit-custom-range',
+            type: CommandType.COMMAND,
+            handler: (_, text) => !!text && commands.syncExecuteCommand(RichTextEditingMutation.id, {
+                unitId,
+                actions: JSONX.getInstance().editOp(text.serialize(), ['body']),
+                textRanges: null,
+                noNeedSetTextRange: true,
+                historyAction: 'set-bookmark',
+                debounce: false,
+            }),
+        };
+        const registration = commands.registerCommand(editRange);
+        onTestFinished(() => registration.dispose());
+        const mutate = (text: TextX) => commands.syncExecuteCommand(editRange.id, text);
+        const ranges = () => document.getDocumentDataModel().getBody()!.customRanges ?? [];
+        expect(mutate(new TextX().updateCustomRanges([{ rangeId: range.rangeId, range }]))).toBeTruthy();
+        const permission = document.getSection(0)!.getPermission();
+        await permission.setEditable(false);
+        const update = new TextX().updateCustomRanges([{
+            rangeId: range.rangeId,
+            range: { ...range, startIndex: 5, endIndex: 7, properties: { bookmarkId: 'Changed' } },
+            propertyPaths: [['bookmarkId']],
+        }]);
+        expect(mutate(update)).toBe(false);
+        expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(false);
+        expect(ranges()).toEqual([range]);
+
+        await permission.setEditable(true);
+        expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true);
+        expect(ranges()).toEqual([]);
+        await permission.setEditable(false);
+        expect(commands.syncExecuteCommand(RedoCommand.id)).toBe(false);
+        expect(ranges()).toEqual([]);
+        await permission.setEditable(true);
+        expect(commands.syncExecuteCommand(RedoCommand.id)).toBe(true);
+        expect(ranges()).toEqual([range]);
+    });
+
+    it.each([false, true])('checks the full bookmark span across protected paragraphs (with text edit: %s)', async (withTextEdit) => {
+        const commands = get(ICommandService);
+        await document.getParagraph('paragraph-two')!.getPermission().setEditable(false);
+        const range = {
+            rangeId: 'cross-paragraph',
+            rangeType: CustomRangeType.BOOKMARK,
+            startIndex: 1,
+            endIndex: withTextEdit ? 8 : 7,
+            properties: { bookmarkId: 'CrossParagraph', collapsed: true },
+        };
+        const actions: TextXAction[] = [];
+        if (withTextEdit) {
+            actions.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: 'X' } });
+        }
+        actions.push({ t: TextXActionType.RETAIN, len: 0, rangeUpdates: [{ rangeId: range.rangeId, range }] });
+        expect(commands.syncExecuteCommand(RichTextEditingMutation.id, {
+            unitId: document.getId(),
+            actions: JSONX.getInstance().editOp(actions, ['body']),
+            textRanges: [],
+        })).toBe(false);
+        expect(document.getParagraph('paragraph-one')!.getText()).toBe('One');
+        expect(document.getDocumentDataModel().getBody()?.customRanges ?? []).toEqual([]);
+    });
+
+    it('maps custom range positions back through text edits before checking protected sections', async () => {
+        const commands = get(ICommandService);
+        const unitId = document.getId();
+        const mutate = (text: TextX) => commands.syncExecuteCommand(RichTextEditingMutation.id, {
+            unitId,
+            actions: JSONX.getInstance().editOp(text.serialize(), ['body']),
+            textRanges: [],
+        });
+        await document.getSection(1)!.getPermission().setEditable(false);
+        const denied = {
+            rangeId: 'denied',
+            rangeType: CustomRangeType.BOOKMARK,
+            startIndex: 3,
+            endIndex: 3,
+            properties: { bookmarkId: 'Denied', collapsed: true },
+        };
+        expect(mutate(new TextX().delete(2).updateCustomRanges([{ rangeId: denied.rangeId, range: denied }]))).toBe(false);
+        expect(document.getParagraph('paragraph-one')!.getText()).toBe('One');
+
+        const allowed = {
+            ...denied,
+            rangeId: 'allowed',
+            startIndex: 6,
+            endIndex: 7,
+            properties: { bookmarkId: 'Allowed' },
+        };
+        expect(mutate(new TextX().retain(1).insert(8, { dataStream: 'abcdefgh' })
+            .updateCustomRanges([{ rangeId: allowed.rangeId, range: allowed }]))).toBeTruthy();
+        expect(document.getParagraph('paragraph-two')!.getText()).toBe('Two');
+        expect(document.getDocumentDataModel().getBody()!.customRanges).toEqual([allowed]);
     });
 
     it('keeps denied Redo history available until the paragraph is editable again', async () => {

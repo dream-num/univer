@@ -15,18 +15,6 @@
  */
 
 import type { IDisposable, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IDeleteRangeMoveLeftCommandParams } from '../../commands/commands/delete-range-move-left.command';
-import type { IDeleteRangeMoveUpCommandParams } from '../../commands/commands/delete-range-move-up.command';
-import type { IInsertRangeMoveDownCommandParams } from '../../commands/commands/insert-range-move-down.command';
-import type { IInsertRangeMoveRightCommandParams } from '../../commands/commands/insert-range-move-right.command';
-import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../commands/commands/insert-row-col.command';
-import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
-import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
-import type { IRemoveRowColCommandInterceptParams } from '../../commands/commands/remove-row-col.command';
-import type { IReorderRangeCommandParams } from '../../commands/commands/reorder-range.command';
-import type { IMoveRangeMutationParams } from '../../commands/mutations/move-range.mutation';
-import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
-import type { EffectRefRangeParams } from './type';
 import {
     CommandType,
     createInterceptorKey,
@@ -40,6 +28,19 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
+import type { IDeleteRangeMoveLeftCommandParams } from '../../commands/commands/delete-range-move-left.command';
+import type { IDeleteRangeMoveUpCommandParams } from '../../commands/commands/delete-range-move-up.command';
+import type { IInsertRangeMoveDownCommandParams } from '../../commands/commands/insert-range-move-down.command';
+import type { IInsertRangeMoveRightCommandParams } from '../../commands/commands/insert-range-move-right.command';
+import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../commands/commands/insert-row-col.command';
+import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
+import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
+import type { IRemoveRowColCommandInterceptParams } from '../../commands/commands/remove-row-col.command';
+import type { IReorderRangeCommandParams } from '../../commands/commands/reorder-range.command';
+import type { IMoveRangeMutationParams } from '../../commands/mutations/move-range.mutation';
+import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
+import type { ICommandMutationGroup } from '../sheet-interceptor/sheet-interceptor.service';
+import type { EffectRefRangeParams } from './type';
 import { getSheetCommandTarget } from '../../commands/commands/utils/target-util';
 import { MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
 import { RemoveSheetMutation } from '../../commands/mutations/remove-sheet.mutation';
@@ -48,12 +49,7 @@ import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.
 import { EffectRefRangId } from './type';
 import { adjustRangeOnMutation, getEffectedRangesOnMutation } from './util';
 
-type RefRangCallback = (params: EffectRefRangeParams) => {
-    redos: IMutationInfo[];
-    undos: IMutationInfo[];
-    preRedos?: IMutationInfo[];
-    preUndos?: IMutationInfo[];
-};
+type RefRangCallback = (params: EffectRefRangeParams) => ICommandMutationGroup;
 
 export type WatchRangeCallback = (before: IRange, after: Nullable<IRange>) => void;
 
@@ -381,25 +377,21 @@ export class RefRangeService extends Disposable {
                     return { redos: [], undos: [], preRedos: [], preUndos: [] };
                 }
 
-                const result = cbList
-                    .reduce(
-                        (result, currentFn) => {
-                            const v = currentFn(command);
-                            result.push(v);
-                            return result;
-                        },
-                        [] as Array<{ redos: IMutationInfo[]; undos: IMutationInfo[]; preUndos?: IMutationInfo[]; preRedos?: IMutationInfo[] }>
-                    )
-                    .reduce(
-                        (result, currentValue) => {
-                            result.redos.push(...currentValue.redos);
-                            result.undos.push(...currentValue.undos);
-                            result.preRedos!.push(...(currentValue.preRedos ?? []));
-                            result.preUndos!.push(...(currentValue.preUndos ?? []));
-                            return result;
-                        },
-                        { redos: [], undos: [], preUndos: [], preRedos: [] }
-                    );
+                const groups = cbList.map((callback) => callback(command));
+                // Row deletion must retain each reference owner's rollback boundaries.
+                if (command.id === EffectRefRangId.RemoveRowCommandId) {
+                    return groups;
+                }
+                const result = groups.reduce(
+                    (result, currentValue) => {
+                        result.redos.push(...currentValue.redos);
+                        result.undos.push(...currentValue.undos);
+                        result.preRedos!.push(...(currentValue.preRedos ?? []));
+                        result.preUndos!.push(...(currentValue.preUndos ?? []));
+                        return result;
+                    },
+                    { redos: [], undos: [], preUndos: [], preRedos: [] }
+                );
 
                 const preRedos = this.interceptor.fetchThroughInterceptors(this.interceptor.getInterceptPoints().MERGE_REDO)(
                     result.preRedos,

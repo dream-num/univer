@@ -131,7 +131,7 @@ describe('Test prob function', () => {
                 column: 0,
             });
             result = testFunction.calculate(xRange, probRange, lowerLimit);
-            expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             xRange = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

@@ -39,7 +39,10 @@ export function generateParagraphs(
     }
 
     for (const paragraph of paragraphs) {
-        if (prevParagraph?.bullet) {
+        if (prevParagraph?.styleId !== undefined) {
+            paragraph.styleId = prevParagraph.styleId;
+        }
+        if (prevParagraph?.bullet !== undefined) {
             paragraph.bullet = Tools.deepClone(prevParagraph.bullet);
         }
 

@@ -178,7 +178,7 @@ describe('Test sequence function', () => {
         );
 
         functionService.registerExecutors(
-            new Sequence(FUNCTION_NAMES_MATH.SEQUENCE)
+            testBed.univer.__getInjector().createInstance(Sequence, FUNCTION_NAMES_MATH.SEQUENCE)
         );
 
         calculate = (formula: string) => {
@@ -208,7 +208,14 @@ describe('Test sequence function', () => {
             expect(result).toBe(ErrorType.VALUE);
 
             const result2 = await calculate('=SEQUENCE(2000,3)');
-            expect(result2).toBe(ErrorType.REF);
+            expect(result2).toHaveLength(2000);
+            expect((result2 as number[][])[0]).toEqual([1, 2, 3]);
+            expect((result2 as number[][])[1999]).toEqual([5998, 5999, 6000]);
+            expect(calculate('=SEQUENCE(1048577)')).toBe(ErrorType.VALUE);
+            expect(calculate('=SEQUENCE(1,1048577)')).toBe(ErrorType.VALUE);
+            const wide = calculate('=SEQUENCE(1,16385)') as number[][];
+            expect(wide[0]).toHaveLength(16385);
+            expect(wide[0][16384]).toBe(16385);
         });
 
         it('Value is number negative', async () => {

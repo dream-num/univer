@@ -25,6 +25,8 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Reduce extends BaseFunction {
+    protected readonly excelCompatibility: boolean = false;
+
     override minParams = 3;
 
     override maxParams = 3;
@@ -52,7 +54,7 @@ export class Reduce extends BaseFunction {
             _arrayReference = null;
         }
 
-        if (_initialValue.isArray()) {
+        if (!this.excelCompatibility && _initialValue.isArray()) {
             return _initialValue.mapValue((initialValueObject) =>
                 this._handleSingleValueObject(initialValueObject, _array, lambda, _initialValueReference, _arrayReference));
         }
@@ -67,7 +69,7 @@ export class Reduce extends BaseFunction {
         _initialValue_reference: Nullable<BaseReferenceObject>,
         _array_reference: Nullable<BaseReferenceObject>
     ): BaseValueObject {
-        if (initialValue.isError()) {
+        if (!this.excelCompatibility && initialValue.isError()) {
             return initialValue;
         }
 
@@ -98,7 +100,7 @@ export class Reduce extends BaseFunction {
             for (let c = 0; c < columnCount; c++) {
                 let valueObject: FunctionVariantType = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
 
-                if (valueObject.isError()) {
+                if (!this.excelCompatibility && valueObject.isError()) {
                     return valueObject;
                 }
 
@@ -116,7 +118,7 @@ export class Reduce extends BaseFunction {
 
                 let value = _lambda.execute(accumulator, valueObject) as BaseValueObject;
 
-                if (value.isError()) {
+                if (!this.excelCompatibility && value.isError()) {
                     return value;
                 }
 

@@ -22,6 +22,9 @@ const locale = {
         msg: {
             'filter-header-forbidden': 'You can\'t move the header row of a filter.',
         },
+        permission: {
+            filterErr: 'The range is protected, and you do not have permission to filter. To filter, please contact the creator.',
+        },
     },
 };
 

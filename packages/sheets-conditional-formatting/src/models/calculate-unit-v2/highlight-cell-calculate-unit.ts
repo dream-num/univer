@@ -16,7 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import { CellValueType, dateKit, Range, Tools } from '@univerjs/core';
-import { ERROR_TYPE_SET, FormulaResultStatus } from '@univerjs/engine-formula';
+import { ERROR_TYPE_SET, FormulaResultStatus, normalizeTextForComparison, upperCaseKeepingPositions } from '@univerjs/engine-formula';
 import type {
     IAverageHighlightCell,
     IFormulaHighlightCell,
@@ -54,6 +54,33 @@ const sortRangesByTopLeft = <T extends { startRow: number; startColumn: number }
     return a.startColumn - b.startColumn;
 });
 
+/**
+ * Case folding for the rules Excel builds from SEARCH: "Text that contains" and "Text that does
+ * not contain" ignore case but compare ligatures as they are written, so a cell "Straße" does
+ * not contain "STRASSE". Upper-casing without changing the length matches SEARCH: it keeps the
+ * Greek final sigma equal to sigma and a dotted İ distinct from a plain i, which lower-casing
+ * would turn into an i followed by a combining dot.
+ */
+function foldForSearch(text: string): string {
+    return upperCaseKeepingPositions(text);
+}
+
+/**
+ * Case folding for the rules Excel builds from "=": "Begins with", "Ends with", "Equal to" and
+ * "Not equal to" compare the cell with the rule text, or with LEFT or RIGHT of it, using "=".
+ * That comparison also folds linguistic ligatures ("Straße" equals "STRASSE"), composes Unicode
+ * normalization (NFC and NFD compare equal) and, as the search folding above, treats the Greek
+ * final sigma as sigma.
+ */
+function foldForEquality(text: string): string {
+    return normalizeTextForComparison(text).replace(/ς/g, 'σ');
+}
+
+const isExcelEqual = (left: string, right: string) => foldForEquality(left) === foldForEquality(right);
+
+// Duplicate and unique values compare text case-insensitively, as Excel does: "Apple" duplicates "apple".
+const duplicateKey = (value: unknown) => (typeof value === 'string' ? value.toLowerCase() : value);
+
 export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConfig>, boolean> {
     // eslint-disable-next-line max-lines-per-function
     override preComputing(row: number, col: number, context: IContext): void {
@@ -85,12 +112,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                             const cell = context.getCellValue(row, col);
                             const v = getCellValue(cell);
                             if (!isNullable(v)) {
-                                const cache = cacheMap.get(v);
-                                if (cache) {
-                                    cacheMap.set(v, cache + 1);
-                                } else {
-                                    cacheMap.set(v, 1);
-                                }
+                                const key = duplicateKey(v);
+                                cacheMap.set(key, (cacheMap.get(key) ?? 0) + 1);
                             }
                         });
                     });
@@ -122,12 +145,14 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         return { value: allValue[safeIndex], type: ruleConfig.subType };
                     }
 
-                    const targetIndex = Math.floor(Tools.clamp(configRule.isBottom ? (configRule.value - 1) : configRule.value, 0, allValue.length));
                     if (configRule.isBottom) {
-                        return { value: allValue[allValue.length - targetIndex - 1], type: ruleConfig.subType };
-                    } else {
-                        return { value: allValue[Math.max(targetIndex - 1, 0)], type: ruleConfig.subType };
+                        // The Nth smallest value; when N exceeds the count, every value is in the bottom N.
+                        const fromEnd = Math.floor(Tools.clamp(configRule.value - 1, 0, allValue.length - 1));
+                        return { value: allValue[allValue.length - fromEnd - 1], type: ruleConfig.subType };
                     }
+
+                    const targetIndex = Math.floor(Tools.clamp(configRule.value, 0, allValue.length));
+                    return { value: allValue[Math.max(targetIndex - 1, 0)], type: ruleConfig.subType };
                 }
                 case CFSubRuleType.formula: {
                     const _ruleConfig = ruleConfig as IFormulaHighlightCell;
@@ -274,10 +299,11 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     const subRuleConfig = ruleConfig as ITextHighlightCell;
                     const value = getCellValue(cellValue);
                     const v = isNullable(value) ? '' : String(value);
-                    const condition = subRuleConfig.value || '';
+                    const ruleText = subRuleConfig.value || '';
                     switch (subRuleConfig.operator) {
                         case CFTextOperator.beginsWith: {
-                            return v.startsWith(condition);
+                            // Excel compares LEFT(cell, LEN(rule text)) with the rule text.
+                            return isExcelEqual(v.slice(0, ruleText.length), ruleText);
                         }
                         case CFTextOperator.containsBlanks: {
                             return /^\s*$/.test(v);
@@ -292,19 +318,20 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                             return !(ERROR_TYPE_SET as Set<unknown>).has(v);
                         }
                         case CFTextOperator.containsText: {
-                            return v.indexOf(condition) > -1;
+                            return foldForSearch(v).includes(foldForSearch(ruleText));
                         }
                         case CFTextOperator.notContainsText: {
-                            return v.indexOf(condition) === -1;
+                            return !foldForSearch(v).includes(foldForSearch(ruleText));
                         }
                         case CFTextOperator.endsWith: {
-                            return v.endsWith(condition);
+                            // Excel compares RIGHT(cell, LEN(rule text)) with the rule text.
+                            return isExcelEqual(v.slice(Math.max(0, v.length - ruleText.length)), ruleText);
                         }
                         case CFTextOperator.equal: {
-                            return v === condition;
+                            return isExcelEqual(v, ruleText);
                         }
                         case CFTextOperator.notEqual: {
-                            return v !== condition;
+                            return !isExcelEqual(v, ruleText);
                         }
                         default: {
                             return false;
@@ -387,7 +414,7 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         return false;
                     }
                     const uniqueCache = preComputingResult.value;
-                    return uniqueCache.get(value) === 1;
+                    return uniqueCache.get(duplicateKey(value)) === 1;
                 }
                 case CFSubRuleType.duplicateValues: {
                     const value = getCellValue(cellValue);
@@ -395,7 +422,7 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     if (isNullable(value) || !preComputingResult) {
                         return false;
                     }
-                    const uniqueCacheValue = preComputingResult.value.get(value);
+                    const uniqueCacheValue = preComputingResult.value.get(duplicateKey(value));
 
                     return uniqueCacheValue && uniqueCacheValue !== 1;
                 }

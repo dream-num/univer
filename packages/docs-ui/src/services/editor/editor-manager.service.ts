@@ -17,7 +17,6 @@
 import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, Nullable } from '@univerjs/core';
 import type { DocBackground, ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
-import type { IEditorCanvasStyle, IEditorConfigParams } from './editor';
 import {
     createIdentifier,
     createParagraphId,
@@ -42,6 +41,7 @@ import {
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent, Subject } from 'rxjs';
+import type { IEditorCanvasStyle, IEditorConfigParams } from './editor';
 import { DOCS_VIEW_KEY } from '../../basics/docs-view-key';
 import { resolveDocRenderBackground } from '../doc-render-background';
 import { Editor } from './editor';
@@ -289,7 +289,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(
                 UniverInstanceType.UNIVER_DOC,
                 initialSnapshot || this._getBlank(editorUnitId),
-                { makeCurrent: false }
+                { makeCurrent: false, workbenchHostUnitId: config.renderConfig?.workbenchHostUnitId }
             );
         }
 

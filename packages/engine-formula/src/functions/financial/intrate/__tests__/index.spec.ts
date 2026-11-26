@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { DateSystem } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { DateSystem, Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -25,7 +25,17 @@ import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Intrate } from '../index';
 
 describe('Test intrate function', () => {
-    const testFunction = new Intrate(FUNCTION_NAMES_FINANCIAL.INTRATE);
+    let injector: Injector;
+    let testFunction: Intrate;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [Intrate, { useFactory: () => injector.createInstance(Intrate, FUNCTION_NAMES_FINANCIAL.INTRATE) }],
+        ]);
+        testFunction = injector.get(Intrate);
+    });
+
+    afterEach(() => injector.dispose());
 
     describe('Intrate', () => {
         it('Value is normal', () => {
@@ -130,7 +140,10 @@ describe('Test intrate function', () => {
             const redemption = NumberValueObject.create(10144200);
             const basis = NumberValueObject.create(2);
             const result = testFunction.calculate(settlement, maturity, investment, redemption, basis);
-            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+            // Excel COM Formula2 preserves each array element and its error.
+            const values = getObjectValue(result) as (number | string)[][];
+            expect(values[0][0]).toBe(ErrorType.NUM);
+            expect(values[0].slice(1)).toEqual([ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME]);
         });
         it('checks the serial-zero boundary in both date systems', () => {
             const args = [

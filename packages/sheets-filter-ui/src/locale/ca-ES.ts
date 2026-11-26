@@ -27,7 +27,7 @@ const locale: typeof enUS = {
             'smart-toggle-filter': 'Alterna el filtre',
         },
         permission: {
-            filterErr: 'No teniu permís per utilitzar el filtre.',
+            filterErr: 'El rang està protegit i no tens permís per filtrar. Per filtrar, contacta amb el creador.',
         },
         panel: {
             'clear-filter': 'Neteja el filtre',

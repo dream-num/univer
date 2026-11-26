@@ -351,6 +351,19 @@ describe('SheetSelectionRenderService pointer gestures with real render provider
         return { injector, workbook, render, spreadsheet, service, skeleton, getSelections, eventAt, click };
     }
 
+    it('ignores a new pointer selection while the display projection is pending', () => {
+        const { click, render, getSelections } = createSelectionTestBed();
+        const skeletonManager = render.with(SheetSkeletonManagerService);
+        click(1, 1);
+        skeletonManager.setProjectionPending('sheet1', true);
+        click(4, 3);
+        expect(getSelections()[0].range).toMatchObject({ startRow: 1, startColumn: 1 });
+
+        skeletonManager.setProjectionPending('sheet1', false);
+        click(4, 3);
+        expect(getSelections()[0].range).toMatchObject({ startRow: 4, startColumn: 3 });
+    });
+
     it.each([
         { rowCount: 20, selectionAnimation: undefined },
         { rowCount: 1_000_000, selectionAnimation: true },

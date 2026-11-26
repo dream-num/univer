@@ -25,6 +25,7 @@ import {
     RANGE_TYPE,
     UniverInstanceType,
 } from '@univerjs/core';
+import { IRenderManagerService, Spreadsheet } from '@univerjs/engine-render';
 import {
     IRefSelectionsService,
     REF_SELECTIONS_ENABLED,
@@ -37,6 +38,7 @@ import {
     SetSelectedColsVisibleCommand,
     SetSelectedRowsVisibleCommand,
     SheetInterceptorService,
+    SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
@@ -206,6 +208,30 @@ describe('Test commands used for change selections', () => {
 
     describe('Simple movement to next cell', () => {
         beforeEach(() => prepareSelectionsTestBed());
+
+        it('skips projected rows for keyboard movement and range expansion', async () => {
+            const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const worksheet = workbook.getActiveSheet()!;
+            const injector = univer!.__getInjector();
+            injector.add([SheetSkeletonService]);
+            const skeleton = injector.get(SheetSkeletonService).createRenderSkeleton(worksheet, workbook.getStyles());
+            skeleton.setProjection({ isRowFiltered: (row) => row === 1, getCell: () => undefined });
+            const display = new Spreadsheet('test', skeleton);
+            const renders = get(IRenderManagerService).getRenderAll();
+            renders.set(workbook.getUnitId(), { mainComponent: display } as never);
+            try {
+                selectTopLeft();
+                expect(await commandService.executeCommand(MoveSelectionCommand.id, { direction: Direction.DOWN })).toBe(true);
+                expectSelectionToBe(2, 0, 2, 0);
+                selectTopLeft();
+                expect(await commandService.executeCommand(ExpandSelectionCommand.id, { direction: Direction.DOWN })).toBe(true);
+                expectSelectionToBe(0, 0, 2, 0);
+            } finally {
+                renders.delete(workbook.getUnitId());
+                display.dispose();
+                skeleton.dispose();
+            }
+        });
 
         it('Should move selection with command', async () => {
             selectTopLeft();

@@ -20,6 +20,7 @@ import type { IDeleteAction, IInsertAction, IRetainAction, TextXAction } from '.
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
 import { CustomRangeType } from '../../../types/interfaces/i-document-data';
+import { isManagedBookmark } from '../../bookmark-id';
 import { DataStreamTreeTokenType } from '../types';
 import { ActionIterator } from './action-iterator';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from './action-types';
@@ -466,16 +467,50 @@ export class TextX {
         let index = 0;
         const reservedParagraphIds = new Set<string>();
         const reservedSectionIds = new Set<string>();
+        const changesText = actions.some((action) => action.t !== TextXActionType.RETAIN || action.body?.customRanges?.length);
+        const ranges = doc.customRanges ?? [];
+        let rangeIndices: Map<string, number> | undefined;
+        let originalOrder: string[] | undefined;
+        let bookmarkOrders: IRetainAction['bookmarkOrders'];
+        let originalOrderIndex: number | undefined;
 
         for (const action of actions) {
+            if (action.t === TextXActionType.RETAIN && action.bookmarkOrders) {
+                bookmarkOrders = action.bookmarkOrders;
+                originalOrderIndex = undefined;
+            }
             if (action.t === TextXActionType.RETAIN && action.rangeUpdates) {
-                action.oldRangeUpdates = action.rangeUpdates.map(({ rangeId, propertyPaths }) => {
-                    const index = doc.customRanges?.findIndex((range) => range.rangeId === rangeId) ?? -1;
+                const positions = rangeIndices ??= new Map(ranges.map((range, index) => [range.rangeId, index]));
+                action.oldRangeUpdates = action.rangeUpdates.map((update) => {
+                    const { rangeId, range, propertyPaths } = update;
+                    const index = positions.get(rangeId) ?? -1;
+                    const previous = ranges[index];
+                    let nextRangeId = previous ? ranges[index + 1]?.rangeId ?? null : undefined;
+                    if (previous?.rangeType === CustomRangeType.BOOKMARK && !propertyPaths) {
+                        if (isManagedBookmark(previous)) {
+                            nextRangeId = undefined;
+                        } else if (range?.rangeType === CustomRangeType.BOOKMARK && update.nextRangeId === undefined) {
+                            // A peer may delete the old target before applying this move.
+                            if (update.fallbackNextRangeId === undefined) {
+                                update.fallbackNextRangeId = nextRangeId;
+                                bookmarkOrders ??= action.bookmarkOrders = [];
+                                if (originalOrderIndex === undefined) {
+                                    // Managed bookmarks have their own stable ordering.
+                                    originalOrder ??= ranges.filter((item) => !isManagedBookmark(item)).map((item) => item.rangeId);
+                                    originalOrderIndex = bookmarkOrders.push(originalOrder) - 1;
+                                }
+                                update.fallbackOrderIndex = originalOrderIndex;
+                            }
+                            if (!changesText) {
+                                nextRangeId = undefined;
+                            }
+                        }
+                    }
                     return {
                         rangeId,
-                        range: index < 0 ? null : Tools.deepClone(doc.customRanges![index]),
-                        nextRangeId: index < 0 ? undefined : doc.customRanges![index + 1]?.rangeId ?? null,
-                        propertyPaths: index < 0 ? undefined : propertyPaths,
+                        range: previous ? Tools.deepClone(previous) : null,
+                        nextRangeId,
+                        propertyPaths: previous ? propertyPaths : undefined,
                     };
                 });
             }

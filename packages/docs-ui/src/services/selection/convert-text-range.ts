@@ -43,6 +43,15 @@ import {
     Liquid,
 } from '@univerjs/engine-render';
 
+export function isDocVerticalTableCell(page: IDocumentSkeletonPage): boolean {
+    return page.cellTextDirection === 'tbRlV';
+}
+
+export function getDocRangeBorderBoxBottom(line: IDocumentSkeletonLine, top: number): number {
+    const { contentHeight, lineHeight, marginBottom, marginTop, paddingBottom, paddingTop } = line;
+    return contentHeight == null ? top + lineHeight - marginTop - marginBottom : top + paddingTop + contentHeight + paddingBottom;
+}
+
 export function findDocRangeNodePositions(
     skeleton: DocumentSkeleton,
     startIndex: number,
@@ -333,7 +342,7 @@ export class NodePositionConvertToCursor {
 
         // eslint-disable-next-line complexity
         this._selectionIterator(start, end, (start_sp, end_sp, isFirst, isLast, divide, line) => {
-            const { lineHeight, asc, paddingTop, paddingBottom, contentHeight, marginTop, marginBottom } = line;
+            const { asc, paddingTop } = line;
             const { glyphGroup, st } = divide;
             if (glyphGroup.length === 0) {
                 // The divide is empty, and no need to set selection.
@@ -373,9 +382,7 @@ export class NodePositionConvertToCursor {
                 selectedGlyphs.length > 0 &&
                 selectedGlyphs.every((glyph) => this._isNonInlineDrawingGlyph(glyph));
             const borderBoxStartY = startY;
-            const borderBoxEndY = contentHeight == null
-                ? startY + lineHeight - marginTop - marginBottom
-                : startY + paddingTop + contentHeight + paddingBottom;
+            const borderBoxEndY = getDocRangeBorderBoxBottom(line, startY);
 
             if (start_sp === 0 && end_sp === glyphGroup.length - 1) {
                 borderBoxPosition = {
@@ -747,7 +754,7 @@ export class NodePositionConvertToCursor {
                     break;
             }
 
-            if (segmentPage.cellTextDirection === 'tbRlV') {
+            if (isDocVerticalTableCell(segmentPage)) {
                 this._verticalCellOrigin = {
                     x: this._liquid.x - segmentPage.marginLeft,
                     y: this._liquid.y - segmentPage.marginTop,

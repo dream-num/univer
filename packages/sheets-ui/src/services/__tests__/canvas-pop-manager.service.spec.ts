@@ -16,13 +16,22 @@
 
 import type { ICommandInfo, IRange } from '@univerjs/core';
 import type { IPopup } from '@univerjs/ui';
-import { ICommandService, Injector, IUniverInstanceService } from '@univerjs/core';
-import { IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
+import {
+    EventSubject,
+    ICommandService,
+    Injector,
+    IUniverInstanceService,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { IRenderManagerService, RENDER_CLASS_TYPE, RenderManagerService } from '@univerjs/engine-render';
 import {
     IRefSelectionsService,
     RefRangeService,
     SetFrozenMutation,
     SetWorksheetRowAutoHeightMutation,
+    SheetInterceptorService,
+    SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
@@ -90,6 +99,10 @@ class TestCanvasPopupService {
 class TestCommandService {
     private readonly _listeners: Array<(info: ICommandInfo) => void> = [];
 
+    disposed() {
+        return false;
+    }
+
     onCommandExecuted(listener: (info: ICommandInfo) => void) {
         this._listeners.push(listener);
         return {
@@ -128,6 +141,7 @@ class TestUniverInstanceService {
 
 class TestRenderManagerService {
     render: any;
+    readonly disposed$ = new Subject<string>();
 
     getRenderUnitById() {
         return this.render;
@@ -288,6 +302,55 @@ function createSheetHarness(options?: { withoutSkeleton?: boolean }) {
 }
 
 describe('SheetCanvasPopManagerService', () => {
+    it('attaches a cell popup to the requested pane canvas', () => {
+        const platform = createSheetHarness();
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([SheetInterceptorService]);
+        injector.add([SheetSkeletonService]);
+        injector.add([SheetsSelectionsService]);
+        injector.add([RefRangeService]);
+        injector.add([IRefSelectionsService, { useValue: platform.refSelectionService as never }]);
+        injector.add([ICanvasPopupService, { useValue: platform.popupService as never }]);
+        injector.add([SheetCanvasPopManagerService]);
+        injector.get(SheetSkeletonService);
+        const workbook = univer.createUnit(UniverInstanceType.UNIVER_SHEET, { id: 'unit-1', sheetOrder: ['sheet-1'], sheets: { 'sheet-1': { id: 'sheet-1' } } });
+        const context = { unitId: 'unit-1', unit: workbook, scene: { ...platform.render.scene, onTransformChange$: new EventSubject() } };
+        injector.add([SheetSkeletonManagerService, { useFactory: function createSkeletonManager() {
+            return injector.createInstance(SheetSkeletonManagerService, context as never);
+        } }]);
+        const skeletons = injector.get(SheetSkeletonManagerService);
+        skeletons.setCurrent({ sheetId: 'sheet-1' });
+        const rightCanvas = document.createElement('canvas');
+        rightCanvas.style.width = '100px';
+        vi.spyOn(rightCanvas, 'getBoundingClientRect').mockReturnValue(platform.canvas.getBoundingClientRect());
+        const withService = (token: unknown) => token === SheetSkeletonManagerService ? skeletons : platform.sheetSelectionRenderService;
+        const manager = injector.get(IRenderManagerService);
+        const primary = { ...platform.render, scene: { ...context.scene, dispose() {} }, engine: { ...platform.render.engine, dispose() {} }, unitId: 'unit-1', type: UniverInstanceType.UNIVER_SHEET, components: new Map(), with: withService, activate() {}, deactivate() {} };
+        manager.addRender('unit-1', primary as never);
+        manager.addRender('right', { ...primary, renderId: 'right', engine: { ...primary.engine, getCanvasElement: () => rightCanvas } } as never);
+        try {
+            const service = injector.get(SheetCanvasPopManagerService);
+            let panelOpen = true;
+            const popup = service.attachPopupToCell(0, 0, {
+                componentKey: 'filter-panel',
+                onAnchorDisposed: () => { panelOpen = false; },
+            }, 'unit-1', 'sheet-1', undefined, 'right');
+            expect(platform.popupService.lastPopup().canvasElement).toBe(rightCanvas);
+            const mainPopup = service.attachPopupToCell(0, 0, { componentKey: 'main-panel' }, 'unit-1', 'sheet-1');
+            manager.removeRender('right');
+            expect(platform.popupService.popups.size).toBe(1);
+            expect(platform.popupService.lastPopup().canvasElement).toBe(platform.canvas);
+            expect(panelOpen).toBe(false);
+            popup?.dispose();
+            expect(platform.popupService.popups.size).toBe(1);
+            mainPopup?.dispose();
+        } finally {
+            univer.dispose();
+        }
+    });
+
     it('resolves registered feature menus for the drawing that opened the menu', () => {
         const { injector } = createSheetHarness();
         const service = injector.get(SheetCanvasPopManagerService);

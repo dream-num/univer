@@ -260,16 +260,17 @@ describe('standalone Sheet formula calculation trigger', () => {
         const data = createWorkbookData();
         data.sheets['sheet-1']!.cellData = {
             0: { 1: { v: 2 } },
-            1: { 0: { f: '=SORT(IF(TRUE,B1:B3,B1))' }, 1: { v: 3 } },
+            1: { 0: { f: '=SORT(IF(TRUE,B1:B3,B1))' }, 1: { v: 3 }, 2: { f: '=LET(x,B1:B3,SORT(x))' } },
             2: { 1: { v: 4 } },
         };
         const sheet = api.createWorkbook(data).getActiveSheet();
-        const custom = api.getFormula().registerFunction('SORT', (value) => Array.isArray(value) ? -1 : Number(value));
+        const custom = api.getFormula().registerFunction('SORT', (value) => Array.isArray(value) ? value.flat().reduce<number>((sum, cell) => sum + Number(cell), 0) : Number(value));
         try {
             const initial = api.getFormula().onCalculationResultApplied(10_000);
             univer.__getInjector().get(LifecycleService).stage = LifecycleStages.Rendered;
             await initial;
             expect(sheet.getRange('A2').getValue()).toBe(3);
+            expect(sheet.getRange('C2').getValue()).toBe(9);
         } finally {
             custom.dispose();
         }
@@ -293,6 +294,8 @@ describe('standalone Sheet formula calculation trigger', () => {
             `=REVIEW_RANGE_SUM(${ref})`,
             `=LET(x,${ref},ABS(x))`,
             `=SUM(LET(x,${ref},x))`,
+            `=SUM(FLATTEN(ABS(${ref})))`,
+            `=REVIEW_RANGE_SUM(ABS(${ref}))`,
         ];
         const cells = data.sheets['sheet-1']!.cellData!;
         for (const [row, value] of [1, 2, 3, 4, 10, 20, 30].entries()) {
@@ -310,15 +313,15 @@ describe('standalone Sheet formula calculation trigger', () => {
             univer.__getInjector().get(LifecycleService).stage = LifecycleStages.Rendered;
             await initial;
             const expected = (sum: number, scalar: number | string, second: number) =>
-                [[sum, sum, sum, scalar, sum, scalar, second, sum, sum, sum, scalar, sum]];
-            expect(sheet.getRange('J3:U3').getValues()).toEqual(expected(9, 3, 3));
-            expect(sheet.getRange('J8:U8').getValues()).toEqual(expected(9, '#VALUE!', 3));
+                [[sum, sum, sum, scalar, sum, scalar, second, sum, sum, sum, scalar, sum, sum, sum]];
+            expect(sheet.getRange('J3:W3').getValues()).toEqual(expected(9, 3, 3));
+            expect(sheet.getRange('J8:W8').getValues()).toEqual(expected(9, '#VALUE!', 3));
             for (const [address, value, sum, second] of [['B1', 0, 60, 20], ['B6', 44, 84, 44]] as const) {
                 const applied = api.getFormula().onCalculationResultApplied(10_000);
                 sheet.getRange(address).setValue(value);
                 await applied;
-                expect(sheet.getRange('J3:U3').getValues()).toEqual(expected(sum, '#VALUE!', second));
-                expect(sheet.getRange('J8:U8').getValues()).toEqual(expected(sum, '#VALUE!', second));
+                expect(sheet.getRange('J3:W3').getValues()).toEqual(expected(sum, '#VALUE!', second));
+                expect(sheet.getRange('J8:W8').getValues()).toEqual(expected(sum, '#VALUE!', second));
             }
         } finally {
             custom.dispose();
@@ -402,6 +405,9 @@ describe('standalone Sheet formula calculation trigger', () => {
             4: { v: 10 },
             5: { f: '=2+3', v: 5 },
             6: { f: '=1+1' },
+            7: { f: '=LET(x,100001,TEXT(x,"#,##0"))', v: '100,001' },
+            8: { f: '=LAMBDA(x,TEXT(x,"#,##0"))(100001)', v: '100,001' },
+            9: { f: '=LET(x,3,x)', v: 3 },
         } };
         const sheet = api.createWorkbook(data).getActiveSheet();
         const injector = univer.__getInjector();
@@ -424,16 +430,17 @@ describe('standalone Sheet formula calculation trigger', () => {
             await applied;
             return [...calculated].sort();
         };
-        expect(await switchRegion('en-IN')).toEqual([1, 2, 3]);
+        expect(await switchRegion('en-IN')).toEqual([1, 2, 3, 7, 8]);
+        expect(sheet.getRange('H1:I1').getValues()).toEqual([['1,00,001', '1,00,001']]);
         expect(sheet.getRange('B1:C1').getValues()).toEqual([[100001, 100002]]);
-        expect(await switchRegion('enUS')).toEqual([1, 2]);
+        expect(await switchRegion('enUS')).toEqual([1, 2, 7, 8]);
         expect(sheet.getRange('B1:C1').getValues()).toEqual([['#VALUE!', -1]]);
 
         const edit = api.getFormula().onCalculationResultApplied(10_000);
         sheet.getRange('B1').setFormula('=E1+1');
         sheet.getRange('G1').setFormula('=TEXT(100001,"#,##0")');
         await edit;
-        expect(await switchRegion('en-IN')).toEqual([6]);
+        expect(await switchRegion('en-IN')).toEqual([6, 7, 8]);
         expect(sheet.getRange('G1').getValue()).toBe('1,00,001');
     });
 
@@ -462,6 +469,9 @@ describe('standalone Sheet formula calculation trigger', () => {
             11: { f: '=VALUE("0,123")' },
             12: { f: '=VALUE("12,34,567%")' },
             13: { f: '=VALUE("12,34,567e2")' },
+            14: { f: '=TEXT(B1,"0.0")' },
+            15: { f: '=TEXT("1,00,001","0.0")' },
+            16: { f: '=TEXT("1,2,3","0.0")' },
         });
         const sheet = api.createWorkbook(data).getActiveSheet();
 
@@ -470,11 +480,13 @@ describe('standalone Sheet formula calculation trigger', () => {
         await initialResult;
         expect(sheet.getRange('B1:E1').getValues()).toEqual([['1,00,000', '1,00,000.00', '100000.00', '₹1,00,000.00']]);
 
+        expect(sheet.getRange('O1:Q1').getValues()).toEqual([['100000.0', '100001.0', '1,2,3']]);
         expect(sheet.getRange('F1:N1').getValues()).toEqual([[100000, 100000, 100001, 100002, '#VALUE!', 12345678, '#VALUE!', 12345.67, 123456700]]);
 
         const switched = api.getFormula().onCalculationResultApplied(10_000);
         api.setRegion('enUS');
         await switched;
+        expect(sheet.getRange('O1:Q1').getValues()).toEqual([['100000.0', '1,00,001', '1,2,3']]);
         expect(sheet.getRange('B1:I1').getValues()).toEqual([['100,000', '100,000.00', '100000.00', '$100,000.00', 100000, 100000, '#VALUE!', -1]]);
         const editResult = api.getFormula().onCalculationResultApplied(10_000);
         sheet.getRange('A1').setValue(100001);

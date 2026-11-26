@@ -992,6 +992,8 @@ export type DocumentSkeletonLineSource = 'page' | 'table-cell' | 'column';
 
 export interface IDocumentSkeletonLineIteratorOptions {
     docsLeft?: number;
+    /** Visit all nested lines in layout coordinates, including horizontally clipped cells. */
+    includeUnclippedDescendants?: boolean;
     pageMarginTop?: number;
     tableCellInsetX?: number;
     unitId?: string;
@@ -1000,6 +1002,8 @@ export interface IDocumentSkeletonLineIteratorOptions {
 export interface IDocumentSkeletonLineContext {
     clipLeft?: number;
     clipRight?: number;
+    /** An ancestor projects coordinates through a rotated cell or nested column path. */
+    hasAncestorTransform?: boolean;
     column: IDocumentSkeletonColumn;
     line: IDocumentSkeletonLine;
     lineWidth: number;
@@ -1166,36 +1170,38 @@ export function documentSkeletonLineIterator(
 ) {
     const {
         docsLeft = 0,
+        includeUnclippedDescendants = false,
         pageMarginTop = 0,
         tableCellInsetX = 0,
         unitId = '',
     } = options;
 
-    pages.forEach((page, pageIndex) => {
-        const pageHeight = page.pageHeight === Infinity ? 0 : page.pageHeight;
-        const pageTop = (pageHeight + pageMarginTop) * pageIndex + page.marginTop;
-        const pageLeft = page.marginLeft;
-
-        visitPageLines(page, {
-            pageIndex,
-            pageLeft,
-            pageTop,
-            source: 'page',
-            getBounds: (linePage, column, section) => getPageLineBounds(linePage, column, section.columns.length, pageLeft),
-        }, cb);
+    const visit = (page: IDocumentSkeletonPage, placement: IVisitPageLineOptions): void => {
+        visitPageLines(page, placement, cb);
+        if (!includeUnclippedDescendants && placement.source !== 'page') {
+            return;
+        }
+        const { pageIndex, pageLeft, pageTop } = placement;
+        const hasAncestorTransform = placement.hasAncestorTransform || page.cellTextDirection === 'tbRlV';
 
         page.skeTables?.forEach((table) => {
-            const sourceTableId = getSourceTableId(table.tableId);
-            const viewport = getDocsTableRenderViewport(unitId, sourceTableId);
+            const viewport = includeUnclippedDescendants ? null : getDocsTableRenderViewport(unitId, getSourceTableId(table.tableId));
             const hasHorizontalViewport = hasDocsTableHorizontalViewport(viewport);
-            const tableViewportLeft = getDocsTableViewportLeft(viewport, pageLeft + table.left, docsLeft);
+            const tableLeft = pageLeft + table.left;
+            const tableTop = pageTop + table.top;
+            const tableViewportLeft = getDocsTableViewportLeft(viewport, tableLeft, docsLeft);
             const tableViewportRight = tableViewportLeft + (hasHorizontalViewport ? viewport.viewportWidth : table.width);
             const tableScrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
 
             table.rows.forEach((row) => {
                 row.cells.forEach((cell) => {
-                    const cellTop = pageTop + table.top + row.top + cell.marginTop;
-                    const cellLeft = pageLeft + table.left + cell.left - tableScrollLeft + cell.marginLeft;
+                    const cellTop = tableTop + row.top + cell.marginTop;
+                    const cellLeft = tableLeft + cell.left - tableScrollLeft + cell.marginLeft;
+                    if (includeUnclippedDescendants) {
+                        visit(cell, { hasAncestorTransform, pageIndex, pageLeft: cellLeft, pageTop: cellTop, source: 'table-cell' });
+                        return;
+                    }
+
                     const cellContentRight = cellLeft + cell.pageWidth - cell.marginLeft - cell.marginRight;
                     const visualLeft = cellLeft + tableCellInsetX;
                     const visualRight = cellContentRight - tableCellInsetX;
@@ -1207,7 +1213,7 @@ export function documentSkeletonLineIterator(
                         return;
                     }
 
-                    visitPageLines(cell, {
+                    visit(cell, {
                         clipLeft,
                         clipRight,
                         pageIndex,
@@ -1216,7 +1222,7 @@ export function documentSkeletonLineIterator(
                         source: 'table-cell',
                         visualLeft,
                         visualWidth,
-                    }, cb);
+                    });
                 });
             });
         });
@@ -1228,7 +1234,8 @@ export function documentSkeletonLineIterator(
                 const nestedPageTop = pageTop + columnGroup.top + columnGroupColumn.top + nestedPage.marginTop;
                 const visualWidth = Math.max(0, columnGroupColumn.width - nestedPage.marginLeft - nestedPage.marginRight);
 
-                visitPageLines(nestedPage, {
+                visit(nestedPage, {
+                    ...(includeUnclippedDescendants ? { hasAncestorTransform: hasAncestorTransform || placement.source !== 'page' } : {}),
                     pageIndex,
                     pageLeft: nestedPageLeft,
                     pageTop: nestedPageTop,
@@ -1238,8 +1245,20 @@ export function documentSkeletonLineIterator(
                         visualLeft: nestedPageLeft + column.left,
                         visualWidth: Math.max(getFiniteWidth(column.width), visualWidth - column.left),
                     }),
-                }, cb);
+                });
             });
+        });
+    };
+
+    pages.forEach((page, pageIndex) => {
+        const pageHeight = page.pageHeight === Infinity ? 0 : page.pageHeight;
+        const pageLeft = page.marginLeft;
+        visit(page, {
+            pageIndex,
+            pageLeft,
+            pageTop: (pageHeight + pageMarginTop) * pageIndex + page.marginTop,
+            source: 'page',
+            getBounds: (linePage, column, section) => getPageLineBounds(linePage, column, section.columns.length, pageLeft),
         });
     });
 }
@@ -1324,6 +1343,7 @@ export function compareDocumentSkeletonNestedPagePathOrder(
 interface IVisitPageLineOptions {
     clipLeft?: number;
     clipRight?: number;
+    hasAncestorTransform?: boolean;
     getBounds?: (
         page: IDocumentSkeletonPage,
         column: IDocumentSkeletonColumn,
@@ -1344,10 +1364,10 @@ function visitPageLines(
 ) {
     page.sections.forEach((section) => {
         section.columns.forEach((column) => {
+            const bounds = options.getBounds?.(page, column, section);
             column.lines.forEach((line) => {
-                const bounds = options.getBounds?.(page, column, section);
-
                 cb({
+                    ...(options.hasAncestorTransform ? { hasAncestorTransform: true } : {}),
                     clipLeft: options.clipLeft,
                     clipRight: options.clipRight,
                     column,

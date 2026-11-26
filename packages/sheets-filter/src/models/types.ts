@@ -99,6 +99,8 @@ export interface ICustomFilters {
 export interface ICustomFilter {
     val: string | number;
     operator?: CustomFilterOperator;
+    /** Preserve text comparison when a numeric-looking string comes from a text filter. */
+    compareAsText?: true;
 }
 
 /**

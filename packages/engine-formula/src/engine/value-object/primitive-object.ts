@@ -45,7 +45,7 @@ function isValidGroupedMantissa(mantissa: string, readRegion?: () => string): bo
     return shortest >= 3 || (shortest === 2 && getNumfmtNumberGrouping(readRegion?.())[1] === 2);
 }
 
-function parseFormulaNumericText(rawValue: string, readRegion?: () => string): { v: number; z?: string } | ErrorValueObject | null {
+export function parseFormulaNumericText(rawValue: string, readRegion?: () => string): { v: number; z?: string } | ErrorValueObject | null {
     const match = rawValue.match(/([0-9.,]+)(?:[eE]([+-]?[0-9]+))?/);
     if (!match) return null;
     const mantissa = match[1];

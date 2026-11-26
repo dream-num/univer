@@ -16,6 +16,7 @@
 
 import type { ICommandInfo, IWorkbookData, Workbook } from '@univerjs/core';
 import {
+    CommandType,
     DesktopLogService,
     Direction,
     DrawingTypeEnum,
@@ -53,10 +54,11 @@ import {
     SetSpecificColsVisibleCommand,
     SetSpecificRowsVisibleCommand,
     SetWorksheetRowAutoHeightMutation,
+    SheetInterceptorService,
     SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import type { ISheetDrawingPlacement } from '../../services/sheet-drawing-placement';
 import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
@@ -438,7 +440,11 @@ describe('sheet drawing transforms without UI plugins', () => {
         expect(getDrawing(service)).toEqual(before);
     });
 
-    it.each([true, false])('moves a deleted Position anchor to the boundary with unequal cell sizes and rows=%s', async (rows) => {
+    it.each([
+        { rows: true, fail: false },
+        { rows: false, fail: false },
+        { rows: true, fail: true },
+    ])('restores a deleted Position anchor with unequal sizes, rows=$rows and failed hook=$fail', async ({ rows, fail }) => {
         const service = await insertDrawing(SheetDrawingAnchorType.Position);
         expect(await testBed.commandService.executeCommand(rows ? SetRowHeightCommand.id : SetColWidthCommand.id, {
             unitId: 'test',
@@ -460,13 +466,37 @@ describe('sheet drawing transforms without UI plugins', () => {
             }],
         })).toBe(true);
         const before = Tools.deepClone(getDrawing(service));
+        const worksheet = testBed.workbook.getSheetBySheetId('sheet1')!;
+        const markerBefore = worksheet.getCellRaw(0, 18)?.v;
+        if (fail) {
+            const cell = (value: string | null) => ({
+                id: SetRangeValuesMutation.id,
+                params: { unitId: 'test', subUnitId: 'sheet1', cellValue: { 0: { 18: { v: value } } } },
+            });
+            const plans = testBed.get(SheetDrawingTransformPlanService);
+            const pre = plans.register({ transform: () => ({ preRedos: [cell('before')], undos: [cell(null)] }) });
+            const post = plans.register({ transform: () => ({ redos: [cell('after')], undos: [cell('before')] }) });
+            onTestFinished(() => {
+                pre.dispose();
+                post.dispose();
+            });
+            testBed.commandService.registerCommand({ id: 'test.fail-drawing-after', type: CommandType.MUTATION, handler: () => false });
+            const failure = testBed.get(SheetInterceptorService).interceptAfterCommand({
+                priority: -100,
+                getMutations: ({ id }) => ({
+                    redos: id === RemoveRowCommand.id ? [{ id: 'test.fail-drawing-after', params: {} }] : [],
+                    undos: [],
+                }),
+            });
+            onTestFinished(() => failure.dispose());
+        }
         const skeleton = testBed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
         const boundary = skeleton.getNoMergeCellWithCoordByIndex(1, 1);
         expect(await testBed.commandService.executeCommand(rows ? RemoveRowCommand.id : RemoveColCommand.id, {
             unitId: 'test',
             subUnitId: 'sheet1',
             range: { startRow: rows ? 1 : 0, endRow: rows ? 3 : 19, startColumn: rows ? 0 : 1, endColumn: rows ? 19 : 3 },
-        })).toBe(true);
+        })).toBe(!fail);
         expect(getDrawing(service).transform).toMatchObject({
             [rows ? 'top' : 'left']: rows ? boundary.startY : boundary.startX,
             width: 180.35,
@@ -474,6 +504,11 @@ describe('sheet drawing transforms without UI plugins', () => {
         });
         expect(await testBed.commandService.executeCommand(UndoCommandId)).toBe(true);
         expect(getDrawing(service)).toEqual(before);
+        expect(worksheet.getCellRaw(0, 18)?.v ?? undefined).toBe(markerBefore);
+        if (fail) {
+            expect(await testBed.commandService.executeCommand(RedoCommandId)).toBe(true);
+            expect(worksheet.getCellRaw(0, 18)?.v).toBe('after');
+        }
     });
 
     it.each([true, false])('clips a Both endpoint at the sheet boundary when deleting the last rows=%s', async (rows) => {

@@ -41,7 +41,7 @@ import {
 import { DocPrintInterceptorService } from '@univerjs/docs-ui';
 import { DrawingManagerService, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingImageClipService, DrawingRenderService, OleUIService } from '@univerjs/drawing-ui';
-import { Documents, DocumentSkeleton, DocumentViewModel, Engine, Scene } from '@univerjs/engine-render';
+import { Documents, DocumentSkeleton, DocumentViewModel, Engine, IRenderManagerService, Scene } from '@univerjs/engine-render';
 import { ComponentManager, IGalleryService } from '@univerjs/ui';
 import { EMPTY, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -59,6 +59,7 @@ describe('DocDrawingPrintingController with real layout and drawing services', (
     let skeleton: DocumentSkeleton;
     let documents: Documents;
     let printService: DocPrintInterceptorService;
+    const getPrintPageDrawingPositions = vi.fn();
     const unitId = 'print-images';
     const imageIds = ['body-first', 'cell-image', 'body-second', 'header-image', 'footer-image'];
 
@@ -107,6 +108,9 @@ describe('DocDrawingPrintingController with real layout and drawing services', (
         injector.add([OleUIService, { useValue: { bindObject: vi.fn() } as never }]);
         injector.add([ComponentManager]);
         injector.add([DocPrintInterceptorService]);
+        injector.add([IRenderManagerService, { useValue: {
+            getRenderUnitById: () => ({ with: () => ({ getPrintPageDrawingPositions }) }),
+        } as never }]);
         injector.add([DocDrawingPrintingController]);
 
         const T = DataStreamTreeTokenType;
@@ -211,10 +215,10 @@ describe('DocDrawingPrintingController with real layout and drawing services', (
         vi.clearAllMocks();
     });
 
-    function collect(pageIndex?: number): void {
+    function collect(pageIndex?: number, pageOrigin?: { left: number; top: number }): void {
         printService.interceptor.fetchThroughInterceptors(
             printService.interceptor.getInterceptPoints().PRINTING_COMPONENT_COLLECT
-        )(undefined, { unitId, scene, engine, skeleton, documents, pageIndex, root: document.createElement('div') });
+        )(undefined, { unitId, scene, engine, skeleton, documents, pageIndex, pageOrigin, root: document.createElement('div') });
     }
 
     function renderedImageIds(): string[] {
@@ -236,6 +240,24 @@ describe('DocDrawingPrintingController with real layout and drawing services', (
         expect(data.skeFooters.get(data.pages[1].footerId)!.get(data.pages[1].pageWidth)!.skeDrawings.has('footer-image')).toBe(true);
         collect(1);
         expect(renderedImageIds()).toEqual(['body-second', 'header-image', 'footer-image']);
+    });
+
+    it('uses the selected projected drawing and its measured position even before the editor has placed it', () => {
+        const manager = univer.__getInjector().get(IDrawingManagerService);
+        const { 'header-image': _header, ...editorDrawings } = manager.getDrawingDataForUnit(unitId)![unitId].data;
+        manager.setDrawingData(unitId, unitId, editorDrawings);
+        const origin = { left: 3, top: -401 };
+        const transform = { left: 23, top: -391, width: 16, height: 16 };
+        getPrintPageDrawingPositions.mockReturnValue({
+            'header-image': { drawingId: 'header-image', transform },
+        });
+        const render = vi.spyOn(univer.__getInjector().get(DrawingRenderService), 'renderImages');
+
+        collect(1, origin);
+
+        expect(getPrintPageDrawingPositions).toHaveBeenCalledWith(unitId, skeleton, 1, origin);
+        expect(renderedImageIds()).toEqual(['header-image']);
+        expect(render.mock.calls[0][0].transform).toEqual(transform);
     });
 
     it('keeps unfiltered drawing collection when there is no traditional page index', () => {

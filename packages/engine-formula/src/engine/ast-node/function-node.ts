@@ -159,6 +159,10 @@ export class FunctionNode extends BaseAstNode {
         return reference.isCell() ? reference : this._functionExecutor.createReferenceObject(reference, range);
     }
 
+    override needsFilteredOutRows() {
+        return this._functionExecutor.needsFilteredOutRows;
+    }
+
     override preservesLazyIfReferenceArray(child: BaseAstNode): boolean {
         const executor = this._functionExecutor;
         if (executor.evaluatesIfArgumentsAsArrays) return true;
@@ -170,9 +174,9 @@ export class FunctionNode extends BaseAstNode {
         return executor.lazyIfReferenceArrayArgumentIndexes.includes(index);
     }
 
-    getNestedArgumentArrayContext(child: BaseAstNode): ArgumentArrayContext {
+    getNestedArgumentArrayContext(child: BaseAstNode, nestedOrBound: boolean): ArgumentArrayContext {
         const children = this.getChildren();
-        if (this._functionExecutor.isCustom()) return 'scalar';
+        if (this._functionExecutor.isCustom()) return nestedOrBound ? 'array' : 'scalar';
         return getNestedArgumentArrayContext(this._functionExecutor.name, children.indexOf(child), children.length);
     }
 

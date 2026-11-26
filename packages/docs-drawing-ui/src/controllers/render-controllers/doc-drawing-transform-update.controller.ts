@@ -180,7 +180,7 @@ export function getDocsOverlayRuntimeDrawing(
 
 export type DocumentDrawingPublicationProgress = Pick<
     IDocumentLayoutProgress,
-    'generation' | 'didPublish' | 'complete' | 'publishedPageCount' | 'reason' | 'didPublishAnchor'
+    'generation' | 'didPublish' | 'complete' | 'publishedPageCount' | 'reason' | 'didPublishAnchor' | 'didPublishEmbeddedGeometry'
 >;
 
 interface IDocumentDrawingPublicationNestedPage {
@@ -248,9 +248,11 @@ export class DocDrawingPublicationTracker {
         const drawingOccurrenceCount = countPublishedDrawingOccurrences(skeletonData, publishedPageCount);
         const didDrawingOccurrencesChange = !(isNewGeneration && progress.reason === 'edit') &&
             drawingOccurrenceCount !== this._drawingOccurrenceCount;
+        const didReplaceDrawingGeometry = progress.didPublishEmbeddedGeometry === true &&
+            (drawingOccurrenceCount > 0 || this._drawingOccurrenceCount > 0);
         this._drawingOccurrenceCount = drawingOccurrenceCount;
 
-        if (progress.complete || progress.didPublishAnchor || didDrawingOccurrencesChange) {
+        if (progress.complete || progress.didPublishAnchor || didDrawingOccurrencesChange || didReplaceDrawingGeometry) {
             return true;
         }
         if (isNewGeneration && progress.reason === 'edit') {
@@ -438,10 +440,11 @@ export function getDocsTableCellDrawingOffset(
     unitId: string,
     table: IDocumentSkeletonTable,
     row: IDocumentSkeletonRow,
-    cell: IDocumentSkeletonPage
+    cell: IDocumentSkeletonPage,
+    useViewport = true
 ) {
     const sourceTableId = getTableIdAndSliceIndex(table.tableId).tableId;
-    const viewport = getDocsTableRenderViewport(unitId, sourceTableId);
+    const viewport = useViewport ? getDocsTableRenderViewport(unitId, sourceTableId) : undefined;
     const hasHorizontalViewport = hasHorizontalTableViewport(viewport);
     const scrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
 
@@ -559,6 +562,7 @@ function hasNewPublishedPageDrawings(
 export class DocDrawingTransformUpdateController extends Disposable implements IRenderModule {
     private _referenceDrawings?: Map<string, { original?: IDrawingParam; projected: IDocDrawingBase }>;
     private _liquid = new Liquid();
+    private _printPage?: { page: IDocumentSkeletonPage; count: number };
     private _changesetDrawingRefreshScheduled = false;
     private _pendingMultiDrawingSelection = new Set<string>();
     private _pendingMultiDrawingSelectionSubscription?: IDisposable;
@@ -908,6 +912,31 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             }
         }
         return affected;
+    }
+
+    getPrintPageDrawingPositions(
+        unitId: string,
+        skeleton: DocumentSkeleton,
+        pageIndex: number,
+        origin: { left: number; top: number }
+    ): Record<string, IDrawingParamsWithBehindText> {
+        const data = skeleton.getSkeletonData();
+        const page = data?.pages[pageIndex];
+        if (!data || !page) {
+            return {};
+        }
+        const editorLiquid = this._liquid;
+        const previousPrintPage = this._printPage;
+        this._liquid = new Liquid();
+        this._printPage = { page, count: data.pages.length };
+        try {
+            const positions: Record<string, IDrawingParamsWithBehindText> = {};
+            this._collectPublishedPageDrawingPositions(unitId, page, data.skeHeaders, data.skeFooters, origin.left, origin.top, positions);
+            return positions;
+        } finally {
+            this._liquid = editorLiquid;
+            this._printPage = previousPrintPage;
+        }
     }
 
     private _collectPublishedPageDrawingPositions(
@@ -1323,14 +1352,14 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
     }
 
     private _getShapePageFieldContext(context: IDrawingPositionContext, drawingType?: DrawingTypeEnum): IDocumentsConfig['pageFieldContext'] {
-        const page = context.hostPage ?? context.page;
+        const page = this._printPage?.page ?? context.hostPage ?? context.page;
         if (drawingType !== DrawingTypeEnum.DRAWING_SHAPE || !Number.isFinite(page.pageHeight) || page.pageNumber == null) {
             return undefined;
         }
         return {
             pageNumber: page.pageNumber,
             pageNumberFormat: page.pageNumberFormat,
-            pageCount: this._docSkeletonManagerService.getSkeleton()?.getSkeletonData()?.pages.length ?? 1,
+            pageCount: this._printPage?.count ?? this._docSkeletonManagerService.getSkeleton()?.getSkeletonData()?.pages.length ?? 1,
         };
     }
 
@@ -1394,7 +1423,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         return;
                     }
 
-                    const cellOffset = getDocsTableCellDrawingOffset(unitId, table, row, cell);
+                    const cellOffset = getDocsTableCellDrawingOffset(unitId, table, row, cell, this._printPage == null);
                     const marginTop = baseMarginTop + cellOffset.top;
                     const marginLeft = baseMarginLeft + cellOffset.left;
 

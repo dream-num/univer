@@ -15,8 +15,10 @@
  */
 
 import type { DocumentDataModel, LocaleService, Nullable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from './basics/i-document-skeleton-cached';
 import type {
+    IDocumentSkeletonContinuousBaseline,
     IDocumentSkeletonContinuousSnapshot,
     IDocumentSkeletonPagePatch,
 } from './components/docs/layout/document-layout-page-patch';
@@ -30,7 +32,6 @@ import type {
     IDocumentLayoutInvalidation,
     IDocumentLayoutProgress,
 } from './components/docs/layout/document-layout-types';
-import { Disposable } from '@univerjs/core';
 import { DocumentSkeleton } from './components/docs/layout/doc-skeleton';
 import {
     hydrateDocumentSkeletonPage,
@@ -49,6 +50,11 @@ export interface IDocumentLayoutSessionStartOptions {
     waitForHyphenationPatterns?: boolean;
     modernPageWidth?: number;
     modernHorizontalMargin?: number;
+    /** Version Main has applied, even when this request needs a full first publication. */
+    acknowledgedLayoutVersion?: string;
+    /** An acknowledged version that this request may use as the first patch's base. */
+    appliedLayoutVersion?: string;
+    continuousLayoutVersion?: string;
 }
 
 export interface IDocumentLayoutStepResult {
@@ -75,7 +81,11 @@ export class DocumentLayoutSession extends Disposable {
     private _layoutReason: DocumentLayoutReason = 'initial';
     private _didPublishEditAnchor = false;
     private _continuousPageSnapshot: IDocumentSkeletonContinuousSnapshot | null = null;
-    private _continuousReplacementOffset: number | undefined;
+    private _continuousInvalidatedOffset: number | undefined;
+    private _completedContinuousLayout: IDocumentSkeletonContinuousBaseline | undefined;
+    private _acknowledgedContinuousLayout: IDocumentSkeletonContinuousBaseline | undefined;
+    private _continuousEditBase: IDocumentSkeletonContinuousBaseline | undefined;
+    private _continuousLayoutVersion: string | undefined;
     private readonly _publishedHeaderPages = new Map<string, Map<number | string, IDocumentSkeletonPage>>();
     private readonly _publishedFooterPages = new Map<string, Map<number | string, IDocumentSkeletonPage>>();
     private _resetPublishedResources = true;
@@ -86,6 +96,10 @@ export class DocumentLayoutSession extends Disposable {
         this._viewModel = new DocumentViewModel(dataModel);
         this._skeleton = DocumentSkeleton.create(this._viewModel, localeService, {
             isolateIncrementalPublications: false,
+            batchContinuousPublications: true,
+            onContinuousLayoutInvalidated: (offset) => {
+                this._continuousInvalidatedOffset = Math.min(this._continuousInvalidatedOffset ?? offset, offset);
+            },
         });
     }
 
@@ -98,17 +112,34 @@ export class DocumentLayoutSession extends Disposable {
         this._publishedFooterPages.clear();
         this._resetPublishedResources = true;
         this._pendingPaginatedCompletion = null;
-        if (options?.reason !== 'edit') {
-            this._continuousPageSnapshot = null;
+        // Only a completed result acknowledged by Main can seed a new generation.
+        const acknowledgedVersion = options?.acknowledgedLayoutVersion ?? options?.appliedLayoutVersion;
+        const completed = this._completedContinuousLayout;
+        const acknowledged = this._acknowledgedContinuousLayout;
+        const base = completed?.version === acknowledgedVersion
+            ? completed
+            : acknowledged?.version === acknowledgedVersion ? acknowledged : undefined;
+        // A later complete reply can be dropped by Main. Preserve its last
+        // acknowledged geometry even for requests that require a full prefix.
+        if (base != null) {
+            this._acknowledgedContinuousLayout = base;
         }
-        this._continuousReplacementOffset = options?.reason === 'edit'
-            ? options.invalidation?.oldStart ?? options.anchor
+        this._continuousEditBase = this._layoutReason === 'edit' && base?.version === options?.appliedLayoutVersion
+            ? base
             : undefined;
+        this._continuousLayoutVersion = options?.continuousLayoutVersion;
+        this._continuousInvalidatedOffset = undefined;
+        this._continuousPageSnapshot = null;
         const generation = this._skeleton.startIncrementalLayout({
             ...options,
             reuseUnaffectedTail: true,
         });
         const progress = this._skeleton.getLayoutProgress();
+        if (progress?.mode === 'paginated') {
+            this._completedContinuousLayout = undefined;
+            this._acknowledgedContinuousLayout = undefined;
+            this._continuousEditBase = undefined;
+        }
         this._lastPublishedPageCount = progress?.mode === 'paginated'
             ? progress.publishedPageCount
             : 0;
@@ -178,6 +209,11 @@ export class DocumentLayoutSession extends Disposable {
         if (generation == null || this._pendingPaginatedCompletion?.generation === generation) {
             this._pendingPaginatedCompletion = null;
         }
+        if (generation == null || this._skeleton.getLayoutProgress()?.generation === generation) {
+            this._continuousEditBase = undefined;
+            this._continuousPageSnapshot = null;
+            this._continuousInvalidatedOffset = undefined;
+        }
         this._skeleton.cancelIncrementalLayout(generation);
     }
 
@@ -186,7 +222,7 @@ export class DocumentLayoutSession extends Disposable {
         this._viewModel.reset(dataModel);
         this._skeleton.makeDirty(true);
         this._lastPublishedPageCount = 0;
-        this._continuousReplacementOffset = undefined;
+        this._continuousPageSnapshot = null;
         this._pendingPaginatedCompletion = null;
     }
 
@@ -202,6 +238,10 @@ export class DocumentLayoutSession extends Disposable {
     }
 
     override dispose(): void {
+        this._completedContinuousLayout = undefined;
+        this._acknowledgedContinuousLayout = undefined;
+        this._continuousEditBase = undefined;
+        this._continuousPageSnapshot = null;
         this._skeleton.dispose();
         super.dispose();
     }
@@ -211,6 +251,9 @@ export class DocumentLayoutSession extends Disposable {
         // A total-page field can restart pagination within the same generation.
         if ((progress.paginationRevision ?? 0) !== this._paginationRevision) {
             this._paginationRevision = progress.paginationRevision ?? 0;
+            if (progress.mode === 'continuous') {
+                this._continuousInvalidatedOffset = 0;
+            }
             this._lastPublishedPageCount = 0;
             this._didPublishEditAnchor = false;
         }
@@ -286,11 +329,27 @@ export class DocumentLayoutSession extends Disposable {
             const { block, snapshot } = serializeDocumentSkeletonContinuousBlock(
                 page,
                 this._continuousPageSnapshot,
-                this._continuousReplacementOffset,
-                true
+                true,
+                {
+                    base: this._continuousEditBase,
+                    invalidatedOffset: this._continuousInvalidatedOffset,
+                    trackBaseline: this._continuousLayoutVersion != null,
+                    complete: progress.complete,
+                    captureFrom: this._completedContinuousLayout ?? this._acknowledgedContinuousLayout,
+                }
             );
-            this._continuousPageSnapshot = snapshot;
-            this._continuousReplacementOffset = undefined;
+            if (progress.complete) {
+                const version = this._continuousLayoutVersion;
+                this._completedContinuousLayout = version != null && snapshot.baselineSections != null && snapshot.tables != null
+                    ? { version, height: snapshot.height, sections: snapshot.baselineSections, tables: snapshot.tables }
+                    : undefined;
+                if (this._completedContinuousLayout != null) {
+                    block.completedLayoutVersion = this._completedContinuousLayout.version;
+                }
+            }
+            this._continuousEditBase = undefined;
+            this._continuousPageSnapshot = progress.complete ? null : snapshot;
+            this._continuousInvalidatedOffset = undefined;
             return {
                 progress,
                 publication: {

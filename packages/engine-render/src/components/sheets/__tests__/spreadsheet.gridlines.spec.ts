@@ -37,7 +37,7 @@ function createTestBed(columns: number[], rows = [24, 48, 72]) {
         rowTotalHeight: rows.at(-1) ?? 0,
         showGridlines: BooleanNumber.TRUE,
         defaultGridlinesColor: '#d5d7dc',
-        worksheet: { getRowVisible },
+        getRowVisible,
         overflowCache: { toNativeArray: () => [] },
         getCurrentRowColumnSegmentMergeData: vi.fn(() => []),
     };

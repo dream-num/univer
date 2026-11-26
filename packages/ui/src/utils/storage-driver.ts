@@ -21,6 +21,7 @@ const DB_VERSION = 1;
 interface IStorageDriver {
     getItem<T>(key: string): Promise<T | null>;
     setItem<T>(key: string, value: T): Promise<T>;
+    updateItem<T>(key: string, update: (value: T | null) => T | undefined): Promise<boolean>;
     removeItem(key: string): Promise<void>;
     clear(): Promise<void>;
     key(index: number): Promise<string | null>;
@@ -44,9 +45,12 @@ class IndexedDBDriver implements IStorageDriver {
         });
     }
 
+    open(): Promise<IDBDatabase> {
+        return this._db ??= this._init();
+    }
+
     private _store(mode: IDBTransactionMode): Promise<IDBObjectStore> {
-        this._db ??= this._init();
-        return this._db.then((db) => {
+        return this.open().then((db) => {
             const tx = db.transaction(STORE_NAME, mode);
             return tx.objectStore(STORE_NAME);
         });
@@ -67,6 +71,29 @@ class IndexedDBDriver implements IStorageDriver {
             const req = store.put(value, key);
             req.onsuccess = () => resolve(value);
             req.onerror = () => reject(req.error);
+        });
+    }
+
+    async updateItem<T>(key: string, update: (value: T | null) => T | undefined): Promise<boolean> {
+        const store = await this._store('readwrite');
+        return new Promise((resolve, reject) => {
+            const transaction = store.transaction;
+            let written = false;
+            transaction.oncomplete = () => resolve(written);
+            transaction.onabort = () => reject(transaction.error ?? new Error('Storage update aborted'));
+            const request = store.get(key);
+            request.onsuccess = () => {
+                try {
+                    const next = update(request.result ?? null);
+                    if (next !== undefined) {
+                        store.put(next, key);
+                        written = true;
+                    }
+                } catch (error) {
+                    reject(error);
+                    transaction.abort();
+                }
+            };
         });
     }
 
@@ -157,22 +184,53 @@ class LocalStorageDriver implements IStorageDriver {
         }
     }
 
-    async setItem<T>(key: string, value: T): Promise<T> {
-        localStorage.setItem(this._key(key), JSON.stringify(value));
-        return value;
-    }
-
-    async removeItem(key: string): Promise<void> {
-        localStorage.removeItem(this._key(key));
-    }
-
-    async clear(): Promise<void> {
-        const toRemove: string[] = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const k = localStorage.key(i)!;
-            if (k.startsWith(this._prefix)) toRemove.push(k);
+    private async _write<T>(write: () => T, requireLock = false): Promise<T> {
+        const locks = globalThis.navigator?.locks;
+        // Clear overlaps writes to every key in this namespace.
+        if (locks) {
+            return locks.request(DB_NAME, write);
         }
-        toRemove.forEach((k) => localStorage.removeItem(k));
+        if (requireLock) {
+            throw new Error('Atomic storage updates require IndexedDB or Web Locks');
+        }
+        return write();
+    }
+
+    setItem<T>(key: string, value: T): Promise<T> {
+        return this._write(() => {
+            localStorage.setItem(this._key(key), JSON.stringify(value));
+            return value;
+        });
+    }
+
+    updateItem<T>(key: string, update: (value: T | null) => T | undefined): Promise<boolean> {
+        const storageKey = this._key(key);
+        return this._write(() => {
+            const raw = localStorage.getItem(storageKey);
+            const next = update(raw === null ? null : JSON.parse(raw));
+            if (next === undefined) {
+                return false;
+            }
+            localStorage.setItem(storageKey, JSON.stringify(next));
+            return true;
+        }, true);
+    }
+
+    removeItem(key: string): Promise<void> {
+        return this._write(() => {
+            localStorage.removeItem(this._key(key));
+        });
+    }
+
+    clear(): Promise<void> {
+        return this._write(() => {
+            const toRemove: string[] = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i)!;
+                if (k.startsWith(this._prefix)) toRemove.push(k);
+            }
+            toRemove.forEach((k) => localStorage.removeItem(k));
+        });
     }
 
     async key(index: number): Promise<string | null> {
@@ -206,55 +264,50 @@ class LocalStorageDriver implements IStorageDriver {
 }
 
 class FallbackStorageDriver implements IStorageDriver {
-    private _fallbackEnabled = false;
+    private _backend?: Promise<IStorageDriver>;
 
     constructor(
-        private readonly _primary: IStorageDriver,
+        private readonly _primary: IndexedDBDriver,
         private readonly _fallback: IStorageDriver
     ) {}
 
-    private async _run<T>(primary: () => Promise<T>, fallback: () => Promise<T>): Promise<T> {
-        if (this._fallbackEnabled) {
-            return fallback();
-        }
-
-        try {
-            return await primary();
-        } catch {
-            this._fallbackEnabled = true;
-            return fallback();
-        }
+    private async _run<T>(action: (driver: IStorageDriver) => Promise<T>): Promise<T> {
+        // Select the backend on open. A failed operation must not switch the tab to a different store.
+        this._backend ??= this._primary.open().then(() => this._primary, () => this._fallback);
+        return action(await this._backend);
     }
 
     getItem<T>(key: string): Promise<T | null> {
-        return this._run(() => this._primary.getItem<T>(key), () => this._fallback.getItem<T>(key));
+        return this._run((driver) => driver.getItem<T>(key));
     }
 
     setItem<T>(key: string, value: T): Promise<T> {
-        return this._run(() => this._primary.setItem(key, value), () => this._fallback.setItem(key, value));
+        return this._run((driver) => driver.setItem(key, value));
+    }
+
+    updateItem<T>(key: string, update: (value: T | null) => T | undefined): Promise<boolean> {
+        // If IndexedDB is exposed but cannot open here, another tab may still use it.
+        return this._primary.updateItem(key, update);
     }
 
     removeItem(key: string): Promise<void> {
-        return this._run(() => this._primary.removeItem(key), () => this._fallback.removeItem(key));
+        return this._run((driver) => driver.removeItem(key));
     }
 
     clear(): Promise<void> {
-        return this._run(() => this._primary.clear(), () => this._fallback.clear());
+        return this._run((driver) => driver.clear());
     }
 
     key(index: number): Promise<string | null> {
-        return this._run(() => this._primary.key(index), () => this._fallback.key(index));
+        return this._run((driver) => driver.key(index));
     }
 
     keys(): Promise<string[]> {
-        return this._run(() => this._primary.keys(), () => this._fallback.keys());
+        return this._run((driver) => driver.keys());
     }
 
     iterate<T, U>(iteratee: (value: T, key: string, iterationNumber: number) => U): Promise<U> {
-        return this._run(
-            () => this._primary.iterate(iteratee),
-            () => this._fallback.iterate(iteratee)
-        );
+        return this._run((driver) => driver.iterate(iteratee));
     }
 }
 

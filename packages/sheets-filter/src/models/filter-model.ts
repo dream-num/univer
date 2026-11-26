@@ -25,6 +25,7 @@ import {
     extractPureTextFromCell,
     mergeSets,
     Rectangle,
+    regexp,
     Tools,
 } from '@univerjs/core';
 import { COLOR_BLACK_RGB } from '@univerjs/engine-render';
@@ -155,14 +156,24 @@ export class FilterModel extends Disposable {
      * another word it would not change `filteredOutRows` on `FilterModel` nor `FilterColumn`.
      * @param col
      */
-    getFilteredOutRowsExceptCol(col: number): Set<number> {
-        return this._getAllFilterColumns(true)
-            .filter(([colOffset]) => colOffset !== col)
-            .reduce((acc, [, filterColumn]) => {
-                const newResult = filterColumn.calc({ getAlreadyFilteredOutRows: () => acc });
-                if (newResult) return mergeSets(acc, newResult);
-                return acc;
-            }, new Set<number>());
+    getFilteredOutRowsExceptCol(col: number, cachedRows?: ReadonlyMap<number, ReadonlySet<number>>): Set<number> {
+        const rows = new Set<number>();
+        let useCache = !!cachedRows;
+        for (const [column, filter] of this._getAllFilterColumns(true)) {
+            if (column === col) {
+                // Later columns originally skipped rows hidden by this column.
+                useCache = false;
+                continue;
+            }
+            const cached = useCache ? cachedRows?.get(column) : undefined;
+            const filtered = cached ?? filter.calc({ getAlreadyFilteredOutRows: () => rows });
+            if (filtered) {
+                for (const row of filtered) {
+                    rows.add(row);
+                }
+            }
+        }
+        return rows;
     }
 
     /**
@@ -568,6 +579,16 @@ function isCompoundCustomFilter(filter: FilterFn[]): filter is [FilterFn, Filter
 // TODO@wzhudev: this is not ideal
 function generateCustomFilterFn(filter: ICustomFilter): FilterFn {
     const compare = filter.val;
+
+    if (filter.compareAsText && typeof compare === 'string' &&
+        (!filter.operator || filter.operator === CustomFilterOperator.EQUAL || filter.operator === CustomFilterOperator.NOT_EQUALS)) {
+        const pattern = regexp.createFromWildcard(compare);
+        const negate = filter.operator === CustomFilterOperator.NOT_EQUALS;
+        return (value) => {
+            const matches = value == null ? compare === '' : pattern.test(String(value));
+            return negate ? !matches : matches;
+        };
+    }
 
     if (filter.operator === CustomFilterOperator.NOT_EQUALS && typeof compare === 'string' && !ensureNumeric(compare)) {
         return createTextNotEqualsFilter(compare);

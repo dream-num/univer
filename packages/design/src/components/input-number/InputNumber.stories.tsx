@@ -15,7 +15,7 @@
  */
 
 import type { Meta } from '@storybook/react';
-
+import { FormLayout } from '../form-layout/FormLayout';
 import { InputNumber } from './InputNumber';
 
 const meta: Meta<typeof InputNumber> = {
@@ -32,13 +32,54 @@ export default meta;
 export const InputNumberBasic = {
     render() {
         return (
-            <>
-                <div>
-                    <InputNumber />
-                    <InputNumber precision={0} />
-                    <InputNumber allowEmpty />
-                </div>
-            </>
+            <div className="univer-flex univer-flex-col univer-gap-3">
+                <InputNumber className="univer-w-44" defaultValue={2} min={0} max={20} precision={0} />
+                <InputNumber className="univer-w-44" defaultValue={0.1} step={0.1} precision={1} min={0} max={10} />
+                <InputNumber className="univer-w-44" allowEmpty placeholder="Enter number" />
+            </div>
+        );
+    },
+};
+
+export const InputNumberSizes = {
+    render() {
+        return (
+            <div className="univer-flex univer-flex-col univer-gap-3">
+                <InputNumber className="univer-w-44" size="mini" defaultValue={12} />
+                <InputNumber className="univer-w-44" size="small" defaultValue={12} />
+                <InputNumber className="univer-w-44" size="middle" defaultValue={12} />
+                <InputNumber className="univer-w-44" size="large" defaultValue={12} />
+            </div>
+        );
+    },
+};
+
+export const InputNumberBoundsAndFormatter = {
+    render() {
+        return (
+            <div className="univer-flex univer-flex-col univer-gap-3">
+                <InputNumber
+                    className="univer-w-44"
+                    defaultValue={50}
+                    min={0}
+                    max={100}
+                    step={5}
+                    formatter={(v) => `${v}%`}
+                    parser={(v) => v?.replace(/%/g, '') ?? ''}
+                />
+                <InputNumber
+                    className="univer-w-44"
+                    defaultValue={0}
+                    min={0}
+                    max={10}
+                />
+                <InputNumber
+                    className="univer-w-44"
+                    defaultValue={10}
+                    min={0}
+                    max={10}
+                />
+            </div>
         );
     },
 };
@@ -46,11 +87,10 @@ export const InputNumberBasic = {
 export const InputNumberDisabled = {
     render() {
         return (
-            <>
-                <div>
-                    <InputNumber disabled />
-                </div>
-            </>
+            <div className="univer-flex univer-flex-col univer-gap-3">
+                <InputNumber className="univer-w-44" defaultValue={2} disabled />
+                <InputNumber className="univer-w-44" placeholder="Disabled" disabled />
+            </div>
         );
     },
 };
@@ -58,26 +98,40 @@ export const InputNumberDisabled = {
 export const InputNumberHideControls = {
     render() {
         return (
-            <>
-                <div>
-                    <InputNumber controls={false} />
-                </div>
-            </>
+            <div>
+                <InputNumber className="univer-w-44" defaultValue={24} controls={false} />
+            </div>
         );
     },
 };
 
 export const InputNumberAllowClear = {
     render() {
-        return <InputNumber allowClear allowEmpty defaultValue={12} />;
+        return (
+            <div className="univer-flex univer-flex-col univer-gap-3">
+                <InputNumber className="univer-w-44" allowClear allowEmpty defaultValue={12} />
+                <InputNumber className="univer-w-44" allowClear allowEmpty controls={false} defaultValue={12} />
+            </div>
+        );
+    },
+};
+
+export const InputNumberInvalid = {
+    render() {
+        return (
+            <FormLayout label="Decimal places" error="Value must be between 0 and 20">
+                <InputNumber className="univer-w-44" defaultValue={2} min={0} max={20} />
+            </FormLayout>
+        );
     },
 };
 
 export const InputNumberRtl = {
     render() {
         return (
-            <div dir="rtl">
-                <InputNumber defaultValue={12} />
+            <div dir="rtl" className="univer-flex univer-flex-col univer-gap-3">
+                <InputNumber className="univer-w-44" defaultValue={12} />
+                <InputNumber className="univer-w-44" allowClear allowEmpty defaultValue={12} />
             </div>
         );
     },

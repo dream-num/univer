@@ -24,7 +24,14 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { CancelFrozenCommand, getPrimaryForRange, SetFrozenMutation, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import {
+    CancelFrozenCommand,
+    getPrimaryForRange,
+    SetFrozenMutation,
+    SetSelectionsOperation,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IScrollStateWithSearchParam } from '../../../services/scroll-manager.service';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
@@ -229,6 +236,29 @@ describe('Test commands used for change selections', () => {
             expect(config?.startRow).toBe(-1);
             expect(config?.startColumn).toBe(7);
             expect(config?.xSplit).toBe(1);
+        });
+
+        it('freezes the first row using the focused pane scroll and supports undo and redo', async () => {
+            const injector = univer!.__getInjector();
+            const renderManager = get(IRenderManagerService);
+            const primary = renderManager.getRenderUnitById('test')!;
+            const child = injector.createChild();
+            child.add([SheetScrollManagerService, { useFactory: function createScrollManager() {
+                return child.createInstance(SheetScrollManagerService, { ...primary, unit: get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)! });
+            } }]);
+            const scroll = child.get(SheetScrollManagerService);
+            scroll.setSearchParam(searchParam);
+            scroll.setValidScrollState({ ...searchParam, sheetViewStartRow: 10, sheetViewStartColumn: 4, offsetX: 0, offsetY: 0 });
+            renderManager.addRender('right-pane', { ...primary, renderId: 'right-pane', with: child.get.bind(child) });
+            renderManager.focusRender!('right-pane');
+            const original = { ...getFreeze() };
+            await expect(commandService.executeCommand(SetFirstRowFrozenCommand.id)).resolves.toBe(true);
+            expect(getFreeze()).toMatchObject({ startRow: 11, ySplit: 1 });
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getFreeze()).toEqual(original);
+            await commandService.executeCommand(RedoCommand.id);
+            expect(getFreeze()).toMatchObject({ startRow: 11, ySplit: 1 });
+            child.dispose();
         });
 
         it('Should not freeze when the whole sheet is selected', async () => {

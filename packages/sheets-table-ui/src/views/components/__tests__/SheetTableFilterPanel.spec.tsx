@@ -66,7 +66,7 @@ import {
     TableStringCompareTypeEnum,
 } from '@univerjs/sheets-table';
 import { IMarkSelectionService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { IDialogService, IShortcutService, RediContext } from '@univerjs/ui';
+import { IDialogService, IShortcutService, IUIPartsService, RediContext, UIPartsService } from '@univerjs/ui';
 import { act, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
@@ -483,6 +483,7 @@ function createTestBed(): ITestBed {
         override onStarting(): void {
             const dependencies: Dependency[] = [
                 [TableManager],
+                [IUIPartsService, { useClass: UIPartsService }],
                 [SheetTableService],
                 [SheetsTableUiService],
                 [SheetsSortService, { useClass: SheetsSortService }],

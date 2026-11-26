@@ -141,7 +141,7 @@ export namespace FilterConditionItems {
             }
 
             const firstCustomFilter = filterColumn.customFilters.customFilters[0];
-            const canMap = firstCustomFilter.val === ' ' && firstCustomFilter.operator === CustomFilterOperator.NOT_EQUALS;
+            const canMap = !firstCustomFilter.compareAsText && firstCustomFilter.val === ' ' && firstCustomFilter.operator === CustomFilterOperator.NOT_EQUALS;
             if (!canMap) {
                 return false;
             }

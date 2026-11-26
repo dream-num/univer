@@ -16,7 +16,7 @@
 
 import { DocumentDataModel, Injector } from '@univerjs/core';
 import { afterEach, beforeEach, expect, it } from 'vitest';
-import { getDocumentHeaderFooterReferenceResolver, registerDocumentHeaderFooterReferenceResolver } from '../header-footer-reference';
+import { getDocumentHeaderFooterReferenceResolver, registerDocumentHeaderFooterReferenceResolver } from '../../../index';
 
 let testInjector: Injector;
 beforeEach(() => {

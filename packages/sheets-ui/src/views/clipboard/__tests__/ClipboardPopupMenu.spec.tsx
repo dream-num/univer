@@ -94,19 +94,19 @@ class TestSheetSkeletonManagerService {
 class TestRenderUnit {
     readonly components = new Map();
     readonly mainComponent = {};
-    readonly engine = {};
+    readonly canvas = document.createElement('canvas');
+    readonly engine = {
+        getCanvasElement: () => this.canvas,
+        getCanvas: () => ({ getWidth: () => 400, getHeight: () => 300 }),
+    };
+
     readonly sheetSkeletonManagerService = new TestSheetSkeletonManagerService();
     readonly scene = {
         scaleX: 1,
         scaleY: 1,
         getViewport: () => ({}),
         getViewportScrollXY: () => ({ x: 0, y: 0 }),
-        getEngine: () => ({
-            getCanvas: () => ({
-                getWidth: () => 400,
-                getHeight: () => 300,
-            }),
-        }),
+        getEngine: () => this.engine,
     };
 
     with(token: unknown): unknown {
@@ -120,13 +120,18 @@ class TestRenderUnit {
 
 class TestRenderManagerService {
     readonly renderUnit = new TestRenderUnit();
-
     getRenderUnitById(): TestRenderUnit {
         return this.renderUnit;
     }
 }
 
 class TestLayoutService {
+    readonly content = document.createElement('div');
+
+    getContentElement(): HTMLElement {
+        return this.content;
+    }
+
     focusCount = 0;
     menuOpenWhenFocused = false;
 

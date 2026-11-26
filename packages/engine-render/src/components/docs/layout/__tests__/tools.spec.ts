@@ -35,9 +35,11 @@ import {
     SpacingRule,
 } from '@univerjs/core';
 import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import type { IDocumentSkeletonPage } from '../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy } from '../../document-compatibility';
+import { setDocsTableRenderViewportProvider } from '../../table-render-viewport';
 import { DocumentViewModel } from '../../view-model/document-view-model';
 import { createParagraphLayoutTestBed } from '../block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import { createSkeletonLetterGlyph } from '../model/glyph';
@@ -1026,6 +1028,65 @@ describe('docs layout tools extra', () => {
                 visualWidth: 290,
             },
         ]);
+    });
+
+    it('retains lines in horizontally hidden cells and their nested columns for unclipped queries', () => {
+        const page = {
+            marginLeft: 10,
+            marginRight: 10,
+            marginTop: 10,
+            pageHeight: 800,
+            pageWidth: 200,
+            sections: [createLineSection(1, 0, 180)],
+            skeTables: new Map([['table', {
+                tableId: 'table',
+                left: 0,
+                top: 40,
+                width: 300,
+                rows: [{
+                    top: 3,
+                    cells: [{
+                        left: 100,
+                        marginLeft: 3,
+                        marginRight: 2,
+                        marginTop: 4,
+                        pageWidth: 100,
+                        cellTextDirection: 'tbRlV',
+                        sections: [createLineSection(2, 0, 80)],
+                        skeColumnGroups: new Map([['nested', {
+                            left: 0,
+                            top: 8,
+                            columns: [{
+                                left: 0,
+                                top: 2,
+                                width: 90,
+                                page: {
+                                    marginLeft: 2,
+                                    marginRight: 2,
+                                    marginTop: 1,
+                                    sections: [createLineSection(3, 0, 86)],
+                                },
+                            }],
+                        }]]),
+                    }],
+                }],
+            }]]),
+        } as unknown as IDocumentSkeletonPage;
+        const viewport = vi.fn(() => ({ contentWidth: 300, scrollLeft: 0, viewportWidth: 20 }));
+        setDocsTableRenderViewportProvider(viewport);
+        onTestFinished(() => setDocsTableRenderViewportProvider(null));
+
+        const visible: number[] = [];
+        documentSkeletonLineIterator([page], {}, ({ line }) => visible.push(line.paragraphIndex));
+        expect(visible).toEqual([1]);
+
+        viewport.mockClear();
+        const unclipped: Array<[number, number, boolean]> = [];
+        documentSkeletonLineIterator([page], { includeUnclippedDescendants: true }, ({ line, sectionTop, hasAncestorTransform }) => {
+            unclipped.push([line.paragraphIndex, sectionTop, !!hasAncestorTransform]);
+        });
+        expect(unclipped).toEqual([[1, 10, false], [2, 57, false], [3, 68, true]]);
+        expect(viewport).not.toHaveBeenCalled();
     });
 
     it('iterates top-level and column nested tables with document geometry', () => {

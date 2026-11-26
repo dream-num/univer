@@ -49,6 +49,7 @@ export type IDocumentLayoutProtectedRange =
 
 export interface IDocumentLayoutApplyResult {
     didReplaceProtectedPages: boolean;
+    requiresFullPublication?: true;
 }
 
 export interface IDocumentLayoutProgress {
@@ -59,6 +60,8 @@ export interface IDocumentLayoutProgress {
     didPublish: boolean;
     /** The publication atomically replaced the page containing the edit anchor. */
     didPublishAnchor: boolean;
+    /** Main published replacement object geometry alongside a protected continuous text suffix. */
+    didPublishEmbeddedGeometry?: boolean;
     publishedPageCount: number;
     reason: DocumentLayoutReason;
     mode: DocumentLayoutMode;

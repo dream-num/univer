@@ -30,7 +30,8 @@ function getRowContent(
     cols: number[],
     hooks: ISheetClipboardHook[],
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-    mergeSet: Set<string>
+    mergeSet: Set<string>,
+    visibleRowAtOffset: (offset: number) => number
 ) {
     const properties = hooks.map((hook) => hook.onCopyRow?.(row)).filter((v) => !!v) as IClipboardPropertyItem[];
     const mergedProperties = mergeProperties(properties);
@@ -40,9 +41,10 @@ function getRowContent(
             if (!mergeSet.has(`${row}-${col}`)) {
                 const v = matrix.getValue(row, col);
                 if (v?.rowSpan && v?.colSpan) {
-                    for (let i = row; i < row + v.rowSpan; i++) {
+                    for (let offset = 0; offset < v.rowSpan; offset++) {
+                        const mergedRow = visibleRowAtOffset(offset);
                         for (let j = col; j < col + v.colSpan; j++) {
-                            mergeSet.add(`${i}-${j}`);
+                            mergeSet.add(`${mergedRow}-${j}`);
                         }
                     }
                 }
@@ -121,7 +123,8 @@ export class USMToHtmlService {
         >,
         range: IDiscreteRange,
         hooks: ISheetClipboardHook[],
-        copyId?: string
+        copyId?: string,
+        compactRows = false
     ): string {
         const { cols, rows } = range;
         if (!cols.length) {
@@ -131,8 +134,9 @@ export class USMToHtmlService {
         // row styles and table contents
         const rowContents: string[] = [];
         const mergeSet = new Set<string>();
-        rows.forEach((row) => {
-            rowContents.push(getRowContent(row, cols, hooks, matrix, mergeSet));
+        rows.forEach((row, index) => {
+            const visibleRowAtOffset = (offset: number) => compactRows ? rows[index + offset] : row + offset;
+            rowContents.push(getRowContent(row, cols, hooks, matrix, mergeSet, visibleRowAtOffset));
         });
 
         const html = `<google-sheets-html-origin><table data-copy-id="${copyId}" xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none">${colStyles}

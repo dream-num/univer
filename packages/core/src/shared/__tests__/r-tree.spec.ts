@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from 'vitest';
 import type { IRange } from '../../sheets/typedef';
 import type { IRTreeItem } from '../r-tree';
+import { describe, expect, it, vi } from 'vitest';
 import { RTree } from '../r-tree';
 
 describe('RTree integration', () => {
@@ -82,6 +82,14 @@ describe('RTree integration', () => {
         tree.bulkRemove([point(1), point(2)]);
         expect(Array.from(tree.searchGenerator(point(1)))).toEqual(['keep', 'same']);
         expect(Array.from(tree.searchGenerator(point(2)))).toEqual(['keep', 'same']);
+
+        tree.remove(point(1, 'keep'));
+        expect(Array.from(tree.searchGenerator(point(1)))).toEqual(['same']);
+        const newPoint = { ...point(1), id: Number.NaN };
+        tree.bulkInsert([newPoint, newPoint, point(1, 'again')]);
+        expect(Array.from(tree.searchGenerator(point(1)))).toEqual([Number.NaN, 'again', 'same']);
+        tree.remove(newPoint);
+        expect(Array.from(tree.searchGenerator(point(1)))).toEqual(['again', 'same']);
         tree.dispose();
     });
 

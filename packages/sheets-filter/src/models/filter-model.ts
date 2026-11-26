@@ -16,6 +16,7 @@
 
 import type { CellValue, ICellData, IRange, IStyleData, Nullable, Worksheet } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import type { IAutoFilter, IColorFilters, ICustomFilter, ICustomFilters, IFilterColumn, IFilters } from './types';
 import {
     CellValueType,
     ColorKit,
@@ -29,7 +30,6 @@ import {
 } from '@univerjs/core';
 import { COLOR_BLACK_RGB } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
-import type { IAutoFilter, IColorFilters, ICustomFilter, ICustomFilters, IFilterColumn, IFilters } from './types';
 import { createTextNotEqualsFilter, ensureNumeric, getCustomFilterFn, isNumericFilterFn } from './custom-filters';
 import { CustomFilterOperator, FilterBy } from './types';
 
@@ -133,6 +133,10 @@ export class FilterModel extends Disposable {
         }
 
         this._emitHasCriteria();
+    }
+
+    get hasCriteria(): boolean {
+        return this._hasCriteria$.value;
     }
 
     isRowFiltered(row: number): boolean {

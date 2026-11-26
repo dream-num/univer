@@ -24,6 +24,8 @@ export class Mina extends BaseFunction {
 
     override maxParams = 255;
 
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
+
     override calculate(...variants: BaseValueObject[]) {
         let accumulatorAll: BaseValueObject = NumberValueObject.create(Number.POSITIVE_INFINITY);
         for (let i = 0; i < variants.length; i++) {

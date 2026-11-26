@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -24,7 +25,40 @@ import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Sortby } from '../index';
 
 describe('Test sortby function', () => {
-    const testFunction = new Sortby(FUNCTION_NAMES_LOOKUP.SORTBY);
+    let injector: Injector;
+    let testFunction: Sortby;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [Sortby, { useFactory: () => injector.createInstance(Sortby, FUNCTION_NAMES_LOOKUP.SORTBY) }],
+        ]);
+        testFunction = injector.get(Sortby);
+    });
+
+    afterEach(() => injector.dispose());
+
+    it.each([
+        { keys: [true, false, true, false], order: 1, expected: [2, 4, 1, 3] },
+        { keys: [true, false, true, false], order: -1, expected: [1, 3, 2, 4] },
+        { keys: [2, 10, '15'], order: 1, expected: [1, 2, 3] },
+        { keys: [2, 10, '15'], order: -1, expected: [3, 2, 1] },
+        { keys: ['#N/A', '#VALUE!', '#DIV/0!', '#NUM!', '#N/A', '#VALUE!'], order: 1, expected: [3, 2, 6, 4, 1, 5] },
+        { keys: ['#N/A', '#VALUE!', '#DIV/0!', '#NUM!', '#N/A', '#VALUE!'], order: -1, expected: [1, 5, 4, 2, 6, 3] },
+    ])('matches Excel type ranks and stable ties for $keys in order $order', ({ keys, order, expected }) => {
+        const column = (values: Array<string | number | boolean>) => ArrayValueObject.create({
+            calculateValueList: transformToValueObject(values.map((value) => [value]), true),
+            rowCount: values.length,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: 0,
+            column: 0,
+        });
+        const array = column(keys.map((_, index) => index + 1));
+        const by = column(keys);
+        expect(getObjectValue(testFunction.calculate(array, by, NumberValueObject.create(order))))
+            .toEqual(expected.map((value) => [value]));
+    });
 
     describe('Sortby', () => {
         it('Value is normal', async () => {
@@ -376,7 +410,7 @@ describe('Test sortby function', () => {
             const resultObject = testFunction.calculate(array, byArray1, sortOrder1, byArray2, sortOrder2);
             expect(getObjectValue(resultObject)).toStrictEqual([
                 [ErrorType.VALUE, ErrorType.VALUE, 11],
-                [11, ErrorType.VALUE, ErrorType.VALUE],
+                [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE],
             ]);
         });
     });

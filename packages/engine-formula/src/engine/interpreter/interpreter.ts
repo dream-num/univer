@@ -26,16 +26,19 @@ import type { BaseValueObject } from '../value-object/base-value-object';
 import { Disposable } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
-import { DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME } from '../../basics/token-type';
+import { operatorToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { FunctionNode } from '../ast-node/function-node';
 import { NodeType } from '../ast-node/node-type';
+import { MultiAreaReferenceObject } from '../reference-object/multi-area-reference-object';
+import { isExplicitDynamicArrayFormula } from '../utils/array-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
+import { BooleanValueObject, NullValueObject } from '../value-object/primitive-object';
 
 type InterpreterRuntimeService = Pick<
     IFormulaRuntimeService,
-    'currentColumn' | 'currentRow' | 'currentUnitId' | 'isStopExecution'
+    'currentColumn' | 'currentRow' | 'currentUnitId' | 'currentSubUnitId' | 'isStopExecution'
 >;
 
 export class Interpreter extends Disposable {
@@ -145,12 +148,11 @@ export class Interpreter extends Disposable {
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
-            const token = item.getToken();
             /**
              * If the lambda expression has no parameters, then do not execute further.
              */
             if (
-                token.toUpperCase() === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME &&
+                item.nodeType === NodeType.LAMBDA &&
                 (item as LambdaNode).isEmptyParamFunction()
             ) {
                 item.execute(dateSystem);
@@ -169,6 +171,7 @@ export class Interpreter extends Disposable {
             node.execute(dateSystem);
         }
 
+        this._intersectBoundReference(node);
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
@@ -188,12 +191,11 @@ export class Interpreter extends Disposable {
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
-            const token = item.getToken();
             /**
              * If the lambda expression has no parameters, then do not execute further.
              */
             if (
-                token.toUpperCase() === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME &&
+                item.nodeType === NodeType.LAMBDA &&
                 (item as LambdaNode).isEmptyParamFunction()
             ) {
                 item.execute(dateSystem);
@@ -207,6 +209,7 @@ export class Interpreter extends Disposable {
         }
 
         node.execute(dateSystem);
+        this._intersectBoundReference(node);
 
         return AstNodePromiseType.SUCCESS;
     }
@@ -263,8 +266,8 @@ export class Interpreter extends Disposable {
         }
 
         await this._executeAsync(children[0], dateSystem, refOffsetX, refOffsetY);
-        const condition = children[0].getValue();
-        if (condition == null || condition.isReferenceObject() || condition.isArray()) {
+        const condition = this._getLazyIfCondition(children[0].getValue());
+        if (condition == null) {
             return false;
         }
         if (condition.isError()) {
@@ -272,7 +275,7 @@ export class Interpreter extends Disposable {
             return true;
         }
 
-        const selected = (condition as BaseValueObject).getValue() ? children[1] : children[2];
+        const selected = condition.getValue() ? children[1] : children[2];
         if (selected == null) {
             node.setValue(BooleanValueObject.create(false));
             return true;
@@ -295,8 +298,8 @@ export class Interpreter extends Disposable {
         }
 
         this._execute(children[0], dateSystem, refOffsetX, refOffsetY);
-        const condition = children[0].getValue();
-        if (condition == null || condition.isReferenceObject() || condition.isArray()) {
+        const condition = this._getLazyIfCondition(children[0].getValue());
+        if (condition == null) {
             return false;
         }
         if (condition.isError()) {
@@ -304,7 +307,7 @@ export class Interpreter extends Disposable {
             return true;
         }
 
-        const selected = (condition as BaseValueObject).getValue() ? children[1] : children[2];
+        const selected = condition.getValue() ? children[1] : children[2];
         if (selected == null) {
             node.setValue(BooleanValueObject.create(false));
             return true;
@@ -313,6 +316,24 @@ export class Interpreter extends Disposable {
         this._execute(selected, dateSystem, refOffsetX, refOffsetY);
         node.setValue(this._toLazyIfSelectedValue(selected.getValue(), node));
         return true;
+    }
+
+    private _getLazyIfCondition(value: Nullable<FunctionVariantType>): BaseValueObject | undefined {
+        if (value == null || value.isArray()) return;
+        let condition = value as BaseValueObject;
+        if (value.isReferenceObject()) {
+            const reference = value as BaseReferenceObject;
+            if (reference.getRowCount() !== 1 || reference.getColumnCount() !== 1) return;
+            condition = reference.getCellByPosition();
+        }
+        if (condition.isString()) {
+            switch (String(condition.getValue()).trim().toUpperCase()) {
+                case 'TRUE': return BooleanValueObject.create(true);
+                case 'FALSE': return BooleanValueObject.create(false);
+                default: return ErrorValueObject.create(ErrorType.VALUE);
+            }
+        }
+        return condition;
     }
 
     private async _executeLazyIfErrorAsync(
@@ -378,9 +399,12 @@ export class Interpreter extends Disposable {
             return null;
         }
 
+        if (value instanceof MultiAreaReferenceObject && value.isArrayOfReferences()) {
+            return value.toReferenceErrorGrid();
+        }
         if (!value.isReferenceObject()) {
             const baseValue = value as BaseValueObject;
-            return baseValue.isNull() ? NumberValueObject.create(0) : baseValue;
+            return baseValue.isNull() ? NullValueObject.create() : baseValue;
         }
 
         const reference = value as BaseReferenceObject;
@@ -389,8 +413,8 @@ export class Interpreter extends Disposable {
             return reference.toArrayValueObject();
         }
 
-        const cellValue = reference.getCellByPosition();
-        return cellValue.isNull() ? NumberValueObject.create(0) : cellValue;
+        const { startRow, startColumn } = reference.getRangePosition();
+        return reference.isCellBlank(startRow, startColumn) ? NullValueObject.create() : reference.getCellByPosition();
     }
 
     private _toLazyIfSelectedValue(value: Nullable<FunctionVariantType>, node: BaseAstNode): FunctionVariantType {
@@ -401,10 +425,10 @@ export class Interpreter extends Disposable {
         const preserveArray = this._preserveLazyIfSelectedReferenceArray(node);
         if (value.isReferenceObject()) {
             const reference = value as BaseReferenceObject;
-            if (preserveArray) {
-                return reference.toArrayValueObject();
+            if (preserveArray || (reference.getRowCount() === 1 && reference.getColumnCount() === 1)) {
+                return reference;
             }
-            value = this._implicitLazyIfReferenceValue(reference);
+            value = reference.getImplicitIntersectionValue(this._runtimeService.currentRow || 0, this._runtimeService.currentColumn || 0);
         }
 
         if (value.isArray() && !preserveArray) {
@@ -413,47 +437,55 @@ export class Interpreter extends Disposable {
 
         if (!value.isArray()) {
             const baseValue = value as BaseValueObject;
-            return baseValue.isNull() ? NumberValueObject.create(0) : baseValue;
+            if (!baseValue.isNull()) return baseValue;
+            if (baseValue instanceof NullValueObject && baseValue.isOmitted() && node instanceof FunctionNode) {
+                return node.getOmittedIfBranchResult() ?? NullValueObject.create();
+            }
+            return NullValueObject.create();
         }
 
         return value;
     }
 
-    private _implicitLazyIfReferenceValue(reference: BaseReferenceObject): BaseValueObject {
-        const range = reference.getRangePosition();
-        const currentRow = this._runtimeService.currentRow || 0;
-        const currentColumn = this._runtimeService.currentColumn || 0;
-        const { startRow, startColumn, endRow, endColumn } = range;
-
-        if (startRow === endRow && startColumn === endColumn) {
-            return reference.getCellByPosition();
-        }
-
-        if (endRow === startRow && currentColumn >= startColumn && currentColumn <= endColumn) {
-            return reference.getCellByColumn(currentColumn);
-        }
-
-        if (startColumn === endColumn && currentRow >= startRow && currentRow <= endRow) {
-            return reference.getCellByRow(currentRow);
-        }
-
-        return ErrorValueObject.create(ErrorType.VALUE);
-    }
-
     private _preserveLazyIfSelectedReferenceArray(node: BaseAstNode): boolean {
+        const { currentUnitId, currentSubUnitId, currentRow, currentColumn } = this._runtimeService;
+        if (isExplicitDynamicArrayFormula(this._currentConfigService, currentUnitId, currentSubUnitId, currentRow, currentColumn)) {
+            return true;
+        }
         let child: BaseAstNode = node;
         let parent = child.getParent();
 
+        let nested = false;
         while (parent != null) {
-            if (parent.nodeType === NodeType.FUNCTION) {
-                return parent.preservesLazyIfReferenceArray(child);
+            if (parent.nodeType === NodeType.UNION || parent.getToken() === operatorToken.INTERSECTION) return true;
+            if (parent instanceof FunctionNode) {
+                if (!nested && parent.preservesLazyIfReferenceArray(child)) return true;
+                if (!parent.preservesReferenceInRangeEndpoint(child) || nested) {
+                    const context = parent.getNestedArgumentArrayContext(child, nested || node.nodeType === NodeType.LAMBDA_PARAMETER);
+                    if (context === 'array') return true;
+                    if (context === 'scalar') return false;
+                    nested = true;
+                }
+            } else if (parent.nodeType === NodeType.LAMBDA) {
+                // LET values and LAMBDA arguments remain references until the body consumes them.
+                const children = parent.getChildren();
+                if (children[children.length - 1] !== child) return true;
             }
-
             child = parent;
             parent = parent.getParent();
         }
 
         return false;
+    }
+
+    private _intersectBoundReference(node: BaseAstNode): void {
+        if (node.nodeType !== NodeType.LAMBDA_PARAMETER) return;
+        const value = node.getValue();
+        if (!value?.isReferenceObject()) return;
+        const reference = value as BaseReferenceObject;
+        if ((reference.getRowCount() > 1 || reference.getColumnCount() > 1) && !this._preserveLazyIfSelectedReferenceArray(node)) {
+            node.setValue(reference.getImplicitIntersectionValue(this._runtimeService.currentRow || 0, this._runtimeService.currentColumn || 0));
+        }
     }
 
     private _implicitLazyIfArrayValue(array: ArrayValueObject): FunctionVariantType {

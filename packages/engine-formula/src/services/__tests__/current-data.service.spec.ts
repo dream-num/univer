@@ -258,8 +258,9 @@ describe('FormulaCurrentConfigService', () => {
         try {
             const service = testBed.get(IFormulaCurrentConfigService);
             const localFilter = testBed.get(ISheetRowFilteredService).register((_unitId, _sheetId, row) => row === 3);
-            service.loadDataLite({ test: { sheet1: { 1: { hd: 1, filtered: true }, 2: { hd: 1 } } } });
+            service.loadDataLite({ test: { sheet1: { 1: { hd: 1, filtered: true }, 2: { hd: 1 }, 4: { hd: 1, subtotalFiltered: true } } } });
             expect(service.getFilteredOutRows('test', 'sheet1', 0, 4)).toEqual([1, 3]);
+            expect(service.getFilteredOutRows('test', 'sheet1', 0, 4, true)).toEqual([1, 3, 4]);
             expect(service.getUnitData().test.sheet1.rowData[2]).toEqual({ hd: 1 });
             localFilter.dispose();
             service.loadDataLite({ test: { sheet1: {} } });

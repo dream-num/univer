@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { DateSystem, Nullable } from '@univerjs/core';
+import type { DateSystem, IRange, Nullable } from '@univerjs/core';
+
 import type { ErrorType } from '../../basics/error-type';
-import type { FunctionVariantType } from '../reference-object/base-reference-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import { AstNodePromiseType } from '../../basics/common';
+import { operatorToken } from '../../basics/token';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NodeType } from './node-type';
 
@@ -85,6 +87,17 @@ export class BaseAstNode {
         return this._address;
     }
 
+    /** Resolved dependency targets. Undefined uses the node's reference result. */
+    getAddressDependencyReferences(): readonly BaseReferenceObject[] | undefined {
+        return undefined;
+    }
+
+    resolveAddressDependencyReferences(
+        _argument: (node: BaseAstNode) => Promise<BaseReferenceObject | null>
+    ): Promise<readonly BaseReferenceObject[]> | undefined {
+        return undefined;
+    }
+
     isForcedCalculateFunction() {
         return this._isForcedCalculateFunction;
     }
@@ -134,8 +147,26 @@ export class BaseAstNode {
         return this._valueObject;
     }
 
+    getImplicitIntersectionReference(_child: BaseAstNode, _reference: BaseReferenceObject, _range: IRange): FunctionVariantType | undefined {
+        return undefined;
+    }
+
     preservesLazyIfReferenceArray(_child: BaseAstNode): boolean {
         return false;
+    }
+
+    preservesReferenceInRangeEndpoint(_child: BaseAstNode): boolean {
+        return false;
+    }
+
+    isUsedAsRangeEndpoint(): boolean {
+        let child: BaseAstNode = this;
+        let parent = child.getParent();
+        while (parent?.preservesReferenceInRangeEndpoint(child)) {
+            child = parent;
+            parent = child.getParent();
+        }
+        return parent?.nodeType === NodeType.UNION || parent?.getToken() === operatorToken.INTERSECTION;
     }
 
     isCalculated() {

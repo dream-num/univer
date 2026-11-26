@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
 import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { getObjectValue } from '../../../util';
 import { functionText } from '../../function-map';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
@@ -41,7 +42,14 @@ const toValueObject = (value: Argument): BaseValueObject => {
 };
 
 describe('Test euroconvert function', () => {
-    const testFunction = new Euroconvert(FUNCTION_NAMES_TEXT.EUROCONVERT);
+    let testFunction: Euroconvert;
+
+    beforeEach(() => {
+        const { univer } = createFunctionTestBed();
+        testFunction = univer.__getInjector().createInstance(Euroconvert, FUNCTION_NAMES_TEXT.EUROCONVERT);
+
+        return () => univer.dispose();
+    });
 
     const euroconvert = (...args: Argument[]) => {
         const [number, source, target, ...rest] = args.map(toValueObject);
@@ -119,9 +127,6 @@ describe('Test euroconvert function', () => {
             expect(euroconvert(true, 'EUR', 'DEM', true)).toStrictEqual(1.95583);
             expect(euroconvert(null, 'EUR', 'DEM')).toStrictEqual(0);
             expect(euroconvert('test', 'DEM', 'EUR')).toStrictEqual(ErrorType.VALUE);
-
-            const error = testFunction.calculate(ErrorValueObject.create(ErrorType.NAME), StringValueObject.create('DEM'), StringValueObject.create('EUR'));
-            expect(getObjectValue(error)).toStrictEqual(ErrorType.NAME);
         });
 
         it('Source and target value test', () => {
@@ -134,9 +139,14 @@ describe('Test euroconvert function', () => {
             expect(euroconvert(1, null, 'DEM')).toStrictEqual(ErrorType.VALUE);
             // Names that every object inherits are not currencies.
             expect(euroconvert(1, 'constructor', 'toString')).toStrictEqual(ErrorType.VALUE);
+        });
 
-            const error = testFunction.calculate(NumberValueObject.create(1), ErrorValueObject.create(ErrorType.NAME), StringValueObject.create('EUR'));
-            expect(getObjectValue(error)).toStrictEqual(ErrorType.NAME);
+        it.each([1, 2, 3, 4, 5])('Returns #VALUE! when argument %i is an error', (position) => {
+            const args = [1, 'DEM', 'EUR', true, 3].map(toValueObject);
+            args[position - 1] = ErrorValueObject.create(ErrorType.NA);
+            const [number, source, target, fullPrecision, triangulationPrecision] = args;
+
+            expect(getObjectValue(testFunction.calculate(number, source, target, fullPrecision, triangulationPrecision))).toStrictEqual(ErrorType.VALUE);
         });
 
         it('FullPrecision value test', () => {

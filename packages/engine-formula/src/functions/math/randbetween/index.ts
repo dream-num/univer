@@ -15,6 +15,7 @@
  */
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { NullValueObject } from '../../../engine/value-object/primitive-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -22,6 +23,8 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Randbetween extends BaseFunction {
+    protected readonly excelCompatibility: boolean = false;
+
     override minParams = 2;
 
     override maxParams = 2;
@@ -59,6 +62,10 @@ export class Randbetween extends BaseFunction {
 
         if (_top.isError()) {
             return _top;
+        }
+
+        if (this.excelCompatibility && [_bottom, _top].some((value) => value.isNull() && (value as NullValueObject).isOmitted())) {
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (_bottom.isBoolean() || _top.isBoolean()) {

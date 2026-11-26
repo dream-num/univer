@@ -15,9 +15,9 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
+import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../sheets-filter.mutation';
 import { ICommandService, Inject, Injector, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
-import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../sheets-filter.mutation';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../../services/sheet-filter.service';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '../sheets-filter.mutation';
 
@@ -181,6 +181,30 @@ describe('test mutations of sheets filter', () => {
     });
 
     describe('test set sheets filter criteria mutations', () => {
+        it('reports active criteria even when no rows are excluded', () => {
+            const workbook = testWorkbookDataFactory();
+            workbook.sheets.sheet1!.cellData = {
+                0: { 0: { v: 'header' } },
+                1: { 0: { v: 'A' } },
+                2: { 0: { v: 'B' } },
+            };
+            const testBed = createFilterMutationTestBed(workbook);
+            const { commandService } = testBed;
+            univer = testBed.univer;
+
+            const range = { startRow: 0, startColumn: 0, endRow: 2, endColumn: 0 };
+            const sheet = { unitId: 'test', subUnitId: 'sheet1' };
+            expect(commandService.syncExecuteCommand(SetSheetsFilterRangeMutation.id, { ...sheet, range })).toBe(true);
+
+            const criteria = { ...sheet, col: 0, criteria: { colId: 0, filters: { filters: ['A', 'B'] } } };
+            expect(commandService.syncExecuteCommand(SetSheetsFilterCriteriaMutation.id, criteria)).toBe(true);
+            expect(criteria).toMatchObject({ filteredOutRows: [], sheetFilterActive: true });
+
+            const removal = { ...sheet };
+            expect(commandService.syncExecuteCommand(RemoveSheetsFilterMutation.id, removal)).toBe(true);
+            expect(removal).toMatchObject({ filteredOutRows: [], sheetFilterActive: false, removedFilterRange: range });
+        });
+
         it('should re calc when set filter criteria', () => {
             const testBed = createFilterMutationTestBed(testWorkbookDataWithFilterFactory());
             const { commandService, sheetsFilterService } = testBed;

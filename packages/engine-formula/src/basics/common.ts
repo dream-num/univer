@@ -23,6 +23,7 @@ import type {
     IRowData,
     IUnitRange,
     IWorkbookCalculationSettings,
+    LocaleType,
     Nullable,
     ObjectMatrix,
     Styles,
@@ -38,6 +39,9 @@ export const ASYNC_OBJECT_CLASS_TYPE = 'asyncObject';
 export const REFERENCE_OBJECT_CLASS_TYPE = 'referenceObject';
 
 export const VALUE_OBJECT_CLASS_TYPE = 'valueObject';
+
+// Remove a worksheet cache value while keeping any newly calculated spill value visible.
+export const CLEAR_IMPORTED_SPILL_CELL: ICellData = { v: null, t: null };
 
 export enum BooleanValue {
     FALSE = 'FALSE',
@@ -250,10 +254,12 @@ export interface IUnitExcludedCell {
 
 export interface IUnitRowData {
     // Calculation transport only: distinguish filter exclusions from manually hidden rows in Workers.
-    [unitId: string]: Nullable<{ [sheetId: string]: IObjectArrayPrimitiveType<Partial<IRowData> & { filtered?: boolean }> }>;
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectArrayPrimitiveType<Partial<IRowData> & { filtered?: boolean; subtotalFiltered?: boolean }> }>;
 }
 
 export interface IFormulaDatasetConfig {
+    /** Effective region captured for this calculation request. */
+    region?: LocaleType;
     /** Sheet metadata changed; rebind and calculate affected references without forcing all formulas. */
     dirtyReferenceUnits?: string[];
     /** Recalculate iteration-sensitive groups and their dependents in these workbooks. */

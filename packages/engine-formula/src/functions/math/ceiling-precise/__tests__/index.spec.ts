@@ -100,7 +100,7 @@ describe('Test ceiling.precise function', () => {
             });
             const result = testFunction.calculate(number, significance);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [3, 0, -0, 0, ErrorType.VALUE, 2.5, -48, 6, ErrorType.NA],
+                [3, 0, 0, 0, ErrorType.VALUE, 2.5, -48, 6, ErrorType.NA],
             ]);
         });
     });

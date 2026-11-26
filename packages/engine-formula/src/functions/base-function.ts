@@ -51,6 +51,7 @@ export class BaseFunction {
     private _column: number = -1;
     private _currentFormulaRowCount: number = 1;
     private _currentFormulaColumnCount: number = 1;
+    private _currentArrayFormula = false;
     private _definedNames: Nullable<IDefinedNameMapItem>;
     private _locale: LocaleType;
     private _dateSystem = DateSystem.Date1900;
@@ -70,6 +71,9 @@ export class BaseFunction {
      * Whether the function needs to pass in reference object
      */
     needsReferenceObject: boolean = false;
+
+    /** Accept value arrays but reject multi-cell reference arguments. */
+    rejectsMultiCellReference = false;
 
     /**
      * Whether the function needs handle locale
@@ -104,9 +108,19 @@ export class BaseFunction {
      */
     needsAstChildren: boolean = false;
 
+    calculateReferenceEndpoint?(variants: FunctionVariantType[]): FunctionVariantType;
+    preservesReferenceInRangeEndpointArgument?(argumentIndex: number, argumentCount: number): boolean;
+
+    bindCalculationRegion?(getRegion: () => LocaleType): void;
+    bindCalculationTimestamp?(getTimestamp: () => number): void;
+    bindExplicitDynamicArrayFormula?(isExplicit: () => boolean): void;
+
     /**
-     * Arguments that preserve a selected lazy IF branch as a reference array.
+     * Arguments that accept a reference from explicit implicit intersection (@).
      */
+    implicitIntersectionReferenceArguments: readonly number[] = [];
+
+    /** Arguments that preserve a selected lazy IF branch as a reference array. */
     lazyIfReferenceArrayArgumentIndexes: readonly number[] = [];
 
     /**
@@ -155,6 +169,10 @@ export class BaseFunction {
 
     get currentFormulaColumnCount() {
         return this._currentFormulaColumnCount;
+    }
+
+    get currentArrayFormula() {
+        return this._currentArrayFormula;
     }
 
     dispose() {
@@ -237,6 +255,18 @@ export class BaseFunction {
         return false;
     }
 
+    needsAddressDependencies?: (args: readonly BaseAstNode[]) => boolean;
+
+    evaluatesIfArgumentsAsArrays?: boolean;
+
+    resolveAddressDependencyReferences?: (
+        argument: (index: number) => Promise<BaseReferenceObject | null>
+    ) => Promise<readonly BaseReferenceObject[]>;
+
+    takeAddressDependencyReferences(): readonly BaseReferenceObject[] | undefined {
+        return undefined;
+    }
+
     isCustom() {
         return false;
     }
@@ -245,13 +275,14 @@ export class BaseFunction {
         return false;
     }
 
-    setRefInfo(unitId: string, subUnitId: string, row: number, column: number, rowCount: number = 1, columnCount: number = 1) {
+    setRefInfo(unitId: string, subUnitId: string, row: number, column: number, rowCount: number = 1, columnCount: number = 1, arrayFormula = false) {
         this._unitId = unitId;
         this._subUnitId = subUnitId;
         this._row = row;
         this._column = column;
         this._currentFormulaRowCount = rowCount;
         this._currentFormulaColumnCount = columnCount;
+        this._currentArrayFormula = arrayFormula;
     }
 
     calculateCustom(
@@ -683,6 +714,10 @@ export class BaseFunction {
         object.setUnitData(reference.getUnitData());
         object.setRuntimeData(reference.getRuntimeData());
         object.setArrayFormulaCellData(reference.getArrayFormulaCellData());
+        object.setArrayFormulaRange(reference.getArrayFormulaRange());
+        object.setRuntimeArrayFormulaCellData(reference.getRuntimeArrayFormulaCellData());
+        object.setRuntimeArrayFormulaRange(reference.getRuntimeArrayFormulaRange());
+        object.setRuntimeFeatureCellData(reference.getRuntimeFeatureCellData());
         object.setUnitStylesData(reference.getUnitStylesData());
 
         return object;

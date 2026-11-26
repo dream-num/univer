@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -25,11 +26,14 @@ export class Isref extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override lazyIfReferenceArrayArgumentIndexes = [0];
+
     override calculate(value: FunctionVariantType) {
-        if (value.isReferenceObject()) {
-            return BooleanValueObject.create(true);
+        if (!value.isReferenceObject()) {
+            return BooleanValueObject.create(false);
         }
 
-        return BooleanValueObject.create(false);
+        const reference = value as BaseReferenceObject;
+        return BooleanValueObject.create(!reference.isMultiArea() || !(reference as MultiAreaReferenceObject).isArrayOfReferences());
     }
 }

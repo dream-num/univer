@@ -35,15 +35,15 @@ export class Choose extends BaseFunction {
     override calculate(indexNum: FunctionVariantType, ...variants: FunctionVariantType[]) {
         let _indexNum = indexNum;
 
-        if (_indexNum.isError()) {
-            return _indexNum;
-        }
-
         if (_indexNum.isReferenceObject()) {
             const values = (_indexNum as BaseReferenceObject).toArrayValueObject();
             _indexNum = values.getRowCount() === 1 && values.getColumnCount() === 1
                 ? values.get(0, 0) as BaseValueObject
                 : values;
+        }
+
+        if (_indexNum.isError()) {
+            return _indexNum;
         }
 
         if (!_indexNum.isArray()) {
@@ -64,27 +64,21 @@ export class Choose extends BaseFunction {
         let maxRowLength = _indexNum.isArray() ? (_indexNum as ArrayValueObject).getRowCount() : 1;
         let maxColumnLength = _indexNum.isArray() ? (_indexNum as ArrayValueObject).getColumnCount() : 1;
 
-        variants.forEach((variant, i) => {
+        const values = variants.map((variant) => variant.isReferenceObject()
+            ? (variant as BaseReferenceObject).toArrayValueObject()
+            : variant as BaseValueObject);
+        for (const variant of values) {
             if (variant.isArray()) {
                 const arrayValue = variant as ArrayValueObject;
                 maxRowLength = Math.max(maxRowLength, arrayValue.getRowCount());
                 maxColumnLength = Math.max(maxColumnLength, arrayValue.getColumnCount());
-            } else {
-                maxRowLength = Math.max(maxRowLength, 1);
-                maxColumnLength = Math.max(maxColumnLength, 1);
             }
-        });
+        }
 
         const indexNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, _indexNum as BaseValueObject, ErrorValueObject.create(ErrorType.NA));
-        const arrayValueObjectList = variants.map((variant) => {
-            let _variant = variant;
-
-            if (_variant.isReferenceObject()) {
-                _variant = (_variant as BaseReferenceObject).toArrayValueObject();
-            }
-
-            return expandArrayValueObject(maxRowLength, maxColumnLength, _variant as BaseValueObject, ErrorValueObject.create(ErrorType.NA));
-        });
+        const arrayValueObjectList = values.map((variant) =>
+            expandArrayValueObject(maxRowLength, maxColumnLength, variant, ErrorValueObject.create(ErrorType.NA))
+        );
 
         return indexNumArray.map((indexNumValue, row, column) => {
             if (indexNumValue.isError()) {

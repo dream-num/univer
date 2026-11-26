@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IUniverEngineFormulaConfig } from '../../config/config';
 import { Besseli } from './besseli';
 import { Besselj } from './besselj';
 import { Besselk } from './besselk';
@@ -131,4 +132,4 @@ export const functionEngineering = [
     [Oct2bin, FUNCTION_NAMES_ENGINEERING.OCT2BIN],
     [Oct2dec, FUNCTION_NAMES_ENGINEERING.OCT2DEC],
     [Oct2hex, FUNCTION_NAMES_ENGINEERING.OCT2HEX],
-];
+] satisfies NonNullable<IUniverEngineFormulaConfig['function']>;

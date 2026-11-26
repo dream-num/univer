@@ -25,6 +25,10 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class TTest extends BaseFunction {
+    protected _lowerTail(statistic: number, degrees: number): number {
+        return studentTCDF(-statistic, degrees);
+    }
+
     override minParams = 4;
 
     override maxParams = 4;
@@ -128,7 +132,7 @@ export class TTest extends BaseFunction {
             return errorObject as ErrorValueObject;
         }
 
-        let result = studentTCDF(-x, degFreedom);
+        let result = this._lowerTail(x, degFreedom);
 
         if (tails === 2) {
             result *= 2;

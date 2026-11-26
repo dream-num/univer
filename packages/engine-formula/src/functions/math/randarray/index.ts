@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { NullValueObject } from '../../../engine/value-object/primitive-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -23,6 +24,8 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Randarray extends BaseFunction {
+    protected readonly excelCompatibility: boolean = false;
+
     override minParams = 0;
 
     override maxParams = 5;
@@ -50,11 +53,17 @@ export class Randarray extends BaseFunction {
             return wholeNumber;
         }
 
-        const _rows = rows ?? NumberValueObject.create(1);
-        const _columns = columns ?? NumberValueObject.create(1);
-        const _min = min ?? NumberValueObject.create(0);
-        const _max = max ?? NumberValueObject.create(1);
-        const _wholeNumber = wholeNumber ?? NumberValueObject.create(0);
+        const withDefault = (value: BaseValueObject | undefined, fallback: number) => {
+            if (this.excelCompatibility && value?.isNull() && (value as NullValueObject).isOmitted()) {
+                return NumberValueObject.create(fallback);
+            }
+            return value ?? NumberValueObject.create(fallback);
+        };
+        const _rows = withDefault(rows, 1);
+        const _columns = withDefault(columns, 1);
+        const _min = withDefault(min, 0);
+        const _max = withDefault(max, 1);
+        const _wholeNumber = withDefault(wholeNumber, 0);
 
         return this._calculateResult(_rows, _columns, _min, _max, _wholeNumber);
     }
@@ -242,7 +251,10 @@ export class Randarray extends BaseFunction {
         let _wholeNumberObject = wholeNumberObject;
 
         if (_wholeNumberObject.isString()) {
-            _wholeNumberObject = _wholeNumberObject.convertToNumberObjectValue();
+            const value = String(_wholeNumberObject.getValue()).toUpperCase();
+            _wholeNumberObject = this.excelCompatibility && (value === 'TRUE' || value === 'FALSE')
+                ? NumberValueObject.create(value === 'TRUE' ? 1 : 0)
+                : _wholeNumberObject.convertToNumberObjectValue();
         }
 
         if (_wholeNumberObject.isError()) {

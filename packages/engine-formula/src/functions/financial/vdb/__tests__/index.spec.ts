@@ -125,7 +125,7 @@ describe('Test vdb function', () => {
             const factor = NullValueObject.create();
             const noSwitch = NullValueObject.create();
             const result = testFunction.calculate(cost, salvage, life, startPeriod, endPeriod, factor, noSwitch);
-            expect(getObjectValue(result)).toBe(3840);
+            expect(getObjectValue(result)).toBe(2100);
         });
 
         it('value is array', () => {

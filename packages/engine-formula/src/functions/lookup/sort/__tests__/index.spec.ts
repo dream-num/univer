@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject } from '../../../../engine/value-object/primitive-object';
@@ -23,9 +24,50 @@ import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Sort } from '../index';
 
 describe('Test sort function', () => {
-    const testFunction = new Sort(FUNCTION_NAMES_LOOKUP.SORT);
+    let injector: Injector;
+    let testFunction: Sort;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [Sort, { useFactory: () => injector.createInstance(Sort, FUNCTION_NAMES_LOOKUP.SORT) }],
+        ]);
+        testFunction = injector.get(Sort);
+    });
+
+    afterEach(() => injector.dispose());
 
     describe('Sort', () => {
+        it.each([
+            { index: 1, axis: '{FALSE,FALSE,FALSE}', expected: [[1, ErrorType.VALUE, ErrorType.VALUE]] },
+            { index: 2, axis: '{FALSE,FALSE,FALSE}', expected: [[1, 0, ErrorType.VALUE]] },
+            { index: 3, axis: '{FALSE,FALSE,FALSE}', expected: [[3, ErrorType.VALUE, ErrorType.VALUE]] },
+            { index: 2, axis: '{#N/A,FALSE,FALSE}', expected: [[ErrorType.NA, 1, 0]] },
+            { index: 1, axis: '{"1","0",FALSE}', expected: [[ErrorType.VALUE, ErrorType.VALUE, 1]] },
+            { index: 1, axis: '{"TRUE","FALSE",FALSE}', expected: [[4, ErrorType.VALUE, ErrorType.VALUE]] },
+        ])('retains local conversion state for index $index and axis $axis', ({ index, axis, expected }) => {
+            const array = ArrayValueObject.create('{4,7,9;1,2,8;3,5,6}');
+            const indices = ArrayValueObject.create(`{${index}}`);
+            const calculate = () => testFunction.calculate(array, indices, NumberValueObject.create(1), ArrayValueObject.create(axis));
+            expect(getObjectValue(calculate())).toStrictEqual(expected);
+            expect(getObjectValue(calculate())).toStrictEqual(expected);
+            expect(getObjectValue(array)).toStrictEqual([[4, 7, 9], [1, 2, 8], [3, 5, 6]]);
+            expect(getObjectValue(indices)).toStrictEqual([[index]]);
+        });
+
+        it.each([
+            { axis: '{TRUE}', expected: 4 },
+            { axis: '{FALSE}', expected: 1 },
+        ])('lifts a one-cell axis array $axis without spilling the entire sorted input', ({ axis, expected }) => {
+            const result = testFunction.calculate(
+                ArrayValueObject.create('{4,7,9;1,2,8;3,5,6}'),
+                NumberValueObject.create(1),
+                NumberValueObject.create(1),
+                ArrayValueObject.create(axis)
+            );
+            expect(result.isArray()).toBe(true);
+            expect(getObjectValue(result)).toStrictEqual([[expected]]);
+        });
+
         it.each([
             { sortOrder: 1, expected: [[1, 'a'], [2, 'b'], [3, 'c'], [3, 'c'], [5, 'e']] },
             { sortOrder: -1, expected: [[5, 'e'], [3, 'c'], [3, 'c'], [2, 'b'], [1, 'a']] },
@@ -215,7 +257,7 @@ describe('Test sort function', () => {
             const resultObject2 = testFunction.calculate(array, sortIndex, sortOrder, byCol2);
             expect(getObjectValue(resultObject2)).toStrictEqual([
                 [ErrorType.VALUE, 0],
-                [2, ErrorType.NAME],
+                [0, ErrorType.NAME],
             ]);
         });
 

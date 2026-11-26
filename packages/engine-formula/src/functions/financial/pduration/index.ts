@@ -28,6 +28,10 @@ export class Pduration extends BaseFunction {
 
     override maxParams = 3;
 
+    protected _invalidRate(rate: number): boolean {
+        return rate <= -1;
+    }
+
     override calculate(rate: BaseValueObject, pv: BaseValueObject, fv: BaseValueObject): BaseValueObject {
         const maxRowLength = Math.max(
             rate.isArray() ? (rate as ArrayValueObject).getRowCount() : 1,
@@ -61,7 +65,7 @@ export class Pduration extends BaseFunction {
             const pvValue = +_pvObject.getValue();
             const fvValue = +_fvObject.getValue();
 
-            if (rateValue <= -1) {
+            if (this._invalidRate(rateValue)) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
@@ -79,5 +83,11 @@ export class Pduration extends BaseFunction {
         }
 
         return resultArray;
+    }
+}
+
+export class ExcelPduration extends Pduration {
+    protected override _invalidRate(rate: number): boolean {
+        return rate <= 0;
     }
 }

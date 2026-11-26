@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { BaseValueObject, IArrayValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -26,9 +28,20 @@ export class Column extends BaseFunction {
 
     override maxParams = 1;
 
+    override needsReferenceObject = true;
+
+    override lazyIfReferenceArrayArgumentIndexes = [0];
+
     override calculate(
-        reference?: BaseValueObject
+        referenceInput?: FunctionVariantType
     ) {
+        if (referenceInput instanceof MultiAreaReferenceObject && !referenceInput.isArrayOfReferences()) {
+            return ErrorValueObject.create(ErrorType.REF);
+        }
+        const reference = referenceInput?.isReferenceObject()
+            ? (referenceInput as BaseReferenceObject).toArrayValueObject()
+            : referenceInput as BaseValueObject | undefined;
+
         if (reference == null) {
             return NumberValueObject.create(this.column + 1);
         }

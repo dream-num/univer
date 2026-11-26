@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -27,13 +28,19 @@ export class Expand extends BaseFunction {
 
     override maxParams = 4;
 
-    override calculate(array: BaseValueObject, rows: BaseValueObject, columns?: BaseValueObject, padWith?: BaseValueObject): BaseValueObject {
+    override needsReferenceObject = true;
+
+    override calculate(source: FunctionVariantType, rowInput: FunctionVariantType, columnInput?: FunctionVariantType, padInput?: FunctionVariantType): BaseValueObject {
+        const array = this._resolveReference(source);
+        const rows = this._resolveReference(rowInput);
+        const columns = columnInput && this._resolveReference(columnInput);
+        const padWith = padInput && this._resolveReference(padInput);
         const arrayRowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
         const arrayColumnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
 
         let _rows = rows;
         let _columns = columns ?? NumberValueObject.create(arrayColumnCount);
-        const _padWith = padWith ?? ErrorValueObject.create(ErrorType.NA);
+        const _padWith = padWith?.isNull() ? NumberValueObject.create(0) : padWith ?? ErrorValueObject.create(ErrorType.NA);
 
         if (rows.isNull()) {
             _rows = NumberValueObject.create(arrayRowCount);
@@ -102,6 +109,18 @@ export class Expand extends BaseFunction {
         return this._getResultArray(array, rowsValue as number, columnsValue as number, padWithObject as BaseValueObject, arrayRowCount, arrayColumnCount);
     }
 
+    private _resolveReference(input: FunctionVariantType): BaseValueObject {
+        if (!input.isReferenceObject()) {
+            return input as BaseValueObject;
+        }
+        const values = (input as BaseReferenceObject).toArrayValueObject();
+        if (values.getRowCount() !== 1 || values.getColumnCount() !== 1) {
+            return values;
+        }
+        const cell = values.getFirstCell();
+        return cell.isNull() ? NumberValueObject.create(0) : cell;
+    }
+
     private _checkRowsColumnsPadWith(
         rowsObject: BaseValueObject,
         columnsObject: BaseValueObject,
@@ -126,17 +145,24 @@ export class Expand extends BaseFunction {
         const rowsValue = Math.trunc(+rowsObject.getValue());
         const columnsValue = Math.trunc(+columnsObject.getValue());
 
-        if (Number.isNaN(rowsValue) || Number.isNaN(columnsValue)) {
+        if (!Number.isFinite(rowsValue) || !Number.isFinite(columnsValue)) {
             return {
                 isError: true,
                 errorObject: ErrorValueObject.create(ErrorType.VALUE),
             };
         }
 
-        if (Math.abs(rowsValue) < arrayRowCount || Math.abs(columnsValue) < arrayColumnCount) {
+        if (rowsValue < arrayRowCount || columnsValue < arrayColumnCount) {
             return {
                 isError: true,
                 errorObject: ErrorValueObject.create(ErrorType.VALUE),
+            };
+        }
+
+        if (rowsValue > 1048576 || columnsValue > 16384) {
+            return {
+                isError: true,
+                errorObject: ErrorValueObject.create(rowsValue > 1048576 ? ErrorType.NUM : ErrorType.SPILL),
             };
         }
 

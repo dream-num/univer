@@ -20,15 +20,6 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
-import {
-    createIdentifier,
-    Disposable,
-    Inject,
-    IUniverInstanceService,
-    ObjectMatrix,
-    RTree,
-    UniverInstanceType,
-} from '@univerjs/core';
 import type {
     IFeatureDirtyRangeType,
     IFormulaData,
@@ -42,7 +33,6 @@ import type {
 } from '../../services/feature-calculation-manager.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
-import type { FunctionNode } from '../ast-node/function-node';
 import type { PrefixNode } from '../ast-node/prefix-node';
 import type { SuffixNode } from '../ast-node/suffix-node';
 import type { FunctionVariantType } from '../reference-object/base-reference-object';
@@ -54,6 +44,15 @@ import type {
     IFormulaDependencyTreeJson,
     IFormulaDependentsAndInRangeResults,
 } from './dependency-tree';
+import {
+    createIdentifier,
+    Disposable,
+    Inject,
+    IUniverInstanceService,
+    ObjectMatrix,
+    RTree,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { prefixToken, suffixToken } from '../../basics/token';
 import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
@@ -527,7 +526,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         return this._dependencyTreeCache.get(treeId);
     }
 
-    protected _getTreeNode(tree: Pick<IFormulaDependencyTree, 'unitId' | 'subUnitId' | 'formula' | 'row' | 'column'>) {
+    protected _getTreeNode(tree: Pick<IFormulaDependencyTree, 'unitId' | 'subUnitId' | 'formula' | 'row' | 'column' | 'refOffsetX' | 'refOffsetY'>) {
         return generateAstNode(
             tree.unitId,
             tree.formula,
@@ -535,8 +534,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
             this._astTreeBuilder,
             this._currentConfigService,
             tree.subUnitId,
-            tree.column,
-            tree.row
+            tree.column - tree.refOffsetX,
+            tree.row - tree.refOffsetY
         );
     }
 
@@ -705,7 +704,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
      * is independent of whether they may be reused right now: a forced calculation rebuilds
      * the index but the ranges it resolves are still valid for the next one.
      */
-    private _canShareRanges(tree: IFormulaDependencyTree, node: BaseAstNode, addressFunctionNodes: FunctionNode[]) {
+    private _canShareRanges(tree: IFormulaDependencyTree, node: BaseAstNode, addressFunctionNodes: BaseAstNode[]) {
         if (addressFunctionNodes.length > 0) {
             return false;
         }
@@ -879,13 +878,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
         this._reusableSheetSignature = sheetSignature;
 
-        for (let i = 0, len = treeList.length; i < len; i++) {
-            const tree = treeList[i];
-            if (tree.isCache) {
-                continue;
-            }
-            this._dependencyManagerService.addDependencyRTreeCache(tree);
-        }
+        this._dependencyManagerService.refreshDependencyRTreeCaches(treeList);
 
         await this._calculateListByFunctionRefNode(treeList);
         return treeList;
@@ -1031,11 +1024,12 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
             token === FUNCTION_NAMES_LOOKUP.ROW || token === FUNCTION_NAMES_LOOKUP.ROWS ||
             token === FUNCTION_NAMES_LOOKUP.COLUMN || token === FUNCTION_NAMES_LOOKUP.COLUMNS
         );
+        const isOffset = node.nodeType === NodeType.FUNCTION && token === FUNCTION_NAMES_LOOKUP.OFFSET;
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
             // Static references only supply coordinates or dimensions to these functions.
             // Expressions and dynamic references can still read cell values while evaluating their arguments.
-            if (readsReferenceMetadata && this._isStaticReference(item)) {
+            if ((readsReferenceMetadata || (isOffset && i === 0)) && this._isStaticReference(item)) {
                 continue;
             }
             if (this._isPreCalculateNode(item)) {
@@ -1055,20 +1049,20 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         }
     }
 
-    private _nodeTraversalReferenceFunction(node: BaseAstNode, result: FunctionNode[]) {
+    private _nodeTraversalReferenceFunction(node: BaseAstNode, result: BaseAstNode[]) {
         const children = node.getChildren();
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
-            if (item.nodeType === NodeType.FUNCTION && (item as FunctionNode).isAddress()) {
-                result.push(item as FunctionNode);
+            if (item.isAddress()) {
+                result.push(item);
                 continue;
             }
             this._nodeTraversalReferenceFunction(item, result);
         }
     }
 
-    private async _executeNode(node: PreCalculateNodeType | FunctionNode, refOffsetX = 0, refOffsetY = 0): Promise<BaseReferenceObject | null> {
+    private async _executeNode(node: BaseAstNode, refOffsetX = 0, refOffsetY = 0): Promise<BaseReferenceObject | null> {
         const nodeData = {
             node,
             refOffsetX,
@@ -1113,6 +1107,9 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 // Preserve the selected cell for reference operands; scalar expressions
                 // instead depend on the references inside their expression.
                 rangeList.push(...intersectionRanges ?? await this._getRangeListByNode({ node, refOffsetX, refOffsetY }));
+            } else if (node.nodeType === NodeType.SUFFIX && node.getToken() === suffixToken.POUND) {
+                // A missing spill anchor can become a formula on a later edit.
+                rangeList.push(...await this._getRangeListByNode({ node, refOffsetX, refOffsetY }));
             }
 
             node.setValue(null);
@@ -1122,7 +1119,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
     }
 
     protected _getAddressFunctionNodeList(node: Nullable<BaseAstNode>) {
-        const referenceFunctionList: FunctionNode[] = [];
+        const referenceFunctionList: BaseAstNode[] = [];
 
         if (node == null) {
             return [];
@@ -1143,6 +1140,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         const refOffsetX = tree.refOffsetX;
         const refOffsetY = tree.refOffsetY;
 
+        // A recursively evaluated precedent may have moved the runtime cursor.
+        this._runtimeService.setCurrent(tree.row, tree.column, tree.rowCount, tree.columnCount, tree.subUnitId, tree.unitId);
         const addressFunctionRangeList = await this._getRangeListByFunctionRefNode(addressFunctionNodes, refOffsetX, refOffsetY);
 
         tree.addressFunctionNodes = [];
@@ -1243,6 +1242,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         while (preCalculateTreeList.length > 0) {
             const tree = preCalculateTreeList.pop()!;
 
+            await this._calculateAddressFunction(treeDependencyCache, tree);
+
             this._runtimeService.setCurrent(
                 tree.row,
                 tree.column,
@@ -1258,8 +1259,6 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 refOffsetX: tree.refOffsetX,
                 refOffsetY: tree.refOffsetY,
             };
-
-            await this._calculateAddressFunction(treeDependencyCache, tree);
 
             let value: FunctionVariantType;
             if (this._interpreter.checkAsyncNode(nodeData.node)) {
@@ -1339,14 +1338,26 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
      * including references and location functions (such as OFFSET, INDIRECT, INDEX, etc.).
      * @param node
      */
-    protected async _getRangeListByFunctionRefNode(referenceFunctionList: FunctionNode[], refOffsetX: number, refOffsetY: number) {
+    protected async _getRangeListByFunctionRefNode(referenceFunctionList: BaseAstNode[], refOffsetX: number, refOffsetY: number) {
         const rangeList: IUnitRange[] = [];
 
         for (let i = 0, len = referenceFunctionList.length; i < len; i++) {
             const node = referenceFunctionList[i];
+            const address = node.resolveAddressDependencyReferences((argument) => this._executeNode(argument, refOffsetX, refOffsetY));
+            if (address) {
+                for (const reference of await address) {
+                    rangeList.push(...reference.toUnitRanges());
+                }
+                continue;
+            }
             const value = await this._executeNode(node, refOffsetX, refOffsetY);
 
-            if (value != null) {
+            const dependencies = node.getAddressDependencyReferences();
+            if (dependencies) {
+                for (const reference of dependencies) {
+                    rangeList.push(...reference.toUnitRanges());
+                }
+            } else if (value != null) {
                 rangeList.push(...value.toUnitRanges());
             }
 

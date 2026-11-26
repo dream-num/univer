@@ -16,11 +16,12 @@
 
 import type { Dependency, ICellData, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { CellValueType, ICommandService, IConfigService, IUniverInstanceService, LocaleType, LogLevel, RedoCommand, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, CellValueType, FormulaType, ICommandService, IConfigService, IUniverInstanceService, LocaleType, LogLevel, RedoCommand, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import {
     FormulaDataModel,
     IDefinedNamesService,
+    IFormulaRuntimeService,
     RemoveDefinedNameMutation,
     SetArrayFormulaDataMutation,
     SetDefinedNameMutation,
@@ -120,6 +121,32 @@ function createControllerTestBed(initialFormulaComputing?: CalculationMode) {
         testBed.injector.get(IConfigService).setConfig(PLUGIN_CONFIG_KEY_BASE, { initialFormulaComputing });
     }
     return testBed;
+}
+
+function setTwoByTwoArrayFormula(formulaDataModel: FormulaDataModel): void {
+    formulaDataModel.setArrayFormulaRange({
+        test: {
+            sheet1: {
+                5: {
+                    5: { startRow: 5, startColumn: 5, endRow: 6, endColumn: 6 },
+                },
+            },
+        },
+    });
+    formulaDataModel.setArrayFormulaCellData({
+        test: {
+            sheet1: {
+                5: {
+                    5: { v: 1 },
+                    6: { v: 2 },
+                },
+                6: {
+                    5: { v: 3 },
+                    6: { v: 4 },
+                },
+            },
+        },
+    });
 }
 
 describe('UpdateFormulaController', () => {
@@ -1034,6 +1061,50 @@ describe('UpdateFormulaController', () => {
         expect(executeCommandSpy.mock.calls.some(([id]) => id === SetArrayFormulaDataMutation.id)).toBe(true);
     });
 
+    it('should not sync array formula data when a formula edit leaves array formulas unchanged', async () => {
+        setTwoByTwoArrayFormula(formulaDataModel);
+        const arrayFormulaRange = formulaDataModel.getArrayFormulaRange();
+        const arrayFormulaCellData = formulaDataModel.getArrayFormulaCellData();
+        const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');
+
+        await commandService.executeCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: {
+                8: {
+                    0: { f: '=A1' },
+                },
+            },
+        });
+
+        expect(formulaDataModel.getFormulaData().test?.sheet1?.[8]?.[0]).toMatchObject({ f: '=A1' });
+        expect(executeCommandSpy.mock.calls.some(([id]) => id === SetFormulaDataMutation.id)).toBe(true);
+        expect(executeCommandSpy.mock.calls.some(([id]) => id === SetArrayFormulaDataMutation.id)).toBe(false);
+        expect(formulaDataModel.getArrayFormulaRange()).toBe(arrayFormulaRange);
+        expect(formulaDataModel.getArrayFormulaCellData()).toBe(arrayFormulaCellData);
+    });
+
+    it('should sync array formula data when a formula edit replaces an array formula anchor', async () => {
+        setTwoByTwoArrayFormula(formulaDataModel);
+        // Replacing a multi-cell array anchor also marks its former range dirty.
+        commandService.registerCommand(SetTriggerFormulaCalculationStartMutation);
+        const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');
+
+        await commandService.executeCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: {
+                5: {
+                    5: { f: '=A1' },
+                },
+            },
+        });
+
+        expect(formulaDataModel.getArrayFormulaRange().test?.sheet1?.[5]?.[5]).toBeUndefined();
+        const notification = executeCommandSpy.mock.calls.find(([id]) => id === SetArrayFormulaDataMutation.id);
+        expect(notification?.[2]).toMatchObject({ onlyLocal: true, remove: true });
+    });
+
     it('should initialize formula data for added sheets and workbooks, then clear removed sheets', async () => {
         const configService = testBed.injector.get(IConfigService);
         const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');
@@ -1127,6 +1198,238 @@ describe('UpdateFormulaController', () => {
 });
 
 describe('UpdateFormulaController spill cache integration', () => {
+    it('recalculates imported spill references and fixed arrays without cached values', async () => {
+        const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: {} }, logLevel: LogLevel.SILENT });
+        univer.registerPlugin(UniverSheetsPlugin);
+        univer.registerPlugin(UniverFormulaEnginePlugin);
+        univer.registerPlugin(UniverSheetsFormulaPlugin, { initialFormulaComputing: CalculationMode.NO_CALCULATION });
+        const facade = FUniver.newAPI(univer);
+        const workbook = facade.createWorkbook({
+            id: 'imported-array-results',
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    name: 'Sheet1',
+                    rowCount: 5000,
+                    columnCount: 27,
+                    cellData: {
+                        0: {
+                            0: { v: 3, t: CellValueType.NUMBER },
+                            1: { f: '=SEQUENCE(A1)', ref: 'B1:B3', ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE },
+                            2: { f: '=_xlfn.SINGLE($A$1:$A$2)' },
+                            3: { f: '=ANCHORARRAY(B1)', ref: 'D1:D3', ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE },
+                            5: { f: '=SUM(A1,1)', ref: 'F1:G2', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE },
+                            8: { f: '={1,2;3,4}*A1', ref: 'I1:K3', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE },
+                            12: { f: '={1,2}*A1', ref: 'M1:N3', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE },
+                            15: { f: '={1;2}*A1', ref: 'P1:Q3', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE },
+                            18: { f: '=ANCHORARRAY(A1)' },
+                            20: { f: '=SUM(ANCHORARRAY(B1))' },
+                            22: { f: '=ANCHORARRAY(U1)' },
+                            24: { f: '=SEQUENCE(2)' },
+                            25: { f: '=ANCHORARRAY(Y1)' },
+                        },
+                        1: { 2: { f: '=_xlfn.SINGLE({1,2;3,4})' }, 18: { f: '=ANCHORARRAY(B2)' }, 24: { v: 7, t: CellValueType.NUMBER } },
+                        8: {
+                            1: { f: '=LINEST({2;4;6}*A1,{1;2;3})', ref: 'B9:D10', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE },
+                            5: { f: '=LINEST({2;4;6}*A1,{1;2;3})', ref: 'F9:G9', ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE },
+                            10: { f: '=LINEST({2;4;6}*A1,{1;2;3})' },
+                        },
+                        12: {
+                            0: { v: 5, t: CellValueType.NUMBER },
+                            1: { f: '=A1' },
+                            3: { f: "=SUM(Sheet1!$A$13:$A$14:'Sheet1'!$C$15)" },
+                            4: { f: '=ISREF((Sheet1!$A$13:$A$14 Sheet1!$C$13:$C$14))' },
+                            6: { f: '=_xlfn.TRIMRANGE(A12:C16)', ref: 'G13', ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE },
+                            10: { f: '=ISREF(TRIMRANGE(A12:C16))' },
+                            11: { f: '=TRIMRANGE(A12:C16,4)' },
+                            12: { f: '=TRIMRANGE(F12:F16)' },
+                            13: { f: '=ROWS(TRIMRANGE(A12:C16,1))' },
+                            14: { f: '=ISO.CEILING(-A1-0.3,-2)' },
+                            15: { f: '=ISO.CEILING(A1+0.3,)' },
+                            16: { f: '=ISO.CEILING(A1+0.3,F12)' },
+                            17: { f: '=ROWS(TRIMRANGE(A12:C16,F12))' },
+                            19: { f: '=ROWS(TRIMRANGE(AA1:AA5000))' },
+                            20: { f: '=INDIRECT("Sheet1!R1C1",)' },
+                            21: { f: '=INDIRECT("A1",)' },
+                            22: { f: '=_xlfn.SINGLE($A$1:$B$2)' },
+                            23: { f: '=ARABIC(" LVII ")' },
+                            24: { f: '=ARABIC("IIV")' },
+                        },
+                        14: { 2: { v: 2, t: CellValueType.NUMBER }, 26: { v: 99, t: CellValueType.NUMBER } },
+                        19: {
+                            2: { f: '=UNREGISTERED_ARRAY_FUNCTION()', ref: 'C20:E20', ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE },
+                            3: { s: { bl: BooleanNumber.TRUE } },
+                            4: { s: { bl: BooleanNumber.TRUE } },
+                        },
+                        20: {
+                            0: { f: '=AMORDEGRC(A1*800,45157,45291,300,1,0.15,1)' },
+                            1: { f: '=AMORDEGRC(2400,45157,45291,300,0,0.15,1)' },
+                            2: { f: '=AMORDEGRC(2400,45157,45291,300,5,0.15,1)' },
+                            3: { f: '=AMORDEGRC(2400,45157,45291,300,6,0.15,1)' },
+                            4: { f: '=AMORDEGRC(2400,45157,45291,300,1,0.15,2)' },
+                            5: { f: '=AMORDEGRC(TRUE,45157,45291,300,1,0.15,1)' },
+                            6: { f: '=SUM(AMORDEGRC(2400,45157,45291,300,{0,1,2,3},0.15,1))' },
+                            7: { f: '=SUM(N(OFFSET(A13,{0,-12,2},0)))' },
+                            8: { f: '=SUM(N(INDIRECT({"A1","A13"})))' },
+                            9: { f: '=SUM(N(A1:A2))' },
+                            10: { f: '=AMORDEGRC(2400,45157,45291,300,2,0.19,1)' },
+                            11: { f: '=SUM(PRICEMAT(DATE(2024,3,15),DATE(2024,11,15),DATE(2023,11,15),0.061,0.061,{0,1,2}+A1))' },
+                            12: { f: '=SUM(YIELDMAT(DATE(2024,3,15),DATE(2024,11,15),DATE(2023,11,15),0.0625,{98,99,100}+A1))' },
+                            13: { f: '=PRICEMAT(DATE(2024,3,15),DATE(2024,11,15),N22,0.061,0.061)' },
+                            14: { f: '=YIELDMAT(DATE(2024,3,15),O22,DATE(2023,11,15),0.0625,100.0123)' },
+                        },
+                    },
+                },
+            },
+        });
+        const calculator = facade.getFormula();
+        const sheet = workbook.getActiveSheet();
+        const injector = univer.__getInjector();
+        injector.get(IUniverInstanceService).focusUnit(workbook.getId());
+        const commands = injector.get(ICommandService);
+        const calculate = async (action: () => unknown) => {
+            let subscription: { dispose(): void } | undefined;
+            let timer: ReturnType<typeof setTimeout> | undefined;
+            const completed = new Promise<void>((resolve, reject) => {
+                subscription = calculator.calculationEnd(() => resolve());
+                timer = setTimeout(() => reject(new Error('Imported array calculation timed out')), 5000);
+            });
+            try {
+                action();
+                await completed;
+            } finally {
+                clearTimeout(timer);
+                subscription?.dispose();
+            }
+        };
+        function expectExcelValues(input: number) {
+            const spill = [[1], [input >= 2 ? 2 : null], [input === 3 ? 3 : null]];
+            expect(sheet.getRange('B1:B3').getValues()).toEqual(spill);
+            expect(sheet.getRange('C1:C2').getValues()).toEqual([[input], [1]]);
+            expect(sheet.getRange('D1:D3').getValues()).toEqual(spill);
+            expect(sheet.getRange('F1:G2').getValues()).toEqual([[input + 1, input + 1], [input + 1, input + 1]]);
+            expect(sheet.getRange('I1:K3').getValues()).toEqual([
+                [input, 2 * input, '#N/A'],
+                [3 * input, 4 * input, '#N/A'],
+                ['#N/A', '#N/A', '#N/A'],
+            ]);
+            expect(sheet.getRange('M1:N3').getValues()).toEqual([[input, 2 * input], [input, 2 * input], [input, 2 * input]]);
+            expect(sheet.getRange('P1:Q3').getValues()).toEqual([[input, input], [2 * input, 2 * input], ['#N/A', '#N/A']]);
+            expect(sheet.getRange('B9:D10').getValues()).toEqual([[2 * input, 0, '#N/A'], [2 * input, 0, '#N/A']]);
+            expect(sheet.getRange('F9:G9').getValues()).toEqual([[2 * input, 0]]);
+            expect(sheet.getRange('K9:L9').getValues()).toEqual([[2 * input, null]]);
+            expect(sheet.getRange('D13').getValue()).toBe(input + 7);
+            expect(sheet.getRange('E13').getValue()).toBe(0);
+            expect(sheet.getRange('G13:I15').getValues()).toEqual([[5, input, 0], [0, 0, 0], [0, 0, 2]]);
+            expect(sheet.getRange('K13:R13').getValues()).toEqual([[1, '#VALUE!', '#REF!', 4, Math.ceil((-input - 0.3) / 2) * 2 + 0, input + 1, 0, 5]]);
+            expect(sheet.getRange('T13').getValue()).toBe(1);
+            expect(sheet.getRange('U13:Y13').getValues()).toEqual([[input, '#REF!', '#VALUE!', 57, 3]]);
+            expect(sheet.getRange('C20:E20').getValues()).toEqual([['#NAME?', null, null]]);
+            expect(sheet.getRange('A21:K21').getValues()).toEqual([[[259, 518, 776][input - 1], 330, 158, 0, '#NUM!', '#VALUE!', 1894, input + 5, input + 5, input, 487]]);
+            if (input === 3) {
+                expect(sheet.getRange('L21').getValue()).toBe('#NUM!');
+            } else {
+                expect(sheet.getRange('L21').getValue()).toBeCloseTo([299.7596187969094, 299.75927781090263][input - 1], 9);
+            }
+            expect(sheet.getRange('M21').getValue()).toBeCloseTo([0.18397312839913993, 0.138528693708766, 0.09395765355598794][input - 1], 10);
+            expect(sheet.getRange('N21').getValue()).toBeCloseTo(70.39210708947269, 10);
+            expect(sheet.getRange('O21').getValue()).toBe('#NUM!');
+            expect(sheet.getRange('S1:S2').getValues()).toEqual([['#REF!'], ['#REF!']]);
+            const sum = input * (input + 1) / 2;
+            expect(sheet.getRange('U1').getValue()).toBe(sum);
+            expect(sheet.getRange('W1').getValue()).toBe(sum);
+            expect(sheet.getRange('Y1:Z1').getValues()).toEqual([['#SPILL!', '#SPILL!']]);
+        }
+        try {
+            await calculate(() => calculator.executeCalculation());
+            expectExcelValues(3);
+            await calculate(() => sheet.getRange('A1').setValue(2));
+            expectExcelValues(2);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expectExcelValues(3);
+            await calculate(() => sheet.getRange('A1').setValue(1));
+            expectExcelValues(1);
+            await calculate(() => sheet.getRange('C15').setValue({ v: null }));
+            expect(sheet.getRange('G13:I15').getValues()).toEqual([[5, 1, null], [null, null, null], [null, null, null]]);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expectExcelValues(1);
+        } finally {
+            univer.dispose();
+        }
+    });
+
+    it('keeps an imported FILTER spill editable after shrinking and undoing', async () => {
+        const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: {} }, logLevel: LogLevel.SILENT });
+        univer.registerPlugin(UniverSheetsPlugin);
+        univer.registerPlugin(UniverFormulaEnginePlugin);
+        univer.registerPlugin(UniverSheetsFormulaPlugin, { initialFormulaComputing: CalculationMode.NO_CALCULATION });
+        const api = FUniver.newAPI(univer);
+        const book = api.createWorkbook({
+            id: 'imported-filter-spill',
+            sheetOrder: ['data'],
+            sheets: {
+                data: {
+                    id: 'data',
+                    name: 'Data',
+                    rowCount: 10,
+                    columnCount: 10,
+                    cellData: {
+                        0: {
+                            0: { v: 1 },
+                            1: { v: 1 },
+                            3: { f: '=FILTER(A1:A3,B1:B3=1)', v: '1', t: CellValueType.NUMBER, ref: 'D1:D3' },
+                            5: { f: '=SUM(D1:D3)' },
+                        },
+                        1: { 0: { v: 2 }, 1: { v: 1 }, 3: { v: '2', t: CellValueType.NUMBER } },
+                        2: { 0: { v: 3 }, 1: { v: 1 }, 3: { v: '3', t: CellValueType.NUMBER } },
+                    },
+                },
+            },
+        });
+        const injector = univer.__getInjector();
+        injector.get(IUniverInstanceService).focusUnit(book.getId());
+        const sheet = book.getActiveSheet();
+        const commands = injector.get(ICommandService);
+        const calculator = api.getFormula();
+        const calculate = async (action: () => unknown) => {
+            let subscription: { dispose(): void } | undefined;
+            let timer: ReturnType<typeof setTimeout> | undefined;
+            const done = new Promise<void>((resolve, reject) => {
+                subscription = calculator.calculationEnd(() => resolve());
+                timer = setTimeout(() => reject(new Error('Imported spill calculation timed out')), 5000);
+            });
+            try {
+                action();
+                await done;
+            } finally {
+                clearTimeout(timer);
+                subscription?.dispose();
+            }
+        };
+        const values = () => sheet.getRange('D1:D3').getValues().map(([value]) => value ?? null);
+        try {
+            await calculate(() => calculator.executeCalculation());
+            expect(values()).toEqual([1, 2, 3]);
+            expect(sheet.getRange('F1').getValue()).toBe(6);
+            await calculate(() => sheet.getRange('A2').setValue(20));
+            expect(values()).toEqual([1, 20, 3]);
+            expect(sheet.getRange('F1').getValue()).toBe(24);
+            await calculate(() => sheet.getRange('B3').setValue(0));
+            expect(values()).toEqual([1, 20, null]);
+            expect(sheet.getRange('F1').getValue()).toBe(21);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expect(values()).toEqual([1, 20, 3]);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expect(values()).toEqual([1, 2, 3]);
+            expect(sheet.getRange('F1').getValue()).toBe(6);
+            await calculate(() => calculator.executeCalculation());
+            expect(values()).toEqual([1, 2, 3]);
+        } finally {
+            univer.dispose();
+        }
+    });
+
     it.each([
         { formula: '=SEQUENCE($A$1)', horizontal: false, scale: 1 },
         { formula: '=SEQUENCE(1,$A$1)', horizontal: true, scale: 1 },
@@ -1216,6 +1519,328 @@ describe('UpdateFormulaController spill cache integration', () => {
             expectValues(5);
             await calculate(() => expect(commands.syncExecuteCommand(RedoCommand.id)).toBe(true));
             expectValues(1, true);
+        } finally {
+            univer.dispose();
+        }
+    });
+});
+
+describe('conditional circular references', () => {
+    it.each([CalculationMode.NO_CALCULATION, CalculationMode.WHEN_EMPTY])('recalculates after edits and undo in mode %s', async (initialFormulaComputing) => {
+        const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: {} }, logLevel: LogLevel.SILENT });
+        univer.registerPlugin(UniverSheetsPlugin);
+        univer.registerPlugin(UniverFormulaEnginePlugin);
+        univer.registerPlugin(UniverSheetsFormulaPlugin, { initialFormulaComputing });
+        const api = FUniver.newAPI(univer);
+        const calculator = api.getFormula();
+        const injector = univer.__getInjector();
+
+        async function calculate(action: () => void): Promise<void> {
+            let subscription: { dispose(): void } | undefined;
+            let timer: ReturnType<typeof setTimeout> | undefined;
+            const completed = new Promise<void>((resolve, reject) => {
+                subscription = calculator.calculationEnd(() => resolve());
+                timer = setTimeout(() => reject(new Error('Conditional cycle calculation timed out')), 5000);
+            });
+            try {
+                action();
+                await completed;
+            } finally {
+                clearTimeout(timer);
+                subscription?.dispose();
+            }
+        }
+
+        const open = () => api.createWorkbook({
+            id: 'conditional-cycle',
+            sheetOrder: ['data'],
+            sheets: {
+                data: {
+                    id: 'data',
+                    name: 'Data',
+                    rowCount: 10,
+                    columnCount: 10,
+                    cellData: {
+                        0: {
+                            0: { v: 1 },
+                            1: { v: 5 },
+                            2: { f: '=INDEX(B1:B2,MATCH(D1,A1:A2,0))' },
+                            3: { v: 1 },
+                            4: { f: '=IF(F1,SUM(E1:E3),G1)' },
+                            5: { v: 0, t: CellValueType.BOOLEAN },
+                            6: { v: 9 },
+                            7: { f: '=C1+E1' },
+                        },
+                        1: { 0: { v: 2 }, 1: { f: '=C1+1' } },
+                    },
+                },
+            },
+        });
+
+        try {
+            let book: ReturnType<typeof open> | undefined;
+            if (initialFormulaComputing === CalculationMode.WHEN_EMPTY) {
+                await calculate(() => {
+                    book = open();
+                });
+            } else {
+                book = open();
+                await calculate(() => calculator.executeCalculation());
+            }
+            const sheet = book!.getActiveSheet();
+            injector.get(IUniverInstanceService).focusUnit(book!.getId());
+            const commands = injector.get(ICommandService);
+            const runtime = injector.get(IFormulaRuntimeService);
+            const cycles = () => runtime.getRuntimeState().circularReferences?.map(({ row, column }) => [row, column]);
+            const values = () => ['C1', 'B2', 'E1', 'H1'].map((cell) => sheet.getRange(cell).getValue());
+            const undo = () => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true);
+
+            expect(values()).toEqual([5, 6, 9, 14]);
+            expect(cycles()).toEqual([]);
+            await calculate(() => sheet.getRange('B1').setValue(8));
+            expect(values()).toEqual([8, 9, 9, 17]);
+
+            await calculate(() => sheet.getRange('D1').setValue(2));
+            expect(cycles()).toHaveLength(2);
+            expect(cycles()).toEqual(expect.arrayContaining([[0, 2], [1, 1]]));
+            expect(values()).toEqual([8, 9, 9, 17]);
+            await calculate(undo);
+            expect(cycles()).toEqual([]);
+
+            await calculate(() => sheet.getRange('F1').setValue(true));
+            expect(cycles()).toEqual([[0, 4]]);
+            expect(values()).toEqual([8, 9, 9, 17]);
+            await calculate(undo);
+            expect(cycles()).toEqual([]);
+            expect(values()).toEqual([8, 9, 9, 17]);
+        } finally {
+            univer.dispose();
+        }
+    });
+});
+
+describe('Grouped dynamic array formulas', () => {
+    it('recalculates PIVOTBY, GROUPBY and BYCOL from source values and restores the spill on undo', async () => {
+        const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: {} }, logLevel: LogLevel.SILENT });
+        univer.registerPlugin(UniverSheetsPlugin);
+        univer.registerPlugin(UniverFormulaEnginePlugin);
+        univer.registerPlugin(UniverSheetsFormulaPlugin, { initialFormulaComputing: CalculationMode.NO_CALCULATION });
+        const facade = FUniver.newAPI(univer);
+        try {
+            const workbook = facade.createWorkbook({
+                id: 'grouped-formula-com',
+                sheetOrder: ['sheet', 'source'],
+                resources: [{
+                    name: 'SHEET_DEFINED_NAME_PLUGIN',
+                    data: JSON.stringify({ previous: { id: 'previous', name: 'PreviousRow', localSheetId: 'source', formulaOrRefString: 'Source!$B1048576' } }),
+                }],
+                sheets: {
+                    sheet: {
+                        id: 'sheet',
+                        name: 'Data',
+                        rowCount: 20,
+                        columnCount: 22,
+                        cellData: {
+                            0: {
+                                7: { f: '=_xlfn.PIVOTBY(A2:A5,B2:B5,C2:C5,_xleta.SUM)' },
+                                13: { f: '=GROUPBY(A2:A5,C2:C5,HSTACK(SUM,AVERAGE))' },
+                                17: { f: '=ARRAYTOTEXT(BYCOL(C2:C5,_xleta.AVERAGE),1)' },
+                                18: { f: '=FORMULATEXT(E2)' },
+                            },
+                            1: { 0: { v: 'West' }, 1: { v: 2025 }, 2: { v: 9 }, 4: { f: '=NA()' } },
+                            2: { 0: { v: 'East' }, 1: { v: 2024 }, 2: { v: 3 } },
+                            3: { 0: { v: 'West' }, 1: { v: 2024 }, 2: { v: 10 } },
+                            4: { 0: { v: 'East' }, 1: { v: 2025 }, 2: { v: 4 } },
+                            7: { 5: { v: 10 }, 6: { v: 'West' }, 7: { v: 'F8' } },
+                            8: { 5: { v: 2 } },
+                            10: {
+                                5: { f: '=GROUPBY(G8:G9,F8:F9,SUM)' },
+                                8: { f: '=ARRAYTOTEXT(GROUPBY(G8:G9,F8:F9,LAMBDA(x,INDEX(x,1))),1)' },
+                                9: { f: '=TYPE(TAKE({10;2},1))' },
+                                10: { f: '=TYPE(FILTER(42,TRUE))' },
+                                11: { f: '=ISREF(TAKE(F8:F9,1))' },
+                                12: { f: '=ISREF({1,2})' },
+                                13: { f: '=TYPE(INDEX({1;2},1)+0)' },
+                                14: { f: '=ARRAYTOTEXT(STDEV.P(4,14,16,27,31),1)' },
+                                15: { f: '=ARRAYTOTEXT(GROUPBY(G8:G9,F8:F9,LAMBDA(x,TAKE(x,1))),1)' },
+                                16: { f: '=ARRAYTOTEXT(VAR.P(1000000000004,1000000000014,1000000000016,1000000000027,1000000000031),1)' },
+                                17: { f: '=ISREF(DROP(F8:F9,1))' },
+                                18: { f: '=ISREF(INDIRECT({"F8"}))' },
+                                19: { f: '=ISREF(INDIRECT(ADDRESS(8,6)))' },
+                                20: { f: '=TYPE(DROP({1;2},1))' },
+                                21: { f: '=TRUNC(-3.59,2)' },
+                            },
+                            14: {
+                                5: { f: '=SUM(DROP(F8:F9,1))' },
+                                6: { f: '=ISREF(INDIRECT(H8))' },
+                                7: { f: '=ADDRESS(2,3,H9,TRUE)' },
+                            },
+                            16: {
+                                5: { f: '=TYPE(MATCH(F9,F8:F9,0))' },
+                                6: { f: '=TYPE(MATCH(F9:F9,F8:F9,0))' },
+                                7: { f: '=TYPE(MATCH({10},F8:F9,0))' },
+                                8: { f: '=ISREF(INDIRECT("F"&(MATCH(F9,F8:F9,0)+7)))' },
+                                9: { f: '=ISREF(INDIRECT("F"&(MATCH({10},F8:F9,0)+7)))' },
+                                10: { f: '=SUM(OFFSET(INDIRECT("F"&(MATCH(F9,F8:F9,0)+7)),0,0))' },
+                                11: { f: '=SUM(OFFSET(INDIRECT({"Source!A1:A2"}),0,1))' },
+                                12: { f: '=ISREF(OFFSET(INDIRECT({"Source!A1"}),0,1))' },
+                            },
+                            17: {
+                                0: { f: '=WORKDAY(45169,{1;2},Source!A1)' },
+                                1: { f: '=WORKDAY.INTL(45169,SEQUENCE(2),,Source!A1)' },
+                                3: { f: '=SUM((Source!B1:B2,Source!B1))' },
+                                4: { f: '=AREAS((Source!B1,Source!B2))' },
+                                5: { f: '=ISREF((Source!B1,Source!B2))' },
+                                6: { f: '=INDEX((Source!B1,Source!B2),1,1,2)' },
+                                7: { f: '=SUM((Source!B1:B2,Source!B2) Source!B2)' },
+                                8: { f: '=SUM(Source!B1 Source!B2)' },
+                                9: { f: '=ROWS((Source!B1,Source!B2))' },
+                            },
+                            19: {
+                                0: { f: '=CUBEVALUE("NoSuchConnection")' },
+                                1: { f: '=CUBEMEMBER("ThisWorkbookDataModel","[Product].[Bikes]")' },
+                                2: { f: '=CONVERT(Source!B1,"in2","cm2")' },
+                                3: { f: '=FILTER(Source!B1:B2,Source!D1:D2>0)' },
+                                4: { f: '=FILTER(Source!B1:B2,Source!D1:D2=0.1)' },
+                                5: { f: '=FILTER(Source!B1:B2,{0;0},)' },
+                                6: { f: '=SUM(CONVERT(+Source!B1:B2,"m","cm"))' },
+                                7: { f: '=CONVERT(Source!B1:B2,"m","cm")' },
+                                8: { f: '=WORKDAY(DATE(2024,3,15),-1.9)' },
+                                9: { f: '=WORKDAY.INTL(DATE(2024,3,15),-0.1)' },
+                                10: { f: '=TEXTJOIN("|",FALSE,CONVERT(1,"m",{"cm","in","ft"}))' },
+                                11: { f: '=ARRAYTOTEXT(FILTER(Source!B1:B3,REGEXTEST(Source!E1:E3,"^m")),1)' },
+                                12: { f: '=ISREF(+Source!B1:B2)' },
+                                13: { f: '=TYPE(+TRUE)' },
+                                14: { f: '=ODDLYIELD(DATE(2008,4,20),DATE(2008,6,15),DATE(2007,12,24),0.0375,IF(Source!B1>25,99.5,99.875),100,2)' },
+                                15: { f: '=IFNA(A20,0)' },
+                                16: { f: '=ISNA(A20)' },
+                            },
+                        },
+                    },
+                    source: {
+                        id: 'source',
+                        name: 'Source',
+                        rowCount: 20,
+                        columnCount: 22,
+                        cellData: {
+                            0: { 0: { v: 45170 }, 1: { v: 19 }, 3: { f: '=1/(B1-19)' }, 4: { f: '=IF(B1>25,"desk","motor")' } },
+                            1: { 1: { v: 23 }, 2: { f: '=PreviousRow', si: 'previous-shared' }, 4: { v: 'desk' } },
+                            2: { 1: { v: 31 }, 2: { si: 'previous-shared' }, 4: { v: 'millimeter' } },
+                        },
+                    },
+                },
+            });
+            const sheet = workbook.getActiveSheet();
+            const injector = univer.__getInjector();
+            injector.get(IUniverInstanceService).focusUnit(workbook.getId());
+            const commands = injector.get(ICommandService);
+            const formula = facade.getFormula();
+            const calculate = async (action: () => unknown) => {
+                let subscription: { dispose(): void } | undefined;
+                let timeout: ReturnType<typeof setTimeout> | undefined;
+                const result = new Promise<void>((resolve, reject) => {
+                    subscription = formula.calculationEnd(() => resolve());
+                    timeout = setTimeout(() => reject(new Error('Grouped formula calculation timed out')), 5000);
+                });
+                try {
+                    action();
+                    await result;
+                } finally {
+                    clearTimeout(timeout);
+                    subscription?.dispose();
+                }
+            };
+            const check = (amount: number) => {
+                expect(sheet.getRange('H1:K4').getValues()).toEqual([
+                    ['', 2024, 2025, 'Total'],
+                    ['East', 3, 4, 7],
+                    ['West', 10, amount, amount + 10],
+                    ['Total', 13, amount + 4, amount + 17],
+                ]);
+                expect(sheet.getRange('N1:P4').getValues()).toEqual([
+                    ['', 'SUM', 'AVERAGE'],
+                    ['East', 7, 3.5],
+                    ['West', amount + 10, (amount + 10) / 2],
+                    ['Total', amount + 17, (amount + 17) / 4],
+                ]);
+                expect(sheet.getRange('R1:S1').getValues()).toEqual([[`{${(amount + 17) / 4}}`, '=NA()']]);
+            };
+            await calculate(() => formula.executeCalculation());
+            check(9);
+            expect(sheet.getRange('F11:G13').getValues()).toEqual([['West', 10], [0, 2], ['Total', 12]]);
+            expect(sheet.getRange('I11:Q11').getValues()).toEqual([[
+                '{"West",10;,2;"Total",#VALUE!}',
+                64,
+                64,
+                1,
+                0,
+                64,
+                '{9.64572444143}',
+                '{"West",#VALUE!;,#VALUE!;"Total",#VALUE!}',
+                '{93.0400000005961}',
+            ]]);
+            await calculate(() => sheet.getRange('C2').setValue(19));
+            check(19);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            check(9);
+            await calculate(() => sheet.getRange('B2').setValue(2026));
+            expect(sheet.getRange('H1:L4').getValues()).toEqual([
+                ['', 2024, 2025, 2026, 'Total'],
+                ['East', 3, 4, '', 7],
+                ['West', 10, '', 9, 19],
+                ['Total', 13, 4, 9, 26],
+            ]);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            check(9);
+            expect(sheet.getRange('L1:L4').getValues()).toEqual([[null], [null], [null], [null]]);
+            expect(sheet.getRange('R11:V11').getValues()).toEqual([[1, 0, 1, 64, -3.59]]);
+            expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, 1]]);
+            expect(sheet.getRange('H15').getValue()).toBe('#VALUE!');
+            expect(sheet.getRange('F17:M17').getValues()).toEqual([[1, 1, 64, 1, 0, 2, 19, 0]]);
+            await calculate(() => sheet.getRange('F9').setValue(7));
+            expect(sheet.getRange('F17:M17').getValues()).toEqual([[1, 1, 64, 1, 0, 7, 19, 0]]);
+            expect(sheet.getRange('F15:G15').getValues()).toEqual([[7, 1]]);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expect(sheet.getRange('F17:M17').getValues()).toEqual([[1, 1, 64, 1, 0, 2, 19, 0]]);
+            await calculate(() => sheet.getRange('H8').setValue('invalid'));
+            expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, 0]]);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, 1]]);
+            expect(sheet.getRange('A18:B19').getValues()).toEqual([[45173, 45173], [45174, 45174]]);
+            expect(sheet.getRange('D18:G18').getValues()).toEqual([[61, 2, 1, 23]]);
+            expect(sheet.getRange('H18:J18').getValues()).toEqual([[46, '#NULL!', '#REF!']]);
+            expect(sheet.getRange('A20:B20').getValues()).toEqual([['#NAME?', '#NAME?']]);
+            expect(sheet.getRange('P20:Q20').getValues()).toEqual([['#NAME?', 0]]);
+            const savedCells = workbook.save().sheets[sheet.getSheetId()]?.cellData;
+            expect(savedCells?.[19]?.[0]?.f).toBe('=CUBEVALUE("NoSuchConnection")');
+            expect(Number(sheet.getRange('C20').getValue())).toBeCloseTo(122.5804, 10);
+            expect(sheet.getRange('D20:F20').getValues()).toEqual([['#DIV/0!', '#DIV/0!', '#CALC!']]);
+            expect(sheet.getRange('G20:J20').getValues()).toEqual([[4200, '#VALUE!', 45364, 45365]]);
+            expect(sheet.getRange('K20').getValue()).toBe('100|39.3700787401575|3.28083989501312');
+            expect(sheet.getRange('L20:N20').getValues()).toEqual([['{19;31}', 0, 4]]);
+            expect(sheet.getRange('O20').getValue()).toBeCloseTo(0.04519223562916916, 12);
+
+            const source = workbook.getSheetByName('Source')!;
+            expect(source.getRange('C2:C3').getValues()).toEqual([[19], [23]]);
+            await calculate(() => source.getRange('A1:B1').setValues([[45173, 29]]));
+            expect(sheet.getRange('A18:B19').getValues()).toEqual([[45170, 45170], [45174, 45174]]);
+            expect(sheet.getRange('D18:G18').getValues()).toEqual([[81, 2, 1, 23]]);
+            expect(Number(sheet.getRange('C20').getValue())).toBeCloseTo(187.0964, 10);
+            expect(sheet.getRange('D20:F20').getValues()).toEqual([[29, 29, '#CALC!']]);
+            expect(sheet.getRange('G20:J20').getValues()).toEqual([[5200, '#VALUE!', 45364, 45365]]);
+            expect(sheet.getRange('L20').getValue()).toBe('{31}');
+            expect(sheet.getRange('O20').getValue()).toBeCloseTo(0.06973332831835138, 12);
+            expect(source.getRange('C2:C3').getValues()).toEqual([[29], [23]]);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expect(sheet.getRange('A18:B19').getValues()).toEqual([[45173, 45173], [45174, 45174]]);
+            expect(sheet.getRange('D18:G18').getValues()).toEqual([[61, 2, 1, 23]]);
+            expect(Number(sheet.getRange('C20').getValue())).toBeCloseTo(122.5804, 10);
+            expect(sheet.getRange('D20:F20').getValues()).toEqual([['#DIV/0!', '#DIV/0!', '#CALC!']]);
+            expect(sheet.getRange('G20:J20').getValues()).toEqual([[4200, '#VALUE!', 45364, 45365]]);
+            expect(sheet.getRange('K20').getValue()).toBe('100|39.3700787401575|3.28083989501312');
+            expect(sheet.getRange('L20:N20').getValues()).toEqual([['{19;31}', 0, 4]]);
+            expect(sheet.getRange('O20').getValue()).toBeCloseTo(0.04519223562916916, 12);
+            expect(source.getRange('C2:C3').getValues()).toEqual([[19], [23]]);
         } finally {
             univer.dispose();
         }

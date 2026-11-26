@@ -23,6 +23,8 @@ import {
     IUniverInstanceService,
     LocaleService,
     ObjectMatrix,
+    Optional,
+    RegionService,
     UniverInstanceType,
 } from '@univerjs/core';
 import type {
@@ -97,6 +99,7 @@ export interface IFormulaCurrentConfigService {
     getExternalReferences(): IFormulaExternalReferences;
 
     getCalculationGeneration(): number;
+    getCalculationTimestamp?(): number;
 
     isForceCalculate(): boolean;
 
@@ -141,6 +144,7 @@ export interface IFormulaCurrentConfigService {
     getClearDependencyTreeCache(): IDirtyUnitSheetNameMap;
 
     getLocale(): LocaleType;
+    getCalculationRegion(): LocaleType;
     getDateSystem(unitId?: string): DateSystem;
 
     getSheetsInfo(unitId?: string): {
@@ -150,7 +154,7 @@ export interface IFormulaCurrentConfigService {
 
     getSheetRowColumnCount(unitId: string, sheetId: string): { rowCount: number; columnCount: number };
 
-    getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number): number[];
+    getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number, forSubtotal?: boolean): number[];
 
     setSheetNameMap(sheetIdToNameMap: IUnitSheetIdToNameMap): void;
 
@@ -182,6 +186,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     private readonly _filteredOutRows = new Map<string, Map<string, Set<number>>>();
 
     private _calculationGeneration = 0;
+    private _calculationTimestamp: number | undefined;
 
     private _forceCalculate: boolean = false;
 
@@ -205,12 +210,14 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _executeUnitId: Nullable<string> = '';
     private _executeSubUnitId: Nullable<string> = '';
+    private _calculationRegion: LocaleType | undefined;
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @Inject(ISheetRowFilteredService) private readonly _sheetRowFilteredService: ISheetRowFilteredService
+        @Inject(ISheetRowFilteredService) private readonly _sheetRowFilteredService: ISheetRowFilteredService,
+        @Optional(RegionService) private readonly _regionService?: RegionService
     ) {
         super();
     }
@@ -302,6 +309,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._calculationGeneration;
     }
 
+    getCalculationTimestamp(): number {
+        return this._calculationTimestamp ??= Date.now();
+    }
+
     isForceCalculate() {
         return this._forceCalculate;
     }
@@ -350,6 +361,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._localeService.getCurrentLocale();
     }
 
+    getCalculationRegion(): LocaleType {
+        return this._calculationRegion ?? this._regionService?.getCurrentRegion() ?? this.getLocale();
+    }
+
     getDateSystem(unitId = this._executeUnitId ?? undefined): DateSystem {
         if (!unitId) return DateSystem.Date1900;
         return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getDateSystem() ?? DateSystem.Date1900;
@@ -391,14 +406,15 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return { rowCount, columnCount };
     }
 
-    getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number) {
+    getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number, forSubtotal?: boolean) {
         const filteredOutRows: number[] = [];
         const override = this._filteredOutRows.get(unitId)?.get(sheetId);
 
         for (let r = startRow; r <= endRow; r++) {
+            const row = this._calculationRowData[unitId]?.[sheetId]?.[r];
             const filtered = override?.has(r) ?? (
-                this._calculationRowData[unitId]?.[sheetId]?.[r]?.filtered
-                || this._sheetRowFilteredService.getRowFiltered(unitId, sheetId, r)
+                row?.filtered || (forSubtotal && row?.subtotalFiltered)
+                || this._sheetRowFilteredService.getRowFiltered(unitId, sheetId, r, forSubtotal)
             );
             if (filtered) {
                 filteredOutRows.push(r);
@@ -419,6 +435,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _loadFormulaDataset(config: IFormulaDatasetConfig | Omit<IFormulaDatasetConfig, 'formulaData'>, snapshot?: IFormulaDataSnapshot): void {
         this._calculationGeneration++;
+        this._calculationTimestamp = undefined;
+        this._calculationRegion = config.region ?? this._regionService?.getCurrentRegion() ?? this.getLocale();
         this._calculationRowData = Object.create(null);
         this._filteredOutRows.clear();
         for (const [unitId, sheets] of Object.entries(config.filteredOutRows ?? {})) {

@@ -44,6 +44,7 @@ import { Numbervalue } from './numbervalue';
 import { Proper } from './proper';
 import { Regexextract } from './regexextract';
 import { Regexmatch } from './regexmatch';
+import { Regextest } from './regextest';
 import { Regexreplace } from './regexreplace';
 // import { RegisterId } from './register-id';
 import { Replace } from './replace';
@@ -96,7 +97,7 @@ export const functionText = [
     // [Phonetic, FUNCTION_NAMES_TEXT.PHONETIC],
     [Regexextract, FUNCTION_NAMES_TEXT.REGEXEXTRACT],
     [Regexmatch, FUNCTION_NAMES_TEXT.REGEXMATCH],
-    [Regexmatch, FUNCTION_NAMES_TEXT.REGEXTEST],
+    [Regextest, FUNCTION_NAMES_TEXT.REGEXTEST],
     [Regexreplace, FUNCTION_NAMES_TEXT.REGEXREPLACE],
     [Proper, FUNCTION_NAMES_TEXT.PROPER],
     [Replace, FUNCTION_NAMES_TEXT.REPLACE],

@@ -31,6 +31,7 @@ import type { IUniverEngineFormulaConfig } from '../../config/config';
 import { OtherFormulaMarkDirty } from '../../commands/mutations/formula.mutation';
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { CustomFunction } from '../../functions/custom-function';
+import { SetFormulaCalculationStartMutation, SetTriggerFormulaCalculationStartMutation } from '../../commands/mutations/set-formula-calculation.mutation';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from '../../services/active-dirty-manager.service';
 import { FormulaCacheService } from '../../services/formula-cache.service';
 import { FunctionService, IFunctionService } from '../../services/function.service';
@@ -60,7 +61,7 @@ function createController(dataSyncPrimaryController?: FormulaDataSyncController,
     injector.add([RegisterOtherFormulaService]);
     injector.add([FormulaController]);
     if (dataSyncPrimaryController) {
-        injector.add([DataSyncPrimaryController, { useValue: dataSyncPrimaryController }]);
+        injector.add([DataSyncPrimaryController, { useValue: dataSyncPrimaryController as DataSyncPrimaryController }]);
     }
     injector.get(IConfigService).setConfig(ENGINE_FORMULA_PLUGIN_CONFIG_KEY, config ?? {});
     const registerOtherFormulaService = injector.get(RegisterOtherFormulaService);
@@ -100,14 +101,18 @@ describe('FormulaController', () => {
         controller.dispose();
     });
 
-    it('registers mutation-only synchronization once per other-formula host', () => {
+    it('syncs calculation requests and registers each other-formula host once', () => {
         const dispose = vi.fn();
         const dataSyncPrimaryController = {
             registerSyncingMutations: vi.fn<DataSyncPrimaryController['registerSyncingMutations']>(),
             syncUnitMutations: vi.fn<DataSyncPrimaryController['syncUnitMutations']>(() => toDisposable(dispose)),
             waitForPendingMutations: vi.fn<DataSyncPrimaryController['waitForPendingMutations']>(() => Promise.resolve()),
         };
-        const { controller, registerOtherFormulaService } = createController(dataSyncPrimaryController);
+        const { controller, commandService, registerOtherFormulaService } = createController(dataSyncPrimaryController);
+
+        expect(commandService.hasCommand(SetTriggerFormulaCalculationStartMutation.id)).toBe(true);
+        expect(dataSyncPrimaryController.registerSyncingMutations).not.toHaveBeenCalledWith(SetTriggerFormulaCalculationStartMutation);
+        expect(dataSyncPrimaryController.registerSyncingMutations).toHaveBeenCalledWith(SetFormulaCalculationStartMutation);
 
         registerOtherFormulaService.registerFormulaWithRange('doc-1', 'body-1', '=1');
         registerOtherFormulaService.registerFormulaWithRange('doc-1', 'body-1', '=2');

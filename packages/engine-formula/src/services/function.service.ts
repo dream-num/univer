@@ -20,6 +20,7 @@ import { createIdentifier, Disposable, Inject, Injector, toDisposable } from '@u
 import { Subject } from 'rxjs';
 import type { IFunctionInfo, IFunctionNames } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';
+import { FUNCTION_NAMES_TEXT } from '../functions/text/function-names';
 import { FormulaCacheService } from './formula-cache.service';
 
 export interface IFunctionRegistration {
@@ -154,11 +155,15 @@ export class FunctionService extends Disposable implements IFunctionService {
     }
 
     getExecutor(functionToken: IFunctionNames) {
-        return this._functionExecutors.get(functionToken);
+        const executor = this._functionExecutors.get(functionToken);
+        if (executor == null && functionToken === FUNCTION_NAMES_TEXT.REGEXTEST) {
+            return this._functionExecutors.get(FUNCTION_NAMES_TEXT.REGEXMATCH);
+        }
+        return executor;
     }
 
     hasExecutor(functionToken: IFunctionNames) {
-        return this._functionExecutors.has(functionToken);
+        return this.getExecutor(functionToken) != null;
     }
 
     unregisterExecutors(...functionTokens: IFunctionNames[]) {

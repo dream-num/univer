@@ -24,6 +24,8 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { BaseFunction } from '../../base-function';
 
 export class ModeSngl extends BaseFunction {
+    protected readonly validateStringArguments: boolean = true;
+
     override minParams = 1;
 
     override maxParams = 255;
@@ -41,7 +43,7 @@ export class ModeSngl extends BaseFunction {
                 return variant;
             }
 
-            if (variant.isString()) {
+            if (this.validateStringArguments && variant.isString()) {
                 const _variant = variant.convertToNumberObjectValue();
 
                 if (_variant.isError()) {

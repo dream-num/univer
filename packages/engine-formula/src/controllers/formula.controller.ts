@@ -128,7 +128,10 @@ export class FormulaController extends Disposable {
             RegisterFunctionMutation,
         ].forEach((mutation) => {
             this._commandService.registerCommand(mutation);
-            this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
+            // The local trigger service sends the resulting calculation request to the Worker.
+            if (mutation.id !== SetTriggerFormulaCalculationStartMutation.id) {
+                this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
+            }
         });
     }
 

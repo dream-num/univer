@@ -17,6 +17,8 @@
 import type { ICellData } from '@univerjs/core';
 import { CellValueType, ObjectMatrix } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import { FormulaCacheService } from '../../../services/formula-cache.service';
+import { createCommandTestBed } from '../../analysis/__tests__/create-command-test-bed';
 import { CellReferenceObject } from '../cell-reference-object';
 import { RangeReferenceObject } from '../range-reference-object';
 
@@ -187,29 +189,43 @@ describe('CellReferenceObject', () => {
     });
 
     it.each([{ v: 20 }, { v: 0 }, { v: false }, { v: '' }])('invalidates a removed spill after its anchor becomes $v while preserving unrelated caches', (value) => {
-        const reference = new CellReferenceObject('A1');
-        reference.setDefaultUnitId('unit-1');
-        reference.setDefaultSheetId('sheet-1');
-        reference.setArrayFormulaRange({ 'unit-1': { 'sheet-1': { 0: {
-            0: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 0 },
-            3: { startRow: 0, endRow: 2, startColumn: 3, endColumn: 3 },
-        } } } });
-        reference.setArrayFormulaCellData({ 'unit-1': { 'sheet-1': new ObjectMatrix({
-            0: { 0: { v: 1 }, 3: { v: 4 } },
-            1: { 0: { v: 2 }, 3: { v: 5 } },
-            2: { 0: { v: 3 }, 3: { v: 6 } },
-        }) } });
-        const runtime = new ObjectMatrix<ICellData>({ 0: { 0: value } });
-        reference.setRuntimeData({ 'unit-1': { 'sheet-1': runtime } });
-        const range = reference.unionBy(new CellReferenceObject('A3'));
-        if (!(range instanceof RangeReferenceObject)) {
-            throw new TypeError('Expected a range reference');
+        const { univer, get } = createCommandTestBed();
+        try {
+            const injector = univer.__getInjector();
+            const reference = injector.createInstance(CellReferenceObject, 'A1');
+            const cache = get(FormulaCacheService).createCalculation();
+            reference.setCalculationCache(cache);
+            reference.setDefaultUnitId('unit-1');
+            reference.setDefaultSheetId('sheet-1');
+            reference.setArrayFormulaRange({ 'unit-1': { 'sheet-1': { 0: {
+                0: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 0 },
+                3: { startRow: 0, endRow: 2, startColumn: 3, endColumn: 3 },
+            } } } });
+            reference.setArrayFormulaCellData({ 'unit-1': { 'sheet-1': new ObjectMatrix({
+                0: { 0: { v: 1 }, 3: { v: 4 } },
+                1: { 0: { v: 2 }, 3: { v: 5 } },
+                2: { 0: { v: 3 }, 3: { v: 6 } },
+            }) } });
+            const runtime = new ObjectMatrix<ICellData>({ 0: { 0: value } });
+            reference.setRuntimeData({ 'unit-1': { 'sheet-1': runtime } });
+            const range = reference.unionBy(injector.createInstance(CellReferenceObject, 'A3'));
+            if (!(range instanceof RangeReferenceObject)) {
+                throw new TypeError('Expected a range reference');
+            }
+            range.setCalculationCache(cache);
+            expect(range.getCellData(0, 0)).toEqual(value);
+            expect(range.getCellData(1, 0)).toBeNull();
+            expect(range.getCellData(2, 0)).toBeNull();
+            expect(reference.getCellData(1, 3)).toEqual({ v: 5 });
+            runtime.setValue(0, 0, { ...value, f: '=SEQUENCE(3)' });
+            expect(range.getCellData(1, 0)).toEqual({ v: 2 });
+            reference.setArrayFormulaRange({ 'unit-1': { 'sheet-1': { 0: {
+                3: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 3 },
+            } } } });
+            runtime.setValue(0, 3, { v: 0 });
+            expect(reference.getCellData(1, 0)).toBeNull();
+        } finally {
+            univer.dispose();
         }
-        expect(range.getCellData(0, 0)).toEqual(value);
-        expect(range.getCellData(1, 0)).toBeNull();
-        expect(range.getCellData(2, 0)).toBeNull();
-        expect(reference.getCellData(1, 3)).toEqual({ v: 5 });
-        runtime.setValue(0, 0, { ...value, f: '=SEQUENCE(3)' });
-        expect(range.getCellData(1, 0)).toEqual({ v: 2 });
     });
 });

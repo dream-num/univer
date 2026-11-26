@@ -73,10 +73,10 @@ export class Euroconvert extends BaseFunction {
         triangulationPrecision?: BaseValueObject
     ): BaseValueObject {
         // Excel does not evaluate EUROCONVERT over arrays, so a multi-cell argument is an invalid one.
-        const { isError, errorObject, variants } = checkVariantsErrorIsArray(number, source, target, fullPrecision ?? BooleanValueObject.create(false));
+        const { isError, variants } = checkVariantsErrorIsArray(number, source, target, fullPrecision ?? BooleanValueObject.create(false));
 
         if (isError) {
-            return errorObject as ErrorValueObject;
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const [numberObject, sourceObject, targetObject, fullPrecisionObject] = variants as BaseValueObject[];
@@ -153,7 +153,7 @@ export class Euroconvert extends BaseFunction {
         const precisionObject = checkVariantErrorIsArray(triangulationPrecision);
 
         if (precisionObject.isError()) {
-            return precisionObject as ErrorValueObject;
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(precisionObject);

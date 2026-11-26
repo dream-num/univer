@@ -31,6 +31,8 @@ export class Xmatch extends BaseFunction {
 
     override maxParams = 4;
 
+    override lazyIfReferenceArrayArgumentIndexes = [1];
+
     override calculate(lookupValue: BaseValueObject, lookupArray: BaseValueObject, matchMode?: BaseValueObject, searchMode?: BaseValueObject): BaseValueObject {
         let _matchMode: BaseValueObject = NumberValueObject.create(0);
         if (matchMode && !matchMode.isNull()) {
@@ -116,7 +118,11 @@ export class Xmatch extends BaseFunction {
         const matchModeValue = (_matchMode as NumberValueObject).getValue();
         const searchModeValue = (_searchMode as NumberValueObject).getValue();
 
-        if (![-1, 0, 1, 2].includes(matchModeValue) || ![-1, 1, 2].includes(searchModeValue)) {
+        if (![-1, 0, 1, 2].includes(matchModeValue) || ![-2, -1, 1, 2].includes(searchModeValue)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        if (matchModeValue === 2 && Math.abs(searchModeValue) === 2) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 

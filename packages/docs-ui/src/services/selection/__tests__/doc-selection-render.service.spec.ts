@@ -2264,7 +2264,6 @@ describe('DocSelectionRenderService', () => {
         });
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
 
-        input.tabIndex = 0;
         input.focus();
         expect(document.activeElement).toBe(input);
         input.blur();

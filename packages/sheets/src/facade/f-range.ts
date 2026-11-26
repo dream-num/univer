@@ -467,7 +467,7 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getCellStyles(type: GetStyleType = 'row'): Array<Array<TextStyleValue | null>> {
-        const cells = this.getCellDatas();
+        const cells = this.getCellDataGrid();
         return cells.map((row, rowIndex) => row.map((cell, colIndex) => {
             if (!cell) return null;
             const style = type !== 'cell'
@@ -805,16 +805,8 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Alias for getCellDataGrid.
+     * @deprecated Use {@link FRange.getCellDataGrid} instead.
      * @returns {Nullable<ICellData>[][]} A two-dimensional array of cell data.
-     * @example
-     * ```ts
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
-     * if (!fWorksheet) return;
-     * const fRange = fWorksheet.getRange('A1:B2');
-     * console.log(fRange.getCellDatas());
-     * ```
      */
     getCellDatas(): Nullable<ICellData>[][] {
         return this.getCellDataGrid();
@@ -1004,7 +996,7 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getWraps(): boolean[][] {
-        const cells = this.getCellDatas();
+        const cells = this.getCellDataGrid();
         const styles = this._workbook.getStyles();
         return cells.map((row) => row.map((cell) => styles.getStyleByCell(cell)?.tb === WrapStrategy.WRAP));
     }

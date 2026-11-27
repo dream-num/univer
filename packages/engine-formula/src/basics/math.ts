@@ -113,6 +113,26 @@ export function calculateMmult(matrix1: number[][], matrix2: number[][]): number
     ));
 }
 
+export function calculateMmultByRows(matrix1: number[][], matrix2: number[][]): number[][] {
+    const columnCount = matrix2[0].length;
+
+    return matrix1.map((row) => {
+        const result = new Array<number>(columnCount).fill(0);
+
+        // Traverse each right-hand row once while retaining each result's k-order.
+        for (let k = 0; k < row.length; k++) {
+            const left = row[k];
+            const right = matrix2[k];
+
+            for (let column = 0; column < result.length; column++) {
+                result[column] += left * right[column];
+            }
+        }
+
+        return result;
+    });
+}
+
 export function matrixTranspose(matrix: number[][]): number[][] {
     return matrix[0].map((_, colIndex) => matrix.map((row) => row[colIndex]));
 }

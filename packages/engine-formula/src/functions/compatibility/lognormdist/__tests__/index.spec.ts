@@ -106,4 +106,14 @@ describe('Test lognormdist function', () => {
             ]);
         });
     });
+
+    it.each([1e-200, 1e200])('normalizes the legacy CDF at scale %s', (scale) => {
+        const result = testFunction.calculate(
+            NumberValueObject.create(1),
+            NumberValueObject.create(-scale),
+            NumberValueObject.create(scale)
+        );
+        // Independent reference from Python math.erfc(-1 / sqrt(2)) / 2.
+        expect(result.getValue()).toBeCloseTo(0.8413447460685429, 13);
+    });
 });

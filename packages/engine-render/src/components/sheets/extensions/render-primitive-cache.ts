@@ -58,6 +58,7 @@ interface IStrokePath {
 interface IStrokeBitmap {
     canvas: HTMLCanvasElement;
     pixels: number;
+    immutable?: boolean;
     offsetX?: number;
     offsetY?: number;
     slot?: ITextSlot;
@@ -109,7 +110,7 @@ export class RenderPrimitiveCache extends Disposable {
         const previousRasterClipBound = this._rasterClipBound;
         this._textClipBound = textClipBound;
         this._rasterClipBound = rasterClipBound;
-        ctx._context = this._getContext(original);
+        ctx._context = this._getContext(ctx);
         this._drawDepth++;
         try {
             draw();
@@ -125,7 +126,7 @@ export class RenderPrimitiveCache extends Disposable {
     }
 
     clear(): void {
-        const canvases = new Set(Array.from(this._bitmaps.values(), (bitmap) => bitmap.canvas));
+        const canvases = new Set([...this._bitmaps.values()].filter((bitmap) => !bitmap.immutable).map((bitmap) => bitmap.canvas));
         for (const page of this._textPages) {
             canvases.add(page.canvas);
         }
@@ -155,11 +156,14 @@ export class RenderPrimitiveCache extends Disposable {
         super.dispose();
     }
 
-    private _getContext(native: CanvasRenderingContext2D): CanvasRenderingContext2D {
+    private _getContext(ctx: UniverRenderingContext): CanvasRenderingContext2D {
+        const native = ctx._context;
         const existing = this._contexts.get(native);
         if (existing) {
             return existing;
         }
+        // Linux WebKit can consume glyph sources after the draw call. Keep submitted bitmaps immutable.
+        const immutableText = ctx.getSystemType() === 'Linux' && ctx.getBrowserType() === 'Safari';
         const path: IStrokePath = { points: [], closed: false, unsupported: false };
         const methods = new Map<PropertyKey, (...args: unknown[]) => unknown>();
         const proxy = new Proxy(native, {
@@ -199,7 +203,7 @@ export class RenderPrimitiveCache extends Disposable {
                 } else if (key === 'stroke') {
                     method = (...args) => this._stroke(target, path, args);
                 } else if (key === 'fillText') {
-                    method = (...args) => this._fillText(target, args);
+                    method = (...args) => this._fillText(target, args, immutableText);
                 } else if (['translate', 'scale', 'rotate', 'transform', 'setTransform', 'resetTransform', 'restore'].includes(String(key))) {
                     method = (...args) => {
                         if (path.points.length) {
@@ -331,7 +335,7 @@ export class RenderPrimitiveCache extends Disposable {
         }
     }
 
-    private _fillText(native: CanvasRenderingContext2D, args: unknown[]): void {
+    private _fillText(native: CanvasRenderingContext2D, args: unknown[], immutable: boolean): void {
         const m = native.getTransform();
         const fallback = () => Reflect.apply(native.fillText, native, args);
         if (this._disposed || args.length !== 3 || typeof args[0] !== 'string' || m.a !== m.d || m.a <= 0 || m.b || m.c
@@ -461,7 +465,7 @@ export class RenderPrimitiveCache extends Disposable {
                 fallback();
                 return;
             }
-            const poolIndex = this._textRasterPool.findIndex((canvas) => canvas.width === width && canvas.height === height);
+            const poolIndex = immutable ? -1 : this._textRasterPool.findIndex((canvas) => canvas.width === width && canvas.height === height);
             const reused = poolIndex >= 0;
             const canvas = reused ? this._textRasterPool.splice(poolIndex, 1)[0] : createCanvasElement();
             this._trim(reused ? 0 : width * height);
@@ -501,10 +505,10 @@ export class RenderPrimitiveCache extends Disposable {
                 this._discardCanvas(canvas);
                 throw error;
             }
-            bitmap = { canvas, pixels: width * height, offsetX: left - ix, offsetY: top - iy };
+            bitmap = { canvas, pixels: width * height, immutable, offsetX: left - ix, offsetY: top - iy };
             this._bitmaps.set(key, bitmap);
             // A shared page needs room for both the source raster and its destination.
-            if (this._maxEntries > 1 && width <= TEXT_PAGE_WIDTH && height <= TEXT_PAGE_HEIGHT) {
+            if (!immutable && this._maxEntries > 1 && width <= TEXT_PAGE_WIDTH && height <= TEXT_PAGE_HEIGHT) {
                 this._pendingTextBitmaps.add(bitmap);
             }
         }
@@ -652,6 +656,9 @@ export class RenderPrimitiveCache extends Disposable {
             this._pendingTextBitmaps.delete(bitmap);
             if (bitmap.slot) {
                 this._releaseTextSlot(bitmap.slot);
+            } else if (bitmap.immutable) {
+                this._pixels -= bitmap.pixels;
+                this._canvasCount--;
             } else if (bitmap.offsetX !== undefined) {
                 this._recycleTextRaster(bitmap.canvas);
             } else {

@@ -161,8 +161,8 @@ export class DataBar extends SheetExtension {
         variant = '',
         strokeWidth = 0
     ): void {
-        // WebKit's offscreen rounded-corner coverage can differ from native destination drawing.
-        if (typeof navigator !== 'undefined' && (ctx.getBrowserType() === 'Safari' || Tools.isIPhone())) {
+        // Linux WebKit uses immutable rasters for stable gradient edges. Apple WebKit keeps native corner coverage.
+        if (typeof navigator !== 'undefined' && (ctx.getBrowserType() === 'Safari' || Tools.isIPhone()) && ctx.getSystemType() !== 'Linux') {
             draw(ctx, x, y);
             return;
         }

@@ -779,6 +779,37 @@ describe('render primitive raster cache', () => {
         }
     });
 
+    it('keeps submitted Linux WebKit glyph sources intact through cache eviction and clearing', () => {
+        vi.spyOn(navigator, 'platform', 'get').mockReturnValue('Linux x86_64');
+        vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue('AppleWebKit/605.1.15 Version/26.0 Safari/605.1.15');
+        const child = injector.createChild([[RenderPrimitiveCache, {
+            useFactory: (container: Injector) => container.createInstance(RenderPrimitiveCache, 2),
+            deps: [Injector],
+        }]]);
+        try {
+            const rasterCache = child.get(RenderPrimitiveCache);
+            const image = vi.spyOn(native, 'drawImage');
+            const draw = (value: string) => rasterCache.draw(ctx, () => ctx.fillText(value, 10, 20));
+            draw('first');
+            draw('first');
+            const original = image.mock.calls[0][0] as HTMLCanvasElement;
+            const originalSize = [original.width, original.height];
+            expect(image.mock.calls[1]).toEqual(image.mock.calls[0]);
+
+            draw('second');
+            draw('third');
+            draw('first');
+            const replacement = image.mock.calls[4][0] as HTMLCanvasElement;
+            expect(replacement).not.toBe(original);
+            rasterCache.clear();
+            expect([original.width, original.height]).toEqual(originalSize);
+            expect([replacement.width, replacement.height]).toEqual(originalSize);
+            expect(original.getContext('2d')!.fillText).toHaveBeenCalledExactlyOnceWith('first', 0, 0);
+        } finally {
+            child.dispose();
+        }
+    });
+
     it('retains a warm glyph when the canvas budget only permits its original raster', () => {
         const child = injector.createChild([[RenderPrimitiveCache, {
             useFactory: (container: Injector) => container.createInstance(RenderPrimitiveCache, 1),

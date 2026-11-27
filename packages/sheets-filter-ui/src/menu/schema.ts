@@ -30,8 +30,8 @@ import {
 export const menuSchema: MenuSchemaType = {
     [RibbonDataGroup.ORGANIZATION]: {
         [SmartToggleSheetsFilterCommand.id]: {
-            order: 2,
-            gridLayout: { row: 1, column: 2 },
+            order: 1,
+            gridLayout: { row: 2, column: 1 },
             menuItemFactory: SmartToggleFilterMenuItemFactory,
             [ClearSheetsFilterCriteriaCommand.id]: {
                 order: 0,

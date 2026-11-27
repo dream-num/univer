@@ -37,7 +37,7 @@ describe('Test address', () => {
         const a1Value = a1 !== undefined ? BooleanValueObject.create(a1) : undefined;
         const sheetText = sheet !== undefined ? StringValueObject.create(sheet) : undefined;
         const result = testFunction.calculate(rowNumber, columnNumber, absNumber, a1Value, sheetText);
-        return (getObjectValue(result) as string[][])[0][0];
+        return getObjectValue(result);
     };
 
     describe('Correct situations', () => {
@@ -62,7 +62,7 @@ describe('Test address', () => {
         });
 
         it('Absolute reference to another workbook and worksheet', async () => {
-            expect(calculate(2, 3, 1, false, '[Book1]Sheet1')).toBe("'[Book1]Sheet1'!R2C3");
+            expect(calculate(2, 3, 1, false, '[Book1]Sheet1')).toBe('[Book1]Sheet1!R2C3');
         });
 
         it('Absolute reference to sheet name with single quote', async () => {
@@ -82,7 +82,7 @@ describe('Test address', () => {
                 StringValueObject.create('Krycí List')
             );
 
-            expect((getObjectValue(result) as string[][])[0][0]).toBe("'Krycí List'!$A$10");
+            expect(getObjectValue(result)).toBe("'Krycí List'!$A$10");
         });
 
         it('Abs less than 1', async () => {

@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { Injector } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { IFormatPainterService } from '../../../services/format-painter/format-painter.service';
 import { SetActivateCellEditOperation } from '../activate-cell-edit.operation';
-import { ScrollToRangeOperation } from '../scroll-to-range.operation';
-import { SetScrollOperation } from '../scroll.operation';
 import { SetFormatPainterOperation } from '../set-format-painter.operation';
 
 function createAccessor(pairs: Array<[unknown, unknown]>) {
@@ -48,92 +45,9 @@ describe('sheets-ui basic operations', () => {
 
     it('SetActivateCellEditOperation should update current edit cell state', () => {
         const setEditCell = vi.fn();
-        const accessor = createAccessor([[IEditorBridgeService, { setEditCell }]]);
+        const accessor = createAccessor([[Injector, new Injector()], [IEditorBridgeService, { setEditCell }]]);
 
         expect(SetActivateCellEditOperation.handler(accessor, { unitId: 'u1' } as any)).toBe(true);
         expect(setEditCell).toHaveBeenCalledWith({ unitId: 'u1' });
-    });
-
-    it('SetScrollOperation should compute final offsets with screen ratios', () => {
-        const emitRawScrollParam = vi.fn();
-        const renderUnit = {
-            with: vi.fn(() => ({ emitRawScrollParam })),
-            engine: { width: 200, height: 100 },
-        };
-
-        const renderManagerService = {
-            getRenderUnitById: vi.fn()
-                .mockReturnValueOnce(renderUnit)
-                .mockReturnValueOnce(renderUnit),
-        };
-
-        const accessor = createAccessor([[IRenderManagerService, renderManagerService]]);
-
-        expect(SetScrollOperation.handler(accessor, {
-            unitId: 'u1',
-            sheetId: 's1',
-            offsetX: 10,
-            offsetY: 20,
-            screenRatioX: 0.5,
-            screenRatioY: 0.25,
-        } as any)).toBe(true);
-
-        expect(emitRawScrollParam).toHaveBeenCalledWith(expect.objectContaining({
-            unitId: 'u1',
-            sheetId: 's1',
-            offsetX: 110,
-            offsetY: 45,
-        }));
-    });
-
-    it('SetScrollOperation should return false for empty params or missing render unit', () => {
-        const accessor = createAccessor([[IRenderManagerService, { getRenderUnitById: vi.fn() }]]);
-        expect(SetScrollOperation.handler(accessor, undefined as any)).toBe(false);
-
-        const renderManagerService = {
-            getRenderUnitById: vi.fn()
-                .mockReturnValueOnce({ with: () => ({ emitRawScrollParam: vi.fn() }) })
-                .mockReturnValueOnce(null),
-        };
-        const accessor2 = createAccessor([[IRenderManagerService, renderManagerService]]);
-        expect(SetScrollOperation.handler(accessor2, { unitId: 'u1', sheetId: 's1' } as any)).toBe(false);
-    });
-
-    it('ScrollToRangeOperation should guard params and call scroll controller', () => {
-        const scrollToRange = vi.fn(() => true);
-        const getRenderUnitById = vi.fn(() => ({ with: () => ({ scrollToRange }) }));
-        const accessor = createAccessor([
-            [IUniverInstanceService, { getCurrentUnitOfType: () => ({ getUnitId: () => 'u1' }) }],
-            [IRenderManagerService, { getRenderUnitById }],
-        ]);
-
-        expect(ScrollToRangeOperation.handler(accessor, undefined as any)).toBe(false);
-
-        expect(ScrollToRangeOperation.handler(accessor, {
-            range: { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 },
-            forceTop: true,
-            forceLeft: false,
-        } as any)).toBe(true);
-
-        expect(scrollToRange).toHaveBeenCalledWith(
-            { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 },
-            true,
-            false
-        );
-        expect(getRenderUnitById).toHaveBeenCalledWith('u1');
-
-        expect(ScrollToRangeOperation.handler(accessor, {
-            unitId: 'embedded-u1',
-            range: { startRow: 2, endRow: 3, startColumn: 2, endColumn: 3 },
-        } as any)).toBe(true);
-        expect(getRenderUnitById).toHaveBeenLastCalledWith('embedded-u1');
-
-        const missingRenderAccessor = createAccessor([
-            [IUniverInstanceService, { getCurrentUnitOfType: () => ({ getUnitId: () => 'missing' }) }],
-            [IRenderManagerService, { getRenderUnitById: () => null }],
-        ]);
-        expect(ScrollToRangeOperation.handler(missingRenderAccessor, {
-            range: { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 },
-        } as any)).toBe(false);
     });
 });

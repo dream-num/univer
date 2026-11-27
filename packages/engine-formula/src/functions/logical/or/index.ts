@@ -25,6 +25,7 @@ export class Or extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 255;
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
 
     override calculate(...logicalValues: BaseValueObject[]) {
         let result = false;

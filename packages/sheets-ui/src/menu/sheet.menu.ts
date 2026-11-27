@@ -29,7 +29,7 @@ import {
     SetWorksheetHideCommand,
     SetWorksheetHideMutation,
     SetWorksheetShowCommand,
-    WorkbookCreateSheetPermission,
+    WorkbookCopySheetPermission,
     WorkbookDeleteSheetPermission,
     WorkbookEditablePermission,
     WorkbookHideSheetPermission,
@@ -86,7 +86,7 @@ export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem<L
         id: CopySheetCommand.id,
         type: MenuItemType.BUTTON,
         title: 'sheets-ui.sheetConfig.copy',
-        disabled$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookCreateSheetPermission]),
+        disabled$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookCopySheetPermission]),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -135,7 +135,7 @@ export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelec
                 }),
             },
         ],
-        hidden$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission]),
+        disabled$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission]),
     };
 }
 

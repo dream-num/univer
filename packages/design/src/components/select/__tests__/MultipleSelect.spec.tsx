@@ -79,4 +79,36 @@ describe('MultipleSelect', () => {
         fireEvent.click(screen.getByText('First'));
         expect(onChange).not.toHaveBeenCalled();
     });
+
+    it('is keyboard focusable, supports placeholder, and wraps selected chips', () => {
+        const { rerender } = render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MultipleSelect
+                    aria-label="Tags"
+                    placeholder="Select tags"
+                    value={[]}
+                    options={options}
+                    onChange={vi.fn()}
+                />
+            </ConfigProvider>
+        );
+
+        const trigger = screen.getByRole('combobox', { name: 'Tags' });
+        expect(trigger.getAttribute('tabindex')).toBe('0');
+        expect(trigger.textContent).toContain('Select tags');
+
+        rerender(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MultipleSelect
+                    aria-label="Tags"
+                    placeholder="Select tags"
+                    value={['first', 'second']}
+                    options={options}
+                    onChange={vi.fn()}
+                />
+            </ConfigProvider>
+        );
+        expect(trigger.className).toContain('univer-h-auto');
+        expect(trigger.querySelector('.univer-flex-wrap')).not.toBeNull();
+    });
 });

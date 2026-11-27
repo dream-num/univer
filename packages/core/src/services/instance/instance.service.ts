@@ -38,6 +38,8 @@ export interface ICreateUnitOptions {
      * @default true
      */
     makeCurrent?: boolean;
+    /** Host whose workbench menus remain active while this inline editor has focus. */
+    workbenchHostUnitId?: string;
     /**
      * If product UI render services should skip their default main-canvas render
      * creation. Embedded units create their render explicitly into a host-owned

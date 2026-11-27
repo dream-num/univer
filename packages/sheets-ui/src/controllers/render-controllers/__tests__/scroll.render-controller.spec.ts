@@ -17,7 +17,7 @@
 import type { IWheelEvent } from '@univerjs/engine-render';
 import { CommandType, Direction, FOCUSING_SHEET, ICommandService, IContextService } from '@univerjs/core';
 import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { SetSelectionsOperation } from '@univerjs/sheets';
+import { ScrollToCellOperation, SetSelectionsOperation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import type { IFakeEngine } from './render-test-bed';
@@ -27,6 +27,7 @@ import { SetScrollOperation } from '../../../commands/operations/scroll.operatio
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import { SheetSelectionRenderService } from '../../../services/selection/selection-render.service';
 import { SheetsScrollRenderController } from '../scroll.render-controller';
+import { SheetRenderController } from '../sheet.render-controller';
 import { createChartRenderTestBed } from './chart-render-test-bed';
 import { createRenderTestBed } from './render-test-bed';
 
@@ -673,5 +674,85 @@ describe('Chart scroll lifecycle disposal', () => {
         injector.get(IRenderManagerService).removeRender(workbook.getUnitId());
         expect(() => callbacks.forEach((callback) => callback(performance.now() + 300))).not.toThrow();
         expect(main.viewportScrollY).toBe(before);
+    });
+});
+
+describe('Companion pane scroll ownership', () => {
+    it.each(['navigation', 'selection'])('reveals %s using only the focused pane viewport', (action) => {
+        const bed = createRealScrollFixture();
+        const renders = bed.injector.get(IRenderManagerService);
+        const companion = renders.createRender(bed.workbook.getUnitId(), undefined, 'scroll-other-pane');
+        companion.with(SheetRenderController);
+        companion.with(SheetsScrollRenderController);
+        companion.engine.resizeBySize(400, 300);
+        companion.scene.getMainViewport().height = 200;
+        renders.focusRender?.(bed.workbook.getUnitId());
+        bed.commands.registerCommand(ScrollToCellOperation);
+        const range = { startRow: 150, endRow: 150, startColumn: 0, endColumn: 0 };
+        bed.controller.scrollToRange(range);
+        const expected = bed.viewport.viewportScrollY;
+        expect(expected).toBeGreaterThan(0);
+        bed.commands.syncExecuteCommand(SetScrollOperation.id, {
+            unitId: bed.workbook.getUnitId(),
+            sheetId: 'grid',
+            sheetViewStartRow: 0,
+            sheetViewStartColumn: 0,
+        });
+        if (action === 'navigation') {
+            bed.commands.syncExecuteCommand(ScrollToCellOperation.id, { unitId: bed.workbook.getUnitId(), range });
+        } else {
+            bed.commands.syncExecuteCommand(SetSelectionsOperation.id, {
+                unitId: bed.workbook.getUnitId(),
+                subUnitId: 'grid',
+                reveal: true,
+                selections: [{ range, primary: bed.workbook.getActiveSheet().getCellInfoInMergeData(150, 0) }],
+            });
+        }
+        expect(bed.viewport.viewportScrollY).toBe(expected);
+        expect(companion.scene.getMainViewport().viewportScrollY).toBe(0);
+    });
+
+    it('discards a queued wheel event after focus moves to another pane', async () => {
+        const bed = createRealScrollFixture();
+        const renders = bed.injector.get(IRenderManagerService);
+        const companion = renders.createRender(bed.workbook.getUnitId(), undefined, 'wheel-other-pane');
+        companion.with(SheetRenderController);
+        companion.with(SheetsScrollRenderController);
+        companion.engine.resizeBySize(400, 300);
+        renders.focusRender?.(bed.workbook.getUnitId());
+        bed.wheel(0, 100);
+        renders.focusRender?.(companion.renderId!);
+        await bed.frame();
+        expect(bed.viewport.viewportScrollY).toBe(0);
+        expect(companion.scene.getMainViewport().viewportScrollY).toBe(0);
+    });
+
+    it('discards deferred selection expansion after focus moves to another pane', async () => {
+        const bed = createChartRenderTestBed([
+            [SheetScrollManagerService],
+            [SheetsScrollRenderController],
+            [SheetSelectionRenderService],
+        ], false, { rowCount: 1000, zoomRatio: 1, freeze: { startRow: 0, startColumn: 0, xSplit: 0, ySplit: 0 } });
+        for (const command of [ScrollCommand, SetScrollOperation, ExpandSelectionCommand]) {
+            bed.commands.registerCommand(command);
+        }
+        const renders = bed.injector.get(IRenderManagerService);
+        const companion = renders.createRender(bed.workbook.getUnitId(), undefined, 'expand-other-pane');
+        companion.with(SheetRenderController);
+        companion.with(SheetsScrollRenderController);
+        companion.engine.resizeBySize(400, 300);
+        renders.focusRender?.(bed.workbook.getUnitId());
+        bed.commands.syncExecuteCommand(SetSelectionsOperation.id, {
+            unitId: bed.workbook.getUnitId(),
+            subUnitId: 'grid',
+            selections: [{ range: { startRow: 150, endRow: 150, startColumn: 0, endColumn: 0 }, primary: bed.workbook.getActiveSheet().getCellInfoInMergeData(150, 0) }],
+        });
+        expect(await bed.commands.executeCommand(ExpandSelectionCommand.id, { direction: Direction.DOWN })).toBe(true);
+        const primaryScroll = bed.render.scene.getMainViewport().viewportScrollY;
+        const companionScroll = companion.scene.getMainViewport().viewportScrollY;
+        renders.focusRender?.(companion.renderId!);
+        vi.advanceTimersByTime(1);
+        expect(bed.render.scene.getMainViewport().viewportScrollY).toBe(primaryScroll);
+        expect(companion.scene.getMainViewport().viewportScrollY).toBe(companionScroll);
     });
 });

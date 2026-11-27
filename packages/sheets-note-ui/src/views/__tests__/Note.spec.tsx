@@ -33,6 +33,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { SheetPermissionCheckController } from '@univerjs/sheets';
 import {
     RemoveNoteMutation,
     SheetsNoteModel,
@@ -127,13 +128,18 @@ function createNotePopup(row: number, col: number): IPopup<{ location: { unitId:
     } as IPopup<{ location: { unitId: string; subUnitId: string; row: number; col: number; trigger: string } }>;
 }
 
-function createNoteViewTestBed() {
+function createNoteViewTestBed(options: { canEdit?: boolean } = {}) {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
     injector.add([SheetsNoteModel]);
     injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
     injector.add([CellPopupManagerService, { useClass: TestCellPopupManagerService as never }]);
+    injector.add([SheetPermissionCheckController, {
+        useValue: {
+            permissionCheckWithRanges: () => options.canEdit ?? true,
+        } as never,
+    }]);
     injector.add([SheetsNotePopupService]);
     injector.get(IUndoRedoService);
     injector.get(IConfigService).setConfig(SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY, {
@@ -222,13 +228,13 @@ describe('SheetsNote', () => {
         resizeObserverDescriptor = undefined;
     });
 
-    function createMountedNote() {
+    function createMountedNote(options: { canEdit?: boolean } = {}) {
         resizeObserverDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'ResizeObserver');
         Object.defineProperty(globalThis, 'ResizeObserver', {
             configurable: true,
             value: TestResizeObserver,
         });
-        currentTestBed = createNoteViewTestBed();
+        currentTestBed = createNoteViewTestBed(options);
         container = document.createElement('div');
         document.body.appendChild(container);
         root = createRoot(container);
@@ -301,6 +307,46 @@ describe('SheetsNote', () => {
         textarea = container!.querySelector('textarea') as HTMLTextAreaElement;
         expect(textarea.style.width).toBe('220px');
         expect(textarea.style.transform).toBe('');
+    });
+
+    it('shows an existing note read-only without edit permission and ignores input', async () => {
+        const testBed = createMountedNote({ canEdit: false });
+        testBed.noteModel.updateNote(UNIT_ID, SUB_UNIT_ID, 2, 3, {
+            id: 'read-only-note',
+            row: 2,
+            col: 3,
+            width: 180,
+            height: 96,
+            note: 'Read only hint',
+        });
+
+        await renderNote(root!, testBed);
+        await act(async () => {
+            await awaitTime(350);
+        });
+
+        const textarea = container!.querySelector('textarea') as HTMLTextAreaElement;
+        expect(textarea.readOnly).toBe(true);
+        expect(textarea.value).toBe('Read only hint');
+
+        await act(async () => {
+            inputText(textarea, 'edited');
+            await awaitTime(350);
+        });
+
+        expect(testBed.noteModel.getNote(UNIT_ID, SUB_UNIT_ID, { row: 2, col: 3 })?.note).toBe('Read only hint');
+    });
+
+    it('does not create an empty note without edit permission', async () => {
+        const testBed = createMountedNote({ canEdit: false });
+
+        await renderNote(root!, testBed);
+        await act(async () => {
+            await awaitTime(350);
+        });
+
+        expect(testBed.noteModel.getNote(UNIT_ID, SUB_UNIT_ID, { row: 2, col: 3 })).toBeUndefined();
+        expect((container!.querySelector('textarea') as HTMLTextAreaElement).readOnly).toBe(true);
     });
 
     it('closes the popup when creating the initial note cannot be saved', async () => {

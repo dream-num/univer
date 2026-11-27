@@ -361,6 +361,24 @@ describe('Sheets numfmt commands', () => {
         });
     });
 
+    it('keeps date and time patterns untouched when decimals cannot change', async () => {
+        selectionService.addSelections([
+            {
+                range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
+                primary: null,
+                style: null,
+            },
+        ]);
+
+        for (const pattern of ['dd.mm.yyyy', 'yyyy. mm. dd.', 'mm:ss.0', 'hh:mm:ss.000', 'dd.mm.yyyy hh:mm:ss.000']) {
+            await commandService.executeCommand(SetNumfmtCommand.id, { values: [{ row: 0, col: 0, pattern }] });
+
+            await expect(commandService.executeCommand(AddDecimalCommand.id)).resolves.toBe(false);
+            await expect(commandService.executeCommand(SubtractDecimalCommand.id)).resolves.toBe(false);
+            expect(numfmtService.getValue('test', 'sheet1', 0, 0)).toEqual({ pattern });
+        }
+    });
+
     it('returns false for quick commands when there is no current selection', async () => {
         await expect(commandService.executeCommand(AddDecimalCommand.id)).resolves.toBe(false);
         await expect(commandService.executeCommand(SubtractDecimalCommand.id)).resolves.toBe(false);

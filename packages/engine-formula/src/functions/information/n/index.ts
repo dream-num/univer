@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -24,22 +26,34 @@ export class N extends BaseFunction {
 
     override maxParams = 1;
 
-    override calculate(value: BaseValueObject): BaseValueObject {
-        let _value = value;
+    override needsReferenceObject = true;
 
+    override calculate(argument: FunctionVariantType): BaseValueObject {
+        let value: BaseValueObject;
+        if (argument.isReferenceObject()) {
+            const reference = argument as BaseReferenceObject;
+            value = reference.isMultiArea() && (reference as MultiAreaReferenceObject).isArrayOfReferences()
+                ? reference.toArrayValueObject()
+                : reference.getFirstCell();
+        } else {
+            value = argument as BaseValueObject;
+        }
         if (value.isArray()) {
-            _value = (value as ArrayValueObject).get(0, 0) as BaseValueObject;
+            return (value as ArrayValueObject).mapValue((item) => this._calculateSingle(item));
+        }
+        return this._calculateSingle(value);
+    }
+
+    private _calculateSingle(value: BaseValueObject): BaseValueObject {
+        if (value.isError()) {
+            return value;
         }
 
-        if (_value.isError()) {
-            return _value;
-        }
-
-        if (_value.isString()) {
+        if (value.isString()) {
             return NumberValueObject.create(0);
         }
 
-        const val = +_value.getValue();
+        const val = +value.getValue();
 
         return NumberValueObject.create(val);
     }

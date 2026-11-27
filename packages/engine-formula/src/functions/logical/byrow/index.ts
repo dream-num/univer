@@ -26,6 +26,8 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Byrow extends BaseFunction {
+    protected readonly excelCompatibility: boolean = false;
+
     override minParams = 2;
 
     override maxParams = 2;
@@ -50,11 +52,13 @@ export class Byrow extends BaseFunction {
             return lambda;
         }
 
-        if (!(lambda.isValueObject() && (lambda as LambdaValueObjectObject).isLambda() && (lambda as LambdaValueObjectObject).getLambdaPrivacyVarKeys().length === 1)) {
+        if (!lambda.isLambda()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
-
         const _lambda = lambda as LambdaValueObjectObject;
+        if (this.excelCompatibility ? !_lambda.acceptsArity(1) : _lambda.getLambdaPrivacyVarKeys().length !== 1) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
 
         const rowCount = _array.isArray() ? (_array as ArrayValueObject).getRowCount() : 1;
         const columnCount = _array.isArray() ? (_array as ArrayValueObject).getColumnCount() : 1;
@@ -112,7 +116,7 @@ export class Byrow extends BaseFunction {
             result.push([value]);
         }
 
-        if (rowCount === 1) {
+        if (!this.excelCompatibility && rowCount === 1) {
             return result[0][0];
         }
 

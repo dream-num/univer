@@ -26,8 +26,8 @@ import { stripErrorMargin } from '../engine/utils/math-kit';
  * @param value Number to format.
  * @returns Formatted preview string.
  */
-export const getFormatPreview = (pattern: string, value: number, dateSystem?: DateSystem) => {
-    return numfmt.format(pattern, value, { dateSystem, throws: false });
+export const getFormatPreview = (pattern: string, value: string | number, dateSystem?: DateSystem, region?: string) => {
+    return numfmt.format(pattern, value, { dateSystem, region, throws: false });
 };
 
 export const getTextValueOfNumberFormat = (text: BaseValueObject): string => {

@@ -322,7 +322,10 @@ export class FFilter {
      * ```
      */
     removeFilterCriteria(): FFilter {
-        this._commandSrv.syncExecuteCommand(ClearSheetsFilterCriteriaCommand.id);
+        this._commandSrv.syncExecuteCommand(ClearSheetsFilterCriteriaCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+        } as ISheetCommandSharedParams);
         return this;
     }
 

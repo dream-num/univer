@@ -138,7 +138,7 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                 <RadioGroup
                     value={editState}
                     onChange={(v) => onEditStateChange(v as EditStateEnum)}
-                    className="univer-flex univer-flex-col"
+                    direction="vertical"
                 >
                     <Radio value={EditStateEnum.OnlyMe}>
                         <span>{localeService.t<LocaleKey>('sheets-ui.permission.panel.onlyICanEdit')}</span>
@@ -232,10 +232,8 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                 <RadioGroup
                     value={viewState}
                     onChange={(v) => onViewStateChange(v as ViewStateEnum)}
-                    className={`
-                      univer-flex univer-flex-col
-                      last:univer-mb-0
-                    `}
+                    direction="vertical"
+                    className="last:univer-mb-0"
                 >
                     <Radio value={ViewStateEnum.OthersCanView}>
                         <span>{localeService.t<LocaleKey>('sheets-ui.permission.panel.othersCanView')}</span>

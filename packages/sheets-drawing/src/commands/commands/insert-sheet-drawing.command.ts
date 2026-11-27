@@ -16,7 +16,6 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import {
     CommandType,
     ICommandService,
@@ -24,6 +23,8 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import { SheetInterceptorService } from '@univerjs/sheets';
+import type { ISheetDrawing } from '../../services/sheet-drawing.service';
+import { getSheetDrawingTransformWithOrientation } from '../../services/sheet-drawing-placement';
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
@@ -44,11 +45,17 @@ export const InsertSheetDrawingCommand: ICommand = {
         const sheetDrawingService = accessor.get(ISheetDrawingService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const drawings = params.drawings;
+        const drawings = params.drawings.map((drawing) => {
+            const transform = getSheetDrawingTransformWithOrientation(drawing);
+            return (['angle', 'flipX', 'flipY', 'skewX', 'skewY'] as const)
+                .some((key) => transform[key] !== drawing.transform?.[key])
+                ? { ...drawing, transform }
+                : drawing;
+        });
         const jsonOp = sheetDrawingService.getBatchAddOp(drawings) as IDrawingJsonUndo1;
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
-        const intercepted = sheetInterceptorService.onCommandExecute({ id: InsertSheetDrawingCommand.id, params });
+        const intercepted = sheetInterceptorService.onCommandExecute({ id: InsertSheetDrawingCommand.id, params: { ...params, drawings } });
         const redoMutations = [
             ...(intercepted.preRedos ?? []),
             {

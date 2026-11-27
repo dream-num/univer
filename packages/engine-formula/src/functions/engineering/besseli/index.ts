@@ -27,6 +27,8 @@ export class Besseli extends BaseFunction {
 
     override maxParams = 2;
 
+    protected _besseli = BESSEL.besseli;
+
     override calculate(x: BaseValueObject, n: BaseValueObject): BaseValueObject {
         if (x.isNull() || n.isNull()) {
             return ErrorValueObject.create(ErrorType.NA);
@@ -51,7 +53,7 @@ export class Besseli extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = BESSEL.besseli(xValue, nValue);
+        const result = this._besseli(xValue, nValue);
 
         if (Number.isNaN(result) || !Number.isFinite(result)) {
             return ErrorValueObject.create(ErrorType.NUM);
@@ -59,4 +61,8 @@ export class Besseli extends BaseFunction {
 
         return NumberValueObject.create(result);
     }
+}
+
+export class ExcelBesseli extends Besseli {
+    protected override _besseli = (x: number, order: number): number => BESSEL.besseli(x, order, true);
 }

@@ -15,6 +15,7 @@
  */
 
 import type { IParagraph } from '@univerjs/core';
+import { CustomRangeType, DataStreamTreeTokenType, SpecialCharacterKind } from '@univerjs/core';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
@@ -52,11 +53,29 @@ export function otherHandler(
             break;
         }
 
+        // Let the paragraph shaper resolve adjacent inline objects and note references.
+        if (step > 0 && (char === DataStreamTreeTokenType.CUSTOM_BLOCK || char === '\uFFFC')) {
+            break;
+        }
+
         if (hasSpace(char) || startWithEmoji(charArray.substring(step)) || (config.textStyle.sc && hasArabic(char))) {
             break;
         }
 
-        const glyph = createSkeletonLetterGlyph(char, config, getCustomRangeGlyphMetrics(index + step, viewModel, paragraphNode, config));
+        let rendered = char;
+        if (char === '\u00AD' && sectionBreakConfig.documentCompatibilityPolicy?.mode !== 'drawingml') {
+            const offset = paragraphNode.contentStartIndex + index + step;
+            const optional = viewModel.getBody()?.customRanges?.some((range) =>
+                range.rangeType === CustomRangeType.CUSTOM && range.wholeEntity === true &&
+                range.startIndex === offset && range.endIndex === offset &&
+                range.properties?.kind === SpecialCharacterKind.OPTIONAL_HYPHEN);
+            // Word paints literal U+00AD; only an explicit optional-hyphen object is discretionary.
+            if (!optional) {
+                rendered = '-';
+            }
+        }
+        const glyph = createSkeletonLetterGlyph(rendered, config, getCustomRangeGlyphMetrics(index + step, viewModel, paragraphNode, config));
+        glyph.raw = char;
 
         glyphGroup.push(glyph);
 

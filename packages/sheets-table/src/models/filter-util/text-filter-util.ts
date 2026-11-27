@@ -14,56 +14,38 @@
  * limitations under the License.
  */
 
-import type { ITableStringFilterInfo } from '../../types/type';
+import type { Nullable } from '@univerjs/core';
 import { regexp } from '@univerjs/core';
+import type { ITableStringFilterInfo } from '../../types/type';
 import { TableStringCompareTypeEnum } from '../../types/enum';
 
-export const textEqual = (compareValue: string, expectedValue: string) => {
-    const regex = regexp.createFromWildcard(expectedValue);
-    return regex.test(compareValue);
-};
-
-export const textNotEqual = (compareValue: string, expectedValue: string) => {
-    const regex = regexp.createFromWildcard(expectedValue);
-    return !regex.test(compareValue);
-};
-
-export const textContain = (compareValue: string, expectedValue: string) => {
-    const regex = regexp.createFromWildcard(`*${expectedValue}*`);
-    return regex.test(compareValue);
-};
-
-export const textNotContain = (compareValue: string, expectedValue: string) => {
-    const regex = regexp.createFromWildcard(`*${expectedValue}*`);
-    return !regex.test(compareValue);
-};
-
-export const textStartWith = (compareValue: string, expectedValue: string) => {
-    const regex = regexp.createFromWildcard(`${expectedValue}*`);
-    return regex.test(compareValue);
-};
-
-export const textEndWith = (compareValue: string, expectedValue: string) => {
-    const regex = regexp.createFromWildcard(`*${expectedValue}`);
-    return regex.test(compareValue);
-};
+function createTextMatcher(pattern: string, negate = false) {
+    const regex = regexp.createFromWildcard(pattern);
+    const matchesBlank = pattern === '';
+    return (value: Nullable<string | number>) => {
+        // A formula that returns an empty string can still match a wildcard.
+        const matches = value == null ? matchesBlank : regex.test(String(value));
+        return negate ? !matches : matches;
+    };
+}
 
 export function getTextFilterExecuteFunc(filter: ITableStringFilterInfo) {
+    const { expectedValue } = filter;
     switch (filter.compareType) {
         case TableStringCompareTypeEnum.Equal:
-            return (value: string) => textEqual(value, filter.expectedValue);
+            return createTextMatcher(expectedValue);
         case TableStringCompareTypeEnum.NotEqual:
-            return (value: string) => textNotEqual(value, filter.expectedValue);
+            return createTextMatcher(expectedValue, true);
         case TableStringCompareTypeEnum.Contains:
-            return (value: string) => textContain(value, filter.expectedValue);
+            return createTextMatcher(`*${expectedValue}*`);
         case TableStringCompareTypeEnum.NotContains:
-            return (value: string) => textNotContain(value, filter.expectedValue);
+            return createTextMatcher(`*${expectedValue}*`, true);
         case TableStringCompareTypeEnum.StartsWith:
-            return (value: string) => textStartWith(value, filter.expectedValue);
+            return createTextMatcher(`${expectedValue}*`);
         case TableStringCompareTypeEnum.EndsWith:
-            return (value: string) => textEndWith(value, filter.expectedValue);
+            return createTextMatcher(`*${expectedValue}`);
         default:
             console.error(`Unknown filter operator: ${filter.compareType}`);
-            return (value: string) => true;
+            return () => true;
     }
 }

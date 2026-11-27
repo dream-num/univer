@@ -19,13 +19,13 @@ import type {
     IHighlightCell,
     IRankHighlightCell,
 } from '@univerjs/sheets-conditional-formatting';
-import type { LocaleKey } from '../../../locale/types';
-import type { IStyleEditorProps } from './type';
 import { LocaleService } from '@univerjs/core';
 import { Checkbox, InputNumber, Select } from '@univerjs/design';
 import { CFNumberOperator, CFRuleType, CFSubRuleType } from '@univerjs/sheets-conditional-formatting';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
+import type { LocaleKey } from '../../../locale/types';
+import type { IStyleEditorProps } from './type';
 import { ConditionalFormattingRulePreview } from '../../ConditionalFormattingRulePreview';
 import { ConditionalStyleEditor } from '../../ConditionalStyleEditor';
 import { previewClassName } from './styles';
@@ -180,18 +180,16 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                             _onChange({ type, isPercent, value, style });
                         }}
                     />
-                    <div
-                        className="univer-flex univer-items-center univer-text-xs"
+                    <Checkbox
+                        className="univer-text-xs"
+                        checked={isPercent}
+                        onChange={(v) => {
+                            setIsPercent(!!v);
+                            _onChange({ type, isPercent: !!v, value, style });
+                        }}
                     >
-                        <Checkbox
-                            checked={isPercent}
-                            onChange={(v) => {
-                                setIsPercent(!!v);
-                                _onChange({ type, isPercent: !!v, value, style });
-                            }}
-                        />
                         {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.valueType.percent')}
-                    </div>
+                    </Checkbox>
 
                 </div>
             )}

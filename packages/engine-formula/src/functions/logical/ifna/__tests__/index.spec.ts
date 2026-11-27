@@ -14,16 +14,41 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { Ifna } from '../index';
 
 describe('Test ifna function', () => {
-    const textFunction = new Ifna(FUNCTION_NAMES_LOGICAL.IFNA);
+    let injector: Injector;
+    let textFunction: Ifna;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [Ifna, { useFactory: () => injector.createInstance(Ifna, FUNCTION_NAMES_LOGICAL.IFNA) }],
+        ]);
+        textFunction = injector.get(Ifna);
+    });
+
+    afterEach(() => injector.dispose());
+
+    it('coerces array blanks without changing scalar blanks or its input', () => {
+        const value = ArrayValueObject.create({ calculateValueList: transformToValueObject([[null], [''], [false], [0]]), rowCount: 4, columnCount: 1, unitId: '', sheetId: '', row: 0, column: 0 });
+        const result = textFunction.calculate(value, NumberValueObject.create(99)) as ArrayValueObject;
+        expect(transformToValue(result.getArrayValue())).toEqual([[0], [''], [false], [0]]);
+        expect(value.getFirstCell().isNull()).toBe(true);
+        expect(textFunction.calculate(NullValueObject.create(), NumberValueObject.create(99)).isNull()).toBe(true);
+    });
+
+    it('ignores an unused error fallback and replaces missing array positions', () => {
+        expect(textFunction.calculate(NumberValueObject.create(1), ErrorValueObject.create(ErrorType.NA)).getValue()).toBe(1);
+        const result = textFunction.calculate(ArrayValueObject.create('{1;2}'), ArrayValueObject.create('{99;99;99}')) as ArrayValueObject;
+        expect(transformToValue(result.getArrayValue())).toEqual([[1], [2], [99]]);
+    });
 
     describe('Ifna', () => {
         it('Value is normal', () => {

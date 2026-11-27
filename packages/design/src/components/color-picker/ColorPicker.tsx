@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
+import { ColorWheelMultiIcon, MoreRightIcon } from '@univerjs/icons';
 import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { borderClassName } from '../../helper/class-utilities';
+import { clsx } from '../../helper/clsx';
 import { isBrowser } from '../../helper/is-browser';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import { AlphaSlider } from './AlphaSlider';
-import { hexToHsv, hsvToHex, hsvToRgba, parseRgba, rgbToHsv } from './color-conversion';
+import {
+    CHECKERBOARD_BACKGROUND_STYLE,
+    hexToHsv,
+    hsvToHex,
+    hsvToRgba,
+    parseRgba,
+    rgbToHsv,
+} from './color-conversion';
 import { ColorInput } from './ColorInput';
 import { ColorPresets } from './ColorPresets';
 import { ColorSpectrum } from './ColorSpectrum';
@@ -92,6 +102,8 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
         setCustom(false);
     }
 
+    const previewColor = format === 'hex' ? hsvToHex(...hsv) : hsvToRgba(...hsv, alpha);
+
     return (
         <div
             data-u-comp="color-picker"
@@ -119,19 +131,28 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
                             }
                         }}
                     >
-                        <div className="univer-h-40 univer-overflow-hidden univer-rounded-md">
+                        <div className="univer-h-40 univer-rounded-md">
                             <ColorSpectrum hsv={hsv} onChange={handleColorChange} />
                         </div>
                         <div className="univer-flex univer-items-center univer-gap-3">
                             <span
-                                className="
-                                  univer-size-8 univer-shrink-0 univer-rounded-md univer-border univer-border-solid
-                                  univer-border-gray-200
-                                  dark:!univer-border-gray-600
-                                "
-                                style={{ backgroundColor: format === 'hex' ? hsvToHex(...hsv) : hsvToRgba(...hsv, alpha) }}
-                            />
-                            <div className="univer-flex-1 univer-space-y-3">
+                                aria-hidden="true"
+                                className={clsx(
+                                    `
+                                      univer-relative univer-box-border univer-size-9 univer-shrink-0
+                                      univer-overflow-hidden univer-rounded-md univer-bg-gray-0
+                                      dark:!univer-bg-gray-700
+                                    `,
+                                    borderClassName
+                                )}
+                                style={CHECKERBOARD_BACKGROUND_STYLE}
+                            >
+                                <span
+                                    className="univer-block univer-size-full"
+                                    style={{ backgroundColor: previewColor }}
+                                />
+                            </span>
+                            <div className="univer-flex-1 univer-space-y-2.5">
                                 <HueSlider hsv={hsv} onChange={handleColorChange} />
                                 {format === 'rgba' && <AlphaSlider hsv={hsv} alpha={alpha} onChange={setAlpha} />}
                             </div>
@@ -145,7 +166,13 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
                                 if (a !== undefined) setAlpha(a);
                             }}
                         />
-                        <footer className="univer-flex univer-justify-end univer-gap-2">
+                        <footer
+                            className="
+                              univer-flex univer-justify-end univer-gap-2 univer-border-0 univer-border-t
+                              univer-border-solid univer-border-gray-200 univer-pt-2.5
+                              dark:!univer-border-gray-600
+                            "
+                        >
                             <Button onClick={cancelCustomColor}>{locale?.ColorPicker.cancel}</Button>
                             <Button variant="primary" onClick={() => applyColor(...hsv, alpha)}>
                                 {locale?.ColorPicker.confirm}
@@ -163,27 +190,62 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
                                 applyColor(h, s, v, 1);
                             }}
                         />
-                        <Button
-                            ref={moreButtonRef}
-                            variant="ghost"
-                            className="univer-w-full univer-justify-between"
-                            onClick={() => {
-                                resetDraft(selectedColor);
-                                setCustom(true);
-                            }}
+                        <div
+                            className="
+                              univer-border-0 univer-border-t univer-border-solid univer-border-gray-200 univer-pt-2
+                              dark:!univer-border-gray-600
+                            "
                         >
-                            {locale?.ColorPicker.more}
-                            {selectedColor && (
+                            <Button
+                                ref={moreButtonRef}
+                                variant="text"
+                                className="
+                                  univer-w-full univer-justify-between univer-px-2 univer-font-normal
+                                  hover:univer-bg-gray-100
+                                  dark:hover:!univer-bg-gray-600
+                                "
+                                onClick={() => {
+                                    resetDraft(selectedColor);
+                                    setCustom(true);
+                                }}
+                            >
+                                <span className="univer-inline-flex univer-items-center univer-gap-2">
+                                    <ColorWheelMultiIcon aria-hidden="true" className="univer-size-4 univer-shrink-0" />
+                                    {locale?.ColorPicker.more}
+                                </span>
                                 <span
-                                    className="
-                                      univer-size-5 univer-rounded univer-border univer-border-solid
-                                      univer-border-gray-200
-                                      dark:!univer-border-gray-600
-                                    "
-                                    style={{ backgroundColor: selectedColor }}
-                                />
-                            )}
-                        </Button>
+                                    aria-hidden="true"
+                                    className="univer-inline-flex univer-items-center univer-gap-1.5"
+                                >
+                                    {selectedColor && (
+                                        <span
+                                            className={clsx(
+                                                `
+                                                  univer-relative univer-box-border univer-size-4 univer-overflow-hidden
+                                                  univer-rounded univer-bg-gray-0
+                                                  dark:!univer-bg-gray-700
+                                                `,
+                                                borderClassName
+                                            )}
+                                            style={CHECKERBOARD_BACKGROUND_STYLE}
+                                        >
+                                            <span
+                                                className="univer-block univer-size-full"
+                                                style={{ backgroundColor: selectedColor }}
+                                            />
+                                        </span>
+                                    )}
+                                    <MoreRightIcon
+                                        preserveStrokeWidth
+                                        className="
+                                          univer-size-3.5 univer-text-gray-500
+                                          rtl:univer-rotate-180
+                                          dark:!univer-text-gray-300
+                                        "
+                                    />
+                                </span>
+                            </Button>
+                        </div>
                     </div>
                 )}
         </div>

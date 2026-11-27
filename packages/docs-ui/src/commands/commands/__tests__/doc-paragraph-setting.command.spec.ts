@@ -15,9 +15,9 @@
  */
 
 import type { ICommand, IDocumentData } from '@univerjs/core';
-import { awaitTime, BooleanNumber, DocStyleType, DocumentFlavor, ICommandService, RedoCommand, resolveDocumentParagraphWordWrap, UndoCommand } from '@univerjs/core';
+import { awaitTime, BooleanNumber, DocStyleType, DocumentFlavor, ICommandService, NumberUnitType, RedoCommand, resolveDocumentParagraphWordWrap, UndoCommand } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
-import { expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { DocParagraphSettingCommand } from '../doc-paragraph-setting.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -65,4 +65,95 @@ it('persists paragraph word wrapping through mutations, undo and redo without ch
     } finally {
         univer.dispose();
     }
+});
+
+describe('DocParagraphSettingCommand', () => {
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('clears inherited line spacing for absolute edits with undo and redo (%s)', async (documentFlavor) => {
+        const data: IDocumentData = {
+            id: 'test-doc',
+            documentStyle: { documentFlavor },
+            styles: { base: { name: 'Base', type: DocStyleType.paragraph, paragraphStyle: {
+                spaceAbove: { v: 2, u: NumberUnitType.LINE, fallback: 12 },
+                spaceBelow: { v: 3, u: NumberUnitType.LINE, fallback: 12 },
+            } } },
+            body: { dataStream: 'Text\r\n', paragraphs: [{ startIndex: 4, paragraphId: 'paragraph', styleId: 'base' }], sectionBreaks: [] },
+        };
+        const { univer, get, doc } = createCommandTestBed(data);
+        try {
+            const commands = get(ICommandService);
+            for (const command of [DocParagraphSettingCommand, SetTextSelectionsOperation, RichTextEditingMutation]) {
+                commands.registerCommand(command as ICommand);
+            }
+            const selection = get(DocSelectionManagerService);
+            selection.__TEST_ONLY_setCurrentSelection({ unitId: 'test-doc', subUnitId: 'test-doc' });
+            selection.__TEST_ONLY_add([{ startOffset: 0, endOffset: 0, collapsed: true, isActive: true, segmentId: '', style: null as never }]);
+            for (const value of [0, 24]) {
+                const before = doc.getBody()?.paragraphs?.[0].paragraphStyle;
+                const update = { spaceAbove: { v: value }, spaceBelow: { v: 16 } };
+                expect(await commands.executeCommand(DocParagraphSettingCommand.id, { paragraph: update })).toBe(true);
+                const expected = documentFlavor === DocumentFlavor.TRADITIONAL
+                    ? { spaceAbove: { v: 0, u: NumberUnitType.LINE, fallback: value }, spaceBelow: { v: 0, u: NumberUnitType.LINE, fallback: 16 } }
+                    : update;
+                expect(doc.getBody()?.paragraphs?.[0].paragraphStyle).toEqual(expected);
+                expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+                expect(doc.getBody()?.paragraphs?.[0].paragraphStyle).toEqual(before);
+                expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+                expect(doc.getBody()?.paragraphs?.[0].paragraphStyle).toEqual(expected);
+                expect(update).toEqual({ spaceAbove: { v: value }, spaceBelow: { v: 16 } });
+            }
+        } finally {
+            univer.dispose();
+        }
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('clears inherited character indents for absolute edits with undo and redo (%s)', async (documentFlavor) => {
+        const data: IDocumentData = {
+            id: 'test-doc',
+            documentStyle: { documentFlavor },
+            styles: {
+                base: { name: 'Base', type: DocStyleType.paragraph, paragraphStyle: {
+                    indentStart: { v: 2, u: NumberUnitType.CHARACTER, fallback: 12 },
+                    hanging: { v: 2, u: NumberUnitType.CHARACTER, fallback: 12 },
+                } },
+            },
+            body: {
+                dataStream: 'Text\r\n',
+                paragraphs: [{ startIndex: 4, paragraphId: 'paragraph', styleId: 'base' }],
+                sectionBreaks: [],
+            },
+        };
+        const { univer, get, doc } = createCommandTestBed(data);
+        try {
+            const commands = get(ICommandService);
+            for (const command of [DocParagraphSettingCommand, SetTextSelectionsOperation, RichTextEditingMutation]) {
+                commands.registerCommand(command as ICommand);
+            }
+            const selection = get(DocSelectionManagerService);
+            selection.__TEST_ONLY_setCurrentSelection({ unitId: 'test-doc', subUnitId: 'test-doc' });
+            selection.__TEST_ONLY_add([{
+                startOffset: 0,
+                endOffset: 0,
+                collapsed: true,
+                isActive: true,
+                segmentId: '',
+                style: null as never,
+            }]);
+            const update = { indentStart: { v: 24 }, indentFirstLine: { v: 16 } };
+            expect(await commands.executeCommand(DocParagraphSettingCommand.id, { paragraph: update })).toBe(true);
+            const expected = documentFlavor === DocumentFlavor.TRADITIONAL
+                ? {
+                    indentStart: { v: 0, u: NumberUnitType.CHARACTER, fallback: 24 },
+                    indentFirstLine: { v: 0, u: NumberUnitType.CHARACTER, fallback: 16 },
+                }
+                : update;
+            expect(doc.getBody()?.paragraphs?.[0].paragraphStyle).toEqual(expected);
+            expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+            expect(doc.getBody()?.paragraphs?.[0].paragraphStyle).toBeUndefined();
+            expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+            expect(doc.getBody()?.paragraphs?.[0].paragraphStyle).toEqual(expected);
+            expect(update).toEqual({ indentStart: { v: 24 }, indentFirstLine: { v: 16 } });
+        } finally {
+            univer.dispose();
+        }
+    });
 });

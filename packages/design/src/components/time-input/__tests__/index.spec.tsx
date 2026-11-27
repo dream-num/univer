@@ -63,4 +63,13 @@ describe('TimeInput', () => {
         const changed = onValueChange.mock.calls[0][0] as Date;
         expect(changed.getMilliseconds()).toBe(0);
     });
+
+    it('ignores empty time input without emitting an invalid date', () => {
+        const onValueChange = vi.fn();
+        const { container } = render(<TimeInput value={new Date(2024, 0, 1, 1, 2, 3)} onValueChange={onValueChange} />);
+        const input = container.querySelector('input[type="time"]') as HTMLInputElement;
+
+        fireEvent.change(input, { target: { value: '' } });
+        expect(onValueChange).not.toHaveBeenCalled();
+    });
 });

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// @vitest-environment happy-dom
-
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { Profiler } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';

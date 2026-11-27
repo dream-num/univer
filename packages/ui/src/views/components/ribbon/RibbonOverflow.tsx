@@ -112,7 +112,6 @@ export function RibbonOverflow({ groups, grid = false }: IRibbonOverflowProps) {
                                                         showLabel={child.gridLayout?.showLabel}
                                                         fullWidth
                                                         overflow
-                                                        preserveStrokeWidth
                                                     />
                                                 </div>
                                             ))}
@@ -134,14 +133,14 @@ export function RibbonOverflow({ groups, grid = false }: IRibbonOverflowProps) {
                   data-[state=open]:univer-bg-primary-50 data-[state=open]:univer-text-primary-600
                   focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600
                   dark:data-[state=open]:!univer-bg-gray-700 dark:data-[state=open]:!univer-text-primary-300
-                `, grid && '!univer-h-14 !univer-w-14 univer-flex-col univer-gap-1.5 univer-text-xs')}
+                `, grid && '!univer-h-full !univer-w-14 univer-flex-col univer-gap-1 univer-text-xs')}
             >
                 {grid
                     ? (
                         <>
                             <MoreHorizontalIcon className="univer-size-5" preserveStrokeWidth />
                             <span
-                                className="univer-flex univer-items-center univer-gap-0.5"
+                                className="univer-flex univer-items-center univer-gap-1"
                             >
                                 {label}
                                 <MoreDownIcon

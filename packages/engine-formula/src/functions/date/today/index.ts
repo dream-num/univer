@@ -24,8 +24,14 @@ export class Today extends BaseFunction {
 
     override maxParams = 0;
 
+    private _getTimestamp?: () => number;
+
+    override bindCalculationTimestamp(getTimestamp: () => number): void {
+        this._getTimestamp = getTimestamp;
+    }
+
     override calculate() {
-        const now = new Date();
+        const now = new Date(this._getTimestamp?.() ?? Date.now());
         // Excel TODAY follows the user's local calendar day. Convert that day to a UTC
         // midnight carrier before calculating the timezone-independent Excel serial.
         const utcNow = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));

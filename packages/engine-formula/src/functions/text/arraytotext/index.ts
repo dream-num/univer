@@ -21,6 +21,7 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { formatExcelTextNumber } from '../format-excel-text-number';
 
 export class Arraytotext extends BaseFunction {
     override minParams = 1;
@@ -47,11 +48,9 @@ export class Arraytotext extends BaseFunction {
         return this._handleSingleObject(array, _format);
     }
 
-    private _handleSingleObject(array: BaseValueObject, format: BaseValueObject): BaseValueObject {
-        const _array = this._checkArray(array);
-
-        if (_array.isError()) {
-            return _array;
+    protected _handleSingleObject(array: BaseValueObject, format: BaseValueObject): BaseValueObject {
+        if (array.isError()) {
+            return array;
         }
 
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(format);
@@ -62,7 +61,10 @@ export class Arraytotext extends BaseFunction {
 
         const [formatObject] = variants as BaseValueObject[];
 
-        const formatValue = +formatObject.getValue();
+        const formatValue = this._readFormat(formatObject);
+        if (formatValue !== 0 && formatValue !== 1) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
 
         const arrayRowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
         const arrayColumnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
@@ -71,23 +73,8 @@ export class Arraytotext extends BaseFunction {
 
         for (let r = 0; r < arrayRowCount; r++) {
             for (let c = 0; c < arrayColumnCount; c++) {
-                const valueObject = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
-
-                let value = `${valueObject.getValue()}`;
-
-                if (valueObject.isNull()) {
-                    value = '';
-                }
-
-                if (valueObject.isBoolean()) {
-                    value = value.toLocaleUpperCase();
-                }
-
-                if (valueObject.isString() && formatValue) {
-                    result += `"${value}"`;
-                } else {
-                    result += value;
-                }
+                const valueObject = array.isArray() ? (array as ArrayValueObject).getRealValue(r, c) : array;
+                result += this._serializeCell(valueObject, formatValue === 1);
 
                 if (!(r === arrayRowCount - 1 && c === arrayColumnCount - 1)) {
                     if (formatValue) {
@@ -114,18 +101,19 @@ export class Arraytotext extends BaseFunction {
         return StringValueObject.create(result);
     }
 
-    private _checkArray(array: BaseValueObject): BaseValueObject {
-        if (array.isArray()) {
-            const arrayRowCount = (array as ArrayValueObject).getRowCount();
-            const arrayColumnCount = (array as ArrayValueObject).getColumnCount();
+    private _serializeCell(value: BaseValueObject | null | undefined, strict: boolean): string {
+        if (value == null || value.isNull()) return '';
+        if (value.isNumber()) return this._formatNumber(Number(value.getValue()));
+        const text = String(value.getValue());
+        if (value.isBoolean()) return text.toUpperCase();
+        return value.isString() && strict ? `"${text.replace(/"/g, '""')}"` : text;
+    }
 
-            if (arrayRowCount > 1 || arrayColumnCount > 1) {
-                return array;
-            }
+    protected _formatNumber(value: number): string {
+        return formatExcelTextNumber(value, false);
+    }
 
-            return (array as ArrayValueObject).get(0, 0) as BaseValueObject;
-        }
-
-        return array;
+    protected _readFormat(format: BaseValueObject): number {
+        return Number(format.getValue());
     }
 }

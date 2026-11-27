@@ -51,7 +51,7 @@ export const COLORS: { [key: string]: number[] } = {
     beige: [245, 245, 220],
     bisque: [255, 228, 196],
     black: [0, 0, 0],
-    blanchealmond: [255, 235, 205],
+    blanchedalmond: [255, 235, 205],
     blue: [0, 0, 255],
     blueviolet: [138, 43, 226],
     brown: [165, 42, 42],
@@ -66,7 +66,7 @@ export const COLORS: { [key: string]: number[] } = {
     cyan: [0, 255, 255],
     darkblue: [0, 0, 139],
     darkcyan: [0, 139, 139],
-    darkgoldenrod: [184, 132, 11],
+    darkgoldenrod: [184, 134, 11],
     darkgray: [169, 169, 169],
     darkgreen: [0, 100, 0],
     darkgrey: [169, 169, 169],
@@ -90,7 +90,7 @@ export const COLORS: { [key: string]: number[] } = {
     dimgrey: [105, 105, 105],
     dodgerblue: [30, 144, 255],
     firebrick: [178, 34, 34],
-    floralwhite: [255, 255, 240],
+    floralwhite: [255, 250, 240],
     forestgreen: [34, 139, 34],
     fuchsia: [255, 0, 255],
     gainsboro: [220, 220, 220],
@@ -140,7 +140,7 @@ export const COLORS: { [key: string]: number[] } = {
     mediumspringgreen: [0, 250, 154],
     mediumturquoise: [72, 209, 204],
     mediumvioletred: [199, 21, 133],
-    midbightblue: [25, 25, 112],
+    midnightblue: [25, 25, 112],
     mintcream: [245, 255, 250],
     mistyrose: [255, 228, 225],
     moccasin: [255, 228, 181],
@@ -160,7 +160,7 @@ export const COLORS: { [key: string]: number[] } = {
     peachpuff: [255, 218, 185],
     peru: [205, 133, 63],
     pink: [255, 192, 203],
-    plum: [221, 160, 203],
+    plum: [221, 160, 221],
     powderblue: [176, 224, 230],
     purple: [128, 0, 128],
     rebeccapurple: [102, 51, 153],
@@ -176,9 +176,9 @@ export const COLORS: { [key: string]: number[] } = {
     silver: [192, 192, 192],
     skyblue: [135, 206, 235],
     slateblue: [106, 90, 205],
-    slategray: [119, 128, 144],
-    slategrey: [119, 128, 144],
-    snow: [255, 255, 250],
+    slategray: [112, 128, 144],
+    slategrey: [112, 128, 144],
+    snow: [255, 250, 250],
     springgreen: [0, 255, 127],
     steelblue: [70, 130, 180],
     tan: [210, 180, 140],
@@ -192,7 +192,7 @@ export const COLORS: { [key: string]: number[] } = {
     white: [255, 255, 255],
     whitesmoke: [245, 245, 245],
     yellow: [255, 255, 0],
-    yellowgreen: [154, 205, 5],
+    yellowgreen: [154, 205, 50],
 };
 
 export class ColorKit {
@@ -473,7 +473,7 @@ const toColor: (color: string | Color) => Color | undefined = (color) => {
             b: Math.round(colorArray[2]),
         };
 
-        rgb.a = colorArray[3] || 1;
+        rgb.a = colorArray[3] ?? 1;
 
         return rgb;
     }

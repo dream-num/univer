@@ -51,6 +51,8 @@ export type { IUniverThreadCommentConfig } from './config/config';
 export { ThreadCommentModel } from './models/thread-comment.model';
 export type { CommentUpdate, IThreadCommentQuery, IThreadInfo } from './models/thread-comment.model';
 export { UniverThreadCommentPlugin } from './plugin';
+export { IThreadCommentAuthzService, ThreadCommentAuthzService } from './services/tc-authz.service';
+export type { IThreadCommentAuthz, IThreadCommentAuthzTarget, ThreadCommentWriteAction } from './services/tc-authz.service';
 export { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
 export type { IThreadCommentDataSource, ThreadCommentJSON } from './services/tc-datasource.service';
 export { isThreadCommentDocumentBody, normalizeThreadCommentContent, ThreadCommentFacadeService } from './services/thread-comment-api.service';

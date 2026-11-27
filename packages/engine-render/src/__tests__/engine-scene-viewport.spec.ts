@@ -61,7 +61,7 @@ function createInputEvent(type: string, extra: Record<string, unknown> = {}) {
     } as any;
 }
 
-function createFixture(): IFixture {
+function createFixture(dpr = 1): IFixture {
     const container = document.createElement('div');
     container.style.width = '420px';
     container.style.height = '260px';
@@ -69,7 +69,7 @@ function createFixture(): IFixture {
     document.body.appendChild(container);
 
     const engine = injector.createChild([[Engine, { useFactory: function createTestInstance() {
-        return injector.createInstance(Engine, 'unit-a', { elementWidth: 320, elementHeight: 180, dpr: 1 });
+        return injector.createInstance(Engine, 'unit-a', { elementWidth: 320, elementHeight: 180, dpr });
     } }]]).get(Engine);
     engine.mount(container, false);
 
@@ -505,7 +505,7 @@ describe('engine scene viewport extra', () => {
         scene.dispose();
     });
 
-    it('keeps shared viewport boundary pixels out of incremental scroll copies', () => {
+    it('repaints shared viewport edges excluded from incremental scroll copies', () => {
         const { engine, scene, viewport } = createFixture();
         viewport.setViewportSize({ left: 46, top: 20, width: 260, height: 160 });
         const rowHeaderViewport = injector.createInstance(Viewport, 'viewRowBottom', scene, {
@@ -546,9 +546,58 @@ describe('engine scene viewport extra', () => {
         expect(mainCopy?.[5]).toBe(47);
         expect(Number(mainCopy?.[6])).toBeGreaterThan(Number(mainCopy?.[2]));
         const copiedOffsetY = Number(mainCopy?.[6]) - Number(mainCopy?.[2]);
-        expect(clearRectSpy.mock.calls).toContainEqual([47, 21, expect.any(Number), copiedOffsetY]);
+
+        expect(clearRectSpy.mock.calls).toContainEqual([46, 20, expect.any(Number), copiedOffsetY + 1]);
+        expect(clearRectSpy.mock.calls).toContainEqual([46, 20, 1, expect.any(Number)]);
 
         scene.dispose();
+    });
+
+    it.each([
+        { zoom: 0.85, dpr: 1.25, headerHeight: 21, reuse: false },
+        { zoom: 0.85, dpr: 1.5, headerHeight: 21, reuse: false },
+        { zoom: 1, dpr: 2, headerHeight: 20.5, reuse: true },
+    ])('uses safe scroll compositing at zoom $zoom and DPR $dpr', ({ zoom, dpr, headerHeight, reuse }) => {
+        const { engine, scene, viewport } = createFixture(dpr);
+        try {
+            scene.scale(zoom, zoom);
+            viewport.setViewportSize({ left: 46, top: 20, width: 260, height: 160 });
+            injector.createInstance(Viewport, 'viewColumnRight', scene, {
+                left: 46,
+                top: 0,
+                width: 260,
+                height: headerHeight,
+                active: true,
+                allowCache: true,
+            });
+
+            const background = injector.createInstance(Rect, 'dark-background', {
+                left: 0,
+                top: 0,
+                width: 500,
+                height: 420,
+                fill: '#102048',
+            });
+            scene.addObject(background, 1);
+            viewport.scrollToViewportPos({ viewportScrollY: 40 });
+            scene.render();
+
+            const ctx = engine.getCanvas().getContext();
+            const drawImage = vi.spyOn(ctx, 'drawImage');
+            const clearCanvas = vi.spyOn(engine, 'clearCanvas');
+            const renderBackground = vi.spyOn(background, 'render');
+
+            viewport.scrollToViewportPos({ viewportScrollY: 0 });
+            scene.makeDirtyForScrolling();
+            scene.render();
+
+            const selfCopies = drawImage.mock.calls.filter(([source]) => source === ctx.canvas);
+            expect(selfCopies).toHaveLength(reuse ? 1 : 0);
+            expect(clearCanvas).toHaveBeenCalledTimes(reuse ? 0 : 1);
+            expect(renderBackground).toHaveBeenCalled();
+        } finally {
+            scene.dispose();
+        }
     });
 
     it('uses a full render after an after-render observer mutates the engine canvas', () => {

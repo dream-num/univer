@@ -51,6 +51,8 @@ export class Subtotal extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams - 1 }, (_, index) => index + 1);
+
     override needsFilteredOutRows = true;
 
     override needsFormulaDataModel = true;

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -23,24 +24,22 @@ export class Counta extends BaseFunction {
 
     override maxParams = 255;
 
-    override calculate(...variants: BaseValueObject[]) {
-        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
-        for (let i = 0; i < variants.length; i++) {
-            let variant = variants[i];
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
 
-            if (variant.isError()) {
-                accumulatorAll = accumulatorAll.plus(NumberValueObject.create(1));
-                continue;
-            }
+    override needsReferenceObject = true;
 
-            if (variant.isArray()) {
-                variant = variant.countA();
-                accumulatorAll = accumulatorAll.plus(variant);
-            } else if (!variant.isNull()) {
-                accumulatorAll = accumulatorAll.plus(NumberValueObject.create(1));
+    override calculate(...variants: FunctionVariantType[]) {
+        let count = 0;
+        for (const variant of variants) {
+            if (variant.isReferenceObject()) {
+                count += Number((variant as BaseReferenceObject).toArrayValueObject().countA().getValue());
+            } else if (variant.isArray()) {
+                const array = variant as ArrayValueObject;
+                count += array.getRowCount() * array.getColumnCount();
+            } else {
+                count++;
             }
         }
-
-        return accumulatorAll;
+        return NumberValueObject.create(count);
     }
 }

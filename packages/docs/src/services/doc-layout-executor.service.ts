@@ -122,6 +122,9 @@ export interface IDocLayoutStartRequest extends IDocLayoutMountIdentity {
     metricsRevision: number;
     baseRevision: number;
     modelRevision: number;
+    supportsAppliedLayoutVersion?: boolean;
+    acknowledgedLayoutVersion?: string;
+    appliedLayoutVersion?: string;
     mutations: IDocLayoutMutationProjection[];
     reason: 'initial' | 'edit';
     anchor?: number;
@@ -375,6 +378,8 @@ export interface IDocLayoutStartOptions {
     invalidation?: IDocumentLayoutSessionStartOptions['invalidation'];
     modernPageWidth?: number;
     modernHorizontalMargin?: number;
+    acknowledgedLayoutVersion?: string;
+    appliedLayoutVersion?: string;
 }
 
 export class DocLayoutExecutorService extends Disposable {
@@ -770,6 +775,9 @@ export class DocLayoutExecutorService extends Disposable {
                 metricsRevision: startId,
                 baseRevision: session.workerRevision,
                 modelRevision: session.modelRevision,
+                ...(currentModel.documentStyle.documentFlavor === DocumentFlavor.MODERN
+                    ? { supportsAppliedLayoutVersion: true }
+                    : {}),
                 mutations,
                 ...projections.request,
                 budgetMs,
@@ -943,6 +951,9 @@ export class DocLayoutExecutorService extends Disposable {
         }
         for (const [segmentId, footerModel] of dataModel.footerModelMap) {
             collectSegment(segmentId, footerModel.getBody());
+        }
+        for (const [segmentId, noteModel] of dataModel.noteModelMap) {
+            collectSegment(segmentId, noteModel.getBody());
         }
 
         return presentations;

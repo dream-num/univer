@@ -14,133 +14,23 @@
  * limitations under the License.
  */
 
-import fs from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { conditionalFormattingIconPresets } from '../src/models/conditional-formatting-icon-presets.ts';
 
-const progress = [
-    ['progress0', '@univerjs/icons-svg/double/progress-0-double-icon.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
-    ['progress25', '@univerjs/icons-svg/double/progress-25-double-icon.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
-    ['progress50', '@univerjs/icons-svg/double/progress-50-double-icon.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
-    ['progress75', '@univerjs/icons-svg/double/progress-75-double-icon.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
-    ['progress100', '@univerjs/icons-svg/double/progress-100-double-icon.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
-];
-
-const star = [
-    ['starEmpty', '@univerjs/icons-svg/double/star-empty-double-icon.svg', { black: '#FFBD37' }],
-    ['starIncomplete', '@univerjs/icons-svg/double/star-incomplete-double-icon.svg', { black: '#FFBD37' }],
-    ['starFull', '@univerjs/icons-svg/double/star-full-double-icon.svg', { black: '#FFBD37' }],
-];
-
-const feeling = [
-    ['guffaw', '@univerjs/icons-svg/double/guffaw-double-icon.svg', { black: '#8F5F00', '#E5E5E5': '#FFBD37' }],
-    ['smile', '@univerjs/icons-svg/double/smile-double-icon.svg', { black: '#8F5F00', '#E5E5E5': '#FFBD37' }],
-    ['noninductive', '@univerjs/icons-svg/double/noninductive-double-icon.svg', { black: '#8F5F00', '#E5E5E5': '#FFBD37' }],
-    ['dissatisfied', '@univerjs/icons-svg/double/dissatisfied-double-icon.svg', { black: '#8F5F00', '#E5E5E5': '#FFBD37' }],
-    ['impatient', '@univerjs/icons-svg/double/impatient-double-icon.svg', { black: '#8F5F00', '#E5E5E5': '#FFBD37' }],
-];
-
-const signal = [
-    ['signal0', '@univerjs/icons-svg/double/signal-0-double-icon.svg', { black: '#0493EE' }],
-    ['signal25', '@univerjs/icons-svg/double/signal-25-double-icon.svg', { black: '#0493EE' }],
-    ['signal50', '@univerjs/icons-svg/double/signal-50-double-icon.svg', { black: '#0493EE' }],
-    ['signal75', '@univerjs/icons-svg/double/signal-75-double-icon.svg', { black: '#0493EE' }],
-    ['signal100', '@univerjs/icons-svg/double/signal-100-double-icon.svg', { black: '#0493EE' }],
-];
-
-const feedback = [
-    ['mistake', '@univerjs/icons-svg/double/mistake-double-icon.svg', { black: '#FE4B4B', '#E5E5E5': '#FFFFFF' }],
-    ['warn', '@univerjs/icons-svg/double/warn-double-icon.svg', { black: '#FFBD37', '#E5E5E5': '#FFFFFF' }],
-    ['correct', '@univerjs/icons-svg/double/correct-double-icon.svg', { black: '#59D01E', '#E5E5E5': '#FFFFFF' }],
-];
-
-const feedback2 = [
-    ['mistake2', '@univerjs/icons-svg/single/close-icon.svg', { black: '#FE4B4B' }],
-    ['warn2', '@univerjs/icons-svg/single/exclamation-icon.svg', { black: '#FFBD37' }],
-    ['correct2', '@univerjs/icons-svg/single/check-mark-icon.svg', { black: '#59D01E' }],
-];
-
-const arrow = [
-    ['down-red', '@univerjs/icons-svg/single/arrow-down-icon.svg', { black: '#FE4B4B' }],
-    ['right-gold', '@univerjs/icons-svg/single/arrow-right-icon.svg', { black: '#FFBD37' }],
-    ['up-green', '@univerjs/icons-svg/single/arrow-up-icon.svg', { black: '#59D01E' }],
-    ['rightAndDown-gold', '@univerjs/icons-svg/single/arrow-tilt-down-icon.svg', { black: '#FFBD37' }],
-    ['rightAndUp-gold', '@univerjs/icons-svg/single/arrow-tilt-up-icon.svg', { black: '#FFBD37' }],
-    ['down-gray', '@univerjs/icons-svg/single/arrow-down-icon.svg', { black: '#999999' }],
-    ['right-gray', '@univerjs/icons-svg/single/arrow-right-icon.svg', { black: '#999999' }],
-    ['up-gray', '@univerjs/icons-svg/single/arrow-up-icon.svg', { black: '#999999' }],
-    ['rightAndDown-gray', '@univerjs/icons-svg/single/arrow-tilt-down-icon.svg', { black: '#999999' }],
-    ['rightAndUp-gray', '@univerjs/icons-svg/single/arrow-tilt-up-icon.svg', { black: '#999999' }],
-];
-
-const flag = [
-    ['flag-green', '@univerjs/icons-svg/single/flag-icon.svg', { black: '#59D01E' }],
-    ['flag-gold', '@univerjs/icons-svg/single/flag-icon.svg', { black: '#FFBD37' }],
-    ['flag-red', '@univerjs/icons-svg/single/flag-icon.svg', { black: '#FE4B4B' }],
-];
-
-const shape = [
-    ['cross', '@univerjs/icons-svg/single/cross-icon.svg', { black: '#FFBD37' }],
-    ['up', '@univerjs/icons-svg/single/up-icon.svg', { black: '#59D01E' }],
-    ['down', '@univerjs/icons-svg/single/down-icon.svg', { black: '#FE4B4B' }],
-
-    ['rhomboid-red', '@univerjs/icons-svg/single/rhomboid-icon.svg', { black: '#FE4B4B' }],
-    ['rhomboid-gold', '@univerjs/icons-svg/single/rhomboid-icon.svg', { black: '#FFBD37' }],
-    ['roundness-greed', '@univerjs/icons-svg/single/roundness-icon.svg', { black: '#59D01E' }],
-    ['roundness-gold', '@univerjs/icons-svg/single/roundness-icon.svg', { black: '#FFBD37' }],
-    ['roundness-red', '@univerjs/icons-svg/single/roundness-icon.svg', { black: '#FE4B4B' }],
-    ['roundness-pink', '@univerjs/icons-svg/single/roundness-icon.svg', { black: '#FB9D9D' }],
-    ['roundness-gray', '@univerjs/icons-svg/single/roundness-icon.svg', { black: '#999999' }],
-    ['roundness-black', '@univerjs/icons-svg/single/roundness-icon.svg'],
-    ['triangle-gold', '@univerjs/icons-svg/single/triangle-icon.svg', { black: '#FFBD37' }],
-
-    ['indicate-greed', '@univerjs/icons-svg/double/indicate-double-icon.svg', { '#E5E5E5': '#59D01E' }],
-    ['indicate-gold', '@univerjs/icons-svg/double/indicate-double-icon.svg', { '#E5E5E5': '#FFBD37' }],
-    ['indicate-red', '@univerjs/icons-svg/double/indicate-double-icon.svg', { '#E5E5E5': '#FE4B4B' }],
-];
-
-const cell = [
-    ['cell-0', '@univerjs/icons-svg/double/cell-0-double-icon.svg', { white: '#0493EE', black: '#0493EE' }],
-    ['cell-25', '@univerjs/icons-svg/double/cell-25-double-icon.svg', { white: '#0493EE', black: '#0493EE' }],
-    ['cell-50', '@univerjs/icons-svg/double/cell-50-double-icon.svg', { white: '#0493EE', black: '#0493EE' }],
-    ['cell-75', '@univerjs/icons-svg/double/cell-75-double-icon.svg', { white: '#0493EE', black: '#0493EE' }],
-    ['cell-100', '@univerjs/icons-svg/double/cell-100-double-icon.svg', { white: '#0493EE', black: '#0493EE' }],
-
-];
-
-function replaceFillAndConvertToBase64(filePath: string, replaceMap: Record<string, string>) {
-    try {
-        let svgContent = fs.readFileSync(filePath, 'utf8');
-        if (replaceMap) {
-            for (const key in replaceMap) {
-                svgContent = svgContent.replace(new RegExp(`"${key}"`, 'g'), `"${replaceMap[key]}"`);
-            }
+// The Facade exposes standalone image URLs for consumers outside React and Canvas.
+const urls: Record<string, string> = {};
+for (const [key, preset] of Object.entries(conditionalFormattingIconPresets)) {
+    const group = preset.name.endsWith('-double-icon') ? 'double' : 'single';
+    const asset = import.meta.resolve(`@univerjs/icons-svg/${group}/${preset.name}.svg`);
+    let svg = readFileSync(new URL(asset), 'utf8');
+    if ('colors' in preset) {
+        for (const [original, color] of Object.entries(preset.colors)) {
+            svg = svg.replaceAll(`"${original}"`, `"${color}"`);
         }
-
-        const base64Encoded = encodeURIComponent(svgContent);
-        return base64Encoded;
-    } catch (error) {
-        console.error('An error occurred:', error);
     }
+    urls[key] = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
-function runTask() {
-    const base64EncodedSVGs: Record<string, Record<string, string>> = {};
-    const obj = { feedback, star, progress, signal, feeling, arrow, shape, feedback2, flag, cell };
-    for (const iconType in obj) {
-        const list = obj[iconType as keyof typeof obj];
-        const map: Record<string, string> = {};
-        base64EncodedSVGs[iconType] = map;
-        for (const element of list) {
-            const [key, path, replaceMap] = element;
-            const base64 = replaceFillAndConvertToBase64(`./node_modules/${path}`, typeof replaceMap === 'object' ? replaceMap : {});
-            map[key as keyof typeof map] = `data:image/svg+xml;charset=utf-8,${base64}`;
-        }
-    }
-
-    if (!fs.existsSync('./src/assets')) {
-        fs.mkdirSync('./src/assets');
-    }
-
-    fs.writeFileSync('./src/assets/icon-map.ts', `/* eslint-disable */\nexport const ICON_MAP = ${JSON.stringify(base64EncodedSVGs, null, 4)};\n`);
-};
-
-runTask();
+const assetDirectory = new URL('../src/assets/', import.meta.url);
+mkdirSync(assetDirectory, { recursive: true });
+writeFileSync(new URL('icon-map.ts', assetDirectory), `export const iconUrls = ${JSON.stringify(urls, null, 4)};\n`);

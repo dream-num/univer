@@ -97,11 +97,6 @@ const locale: typeof enUS = {
         showTime: {
             label: 'إظهار منتقي الوقت',
         },
-        permission: {
-            dialog: {
-                setStyleErr: 'النطاق محمي، وليس لديك الإذن بتعيين الأنماط. لتعيين الأنماط، يُرجى التواصل مع المنشئ.',
-            },
-        },
     },
 };
 

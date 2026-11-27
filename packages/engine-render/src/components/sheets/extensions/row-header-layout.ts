@@ -50,6 +50,16 @@ const DEFAULT_PRINTING_ROW_STYLE = {
 
 export class RowHeaderLayout extends SheetExtension {
     override readonly viewportCacheReusable = this.constructor === RowHeaderLayout;
+    private readonly _displayStyles = new WeakMap<SpreadsheetSkeleton, Partial<IHeaderStyleCfg>>();
+
+    /** Applies transient editor colors without changing configured or printed headers. */
+    setDisplayStyle(skeleton: SpreadsheetSkeleton, style: Partial<IHeaderStyleCfg> | undefined): void {
+        if (style) {
+            this._displayStyles.set(skeleton, style);
+        } else {
+            this._displayStyles.delete(skeleton);
+        }
+    }
 
     override uKey = UNIQUE_KEY;
     override Z_INDEX = 10;
@@ -82,10 +92,11 @@ export class RowHeaderLayout extends SheetExtension {
         return { ...this.rowsCfg, ...rowsCfg };
     }
 
-    getHeaderStyle(sheetId: string, isPrinting = false): IRowStyleCfg {
+    getHeaderStyle(sheetId: string, isPrinting = false, skeleton?: SpreadsheetSkeleton): IRowStyleCfg {
         const headerStyle = this.headerStyleOfWorksheet.get(sheetId) ?? {};
         const defaultStyle = isPrinting ? DEFAULT_PRINTING_ROW_STYLE : DEFAULT_ROW_STYLE;
-        return { ...defaultStyle, ...this.headerStyle, ...headerStyle };
+        const displayStyle = !isPrinting && skeleton ? this._displayStyles.get(skeleton) : undefined;
+        return { ...defaultStyle, ...this.headerStyle, ...headerStyle, ...displayStyle };
     }
 
     getCfgOfCurrentRow(rowsCfg: Record<number, IARowCfg>, headerStyle: IHeaderStyleCfg, rowIndex: number) {
@@ -135,7 +146,7 @@ export class RowHeaderLayout extends SheetExtension {
         }
 
         const rowsCfg = this.getRowsCfg(worksheet.getSheetId());
-        const headerStyle = this.getHeaderStyle(worksheet.getSheetId(), ctx.__mode === 'printing');
+        const headerStyle = this.getHeaderStyle(worksheet.getSheetId(), ctx.__mode === 'printing', spreadsheetSkeleton);
 
         const scale = this._getScale(parentScale);
         this.setStyleToCtx(ctx, headerStyle);

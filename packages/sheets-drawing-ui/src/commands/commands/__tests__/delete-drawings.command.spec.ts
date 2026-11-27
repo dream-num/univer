@@ -29,21 +29,8 @@ function createSheetDrawing(drawingId: string): ISheetDrawing {
         drawingType: DrawingTypeEnum.DRAWING_IMAGE,
         imageSourceType: ImageSourceType.URL,
         source: `https://example.com/${drawingId}.png`,
-        sheetTransform: {
-            angle: 0,
-            flipX: false,
-            flipY: false,
-            skewX: 0,
-            skewY: 0,
-            from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
-            to: { row: 4, column: 3, rowOffset: 0, columnOffset: 0 },
-        },
+        transform: { left: 10, top: 20, width: 100, height: 80 },
         axisAlignSheetTransform: {
-            angle: 0,
-            flipX: false,
-            flipY: false,
-            skewX: 0,
-            skewY: 0,
             from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
             to: { row: 4, column: 3, rowOffset: 0, columnOffset: 0 },
         },
@@ -51,19 +38,21 @@ function createSheetDrawing(drawingId: string): ISheetDrawing {
 }
 
 describe('DeleteDrawingsCommand', () => {
+    let testBed: ReturnType<typeof createSheetsDrawingUiTestBed>;
+
     afterEach(() => {
-        // each test disposes its own univer instance
+        testBed.univer.dispose();
     });
 
     it('removes the focused drawing from the real sheet drawing model', async () => {
-        const testBed = createSheetsDrawingUiTestBed();
+        testBed = createSheetsDrawingUiTestBed();
         const sheetDrawingService = testBed.get(ISheetDrawingService);
         testBed.commandService.registerCommand(DeleteDrawingsCommand);
 
-        await testBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+        expect(await testBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId: testBed.unitId,
             drawings: [createSheetDrawing('drawing-1')],
-        });
+        })).toBe(true);
         sheetDrawingService.focusDrawing([{
             unitId: testBed.unitId,
             subUnitId: testBed.subUnitId,
@@ -78,19 +67,17 @@ describe('DeleteDrawingsCommand', () => {
             drawingId: 'drawing-1',
         })).toBeUndefined();
         expect(sheetDrawingService.getDrawingOrder(testBed.unitId, testBed.subUnitId)).toEqual([]);
-
-        testBed.univer.dispose();
     });
 
     it('keeps the model unchanged when there is no focused drawing', async () => {
-        const testBed = createSheetsDrawingUiTestBed();
+        testBed = createSheetsDrawingUiTestBed();
         const sheetDrawingService = testBed.get(ISheetDrawingService);
         testBed.commandService.registerCommand(DeleteDrawingsCommand);
 
-        await testBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+        expect(await testBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId: testBed.unitId,
             drawings: [createSheetDrawing('drawing-2')],
-        });
+        })).toBe(true);
 
         expect(await testBed.commandService.executeCommand(DeleteDrawingsCommand.id)).toBe(false);
         expect(sheetDrawingService.getDrawingByParam({
@@ -100,7 +87,5 @@ describe('DeleteDrawingsCommand', () => {
         })).toMatchObject({
             drawingId: 'drawing-2',
         });
-
-        testBed.univer.dispose();
     });
 });

@@ -39,7 +39,7 @@ const locale: typeof enUS = {
             add: '新增連結',
         },
         permission: {
-            hyperLinkErr: '你沒有權限插入連結。',
+            editErr: '該範圍已被保護，目前無編輯權限。如需編輯，請聯絡創建者。 ',
         },
         message: {
             noSheet: '該子表已被刪除',

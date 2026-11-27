@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { DatabaseCriterionEvaluator } from '../../../basics/database';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { checkCriteria, checkDatabase, checkField, isCriteriaMatch } from '../../../basics/database';
 import { ErrorType } from '../../../basics/error-type';
@@ -27,6 +28,10 @@ export class Daverage extends BaseFunction {
     override maxParams = 3;
 
     override calculate(database: BaseValueObject, field: BaseValueObject, criteria: BaseValueObject) {
+        return this.calculateWithCriterion(database, field, criteria);
+    }
+
+    calculateWithCriterion(database: BaseValueObject, field: BaseValueObject, criteria: BaseValueObject, evaluateCriterion?: DatabaseCriterionEvaluator) {
         const { isError: databaseIsError, errorObject: databaseErrorObject, databaseValues } = checkDatabase(database);
 
         if (databaseIsError) {
@@ -55,7 +60,7 @@ export class Daverage extends BaseFunction {
                 continue;
             }
 
-            if (isCriteriaMatch(criteriaValues, databaseValues, r, criteria.getDateSystem())) {
+            if (isCriteriaMatch(criteriaValues, databaseValues, r, criteria.getDateSystem(), evaluateCriterion)) {
                 sum += value;
                 count++;
             }

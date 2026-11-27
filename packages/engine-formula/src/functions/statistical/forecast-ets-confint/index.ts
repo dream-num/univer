@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { NotImplementedFunction } from '../../not-implemented-function';
+import { EtsFunction } from '../forecast-ets/base';
 
-export class ForecastEtsConfint extends NotImplementedFunction {
+export class ForecastEtsConfint extends EtsFunction {
     override minParams = 3;
 
     override maxParams = 7;
 
-    // TODO: Implement ETS confidence intervals with Excel-compatible defaults.
+    protected override readonly mode = 'confidence';
 }

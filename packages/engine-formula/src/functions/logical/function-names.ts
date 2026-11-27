@@ -31,6 +31,7 @@ export enum FUNCTION_NAMES_LOGICAL {
     NOT = 'NOT',
     OR = 'OR',
     PERCENTOF = 'PERCENTOF',
+    PIVOTBY = 'PIVOTBY',
     REDUCE = 'REDUCE',
     SCAN = 'SCAN',
     SWITCH = 'SWITCH',

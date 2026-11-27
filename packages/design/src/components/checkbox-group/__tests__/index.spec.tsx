@@ -16,7 +16,7 @@
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { useState } from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Checkbox } from '../../checkbox/Checkbox';
 import { CheckboxGroup } from '../CheckboxGroup';
 
@@ -64,5 +64,22 @@ describe('CheckboxGroup', () => {
         fireEvent.click(getByText('y'));
 
         expect(result).toEqual(['0', '1']);
+    });
+
+    it('supports falsy option values and preserves per-item disabled state', () => {
+        const onChange = vi.fn();
+        const { getByRole, getByLabelText } = render(
+            <CheckboxGroup aria-label="Options" value={[0]} onChange={onChange}>
+                <Checkbox value={0}>Zero</Checkbox>
+                <Checkbox value={1} disabled>One</Checkbox>
+            </CheckboxGroup>
+        );
+
+        expect(getByRole('group', { name: 'Options' })).toBeTruthy();
+        expect((getByLabelText('Zero') as HTMLInputElement).checked).toBe(true);
+        expect((getByLabelText('One') as HTMLInputElement).disabled).toBe(true);
+
+        fireEvent.click(getByLabelText('One'));
+        expect(onChange).not.toHaveBeenCalled();
     });
 });

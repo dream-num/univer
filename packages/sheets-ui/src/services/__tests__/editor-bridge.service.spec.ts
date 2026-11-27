@@ -86,6 +86,7 @@ function createService(options?: {
             },
         },
         sheetSkeletonService: {
+            getDisplaySkeleton: vi.fn(() => undefined),
             getSkeleton: vi.fn(() => null),
         },
         renderManagerService: {
@@ -123,6 +124,7 @@ function createService(options?: {
     }
 
     class TestSheetSkeletonService {
+        getDisplaySkeleton = mocks.sheetSkeletonService.getDisplaySkeleton;
         getSkeleton = mocks.sheetSkeletonService.getSkeleton;
     }
 
@@ -461,7 +463,7 @@ describe('EditorBridgeService merged-cell layout with real providers', () => {
     let univer: Univer;
 
     beforeEach(() => {
-        // Happy DOM has no canvas backend; workbook, editor, and skeleton services remain real.
+        // jsdom has no canvas backend; workbook, editor, and skeleton services remain real.
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
             return { canvas: this, setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D;
         });

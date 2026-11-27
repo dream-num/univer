@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         message: {
             refError: '잘못된 범위입니다',
         },
+        permission: {
+            editErr: '해당 범위는 보호되어 있어 편집 권한이 없습니다. 편집하려면 작성자에게 문의하세요.',
+        },
     },
 };
 

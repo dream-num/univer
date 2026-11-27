@@ -27,6 +27,8 @@ export class Harmean extends BaseFunction {
 
     override maxParams = 255;
 
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
+
     override calculate(...variants: BaseValueObject[]): BaseValueObject {
         let sum = 0;
         let len = 0;

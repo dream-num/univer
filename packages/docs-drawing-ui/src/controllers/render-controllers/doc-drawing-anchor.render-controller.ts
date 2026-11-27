@@ -26,16 +26,13 @@ import {
     TEXT_RANGE_LAYER_INDEX,
 } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { Path } from '@univerjs/engine-render';
+import { CanvasIconShape } from '@univerjs/engine-render';
 import { findDrawingTextAnchor } from '../../utils/drawing-text-anchor';
-
-// A slender, rounded canvas outline. Inverse scene scale keeps the icon and stroke screen-sized.
-const ANCHOR_PATH = 'M 8 4 C 9.104 4 10 3.104 10 2 C 10 0.896 9.104 0 8 0 C 6.896 0 6 0.896 6 2 C 6 3.104 6.896 4 8 4 Z M 8 4 L 8 16 M 5 7.2 L 11 7.2 M 1 9.5 L 1 10.5 C 1 13.5 4.25 16 8 16 C 11.75 16 15 13.5 15 10.5 L 15 9.5 M 1 9.5 L 3.25 11 M 15 9.5 L 12.75 11';
 
 export class DocDrawingAnchorRenderController extends Disposable implements IRenderModule {
     private _stroke = '';
     private _focused: IDrawingParam[] = [];
-    private readonly _markers = new Map<string, Path>();
+    private readonly _markers = new Map<string, CanvasIconShape>();
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -99,14 +96,10 @@ export class DocDrawingAnchorRenderController extends Disposable implements IRen
                 let marker = this._markers.get(drawingId);
                 const stroke = this._stroke;
                 if (!marker) {
-                    marker = new Path(`__DocDrawingAnchor__${drawingId}`, {
-                        data: ANCHOR_PATH,
-                        width: 14,
+                    marker = new CanvasIconShape(`__DocDrawingAnchor__${drawingId}`, 'document-anchor-icon', {
+                        width: 16,
                         height: 16,
-                        stroke,
-                        strokeWidth: 1.25,
-                        strokeLineCap: 'round',
-                        strokeLineJoin: 'round',
+                        fill: stroke,
                         evented: false,
                         debounceParentDirty: false,
                     });
@@ -116,8 +109,8 @@ export class DocDrawingAnchorRenderController extends Disposable implements IRen
                 if (marker.left !== left || marker.top !== top || marker.scaleX !== 1 / scale.scaleX || marker.scaleY !== 1 / scale.scaleY) {
                     marker.transformByState({ left, top, scaleX: 1 / scale.scaleX, scaleY: 1 / scale.scaleY });
                 }
-                if (marker.stroke !== stroke) {
-                    marker.setProps({ stroke });
+                if (marker.fill !== stroke) {
+                    marker.setProps({ fill: stroke });
                 }
                 active.add(drawingId);
             }

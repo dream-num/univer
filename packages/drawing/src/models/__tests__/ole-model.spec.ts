@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// @vitest-environment node
+
 import { Buffer } from 'node:buffer';
 import { createHash } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';

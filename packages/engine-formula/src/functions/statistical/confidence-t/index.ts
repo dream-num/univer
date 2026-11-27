@@ -82,9 +82,7 @@ export class ConfidenceT extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
 
-            const result = Math.abs(studentTINV(alphaValue / 2, sizeValue - 1) * standardDevValue / Math.sqrt(sizeValue));
-
-            return NumberValueObject.create(result);
+            return this._margin(alphaValue, standardDevValue, sizeValue);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -92,5 +90,9 @@ export class ConfidenceT extends BaseFunction {
         }
 
         return resultArray;
+    }
+
+    protected _margin(alpha: number, standardDev: number, size: number): BaseValueObject {
+        return NumberValueObject.create(Math.abs(studentTINV(alpha / 2, size - 1) * standardDev / Math.sqrt(size)));
     }
 }

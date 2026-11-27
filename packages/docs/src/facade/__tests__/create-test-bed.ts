@@ -169,12 +169,14 @@ export interface ITestBed {
     univerAPI: FUniver;
 }
 
-export function createTestBed(documentConfig?: IDocumentData): ITestBed {
+export function createTestBed(documentConfig?: IDocumentData, { render = true } = {}): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
     injector.get(ILogService).setLogLevel(LogLevel.SILENT);
-    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    if (render) {
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    }
 
     univer.registerPlugin(UniverDocsPlugin);
     const documentConfigWithIds = cloneDocumentData(documentConfig ?? getTestDocumentDataDemo());
@@ -184,7 +186,8 @@ export function createTestBed(documentConfig?: IDocumentData): ITestBed {
     );
 
     injector.get(IUniverInstanceService).focusUnit(doc.getUnitId());
-    injector.get(IRenderManagerService).addRender(doc.getUnitId(), {
+    const renderManager = render ? injector.get(IRenderManagerService) : undefined;
+    renderManager?.addRender(doc.getUnitId(), {
         unitId: doc.getUnitId(),
         type: UniverInstanceType.UNIVER_DOC,
         engine: new DisposableCollection() as never,

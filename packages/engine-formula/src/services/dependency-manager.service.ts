@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IRange, IRTreeItem, IUnitRange, Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable, ObjectMatrix, RTree } from '@univerjs/core';
+import type { IRTreeItem, IUnitRange, Nullable } from '@univerjs/core';
 import type { AstRootNode } from '../engine/ast-node';
 import type { FormulaDependencyTree, IFormulaDependencyTree } from '../engine/dependency/dependency-tree';
+import { createIdentifier, Disposable, ObjectMatrix, RTree } from '@univerjs/core';
 
 export interface IDependencyManagerService {
     dispose(): void;
@@ -45,9 +45,11 @@ export interface IDependencyManagerService {
     addFormulaDependencyByDefinedName(tree: IFormulaDependencyTree, node: Nullable<AstRootNode>): void;
 
     addDependencyRTreeCache(tree: IFormulaDependencyTree): void;
+    refreshDependencyRTreeCaches(trees: readonly IFormulaDependencyTree[]): void;
     hasDependencyRTreeCache(treeId: number): boolean;
     searchDependency(search: IUnitRange[], exceptTreeIds?: Set<number>): Set<number>;
 
+    readonly calculationRegionReads?: Map<number, boolean>;
     getLastTreeId(): number;
 
     getTreeById(treeId: number): Nullable<IFormulaDependencyTree>;
@@ -164,23 +166,23 @@ export class DependencyManagerBaseService extends Disposable implements IDepende
         return this._formulaData.get(unitId)?.get(sheetId)?.getValue(row, column);
     }
 
-    addDependencyRTreeCache(tree: IFormulaDependencyTree) {
-        const searchRanges: IRTreeItem[] = [];
-        for (let i = 0; i < tree.rangeList.length; i++) {
-            const unitRangeWithNum = tree.rangeList[i];
-            const { unitId, sheetId, range } = unitRangeWithNum;
-
-            searchRanges.push({
-                unitId,
-                sheetId,
-                range,
-                id: tree.treeId,
-            });
+    refreshDependencyRTreeCaches(trees: readonly IFormulaDependencyTree[]): void {
+        for (const tree of trees) {
+            if (!tree.isCache) {
+                this.addDependencyRTreeCache(tree);
+            }
         }
+    }
 
+    addDependencyRTreeCache(tree: IFormulaDependencyTree) {
+        const searchRanges = tree.rangeList.map(({ unitId, sheetId, range }): IRTreeItem => ({
+            unitId,
+            sheetId,
+            range,
+            id: tree.treeId,
+        }));
         this._dependencyRTreeCache.bulkInsert(searchRanges);
-
-        this._addAllTreeMap(tree);
+        this._addAllTreeMap(tree, searchRanges);
     }
 
     /**
@@ -198,7 +200,7 @@ export class DependencyManagerBaseService extends Disposable implements IDepende
         return id;
     }
 
-    protected _addAllTreeMap(tree: IFormulaDependencyTree) {
+    protected _addAllTreeMap(tree: IFormulaDependencyTree, searchRanges: IRTreeItem[]) {
         throw new Error('Method not implemented.');
     }
 
@@ -244,7 +246,8 @@ export class DependencyManagerBaseService extends Disposable implements IDepende
  * thereby completing the calculation of the entire dependency tree.
  */
 export class DependencyManagerService extends DependencyManagerBaseService implements IDependencyManagerService {
-    protected _allTreeMap: Map<number, Map<string, Map<string, IRange>>> = new Map();
+    readonly calculationRegionReads = new Map<number, boolean>();
+    protected _allTreeMap: Map<number, IRTreeItem[]> = new Map();
 
     protected override _dependencyRTreeCache: RTree = new RTree(true); // true: open kd-tree search state
 
@@ -253,10 +256,23 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
     }
 
     override addDependencyRTreeCache(tree: IFormulaDependencyTree) {
-        // Replacement must use the old bounds; a new tree has no entries to remove.
-        this._removeDependencyRTreeCache(tree.treeId);
-        this._removeAllTreeMap(tree.treeId);
+        if (this.hasDependencyRTreeCache(tree.treeId)) {
+            this._removeDependencyRTreeCache(tree.treeId);
+        }
         super.addDependencyRTreeCache(tree);
+    }
+
+    override refreshDependencyRTreeCaches(trees: readonly IFormulaDependencyTree[]): void {
+        const replacedIds: number[] = [];
+        for (const tree of trees) {
+            if (!tree.isCache && this.hasDependencyRTreeCache(tree.treeId)) {
+                replacedIds.push(tree.treeId);
+            }
+        }
+
+        // Remove the old entries together so overlapping ranges share a single index scan.
+        this._removeDependencyRTreeCaches(replacedIds);
+        super.refreshDependencyRTreeCaches(trees);
     }
 
     override reset() {
@@ -264,6 +280,7 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
         this._featureFormulaData.clear();
         this._formulaData.clear();
         this._dependencyRTreeCache.clear();
+        this.calculationRegionReads.clear();
         this._allTreeMap.clear();
         this._restDependencyTreeId();
 
@@ -518,14 +535,13 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
     private _removeDependencyRTreeCaches(treeIds: number[]) {
         const searchRanges: IRTreeItem[] = [];
         for (const treeId of treeIds) {
-            const treeRangeMap = this._allTreeMap.get(treeId);
-            if (!treeRangeMap) {
+            this.calculationRegionReads.delete(treeId);
+            const bounds = this._allTreeMap.get(treeId);
+            if (!bounds) {
                 continue;
             }
-            for (const [unitId, sheetMap] of treeRangeMap) {
-                for (const [sheetId, range] of sheetMap) {
-                    searchRanges.push({ unitId, sheetId, range, id: treeId });
-                }
+            for (const entry of bounds) {
+                searchRanges.push(entry);
             }
             this._allTreeMap.delete(treeId);
         }
@@ -562,33 +578,30 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
         this._allTreeMap.delete(treeId);
     }
 
-    protected override _addAllTreeMap(tree: IFormulaDependencyTree) {
-        const rangeList = tree.rangeList;
-        let oldTreeMap = this._allTreeMap.get(tree.treeId);
-        for (let i = 0; i < rangeList.length; i++) {
-            const unitRangeWithNum = rangeList[i];
-            let { unitId, sheetId, range } = unitRangeWithNum;
-            if (!oldTreeMap) {
-                oldTreeMap = new Map<string, Map<string, IRange>>();
-                this._allTreeMap.set(tree.treeId, oldTreeMap);
-            }
-
-            if (!oldTreeMap.has(unitId)) {
-                oldTreeMap.set(unitId, new Map<string, IRange>());
-            }
-
-            const oldRange = oldTreeMap?.get(unitId)?.get(sheetId);
-            if (oldRange) {
-                range = {
-                    startRow: Math.min(range.startRow, oldRange.startRow),
-                    startColumn: Math.min(range.startColumn, oldRange.startColumn),
-                    endRow: Math.max(range.endRow, oldRange.endRow),
-                    endColumn: Math.max(range.endColumn, oldRange.endColumn),
-                };
-            }
-
-            oldTreeMap.get(unitId)?.set(sheetId, range);
+    protected override _addAllTreeMap(tree: IFormulaDependencyTree, searchRanges: IRTreeItem[]) {
+        if (searchRanges.length === 0) {
+            return;
         }
+
+        // Store one removal range per worksheet without retaining two Maps per formula.
+        const bounds = searchRanges.length === 1 ? searchRanges : [searchRanges[0]];
+        for (let index = 1; index < searchRanges.length; index++) {
+            const entry = searchRanges[index];
+            const existing = bounds.find(({ unitId, sheetId }) => unitId === entry.unitId && sheetId === entry.sheetId);
+            if (!existing) {
+                bounds.push(entry);
+                continue;
+            }
+            const { range } = entry;
+            const previous = existing.range;
+            existing.range = {
+                startRow: Math.min(range.startRow, previous.startRow),
+                startColumn: Math.min(range.startColumn, previous.startColumn),
+                endRow: Math.max(range.endRow, previous.endRow),
+                endColumn: Math.max(range.endColumn, previous.endColumn),
+            };
+        }
+        this._allTreeMap.set(tree.treeId, bounds);
     }
 
     override dispose(): void {

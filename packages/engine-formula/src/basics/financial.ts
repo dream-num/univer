@@ -20,6 +20,7 @@ import {
     dateAddMonths,
     getDaysInMonth,
     getTwoDateDaysByBasis,
+    isLeapYear,
     lastDayOfMonth,
 } from './date';
 import { ErrorType } from './error-type';
@@ -39,7 +40,7 @@ interface ICouponSchedule {
 
 const COUPON_DATE_PARTS_OPTIONS = { hours: 0, minutes: 0, seconds: 0, fractionalSecond: 0 };
 
-function getCouponDateParts(serial: number, dateSystem: DateSystem): ICouponDateParts {
+export function getCouponDateParts(serial: number, dateSystem: DateSystem): ICouponDateParts {
     const parts = excelSerialToDateTimeParts(serial, { dateSystem });
 
     if (parts) {
@@ -59,7 +60,7 @@ function getCouponDateParts(serial: number, dateSystem: DateSystem): ICouponDate
     return { year, month, day, monthEnd: day === getDaysInMonth(year, month - 1) };
 }
 
-function getCouponDateSerial(parts: ICouponDateParts, dateSystem: DateSystem): number {
+export function getCouponDateSerial(parts: ICouponDateParts, dateSystem: DateSystem): number {
     if (dateSystem === DateSystem.Date1900 && parts.year === 1900 && parts.month === 1 && parts.day === 0) {
         return 0;
     }
@@ -94,8 +95,33 @@ function compareCouponDate(left: ICouponDateParts, right: ICouponDateParts): num
     return left.day - right.day;
 }
 
+export function getMaturityBondActualYearDays(issue: number, settlement: number, dateSystem: DateSystem): number {
+    const start = getCouponDateParts(issue, dateSystem);
+    const end = getCouponDateParts(settlement, dateSystem);
+    const yearCount = end.year - start.year + 1;
+    if (yearCount === 1) {
+        return isLeapYear(start.year) ? 366 : 365;
+    }
+    if (yearCount === 2 && compareCouponDate(end, { ...start, year: end.year }) <= 0) {
+        const leapYear = isLeapYear(start.year) ? start.year : end.year;
+        if (!isLeapYear(leapYear)) {
+            return 365;
+        }
+        const leapDay = getCouponDateSerial({ year: leapYear, month: 2, day: 29, monthEnd: true }, dateSystem);
+        return issue <= leapDay && leapDay <= settlement ? 366 : 365;
+    }
+
+    let leapDays = 0;
+    for (let year = start.year; year <= end.year; year++) {
+        if (isLeapYear(year)) {
+            leapDays++;
+        }
+    }
+    return 365 + leapDays / yearCount;
+}
+
 // Excel keeps the maturity day/month-end rule for every coupon period; it must not be inferred from an intermediate date.
-function addCouponMonths(parts: ICouponDateParts, months: number): ICouponDateParts {
+export function addCouponMonths(parts: ICouponDateParts, months: number): ICouponDateParts {
     const monthIndex = parts.year * 12 + parts.month - 1 + months;
     const year = Math.floor(monthIndex / 12);
     const month = monthIndex - year * 12 + 1;
@@ -138,6 +164,61 @@ function getCouponSchedule(
     }
 
     return { previousSerial, nextSerial, count };
+}
+
+export function calculateAccruedInterest(
+    issue: number,
+    first: number,
+    settlement: number,
+    rate: number,
+    par: number,
+    frequency: number,
+    basis: number,
+    fromIssue: boolean,
+    dateSystem: DateSystem
+): number | ErrorType {
+    const months = 12 / frequency;
+    const anchor = getCouponDateParts(first, dateSystem);
+    const issued = getCouponDateParts(issue, dateSystem);
+    const couponAt = (index: number) => getCouponDateSerial(addCouponMonths(anchor, index * months), dateSystem);
+    let index = Math.trunc(((issued.year - anchor.year) * 12 + issued.month - anchor.month) / months);
+    if (couponAt(index) > issue) index--;
+    let previous = couponAt(index);
+    if (dateSystem === DateSystem.Date1900 && previous <= 0) return ErrorType.NUM;
+
+    const periodLength = (start: number, end: number) => basis === 1 ? end - start : (basis === 3 ? 365 : 360) / frequency;
+    const firstLength = periodLength(couponAt(-1), first);
+    if (!fromIssue && first < settlement) {
+        return rate * par / frequency * accruedDays(issue, settlement, basis, dateSystem) / firstLength;
+    }
+
+    let accrued = 0;
+    while (previous < settlement) {
+        const next = couponAt(++index);
+        if (next <= previous) return ErrorType.NUM;
+        if (issue <= previous && next <= settlement) {
+            accrued += 1;
+        } else {
+            const length = previous >= first ? firstLength : periodLength(previous, next);
+            accrued += accruedDays(Math.max(issue, previous), Math.min(settlement, next), basis, dateSystem) / length;
+        }
+        previous = next;
+    }
+    return rate * par / frequency * accrued;
+}
+
+export function accruedDays(start: number, end: number, basis: number, dateSystem: DateSystem): number {
+    if (basis !== 0) return getTwoDateDaysByBasis(start, end, basis, dateSystem).days;
+
+    return accruedDaysBetweenParts(getCouponDateParts(start, dateSystem), getCouponDateParts(end, dateSystem));
+}
+
+export function accruedDaysBetweenParts(from: ICouponDateParts, to: ICouponDateParts): number {
+    const lastFebruaryFrom = from.month === 2 && from.monthEnd;
+    const lastFebruaryTo = to.month === 2 && to.monthEnd;
+    const firstDay = lastFebruaryFrom ? 30 : Math.min(from.day, 30);
+    const lastDay = (lastFebruaryFrom && lastFebruaryTo) || (to.day === 31 && firstDay === 30) ? 30 : to.day;
+    return (to.year - from.year) * 360 + (to.month - from.month) * 30 + lastDay - firstDay;
 }
 
 export function calculateCoupdaybs(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number, basis: number, dateSystem = DateSystem.Date1900): number {
@@ -212,6 +293,23 @@ export function calculateDuration(settlementSerialNumber: number, maturitySerial
     den += num;
 
     return duration / den / frequency;
+}
+
+export function calculateCompoundingTerm(rate: number, periods: number): number {
+    if (!Number.isInteger(periods) || Math.abs(periods) > 0x7FFF_FFFF) {
+        return (1 + rate) ** periods;
+    }
+
+    // Integer multiplication preserves the compounding factor in loan balances.
+    let term = 1;
+    let factor = 1 + rate;
+    for (let exponent = Math.abs(periods); exponent > 0; exponent = Math.floor(exponent / 2)) {
+        if (exponent % 2 === 1) {
+            term *= factor;
+        }
+        factor *= factor;
+    }
+    return periods < 0 ? 1 / term : term;
 }
 
 export function calculatePMT(rate: number, nper: number, pv: number, fv: number, type: number): number {

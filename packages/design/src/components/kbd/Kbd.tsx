@@ -26,25 +26,51 @@ export interface IKBDProps {
 export function KBD(props: IKBDProps) {
     const { keyboard, className } = props;
 
-    const keys = keyboard.split('+');
+    const trimmed = keyboard.trim();
+    const rawKeys = trimmed === '+'
+        ? ['+']
+        : keyboard
+            .split('+')
+            .map((key) => key.trim())
+            .filter(Boolean);
+
+    const keyCounts = new Map<string, number>();
+    const keys = rawKeys.map((text) => {
+        const count = (keyCounts.get(text) ?? 0) + 1;
+        keyCounts.set(text, count);
+        return {
+            id: `${text}-${count}`,
+            text,
+        };
+    });
 
     return (
         <span
+            data-u-comp="kbd"
             className={clsx(`
-              univer-inline-block univer-h-6 univer-select-none univer-whitespace-nowrap univer-rounded-md
-              univer-bg-gray-50 univer-px-2 univer-font-mono univer-text-xs/6 univer-font-medium univer-text-gray-700
-              dark:!univer-bg-gray-700 dark:!univer-text-gray-0
-            `, borderClassName, className)}
+              univer-inline-flex univer-select-none univer-items-center univer-gap-1 univer-whitespace-nowrap
+            `, className)}
         >
-            {keys.map((text, index) => (
-                <Fragment key={index}>
+            {keys.map(({ id, text }, index) => (
+                <Fragment key={id}>
                     <kbd
-                        className="univer-inline-block univer-h-full"
+                        className={clsx(`
+                          univer-box-border univer-inline-flex univer-h-5 univer-min-w-5 univer-items-center
+                          univer-justify-center univer-rounded univer-bg-gray-50 univer-px-1.5 univer-text-xs
+                          univer-font-medium univer-leading-none univer-text-gray-700 univer-shadow-sm
+                          dark:!univer-bg-gray-700 dark:!univer-text-gray-0
+                        `, borderClassName)}
                     >
                         {text}
                     </kbd>
                     {index < keys.length - 1 && (
-                        <span className="univer-inline-block univer-h-full univer-px-1">
+                        <span
+                            aria-hidden="true"
+                            className="
+                              univer-text-xs univer-font-medium univer-leading-none univer-text-gray-500
+                              dark:!univer-text-gray-300
+                            "
+                        >
                             +
                         </span>
                     )}

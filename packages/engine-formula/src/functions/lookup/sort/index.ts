@@ -15,20 +15,30 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
-import { getCompare } from '../../../engine/utils/compare';
+import { createSortCompare } from '../../../engine/utils/sort-compare';
+import { compareSortValues, getSortIndices } from '../../../engine/utils/sort-order';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+
+type SortArguments = (Nullable<BaseValueObject> | number)[] | ErrorValueObject;
 
 export class Sort extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 4;
 
-    override calculate(array: BaseValueObject, sortIndex?: BaseValueObject, sortOrder?: BaseValueObject, byCol?: BaseValueObject) {
+    override needsReferenceObject = true;
+
+    override calculate(input: FunctionVariantType, indexInput?: FunctionVariantType, orderInput?: FunctionVariantType, byColInput?: FunctionVariantType) {
+        const array = this._resolveReference(input);
+        const sortIndex = indexInput && this._resolveReference(indexInput);
+        const sortOrder = orderInput && this._resolveReference(orderInput);
+        const byCol = byColInput && this._resolveReference(byColInput);
         let _sortIndex = sortIndex ?? NumberValueObject.create(1);
         let _sortOrder = sortOrder ?? NumberValueObject.create(1);
         const _byCol = byCol ?? BooleanValueObject.create(false);
@@ -41,27 +51,27 @@ export class Sort extends BaseFunction {
             _sortOrder = NumberValueObject.create(1);
         }
 
+        const error = [array, _sortIndex, _sortOrder].find((value) => value.isError());
+        if (error) {
+            return _byCol.isArray() ? (_byCol as ArrayValueObject).mapValue(() => error) : error;
+        }
+        const indices = this._sortArguments(_sortIndex);
+        const orders = this._sortArguments(_sortOrder);
         if (_byCol.isArray()) {
-            const byColRowCount = (_byCol as ArrayValueObject).getRowCount();
-            const byColColumnCount = (_byCol as ArrayValueObject).getColumnCount();
-
-            if (byColRowCount === 1 && byColColumnCount === 1) {
-                const byColObject = (_byCol as ArrayValueObject).get(0, 0) as BaseValueObject;
-
-                return this._handleSingleObject(array, _sortIndex, _sortOrder, byColObject);
-            }
-
+            let currentArray = array;
             return _byCol.map((byColObject) => {
-                const result = this._handleSingleObject(array, _sortIndex, _sortOrder, byColObject);
+                const result = this._handleSingleObject(currentArray, indices, orders, byColObject);
+                // Excel moves the input to its result and retains converted indices between lifts.
+                if (!result.isError()) currentArray = NumberValueObject.create(0);
 
                 return result.isArray() ? (result as ArrayValueObject).get(0, 0) as BaseValueObject : result;
             });
         }
 
-        return this._handleSingleObject(array, _sortIndex, _sortOrder, _byCol);
+        return this._handleSingleObject(array, indices, orders, _byCol);
     }
 
-    private _handleSingleObject(array: BaseValueObject, sortIndex: BaseValueObject, sortOrder: BaseValueObject, byCol: BaseValueObject) {
+    private _handleSingleObject(array: BaseValueObject, sortIndex: SortArguments, sortOrder: SortArguments, byCol: BaseValueObject) {
         if (array.isError()) {
             return array;
         }
@@ -69,227 +79,106 @@ export class Sort extends BaseFunction {
         const arrayRowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
         const arrayColumnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
 
-        const _sortIndex = this._checkArrayError(sortIndex);
-
-        if (_sortIndex.isError()) {
-            return _sortIndex;
-        }
-
-        const sortIndexValue = Math.floor(+_sortIndex.getValue());
-
-        if (sortIndexValue < 1) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        const _sortOrder = this._checkArrayError(sortOrder);
-
-        if (_sortOrder.isError()) {
-            return _sortOrder;
-        }
-
-        const sortOrderValue = Math.floor(+_sortOrder.getValue());
-
-        if (sortOrderValue !== -1 && sortOrderValue !== 1) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
         let _byCol = byCol;
 
         if (_byCol.isString()) {
-            _byCol = _byCol.convertToNumberObjectValue();
+            const text = String(_byCol.getValue()).toUpperCase();
+            if (text !== 'TRUE' && text !== 'FALSE') return ErrorValueObject.create(ErrorType.VALUE);
+            _byCol = BooleanValueObject.create(text === 'TRUE');
         }
 
         if (_byCol.isError()) {
             return _byCol;
         }
 
+        const byColValue = Boolean(+_byCol.getValue());
+        const bound = byColValue ? arrayRowCount : arrayColumnCount;
+        const indices = this._coerceSortArguments(sortIndex, bound, 1, bound, true);
+        if (indices instanceof ErrorValueObject) {
+            return indices;
+        }
+        const orders = this._coerceSortArguments(sortOrder, indices.length, -1, 1, false);
+        if (orders instanceof ErrorValueObject) {
+            return orders;
+        }
+        if (orders.length !== 1 && orders.length !== indices.length) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
         if (!array.isArray() || (arrayRowCount === 1 && arrayColumnCount === 1)) {
             return array;
         }
 
-        const byColValue = +_byCol.getValue();
-
-        return this._getResult(array, sortIndexValue, sortOrderValue, byColValue, arrayRowCount, arrayColumnCount);
-    }
-
-    private _checkArrayError(variant: BaseValueObject): BaseValueObject {
-        let _variant = variant;
-
-        if (_variant.isArray()) {
-            const rowCount = (_variant as ArrayValueObject).getRowCount();
-            const columnCount = (_variant as ArrayValueObject).getColumnCount();
-
-            if (rowCount > 1 || columnCount > 1) {
-                return ErrorValueObject.create(ErrorType.VALUE);
+        const oriented = byColValue ? (array as ArrayValueObject).transpose() : array;
+        const compare = createSortCompare();
+        const comparators = indices.map((index, orderIndex) => {
+            const order = orders.length === 1 ? orders[0] : orders[orderIndex];
+            return (left: Nullable<BaseValueObject>[], right: Nullable<BaseValueObject>[]) => compareSortValues(left[index - 1], right[index - 1], order, compare);
+        });
+        const input = oriented.getArrayValue();
+        const compareRows = (left: Nullable<BaseValueObject>[], right: Nullable<BaseValueObject>[]) => {
+            for (const comparator of comparators) {
+                const result = comparator(left, right);
+                if (result) {
+                    return result;
+                }
             }
-
-            _variant = (_variant as ArrayValueObject).get(0, 0) as BaseValueObject;
-        }
-
-        if (_variant.isString()) {
-            _variant = _variant.convertToNumberObjectValue();
-        }
-
-        return _variant;
-    }
-
-    private _getResult(array: BaseValueObject, sortIndexValue: number, sortOrderValue: 1 | -1, byColValue: number, arrayRowCount: number, arrayColumnCount: number): BaseValueObject {
-        if (!byColValue) {
-            if (sortIndexValue > arrayColumnCount) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            const arrayValue = array.getArrayValue().slice();
-            arrayValue.sort(this._sort(sortIndexValue - 1, sortOrderValue));
-
-            return ArrayValueObject.create({
-                calculateValueList: arrayValue,
-                rowCount: arrayValue.length,
-                columnCount: arrayValue[0].length || 0,
-                unitId: this.unitId as string,
-                sheetId: this.subUnitId as string,
-                row: this.row,
-                column: this.column,
-            });
-        } else {
-            if (sortIndexValue > arrayRowCount) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            const arrayValue = (array as ArrayValueObject).transpose().getArrayValue();
-            arrayValue.sort(this._sort(sortIndexValue - 1, sortOrderValue));
-
-            const newArray = ArrayValueObject.create({
-                calculateValueList: arrayValue,
-                rowCount: arrayValue.length,
-                columnCount: arrayValue[0].length || 0,
-                unitId: this.unitId as string,
-                sheetId: this.subUnitId as string,
-                row: this.row,
-                column: this.column,
-            });
-
-            return newArray.transpose();
-        }
-    }
-
-    private _sort(sortIndex: number, sortOrder: 1 | -1 = 1) {
-        const compare = getCompare();
-
-        if (sortOrder === 1) {
-            return this._sortAsc(sortIndex, compare);
-        } else {
-            return this._sortDesc(sortIndex, compare);
-        }
-    }
-
-    private _sortAsc(sortIndex: number, compare: Function) {
-        return (a: Nullable<BaseValueObject>[], b: Nullable<BaseValueObject>[]) => {
-            const columnA = a[sortIndex];
-            const columnB = b[sortIndex];
-
-            if (columnA == null || columnA.isNull()) {
-                return 1;
-            }
-
-            if (columnB == null || columnB.isNull()) {
-                return -1;
-            }
-
-            if (columnA.isError() && columnB.isError()) {
-                return 0;
-            }
-
-            if (columnA.isError()) {
-                return 1;
-            }
-
-            if (columnB.isError()) {
-                return -1;
-            }
-
-            const columnAValue = (columnA as BaseValueObject).getValue();
-            const columnBValue = (columnB as BaseValueObject).getValue();
-
-            if (columnA.isBoolean() && columnAValue === true) {
-                return 1;
-            }
-
-            if (columnB.isBoolean() && columnBValue === true) {
-                return -1;
-            }
-
-            if (columnA.isBoolean() && columnAValue === false) {
-                return 1;
-            }
-
-            if (columnB.isBoolean() && columnBValue === false) {
-                return -1;
-            }
-
-            if (columnA.isNumber() && columnB.isNumber()) {
-                return (+columnAValue) - (+columnBValue);
-            }
-
-            return compare(
-                columnAValue as string,
-                columnBValue as string
-            );
+            return 0;
         };
+        const simple = indices.every((index) => input[0][index - 1]?.isNumber()
+            ? input.every((row) => row[index - 1]?.isNumber())
+            : input.every((row) => row[index - 1]?.isString() && !/[^a-z0-9]/i.test(String(row[index - 1]!.getValue()))));
+        const values = simple
+            ? input.slice().sort(compareRows)
+            : getSortIndices(input.length, (left, right) => compareRows(input[left], input[right])).map((index) => input[index]);
+        const result = ArrayValueObject.create({
+            calculateValueList: values,
+            rowCount: values.length,
+            columnCount: values[0].length,
+            unitId: this.unitId as string,
+            sheetId: this.subUnitId as string,
+            row: this.row,
+            column: this.column,
+        });
+        return byColValue ? result.transpose() : result;
     }
 
-    private _sortDesc(sortIndex: number, compare: Function) {
-        return (a: Nullable<BaseValueObject>[], b: Nullable<BaseValueObject>[]) => {
-            const columnA = a[sortIndex];
-            const columnB = b[sortIndex];
+    private _resolveReference(input: FunctionVariantType): BaseValueObject {
+        if (!input.isReferenceObject()) {
+            return input as BaseValueObject;
+        }
+        const array = (input as BaseReferenceObject).toArrayValueObject();
+        if (array.getRowCount() !== 1 || array.getColumnCount() !== 1) {
+            return array;
+        }
+        const cell = array.getFirstCell();
+        return cell.isNull() ? NumberValueObject.create(0) : cell;
+    }
 
-            if (columnA == null || columnA.isNull()) {
-                return 1;
+    private _sortArguments(input: BaseValueObject): SortArguments {
+        const array = input.isArray() ? input as ArrayValueObject : undefined;
+        if (array && array.getRowCount() > 1 && array.getColumnCount() > 1) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        return array ? array.getArrayValue().flat() : [input];
+    }
+
+    private _coerceSortArguments(input: SortArguments, maxCount: number, min: number, max: number, index: boolean): number[] | ErrorValueObject {
+        if (input instanceof ErrorValueObject) return input;
+        if (input.length > maxCount) return ErrorValueObject.create(ErrorType.VALUE);
+        const parameters: number[] = [];
+        for (let position = input.length - 1; position >= 0; position--) {
+            const value = input[position];
+            const resolved = typeof value === 'number' || value == null
+                ? value
+                : value.isString() ? value.convertToNumberObjectValue() : value;
+            const number = Math.floor(typeof resolved === 'number' ? resolved : +(resolved?.getValue() ?? 0));
+            if (!Number.isFinite(number) || number < min || number > max || (!index && number === 0)) {
+                return ErrorValueObject.create(ErrorType.VALUE);
             }
-
-            if (columnB == null || columnB.isNull()) {
-                return -1;
-            }
-
-            if (columnA.isError() && columnB.isError()) {
-                return 0;
-            }
-
-            if (columnA.isError()) {
-                return -1;
-            }
-
-            if (columnB.isError()) {
-                return 1;
-            }
-
-            const columnAValue = (columnA as BaseValueObject).getValue();
-            const columnBValue = (columnB as BaseValueObject).getValue();
-
-            if (columnA.isBoolean() && columnAValue === true) {
-                return -1;
-            }
-
-            if (columnB.isBoolean() && columnBValue === true) {
-                return 1;
-            }
-
-            if (columnA.isBoolean() && columnAValue === false) {
-                return -1;
-            }
-
-            if (columnB.isBoolean() && columnBValue === false) {
-                return 1;
-            }
-
-            if (columnA.isNumber() && columnB.isNumber()) {
-                return (+columnBValue) - (+columnAValue);
-            }
-
-            return compare(
-                columnBValue as string,
-                columnAValue as string
-            );
-        };
+            parameters[position] = number;
+            input[position] = number - (index ? 1 : 0);
+        }
+        return parameters;
     }
 }

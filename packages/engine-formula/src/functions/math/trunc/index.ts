@@ -70,12 +70,12 @@ export class Trunc extends BaseFunction {
 
             const factor = 10 ** Math.trunc(numDigitsValue);
             const epsilon = baseEpsilon(numberValue, factor);
-            const result = Math.trunc(multiply(numberValue, factor) + epsilon) / factor;
+            const result = Math.trunc(multiply(numberValue, factor) + Math.sign(numberValue) * epsilon) / factor;
 
             return NumberValueObject.create(result);
         });
 
-        if (maxRowLength === 1 && maxColumnLength === 1) {
+        if (!number.isArray() && !_numDigits.isArray()) {
             return (resultArray as ArrayValueObject).get(0, 0) as NumberValueObject;
         }
 

@@ -14,90 +14,117 @@
  * limitations under the License.
  */
 
-import { AddHyperLinkMutation, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import { COPY_TYPE, PREDEFINED_HOOK_NAME_PASTE } from '@univerjs/sheets-ui';
-import { describe, expect, it, vi } from 'vitest';
+import type { ISheetClipboardHook } from '@univerjs/sheets-ui';
+import { ICommandService, LocaleService, LocaleType, ObjectMatrix, Univer, UniverInstanceType } from '@univerjs/core';
+import { DefinedNamesService, IDefinedNamesService } from '@univerjs/engine-formula';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
+import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
+import {
+    COPY_TYPE,
+    IMarkSelectionService,
+    ISheetClipboardService,
+    MarkSelectionService,
+    PREDEFINED_HOOK_NAME_PASTE,
+    SheetClipboardService,
+} from '@univerjs/sheets-ui';
+import {
+    BrowserClipboardService,
+    DesktopMessageService,
+    IClipboardInterfaceService,
+    IMessageService,
+    INotificationService,
+    IPlatformService,
+    IUIPartsService,
+    UIPartsService,
+} from '@univerjs/ui';
+import { describe, expect, it } from 'vitest';
+import enUS from '../../locale/en-US';
+import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { SheetsHyperLinkCopyPasteController } from '../copy-paste.controller';
 
 describe('SheetsHyperLinkCopyPasteController', () => {
-    it('should generate remove/add mutations when pasting a copied hyperlink cell', () => {
-        let hook: any;
-        const addClipboardHook = vi.fn((h) => {
-            hook = h;
+    it('pastes hyperlinks from the same discrete rows as copied cell values and supports undo', () => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([IUIPartsService, { useClass: UIPartsService }]);
+        injector.add([SheetsSelectionsService]);
+        injector.add([HyperLinkModel]);
+        injector.add([SheetsHyperLinkCopyPasteController]);
+        injector.add([SheetsHyperLinkResolverService]);
+        injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+        injector.add([IMessageService, { useClass: DesktopMessageService }]);
+        injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService }]);
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([SheetSkeletonService]);
+        injector.add([IMarkSelectionService, { useClass: MarkSelectionService }]);
+        injector.add([INotificationService, { useValue: { show: () => ({ dispose: () => {} }) } }]);
+        injector.add([IPlatformService, { useValue: { isWindows: true, isMac: false, isLinux: false } }]);
+        injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
+        const clipboard = injector.get(ISheetClipboardService) as SheetClipboardService;
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+            id: 'source',
+            locale: LocaleType.EN_US,
+            sheetOrder: ['sheet'],
+            sheets: { sheet: { id: 'sheet', name: 'Sheet', cellData: {} } },
         });
-
-        const sheetClipboardService = {
-            addClipboardHook,
-        } as any;
-
-        const hyperLinkModel = {
-            getHyperLinkByLocation: vi.fn((unitId: string, subUnitId: string, row: number, col: number) => {
-                if (unitId === 'u1' && subUnitId === 's1' && row === 0 && col === 0) {
-                    return { id: 'old-id', payload: '#gid=s1&range=A1', row, column: col };
-                }
-
-                if (unitId === 'u2' && subUnitId === 's2' && row === 1 && col === 1) {
-                    return { id: 'current-id', payload: '#gid=s2&range=B2', row, column: col };
-                }
-
-                return null;
-            }),
-            getHyperLink: vi.fn((unitId: string, subUnitId: string, id: string) => {
-                if (unitId === 'u1' && subUnitId === 's1' && id === 'old-id') {
-                    return { id, payload: '#gid=s1&range=A1', row: 0, column: 0 };
-                }
-                return null;
-            }),
-        } as any;
-
-        const injector = {
-            invoke: vi.fn(() => ({ rows: [0], cols: [0] })),
-        } as any;
-
-        const resolverService = {} as any;
-
-        const controller = new SheetsHyperLinkCopyPasteController(sheetClipboardService, hyperLinkModel, injector, resolverService);
-        expect(addClipboardHook).toHaveBeenCalledTimes(1);
-
-        // Simulate copy stage
-        hook.onBeforeCopy('u1', 's1', { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 });
-
-        const res = hook.onPasteCells(
-            { range: { rows: [0], cols: [0] } },
-            { unitId: 'u2', subUnitId: 's2', range: { rows: [1], cols: [1] } },
-            null,
-            { copyType: COPY_TYPE.COPY, pasteType: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, copyRange: { rows: [0], cols: [0] } }
-        );
-
-        expect(res.redos.map((m: any) => m.id)).toEqual([RemoveHyperLinkMutation.id, AddHyperLinkMutation.id]);
-        expect(res.undos.map((m: any) => m.id)).toEqual([RemoveHyperLinkMutation.id, AddHyperLinkMutation.id]);
-
-        controller.dispose();
-    });
-
-    it('should ignore special paste types', () => {
-        let hook: any;
-        const sheetClipboardService = {
-            addClipboardHook: vi.fn((h) => {
-                hook = h;
-            }),
-        } as any;
-        const hyperLinkModel = { getHyperLinkByLocation: vi.fn(), getHyperLink: vi.fn() } as any;
-        const injector = { invoke: vi.fn(() => ({ rows: [0], cols: [0] })) } as any;
-        const resolverService = {} as any;
-
-        const controller = new SheetsHyperLinkCopyPasteController(sheetClipboardService, hyperLinkModel, injector, resolverService);
-        hook.onBeforeCopy('u1', 's1', { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 });
-
-        const res = hook.onPasteCells(
-            { range: { rows: [0], cols: [0] } },
-            { unitId: 'u2', subUnitId: 's2', range: { rows: [1], cols: [1] } },
-            null,
-            { copyType: COPY_TYPE.COPY, pasteType: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE, copyRange: { rows: [0], cols: [0] } }
-        );
-
-        expect(res).toEqual({ redos: [], undos: [] });
-
-        controller.dispose();
+        const locale = injector.get(LocaleService);
+        locale.load({ enUS });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+        const model = injector.get(HyperLinkModel);
+        const commands = injector.get(ICommandService);
+        commands.registerCommand(AddHyperLinkMutation);
+        commands.registerCommand(RemoveHyperLinkMutation);
+        try {
+            injector.get(SheetsHyperLinkCopyPasteController);
+            ['A', 'B', 'C'].forEach((display, row) => model.addHyperLink('source', 'sheet', {
+                id: display,
+                display,
+                row,
+                column: 0,
+                payload: `https://example.com/${display}`,
+            }));
+            model.addHyperLink('target', 'sheet', {
+                id: 'previous',
+                row: 6,
+                column: 0,
+                display: 'Previous',
+                payload: 'https://example.com/previous',
+            });
+            let hooks: ISheetClipboardHook[] = [];
+            const subscription = clipboard.clipboardHooks$.subscribe((value) => {
+                hooks = value;
+            });
+            const hook = hooks.find((value) => value.onPasteCells)!;
+            const copiedRange = { rows: [0, 2], cols: [0] };
+            hook.onBeforeCopy!('source', 'sheet', {
+                startRow: 0,
+                endRow: 2,
+                startColumn: 0,
+                endColumn: 0,
+            }, COPY_TYPE.COPY, copiedRange);
+            expect(hook.onPasteCells!(
+                { unitId: 'source', subUnitId: 'sheet', range: copiedRange },
+                { unitId: 'target', subUnitId: 'sheet', range: { rows: [5, 6], cols: [0] } },
+                new ObjectMatrix(),
+                { copyType: COPY_TYPE.COPY, pasteType: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE }
+            )).toEqual({ redos: [], undos: [] });
+            const mutations = hook.onPasteCells!(
+                { unitId: 'source', subUnitId: 'sheet', range: copiedRange },
+                { unitId: 'target', subUnitId: 'sheet', range: { rows: [5, 6], cols: [0] } },
+                new ObjectMatrix(),
+                { copyType: COPY_TYPE.COPY, pasteType: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE }
+            )!;
+            mutations.redos.forEach(({ id, params }) => commands.syncExecuteCommand(id, params));
+            expect([5, 6].map((row) => model.getHyperLinkByLocation('target', 'sheet', row, 0)?.payload))
+                .toEqual(['https://example.com/A', 'https://example.com/C']);
+            mutations.undos.forEach(({ id, params }) => commands.syncExecuteCommand(id, params));
+            expect([5, 6].map((row) => model.getHyperLinkByLocation('target', 'sheet', row, 0)?.payload))
+                .toEqual([undefined, 'https://example.com/previous']);
+            subscription.unsubscribe();
+        } finally {
+            univer.dispose();
+        }
     });
 });

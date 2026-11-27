@@ -63,7 +63,7 @@ describe('Test accrint function', () => {
             const par = NumberValueObject.create(1000);
             const frequency = NumberValueObject.create(2);
             const result = testFunction.calculate(issue, firstInterest, settlement, rate, par, frequency);
-            expect(getObjectValue(result)).toBe(0);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const issue2 = StringValueObject.create('2008/2/29');
             const settlement2 = StringValueObject.create('2008/11/1');
@@ -72,11 +72,11 @@ describe('Test accrint function', () => {
 
             const basis = NumberValueObject.create(3);
             const result3 = testFunction.calculate(issue2, firstInterest, settlement2, rate, par, frequency, basis);
-            expect(getObjectValue(result3, true)).toBe(67.9452054795);
+            expect(getObjectValue(result3, true)).toBe(66.9863013699);
 
             const basis2 = NumberValueObject.create(1);
             const result4 = testFunction.calculate(issue2, firstInterest, settlement2, rate, par, frequency, basis2);
-            expect(getObjectValue(result4, true)).toBe(68.2065217391);
+            expect(getObjectValue(result4, true)).toBe(66.847826087);
         });
 
         it('value is error', () => {
@@ -176,7 +176,13 @@ describe('Test accrint function', () => {
             const par = NumberValueObject.create(1000);
             const frequency = NumberValueObject.create(2);
             const result = testFunction.calculate(issue, firstInterest, settlement, rate, par, frequency);
-            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toEqual([[
+                ErrorType.NUM,
+                ErrorType.VALUE,
+                ErrorType.VALUE,
+                ErrorType.VALUE,
+                ErrorType.NAME,
+            ]]);
         });
         it('checks the serial-zero boundary in both date systems', () => {
             const args = [
@@ -193,7 +199,7 @@ describe('Test accrint function', () => {
             expect(getObjectValue(testFunction.calculate(...args))).toBe(ErrorType.NUM);
 
             testFunction.setDateSystem(DateSystem.Date1904);
-            expect(getObjectValue(testFunction.calculate(...args))).toBeCloseTo(5.027472527472527, 12);
+            expect(getObjectValue(testFunction.calculate(...args))).toBe(ErrorType.NUM);
 
             testFunction.setDateSystem(DateSystem.Date1900);
         });
@@ -210,7 +216,7 @@ describe('Test accrint function', () => {
             ] as const;
 
             testFunction.setDateSystem(DateSystem.Date1900);
-            expect(getObjectValue(testFunction.calculate(...args))).toBe(0);
+            expect(getObjectValue(testFunction.calculate(...args))).toBe(ErrorType.NUM);
         });
     });
 });

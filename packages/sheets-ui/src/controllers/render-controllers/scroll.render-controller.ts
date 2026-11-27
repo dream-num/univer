@@ -36,10 +36,12 @@ import {
     IContextService,
     Inject,
     Injector,
+    IUniverInstanceService,
     RANGE_TYPE,
     SheetTypes,
     toDisposable,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSelectionsService, ScrollToCellOperation, SetSelectionsOperation } from '@univerjs/sheets';
@@ -55,7 +57,7 @@ import { ScrollCommand, SetScrollRelativeCommand } from '../../commands/commands
 import { ExpandSelectionCommand } from '../../commands/commands/set-selection.command';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
-import { getSheetObject } from '../utils/component-tools';
+import { getSheetObject, isFocusedSheetRender } from '../utils/component-tools';
 
 const MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR = 3;
 const WHEEL_CROSS_AXIS_LOCK_RATIO = 2;
@@ -92,6 +94,11 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         return this._context.unit.getActiveSheet()?.getConfig().type;
     }
 
+    private _isFocusedRender(): boolean {
+        const workbook = this._injector.get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        return workbook?.getUnitId() === this._context.unitId && isFocusedSheetRender(this._context, this._renderManagerService);
+    }
+
     private _wheelEventListener() {
         const { scene } = this._context;
         if (!scene) return;
@@ -109,7 +116,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         })));
         this.disposeWithMe(
             scene.onMouseWheel$.subscribeEvent((evt: IWheelEvent, state) => {
-                if (evt.ctrlKey || !this._contextService.getContextValue(FOCUSING_SHEET)) {
+                if (evt.ctrlKey || !this._contextService.getContextValue(FOCUSING_SHEET) || !this._isFocusedRender()) {
                     return;
                 }
                 const sheetId = this._context.unit.getActiveSheet(true)?.getSheetId();
@@ -214,7 +221,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         const sheetId = this._pendingWheelSheetId;
         this._pendingWheelSheetId = undefined;
         if (sheetId !== this._context.unit.getActiveSheet(true)?.getSheetId() ||
-            !this._contextService.getContextValue(FOCUSING_SHEET)) {
+            !this._contextService.getContextValue(FOCUSING_SHEET) || !this._isFocusedRender()) {
             return;
         }
         if (this._getSheetType() === SheetTypes.CHART) {
@@ -560,6 +567,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
     private _initCommandListener(): void {
         this.disposeWithMe(this._commandService.onCommandExecuted((command) => {
+            if (!this._isFocusedRender()) {
+                return;
+            }
             switch (command.id) {
                 case SetSelectionsOperation.id:
                     {
@@ -601,7 +611,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         }
         const timer = setTimeout(() => {
             this._selectionScrollTimers.delete(timer);
-            if (this._disposed || generation !== this._scrollGeneration || worksheet !== this._context.unit.getActiveSheet()) {
+            if (this._disposed || generation !== this._scrollGeneration || worksheet !== this._context.unit.getActiveSheet() || !this._isFocusedRender()) {
                 return;
             }
             const selection = this._getSelectionsService().getCurrentLastSelection();

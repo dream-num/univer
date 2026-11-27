@@ -134,4 +134,43 @@ describe('Tree', () => {
         const checkboxes = Array.from(container.querySelectorAll('input[type="checkbox"]')) as HTMLInputElement[];
         expect(checkboxes.some((checkbox) => checkbox.checked)).toBe(true);
     });
+
+    it('should render semantic tree roles, expand button state, and support keyboard navigation', () => {
+        const onChange = vi.fn();
+        const { getByRole, getAllByRole, queryByText } = render(
+            <Tree
+                data={data}
+                onChange={onChange}
+            />
+        );
+
+        expect(getByRole('tree')).toBeTruthy();
+
+        const rootItem = getByRole('treeitem');
+        expect(rootItem.getAttribute('aria-expanded')).toBe('false');
+        expect(queryByText('node 0-0')).toBeNull();
+
+        const expandButton = getByRole('button', { name: 'node 0' });
+        expect(expandButton.getAttribute('aria-expanded')).toBe('false');
+
+        // Expand with ArrowRight
+        fireEvent.keyDown(rootItem, { key: 'ArrowRight' });
+        expect(rootItem.getAttribute('aria-expanded')).toBe('true');
+        expect(getAllByRole('treeitem')).toHaveLength(3);
+
+        // Move focus down to first child
+        fireEvent.keyDown(rootItem, { key: 'ArrowDown' });
+        const items = getAllByRole('treeitem');
+        expect(document.activeElement).toBe(items[1]);
+
+        // Toggle selection via Space on focused treeitem
+        fireEvent.keyDown(items[1], { key: ' ' });
+        expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ key: '0-0' }));
+
+        // Move back up and collapse via ArrowLeft
+        fireEvent.keyDown(items[1], { key: 'ArrowUp' });
+        expect(document.activeElement).toBe(items[0]);
+        fireEvent.keyDown(items[0], { key: 'ArrowLeft' });
+        expect(getAllByRole('treeitem')).toHaveLength(1);
+    });
 });

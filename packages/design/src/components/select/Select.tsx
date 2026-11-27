@@ -18,7 +18,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { MoreDownIcon } from '@univerjs/icons';
 import { useContext, useMemo, useState } from 'react';
 import type { IDropdownMenuProps } from '../dropdown-menu/DropdownMenu';
-import { borderClassName, focusClassName, inputStateClassName } from '../../helper/class-utilities';
+import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { Button } from '../button/Button';
 import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
@@ -43,6 +43,11 @@ export interface ISelectProps extends Omit<ButtonHTMLAttributes<HTMLButtonElemen
      * The value of select
      */
     value: string;
+
+    /**
+     * Placeholder shown when value is empty and no matching option is selected
+     */
+    placeholder?: string;
 
     /**
      * Whether the select is disabled
@@ -76,9 +81,19 @@ export interface ISelectProps extends Omit<ButtonHTMLAttributes<HTMLButtonElemen
 
 export const selectClassName = clsx(`
   univer-box-border univer-inline-flex univer-h-8 univer-min-w-36 univer-items-center univer-justify-between
-  univer-gap-2 univer-rounded-md univer-bg-gray-0 univer-px-2.5 univer-transition-colors univer-duration-200
+  univer-gap-2 univer-rounded-md univer-bg-gray-0 univer-px-2.5 univer-text-gray-900 univer-outline-none
+  univer-transition-colors univer-duration-200
+  aria-[invalid=true]:!univer-border-red-600
+  focus-visible:!univer-border-primary-600 focus-visible:univer-outline-0 focus-visible:univer-ring-2
+  focus-visible:univer-ring-primary-50
+  aria-[invalid=true]:focus-visible:!univer-border-red-600 aria-[invalid=true]:focus-visible:univer-ring-red-50
+  motion-reduce:univer-transition-none
   dark:!univer-bg-gray-700 dark:!univer-text-gray-0
-`, borderClassName, focusClassName, inputStateClassName);
+  dark:aria-[invalid=true]:!univer-border-red-400
+  dark:focus-visible:!univer-border-primary-300 dark:focus-visible:!univer-ring-primary-900
+  dark:aria-[invalid=true]:focus-visible:!univer-border-red-400
+  dark:aria-[invalid=true]:focus-visible:!univer-ring-red-900
+`, borderClassName);
 
 const EMPTY_OPTIONS: NonNullable<ISelectProps['options']> = [];
 
@@ -87,6 +102,7 @@ export function Select(props: ISelectProps) {
         className,
         size = 'small',
         value,
+        placeholder,
         disabled = false,
         options = EMPTY_OPTIONS,
         borderless = false,
@@ -99,14 +115,14 @@ export function Select(props: ISelectProps) {
     const [open, setOpen] = useState(false);
     const invalid = useContext(FormLayoutContext);
 
-    function handleOpenChange(open: boolean) {
-        setOpen(open);
+    function handleOpenChange(nextOpen: boolean) {
+        setOpen(nextOpen);
     }
 
     const items: IDropdownMenuProps['items'] = useMemo(() => {
         const selectOptions: (IOption | IOptionSeparator)[] = [];
 
-        for (const option of options) {
+        options.forEach((option, index) => {
             if (option.options) {
                 option.options.forEach((opt) => {
                     selectOptions.push({
@@ -115,9 +131,11 @@ export function Select(props: ISelectProps) {
                         disabled: opt.disabled,
                     });
                 });
-                selectOptions.push({
-                    type: 'separator',
-                });
+                if (index < options.length - 1) {
+                    selectOptions.push({
+                        type: 'separator',
+                    });
+                }
             } else {
                 selectOptions.push({
                     label: option.label,
@@ -125,7 +143,7 @@ export function Select(props: ISelectProps) {
                     disabled: option.disabled,
                 });
             }
-        }
+        });
 
         return [{
             type: 'radio',
@@ -138,7 +156,7 @@ export function Select(props: ISelectProps) {
     }, [onChange, options, value]);
 
     const displayValue = useMemo(() => {
-        let label = null;
+        let label: string | ReactNode = null;
 
         for (const option of options) {
             if (option.options) {
@@ -148,16 +166,16 @@ export function Select(props: ISelectProps) {
                         break;
                     }
                 }
-            } else {
-                if (option.value === value) {
-                    label = option.label;
-                    break;
-                }
+            } else if (option.value === value) {
+                label = option.label;
+                break;
             }
         }
 
         return label || value;
     }, [options, value]);
+
+    const isPlaceholder = !displayValue && Boolean(placeholder);
 
     return (
         <DropdownMenu
@@ -177,28 +195,46 @@ export function Select(props: ISelectProps) {
                 disabled={disabled}
                 data-u-comp="select"
                 aria-invalid={triggerProps['aria-invalid'] ?? (invalid || undefined)}
-                className={clsx(selectClassName, {
+                className={clsx(selectClassName, 'univer-font-normal', {
                     '!univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-border-primary-300 dark:!univer-ring-primary-900': open && !borderless,
-                    'univer-border-transparent univer-bg-transparent hover:univer-border-transparent': borderless,
-                    'univer-cursor-not-allowed': disabled,
-                    'hover:univer-border-primary-600': !disabled && !borderless,
-                    'univer-cursor-pointer': !disabled && !open,
+                    'univer-border-transparent univer-bg-transparent hover:univer-border-transparent dark:!univer-border-transparent dark:!univer-bg-transparent': borderless,
+                    'univer-cursor-not-allowed !univer-bg-gray-50 !univer-text-gray-400 dark:!univer-bg-gray-800 dark:!univer-text-gray-500': disabled,
+                    'hover:univer-border-gray-300 hover:!univer-bg-gray-0 dark:hover:!univer-border-gray-500 dark:hover:!univer-bg-gray-700': !disabled && !borderless,
+                    'univer-cursor-pointer': !disabled,
                 }, className)}
             >
                 <span
-                    className={`
-                      univer-flex-1 univer-truncate univer-text-start univer-text-gray-500
-                      dark:!univer-text-gray-0
-                    `}
+                    className={clsx(
+                        'univer-flex-1 univer-truncate univer-text-start',
+                        isPlaceholder
+                            ? `
+                              univer-text-gray-500
+                              dark:!univer-text-gray-300
+                            `
+                            : `
+                              univer-text-gray-900
+                              dark:!univer-text-gray-0
+                            `,
+                        disabled && `
+                          !univer-text-gray-400
+                          dark:!univer-text-gray-500
+                        `
+                    )}
                 >
-                    {displayValue}
+                    {isPlaceholder ? placeholder : displayValue}
                 </span>
                 <MoreDownIcon
+                    aria-hidden="true"
                     preserveStrokeWidth
-                    className={`
-                      univer-flex-shrink-0
-                      dark:!univer-text-gray-0
-                    `}
+                    className={clsx(
+                        `
+                          univer-size-4 univer-shrink-0 univer-text-gray-500 univer-transition-transform
+                          univer-duration-200
+                          motion-reduce:univer-transition-none
+                          dark:!univer-text-gray-300
+                        `,
+                        open && 'univer-rotate-180'
+                    )}
                 />
             </Button>
         </DropdownMenu>

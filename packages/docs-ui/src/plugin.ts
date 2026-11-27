@@ -145,6 +145,7 @@ import { MoveCursorOperation, MoveSelectionOperation } from './commands/operatio
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
 import { DocSectionSettingPanelOperation } from './commands/operations/doc-section-setting-panel.operation';
 import {
+    DOCUMENT_SECTION_BREAK_MENU_OPERATIONS,
     InsertDocumentColumnBreakOperation,
     InsertDocumentSectionBreakOperation,
 } from './commands/operations/insert-break.operation';
@@ -386,6 +387,7 @@ export class UniverDocsUIPlugin extends Plugin {
             DocSectionSettingPanelOperation,
             InsertDocumentColumnBreakOperation,
             InsertDocumentSectionBreakOperation,
+            ...Object.values(DOCUMENT_SECTION_BREAK_MENU_OPERATIONS),
             MoveCursorOperation,
             MoveSelectionOperation,
             ReplaceTextRunsCommand,

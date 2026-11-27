@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { CheckMarkIcon } from '@univerjs/icons';
-import { useContext, useMemo } from 'react';
-import { borderClassName, scrollbarClassName } from '../../helper/class-utilities';
+import type { KeyboardEvent } from 'react';
+import { CheckMarkIcon, MoreRightIcon } from '@univerjs/icons';
+import { useContext, useMemo, useRef } from 'react';
+import { borderClassName, divideXClassName, focusClassName, scrollbarClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
@@ -55,12 +56,14 @@ export interface ICascaderListProps {
     wrapperClassName?: string;
 }
 
+const EMPTY_OPTIONS: ICascaderOption[] = [];
+
 function Empty({ emptyText }: { emptyText?: string }) {
     return (
         <section
             className={`
-              univer-h-8 univer-px-2 univer-pr-32 univer-text-sm/8 univer-text-gray-600
-              dark:!univer-text-gray-200
+              univer-flex univer-h-8 univer-min-w-28 univer-items-center univer-px-3 univer-text-sm univer-text-gray-500
+              dark:!univer-text-gray-300
             `}
         >
             {emptyText}
@@ -69,22 +72,27 @@ function Empty({ emptyText }: { emptyText?: string }) {
 }
 
 export function CascaderList(props: ICascaderListProps) {
-    const { value, options = [], onChange, contentClassName, wrapperClassName } = props;
+    const { value, options = EMPTY_OPTIONS, onChange, contentClassName, wrapperClassName } = props;
 
-    const { locale } = useContext(ConfigContext);
+    const { direction, locale } = useContext(ConfigContext);
+    const columnOptionMapRef = useRef<Map<string, HTMLButtonElement>>(new Map());
 
     const activeOptions = useMemo(() => {
-        const activeOptions = [options];
+        const columns = [options];
         value.forEach((item, index) => {
-            const option = activeOptions[index].find((option) => option.value === item);
+            const currentLevel = columns[index];
+            if (!currentLevel) {
+                return;
+            }
+            const option = currentLevel.find((opt) => opt.value === item);
 
             if (option?.children) {
-                activeOptions.push(option.children);
+                columns.push(option.children);
             }
         });
 
-        return activeOptions;
-    }, [value]);
+        return columns;
+    }, [options, value]);
 
     function handleChange(index: number, v: string) {
         if (v === value[index]) {
@@ -105,64 +113,155 @@ export function CascaderList(props: ICascaderListProps) {
         onChange(newValue);
     }
 
+    function handleKeyDown(
+        event: KeyboardEvent<HTMLButtonElement>,
+        colIndex: number,
+        rowIndex: number,
+        colOptions: ICascaderOption[]
+    ) {
+        const rtl = direction === 'rtl';
+        const forwardKey = rtl ? 'ArrowLeft' : 'ArrowRight';
+        const backwardKey = rtl ? 'ArrowRight' : 'ArrowLeft';
+
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            const nextRow = (rowIndex + 1) % colOptions.length;
+            columnOptionMapRef.current.get(`${colIndex}:${nextRow}`)?.focus();
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            const prevRow = (rowIndex - 1 + colOptions.length) % colOptions.length;
+            columnOptionMapRef.current.get(`${colIndex}:${prevRow}`)?.focus();
+        } else if (event.key === forwardKey) {
+            const option = colOptions[rowIndex];
+            if (option?.children?.length) {
+                event.preventDefault();
+                handleChange(colIndex, option.value);
+                columnOptionMapRef.current.get(`${colIndex + 1}:0`)?.focus();
+            }
+        } else if (event.key === backwardKey && colIndex > 0) {
+            event.preventDefault();
+            const parentCol = activeOptions[colIndex - 1] ?? [];
+            const selectedParentIdx = Math.max(0, parentCol.findIndex((opt) => opt.value === value[colIndex - 1]));
+            columnOptionMapRef.current.get(`${colIndex - 1}:${selectedParentIdx}`)?.focus();
+        }
+    }
+
     return (
         <section
             data-u-comp="cascader-list"
-            className={clsx(`
-              univer-grid univer-h-full univer-max-h-80 univer-grid-flow-col univer-overflow-y-auto univer-rounded
-              univer-py-2 univer-text-gray-900
-              dark:!univer-text-gray-0
-              [&>ul:not(:last-child)]:univer-border-0 [&>ul:not(:last-child)]:univer-border-r
-              [&>ul:not(:last-child)]:univer-border-solid [&>ul:not(:last-child)]:univer-border-r-gray-200
-            `, borderClassName, scrollbarClassName, wrapperClassName)}
+            dir={direction}
+            className={clsx(
+                `
+                  univer-grid univer-h-full univer-max-h-80 univer-grid-flow-col univer-overflow-y-auto
+                  univer-rounded-md univer-bg-gray-0 univer-py-1.5 univer-text-gray-900
+                  dark:!univer-bg-gray-700 dark:!univer-text-gray-0
+                `,
+                borderClassName,
+                divideXClassName,
+                scrollbarClassName,
+                wrapperClassName
+            )}
         >
-            {activeOptions.map((options, index) =>
-                options.length
+            {activeOptions.map((colOptions, index) => {
+                const columnKey = index === 0 ? 'root' : `col-${value.slice(0, index).join('/') || 'empty'}`;
+
+                return colOptions.length
                     ? (
                         <ul
-                            key={index}
-                            className={clsx(`
-                              univer-m-0 univer-h-full univer-max-h-full univer-list-none univer-overflow-auto
-                              univer-px-2
-                            `, scrollbarClassName, contentClassName)}
+                            key={columnKey}
+                            role="listbox"
+                            className={clsx(
+                                `
+                                  univer-m-0 univer-flex univer-h-full univer-max-h-full univer-list-none
+                                  univer-flex-col univer-gap-0.5 univer-overflow-auto univer-px-1.5
+                                `,
+                                scrollbarClassName,
+                                contentClassName
+                            )}
                         >
-                            {options.map((option) => (
-                                <li key={option.value}>
-                                    <a
-                                        className={clsx(`
-                                          univer-relative univer-block univer-h-8 univer-cursor-pointer univer-rounded
-                                          univer-text-sm/8
-                                        `, {
-                                            'univer-px-7': index > 0,
-                                            'univer-px-1.5': index === 0,
-                                            'univer-bg-gray-200 dark:!univer-bg-gray-600': option.value === value[index],
-                                        })}
-                                        onClick={() => handleChange(index, option.value)}
-                                    >
-                                        {index > 0 && (
-                                            <span
-                                                className={`
-                                                  univer-absolute univer-left-2 univer-flex univer-h-full
-                                                  univer-items-center
-                                                `}
-                                            >
-                                                {option.value === value[index] && (
-                                                    <CheckMarkIcon
-                                                        className="univer-text-primary-600"
-                                                    />
-                                                )}
+                            {colOptions.map((option, rowIndex) => {
+                                const selected = option.value === value[index];
+                                const hasChildren = Boolean(option.children && option.children.length > 0);
+
+                                return (
+                                    <li key={option.value} role="presentation">
+                                        <button
+                                            ref={(el) => {
+                                                const key = `${index}:${rowIndex}`;
+                                                if (el) {
+                                                    columnOptionMapRef.current.set(key, el);
+                                                } else {
+                                                    columnOptionMapRef.current.delete(key);
+                                                }
+                                            }}
+                                            type="button"
+                                            role="option"
+                                            aria-selected={selected}
+                                            className={clsx(
+                                                `
+                                                  univer-relative univer-flex univer-h-8 univer-w-full
+                                                  univer-cursor-pointer univer-select-none univer-items-center
+                                                  univer-gap-2 univer-rounded univer-border-none univer-bg-transparent
+                                                  univer-text-left univer-text-sm univer-text-gray-900
+                                                  univer-transition-colors univer-duration-200
+                                                  hover:univer-bg-gray-100
+                                                  motion-reduce:univer-transition-none
+                                                  rtl:univer-text-right
+                                                  dark:!univer-text-gray-0
+                                                  dark:hover:!univer-bg-gray-600
+                                                `,
+                                                focusClassName,
+                                                index > 0
+                                                    ? `
+                                                      univer-pl-7 univer-pr-2
+                                                      rtl:univer-pl-2 rtl:univer-pr-7
+                                                    `
+                                                    : 'univer-px-2',
+                                                selected && `
+                                                  univer-bg-primary-50 univer-font-medium
+                                                  dark:!univer-bg-gray-600
+                                                `
+                                            )}
+                                            onClick={() => handleChange(index, option.value)}
+                                            onKeyDown={(event) => handleKeyDown(event, index, rowIndex, colOptions)}
+                                        >
+                                            {index > 0 && selected && (
+                                                <CheckMarkIcon
+                                                    aria-hidden="true"
+                                                    preserveStrokeWidth
+                                                    className={`
+                                                      univer-absolute univer-left-2 univer-top-1/2 univer-size-4
+                                                      -univer-translate-y-1/2 univer-text-primary-600
+                                                      rtl:univer-left-auto rtl:univer-right-2
+                                                      dark:!univer-text-primary-300
+                                                    `}
+                                                />
+                                            )}
+                                            <span className="univer-truncate" style={{ color: option.color }}>
+                                                {option.label}
                                             </span>
-                                        )}
-                                        <span>{option.label}</span>
-                                    </a>
-                                </li>
-                            ))}
+                                            {hasChildren && (
+                                                <MoreRightIcon
+                                                    aria-hidden="true"
+                                                    preserveStrokeWidth
+                                                    className={`
+                                                      univer-ml-auto univer-size-3.5 univer-shrink-0
+                                                      univer-text-gray-500
+                                                      rtl:univer-ml-0 rtl:univer-mr-auto rtl:univer-rotate-180
+                                                      dark:!univer-text-gray-300
+                                                    `}
+                                                />
+                                            )}
+                                        </button>
+                                    </li>
+                                );
+                            })}
                         </ul>
                     )
                     : (
-                        <Empty key={index} emptyText={locale?.CascaderList.empty} />
-                    )
-            )}
+                        <Empty key={columnKey} emptyText={locale?.CascaderList.empty} />
+                    );
+            })}
             {value.length <= 0 && (
                 <Empty emptyText={locale?.CascaderList.empty} />
             )}

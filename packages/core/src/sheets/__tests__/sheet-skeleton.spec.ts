@@ -205,6 +205,54 @@ describe('SheetSkeleton dimension fallback', () => {
             skeleton.dispose();
         }
     });
+
+    it('skips inactive row filters and keeps row coordinates when the filter changes', () => {
+        const worksheet = testBed.sheet.getActiveSheet()!;
+        const config = worksheet.getConfig();
+        config.rowCount = 100_000;
+        config.defaultRowHeight = 24;
+        config.rowData[5] = { h: 30, ah: 31.5 };
+        config.rowData[100] = { hd: BooleanNumber.TRUE };
+        const skeleton = testBed.univer.__getInjector().createInstance(SheetSkeleton, worksheet, testBed.sheet.getStyles());
+        let active = false;
+        let filterCalls = 0;
+        const filteredRow = config.rowCount - 2;
+        worksheet.__interceptViewModel((viewModel) => {
+            skeleton.disposeWithMe(viewModel.registerRowFilteredInterceptor({
+                mayFilterRows: () => active,
+                getRowFiltered: (row) => {
+                    filterCalls++;
+                    return active && row === filteredRow;
+                },
+            }));
+        });
+
+        try {
+            skeleton.setGapConfig({ rowGaps: { 3: { size: 3.25 } } });
+            const unfilteredHeight = (config.rowCount - 1) * 24 + 7.5 + 3.25;
+            expect(filterCalls).toBe(0);
+            expect(skeleton.rowHeightAccumulation).toHaveLength(config.rowCount);
+            expect(skeleton.rowTotalHeight).toBe(unfilteredHeight);
+            expect(skeleton.rowHeightAccumulation[5]).toBe(154.75);
+            expect(skeleton.rowHeightAccumulation[100]).toBe(skeleton.rowHeightAccumulation[99]);
+
+            active = true;
+            skeleton.makeDirty(true);
+            skeleton.calculate();
+            expect(filterCalls).toBe(config.rowCount);
+            expect(skeleton.rowHeightAccumulation[filteredRow]).toBe(skeleton.rowHeightAccumulation[filteredRow - 1]);
+            expect(skeleton.rowTotalHeight).toBe(unfilteredHeight - 24);
+
+            active = false;
+            skeleton.setProjection({ isRowFiltered: (row) => row === 0, getCell: () => undefined });
+            skeleton.calculate();
+            expect(filterCalls).toBe(config.rowCount);
+            expect(skeleton.rowHeightAccumulation[0]).toBe(0);
+            expect(skeleton.rowTotalHeight).toBe(unfilteredHeight - 24);
+        } finally {
+            skeleton.dispose();
+        }
+    });
 });
 
 const workbookDataFactory = (): IWorkbookData => ({

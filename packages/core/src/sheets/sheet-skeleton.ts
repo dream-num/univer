@@ -148,10 +148,23 @@ export interface ISheetDisplayProjection {
     getCell(row: number, column: number): Pick<ICellData, 'v' | 't'> | null | undefined;
 }
 
-interface IProjectedRowLayout {
-    filteredOutRows: ReadonlySet<number>;
+interface IRowLayout {
     rowTotalHeight: number;
     rowHeightAccumulation: number[];
+}
+
+interface IProjectedRowLayout extends IRowLayout {
+    filteredOutRows: ReadonlySet<number>;
+}
+
+function getRowDataHeight(row: Partial<IRowData>, fallbackHeight: number): number {
+    if (row.hd === BooleanNumber.TRUE) {
+        return 0;
+    }
+    const { h = fallbackHeight, ah, ia } = row;
+    return (ia == null || ia === BooleanNumber.TRUE) && isValidSheetDimension(ah, false)
+        ? ah
+        : normalizeSheetDimension(h, 0);
 }
 
 function sameFilterMask(left: ReadonlySet<number> | undefined, right: ReadonlySet<number> | undefined): boolean {
@@ -497,7 +510,7 @@ export class SheetSkeleton extends Skeleton {
         rowCount: number,
         rowData: IObjectArrayPrimitiveType<Partial<IRowData>>,
         defaultRowHeight: number
-    ): { rowTotalHeight: number; rowHeightAccumulation: number[] } {
+    ): IRowLayout {
         let rowTotalHeight = 0;
         const rowHeightAccumulation: number[] = [];
         const fallbackHeight = normalizeSheetDimension(defaultRowHeight, DEFAULT_WORKSHEET_ROW_HEIGHT, false);
@@ -513,19 +526,7 @@ export class SheetSkeleton extends Skeleton {
                     continue;
                 }
 
-                const { h = fallbackHeight, ah, ia } = rowDataItem;
-                if (
-                    (ia == null || ia === BooleanNumber.TRUE) &&
-                    isValidSheetDimension(ah, false)
-                ) {
-                    rowHeight = ah;
-                } else {
-                    rowHeight = normalizeSheetDimension(h, 0);
-                }
-
-                if (rowDataItem.hd === BooleanNumber.TRUE) {
-                    rowHeight = 0;
-                }
+                rowHeight = getRowDataHeight(rowDataItem, fallbackHeight);
             }
 
             // Add gap BEFORE this row (gap appears between row r-1 and row r)
@@ -541,6 +542,27 @@ export class SheetSkeleton extends Skeleton {
             rowTotalHeight,
             rowHeightAccumulation,
         };
+    }
+
+    private _generateUnfilteredRowMatrixCache(
+        rowCount: number,
+        rowData: IObjectArrayPrimitiveType<Partial<IRowData>>,
+        defaultRowHeight: number
+    ): IRowLayout {
+        const rowHeightAccumulation: number[] = [];
+        let rowTotalHeight = 0;
+        const fallbackHeight = normalizeSheetDimension(defaultRowHeight, DEFAULT_WORKSHEET_ROW_HEIGHT, false);
+        const rowGaps = this._gapConfig.rowGaps;
+        for (let row = 0; row < rowCount; row++) {
+            const data = rowData[row];
+            if (data != null && !data) {
+                continue;
+            }
+            rowTotalHeight += rowGaps?.[row]?.size ?? 0;
+            rowTotalHeight += data ? getRowDataHeight(data, fallbackHeight) : fallbackHeight;
+            rowHeightAccumulation.push(rowTotalHeight);
+        }
+        return { rowTotalHeight, rowHeightAccumulation };
     }
 
     /**
@@ -654,9 +676,14 @@ export class SheetSkeleton extends Skeleton {
 
         const filteredOutRows = this._projection?.filteredOutRows;
         const cached = this._projectedRowLayout;
-        const rowLayout = cached && sameFilterMask(cached.filteredOutRows, filteredOutRows)
-            ? cached
-            : this._generateRowMatrixCache(rowCount, rowData, defaultRowHeight);
+        let rowLayout: IRowLayout;
+        if (cached && sameFilterMask(cached.filteredOutRows, filteredOutRows)) {
+            rowLayout = cached;
+        } else if (this._projection || this.getRowFiltered !== SheetSkeleton.prototype.getRowFiltered || this.worksheet.mayFilterRows()) {
+            rowLayout = this._generateRowMatrixCache(rowCount, rowData, defaultRowHeight);
+        } else {
+            rowLayout = this._generateUnfilteredRowMatrixCache(rowCount, rowData, defaultRowHeight);
+        }
         if (filteredOutRows) {
             this._projectedRowLayout = { filteredOutRows, ...rowLayout };
         }

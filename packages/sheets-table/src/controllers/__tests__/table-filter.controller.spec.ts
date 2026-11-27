@@ -109,6 +109,7 @@ describe('TableFilterController', () => {
             startColumn: 0,
             endColumn: 0,
         });
+        expect(sheet.mayFilterRows()).toBe(false);
         const filter = { filterType: TableColumnFilterTypeEnum.manual, values: ['A'] };
         expect(await commands.executeCommand(SetSheetTableFilterCommand.id, {
             unitId,
@@ -116,6 +117,7 @@ describe('TableFilterController', () => {
             column: 0,
             tableFilter: filter,
         })).toBe(true);
+        expect(sheet.mayFilterRows()).toBe(true);
         expect(sheet.isRowFiltered(1)).toBe(false);
         expect(sheet.isRowFiltered(3)).toBe(true);
         expect(formulaRows.getRowFiltered(unitId, 'sheet1', 3)).toBe(true);
@@ -126,12 +128,14 @@ describe('TableFilterController', () => {
             subUnitId: 'sheet1',
             tableId,
         })).toBe(true);
+        expect(sheet.mayFilterRows()).toBe(false);
         expect(sheet.isRowFiltered(3)).toBe(false);
         expect(sheet.getRowVisible(3)).toBe(true);
         expect(sheet.getRowVisible(2)).toBe(false);
         expect(formulaRows.getRowFiltered(unitId, 'sheet1', 3)).toBe(false);
 
         expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(sheet.mayFilterRows()).toBe(true);
         expect(manager.getTable(unitId, tableId)?.getTableFilterColumn(0)).toEqual(filter);
         expect(sheet.isRowFiltered(3)).toBe(true);
         expect(formulaRows.getRowFiltered(unitId, 'sheet1', 3)).toBe(true);

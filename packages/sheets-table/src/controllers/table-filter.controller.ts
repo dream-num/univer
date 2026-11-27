@@ -19,7 +19,6 @@ import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '
 import { ISheetRowFilteredService } from '@univerjs/engine-formula';
 import {
     getSheetCommandTarget,
-    INTERCEPTOR_POINT,
     SheetInterceptorService,
     ZebraCrossingCacheController,
 } from '@univerjs/sheets';
@@ -50,9 +49,10 @@ export class TableFilterController extends Disposable {
     }
 
     initTableHiddenRowIntercept() {
-        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.ROW_FILTERED, {
+        this.disposeWithMe(this._sheetInterceptorService.interceptRowFiltered({
             // Priority must be higher than sheet filtering, because filtering has no next, and those below filtering will not trigger interceptor
             priority: 100,
+            mayFilterRows: (unitId, subUnitId) => this._getTableFilteredOutRows(unitId, subUnitId).size > 0,
             handler: (filtered, rowLocation, next) => {
                 if (filtered) {
                     return true;

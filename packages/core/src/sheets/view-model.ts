@@ -44,6 +44,8 @@ export interface ICellContentInterceptor {
  */
 export interface IRowFilteredInterceptor {
     getRowFiltered(row: number): boolean;
+    /** Return false only if getRowFiltered would return false for every row. */
+    mayFilterRows?(): boolean;
 }
 
 export interface IRowFilteredInterceptor {}
@@ -107,6 +109,11 @@ export class SheetViewModel extends Disposable {
 
     getRowFiltered(row: number): boolean {
         return this._rowFilteredInterceptor?.getRowFiltered(row) ?? false;
+    }
+
+    mayFilterRows(): boolean {
+        const interceptor = this._rowFilteredInterceptor;
+        return interceptor != null && (interceptor.mayFilterRows?.() ?? true);
     }
 
     registerCellContentInterceptor(interceptor: ICellContentInterceptor): IDisposable {

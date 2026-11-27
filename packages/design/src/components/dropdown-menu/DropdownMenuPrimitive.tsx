@@ -119,8 +119,8 @@ function DropdownMenuSubTrigger({
                 aria-hidden="true"
                 preserveStrokeWidth
                 className="
-                  univer-ms-auto
-                  rtl:univer-rotate-180
+                  univer-ml-auto
+                  rtl:univer-ml-0 rtl:univer-mr-auto rtl:univer-rotate-180
                 "
             />
         </SubTrigger>
@@ -245,16 +245,17 @@ function DropdownMenuCheckboxItem({
             className={clsx(
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center
-                  univer-rounded univer-py-1.5 univer-pe-2 univer-text-sm univer-outline-none univer-transition-colors
+                  univer-rounded univer-py-1.5 univer-pr-2 univer-text-sm univer-outline-none univer-transition-colors
                   univer-duration-200
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
                   focus:univer-bg-gray-100
                   motion-reduce:univer-transition-none
+                  rtl:univer-pl-2
                   dark:focus:!univer-bg-gray-600
                 `,
                 {
-                    'univer-ps-8': !hideIndicator,
-                    'univer-ps-2': hideIndicator,
+                    'univer-pl-8 rtl:univer-pr-8': !hideIndicator,
+                    'univer-pl-2 rtl:univer-pr-2': hideIndicator,
                 },
                 className
             )}
@@ -264,8 +265,9 @@ function DropdownMenuCheckboxItem({
             {!hideIndicator && (
                 <span
                     className={`
-                      univer-absolute univer-start-2 univer-flex univer-size-3.5 univer-items-center
+                      univer-absolute univer-left-2 univer-flex univer-size-3.5 univer-items-center
                       univer-justify-center
+                      rtl:univer-left-auto rtl:univer-right-2
                     `}
                 >
                     <ItemIndicator>
@@ -297,16 +299,17 @@ function DropdownMenuRadioItem({
             className={clsx(
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center
-                  univer-rounded univer-py-1.5 univer-pe-2 univer-text-sm univer-outline-none univer-transition-colors
+                  univer-rounded univer-py-1.5 univer-pr-2 univer-text-sm univer-outline-none univer-transition-colors
                   univer-duration-200
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
                   focus:univer-bg-gray-100
                   motion-reduce:univer-transition-none
+                  rtl:univer-pl-2
                   dark:focus:!univer-bg-gray-600
                 `,
                 {
-                    'univer-ps-8': !hideIndicator,
-                    'univer-ps-2': hideIndicator,
+                    'univer-pl-8 rtl:univer-pr-8': !hideIndicator,
+                    'univer-pl-2 rtl:univer-pr-2': hideIndicator,
                 },
                 className
             )}
@@ -315,8 +318,9 @@ function DropdownMenuRadioItem({
             {!hideIndicator && (
                 <span
                     className={`
-                      univer-absolute univer-start-2 univer-flex univer-size-3.5 univer-items-center
+                      univer-absolute univer-left-2 univer-flex univer-size-3.5 univer-items-center
                       univer-justify-center
+                      rtl:univer-left-auto rtl:univer-right-2
                     `}
                 >
                     <ItemIndicator>
@@ -378,7 +382,8 @@ function DropdownMenuShortcut({
         <span
             data-slot="dropdown-menu-shortcut"
             className={clsx(`
-              univer-ms-auto univer-text-xs univer-tracking-widest univer-text-gray-500
+              univer-ml-auto univer-text-xs univer-tracking-widest univer-text-gray-500
+              rtl:univer-ml-0 rtl:univer-mr-auto
               dark:!univer-text-gray-300
             `, className)}
             {...props}

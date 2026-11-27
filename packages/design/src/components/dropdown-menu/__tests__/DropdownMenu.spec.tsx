@@ -152,13 +152,13 @@ describe('DropdownMenu', () => {
         );
 
         const checkboxItem = getByRole('menuitemcheckbox', { name: 'Check Item' });
-        expect(checkboxItem).toHaveClass('univer-ps-8', 'univer-pe-2');
-        expect(checkboxItem.querySelector('.univer-start-2')).not.toBeNull();
+        expect(checkboxItem).toHaveClass('univer-pl-8', 'univer-pr-2', 'rtl:univer-pr-8', 'rtl:univer-pl-2');
+        expect(checkboxItem.querySelector('.rtl\\:univer-right-2')).not.toBeNull();
         expect(checkboxItem.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
 
         const radioItem = getByRole('menuitemradio', { name: 'Radio Item' });
-        expect(radioItem).toHaveClass('univer-ps-8', 'univer-pe-2');
-        expect(radioItem.querySelector('.univer-start-2')).not.toBeNull();
+        expect(radioItem).toHaveClass('univer-pl-8', 'univer-pr-2', 'rtl:univer-pr-8', 'rtl:univer-pl-2');
+        expect(radioItem.querySelector('.rtl\\:univer-right-2')).not.toBeNull();
 
         const subTrigger = getByRole('menuitem', { name: 'Sub Menu' });
         const subArrow = subTrigger.querySelector('svg');
@@ -166,6 +166,6 @@ describe('DropdownMenu', () => {
         expect(subArrow?.getAttribute('class')).toContain('rtl:univer-rotate-180');
 
         const shortcut = getByText('⌘S');
-        expect(shortcut).toHaveClass('univer-ms-auto', 'univer-text-xs', 'univer-text-gray-500');
+        expect(shortcut).toHaveClass('univer-ml-auto', 'rtl:univer-mr-auto', 'univer-text-xs', 'univer-text-gray-500');
     });
 });

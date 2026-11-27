@@ -100,13 +100,13 @@ describe('DatePanel', () => {
             act(() => injector.get(RegionService).setRegion(LocaleType.EN_US));
             expect(onActionChange.mock.lastCall![0]()).toBe('m/d/yyyy');
             act(() => injector.get(RegionService).setRegion('enIN'));
-            expect(container.querySelector('li a')?.textContent?.trim()).toBe('05/08/1930');
+            expect(container.querySelector('[role="option"]')?.textContent?.trim()).toBe('05/08/1930');
             expect(onActionChange.mock.lastCall![0]()).toBe('dd/mm/yyyy');
             expect(onChange.mock.calls).toEqual([['m/d/yyyy'], ['dd/mm/yyyy']]);
             onChange.mockClear();
         }
         expect(container.textContent).not.toContain('下午');
-        const option = Array.from(container.querySelectorAll('li a')).find((element) =>
+        const option = Array.from(container.querySelectorAll('[role="option"]')).find((element) =>
             element.textContent?.trim() === '1:30 PM');
         expect(option).toBeDefined();
         act(() => option!.dispatchEvent(new MouseEvent('click', { bubbles: true })));
@@ -121,6 +121,6 @@ describe('DatePanel', () => {
         expect(container.textContent).toContain('下午 1:30');
         expect(onActionChange.mock.lastCall![0]()).toBe(selectedPattern);
         expect(onChange).toHaveBeenCalledTimes(1);
-        expect(container.querySelector('li a.univer-bg-gray-200')?.textContent).toContain(explicitRegion ? '1:30 PM' : '1:30 下午');
+        expect(container.querySelector('[role="option"][aria-selected="true"]')?.textContent).toContain(explicitRegion ? '1:30 PM' : '1:30 下午');
     });
 });

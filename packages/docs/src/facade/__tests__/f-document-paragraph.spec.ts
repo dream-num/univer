@@ -44,6 +44,51 @@ describe('FDocumentParagraph', () => {
         univer = null;
     });
 
+    it('preserves mixed inline styles across a paragraph rename and restores them with undo', () => {
+        const data = createDocumentData('doc', {
+            dataStream: 'Rate 9% today\r\n',
+            paragraphs: [{ startIndex: 13, paragraphId: 'rate' }],
+            textRuns: [{ st: 5, ed: 7, ts: { bl: 1, cl: { rgb: '#C00000' } } }, { st: 8, ed: 13, ts: { it: 1 } }],
+        });
+        createDocumentFacade(data);
+        const p = document.getParagraphs()[0];
+        const before = p.getTextRange().getExplicitTextStyleRuns();
+        expect(p.setText(p.getText(), { preserveStyles: true })).toBe(true);
+        expect(p.getTextRange().getExplicitTextStyleRuns()).toEqual(before);
+        expect(p.setText('Rate 32% today', { preserveStyles: true })).toBe(true);
+        expect(p.getTextRange().getExplicitTextStyleRuns()).toEqual([
+            { startOffset: 5, endOffset: 8, textStyle: before[0].textStyle },
+            { startOffset: 9, endOffset: 14, textStyle: before[1].textStyle },
+        ]);
+        expect(document.undo()).toBe(true);
+        expect(p.getText()).toBe('Rate 9% today');
+        expect(p.getTextRange().getExplicitTextStyleRuns()).toEqual(before);
+        expect(document.redo()).toBe(true);
+        expect(p.getText()).toBe('Rate 32% today');
+        expect(p.setText(p.getText())).toBe(true);
+        expect(p.getTextRange().getExplicitTextStyleRuns()).toEqual([]);
+    });
+
+    it('maps mixed replacement styles by Unicode characters, including unstyled gaps', () => {
+        const data = createDocumentData('doc', {
+            dataStream: 'xA😀B!\r\n',
+            paragraphs: [{ startIndex: 6, paragraphId: 'mixed' }],
+            textRuns: [{ st: 1, ed: 2, ts: { bl: 1 } }, { st: 4, ed: 5, ts: { it: 1 } }],
+        });
+        createDocumentFacade(data);
+        const options = { preserveStyles: true };
+        expect(document.getTextRange(1, 5).setText('😎yZZ', options)).toBe(true);
+        expect(document.getParagraphs()[0].getText()).toBe('x😎yZZ!');
+        expect(document.getTextRange(0, 7).getExplicitTextStyleRuns()).toEqual([
+            { startOffset: 1, endOffset: 3, textStyle: { bl: 1 } },
+            { startOffset: 4, endOffset: 6, textStyle: { it: 1 } },
+        ]);
+        expect(document.getTextRange(1, 3).setText('a😎', options)).toBe(true);
+        expect(document.getTextRange(1, 4).getCommonExplicitTextStyle()).toEqual({ bl: 1 });
+        expect(document.getTextRange(1, 4).setText('', options)).toBe(true);
+        expect(document.getParagraphs()[0].getText()).toBe('xyZZ!');
+    });
+
     it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('edits inherited character indents through save, undo and redo (%s)', (documentFlavor) => {
         const data = createSimpleDocument();
         data.documentStyle = { ...data.documentStyle, documentFlavor };

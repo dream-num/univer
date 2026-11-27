@@ -67,7 +67,7 @@ describe('ButtonGroup', () => {
         const { getByRole, getAllByRole } = render(
             <ButtonGroup>
                 <Button>First</Button>
-                {false && <Button>Hidden</Button>}
+                {null}
                 <Button>Last</Button>
             </ButtonGroup>
         );

@@ -116,6 +116,10 @@ export function getFormulaSequenceNodeIndex(
         currentOffset = nextOffset;
     }
 
+    if (!isEqual && sequenceNodes.length > 0 && offset > currentOffset) {
+        return sequenceNodes.length - 1;
+    }
+
     return -1;
 }
 
@@ -168,9 +172,23 @@ export function isFormulaReferenceAddingContext(
 export function isFormulaReferenceAddingTextContext(formulaText: string, offset: number): boolean {
     const character = formulaText[offset - 1];
     const nextCharacter = formulaText[offset];
+
+    let checkChar = character;
+    let isLeadingWhitespace = false;
+    if (checkChar && /\s/.test(checkChar)) {
+        let i = offset - 1;
+        while (i >= 0 && /\s/.test(formulaText[i])) {
+            i--;
+        }
+        if (i < 0) {
+            isLeadingWhitespace = true;
+        } else {
+            checkChar = formulaText[i];
+        }
+    }
+
     return Boolean(
-        character &&
-        matchRefDrawToken(character) &&
+        (isLeadingWhitespace || (checkChar && (matchRefDrawToken(checkChar) || checkChar === '='))) &&
         (!nextCharacter || (isFormulaLexerToken(nextCharacter) && nextCharacter !== matchToken.OPEN_BRACKET))
     );
 }

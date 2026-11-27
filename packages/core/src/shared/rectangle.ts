@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { BBox } from 'rbush';
 import type { IRange, IRectLTRB } from '../sheets/typedef';
-import RBush from 'rbush';
+import type { IBoundingBox } from './rbush';
 import { AbsoluteRefType, RANGE_TYPE } from '../sheets/typedef';
 import { MAX_COLUMN_COUNT, MAX_ROW_COUNT } from './max-row-column';
 import { mergeRanges, multiSubtractSingleRange, splitIntoGrid } from './range';
+import { RBush } from './rbush';
 
 /**
  * This class provides a set of methods to calculate and manipulate rectangular ranges (IRange).
@@ -187,9 +187,19 @@ export class Rectangle {
      * ```
      */
     static doAnyRangesIntersect(src: IRange[], target: IRange[]): boolean {
-        const rbush = new RBush<BBox>();
+        if (!src.length || !target.length) {
+            return false;
+        }
+        if (src.length === 1) {
+            return target.some((range) => Rectangle.simpleRangesIntersect(src[0], range));
+        }
+        // Unresolved or inverted source bounds must go through the same index as a multi-range query.
+        if (target.length <= 2 && src.every((r) => r.startRow <= r.endRow && r.startColumn <= r.endColumn)) {
+            return target.some((query) => src.some((range) => Rectangle.simpleRangesIntersect(range, query)));
+        }
+        const rbush = new RBush<IBoundingBox>();
         rbush.load(src.map((r) => ({ minX: r.startColumn, minY: r.startRow, maxX: r.endColumn, maxY: r.endRow })));
-        return target.some((r) => rbush.search({ minX: r.startColumn, minY: r.startRow, maxX: r.endColumn, maxY: r.endRow }).length > 0);
+        return target.some((r) => rbush.collides({ minX: r.startColumn, minY: r.startRow, maxX: r.endColumn, maxY: r.endRow }));
     }
 
     /**

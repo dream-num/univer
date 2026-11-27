@@ -15,12 +15,12 @@
  */
 
 import type { IDocumentStatistics } from '@univerjs/core';
-import type { LocaleKey } from '../../locale/types';
-import { LOCALE_META, LocaleService, RegionService } from '@univerjs/core';
+import { getRegionTag, LocaleService, RegionService } from '@univerjs/core';
 import { Dropdown, Separator } from '@univerjs/design';
 import { LoadingMultiIcon, StatisticalFunctionIcon } from '@univerjs/icons';
 import { ToolbarButton, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { DocPageStatus } from './DocPageStatus';
 import { useDocStatistics } from './use-doc-statistics';
 
@@ -62,7 +62,7 @@ function StatisticsContent({ statistics, selection, showPages, loading }: IStati
     const regionService = useDependency(RegionService);
     const direction = useObservable(localeService.direction$, localeService.getDirection());
     const currentRegion = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
-    const regionTag = LOCALE_META[currentRegion].tag;
+    const regionTag = getRegionTag(currentRegion);
     const statisticGroups = STATISTIC_ROW_GROUPS
         .map((rows) => rows.filter(({ key }) => showPages || key !== 'pages'))
         .filter((rows) => rows.length > 0);
@@ -145,7 +145,7 @@ export function DocStatistics() {
     const [open, setOpen] = useState(false);
     const { document, selection, loading, showPages } = useDocStatistics(open);
     const currentRegion = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
-    const regionTag = LOCALE_META[currentRegion].tag;
+    const regionTag = getRegionTag(currentRegion);
     const displayedStatistics = selection ?? document;
     const openLabel = localeService.t<LocaleKey>('docs-ui.statistics.open');
     const title = localeService.t<LocaleKey>('docs-ui.statistics.title');

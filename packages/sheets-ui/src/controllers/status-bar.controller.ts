@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
-import type { CellValue, ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, ISelectionCell, IStyleData, Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
-import type { ArrayValueObject, ISheetData } from '@univerjs/engine-formula';
+import type {
+    CellValue,
+    ICellData,
+    ICommandInfo,
+    IObjectMatrixPrimitiveType,
+    IRange,
+    ISelectionCell,
+    IStyleData,
+    Nullable,
+    SheetSkeleton,
+    Styles,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
+import type { ArrayValueObject } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 import {
     CellValueType,
     createInterceptorKey,
@@ -31,24 +43,27 @@ import {
     ObjectMatrix,
     RANGE_TYPE,
     splitIntoGrid,
-    toDisposable,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-
 import {
     FormulaDataModel,
     FUNCTION_NAMES_MATH,
     FUNCTION_NAMES_STATISTICAL,
 } from '@univerjs/engine-formula';
+import { getFocusedRenderForUnit, IRenderManagerService } from '@univerjs/engine-render';
 import {
     INumfmtService,
     SetRangeValuesMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import { distinctUntilChanged, EMPTY, filter, map, merge, of, startWith, switchMap } from 'rxjs';
+import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import { IStatusBarService } from '../services/status-bar.service';
 
 export const STATUS_BAR_PERMISSION_CORRECT = createInterceptorKey<ArrayValueObject[], ArrayValueObject[]>('statusBarPermissionCorrect');
+
+type PatternInfoRecord = Record<string, ReturnType<typeof numfmt.getFormatInfo>>;
 
 class CalculateValueSet {
     private _sum: number = 0;
@@ -57,7 +72,7 @@ class CalculateValueSet {
     private _min: number = Number.POSITIVE_INFINITY;
     private _max: number = Number.NEGATIVE_INFINITY;
 
-    add(value: Nullable<ICellData>, styles: Styles, patternInfoRecord: Record<string, any>) {
+    add(value: Nullable<ICellData>, styles: Styles, patternInfoRecord: PatternInfoRecord) {
         if (!Tools.isDefine(value?.v)) {
             return;
         }
@@ -74,7 +89,7 @@ class CalculateValueSet {
         const processNumberWithStyle = (
             style: Nullable<IStyleData>,
             v: Nullable<CellValue>,
-            patternInfoRecord: Record<string, any>
+            patternInfoRecord: PatternInfoRecord
         ) => {
             if (!style?.n?.pattern) {
                 return;
@@ -158,64 +173,43 @@ export class StatusBarController extends Disposable {
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IStatusBarService private readonly _statusBarService: IStatusBarService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(INumfmtService) private _numfmtService: INumfmtService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
+        @Inject(INumfmtService) private readonly _numfmtService: INumfmtService,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
-        this._init();
-    }
-
-    private _init(): void {
         this._registerSelectionListener();
     }
 
     private _registerSelectionListener(): void {
-        const _statisticsHandler = debounce((selections: ISelectionWithStyle[]) => {
+        const calculate = (selections: readonly ISelectionWithStyle[]) => {
             const primary = selections[selections.length - 1]?.primary;
             this._calculateSelection(
                 selections.map((selection) => selection.range),
                 primary
             );
-        }, 100);
+        };
+        const statisticsHandler = debounce(calculate, 100);
+        const statisticsMovingHandler = debounce(calculate, 500);
+        this.disposeWithMe(() => {
+            statisticsHandler.cancel();
+            statisticsMovingHandler.cancel();
+        });
 
-        const _statisticsMovingHandler = debounce((selections: ISelectionWithStyle[]) => {
-            const primary = selections[selections.length - 1]?.primary;
-            this._calculateSelection(
-                selections.map((selection) => selection.range),
-                primary
-            );
-        }, 500);
-
-        this.disposeWithMe(
-            toDisposable(
-                this._selectionManagerService.selectionMoving$.subscribe((selections) => {
-                    if (selections) {
-                        _statisticsMovingHandler(selections);
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            toDisposable(
-                this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
-                    if (selections) {
-                        _statisticsHandler(selections);
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            toDisposable(
-                this._selectionManagerService.selectionSet$.subscribe((selections) => {
-                    if (selections) {
-                        _statisticsHandler(selections);
-                    }
-                })
-            )
-        );
+        this.disposeWithMe(this._selectionManagerService.selectionMoving$.subscribe((selections) => {
+            if (selections) {
+                statisticsMovingHandler(selections);
+            }
+        }));
+        this.disposeWithMe(merge(this._selectionManagerService.selectionMoveEnd$, this._selectionManagerService.selectionSet$)
+            .subscribe((selections) => {
+                if (selections) {
+                    statisticsMovingHandler.cancel();
+                    statisticsHandler(selections);
+                }
+            }));
+        this._registerProjectionListener(statisticsHandler);
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -242,12 +236,39 @@ export class StatusBarController extends Disposable {
                         });
 
                         if (valueInSelection) {
-                            _statisticsHandler(selections as ISelectionWithStyle[]);
+                            statisticsHandler(selections);
                         }
                     }
                 }
             })
         );
+    }
+
+    private _registerProjectionListener(refresh: (selections: readonly ISelectionWithStyle[]) => void): void {
+        const renders = this._renderManagerService;
+        const workbook$ = this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        this.disposeWithMe(workbook$.pipe(switchMap((workbook) => {
+            if (!workbook) {
+                return EMPTY;
+            }
+            const unitId = workbook.getUnitId();
+            return merge(
+                renders.created$.pipe(filter((render) => render.unitId === unitId)),
+                renders.disposed$.pipe(filter((renderId) => renderId === unitId)),
+                (renders.focusedRenderChanged$ ?? EMPTY).pipe(filter((focusedUnitId) => focusedUnitId === unitId))
+            ).pipe(
+                startWith(null),
+                map(() => getFocusedRenderForUnit(renders, unitId)),
+                distinctUntilChanged(),
+                switchMap((render) => {
+                    const activeSheetId = workbook.getActiveSheet()?.getSheetId();
+                    const manager = render?.with(SheetSkeletonManagerService);
+                    return manager?.projectionChanged$.pipe(startWith(activeSheetId)) ?? of(activeSheetId);
+                }),
+                filter((sheetId) => sheetId !== undefined && sheetId === workbook.getActiveSheet()?.getSheetId()),
+                map((sheetId) => this._selectionManagerService.getWorkbookSelections(unitId).getSelectionsOfWorksheet(sheetId))
+            );
+        })).subscribe(refresh));
     }
 
     private _clearResult(): void {
@@ -269,7 +290,6 @@ export class StatusBarController extends Disposable {
                 startColumn: range.startColumn,
                 endRow: sheet.getRowCount() - 1,
                 endColumn: range.endColumn,
-
             };
         }
         if (range.rangeType === RANGE_TYPE.ROW) {
@@ -288,10 +308,22 @@ export class StatusBarController extends Disposable {
         };
     }
 
-    private _getCellValue(row: number, col: number, sheet: Worksheet, sheetArrayFormulaCellData?: IObjectMatrixPrimitiveType<Nullable<ICellData>>): Nullable<ICellData> {
+    private _getCellValue(
+        row: number,
+        col: number,
+        sheet: Worksheet,
+        sheetArrayFormulaCellData: IObjectMatrixPrimitiveType<Nullable<ICellData>> | undefined,
+        projection: Nullable<SheetSkeleton>
+    ): Nullable<ICellData> {
+        const override = projection?.getCellDisplayOverride(row, col);
+        if (override === null) {
+            return null;
+        }
         const rawCell = sheet.getCellRaw(row, col);
+        if (override !== undefined) {
+            return { ...override, s: rawCell?.s };
+        }
 
-        // Check array formula cell data if raw cell has no value
         const arrayCell = sheetArrayFormulaCellData?.[row]?.[col];
 
         if (arrayCell) {
@@ -306,94 +338,35 @@ export class StatusBarController extends Disposable {
         return rawCell;
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _calculateSelection(selections: IRange[], primary: Nullable<ISelectionCell>) {
         const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
+        const sheet = workbook?.getActiveSheet();
+        if (!workbook || !sheet || selections.length === 0) {
             return this._clearResult();
         }
         const unitId = workbook.getUnitId();
-        const sheet = workbook.getActiveSheet();
-        const sheetId = sheet?.getSheetId();
-        if (!sheetId) {
-            return this._clearResult();
+        const sheetId = sheet.getSheetId();
+        const manager = getFocusedRenderForUnit(this._renderManagerService, unitId)?.with(SheetSkeletonManagerService);
+        const projection = manager?.hasProjection(sheetId) ? manager.getSkeleton(sheetId) : undefined;
+        const visibleRows = projection ?? sheet;
+        const ranges = splitIntoGrid(selections.map((selection) => this.getRangeStartEndInfo(selection, sheet)));
+        const calculateValueSet = new CalculateValueSet();
+        const styles = workbook.getStyles();
+        const patternInfoRecord: PatternInfoRecord = {};
+        const sheetArrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData()?.[unitId]?.[sheetId];
+        for (const { startRow, startColumn, endRow, endColumn } of ranges) {
+            for (let row = startRow; row <= endRow; row++) {
+                if (!visibleRows.getRowVisible(row)) {
+                    continue;
+                }
+                for (let column = startColumn; column <= endColumn; column++) {
+                    const value = this._getCellValue(row, column, sheet, sheetArrayFormulaCellData, projection);
+                    calculateValueSet.add(value, styles, patternInfoRecord);
+                }
+            }
         }
 
-        const sheetData: ISheetData = {};
-
-        this._univerInstanceService
-            .getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!
-            .getSheets()
-            .forEach((sheet) => {
-                const sheetConfig = sheet.getConfig();
-                sheetData[sheet.getSheetId()] = {
-                    cellData: new ObjectMatrix(sheetConfig.cellData),
-                    rowCount: sheetConfig.rowCount,
-                    columnCount: sheetConfig.columnCount,
-                    rowData: sheetConfig.rowData,
-                    columnData: sheetConfig.columnData,
-                };
-            });
-
-        if (selections?.length) {
-            const realSelections: IRange[] = [];
-            selections.forEach((selection) => {
-                const { startRow: start, endRow: end } = selection;
-                let prev = null;
-                for (let r = start; r <= end; r++) {
-                    if (sheet.getRowVisible(r)) {
-                        if (prev === null) {
-                            prev = r;
-                        }
-                    } else {
-                        if (prev !== null) {
-                            realSelections.push({ ...selection, startRow: prev, endRow: r - 1 });
-                            prev = null;
-                        }
-                    }
-                }
-                if (prev !== null) {
-                    realSelections.push({ ...selection, startRow: prev, endRow: end });
-                }
-            });
-
-            const noDuplicate = splitIntoGrid(realSelections);
-            // const matrix = sheet.getCellMatrix();
-            const calculateValueSet = new CalculateValueSet();
-            const styles = workbook.getStyles();
-            const patternInfoRecord: Record<string, any> = {};
-
-            // Cache arrayFormulaCellData outside the loop to avoid repeated calls
-            const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
-            const sheetArrayFormulaCellData = arrayFormulaCellData?.[unitId]?.[sheetId];
-
-            for (const range of noDuplicate) {
-                const { startRow, startColumn, endColumn, endRow } = this.getRangeStartEndInfo(range, sheet);
-                for (let r = startRow; r <= endRow; r++) {
-                    for (let c = startColumn; c <= endColumn; c++) {
-                        const value = this._getCellValue(r, c, sheet, sheetArrayFormulaCellData);
-                        calculateValueSet.add(value, styles, patternInfoRecord);
-                    }
-                }
-            }
-
-            const calcResult = calculateValues(calculateValueSet);
-            if (calcResult.every((r) => r === undefined)) {
-                return;
-            }
-            let pattern = null;
-            if (primary) {
-                const { actualRow, actualColumn } = primary;
-                pattern = this._numfmtService.getValue(unitId, sheetId, actualRow, actualColumn)?.pattern;
-            }
-            const availableResult = calcResult.filter((r) => r !== undefined);
-            const newState = {
-                values: availableResult,
-                pattern,
-            };
-            this._statusBarService.setState(newState as IStatusBarServiceStatus);
-        } else {
-            this._clearResult();
-        }
+        const pattern = primary ? this._numfmtService.getValue(unitId, sheetId, primary.actualRow, primary.actualColumn)?.pattern : null;
+        this._statusBarService.setState({ values: calculateValues(calculateValueSet), pattern });
     }
 }

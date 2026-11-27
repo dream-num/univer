@@ -295,7 +295,7 @@ export class UnitDrawingService<T extends IDrawingParam & IDrawingRefreshMetadat
         this._visible$.next(visibleParams);
     }
 
-    refreshTransform(updateParams: T[]) {
+    refreshTransform(updateParams: T[], notify = true) {
         updateParams.forEach((updateParam) => {
             const param = this._getCurrentBySearch(updateParam);
             if (param == null) {
@@ -305,7 +305,11 @@ export class UnitDrawingService<T extends IDrawingParam & IDrawingRefreshMetadat
             param.transform = updateParam.transform;
             // Cell anchors must describe the same bounds as the refreshed pixel transform.
             if (Object.prototype.hasOwnProperty.call(updateParam, 'sheetTransform')) {
-                param.sheetTransform = updateParam.sheetTransform;
+                if (updateParam.sheetTransform === undefined) {
+                    delete param.sheetTransform;
+                } else {
+                    param.sheetTransform = updateParam.sheetTransform;
+                }
             }
             if (Object.prototype.hasOwnProperty.call(updateParam, 'axisAlignSheetTransform')) {
                 param.axisAlignSheetTransform = updateParam.axisAlignSheetTransform;
@@ -325,7 +329,9 @@ export class UnitDrawingService<T extends IDrawingParam & IDrawingRefreshMetadat
             }
         });
 
-        this.refreshTransformNotification(updateParams);
+        if (notify) {
+            this.refreshTransformNotification(updateParams);
+        }
     }
 
     getDrawingDataForUnit(unitId: string) {

@@ -29,10 +29,6 @@ export class Concat extends BaseFunction {
         let isError: BaseValueObject | null = null;
 
         for (const textValue of textValues) {
-            if (textValue.isError()) {
-                return textValue;
-            }
-
             if (textValue.isArray()) {
                 (textValue as ArrayValueObject).iterator((valueObject) => {
                     if (valueObject == null || valueObject.isNull()) {
@@ -44,18 +40,29 @@ export class Concat extends BaseFunction {
                         return false; // break
                     }
 
-                    concatenatedString += formatValueForFormulaText(valueObject.getValue());
+                    concatenatedString += this._formatText(valueObject.getValue());
                 });
 
                 if (isError) {
                     return isError;
                 }
+            } else if (textValue.isError()) {
+                if (this._propagatesScalarErrors()) {
+                    return textValue;
+                }
             } else if (!textValue.isNull()) {
-                // Direct concatenation if it's a single value
-                concatenatedString += formatValueForFormulaText(textValue.getValue());
+                concatenatedString += this._formatText(textValue.getValue());
             }
         }
 
         return StringValueObject.create(concatenatedString);
+    }
+
+    protected _propagatesScalarErrors(): boolean {
+        return false;
+    }
+
+    protected _formatText(value: string | number | boolean | null): string {
+        return formatValueForFormulaText(value);
     }
 }

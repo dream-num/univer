@@ -16,7 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import { CellValueType, dateKit, Range, Tools } from '@univerjs/core';
-import { ERROR_TYPE_SET, FormulaResultStatus } from '@univerjs/engine-formula';
+import { ERROR_TYPE_SET, FormulaResultStatus, normalizeTextForComparison, upperCaseKeepingPositions } from '@univerjs/engine-formula';
 import type {
     IAverageHighlightCell,
     IFormulaHighlightCell,
@@ -53,6 +53,30 @@ const sortRangesByTopLeft = <T extends { startRow: number; startColumn: number }
 
     return a.startColumn - b.startColumn;
 });
+
+/**
+ * Case folding for the rules Excel builds from SEARCH: "Text that contains" and "Text that does
+ * not contain" ignore case but compare ligatures as they are written, so a cell "Straße" does
+ * not contain "STRASSE". Upper-casing without changing the length matches SEARCH: it keeps the
+ * Greek final sigma equal to sigma and a dotted İ distinct from a plain i, which lower-casing
+ * would turn into an i followed by a combining dot.
+ */
+function foldForSearch(text: string): string {
+    return upperCaseKeepingPositions(text);
+}
+
+/**
+ * Case folding for the rules Excel builds from "=": "Begins with", "Ends with", "Equal to" and
+ * "Not equal to" compare the cell with the rule text, or with LEFT or RIGHT of it, using "=".
+ * That comparison also folds linguistic ligatures ("Straße" equals "STRASSE"), composes Unicode
+ * normalization (NFC and NFD compare equal) and, as the search folding above, treats the Greek
+ * final sigma as sigma.
+ */
+function foldForEquality(text: string): string {
+    return normalizeTextForComparison(text).replace(/ς/g, 'σ');
+}
+
+const isExcelEqual = (left: string, right: string) => foldForEquality(left) === foldForEquality(right);
 
 // Duplicate and unique values compare text case-insensitively, as Excel does: "Apple" duplicates "apple".
 const duplicateKey = (value: unknown) => (typeof value === 'string' ? value.toLowerCase() : value);
@@ -275,10 +299,11 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     const subRuleConfig = ruleConfig as ITextHighlightCell;
                     const value = getCellValue(cellValue);
                     const v = isNullable(value) ? '' : String(value);
-                    const condition = subRuleConfig.value || '';
+                    const ruleText = subRuleConfig.value || '';
                     switch (subRuleConfig.operator) {
                         case CFTextOperator.beginsWith: {
-                            return v.startsWith(condition);
+                            // Excel compares LEFT(cell, LEN(rule text)) with the rule text.
+                            return isExcelEqual(v.slice(0, ruleText.length), ruleText);
                         }
                         case CFTextOperator.containsBlanks: {
                             return /^\s*$/.test(v);
@@ -293,19 +318,20 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                             return !(ERROR_TYPE_SET as Set<unknown>).has(v);
                         }
                         case CFTextOperator.containsText: {
-                            return v.indexOf(condition) > -1;
+                            return foldForSearch(v).includes(foldForSearch(ruleText));
                         }
                         case CFTextOperator.notContainsText: {
-                            return v.indexOf(condition) === -1;
+                            return !foldForSearch(v).includes(foldForSearch(ruleText));
                         }
                         case CFTextOperator.endsWith: {
-                            return v.endsWith(condition);
+                            // Excel compares RIGHT(cell, LEN(rule text)) with the rule text.
+                            return isExcelEqual(v.slice(Math.max(0, v.length - ruleText.length)), ruleText);
                         }
                         case CFTextOperator.equal: {
-                            return v === condition;
+                            return isExcelEqual(v, ruleText);
                         }
                         case CFTextOperator.notEqual: {
-                            return v !== condition;
+                            return !isExcelEqual(v, ruleText);
                         }
                         default: {
                             return false;

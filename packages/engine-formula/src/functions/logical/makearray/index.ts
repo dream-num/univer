@@ -25,18 +25,20 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Makearray extends BaseFunction {
+    protected readonly excelCompatibility: boolean = false;
+
     override minParams = 3;
 
     override maxParams = 3;
 
     override calculate(...variants: BaseValueObject[]) {
-        const row = this.getIndexNumValue(variants[0]);
+        const row = this._getDimension(variants[0]);
 
         if (typeof row !== 'number') {
             return row;
         }
 
-        const column = this.getIndexNumValue(variants[1]);
+        const column = this._getDimension(variants[1]);
 
         if (typeof column !== 'number') {
             return column;
@@ -47,6 +49,9 @@ export class Makearray extends BaseFunction {
         }
 
         const lambda = variants[2] as LambdaValueObjectObject;
+        if (this.excelCompatibility && !lambda.acceptsArity(2)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
 
         const result: Array<Array<BaseValueObject | AsyncObject>> = [];
 
@@ -58,7 +63,11 @@ export class Makearray extends BaseFunction {
                 let value = lambda.execute(NumberValueObject.create(r + 1), NumberValueObject.create(c + 1));
 
                 if (value.isArray()) {
-                    value = (value as ArrayValueObject).get(0, 0) as BaseValueObject;
+                    const output = value as ArrayValueObject;
+                    if (this.excelCompatibility && (output.getRowCount() > 1 || output.getColumnCount() > 1)) {
+                        return ErrorValueObject.create(ErrorType.CALC);
+                    }
+                    value = output.get(0, 0) as BaseValueObject;
                 }
 
                 result[r][c] = value;
@@ -70,5 +79,20 @@ export class Makearray extends BaseFunction {
 
     override isAsync(): boolean {
         return true;
+    }
+
+    private _getDimension(value: BaseValueObject): number | BaseValueObject {
+        const scalar = value.isArray() ? (value as ArrayValueObject).getFirstCell() : value;
+        if (scalar.isError()) {
+            return scalar;
+        }
+        const dimension = this.getIndexNumValue(scalar);
+        if (typeof dimension !== 'number' || !Number.isFinite(dimension) || dimension < 1) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+        if (this.excelCompatibility && !Number.isInteger(dimension)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+        return Math.floor(dimension);
     }
 }

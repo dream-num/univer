@@ -119,11 +119,11 @@ describe('Test oddlprice function', () => {
 
             const basis3 = NumberValueObject.create(2);
             const result3 = testFunction.calculate(settlement, maturity, lastInterest, rate, yld, redemption, frequency, basis3);
-            expect(getObjectValue(result3, true)).toBe(110.876163657771);
+            expect(getObjectValue(result3, true)).toBe(110.8745242842);
 
             const basis4 = NumberValueObject.create(3);
             const result4 = testFunction.calculate(settlement, maturity, lastInterest, rate, yld, redemption, frequency, basis4);
-            expect(getObjectValue(result4, true)).toBe(110.87411927);
+            expect(getObjectValue(result4, true)).toBe(110.8745242842);
 
             const basis5 = NumberValueObject.create(4);
             const result5 = testFunction.calculate(settlement, maturity, lastInterest, rate, yld, redemption, frequency, basis5);

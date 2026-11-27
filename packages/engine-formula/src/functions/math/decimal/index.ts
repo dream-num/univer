@@ -65,7 +65,11 @@ export class Decimal extends BaseFunction {
                 return radixObject;
             }
 
-            const textValue = `${textObject.getValue()}`;
+            const input = `${textObject.getValue()}`;
+            if (input.length > 255) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+            const textValue = input.replace(/^ +/, '');
             const radixValue = Math.floor(+radixObject.getValue());
 
             // The number that you want to convert. Must be an integer greater than or equal to 0 and less than 2^53.

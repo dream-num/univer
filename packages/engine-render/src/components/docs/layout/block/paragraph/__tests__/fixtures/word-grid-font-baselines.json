@@ -1,0 +1,32 @@
+{
+    "source": "Independent Word readonly first-print baselines for a 312-twip document grid, paired with real browser font metrics; nominal 11pt body and optional17pt character style/15pt paragraph mark",
+    "actualWordSessionSha256": "cbd53085c45a75183831a802c4ca48925aa8efae5428b062824a862c2a008586",
+    "cases": [
+        {
+            "name": "unchanged",
+            "marginTop": 96,
+            "linePitch": 20.8,
+            "lineSpacing": 1.1583333333333334,
+            "boundingBoxAscent": 11.888020833333332,
+            "boundingBoxDescent": 3.4088541666666665,
+            "normalLineHeight": 19.885937499999997,
+            "wordBaseline": 112.34666666666665,
+            "actualWordInputSha256": "ecd27dc24118a961cf762053bc8066c7e8446d1006d38f35c17fbab7bf13e6f4",
+            "actualWordPdfSha256": "9e9cc47e3d0ee07bfaa6165bcf7a1623547091b950fb650d6b27a494c144e06d",
+            "actualSdkLayoutSha256": "f65affdc50f36d729f75bd5a61dcfc7b143bb4145e720971563751b23bf5f92c"
+        },
+        {
+            "name": "public-direct-and-named-style",
+            "marginTop": 96,
+            "linePitch": 20.8,
+            "lineSpacing": 1.1583333333333334,
+            "boundingBoxAscent": 18.372395833333336,
+            "boundingBoxDescent": 5.268229166666667,
+            "normalLineHeight": 30.732812500000005,
+            "wordBaseline": 123.38666666666661,
+            "actualWordInputSha256": "a981f12eadf8e04d0267006a74079528f2eb5e7a2fc86ce21a6df4d65e409a89",
+            "actualWordPdfSha256": "4771bd9190fec591ee44b470f6be1c563b5c145b77b044853f902d7ee4763d0f",
+            "actualSdkLayoutSha256": "b7859ea7373e991c4237293c9dc8fe1fdc2b67b1072fe1915543769ef898282c"
+        }
+    ]
+}

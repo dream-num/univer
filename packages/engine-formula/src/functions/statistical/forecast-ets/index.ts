@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { NotImplementedFunction } from '../../not-implemented-function';
+import { EtsFunction } from './base';
 
-export class ForecastEts extends NotImplementedFunction {
+export class ForecastEts extends EtsFunction {
     override minParams = 3;
 
     override maxParams = 6;
 
-    // TODO: Implement exponential-triple-smoothing forecasting and timeline validation.
+    protected override readonly mode = 'forecast';
 }

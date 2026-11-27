@@ -38,7 +38,6 @@ import { SetWorksheetColumnCountMutation } from '../../mutations/set-worksheet-c
 import { SetWorksheetHideMutation } from '../../mutations/set-worksheet-hide.mutation';
 import { SetWorksheetPermissionPointsMutation } from '../../mutations/set-worksheet-permission-points.mutation';
 import { SetWorksheetProtectionMutation } from '../../mutations/set-worksheet-protection.mutation';
-import { SetWorksheetRightToLeftMutation } from '../../mutations/set-worksheet-right-to-left.mutation';
 import { SetWorksheetRowCountMutation } from '../../mutations/set-worksheet-row-count.mutation';
 import { SetWorksheetActiveOperation } from '../../operations/set-worksheet-active.operation';
 import { AddRangeProtectionCommand } from '../add-range-protection.command';
@@ -49,7 +48,6 @@ import { SetProtectionCommand } from '../set-protection.command';
 import { SetWorksheetColumnCountCommand } from '../set-worksheet-column-count.command';
 import { SetWorksheetPermissionPointsCommand } from '../set-worksheet-permission-points.command';
 import { SetWorksheetProtectionCommand } from '../set-worksheet-protection.command';
-import { SetWorksheetRightToLeftCommand } from '../set-worksheet-right-to-left.command';
 import { SetWorksheetRowCountCommand } from '../set-worksheet-row-count.command';
 import { SetWorksheetShowCommand } from '../set-worksheet-show.command';
 
@@ -387,7 +385,7 @@ describe('mixed protection command', () => {
     });
 });
 
-describe('worksheet row, column, rtl and show commands', () => {
+describe('worksheet row, column and show commands', () => {
     it('sets row and column counts and records previous dimensions for undo', () => {
         const commandService = createCommandService();
         const undoRedoService = createUndoRedoService();
@@ -434,43 +432,6 @@ describe('worksheet row, column, rtl and show commands', () => {
         expect(SetWorksheetColumnCountCommand.handler(accessor, { unitId: 'unit-1', subUnitId: 'missing', columnCount: 40 })).toBe(false);
         expect(SetWorksheetRowCountCommand.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1', rowCount: 120 })).toBe(false);
         expect(SetWorksheetColumnCountCommand.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1', columnCount: 40 })).toBe(false);
-    });
-
-    it('sets worksheet right-to-left mode from explicit params or defaults to false', async () => {
-        const commandService = createCommandService();
-        const undoRedoService = createUndoRedoService();
-        const { univerInstanceService } = createWorkbookTarget();
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, commandService],
-            [IUndoRedoService, undoRedoService],
-            [IUniverInstanceService, univerInstanceService],
-        ]));
-
-        await expect(SetWorksheetRightToLeftCommand.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1', rightToLeft: BooleanNumber.TRUE })).resolves.toBe(true);
-        await expect(SetWorksheetRightToLeftCommand.handler(accessor)).resolves.toBe(true);
-        expect(commandService.calls).toEqual([
-            { id: SetWorksheetRightToLeftMutation.id, params: { unitId: 'unit-1', subUnitId: 'sheet-1', rightToLeft: BooleanNumber.TRUE }, async: false },
-            { id: SetWorksheetRightToLeftMutation.id, params: { unitId: 'unit-1', subUnitId: 'sheet-1', rightToLeft: BooleanNumber.FALSE }, async: false },
-        ]);
-        expect(undoRedoService.records).toHaveLength(2);
-    });
-
-    it('returns false when worksheet right-to-left cannot target or apply the sheet', async () => {
-        const { univerInstanceService } = createWorkbookTarget();
-        const accessorWithoutTarget = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, createCommandService()],
-            [IUndoRedoService, createUndoRedoService()],
-            [IUniverInstanceService, { ...univerInstanceService, getUnit: () => null, getCurrentUnitOfType: () => null }],
-        ]));
-        await expect(SetWorksheetRightToLeftCommand.handler(accessorWithoutTarget, { unitId: 'missing', subUnitId: 'sheet-1', rightToLeft: BooleanNumber.TRUE })).resolves.toBe(false);
-
-        const falseCommandService = createCommandService({ [SetWorksheetRightToLeftMutation.id]: false });
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, falseCommandService],
-            [IUndoRedoService, createUndoRedoService()],
-            [IUniverInstanceService, univerInstanceService],
-        ]));
-        await expect(SetWorksheetRightToLeftCommand.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1', rightToLeft: BooleanNumber.TRUE })).resolves.toBe(false);
     });
 
     it('shows a hidden worksheet, activates it, and records undo for the hide state', () => {

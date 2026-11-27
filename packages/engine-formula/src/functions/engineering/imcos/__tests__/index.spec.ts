@@ -35,13 +35,13 @@ describe('Test imcos function', () => {
         it('Value is large numbers', () => {
             const inumber = NumberValueObject.create(25698432);
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(-0.993968497433099);
+            expect(result.getValue()).toBe('-0.993968497433099');
         });
 
         it('Value is number string', () => {
             const inumber = StringValueObject.create('1.5');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(0.0707372016677029);
+            expect(result.getValue()).toBe('0.0707372016677029');
         });
 
         it('Value is normal string', () => {
@@ -69,7 +69,7 @@ describe('Test imcos function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(1);
+            expect(result.getValue()).toBe('1');
         });
 
         it('Value is error', () => {

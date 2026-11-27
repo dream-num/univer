@@ -19,7 +19,7 @@ import { erf } from '../../../basics/engineering';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Erf extends BaseFunction {
@@ -66,5 +66,14 @@ export class Erf extends BaseFunction {
         }
 
         return NumberValueObject.create(result);
+    }
+}
+
+export class ExcelErf extends Erf {
+    override calculate(lowerLimit: BaseValueObject, upperLimit?: BaseValueObject): BaseValueObject {
+        const argument = (value: BaseValueObject) => value instanceof NullValueObject && value.isOmitted()
+            ? ErrorValueObject.create(ErrorType.NA)
+            : value;
+        return super.calculate(argument(lowerLimit), upperLimit && argument(upperLimit));
     }
 }

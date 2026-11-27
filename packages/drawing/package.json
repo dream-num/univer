@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/drawing",
-    "version": "1.5.2",
+    "version": "1.6.2",
     "private": false,
     "description": "Shared drawing models, commands, and services for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -73,7 +73,7 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "7.8.2",
-        "tsrs": "0.23.0-ts7.1.0-beta",
-        "vitest": "^5.1.0"
+        "tsrs": "7.1.0-beta.tsrs5",
+        "vitest": "^5.1.1"
     }
 }

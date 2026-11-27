@@ -16,8 +16,9 @@
 
 import type { LocaleKey } from '../locale/types';
 import { DEFAULT_TEXT_FORMAT_EXCEL } from '@univerjs/core';
+import { getDefaultDateFormat } from '@univerjs/sheets-numfmt';
 
-export const MENU_OPTIONS = (currencySymbol: string): Array<{
+export const MENU_OPTIONS = (currencySymbol: string, region?: string): Array<{
     label: LocaleKey;
     pattern: string | null;
 } | '|'> => {
@@ -63,7 +64,7 @@ export const MENU_OPTIONS = (currencySymbol: string): Array<{
         '|',
         {
             label: 'sheets-numfmt-ui.date',
-            pattern: 'yyyy-mm-dd;@',
+            pattern: region ? `${getDefaultDateFormat(region)};@` : 'yyyy-mm-dd;@',
         },
         {
             label: 'sheets-numfmt-ui.time',

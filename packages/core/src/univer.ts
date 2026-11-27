@@ -79,7 +79,7 @@ export interface IUniverConfig {
     /**
      * The region of the Univer instance. It follows locale until explicitly configured.
      */
-    region?: LocaleType;
+    region?: string;
 
     /**
      * The direction of the Univer instance.
@@ -190,7 +190,7 @@ export class Univer implements IDisposable {
         this._injector.get(LocaleService).setLocale(locale);
     }
 
-    setRegion(region: LocaleType): void {
+    setRegion(region: string): void {
         this._injector.get(RegionService).setRegion(region);
     }
 

@@ -15,7 +15,7 @@
  */
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Accordion } from '../Accordion';
 
 afterEach(cleanup);
@@ -53,5 +53,38 @@ describe('Accordion', () => {
         // Should collapse the second item
         fireEvent.click(getByText('Item 2'));
         expect(queryByText('Content 2')?.parentElement?.parentElement?.className).toContain('univer-max-h-0');
+    });
+
+    it('exposes WAI-ARIA trigger/region relationships and honors controlled openIndex including null', () => {
+        const onOpenIndexChange = vi.fn();
+        const items = [
+            { id: 'first', label: 'Section A', children: <div>Body A</div> },
+            { id: 'second', label: 'Section B', children: <div>Body B</div> },
+        ];
+
+        const { getByRole, rerender } = render(
+            <Accordion items={items} defaultOpenIndex={0} openIndex={null} onOpenIndexChange={onOpenIndexChange} />
+        );
+
+        const triggerA = getByRole('button', { name: 'Section A' });
+        expect(triggerA.getAttribute('aria-expanded')).toBe('false');
+        const panelAId = triggerA.getAttribute('aria-controls');
+        expect(panelAId).toBeTruthy();
+
+        const panelA = document.getElementById(panelAId!);
+        expect(panelA?.getAttribute('role')).toBe('region');
+        expect(panelA?.getAttribute('aria-labelledby')).toBe(triggerA.id);
+        expect(panelA?.getAttribute('aria-hidden')).toBe('true');
+
+        fireEvent.click(triggerA);
+        expect(onOpenIndexChange).toHaveBeenCalledWith(0);
+        // Remains collapsed while controlled openIndex stays null
+        expect(triggerA.getAttribute('aria-expanded')).toBe('false');
+
+        rerender(
+            <Accordion items={items} defaultOpenIndex={0} openIndex={0} onOpenIndexChange={onOpenIndexChange} />
+        );
+        expect(triggerA.getAttribute('aria-expanded')).toBe('true');
+        expect(panelA?.getAttribute('aria-hidden')).toBe('false');
     });
 });

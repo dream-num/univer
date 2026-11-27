@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsNumfmtConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import type { IUniverSheetsNumfmtConfig } from './config/config';
 import pkg from '../package.json';
 import { SHEET_NUMFMT_PLUGIN } from './base/const/plugin-name';
 import { AddDecimalCommand } from './commands/commands/add-decimal.command';
@@ -26,6 +26,7 @@ import { SetPercentCommand } from './commands/commands/set-percent.command';
 import { SubtractDecimalCommand } from './commands/commands/subtract-decimal.command';
 import { defaultPluginConfig, SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsNumfmtCellContentController } from './controllers/numfmt-cell-content.controller';
+import { NumfmtPermissionController } from './controllers/numfmt-permission.controller';
 
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsNumfmtPlugin extends Plugin {
@@ -55,10 +56,12 @@ export class UniverSheetsNumfmtPlugin extends Plugin {
     override onStarting(): void {
         registerDependencies(this._injector, [
             [SheetsNumfmtCellContentController],
+            [NumfmtPermissionController],
         ]);
 
         touchDependencies(this._injector, [
             [SheetsNumfmtCellContentController],
+            [NumfmtPermissionController],
         ]);
 
         [

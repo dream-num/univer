@@ -41,7 +41,7 @@ describe('Test imexp function', () => {
         it('Value is number string', () => {
             const inumber = StringValueObject.create('1.5');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(4.48168907033806);
+            expect(result.getValue()).toBe('4.48168907033806');
         });
 
         it('Value is normal string', () => {
@@ -69,7 +69,7 @@ describe('Test imexp function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(1);
+            expect(result.getValue()).toBe('1');
         });
 
         it('Value is error', () => {

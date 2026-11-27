@@ -101,4 +101,20 @@ describe('HueSlider', () => {
         const lastCall = onChanged.mock.calls[onChanged.mock.calls.length - 1];
         expect(lastCall[0]).not.toBe(120);
     });
+
+    it('supports keyboard navigation with arrows, Shift, Home and End', () => {
+        const onChange = vi.fn();
+        const onChanged = vi.fn();
+        const { getByRole } = render(<HueSlider hsv={[120, 60, 70]} onChange={onChange} onChanged={onChanged} />);
+        const slider = getByRole('slider', { name: 'Hue' });
+
+        fireEvent.keyDown(slider, { key: 'ArrowRight', shiftKey: true });
+        expect(onChange).toHaveBeenLastCalledWith(130, 60, 70);
+
+        fireEvent.keyDown(slider, { key: 'Home' });
+        expect(onChange).toHaveBeenLastCalledWith(0, 60, 70);
+
+        fireEvent.keyDown(slider, { key: 'End' });
+        expect(onChange).toHaveBeenLastCalledWith(360, 60, 70);
+    });
 });

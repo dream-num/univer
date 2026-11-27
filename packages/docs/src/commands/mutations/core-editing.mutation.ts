@@ -73,6 +73,8 @@ export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     noNeedSetTextRange?: boolean;
     isCompositionEnd?: boolean;
     noHistory?: boolean;
+    /** Skip automatic undo history while retaining collaboration for a manually owned history item. */
+    skipHistory?: boolean;
     // Do you need to compose the undo and redo of history, and compose of the change states.
     debounce?: boolean;
     options?: { [key: string]: boolean };
@@ -292,6 +294,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             prevTextRanges,
             trigger,
             noHistory,
+            skipHistory,
             isCompositionEnd,
             debounce,
             isEditing = true,
@@ -300,11 +303,11 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         } = params;
         const isSync = Boolean(paramsIsSync || options?.fromCollab || options?.fromChangeset);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const renderManagerService = accessor.get(IRenderManagerService);
+        const renderManagerService = accessor.has(IRenderManagerService) ? accessor.get(IRenderManagerService) : undefined;
         const docStateEmitService = accessor.get(DocStateEmitService);
 
         const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        const documentViewModel = renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService).getViewModel();
+        const documentViewModel = renderManagerService?.getRenderUnitById(unitId)?.with(DocSkeletonManagerService).getViewModel();
         if (documentDataModel == null) {
             throw new Error(`DocumentDataModel not found for unitId: ${unitId}`);
         }
@@ -370,6 +373,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             segmentId,
             trigger,
             noHistory,
+            skipHistory,
             debounce,
             redoState: {
                 ...(presentation ? { layoutState: params.layoutState } : {}),

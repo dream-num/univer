@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// @vitest-environment happy-dom
-
 import { IImageIoService, IURLImageService, Univer } from '@univerjs/core';
 import { IDrawingManagerService, OleService } from '@univerjs/drawing';
 import { ComponentManager, IconManager, IDialogService, IGalleryService, IMessageService, INotificationService } from '@univerjs/ui';

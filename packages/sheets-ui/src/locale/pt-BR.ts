@@ -381,6 +381,7 @@ const locale: typeof enUS = {
                 searchEmptyDescription: 'Tente outro nome ou limpe a busca.',
                 commonErr: 'O intervalo está protegido e você não tem permissão para esta operação. Para editar, entre em contato com o criador.',
                 editErr: 'O intervalo está protegido e você não tem permissão para editar. Para editar, entre em contato com o criador.',
+                operatorSheetErr: 'Você não tem permissão para operar a planilha. Para operar a planilha, entre em contato com o criador.',
                 pasteErr: 'O intervalo está protegido e você não tem permissão para colar. Para colar, entre em contato com o criador.',
                 setStyleErr: 'O intervalo está protegido e você não tem permissão para definir estilos. Para definir estilos, entre em contato com o criador.',
                 copyErr: 'O intervalo está protegido e você não tem permissão para copiar. Para copiar, entre em contato com o criador.',

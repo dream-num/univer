@@ -33,11 +33,27 @@ export function createLiteralRegExp(value: string, flags?: string): RegExp {
 /**
  * Converts a spreadsheet-style wildcard pattern to an anchored regular expression.
  *
- * `*` matches any number of characters and `?` matches one character. All other
- * regular-expression syntax is treated as literal text. Matching is case-insensitive.
+ * `*` matches any number of characters and `?` matches one character, including
+ * line breaks. If the pattern contains either symbol, a tilde escapes the next
+ * character and a trailing tilde is ignored. Other patterns are matched as
+ * written, including tildes. Matching is case-insensitive.
  */
 export function createFromWildcard(pattern: string): RegExp {
-    const escaped = escapeRegExp(pattern);
-    const source = escaped.replace(/\\\*/g, '.*').replace(/\\\?/g, '.');
-    return createRegExpFromSafeFragment(`^${source}$`, 'i');
+    if (!/[*?]/.test(pattern)) {
+        return createRegExpFromSafeFragment(`^${escapeRegExp(pattern)}$`, 'i');
+    }
+
+    const source = pattern.replace(/~.?|[*?]|[^~*?]+/gs, (token) => {
+        switch (token[0]) {
+            case '~':
+                return escapeRegExp(token.slice(1));
+            case '*':
+                return '.*';
+            case '?':
+                return '.';
+            default:
+                return escapeRegExp(token);
+        }
+    });
+    return createRegExpFromSafeFragment(`^${source}$`, 'is');
 }

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -24,7 +25,17 @@ import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Sqrtpi } from '../index';
 
 describe('Test sqrtpi function', () => {
-    const testFunction = new Sqrtpi(FUNCTION_NAMES_MATH.SQRTPI);
+    let injector: Injector;
+    let testFunction: Sqrtpi;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [Sqrtpi, { useFactory: () => injector.createInstance(Sqrtpi, FUNCTION_NAMES_MATH.SQRTPI) }],
+        ]);
+        testFunction = injector.get(Sqrtpi);
+    });
+
+    afterEach(() => injector.dispose());
 
     describe('Sqrtpi', () => {
         it('Value is normal number', () => {
@@ -72,8 +83,8 @@ describe('Test sqrtpi function', () => {
         it('Value is array', () => {
             const valueArray = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    [1, ' ', 1.23, true, false, null],
-                    [0, '100', '2.34', 'test', -3, ErrorType.NAME],
+                    [0, 1, 4, true, false, null],
+                    ['1', '4', -1, 'test', ErrorType.NA, ErrorType.NAME],
                 ]),
                 rowCount: 2,
                 columnCount: 6,
@@ -83,7 +94,10 @@ describe('Test sqrtpi function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(valueArray);
-            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual([
+                [0, expect.closeTo(1.772453850905516, 12), expect.closeTo(3.544907701811032, 12), expect.closeTo(1.772453850905516, 12), 0, 0],
+                [expect.closeTo(1.772453850905516, 12), expect.closeTo(3.544907701811032, 12), ErrorType.NUM, ErrorType.VALUE, ErrorType.NA, ErrorType.NAME],
+            ]);
         });
     });
 });

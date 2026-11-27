@@ -24,6 +24,9 @@ const locale: typeof enUS = {
         msg: {
             'filter-header-forbidden': 'Non è possibile spostare la riga di intestazione di un filtro.',
         },
+        permission: {
+            filterErr: 'L\'intervallo è protetto e non hai l\'autorizzazione per filtrare. Per filtrare, contatta il creatore.',
+        },
     },
 };
 

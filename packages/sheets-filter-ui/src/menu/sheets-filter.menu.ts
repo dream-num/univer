@@ -93,6 +93,9 @@ function getFilterRangeDisabled$(accessor: IAccessor) {
     return getObservableWithExclusiveRange$(
         accessor,
         getCurrentRangeDisable$(accessor, {
+            // Filtering is allowed without workbook edit permission; without this explicit empty
+            // array the helper defaults to WorkbookEditablePermission and disables the menu.
+            workbookTypes: [],
             worksheetTypes: [WorksheetFilterPermission, WorksheetViewPermission],
             rangeTypes: [RangeProtectionPermissionViewPoint],
         })

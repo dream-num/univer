@@ -19,6 +19,7 @@ import type { Observable } from 'rxjs';
 
 import type { IFeatureDirtyRangeType, IRuntimeUnitDataType } from '../basics/common';
 import type { IRemoveFeatureCalculationMutationParam } from '../commands/mutations/set-feature-calculation.mutation';
+import type { IPivotFormulaReport } from '../functions/lookup/getpivotdata';
 import type { IFormulaDirtyData } from './current-data.service';
 import type { IAllRuntimeData } from './runtime.service';
 import { createIdentifier, Disposable } from '@univerjs/core';
@@ -31,6 +32,7 @@ export interface IFeatureCalculationManagerParam {
     getDirtyData: (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
         runtimeCellData: IRuntimeUnitDataType;
         dirtyRanges: IFeatureDirtyRangeType;
+        pivotReport?: IPivotFormulaReport | null;
     };
 }
 

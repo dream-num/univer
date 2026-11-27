@@ -83,11 +83,11 @@ export class Ppmt extends BaseFunction {
             const fvValue = +_fvObject.getValue();
             const typeValue = +_typeObject.getValue();
 
-            if (perValue < 1 || Math.floor(perValue) > Math.ceil(nperValue) || perValue - nperValue >= 1) {
+            if (!this._isPaymentDomainValid(rateValue, perValue, nperValue)) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = calculatePMT(rateValue, nperValue, pvValue, fvValue, typeValue ? 1 : 0) - calculateIPMT(rateValue, perValue, nperValue, pvValue, fvValue, typeValue ? 1 : 0);
+            const result = this._calculateValue(rateValue, perValue, nperValue, pvValue, fvValue, typeValue ? 1 : 0);
 
             if (Number.isNaN(result) || !Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);
@@ -105,5 +105,13 @@ export class Ppmt extends BaseFunction {
         }
 
         return resultArray;
+    }
+
+    protected _calculateValue(rate: number, period: number, periods: number, pv: number, fv: number, type: number): number {
+        return calculatePMT(rate, periods, pv, fv, type) - calculateIPMT(rate, period, periods, pv, fv, type);
+    }
+
+    protected _isPaymentDomainValid(_rate: number, period: number, periods: number): boolean {
+        return period >= 1 && Math.floor(period) <= Math.ceil(periods) && period - periods < 1;
     }
 }

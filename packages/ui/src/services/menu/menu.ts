@@ -89,6 +89,11 @@ export interface IValueOption<TLocaleKey extends string = string, TValue = undef
     commandId?: string;
 }
 
+export function isSingleEmbeddedMenuPanel(options: readonly IValueOption[]) {
+    const label = options.length === 1 ? options[0].label : undefined;
+    return typeof label === 'object' && label?.hoverable === false && label.props?.embedded === true;
+}
+
 export interface ICustomComponentProps<T> {
     value: T;
     onChange: (v: T) => void;

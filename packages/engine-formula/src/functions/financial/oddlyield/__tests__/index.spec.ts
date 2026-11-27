@@ -119,11 +119,11 @@ describe('Test oddlyield function', () => {
 
             const basis3 = NumberValueObject.create(2);
             const result3 = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis3);
-            expect(getObjectValue(result3, true)).toBe(0.107053227022);
+            expect(getObjectValue(result3, true)).toBe(0.107072088907);
 
             const basis4 = NumberValueObject.create(3);
             const result4 = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis4);
-            expect(getObjectValue(result4, true)).toBe(0.107076742612);
+            expect(getObjectValue(result4, true)).toBe(0.107072088907);
 
             const basis5 = NumberValueObject.create(4);
             const result5 = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis5);

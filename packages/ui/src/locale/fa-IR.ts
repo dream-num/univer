@@ -151,6 +151,7 @@ const locale: typeof enUS = {
                 formulas: 'فرمول‌ها',
                 rules: 'قواعد',
                 organization: 'سازمان‌دهی داده‌ها',
+                analysis: 'تحلیل داده‌ها',
                 display: 'نمایش',
                 visibility: 'قابلیت مشاهده',
             },

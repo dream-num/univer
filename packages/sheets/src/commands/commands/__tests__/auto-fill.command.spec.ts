@@ -15,12 +15,18 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import { ICommandService, IUniverInstanceService, LocaleService, LocaleType, RedoCommand, UndoCommand } from '@univerjs/core';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import enUS from '../../../locale/en-US';
 import { IAutoFillService } from '../../../services/auto-fill/auto-fill.service';
 import { AUTO_FILL_APPLY_TYPE } from '../../../services/auto-fill/type';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
-import { AutoFillCommand, SheetCopyDownCommand, SheetCopyRightCommand } from '../auto-fill.command';
+import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
+import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
+import { SetWorksheetNameMutation } from '../../mutations/set-worksheet-name.mutation';
+import { SetSelectionsOperation } from '../../operations/selection.operation';
+import { AutoClearContentCommand, AutoFillCommand, SheetCopyDownCommand, SheetCopyRightCommand } from '../auto-fill.command';
+import { createCommandTestBed } from './create-command-test-bed';
 
 function createAccessor(pairs: Array<[unknown, unknown]>): IAccessor {
     const map = new Map<unknown, unknown>(pairs);
@@ -155,5 +161,56 @@ describe('Sheet copy fill commands', () => {
         expect(await SheetCopyRightCommand.handler(leftColumn.accessor)).toBe(false);
         expect(leftColumn.executeCommand).not.toHaveBeenCalled();
         expect(leftColumn.setShowMenu).not.toHaveBeenCalled();
+    });
+});
+
+describe('AutoClearContentCommand', () => {
+    it('clears dragged content and restores cells, selection and companion mutations through undo/redo', async () => {
+        const { univer, get, sheet } = createCommandTestBed();
+        onTestFinished(() => univer.dispose());
+        const locale = get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: enUS });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+        const commands = get(ICommandService);
+        for (const command of [AutoClearContentCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameMutation]) {
+            commands.registerCommand(command);
+        }
+        const worksheet = sheet.getActiveSheet()!;
+        const target = { unitId: sheet.getUnitId(), subUnitId: worksheet.getSheetId() };
+        expect(commands.syncExecuteCommand(SetRangeValuesMutation.id, {
+            ...target,
+            cellValue: { 2: { 2: { v: 'old' }, 3: { v: 'other' } } },
+        })).toBe(true);
+        const selections = get(SheetsSelectionsService);
+        const oldRange = { startRow: 9, endRow: 9, startColumn: 9, endColumn: 9 };
+        selections.setSelections(target.unitId, target.subUnitId, [{ range: oldRange, primary: null, style: null }]);
+        const oldName = worksheet.getName();
+        get(SheetInterceptorService).interceptAfterCommand({
+            getMutations: ({ id }) => id === SetRangeValuesMutation.id
+                ? {
+                    redos: [{ id: SetWorksheetNameMutation.id, params: { ...target, name: 'Cleared' } }],
+                    undos: [{ id: SetWorksheetNameMutation.id, params: { ...target, name: oldName } }],
+                }
+                : { redos: [], undos: [] },
+        });
+        const range = { startRow: 2, endRow: 2, startColumn: 2, endColumn: 3 };
+        const values = () => [2, 3].map((column) => worksheet.getCellRaw(2, column)?.v ?? null);
+        expect(await commands.executeCommand(AutoClearContentCommand.id, {
+            ...target,
+            clearRange: range,
+            selectionRange: range,
+        })).toBe(true);
+        expect(values()).toEqual([null, null]);
+        expect(selections.getCurrentLastSelection()?.range).toEqual(range);
+        expect(worksheet.getName()).toBe('Cleared');
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(values()).toEqual(['old', 'other']);
+        expect(selections.getCurrentLastSelection()?.range).toEqual(oldRange);
+        expect(worksheet.getName()).toBe(oldName);
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(values()).toEqual([null, null]);
+        expect(selections.getCurrentLastSelection()?.range).toEqual(range);
+        expect(worksheet.getName()).toBe('Cleared');
     });
 });

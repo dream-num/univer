@@ -107,5 +107,24 @@ describe('Test median function', () => {
             const result3 = testFunction.calculate(number2, number3, number5);
             expect(getObjectValue(result3)).toStrictEqual(ErrorType.VALUE);
         });
+
+        it('Text in a range is ignored', () => {
+            const array = ArrayValueObject.create({
+                calculateValueList: [[
+                    NumberValueObject.create(1),
+                    StringValueObject.create('12'),
+                    NumberValueObject.create(3),
+                    NumberValueObject.create(5),
+                ]],
+                rowCount: 1,
+                columnCount: 4,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(array);
+            expect(getObjectValue(result)).toStrictEqual(3);
+        });
     });
 });

@@ -16,7 +16,7 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { excelDateSerial } from '@univerjs/core';
+import { DateSystem, excelDateSerial, getDateSystemMaxSerial } from '@univerjs/core';
 import { DEFAULT_DATE_FORMAT } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -29,6 +29,8 @@ export class DateFunction extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 3;
+
+    protected readonly useExcelDateBounds: boolean = false;
 
     override calculate(year: BaseValueObject, month: BaseValueObject, day: BaseValueObject) {
         const maxRowLength = Math.max(
@@ -72,14 +74,23 @@ export class DateFunction extends BaseFunction {
 
             let yearValue = Math.floor(+_yearObject.getValue());
             const monthValue = Math.floor(+_monthObject.getValue());
-            const dayValue = Math.floor(+_dayObject.getValue());
+            let dayValue = Math.floor(+_dayObject.getValue());
 
             if (yearValue < 0 || yearValue > 9999) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            if (yearValue >= 0 && yearValue < 1899) {
+            if (yearValue < (this.useExcelDateBounds ? 1900 : 1899)) {
                 yearValue += 1900;
+            }
+            if (this.useExcelDateBounds) {
+                if (!this._isExcelMonthValid(yearValue, monthValue)) {
+                    return ErrorValueObject.create(ErrorType.NUM);
+                }
+                // Excel uses 32767 for a day outside the signed 16-bit range.
+                if (dayValue < -32768 || dayValue > 32767) {
+                    dayValue = 32767;
+                }
             }
 
             // Build the serial from the first day of the normalized month. This keeps
@@ -88,7 +99,7 @@ export class DateFunction extends BaseFunction {
             const firstDateOfMonth = new Date(Date.UTC(yearValue, monthValue - 1, 1));
             const currentSerial = excelDateSerial(firstDateOfMonth, this.getDateSystem()) + dayValue - 1;
 
-            if (currentSerial < 0) {
+            if (currentSerial < 0 || (this.useExcelDateBounds && currentSerial > getDateSystemMaxSerial(this.getDateSystem()))) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
@@ -102,5 +113,11 @@ export class DateFunction extends BaseFunction {
         }
 
         return resultArray;
+    }
+
+    private _isExcelMonthValid(year: number, month: number): boolean {
+        const normalizedYear = year + Math.floor((month - 1) / 12);
+        const firstYear = this.getDateSystem() === DateSystem.Date1904 ? 1904 : 1900;
+        return month >= -32768 && month < 32767 && normalizedYear >= firstYear && normalizedYear <= 9999;
     }
 }

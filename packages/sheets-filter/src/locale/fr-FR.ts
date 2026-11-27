@@ -24,6 +24,9 @@ const locale: typeof enUS = {
         msg: {
             'filter-header-forbidden': 'Vous ne pouvez pas déplacer la ligne d\'en-tête d\'un filtre.',
         },
+        permission: {
+            filterErr: 'La plage est protégée et vous n\'avez pas l\'autorisation de filtrer. Pour filtrer, veuillez contacter le créateur.',
+        },
     },
 };
 

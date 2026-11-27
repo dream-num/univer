@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { IUniverEngineFormulaConfig } from '../../config/config';
 import { Accrint } from './accrint';
 import { Accrintm } from './accrintm';
-// import { Amordegrc } from './amordegrc';
+import { Amordegrc } from './amordegrc';
 import { Amorlinc } from './amorlinc';
 import { Coupdaybs } from './coupdaybs';
 import { Coupdays } from './coupdays';
@@ -74,7 +75,7 @@ import { Yieldmat } from './yieldmat';
 export const functionFinancial = [
     [Accrint, FUNCTION_NAMES_FINANCIAL.ACCRINT],
     [Accrintm, FUNCTION_NAMES_FINANCIAL.ACCRINTM],
-    // [Amordegrc, FUNCTION_NAMES_FINANCIAL.AMORDEGRC],
+    [Amordegrc, FUNCTION_NAMES_FINANCIAL.AMORDEGRC],
     [Amorlinc, FUNCTION_NAMES_FINANCIAL.AMORLINC],
     [Coupdaybs, FUNCTION_NAMES_FINANCIAL.COUPDAYBS],
     [Coupdays, FUNCTION_NAMES_FINANCIAL.COUPDAYS],
@@ -127,4 +128,4 @@ export const functionFinancial = [
     [Yield, FUNCTION_NAMES_FINANCIAL.YIELD],
     [Yielddisc, FUNCTION_NAMES_FINANCIAL.YIELDDISC],
     [Yieldmat, FUNCTION_NAMES_FINANCIAL.YIELDMAT],
-];
+] satisfies NonNullable<IUniverEngineFormulaConfig['function']>;

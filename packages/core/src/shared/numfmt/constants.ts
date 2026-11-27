@@ -134,7 +134,8 @@ export const indexColors = [
     '#333333',
 ];
 
-export const currencySymbols = [
+// Single-character currency prefixes and suffixes accepted when parsing cell input.
+export const currencyInputCharacters = [
     '¤',
     '$',
     '£',
@@ -164,4 +165,4 @@ export const currencySymbols = [
     '₿',
 ];
 
-export const reCurrencySymbols = new RegExp(`[${currencySymbols.join('')}]`);
+export const reCurrencySymbols = new RegExp(`[${currencyInputCharacters.join('')}]`);

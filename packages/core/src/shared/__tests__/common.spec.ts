@@ -24,6 +24,7 @@ import { BorderStyleTypes, ThemeColorType } from '../../types/enum';
 import {
     BaselineOffset,
     HorizontalAlign,
+    TextDecoration,
     TextDirection,
     VerticalAlign,
     WrapStrategy,
@@ -156,6 +157,24 @@ describe('Test common', () => {
         expect(isEmptyCell({ v: '', p: { body: { dataStream: 'x' } } } as unknown as ICellData)).toBe(false);
         expect(isCellCoverable({ v: '', p: null } as unknown as ICellData)).toBe(true);
         expect(isCellCoverable({ v: '', p: null, coverable: false } as never)).toBe(false);
+    });
+
+    it('should write underline and strikethrough as one text-decoration', () => {
+        // A `text-decoration-line` written after the `text-decoration` shorthand would replace the underline.
+        expect(handleStyleToString({ ul: { s: 1 }, st: { s: 1 } } as never)).toBe('text-decoration: underline line-through; ');
+        expect(handleStyleToString({ st: { s: 1 }, ul: { s: 1 } } as never)).toBe('text-decoration-line: line-through underline; ');
+        expect(handleStyleToString({ ul: { s: 1 }, st: { s: 1 }, ol: { s: 1 } } as never)).toBe('text-decoration: underline line-through overline; ');
+    });
+
+    it('should end the text-decoration-style declaration before the next one', () => {
+        // Without the `;` the next declaration becomes part of the line style value and is lost.
+        const cl = { rgb: '#ff0000' };
+        expect(handleStyleToString({ ul: { s: 1, t: TextDecoration.DOUBLE }, cl }))
+            .toBe('text-decoration: underline; text-decoration-style: 10; color: #ff0000; ');
+        expect(handleStyleToString({ st: { s: 1, t: TextDecoration.DOUBLE }, cl }))
+            .toBe('text-decoration-line: line-through; text-decoration-style: 10; color: #ff0000; ');
+        expect(handleStyleToString({ ol: { s: 1, t: TextDecoration.DOUBLE }, cl }))
+            .toBe('text-decoration-line: overline; text-decoration-style: 10; color: #ff0000; ');
     });
 
     it('should resolve colors and style strings', () => {

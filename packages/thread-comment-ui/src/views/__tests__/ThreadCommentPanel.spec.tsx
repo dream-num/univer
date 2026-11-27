@@ -48,9 +48,11 @@ import {
     DeleteCommentCommand,
     DeleteCommentMutation,
     DeleteCommentTreeCommand,
+    IThreadCommentAuthzService,
     IThreadCommentDataSourceService,
     ResolveCommentCommand,
     ResolveCommentMutation,
+    ThreadCommentAuthzService,
     ThreadCommentDataSourceService,
     ThreadCommentModel,
     UpdateCommentCommand,
@@ -330,6 +332,10 @@ class TestUniverInstanceService {
         return new BehaviorSubject({ id: 'workbook' });
     }
 
+    getUnitType() {
+        return UniverInstanceType.UNIVER_SHEET;
+    }
+
     setCurrentUnitForType(): void {
     }
 }
@@ -370,6 +376,7 @@ function createPanelTestBed() {
         [IShortcutService, { useClass: TestShortcutService as never }],
         [ISidebarService, { useClass: TestSidebarService as never }],
         [IUniverInstanceService, { useClass: TestUniverInstanceService as never }],
+        [IThreadCommentAuthzService, { useClass: ThreadCommentAuthzService }],
         [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
         [LifecycleService],
         [UserManagerService],
@@ -578,7 +585,7 @@ describe('ThreadCommentPanel', () => {
         root = rendered.root;
         container = rendered.container;
 
-        expect(container.textContent).toContain('thread-comment-ui.editor.placeholder');
+        expect(testBed.injector.get(IEditorService).getAllEditor().size).toBe(1);
         expect(testBed.panelService.activeCommentId).toEqual({
             unitId: UNIT_ID,
             subUnitId: SHEET_ID,
@@ -664,7 +671,7 @@ describe('ThreadCommentPanel', () => {
         root = rendered.root;
         container = rendered.container;
 
-        expect(container.textContent).not.toContain('thread-comment-ui.editor.placeholder');
+        expect(testBed.injector.get(IEditorService).getAllEditor().size).toBe(0);
         expect(onTempCommentClose).toHaveBeenCalledTimes(1);
     });
 

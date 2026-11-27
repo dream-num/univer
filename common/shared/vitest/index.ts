@@ -16,7 +16,8 @@ export default function createConfig(options?: any) {
                     classNameStrategy: 'non-scoped',
                 },
             },
-            environment: 'happy-dom',
+            environment: 'jsdom',
+            setupFiles: [require.resolve('./setup.ts')],
             coverage: {
                 reporter: isCI ? ['json', 'lcovonly'] : ['html'],
                 provider: 'custom',

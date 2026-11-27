@@ -117,6 +117,36 @@ export const FULL_WIDTH_HORIZONTAL_ALIGNMENTS = new Set([
     HorizontalAlign.DISTRIBUTED,
 ]);
 
+function isNumericCell(cell: ICellDataForSheetInterceptor): boolean {
+    return cell.t === CellValueType.NUMBER || (!Tools.isDefine(cell.t) && typeof cell.v === 'number');
+}
+
+function getGeneralNumberReserveWidth(fontString: string): number {
+    return FontCache.getMeasureText(GENERAL_NUMBER_RESERVE_GLYPH, fontString).width;
+}
+
+function shouldUseCellDocumentLayout(
+    cell: Nullable<ICellDataForSheetInterceptor>,
+    style: IStyleData,
+    { vertexAngle, centerAngle }: ReturnType<typeof convertTextRotation>
+): boolean {
+    return Boolean(cell?.p || vertexAngle || centerAngle) ||
+        FULL_WIDTH_HORIZONTAL_ALIGNMENTS.has(style?.ht ?? HorizontalAlign.UNSPECIFIED);
+}
+
+function measureNumericCellWidth(cell: ICellDataForSheetInterceptor, style: IStyleData): number {
+    const displayText = getDisplayValueFromCell(cell);
+    if (!displayText) return 0;
+
+    const fontString = getFontStyleString(style).fontCache;
+    const roundingReserveWidth = isDefaultFormat(style.n?.pattern) && Number.isFinite(Number(cell.v))
+        ? getGeneralNumberReserveWidth(fontString)
+        : 0;
+    const padding = style.pd ?? DEFAULT_PADDING_DATA;
+    const horizontalPadding = (padding.l ?? DEFAULT_PADDING_DATA.l) + (padding.r ?? DEFAULT_PADDING_DATA.r);
+    return Math.ceil(FontCache.getMeasureText(displayText, fontString).width + roundingReserveWidth + horizontalPadding);
+}
+
 function getNumberOverflowText(fontString: string, availableWidth: number): string {
     const hashWidth = FontCache.getMeasureText('#', fontString).width;
     if (hashWidth <= 0) {
@@ -143,7 +173,7 @@ export function getGeneralNumberDisplayText(
         return displayText;
     }
 
-    const roundingReserveWidth = FontCache.getMeasureText(GENERAL_NUMBER_RESERVE_GLYPH, fontString).width;
+    const roundingReserveWidth = getGeneralNumberReserveWidth(fontString);
     if (FontCache.getMeasureText(displayText, fontString).width + roundingReserveWidth <= availableWidth) {
         return displayText;
     }
@@ -620,7 +650,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             const expandStartCol = Math.max(0, visibleStartColumn - EXPAND_SIZE_FOR_RENDER_OVERFLOW);
             const expandEndCol = Math.min(columnWidthAccumulation.length - 1, visibleEndColumn + EXPAND_SIZE_FOR_RENDER_OVERFLOW);
             for (let r = visibleStartRow; r <= visibleEndRow; r++) {
-                if (this.worksheet.getRowVisible(r) === false) {
+                if (this.getRowVisible(r) === false) {
                     if (mergeVisibleRangeStartRow < r) {
                         mergeVisibleRanges.push({
                             startRow: mergeVisibleRangeStartRow,
@@ -666,7 +696,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     if (shouldUseIncrementalStyleRange) {
                         pushRowRange(this._incrementalFontRenderRanges, r, c, c);
                     }
-                    const cell = this.worksheet.getCell(r, c);
+                    const cell = this.getCell(r, c);
                     if (!isCellCoverable(cell) || (hasMergeData && this.intersectMergeRange(r, c))) {
                         break;
                     }
@@ -679,7 +709,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     if (shouldUseIncrementalStyleRange) {
                         pushRowRange(this._incrementalFontRenderRanges, r, c, c);
                     }
-                    const cell = this.worksheet.getCell(r, c);
+                    const cell = this.getCell(r, c);
                     if (!isCellCoverable(cell) || (hasMergeData && this.intersectMergeRange(r, c))) {
                         break;
                     }
@@ -803,7 +833,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         // TODO@weird94: in future, we should use `getCellRaw` instead of `getCell` to improve performance.
-        const cell = this.worksheet.getCell(row, col);
+        const cell = this.getCell(row, col);
         const style = this.worksheet.getComposedCellStyleByCellData(row, col, cell);
 
         if (cell?.interceptorAutoHeight) {
@@ -938,11 +968,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 // If the row has already been calculated, it does not need to be recalculated
                 if (calculatedCols.has(colIndex)) continue;
 
-                const autoWidth = this._calculateColWidth(colIndex);
                 calculatedCols.add(colIndex);
                 results.push({
                     col: colIndex,
-                    width: Math.max(this._worksheetData.defaultColumnWidth, autoWidth),
+                    width: this._calculateColWidth(colIndex),
                 });
             }
         }
@@ -959,6 +988,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
     private _calculateColWidth(colIndex: number): number {
         const worksheet = this.worksheet;
+        const { defaultColumnWidth } = this._worksheetData;
 
         // row has default height, but col does not, col can be very narrow near zero
         let colWidth = 0;
@@ -968,10 +998,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         // first row and last row should be considered.
         // skip hidden row
         // also handle multiple viewport situation (freeze row & freeze row&col)
-        // if there are no content in this column, return current column width.
 
         const visibleRangeViewMain = this.visibleRangeByViewportKey(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-        if (!visibleRangeViewMain) return colWidth;
+        if (!visibleRangeViewMain) return defaultColumnWidth;
 
         const { startRow: startRowOfViewMain, endRow: endRowOfViewMain } = visibleRangeViewMain;
         const rowCount = this.worksheet.getRowCount();
@@ -1011,10 +1040,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         for (let i = 0; i < rowIdxArr.length; i++) {
             const row = rowIdxArr[i];
-            const { isMerged, isMergedMainCell } = this.worksheet.getCellInfoInMergeData(colIndex, row);
+            const { isMerged, isMergedMainCell } = worksheet.getCellInfoInMergeData(row, colIndex);
             if (isMerged && !isMergedMainCell) continue;
-            if (!this.worksheet.getRowVisible(row)) continue;
-            const cell = worksheet.getCell(row, colIndex);
+            if (!this.getRowVisible(row)) continue;
+            const cell = this.getCell(row, colIndex);
             if (!cell) continue;
 
             // for cell with paragraph, only check ±1000 rows around visible area, continue the loop if out of range
@@ -1031,7 +1060,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             // early return, if maxColWidth is larger than MAXIMUM_COL_WIDTH
             if (colWidth >= MAXIMUM_COL_WIDTH) return MAXIMUM_COL_WIDTH;
         }
-        if (colWidth === 0) return currColWidth; // if column is empty, do not modify colWidth, like Google sheet.
+        if (colWidth === 0) return Math.max(defaultColumnWidth, currColWidth);
         return Math.max(MIN_COL_WIDTH, colWidth); // min col width is 2
     }
 
@@ -1056,13 +1085,26 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         let measuredWidth = 0;
 
         // isSkip means the text in this cell would not rendering.
-        if (cell.fontRenderExtension?.isSkip && cell?.interceptorAutoWidth) {
-            const cellWidth = cell.interceptorAutoWidth?.();
+        if (cell.fontRenderExtension?.isSkip && cell.interceptorAutoWidth) {
+            const cellWidth = cell.interceptorAutoWidth();
             if (cellWidth) {
                 return cellWidth;
             }
         }
+        // An empty formula result contributes zero text width.
+        if (!cell.p && (cell.v == null || cell.v === '')) {
+            return 0;
+        }
+
         const style = this.worksheet.getComposedCellStyleByCellData(row, column, cell);
+        if (
+            isNumericCell(cell) &&
+            style.stf !== BooleanNumber.TRUE &&
+            !shouldUseCellDocumentLayout(cell, style, convertTextRotation(style.tr ?? undefined))
+        ) {
+            return measureNumericCellWidth(cell, style);
+        }
+
         const modelObject = this.worksheet.getCellDocumentModel(cell, style, { isDeepClone: true });
         if (modelObject == null) {
             return measuredWidth;
@@ -1072,6 +1114,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         if (documentModel == null) {
             return measuredWidth;
         }
+
+        // Treat paragraph marks as zero-width in the temporary layout used to fit columns.
+        // The editor uses the mark's width to lay out empty cells.
+        documentModel.updateDocumentRenderConfig({ zeroWidthParagraphBreak: BooleanNumber.TRUE });
 
         const documentViewModel = new SheetCellDocumentViewModel(documentModel);
         const { vertexAngle: angle } = convertTextRotation(textRotation);
@@ -1188,7 +1234,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         const cachedAdjacentCell = this._stylesCache.fontMatrix.getValue(row, adjacentColumn)?.cellData;
-        const adjacentCell = cachedAdjacentCell ?? this.worksheet.getCell(row, adjacentColumn);
+        const adjacentCell = cachedAdjacentCell ?? this.getCell(row, adjacentColumn);
         return !isCellCoverable(adjacentCell) || (hasMergeData && this.intersectMergeRange(row, adjacentColumn));
     }
 
@@ -1586,10 +1632,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
     private _applyNumberDisplay(row: number, col: number, fontCache: IFontCacheItem, style: IStyleData): void {
         const cellData = fontCache.cellData;
-        if (!cellData || style.stf === BooleanNumber.TRUE || fontCache.documentSkeleton) {
-            return;
-        }
-        if (cellData.t !== CellValueType.NUMBER && (Tools.isDefine(cellData.t) || typeof cellData.v !== 'number')) {
+        if (!cellData || style.stf === BooleanNumber.TRUE || fontCache.documentSkeleton || !isNumericCell(cellData)) {
             return;
         }
 
@@ -1637,9 +1680,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             this._stylesCache.fontMatrix.setValue(row, col, cacheValue as IFontCacheItem);
             return;
         }
-        const { vertexAngle, centerAngle } = convertTextRotation(style?.tr ?? { a: 0 });
-        const shouldUseDocumentLayout = Boolean(cellData?.p || vertexAngle || centerAngle) ||
-            FULL_WIDTH_HORIZONTAL_ALIGNMENTS.has(style?.ht ?? HorizontalAlign.UNSPECIFIED);
+        const rotation = convertTextRotation(style?.tr ?? undefined);
+        const { vertexAngle, centerAngle } = rotation;
+        const shouldUseDocumentLayout = shouldUseCellDocumentLayout(cellData, style, rotation);
 
         const modelObject = shouldUseDocumentLayout ?
             this.worksheet.getCellDocumentModel(cellData, style, {
@@ -1652,7 +1695,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             const { documentModel } = modelObject;
             if (documentModel) {
                 const { fontString, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
-                if (FULL_WIDTH_HORIZONTAL_ALIGNMENTS.has(horizontalAlign)) {
+                const wrapsAtCellWidth = wrapStrategy === WrapStrategy.WRAP && !vertexAngle && !centerAngle && style.stf !== BooleanNumber.TRUE;
+                // Rotated and shrink-to-fit cells retain their measurement path.
+                if (FULL_WIDTH_HORIZONTAL_ALIGNMENTS.has(horizontalAlign) || wrapsAtCellWidth) {
                     updateDocumentPageWidth(documentModel, this.getCellWithCoordByIndex(row, col, false));
                 }
                 const documentViewModel = new SheetCellDocumentViewModel(documentModel);
@@ -1661,6 +1706,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     // Wrapped stacks are laid out once their physical cell height is available below.
                     if (wrapStrategy !== WrapStrategy.WRAP || centerAngle !== VERTICAL_ROTATE_ANGLE || style.stf === BooleanNumber.TRUE) {
                         documentSkeleton.calculate();
+                        // This layout already uses Font's final width; the first paint can reuse it.
+                        if (wrapsAtCellWidth) {
+                            documentSkeleton.makeDirty(false);
+                        }
                     }
 
                     config = {
@@ -1750,7 +1799,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             isMergedMainCell = mergeInfo.isMergedMainCell;
         }
 
-        const rowVisible = options.rowVisible ?? this.worksheet.getRowVisible(row);
+        const rowVisible = options.rowVisible ?? this.getRowVisible(row);
         const hidden = this.worksheet.getColVisible(col) === false || rowVisible === false;
 
         // hidden and not in mergeRange return.
@@ -1764,7 +1813,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             }
         }
 
-        const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
+        const cell = this.getCell(row, col) || this.worksheet.getCellRaw(row, col);
         const style = this.worksheet.getComposedCellStyleByCellData(row, col, cell);
         // Empty merge anchors still own borders contributed by other members.
         if (!mergeRange && isNullCell(cell) && Object.keys(style).length === 0) {
@@ -1824,7 +1873,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 row = i;
             }
 
-            const cell = this.worksheet.getCell(row, column);
+            const cell = this.getCell(row, column);
             if (!cell) {
                 isAddBorders = false;
                 break;
@@ -1928,7 +1977,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     getHiddenRowsInRange(range: IRowRange) {
         const hiddenRows = [];
         for (let i = range.startRow; i <= range.endRow; i++) {
-            if (!this.worksheet.getRowVisible(i)) {
+            if (!this.getRowVisible(i)) {
                 hiddenRows.push(i);
             }
         }

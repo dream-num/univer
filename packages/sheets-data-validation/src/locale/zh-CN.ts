@@ -136,6 +136,11 @@ const locale: typeof enUS = {
             title: '复选框',
             error: '此单元格的内容违反了验证规则',
         },
+        permission: {
+            dialog: {
+                setStyleErr: '该范围已被保护，目前无设置样式权限。如需设置样式，请联系创建者。',
+            },
+        },
     },
 };
 

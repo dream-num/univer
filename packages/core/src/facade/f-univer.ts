@@ -471,7 +471,7 @@ export class FUniver extends Disposable {
      */
     setRegion(region: string): void {
         const regionService = this._injector.get(RegionService);
-        regionService.setRegion(region as LocaleType);
+        regionService.setRegion(region);
     }
 
     /**

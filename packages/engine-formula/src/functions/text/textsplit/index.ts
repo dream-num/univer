@@ -32,7 +32,7 @@ export class Textsplit extends BaseFunction {
         let _rowDelimiter = rowDelimiter ?? StringValueObject.create('\\s');
         const _ignoreEmpty = ignoreEmpty ?? NumberValueObject.create(0);
         const _matchMode = matchMode ?? NumberValueObject.create(0);
-        const _padWith = padWith ?? StringValueObject.create(ErrorType.NA);
+        const _padWith = padWith ?? this._createDefaultPadding();
 
         const { _variant, values: rowDelimiterValue } = this._getStringValues(_rowDelimiter, false);
         _rowDelimiter = _variant;
@@ -150,7 +150,7 @@ export class Textsplit extends BaseFunction {
                 return _variantsError;
             }
 
-            if (textObject.isNull()) {
+            if (this._isEmptyInput(textObject)) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
@@ -203,7 +203,7 @@ export class Textsplit extends BaseFunction {
                 padWithValue = padWithValue.toLocaleUpperCase();
             }
 
-            return this._getResult(textValue, colDelimiterValue, rowDelimiterValue, ignoreEmptyValue, matchModeValue, padWithValue);
+            return this._getResult(textValue, colDelimiterValue, rowDelimiterValue, ignoreEmptyValue, matchModeValue, padWithValue, _padWith);
         });
 
         return resultArray;
@@ -215,7 +215,8 @@ export class Textsplit extends BaseFunction {
         rowDelimiterValue: string[],
         ignoreEmptyValue: number,
         matchModeValue: number,
-        padWithValue: string
+        padWithValue: string,
+        padWith: BaseValueObject
     ) {
         const rowDelimiterRegExp = new RegExp(rowDelimiterValue.join('|'), `g${!matchModeValue ? '' : 'i'}`);
         const colDelimiterRegExp = new RegExp(colDelimiterValue.join('|'), `g${!matchModeValue ? '' : 'i'}`);
@@ -236,6 +237,20 @@ export class Textsplit extends BaseFunction {
             return cols;
         });
 
+        if (this._preserveTextTokens()) {
+            const values = result.map((row) => Array.from({ length: resultColsMaxCount }, (_, column) =>
+                column < row.length ? StringValueObject.create(row[column]) : padWith));
+            return ArrayValueObject.create({
+                calculateValueList: values,
+                rowCount: values.length,
+                columnCount: resultColsMaxCount,
+                unitId: '',
+                sheetId: '',
+                row: -1,
+                column: -1,
+            });
+        }
+
         result = result.map((row) => {
             let _row = row;
 
@@ -247,6 +262,18 @@ export class Textsplit extends BaseFunction {
         });
 
         return ArrayValueObject.createByArray(result);
+    }
+
+    protected _createDefaultPadding(): BaseValueObject {
+        return StringValueObject.create(ErrorType.NA);
+    }
+
+    protected _isEmptyInput(value: BaseValueObject): boolean {
+        return value.isNull();
+    }
+
+    protected _preserveTextTokens(): boolean {
+        return false;
     }
 
     private _checkVariantsError(...variantas: BaseValueObject[]) {

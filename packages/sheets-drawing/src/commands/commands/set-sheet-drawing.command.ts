@@ -23,10 +23,12 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { SheetInterceptorService } from '@univerjs/sheets';
+import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
 import type { ISheetDrawing } from '../../services/sheet-drawing.service';
+import { transformToAxisAlignPosition } from '../../basics/transform-position';
 import { resolveSheetDrawingRotateEnabled } from '../../common/rotate-enabled';
-import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import { getSheetDrawingTransformWithOrientation } from '../../services/sheet-drawing-placement';
+import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 
@@ -109,7 +111,40 @@ export const SetSheetDrawingCommand: ICommand<ISetDrawingCommandParams> = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const { drawings } = params;
-        const normalizedDrawings = drawings.map((drawing) => normalizeNonRotatableAngleUpdate(drawing, sheetDrawingService));
+        const normalizedDrawings = drawings.map((drawing) => {
+            const normalized = normalizeNonRotatableAngleUpdate(drawing, sheetDrawingService);
+            if (!normalized.unitId || !normalized.subUnitId || !normalized.drawingId) {
+                return normalized;
+            }
+            const current = sheetDrawingService.getDrawingByParam({
+                unitId: normalized.unitId,
+                subUnitId: normalized.subUnitId,
+                drawingId: normalized.drawingId,
+            });
+            if (!current || !normalized.transform) {
+                return normalized;
+            }
+            const transform = { ...getSheetDrawingTransformWithOrientation(current), ...normalized.transform };
+            const patch = { ...normalized, transform };
+            if (current.groupId || current.anchorType === SheetDrawingAnchorType.None) {
+                return patch;
+            }
+            const geometryChanged = (['left', 'top', 'width', 'height', 'angle', 'flipX', 'flipY', 'skewX', 'skewY'] as const)
+                .some((key) => normalized.transform?.[key] !== undefined && normalized.transform[key] !== current.transform?.[key]);
+            if (!geometryChanged) {
+                return patch;
+            }
+            const skeleton = accessor.get(SheetSkeletonService).ensureSkeleton(current.unitId, current.subUnitId);
+            if (!skeleton) {
+                return normalized;
+            }
+            // Pixel-only Facade and group edits are authored geometry. Capture
+            // their anchors before replicas derive pixels from their own layout.
+            return {
+                ...patch,
+                axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton),
+            };
+        });
         const normalizedParams = { ...params, drawings: normalizedDrawings };
         if (!accessor.get(IDrawingManagerService).canExecuteCommand({ id: SetSheetDrawingCommand.id, params: normalizedParams })) {
             return false;

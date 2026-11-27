@@ -17,8 +17,6 @@
 import type { Workbook } from '@univerjs/core';
 import type { IDataBar, IValueConfig } from '@univerjs/sheets-conditional-formatting';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
-import type { LocaleKey } from '../../../locale/types';
-import type { IStyleEditorProps } from './type';
 import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Radio, RadioGroup, Select } from '@univerjs/design';
 import {
@@ -31,6 +29,8 @@ import {
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../../../locale/types';
+import type { IStyleEditorProps } from './type';
 import { ColorPicker } from '../../ColorPicker';
 import { ConditionalFormattingRulePreview } from '../../ConditionalFormattingRulePreview';
 import { RuleNumberInput } from './RuleNumberInput';
@@ -328,32 +328,32 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                             });
                         }}
                     >
-                        <Radio value="0">
-                            <span className="univer-text-xs">{localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.pureColor')}</span>
+                        <Radio value="0" className="univer-text-xs">
+                            {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.pureColor')}
                         </Radio>
-                        <Radio value="1">
-                            <span className="univer-text-xs">{localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.gradient')}</span>
+                        <Radio value="1" className="univer-text-xs">
+                            {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.gradient')}
                         </Radio>
                     </RadioGroup>
-                    <div className="univer-flex univer-items-center univer-text-xs">
-                        <Checkbox
-                            checked={!isShowValue}
-                            onChange={(v) => {
-                                setIsShowValue(!v);
-                                handleChange({
-                                    isGradient: v as string,
-                                    minValue,
-                                    minValueType,
-                                    maxValue,
-                                    maxValueType,
-                                    positiveColor,
-                                    nativeColor,
-                                    isShowValue: !v,
-                                });
-                            }}
-                        />
+                    <Checkbox
+                        className="univer-text-xs"
+                        checked={!isShowValue}
+                        onChange={(v) => {
+                            setIsShowValue(!v);
+                            handleChange({
+                                isGradient,
+                                minValue,
+                                minValueType,
+                                maxValue,
+                                maxValueType,
+                                positiveColor,
+                                nativeColor,
+                                isShowValue: !v,
+                            });
+                        }}
+                    >
                         {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.onlyShowDataBar')}
-                    </div>
+                    </Checkbox>
                 </div>
             </div>
             <div>

@@ -19,13 +19,21 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { excelTextSerializationFunctions } from '../../excel-text-serialization';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Concat } from '../index';
 
 describe('Test concat function', () => {
     const testFunction = new Concat(FUNCTION_NAMES_TEXT.CONCAT);
 
-    describe('Concat', () => {
+    describe('Excel CONCAT error propagation', () => {
+        const registration = excelTextSerializationFunctions.find(([, name]) => name === FUNCTION_NAMES_TEXT.CONCAT);
+        if (!registration) {
+            throw new Error('Missing Excel CONCAT registration');
+        }
+        const [ExcelConcat] = registration;
+        const excelFunction = new ExcelConcat(FUNCTION_NAMES_TEXT.CONCAT);
+
         it.each([
             [ErrorType.NA, 0],
             [ErrorType.NA, 1],
@@ -39,7 +47,7 @@ describe('Test concat function', () => {
         ] as const)('propagates scalar %s at argument position %s', (errorType, position) => {
             const error = ErrorValueObject.create(errorType);
             const args = [StringValueObject.create('before'), StringValueObject.create('after')];
-            const result = testFunction.calculate(...args.slice(0, position), error, ...args.slice(position));
+            const result = excelFunction.calculate(...args.slice(0, position), error, ...args.slice(position));
 
             expect(result).toBe(error);
         });
@@ -47,14 +55,21 @@ describe('Test concat function', () => {
         it.each([false, true])('preserves argument-order error precedence with an array (arrayFirst=%s)', (arrayFirst) => {
             const scalar = ErrorValueObject.create(ErrorType.NUM);
             const array = ArrayValueObject.createByArray([['text', ErrorType.REF]]);
-            const result = arrayFirst ? testFunction.calculate(array, scalar) : testFunction.calculate(scalar, array);
+            const result = arrayFirst ? excelFunction.calculate(array, scalar) : excelFunction.calculate(scalar, array);
 
             expect(result.getValue()).toBe(arrayFirst ? ErrorType.REF : ErrorType.NUM);
         });
 
         it('keeps literal error-looking text as text', () => {
-            const result = testFunction.calculate(StringValueObject.create('#N/A'), StringValueObject.create(' value'));
+            const result = excelFunction.calculate(StringValueObject.create('#N/A'), StringValueObject.create(' value'));
             expect(result.getValue()).toBe('#N/A value');
+        });
+    });
+
+    describe('Concat', () => {
+        it('retains native scalar-error handling', () => {
+            const result = testFunction.calculate(StringValueObject.create('before'), ErrorValueObject.create(ErrorType.NA), StringValueObject.create('after'));
+            expect(result.getValue()).toBe('beforeafter');
         });
 
         it('Text is single cell', () => {

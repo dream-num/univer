@@ -80,7 +80,7 @@ function parseComplexPart(part: string, dateSystem: DateSystem): number | null {
  * Reads the coefficient of the imaginary unit. Excel accepts an empty
  * coefficient and a bare sign, e.g. `i`, `1+i` and `-i`.
  */
-function parseImaginaryCoefficient(part: string, dateSystem: DateSystem): number | null {
+function parseImaginaryCoefficient(part: string, dateSystem: DateSystem, parsePart: typeof parseComplexPart): number | null {
     const value = part.trim();
 
     if (value === '' || value === '+') {
@@ -91,7 +91,7 @@ function parseImaginaryCoefficient(part: string, dateSystem: DateSystem): number
         return -1;
     }
 
-    return parseComplexPart(value, dateSystem);
+    return parsePart(value, dateSystem);
 }
 
 /**
@@ -146,19 +146,19 @@ function formatImaginaryNumber(iValue: Decimal, suffix: string): string {
 }
 
 export class Complex {
-    static getComplex(realNum: number, iNum: number, suffix: string): number | string {
+    static getComplex(realNum: number, iNum: number, suffix: string): string {
         const realValue = new Decimal(realNum).toSignificantDigits(15, Decimal.ROUND_HALF_UP);
         const iValue = new Decimal(iNum).toSignificantDigits(15, Decimal.ROUND_HALF_UP);
         const _suffix = suffix === '' ? 'i' : suffix;
 
-        let result: number | string;
+        let result: string;
 
         if (realValue.isZero() && iValue.isZero()) {
-            result = 0;
+            result = '0';
         } else if (realValue.isZero()) {
             result = formatImaginaryNumber(iValue, _suffix);
         } else if (iValue.isZero()) {
-            result = realValue.toNumber();
+            result = formatComplexNumber(realValue);
         } else {
             const sign = iValue.gt(0) ? '+' : '';
             result = `${formatComplexNumber(realValue)}${sign}${formatImaginaryNumber(iValue, _suffix)}`;
@@ -185,7 +185,11 @@ export class Complex {
 
     private _dateSystem: DateSystem = DateSystem.Date1900;
 
-    constructor(inumber: number | string, dateSystem: DateSystem = DateSystem.Date1900) {
+    constructor(
+        inumber: number | string,
+        dateSystem: DateSystem = DateSystem.Date1900,
+        private readonly _parsePart = parseComplexPart
+    ) {
         this._inumber = inumber;
         this._dateSystem = dateSystem;
         this._parseInumber();
@@ -198,6 +202,11 @@ export class Complex {
      * be read makes the whole number invalid.
      */
     private _parseInumber(): void {
+        if (this._parsePart !== parseComplexPart && typeof this._inumber === 'number') {
+            this._realNum = this._inumber;
+            this._isError = !Number.isFinite(this._inumber);
+            return;
+        }
         const inumberStr = `${this._inumber}`.trim();
 
         if (inumberStr === '') {
@@ -231,8 +240,8 @@ export class Complex {
             }
         }
 
-        const realNum = realText === '' ? 0 : parseComplexPart(realText, this._dateSystem);
-        const iNum = iText === null ? 0 : parseImaginaryCoefficient(iText, this._dateSystem);
+        const realNum = realText === '' ? 0 : this._parsePart(realText, this._dateSystem);
+        const iNum = iText === null ? 0 : parseImaginaryCoefficient(iText, this._dateSystem, this._parsePart);
         const iSign = separatorIndex >= 0 && body[separatorIndex] === '-' ? -1 : 1;
 
         if (realNum === null || iNum === null) {
@@ -261,7 +270,7 @@ export class Complex {
         return this._isError;
     }
 
-    toString(): number | string {
+    toString(): string {
         return Complex.getComplex(this._realNum, this._iNum, this._suffix);
     }
 
@@ -293,11 +302,11 @@ export class Complex {
         return result;
     }
 
-    Conjugate(): number | string {
+    Conjugate(): string {
         return Complex.getComplex(this._realNum, -this._iNum, this._suffix);
     }
 
-    Cos(): number | string {
+    Cos(): string {
         if (this._iNum) {
             const realNum = Decimal.cos(this._realNum).mul(Decimal.cosh(this._iNum)).toNumber();
             const iNum = Decimal.sin(this._realNum).mul(Decimal.sinh(this._iNum)).negated().toNumber();
@@ -310,7 +319,7 @@ export class Complex {
         }
     }
 
-    Cosh(): number | string {
+    Cosh(): string {
         if (!Number.isFinite(Math.sinh(this._realNum)) || !Number.isFinite(Math.cosh(this._realNum))) {
             this._isError = true;
             return '';
@@ -328,7 +337,7 @@ export class Complex {
         }
     }
 
-    Cot(): number | string {
+    Cot(): string {
         if (this._iNum) {
             const den = Decimal.cosh(this._iNum * 2).sub(Decimal.cos(this._realNum * 2));
             const realNum = Decimal.sin(this._realNum * 2).div(den).toNumber();
@@ -342,7 +351,7 @@ export class Complex {
         }
     }
 
-    Coth(): number | string {
+    Coth(): string {
         if (!Number.isFinite(Math.sinh(this._realNum)) || !Number.isFinite(Math.cosh(this._realNum))) {
             this._isError = true;
             return '';
@@ -361,7 +370,7 @@ export class Complex {
         }
     }
 
-    Csc(): number | string {
+    Csc(): string {
         if (this._iNum) {
             const den = Decimal.cosh(this._iNum * 2).sub(Decimal.cos(this._realNum * 2));
             const realNum = Decimal.sin(this._realNum).mul(Decimal.cosh(this._iNum)).mul(2).div(den).toNumber();
@@ -375,7 +384,7 @@ export class Complex {
         }
     }
 
-    Csch(): number | string {
+    Csch(): string {
         if (!Number.isFinite(Math.sinh(this._realNum)) || !Number.isFinite(Math.cosh(this._realNum))) {
             return Complex.getComplex(0, 0, this._suffix);
         }
@@ -393,7 +402,7 @@ export class Complex {
         }
     }
 
-    Div(complex2: Complex): number | string {
+    Div(complex2: Complex): string {
         const Decimal_realNum1 = new Decimal(this._realNum);
         const Decimal_iNum1 = new Decimal(this._iNum);
         const Decimal_realNum2 = new Decimal(complex2.getRealNum());
@@ -408,7 +417,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, suffix);
     }
 
-    Exp(): number | string {
+    Exp(): string {
         if (!Number.isFinite(Math.exp(this._realNum))) {
             this._isError = true;
             return '';
@@ -420,7 +429,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Ln(): number | string {
+    Ln(): string {
         // Keep the real part and the argument in double precision so the
         // result matches Excel, including ln|z| when |z| is close to 1.
         // atan2 also carries the sign of the imaginary part.
@@ -430,7 +439,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Log(base: number): number | string {
+    Log(base: number): string {
         const abs = Decimal.sqrt(Decimal.pow(this._realNum, 2).add(Decimal.pow(this._iNum, 2)));
         const Decimal_realNum1 = Decimal.ln(abs);
         let Decimal_iNum1 = Decimal.acos(new Decimal(this._realNum).div(abs));
@@ -455,7 +464,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Power(number: number): number | string {
+    Power(number: number): string {
         if (this._realNum === 0 && this._iNum === 0) {
             if (number > 0) {
                 return Complex.getComplex(this._realNum, this._iNum, this._suffix);
@@ -486,7 +495,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Product(complex2: Complex): number | string {
+    Product(complex2: Complex): string {
         const Decimal_realNum1 = new Decimal(this._realNum);
         const Decimal_iNum1 = new Decimal(this._iNum);
         const Decimal_realNum2 = new Decimal(complex2.getRealNum());
@@ -500,7 +509,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, suffix);
     }
 
-    Sec(): number | string {
+    Sec(): string {
         if (this._iNum) {
             const den = Decimal.cosh(this._iNum * 2).add(Decimal.cos(this._realNum * 2));
             const realNum = Decimal.cos(this._realNum).mul(Decimal.cosh(this._iNum)).mul(2).div(den).toNumber();
@@ -514,7 +523,7 @@ export class Complex {
         }
     }
 
-    Sech(): number | string {
+    Sech(): string {
         if (!Number.isFinite(Math.sinh(this._realNum * 2)) || !Number.isFinite(Math.cosh(this._realNum * 2))) {
             return Complex.getComplex(0, 0, this._suffix);
         }
@@ -532,7 +541,7 @@ export class Complex {
         }
     }
 
-    Sin(): number | string {
+    Sin(): string {
         if (this._iNum) {
             const realNum = Decimal.sin(this._realNum).mul(Decimal.cosh(this._iNum)).toNumber();
             const iNum = Decimal.cos(this._realNum).mul(Decimal.sinh(this._iNum)).toNumber();
@@ -545,7 +554,7 @@ export class Complex {
         }
     }
 
-    Sinh(): number | string {
+    Sinh(): string {
         if (!Number.isFinite(Math.sinh(this._realNum)) || !Number.isFinite(Math.cosh(this._realNum))) {
             this._isError = true;
             return '';
@@ -563,7 +572,7 @@ export class Complex {
         }
     }
 
-    Sqrt(): number | string {
+    Sqrt(): string {
         const abs = Decimal.sqrt(Decimal.pow(this._realNum, 2).add(Decimal.pow(this._iNum, 2)));
         const abs_sqrt = Decimal.sqrt(abs);
 
@@ -579,7 +588,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Sub(complex2: Complex): number | string {
+    Sub(complex2: Complex): string {
         const Decimal_realNum1 = new Decimal(this._realNum);
         const Decimal_iNum1 = new Decimal(this._iNum);
         const Decimal_realNum2 = new Decimal(complex2.getRealNum());
@@ -593,7 +602,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, suffix);
     }
 
-    Sum(complex2: Complex): number | string {
+    Sum(complex2: Complex): string {
         const Decimal_realNum1 = new Decimal(this._realNum);
         const Decimal_iNum1 = new Decimal(this._iNum);
         const Decimal_realNum2 = new Decimal(complex2.getRealNum());
@@ -607,7 +616,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, suffix);
     }
 
-    Tan(): number | string {
+    Tan(): string {
         if (this._iNum) {
             const den = Decimal.cos(this._realNum * 2).add(Decimal.cosh(this._iNum * 2));
             const realNum = Decimal.sin(this._realNum * 2).div(den).toNumber();
@@ -621,7 +630,7 @@ export class Complex {
         }
     }
 
-    Tanh(): number | string {
+    Tanh(): string {
         if (!Number.isFinite(Math.sinh(this._realNum)) || !Number.isFinite(Math.cosh(this._realNum))) {
             this._isError = true;
             return '';

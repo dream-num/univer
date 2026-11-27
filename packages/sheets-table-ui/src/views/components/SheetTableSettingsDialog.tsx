@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { ActionRow, Button, Checkbox } from '@univerjs/design';
 import { SetSheetTableCommand, TableManager } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { SheetTableCalculatedColumn } from './SheetTableCalculatedColumn';
 
 export interface ISheetTableSettingsDialogProps {
@@ -76,7 +76,7 @@ export function SheetTableSettingsDialog(props: ISheetTableSettingsDialogProps) 
     };
 
     return (
-        <div className="univer-flex univer-flex-col univer-gap-4 univer-py-2">
+        <div className="univer-flex univer-flex-col univer-gap-4">
             <Checkbox checked={showAutoFilter} disabled={saving || !initial} onChange={(value) => setShowAutoFilter(Boolean(value))}>
                 {localeService.t<LocaleKey>('sheets-table-ui.showFilterButtons')}
             </Checkbox>

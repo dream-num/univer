@@ -20,7 +20,7 @@ import type { BaseReferenceObject, FunctionVariantType } from '../reference-obje
 import type { BaseValueObject } from '../value-object/base-value-object';
 import { DateSystem } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
-import { OPERATOR_TOKEN_COMPARE_SET, prefixToken } from '../../basics/token';
+import { OPERATOR_TOKEN_COMPARE_SET, operatorToken, prefixToken } from '../../basics/token';
 import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFunctionService } from '../../services/function.service';
@@ -28,7 +28,7 @@ import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
 import { ArrayValueObject } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
-import { NumberValueObject } from '../value-object/primitive-object';
+import { NullValueObject, NumberValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -52,7 +52,7 @@ export class PrefixNode extends BaseAstNode {
         return NodeType.PREFIX;
     }
 
-    override execute(dateSystem: DateSystem = DateSystem.Date1900) {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900, readRegion?: () => string) {
         this._referenceRanges = null;
         const children = this.getChildren();
         let value = children[0].getValue();
@@ -65,18 +65,31 @@ export class PrefixNode extends BaseAstNode {
 
         if (this._operatorString === prefixToken.MINUS) {
             if (value.isReferenceObject()) {
-                value = (value as BaseReferenceObject).withDateSystem(dateSystem).toArrayValueObject();
+                const array = (value as BaseReferenceObject).withDateSystem(dateSystem, readRegion).toArrayValueObject();
+                value = array.getRowCount() === 1 && array.getColumnCount() === 1 ? array.getFirstCell() : array;
             }
             result = this._functionExecutor!.calculate(
                 NumberValueObject.create(0),
-                (value as BaseValueObject).withDateSystem(dateSystem)
+                (value as BaseValueObject).withDateSystem(dateSystem, readRegion)
             ) as FunctionVariantType;
+        } else if (this._operatorString === prefixToken.PLUS) {
+            if (value.isReferenceObject()) {
+                const reference = (value as BaseReferenceObject).withDateSystem(dateSystem, readRegion);
+                if (reference.getRowCount() === 1 && reference.getColumnCount() === 1) {
+                    const { startRow, startColumn } = reference.getRangePosition();
+                    result = reference.isCellBlank(startRow, startColumn) ? NullValueObject.create() : reference.getFirstCell();
+                } else {
+                    result = reference.toArrayValueObject();
+                }
+            } else {
+                result = value;
+            }
         } else if (this._operatorString === prefixToken.AT) {
             result = this._handlerAT(value);
         } else {
             result = ErrorValueObject.create(ErrorType.VALUE);
         }
-        this.setValue(result.withDateSystem(dateSystem));
+        this.setValue(result.withDateSystem(dateSystem, readRegion));
     }
 
     private _handlerAT(value: FunctionVariantType) {
@@ -112,7 +125,7 @@ export class PrefixNode extends BaseAstNode {
         }
 
         if (startRow === endRow && startColumn === endColumn) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return this._getReferencedCell(currentValue);
         }
 
         // @ projection to current
@@ -143,7 +156,9 @@ export class PrefixNode extends BaseAstNode {
                 endColumn: selectedColumn,
             },
         }));
-        return reference.getCellByPosition(selectedRow, selectedColumn);
+        const selected = this._referenceRanges[0]?.range;
+        const preserved = selected && this.getParent()?.getImplicitIntersectionReference(this, reference, selected);
+        return preserved ?? reference.getCellByPosition(selectedRow, selectedColumn);
     }
 
     private _preserveAtRangeForFormula2LookupArray(): boolean {
@@ -188,6 +203,16 @@ export class PrefixNodeFactory extends BaseAstNodeFactory {
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {
+        if (param === operatorToken.UNARY_PLUS) {
+            return new PrefixNode(this._runtimeService, prefixToken.PLUS);
+        }
+        if (param === operatorToken.IMPLICIT_INTERSECTION) {
+            return new PrefixNode(this._runtimeService, prefixToken.AT);
+        }
+        if (param === operatorToken.UNARY_MINUS) {
+            const executor = this._functionService.getExecutor(FUNCTION_NAMES_META.MINUS);
+            return executor ? new PrefixNode(this._runtimeService, prefixToken.MINUS, executor) : ErrorNode.create(ErrorType.NAME);
+        }
         if (!(param instanceof LexerNode)) {
             return;
         }

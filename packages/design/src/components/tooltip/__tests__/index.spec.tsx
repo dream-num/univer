@@ -212,4 +212,35 @@ describe('Tooltip', () => {
         fireEvent.scroll(window);
         expect(tooltip.style.left).not.toBe('');
     });
+
+    it('links trigger with aria-describedby, dismisses on Escape, and enforces showIfEllipsis on focus', async () => {
+        render(
+            <Tooltip title="Ellipsis focus tip" showIfEllipsis asChild={false}>
+                Focus target
+            </Tooltip>
+        );
+
+        const trigger = screen.getByRole('button', { name: 'Focus target' });
+        Object.defineProperty(trigger, 'clientWidth', { value: 100, configurable: true });
+        Object.defineProperty(trigger, 'scrollWidth', { value: 100, configurable: true });
+
+        // Should not open on focus when not overflowing
+        fireEvent.focus(trigger);
+        expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+        expect(trigger).not.toHaveAttribute('aria-describedby');
+
+        // Open on focus once overflowing
+        Object.defineProperty(trigger, 'scrollWidth', { value: 150, configurable: true });
+        fireEvent.focus(trigger);
+        const tooltip = await screen.findByRole('tooltip');
+        expect(tooltip.id).toBeTruthy();
+        expect(trigger).toHaveAttribute('aria-describedby', tooltip.id);
+
+        // Dismiss on Escape
+        fireEvent.keyDown(document, { key: 'Escape' });
+        await waitFor(() => {
+            expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+        });
+        expect(trigger).not.toHaveAttribute('aria-describedby');
+    });
 });

@@ -136,6 +136,11 @@ const locale: typeof enUS = {
             title: 'Casella di controllo',
             error: 'Il contenuto di questa cella viola la regola di convalida',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'L\'intervallo è protetto e non hai l\'autorizzazione per impostare gli stili. Per impostare gli stili, contatta il creatore.',
+            },
+        },
     },
 };
 

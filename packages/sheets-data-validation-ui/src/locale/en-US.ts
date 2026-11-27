@@ -95,11 +95,6 @@ const locale = {
         showTime: {
             label: 'Show TimePicker',
         },
-        permission: {
-            dialog: {
-                setStyleErr: 'The range is protected, and you do not have permission to set styles. To set styles, please contact the creator.',
-            },
-        },
     },
 };
 

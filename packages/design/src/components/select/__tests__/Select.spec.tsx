@@ -66,4 +66,19 @@ describe('Select', () => {
         fireEvent.click(trigger);
         expect(onSubmit).not.toHaveBeenCalled();
     });
+
+    it('renders placeholder when value is empty and omits trailing group separators', async () => {
+        render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <Select aria-label="Format" value="" placeholder="Choose format" options={options} onChange={vi.fn()} />
+            </ConfigProvider>
+        );
+
+        const trigger = screen.getByRole('button', { name: 'Format' });
+        expect(trigger.textContent).toContain('Choose format');
+
+        fireEvent.keyDown(trigger, { key: 'ArrowDown' });
+        await screen.findByRole('menuitemradio', { name: 'First' });
+        expect(screen.queryByRole('separator')).toBeNull();
+    });
 });

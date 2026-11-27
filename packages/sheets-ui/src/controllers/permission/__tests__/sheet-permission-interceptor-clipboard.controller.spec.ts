@@ -32,12 +32,18 @@ import {
     SheetPermissionCheckController,
     SheetsSelectionsService,
     ViewStateEnum,
+    WorkbookInsertRowPermission,
+    WorksheetInsertColumnPermission,
+    WorksheetSetCellValuePermission,
 } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
 import enUS from '../../../locale/en-US';
 import { clipboardTestBed } from '../../../services/clipboard/__tests__/clipboard-test-bed';
-import { ISheetClipboardService } from '../../../services/clipboard/clipboard.service';
-import { SHEET_PERMISSION_PASTE_PLUGIN, SheetPermissionInterceptorClipboardController } from '../sheet-permission-interceptor-clipboard.controller';
+import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../../../services/clipboard/clipboard.service';
+import {
+    SHEET_PERMISSION_PASTE_PLUGIN,
+    SheetPermissionInterceptorClipboardController,
+} from '../sheet-permission-interceptor-clipboard.controller';
 
 describe('SheetPermissionInterceptorClipboardController', () => {
     let univer: Univer;
@@ -51,7 +57,8 @@ describe('SheetPermissionInterceptorClipboardController', () => {
         const localeService = get(LocaleService);
         localeService.load({ [LocaleType.EN_US]: enUS });
         localeService.setLocale(LocaleType.EN_US);
-        const controller = get(SheetPermissionInterceptorClipboardController);
+        localeService.setDirection('ltr');
+        get(SheetPermissionInterceptorClipboardController);
         const instances = get(IUniverInstanceService);
         const source = instances.getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!;
         instances.createUnit(UniverInstanceType.UNIVER_SHEET, { ...Tools.deepClone(source.getSnapshot()), id: 'peer' });
@@ -95,7 +102,39 @@ describe('SheetPermissionInterceptorClipboardController', () => {
             expect(messages).toEqual([]);
         }
         subscription.unsubscribe();
-        controller.dispose();
-        expect(clipboard.getClipboardHooks().some((item) => item.id === SHEET_PERMISSION_PASTE_PLUGIN)).toBe(false);
+    });
+
+    it('checks current write and insertion permissions against the expanded clipboard target', () => {
+        const bed = clipboardTestBed(undefined, [[SheetPermissionInterceptorClipboardController]]);
+        univer = bed.univer;
+        const { get, sheet } = bed;
+        get(SheetPermissionInterceptorClipboardController);
+        const worksheet = sheet.getActiveSheet();
+        const unitId = sheet.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        const value = new WorksheetSetCellValuePermission(unitId, subUnitId);
+        const insertRow = new WorkbookInsertRowPermission(unitId);
+        const insertCol = new WorksheetInsertColumnPermission(unitId, subUnitId);
+        const permissions = get(IPermissionService);
+        for (const point of [value, insertRow, insertCol]) {
+            permissions.addPermissionPoint(point);
+            permissions.updatePermissionPoint(point.id, false);
+        }
+        const locale = get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: enUS });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+        const clipboard = get(ISheetClipboardService);
+        const hook = clipboard.getClipboardHooks().find((item) => item.id === SHEET_PERMISSION_PASTE_PLUGIN)!;
+        const beforePaste = (row: number, col: number) => hook.onBeforePaste!({
+            unitId,
+            subUnitId,
+            range: { rows: [row], cols: [col] },
+        }, { pasteType: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE });
+        expect(() => beforePaste(0, 0)).toThrow(CustomCommandExecutionError);
+        permissions.updatePermissionPoint(value.id, true);
+        expect(beforePaste(0, 0)).toBe(true);
+        expect(() => beforePaste(worksheet.getMaxRows(), 0)).toThrow(CustomCommandExecutionError);
+        expect(() => beforePaste(0, worksheet.getMaxColumns())).toThrow(CustomCommandExecutionError);
     });
 });

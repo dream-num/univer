@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { hexToHsv, hsvToHex, hsvToRgb, hsvToRgba, parseRgba, rgbToHex, rgbToHsv } from '../color-conversion';
+import { hexToHsv, hsvToHex, hsvToRgb, hsvToRgba, isLightColor, parseRgba, rgbToHex, rgbToHsv } from '../color-conversion';
 
 describe('color-conversion', () => {
     it('should convert hsv to rgb across hue segments', () => {
@@ -58,5 +58,13 @@ describe('color-conversion', () => {
         expect(parseRgba('rgba(255, 128, 0, 0.25)')).toEqual([255, 128, 0, 0.25]);
         expect(parseRgba('rgb(10, 20, 30)')).toEqual([10, 20, 30, 1]);
         expect(() => parseRgba('not-a-color')).toThrow('Invalid RGBA string');
+    });
+
+    it('detects light vs dark hex colors for contrast indicators', () => {
+        expect(isLightColor('#FFFFFF')).toBe(true);
+        expect(isLightColor('#FFF4B9')).toBe(true);
+        expect(isLightColor('#000000')).toBe(false);
+        expect(isLightColor('#3F83F8')).toBe(false);
+        expect(isLightColor('#fff')).toBe(true);
     });
 });

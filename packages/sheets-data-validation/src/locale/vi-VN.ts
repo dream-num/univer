@@ -136,6 +136,11 @@ const locale: typeof enUS = {
             title: 'Hộp kiểm',
             error: 'Nội dung của ô này vi phạm quy tắc xác thực',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền thiết lập kiểu. Nếu cần thiết lập kiểu, vui lòng liên hệ với người tạo.',
+            },
+        },
     },
 };
 

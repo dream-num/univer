@@ -136,6 +136,11 @@ const locale: typeof enUS = {
             title: 'Casilla de verificación',
             error: 'El contenido de esta celda viola su regla de validación',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'El rango está protegido y no tienes permiso para establecer estilos. Para establecer estilos, contacta al creador.',
+            },
+        },
     },
 };
 

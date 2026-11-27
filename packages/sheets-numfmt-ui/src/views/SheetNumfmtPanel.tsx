@@ -16,13 +16,13 @@
 
 import type { ISelectProps } from '@univerjs/design';
 import type { ComponentType } from 'react';
+import type { LocaleKey } from '../locale/types';
+import type { IBusinessComponentProps } from './components/interface';
 import { LocaleService } from '@univerjs/core';
 import { Button, clsx, scrollbarClassName, Select } from '@univerjs/design';
 import { getCurrencyType } from '@univerjs/sheets-numfmt';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useRef, useState } from 'react';
-import type { LocaleKey } from '../locale/types';
-import type { IBusinessComponentProps } from './components/interface';
 import { UserHabitCurrencyContext } from '../controllers/user-habit.controller';
 import { AccountingPanel, isAccountingPanel } from './components/Accounting';
 import { CurrencyPanel, isCurrencyPanel } from './components/Currency';
@@ -54,15 +54,15 @@ export function SheetNumfmtPanel(props: ISheetNumfmtPanelProps) {
 
 function SheetNumfmtPanelContent(props: ISheetNumfmtPanelProps) {
     const { onChange } = props;
-    const { defaultValue, defaultPattern, row, col } = props.value;
+    const { defaultValue, defaultPattern } = props.value;
     const localeService = useDependency(LocaleService);
     useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
     const currentPatternRef = useRef<() => string | null>(() => '');
+    const onConfirmRef = useRef<(() => void) | undefined>(undefined);
     const nextTick = useNextTick();
 
     const [type, setType] = useState(findDefaultType);
-    const [key, setKey] = useState(() => `${row}_${col}_${defaultPattern}`);
-    const { mark, userHabitCurrency } = useCurrencyOptions(() => setKey(`${row}_${col}_${defaultPattern}_userCurrency`));
+    const { mark, userHabitCurrency } = useCurrencyOptions();
 
     const BusinessComponent = TYPE_OPTIONS.find((item) => item.label === type)?.component;
 
@@ -89,12 +89,14 @@ function SheetNumfmtPanelContent(props: ISheetNumfmtPanelProps) {
         onChange({ type: 'change', value: v });
     }, [onChange]);
 
-    const handleActionChange = useCallback((action: () => string | null) => {
-        currentPatternRef.current = action;
+    const handleActionChange = useCallback<IBusinessComponentProps['onActionChange']>((getPattern, onConfirm) => {
+        currentPatternRef.current = getPattern;
+        onConfirmRef.current = onConfirm;
     }, []);
 
     const handleConfirm = () => {
         const pattern = currentPatternRef.current() || '';
+        onConfirmRef.current?.();
         const currency = getCurrencyType(pattern);
         if (currency) {
             mark(currency);
@@ -118,7 +120,7 @@ function SheetNumfmtPanelContent(props: ISheetNumfmtPanelProps) {
             className={clsx(
                 `
                   univer-box-border univer-flex univer-h-full univer-flex-col univer-justify-between
-                  univer-overflow-y-auto univer-pb-5
+                  univer-overflow-y-auto
                 `,
                 scrollbarClassName
             )}
@@ -133,7 +135,7 @@ function SheetNumfmtPanelContent(props: ISheetNumfmtPanelProps) {
                 <div>
                     {BusinessComponent && (
                         <UserHabitCurrencyContext.Provider value={userHabitCurrency}>
-                            <BusinessComponent {...subProps} key={key} />
+                            <BusinessComponent {...subProps} />
                         </UserHabitCurrencyContext.Provider>
                     )}
                 </div>

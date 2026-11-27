@@ -21,12 +21,93 @@ import { ErrorValueObject } from '../../../../engine/value-object/base-value-obj
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
-import { Pduration } from '../index';
+import { ExcelPduration, Pduration } from '../index';
 
 describe('Test pduration function', () => {
     const testFunction = new Pduration(FUNCTION_NAMES_FINANCIAL.PDURATION);
 
+    describe('ExcelPduration compatibility', () => {
+        const excelFunction = new ExcelPduration(FUNCTION_NAMES_FINANCIAL.PDURATION);
+
+        it.each([1e-15, 1])('Preserves Excel zero periods when logarithms coincide: rate=%s', (rate) => {
+            const result = excelFunction.calculate(
+                NumberValueObject.create(rate),
+                NumberValueObject.create(1e15),
+                NumberValueObject.create(1e15 + 1)
+            );
+            expect(result.getValue()).toBe(0);
+        });
+
+        it.each([-0.5, -0.01, 0])('Rejects nonpositive rates: %s', (rate) => {
+            const result = excelFunction.calculate(NumberValueObject.create(rate), NumberValueObject.create(1000), NumberValueObject.create(1200));
+            expect(result.getValue()).toBe(ErrorType.NUM);
+        });
+
+        it('Preserves numeric errors when the rate rounds away on addition to one', () => {
+            const rate = NumberValueObject.create(1e-20);
+            const present = NumberValueObject.create(1);
+            const result = excelFunction.calculate(rate, present, NumberValueObject.create(2));
+            expect(result.getValue()).toBe(ErrorType.NUM);
+            expect(excelFunction.calculate(rate, present, present).getValue()).toBe(ErrorType.NUM);
+        });
+
+        it('Preserves Excel nonzero periods at a small positive rate', () => {
+            const result = excelFunction.calculate(
+                NumberValueObject.create(1e-13),
+                NumberValueObject.create(100),
+                NumberValueObject.create(200)
+            );
+            expect(result.getValue()).toBeCloseTo(6937016409072.96, 0);
+            expect(Number(result.getValue()) > 6.935e12).toBe(true);
+
+            const numericString = excelFunction.calculate(
+                StringValueObject.create('1e-13'),
+                StringValueObject.create('100'),
+                StringValueObject.create('200')
+            );
+            expect(numericString.getValue()).toBe(result.getValue());
+        });
+
+        it('Preserves rounding and domain checks independently in an array', () => {
+            const rates = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[1e-13, 1e-20, -0.5]]),
+                rowCount: 1,
+                columnCount: 3,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = excelFunction.calculate(rates, NumberValueObject.create(100), NumberValueObject.create(200));
+            expect(getObjectValue(result)).toStrictEqual([[6937016409072.96, ErrorType.NUM, ErrorType.NUM]]);
+        });
+
+        it('Preserves zero periods when nearby large values have the same logarithm', () => {
+            const rate = 2 ** -50;
+            const present = 2 ** 1000;
+            const result = excelFunction.calculate(
+                NumberValueObject.create(rate),
+                NumberValueObject.create(present),
+                NumberValueObject.create(present * (1 + rate))
+            );
+            expect(result.getValue()).toBe(0);
+        });
+
+        it.each([
+            [1e-300, 1e300, 1993.1568569324174],
+            [1e300, 1e-300, -1993.1568569324174],
+        ])('Keeps widely separated positive values finite', (present, future, expected) => {
+            const result = excelFunction.calculate(NumberValueObject.create(1), NumberValueObject.create(present), NumberValueObject.create(future));
+            expect(result.getValue()).toBeCloseTo(expected, 10);
+        });
+    });
+
     describe('Pduration', () => {
+        it('Retains the native negative-rate domain', () => {
+            const result = testFunction.calculate(NumberValueObject.create(-0.5), NumberValueObject.create(100), NumberValueObject.create(50));
+            expect(result.getValue()).toBeCloseTo(1, 14);
+        });
+
         it('Value is normal', () => {
             const rate = NumberValueObject.create(0.025 / 12);
             const pv = NumberValueObject.create(1000);

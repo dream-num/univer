@@ -20,7 +20,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Textsplit extends BaseFunction {
@@ -29,13 +29,17 @@ export class Textsplit extends BaseFunction {
     override maxParams = 6;
 
     override calculate(text: BaseValueObject, colDelimiter: BaseValueObject, rowDelimiter?: BaseValueObject, ignoreEmpty?: BaseValueObject, matchMode?: BaseValueObject, padWith?: BaseValueObject) {
-        let _rowDelimiter = rowDelimiter ?? StringValueObject.create('\\s');
+        let _rowDelimiter = rowDelimiter ?? NullValueObject.create();
         const _ignoreEmpty = ignoreEmpty ?? NumberValueObject.create(0);
         const _matchMode = matchMode ?? NumberValueObject.create(0);
         const _padWith = padWith ?? this._createDefaultPadding();
 
-        const { _variant, values: rowDelimiterValue } = this._getStringValues(_rowDelimiter, false);
-        _rowDelimiter = _variant;
+        let rowDelimiterValue: string[] = [];
+        if (!_rowDelimiter.isNull()) {
+            const { _variant, values } = this._getStringValues(_rowDelimiter, false);
+            _rowDelimiter = _variant;
+            rowDelimiterValue = values;
+        }
 
         const allowBlankColDelimiter =
             rowDelimiter != null && !rowDelimiter.isNull() && !_rowDelimiter.isError() && rowDelimiterValue.length > 0;
@@ -221,7 +225,7 @@ export class Textsplit extends BaseFunction {
         const rowDelimiterRegExp = new RegExp(rowDelimiterValue.join('|'), `g${!matchModeValue ? '' : 'i'}`);
         const colDelimiterRegExp = new RegExp(colDelimiterValue.join('|'), `g${!matchModeValue ? '' : 'i'}`);
 
-        const resultRows = textValue.split(rowDelimiterRegExp);
+        const resultRows = rowDelimiterValue.length > 0 ? textValue.split(rowDelimiterRegExp) : [textValue];
 
         let resultColsMaxCount = 1;
 

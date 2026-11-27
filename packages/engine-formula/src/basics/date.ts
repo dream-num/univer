@@ -203,6 +203,10 @@ export function getWeekendArray(weekend: number | string): number[] {
 }
 
 export function countWorkingDays(startDateSerialNumber: number, endDateSerialNumber: number, weekend: number | string = 1, holidays?: number[], dateSystem = DateSystem.Date1900): number {
+    if (!Number.isFinite(startDateSerialNumber) || !Number.isFinite(endDateSerialNumber)) {
+        return 0;
+    }
+
     const weekendArray = getWeekendArray(weekend);
 
     const start = Math.floor(startDateSerialNumber);

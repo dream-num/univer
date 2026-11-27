@@ -16,6 +16,7 @@
 
 import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import { getWeekDayByDateSerialNumber, getWeekendArray } from '../../../../basics/date';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -261,5 +262,59 @@ describe('Test networkdays.intl function', () => {
 
             testFunction.setDateSystem(DateSystem.Date1900);
         });
+    });
+});
+
+function countDayByDay(start: number, end: number, weekend: number | string, holidays: number[], dateSystem: DateSystem): number {
+    const weekendDays = getWeekendArray(weekend);
+    let count = 0;
+    for (let day = Math.min(Math.floor(start), Math.floor(end)); day <= Math.max(Math.floor(start), Math.floor(end)); day++) {
+        if (!weekendDays.includes(getWeekDayByDateSerialNumber(day, dateSystem)) && !holidays.some((holiday) => Math.floor(holiday) === day)) {
+            count++;
+        }
+    }
+    return Math.floor(end) >= Math.floor(start) ? count : -count;
+}
+
+describe('Working-day ranges', () => {
+    it.each([DateSystem.Date1900, DateSystem.Date1904])('retains zero for a non-finite formula result in date system %s', (dateSystem) => {
+        const international = new NetworkdaysIntl(FUNCTION_NAMES_DATE.NETWORKDAYS_INTL);
+        international.setDateSystem(dateSystem);
+        const invalid = NumberValueObject.create(Number.NaN);
+
+        for (const [from, to] of [[invalid, NumberValueObject.create(10)], [NumberValueObject.create(10), invalid]]) {
+            for (const weekend of ['1010101', '0000000', '1111111']) {
+                const mask = StringValueObject.create(weekend);
+                expect(international.calculate(from, to, mask).getValue()).toBeCloseTo(0);
+                expect(international.calculate(from, to, mask, ArrayValueObject.createByArray([[1, 2, 2]])).getValue()).toBeCloseTo(0);
+                expect(international.calculate(from, to, mask, ErrorValueObject.create(ErrorType.NA)).getValue()).toBe(ErrorType.NA);
+            }
+        }
+        expect(international.calculate(invalid, NumberValueObject.create(10), NumberValueObject.create(99)).getValue()).toBe(ErrorType.NUM);
+        for (const invalid of [Infinity, -Infinity]) {
+            expect(international.calculate(NumberValueObject.create(invalid), NumberValueObject.create(10)).getValue()).toBe(ErrorType.NUM);
+        }
+    });
+
+    it.each([DateSystem.Date1900, DateSystem.Date1904])('retains custom weekends and holiday deduplication in date system %s', (dateSystem) => {
+        const holidays = [59, 59.9, 60, 60, 61.1, 99, 100, 101];
+        const holidayArray = ArrayValueObject.create({
+            calculateValueList: transformToValueObject([holidays]),
+            rowCount: 1,
+            columnCount: holidays.length,
+            unitId: '',
+            sheetId: '',
+            row: 0,
+            column: 0,
+        });
+        const international = new NetworkdaysIntl(FUNCTION_NAMES_DATE.NETWORKDAYS_INTL);
+        international.setDateSystem(dateSystem);
+
+        for (const [from, to] of [[58, 100], [100, 58], [60, 60]]) {
+            for (const weekend of ['1010101', '0000000', '1111111']) {
+                expect(international.calculate(NumberValueObject.create(from), NumberValueObject.create(to), StringValueObject.create(weekend), holidayArray).getValue())
+                    .toBe(countDayByDay(from, to, weekend, holidays, dateSystem));
+            }
+        }
     });
 });

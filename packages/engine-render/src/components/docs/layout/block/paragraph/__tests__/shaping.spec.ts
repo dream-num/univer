@@ -585,6 +585,8 @@ describe('shaping', () => {
             fontBoundingBoxDescent: 2,
             actualBoundingBoxAscent: 0,
             actualBoundingBoxDescent: 0,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
         });
         const content = ' A B  C ';
         const shape = (balanceSingleByteDoubleByteWidth?: BooleanNumber) => {
@@ -798,6 +800,8 @@ describe('shaping', () => {
                 fontBoundingBoxDescent: 3,
                 actualBoundingBoxAscent: 10,
                 actualBoundingBoxDescent: 2,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
             });
         }
         try {
@@ -831,6 +835,8 @@ describe('shaping', () => {
             fontBoundingBoxDescent: 3,
             actualBoundingBoxAscent: 11,
             actualBoundingBoxDescent: 3,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
         });
         try {
             clearFontCreateConfigCache();
@@ -924,6 +930,8 @@ describe('shaping', () => {
             fontBoundingBoxDescent: 4,
             actualBoundingBoxAscent: 20,
             actualBoundingBoxDescent: 4,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
         });
         const shape = (spaceWidthEastAsian?: BooleanNumber) => {
             const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('中A文2字 文 A', {

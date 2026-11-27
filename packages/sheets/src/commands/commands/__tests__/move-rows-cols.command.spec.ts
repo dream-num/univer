@@ -15,7 +15,6 @@
  */
 
 import type { ICellData, Injector, IRange, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
-import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../move-rows-cols.command';
 import {
     cellToRange,
     ICommandService,
@@ -27,10 +26,12 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../move-rows-cols.command';
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
+import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../../mutations/move-rows-cols.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
@@ -60,6 +61,56 @@ describe('Test move rows cols', () => {
             SetSelectionsOperation,
         ].forEach((c) => commandService.registerCommand(c));
         get(MergeCellController);
+    });
+
+    afterEach(() => {
+        univer.dispose();
+    });
+
+    it.each([
+        {
+            command: MoveRowsCommand,
+            mutation: MoveRowsMutation,
+            fromRange: cellToRange(18, 1),
+            toRange: cellToRange(1, 1),
+            range: { startRow: 18, startColumn: 0, endRow: 19, endColumn: 19, rangeType: RANGE_TYPE.ROW },
+        },
+        {
+            command: MoveColsCommand,
+            mutation: MoveColsMutation,
+            fromRange: cellToRange(1, 18),
+            toRange: cellToRange(1, 1),
+            range: { startRow: 0, startColumn: 18, endRow: 19, endColumn: 19, rangeType: RANGE_TYPE.COLUMN },
+        },
+    ])('passes original parameters and the actual move to both interceptors for $command.id', async ({ command, mutation, fromRange, toRange, range }) => {
+        const intercepted: unknown[] = [];
+        const interceptor = {
+            getMutations(info: Parameters<SheetInterceptorService['onCommandExecute']>[0]) {
+                if (info.id === command.id) {
+                    intercepted.push(info.params);
+                }
+                return { redos: [], undos: [] };
+            },
+        };
+        const service = get(SheetInterceptorService);
+        const before = service.interceptCommand(interceptor);
+        const after = service.interceptAfterCommand(interceptor);
+        let resolvedMove: unknown;
+        const listener = commandService.onCommandExecuted((info) => {
+            if (info.id === mutation.id) {
+                resolvedMove = info.params;
+            }
+        });
+        const params = { fromRange, toRange, range };
+        try {
+            expect(await commandService.executeCommand(command.id, params)).toBe(true);
+            expect(resolvedMove).toMatchObject({ sourceRange: range });
+            expect(intercepted).toEqual([{ ...params, resolvedMove }, { ...params, resolvedMove }]);
+        } finally {
+            listener.dispose();
+            after.dispose();
+            before.dispose();
+        }
     });
 
     function selectRow(rowStart: number, rowEnd: number): void {

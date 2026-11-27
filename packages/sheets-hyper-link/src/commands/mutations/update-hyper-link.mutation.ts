@@ -15,9 +15,9 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import type { ICellLinkContent } from '../../types/interfaces/i-hyper-link';
 import { CommandType, CustomRangeType, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
+import type { ICellLinkContent } from '../../types/interfaces/i-hyper-link';
 import { HyperLinkModel } from '../../models/hyper-link.model';
 
 export interface IUpdateHyperLinkMutationParams {
@@ -71,6 +71,31 @@ export interface IUpdateRichHyperLinkMutationParams {
     col: number;
     id: string;
     url: string;
+    /**
+     * The link update is applied after the associated row or column mutation.
+     * Its source cell and target range use the resulting coordinates of their respective worksheets.
+     */
+    afterDimensionChange?: true;
+    /** Only apply an OT follow-up if the preceding URL update is still current. */
+    expectedUrl?: string;
+}
+
+function matchesExpectedUrl(currentUrl: unknown, expectedUrl: unknown): boolean {
+    if (typeof currentUrl !== 'string' || typeof expectedUrl !== 'string') {
+        return false;
+    }
+    if (currentUrl === expectedUrl) {
+        return true;
+    }
+    if (!currentUrl.startsWith('#') || !expectedUrl.startsWith('#')) {
+        return false;
+    }
+
+    const currentParams = new URLSearchParams(currentUrl.slice(1));
+    const expectedParams = new URLSearchParams(expectedUrl.slice(1));
+    currentParams.sort();
+    expectedParams.sort();
+    return currentParams.toString() === expectedParams.toString();
 }
 
 export const UpdateRichHyperLinkMutation: ICommand<IUpdateRichHyperLinkMutationParams> = {
@@ -81,7 +106,7 @@ export const UpdateRichHyperLinkMutation: ICommand<IUpdateRichHyperLinkMutationP
             return false;
         }
 
-        const { unitId, subUnitId, row, col, id, url } = params;
+        const { unitId, subUnitId, row, col, id, url, expectedUrl } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetTarget = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
         if (!sheetTarget) {
@@ -91,7 +116,7 @@ export const UpdateRichHyperLinkMutation: ICommand<IUpdateRichHyperLinkMutationP
         const cell = worksheet.getCellRaw(row, col);
 
         const link = cell?.p?.body?.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK && range.rangeId === id);
-        if (!link) {
+        if (!link || (expectedUrl !== undefined && !matchesExpectedUrl(link.properties?.url, expectedUrl))) {
             return true;
         }
 

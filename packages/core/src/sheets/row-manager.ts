@@ -18,7 +18,6 @@ import type { IObjectArrayPrimitiveType } from '../shared/object-matrix';
 import type { Nullable } from '../shared/types';
 import type { IStyleData } from '../types/interfaces';
 import type { CustomData, IRange, IRowData, IWorksheetData } from './typedef';
-import type { SheetViewModel } from './view-model';
 import { getArrayLength } from '../shared/object-matrix';
 import { BooleanNumber } from '../types/enum';
 import { isValidSheetDimension, normalizeSheetDimension } from './sheet-dimensions';
@@ -35,7 +34,8 @@ export class RowManager {
 
     constructor(
         private readonly _config: IWorksheetData,
-        private readonly _viewModel: SheetViewModel,
+        // The legacy argument slot is retained, but row management does not read the view model.
+        private readonly _viewModel: unknown,
         data: IObjectArrayPrimitiveType<Partial<IRowData>>
     ) {
         this._rowData = data;

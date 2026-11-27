@@ -155,3 +155,45 @@ describe('Test quartileExc function', () => {
         });
     });
 });
+
+function createArray(values: number[]) {
+    return ArrayValueObject.create({
+        calculateValueList: transformToValueObject([values]),
+        rowCount: 1,
+        columnCount: values.length,
+        unitId: '',
+        sheetId: '',
+        row: 0,
+        column: 0,
+    });
+}
+
+describe('QuartileExc finite interpolation', () => {
+    const instance = new QuartileExc(FUNCTION_NAMES_STATISTICAL.QUARTILE_EXC);
+    const parameter = 2;
+
+    it('interpolates opposite finite extremes without overflowing their difference', () => {
+        const result = instance.calculate(createArray([1e308, -1e308]), NumberValueObject.create(parameter));
+        expect(result.getValue()).toBe(0);
+    });
+
+    it.each([
+        { values: [1e308, 1.6e308], expected: 1.3e308 },
+        { values: [-1.6e308, -1e308], expected: -1.3e308 },
+        { values: [1e308, 1e308], expected: 1e308 },
+        { values: [-4, 2], expected: -1 },
+        { values: [Number.MIN_VALUE, Number.MIN_VALUE], expected: Number.MIN_VALUE },
+    ])('preserves ordinary, same-sign and subnormal interpolation: $values', ({ values, expected }) => {
+        const result = instance.calculate(createArray(values), NumberValueObject.create(parameter));
+        expect(result.getValue()).toBe(expected);
+    });
+
+    it.each([
+        { values: [-1.6e308, 1e308, 1e308, 1e308, 1e308, 1e308], parameter: 1, expected: 3.5e307 },
+    ])('keeps a finite weighted result for parameter $parameter', ({ values, parameter, expected }) => {
+        const result = instance.calculate(createArray(values), NumberValueObject.create(parameter));
+        expect(result.isNumber()).toBe(true);
+        expect(Number.isFinite(result.getValue())).toBe(true);
+        expect((result.getValue() as number) / expected).toBeCloseTo(1, 14);
+    });
+});

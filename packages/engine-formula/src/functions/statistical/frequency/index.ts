@@ -51,6 +51,10 @@ export class Frequency extends BaseFunction {
 
         const counts: number[] = new Array(thresholds.length + 1).fill(0);
         for (const observation of observations) {
+            if (Number.isNaN(observation) || observation === -Infinity) {
+                continue;
+            }
+
             let start = 0;
             let end = thresholds.length;
             while (start < end) {

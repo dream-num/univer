@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { createIdentifier, Injector, WithNew } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DeviceType, PointerInput } from '../basics/i-events';
 import { Vector2 } from '../basics/vector2';
@@ -21,6 +22,7 @@ import { Engine } from '../engine';
 import { Group } from '../group';
 import { Scene } from '../scene';
 import { Transformer } from '../scene.transformer';
+import { DumbCanvasColorService, ICanvasColorService } from '../services/canvas-color.service';
 import { Control } from '../shape/control';
 import { Line } from '../shape/line';
 import { Rect } from '../shape/rect';
@@ -49,11 +51,34 @@ function createPointerEvent(type: string, offsetX: number, offsetY: number) {
     return event;
 }
 
+let injector: Injector;
+
+function getRenderObject<T, TArgs extends unknown[]>(ctor: new (...args: TArgs) => T, ...args: TArgs): T {
+    const instance = createIdentifier<{ object: T }>('RenderTestObject');
+    const scope = injector.createChild([
+        [ctor, { useFactory: function createRenderInstance() {
+            return injector.createInstance<TArgs, [], T>(ctor, ...args);
+        } }],
+        [instance, {
+            // Render objects keep their existing scene or test owner.
+            deps: [[WithNew, ctor]],
+            useFactory: function exposeRenderObject(object: T) {
+                return { object };
+            },
+        }],
+    ]);
+    try {
+        return scope.get(instance).object;
+    } finally {
+        scope.dispose();
+    }
+}
+
 function createTransformerFixture() {
-    const engine = new Engine('transformer', { elementWidth: 500, elementHeight: 400, dpr: 1 });
-    const scene = new Scene('transformer', engine, { width: 500, height: 400 });
-    const viewport = new Viewport('main', scene, { left: 0, top: 0, width: 500, height: 400 });
-    const rect = new Rect('rect-main', { left: 10, top: 10, width: 100, height: 60 });
+    const engine = getRenderObject(Engine, 'transformer', { elementWidth: 500, elementHeight: 400, dpr: 1 });
+    const scene = getRenderObject(Scene, 'transformer', engine, { width: 500, height: 400 });
+    const viewport = getRenderObject(Viewport, 'main', scene, { left: 0, top: 0, width: 500, height: 400 });
+    const rect = getRenderObject(Rect, 'rect-main', { left: 10, top: 10, width: 100, height: 60 });
     scene.addObject(rect);
     return { engine, scene, rect, viewport };
 }
@@ -63,20 +88,22 @@ describe('Transformer', () => {
 
     beforeEach(() => {
         env = setupRenderTestEnv();
+        injector = new Injector([[ICanvasColorService, { useClass: DumbCanvasColorService }]]);
     });
 
     afterEach(() => {
+        injector.dispose();
         env.restore();
     });
 
     it.each([0.35, 1, 2])('keeps resize and rotation touch targets in screen pixels at scale %s', (scale) => {
-        const engine = new Engine('touch-controls-engine', { elementWidth: 1600, elementHeight: 1600, dpr: 1 });
-        const scene = new Scene('touch-controls-scene', engine);
-        const viewport = new Viewport('touch-controls-viewport', scene, { left: 0, top: 0, width: 1600, height: 1600 });
+        const engine = getRenderObject(Engine, 'touch-controls-engine', { elementWidth: 1600, elementHeight: 1600, dpr: 1 });
+        const scene = getRenderObject(Scene, 'touch-controls-scene', engine);
+        const viewport = getRenderObject(Viewport, 'touch-controls-viewport', scene, { left: 0, top: 0, width: 1600, height: 1600 });
         scene.scale(scale, scale);
-        const rect = new Rect('touch-object', { left: 200, top: 200, width: 400, height: 300 });
+        const rect = getRenderObject(Rect, 'touch-object', { left: 200, top: 200, width: 400, height: 300 });
         scene.addObject(rect);
-        const transformer = new Transformer(scene, { rotateEnabled: true });
+        const transformer = getRenderObject(Transformer, scene, { rotateEnabled: true });
         try {
             transformer.setSelectedControl(rect);
             for (const key of ['ResizeRB', 'Rotate__']) {
@@ -109,13 +136,13 @@ describe('Transformer', () => {
         { left: 40, top: 20, angle: 15, scale: 2 },
         { left: -80, top: -60, angle: 0, scale: 1 },
     ])('keeps rotation visible and clickable near viewport edges: %j', ({ left, top, angle, scale }) => {
-        const engine = new Engine('rotation-edge', { elementWidth: 500, elementHeight: 400, dpr: 1 });
-        const scene = new Scene('rotation-edge', engine);
-        const viewport = new Viewport('main', scene, { left: 40, top: 20, width: 460, height: 380 });
+        const engine = getRenderObject(Engine, 'rotation-edge', { elementWidth: 500, elementHeight: 400, dpr: 1 });
+        const scene = getRenderObject(Scene, 'rotation-edge', engine);
+        const viewport = getRenderObject(Viewport, 'main', scene, { left: 40, top: 20, width: 460, height: 380 });
         scene.scale(scale, scale);
-        const rect = new Rect('edge-object', { left, top, width: 200, height: 120, angle });
+        const rect = getRenderObject(Rect, 'edge-object', { left, top, width: 200, height: 120, angle });
         scene.addObject(rect);
-        const transformer = new Transformer(scene, { rotateAnchorPosition: 'top' });
+        const transformer = getRenderObject(Transformer, scene, { rotateAnchorPosition: 'top' });
         try {
             transformer.setSelectedControl(rect);
             const anchor = scene.getAllObjectsByOrderForPick().find((object) => object.oKey.includes('Rotate__'))!;
@@ -137,13 +164,13 @@ describe('Transformer', () => {
     });
 
     it.each([50, 200])('keeps the handle usable in the pane showing most of a frozen selection at x=%s', (left) => {
-        const engine = new Engine('frozen', { elementWidth: 600, elementHeight: 400, dpr: 1 });
-        const scene = new Scene('frozen', engine, { width: 1000, height: 1000 });
-        const frozen = new Viewport('frozen', scene, { left: 40, top: 30, width: 200, height: 370 });
-        const main = new Viewport('main', scene, { left: 240, top: 30, width: 360, height: 370 });
-        const rect = new Rect('frozen-object', { left, top: 35, width: 200, height: 100 });
+        const engine = getRenderObject(Engine, 'frozen', { elementWidth: 600, elementHeight: 400, dpr: 1 });
+        const scene = getRenderObject(Scene, 'frozen', engine, { width: 1000, height: 1000 });
+        const frozen = getRenderObject(Viewport, 'frozen', scene, { left: 40, top: 30, width: 200, height: 370 });
+        const main = getRenderObject(Viewport, 'main', scene, { left: 240, top: 30, width: 360, height: 370 });
+        const rect = getRenderObject(Rect, 'frozen-object', { left, top: 35, width: 200, height: 100 });
         scene.addObject(rect);
-        const transformer = new Transformer(scene, { rotateAnchorPosition: 'top' });
+        const transformer = getRenderObject(Transformer, scene, { rotateAnchorPosition: 'top' });
         try {
             transformer.setSelectedControl(rect);
             const viewport = left === 50 ? frozen : main;
@@ -167,13 +194,13 @@ describe('Transformer', () => {
     });
 
     it('repositions after scrolling and zooming without changing the object or keeping the scene dirty', () => {
-        const engine = new Engine('rotation-scroll', { elementWidth: 500, elementHeight: 400, dpr: 1 });
-        const scene = new Scene('rotation-scroll', engine, { width: 1000, height: 1000 });
-        const viewport = new Viewport('main', scene, { left: 40, top: 20, width: 460, height: 380 });
-        const scrollbar = new ScrollBar(viewport);
-        const rect = new Rect('object', { left: 120, top: 200, width: 200, height: 120 });
+        const engine = getRenderObject(Engine, 'rotation-scroll', { elementWidth: 500, elementHeight: 400, dpr: 1 });
+        const scene = getRenderObject(Scene, 'rotation-scroll', engine, { width: 1000, height: 1000 });
+        const viewport = getRenderObject(Viewport, 'main', scene, { left: 40, top: 20, width: 460, height: 380 });
+        const scrollbar = getRenderObject(ScrollBar, viewport);
+        const rect = getRenderObject(Rect, 'object', { left: 120, top: 200, width: 200, height: 120 });
         scene.addObject(rect);
-        const transformer = new Transformer(scene, { rotateAnchorPosition: 'top', rotateIconEnabled: true });
+        const transformer = getRenderObject(Transformer, scene, { rotateAnchorPosition: 'top', rotateIconEnabled: true });
         try {
             transformer.setSelectedControl(rect);
             const initial = rect.getState();
@@ -202,13 +229,13 @@ describe('Transformer', () => {
     });
 
     it.each([1, 2])('rotates from a relocated handle without jumping at scale %s', (scale) => {
-        const engine = new Engine('rotation-gesture', { elementWidth: 500, elementHeight: 400, dpr: 1 });
-        const scene = new Scene('rotation-gesture', engine, { width: 500, height: 400 });
-        const viewport = new Viewport('main', scene, { left: 0, top: 0, width: 500, height: 400 });
+        const engine = getRenderObject(Engine, 'rotation-gesture', { elementWidth: 500, elementHeight: 400, dpr: 1 });
+        const scene = getRenderObject(Scene, 'rotation-gesture', engine, { width: 500, height: 400 });
+        const viewport = getRenderObject(Viewport, 'main', scene, { left: 0, top: 0, width: 500, height: 400 });
         scene.scale(scale, scale);
-        const rect = new Rect('object', { left: 80, top: 10, width: 100, height: 60 });
+        const rect = getRenderObject(Rect, 'object', { left: 80, top: 10, width: 100, height: 60 });
         scene.addObject(rect);
-        const transformer = new Transformer(scene, { rotateAnchorPosition: 'top' });
+        const transformer = getRenderObject(Transformer, scene, { rotateAnchorPosition: 'top' });
         try {
             transformer.setSelectedControl(rect);
             const anchor = scene.getAllObjectsByOrderForPick().find((object) => object.oKey.includes('Rotate__'))!;
@@ -244,7 +271,7 @@ describe('Transformer', () => {
             rotateLineEnabled: false,
             rotateIconEnabled: true,
         };
-        const transformer = new Transformer(scene, {
+        const transformer = getRenderObject(Transformer, scene, {
             rotateEnabled: true,
             resizeEnabled: true,
             borderEnabled: true,
@@ -280,7 +307,7 @@ describe('Transformer', () => {
                 height: object.height + 18,
             }),
         };
-        const transformer = new Transformer(scene);
+        const transformer = getRenderObject(Transformer, scene);
 
         transformer.setSelectedControl(rect);
         const control = scene.getObject(`__SpreadsheetTransformer___${rect.oKey}`);
@@ -341,7 +368,7 @@ describe('Transformer', () => {
             rotateStroke: '#d1d5db',
             rotateIconEnabled: true,
         };
-        const transformer = new Transformer(scene, {
+        const transformer = getRenderObject(Transformer, scene, {
             rotateEnabled: true,
             resizeEnabled: true,
             borderEnabled: true,
@@ -385,7 +412,7 @@ describe('Transformer', () => {
             anchorStyle: 'canva',
             anchorSize: 8,
         };
-        const transformer = new Transformer(scene);
+        const transformer = getRenderObject(Transformer, scene);
 
         transformer.setSelectedControl(rect);
         const control = scene.getObject(`__SpreadsheetTransformer___${rect.oKey}`) as Group;
@@ -404,7 +431,7 @@ describe('Transformer', () => {
     });
     it.each(['ResizeLT', 'ResizeRB'])('keeps a positive minimum size when dragging %s past the opposite corner', (key) => {
         const { engine, scene, rect } = createTransformerFixture();
-        const transformer = new Transformer(scene, { keepRatio: false });
+        const transformer = getRenderObject(Transformer, scene, { keepRatio: false });
         try {
             transformer.setSelectedControl(rect);
             const anchor = scene.getAllObjectsByOrderForPick().find((object) => object.oKey.includes(key))!;
@@ -425,7 +452,7 @@ describe('Transformer', () => {
     it.each(['ResizeLT', 'ResizeRB'])('clips a resized object to the content bounds at %s', (key) => {
         const { engine, scene, rect } = createTransformerFixture();
         rect.translate(80, 60);
-        const transformer = new Transformer(scene, { keepRatio: false, zeroLeft: 46, zeroTop: 20 });
+        const transformer = getRenderObject(Transformer, scene, { keepRatio: false, zeroLeft: 46, zeroTop: 20 });
         try {
             transformer.setSelectedControl(rect);
             const anchor = scene.getAllObjectsByOrderForPick().find((object) => object.oKey.includes(key))!;
@@ -448,7 +475,7 @@ describe('Transformer', () => {
 
     it.each([true, false])('respects the move boundary setting %s', (moveBoundaryEnabled) => {
         const { engine, scene, rect } = createTransformerFixture();
-        const transformer = new Transformer(scene, { moveBoundaryEnabled });
+        const transformer = getRenderObject(Transformer, scene, { moveBoundaryEnabled });
         const changed = vi.fn();
         const subscription = transformer.changing$.subscribe(changed);
         try {
@@ -477,9 +504,9 @@ describe('Transformer', () => {
         const { engine, scene, rect } = createTransformerFixture();
         scene.scale(scale, scale);
         rect.translate(80, 60);
-        const second = new Rect('second', { left: 200, top: 150, width: 80, height: 50 });
+        const second = getRenderObject(Rect, 'second', { left: 200, top: 150, width: 80, height: 50 });
         scene.addObject(second);
-        const transformer = new Transformer(scene, { zeroLeft: 46, zeroTop: 20 });
+        const transformer = getRenderObject(Transformer, scene, { zeroLeft: 46, zeroTop: 20 });
         try {
             transformer.attachTo(rect);
             transformer.setSelectedControl(rect);
@@ -501,10 +528,44 @@ describe('Transformer', () => {
         }
     });
 
+    it.each([30, 60, 90, 270, -90].flatMap((angle) => [0.5, 1, 2].map((scale) => ({ angle, scale }))))(
+        'keeps rotated corners inside content bounds at $angle degrees and zoom $scale',
+        ({ angle, scale }) => {
+            const { engine, scene, rect } = createTransformerFixture();
+            scene.scale(scale, scale);
+            rect.transformByState({ left: 200, top: 160, width: 160, height: 40, angle });
+            const transformer = getRenderObject(Transformer, scene, { zeroLeft: 46, zeroTop: 20 });
+            const bounds = () => rect.transform.makeBoundingBoxFromPoints([
+                new Vector2(0, 0),
+                new Vector2(rect.width, 0),
+                new Vector2(rect.width, rect.height),
+                new Vector2(0, rect.height),
+            ]);
+            try {
+                transformer.attachTo(rect);
+                rect.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 280 * scale, 180 * scale));
+                scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', -1000, -1000));
+                scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', -1000, -1000));
+                expect(bounds().left).toBeCloseTo(46);
+                expect(bounds().top).toBeCloseTo(20);
+                rect.onPointerDown$.emitEvent(createPointerEvent('pointerdown', (rect.left + rect.width / 2) * scale, (rect.top + rect.height / 2) * scale));
+                scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', 2000, 2000));
+                scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', 2000, 2000));
+                expect(bounds().left! + bounds().width!).toBeCloseTo(scene.width);
+                expect(bounds().top! + bounds().height!).toBeCloseTo(scene.height);
+                expect(rect.getState()).toMatchObject({ width: 160, height: 40, angle });
+            } finally {
+                transformer.dispose();
+                scene.dispose();
+                engine.dispose();
+            }
+        }
+    );
+
     it('keeps an oversized object reachable without resizing it', () => {
         const { engine, scene, rect } = createTransformerFixture();
         rect.transformByState({ left: 46, top: 20, width: 800, height: 600 });
-        const transformer = new Transformer(scene, { zeroLeft: 46, zeroTop: 20 });
+        const transformer = getRenderObject(Transformer, scene, { zeroLeft: 46, zeroTop: 20 });
         try {
             transformer.attachTo(rect);
             rect.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 100, 80));
@@ -521,7 +582,7 @@ describe('Transformer', () => {
     it('allows moving outside the viewport while remaining inside the scene', () => {
         const { engine, scene, rect } = createTransformerFixture();
         scene.transformByState({ width: 2000, height: 2000 });
-        const transformer = new Transformer(scene);
+        const transformer = getRenderObject(Transformer, scene);
         try {
             transformer.attachTo(rect);
             rect.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 30, 30));
@@ -536,12 +597,12 @@ describe('Transformer', () => {
     });
 
     it('chooses the nearest touch control and leaves mouse, hidden controls and overlays precise', () => {
-        const engine = new Engine('adjust-hit-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
-        const scene = new Scene('adjust-hit-scene', engine);
-        const viewport = new Viewport('adjust-hit-viewport', scene, { left: 0, top: 0, width: 800, height: 800 });
-        const object = new Rect('object', { left: 0, top: 0, width: 400, height: 300 });
-        const a = new Control('adjust-a', { left: 100, top: 100, width: 8, height: 8, angle: 45 });
-        const b = new Control('adjust-b', { left: 120, top: 100, width: 8, height: 8 });
+        const engine = getRenderObject(Engine, 'adjust-hit-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
+        const scene = getRenderObject(Scene, 'adjust-hit-scene', engine);
+        const viewport = getRenderObject(Viewport, 'adjust-hit-viewport', scene, { left: 0, top: 0, width: 800, height: 800 });
+        const object = getRenderObject(Rect, 'object', { left: 0, top: 0, width: 400, height: 300 });
+        const a = getRenderObject(Control, 'adjust-a', { left: 100, top: 100, width: 8, height: 8, angle: 45 });
+        const b = getRenderObject(Control, 'adjust-b', { left: 120, top: 100, width: 8, height: 8 });
         scene.addObject(object, 1);
         scene.addObjects([a, b], 2);
         scene.attachControl();
@@ -559,7 +620,7 @@ describe('Transformer', () => {
             b.evented = false;
             expect(scene.pick(point, DeviceType.Touch)).toBe(object);
             b.evented = true;
-            const overlay = new Rect('overlay', { left: 100, top: 100, width: 40, height: 40 });
+            const overlay = getRenderObject(Rect, 'overlay', { left: 100, top: 100, width: 40, height: 40 });
             scene.addObject(overlay, 3);
             expect(scene.pick(point, DeviceType.Touch)).toBe(overlay);
         } finally {
@@ -571,16 +632,16 @@ describe('Transformer', () => {
     });
 
     it.each([0.5, 1, 2])('keeps all eight crop hit targets usable at scale %s without enlarging their artwork', (scale) => {
-        const engine = new Engine('crop-hit-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
-        const scene = new Scene('crop-hit-scene', engine);
-        const viewport = new Viewport('crop-hit-viewport', scene, { left: 0, top: 0, width: 800, height: 800 });
+        const engine = getRenderObject(Engine, 'crop-hit-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
+        const scene = getRenderObject(Scene, 'crop-hit-scene', engine);
+        const viewport = getRenderObject(Viewport, 'crop-hit-viewport', scene, { left: 0, top: 0, width: 800, height: 800 });
         scene.scale(scale, scale);
-        const crop = new Rect('crop-frame', { left: 100, top: 100, width: 400, height: 300, angle: 30 });
+        const crop = getRenderObject(Rect, 'crop-frame', { left: 100, top: 100, width: 400, height: 300, angle: 30 });
         crop.transformerConfig = { isCropper: true, anchorSize: 24, cropAnchorHitSize: 44 };
-        const image = new Rect('underlying-image', crop.getState());
+        const image = getRenderObject(Rect, 'underlying-image', crop.getState());
         scene.addObject(image, 1);
         scene.addObject(crop, 2);
-        const transformer = new Transformer(scene);
+        const transformer = getRenderObject(Transformer, scene);
         try {
             transformer.createControlForCopper(crop);
             transformer.setSelectedControl(image);
@@ -611,12 +672,12 @@ describe('Transformer', () => {
     });
 
     it('keeps desktop crop handles using their precise painted hit areas', () => {
-        const engine = new Engine('desktop-crop-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
-        const scene = new Scene('desktop-crop-scene', engine);
-        const crop = new Rect('desktop-crop-frame', { width: 400, height: 300 });
+        const engine = getRenderObject(Engine, 'desktop-crop-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
+        const scene = getRenderObject(Scene, 'desktop-crop-scene', engine);
+        const crop = getRenderObject(Rect, 'desktop-crop-frame', { width: 400, height: 300 });
         crop.transformerConfig = { isCropper: true, anchorSize: 24 };
         scene.addObject(crop);
-        const transformer = new Transformer(scene);
+        const transformer = getRenderObject(Transformer, scene);
         try {
             transformer.createControlForCopper(crop);
             const anchors = scene.getAllObjectsByOrderForPick().filter((object) => object.oKey.includes('TransformerResize'));
@@ -632,12 +693,12 @@ describe('Transformer', () => {
     });
 
     it.each(['takeover', 'pointercancel'])('finishes a move once on %s and releases the scene for viewport gestures', (reason) => {
-        const engine = new Engine('gesture-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
-        const scene = new Scene('gesture-scene', engine, { width: 800, height: 800 });
-        const viewport = new Viewport('gesture-viewport', scene, { left: 0, top: 0, width: 800, height: 800 });
-        const rect = new Rect('gesture-object', { left: 100, top: 100, width: 100, height: 100 });
+        const engine = getRenderObject(Engine, 'gesture-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
+        const scene = getRenderObject(Scene, 'gesture-scene', engine, { width: 800, height: 800 });
+        const viewport = getRenderObject(Viewport, 'gesture-viewport', scene, { left: 0, top: 0, width: 800, height: 800 });
+        const rect = getRenderObject(Rect, 'gesture-object', { left: 100, top: 100, width: 100, height: 100 });
         scene.addObject(rect);
-        const transformer = new Transformer(scene);
+        const transformer = getRenderObject(Transformer, scene);
         const ended = vi.fn();
         const subscription = transformer.changeEnd$.subscribe(ended);
         try {
@@ -670,12 +731,12 @@ describe('Transformer', () => {
     });
 
     it('releases hover subscriptions with its object subscription', () => {
-        const engine = new Engine('transformer-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
-        const scene = new Scene('transformer-scene', engine);
-        const rect = new Rect('transformer-rect', { width: 10, height: 10 });
+        const engine = getRenderObject(Engine, 'transformer-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
+        const scene = getRenderObject(Scene, 'transformer-scene', engine);
+        const rect = getRenderObject(Rect, 'transformer-rect', { width: 10, height: 10 });
         const entered = vi.fn();
         const left = vi.fn();
-        const transformer = new Transformer(scene, {
+        const transformer = getRenderObject(Transformer, scene, {
             hoverEnabled: true,
             hoverEnterFunc: entered,
             hoverLeaveFunc: left,
@@ -701,12 +762,12 @@ describe('Transformer', () => {
     });
 
     it.each(['ResizeRB', 'Rotate__'])('releases %s controls when a pinch takes ownership', (controlKey) => {
-        const engine = new Engine('control-gesture-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
-        const scene = new Scene('control-gesture-scene', engine, { width: 800, height: 800 });
-        const viewport = new Viewport('control-gesture-viewport', scene, { left: 0, top: 0, width: 800, height: 800 });
-        const rect = new Rect('control-gesture-object', { left: 100, top: 100, width: 100, height: 100 });
+        const engine = getRenderObject(Engine, 'control-gesture-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
+        const scene = getRenderObject(Scene, 'control-gesture-scene', engine, { width: 800, height: 800 });
+        const viewport = getRenderObject(Viewport, 'control-gesture-viewport', scene, { left: 0, top: 0, width: 800, height: 800 });
+        const rect = getRenderObject(Rect, 'control-gesture-object', { left: 100, top: 100, width: 100, height: 100 });
         scene.addObject(rect);
-        const transformer = new Transformer(scene, { rotateEnabled: true });
+        const transformer = getRenderObject(Transformer, scene, { rotateEnabled: true });
         const ended = vi.fn();
         const subscription = transformer.changeEnd$.subscribe(ended);
         try {
@@ -737,11 +798,11 @@ describe('Transformer', () => {
     });
 
     it('renders controls on the configured layer without moving the selected object', () => {
-        const engine = new Engine('transformer-layer-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
-        const scene = new Scene('transformer-layer-scene', engine);
-        const rect = new Rect('transformer-layer-rect', { width: 10, height: 10 });
+        const engine = getRenderObject(Engine, 'transformer-layer-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
+        const scene = getRenderObject(Scene, 'transformer-layer-scene', engine);
+        const rect = getRenderObject(Rect, 'transformer-layer-rect', { width: 10, height: 10 });
         scene.addObject(rect, 2);
-        const transformer = new Transformer(scene, {
+        const transformer = getRenderObject(Transformer, scene, {
             borderEnabled: true,
             controlLayerIndex: 4,
         });
@@ -762,11 +823,11 @@ describe('Transformer', () => {
     });
 
     it('restores a missing control when an already selected object is activated again', () => {
-        const engine = new Engine('transformer-restore-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
-        const scene = new Scene('transformer-restore-scene', engine);
-        const rect = new Rect('transformer-restore-rect', { width: 10, height: 10 });
+        const engine = getRenderObject(Engine, 'transformer-restore-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
+        const scene = getRenderObject(Scene, 'transformer-restore-scene', engine);
+        const rect = getRenderObject(Rect, 'transformer-restore-rect', { width: 10, height: 10 });
         scene.addObject(rect);
-        const transformer = new Transformer(scene);
+        const transformer = getRenderObject(Transformer, scene);
         const createControl = vi.fn();
         const subscription = transformer.createControl$.subscribe(createControl);
 
@@ -784,16 +845,16 @@ describe('Transformer', () => {
     });
 
     it.each(['move', 'resize'])('only transforms eligible objects during mixed selection %s and preserves selection events', (gesture) => {
-        const engine = new Engine('locked-selection-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
-        const scene = new Scene('locked-selection-scene', engine, { width: 800, height: 800 });
-        const viewport = new Viewport('locked-selection-viewport', scene, { left: 0, top: 0, width: 800, height: 800 });
-        const locked = new Rect('locked', { left: 0, top: 0, width: 400, height: 300 });
+        const engine = getRenderObject(Engine, 'locked-selection-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
+        const scene = getRenderObject(Scene, 'locked-selection-scene', engine, { width: 800, height: 800 });
+        const viewport = getRenderObject(Viewport, 'locked-selection-viewport', scene, { left: 0, top: 0, width: 800, height: 800 });
+        const locked = getRenderObject(Rect, 'locked', { left: 0, top: 0, width: 400, height: 300 });
         locked.transformerConfig = { moveEnabled: false, resizeEnabled: false };
-        const editable = new Rect('editable', { left: 100, top: 100, width: 100, height: 100 });
+        const editable = getRenderObject(Rect, 'editable', { left: 100, top: 100, width: 100, height: 100 });
         editable.transformerConfig = gesture === 'move' ? { resizeEnabled: false } : { moveEnabled: false };
         scene.addObject(locked);
         scene.addObject(editable);
-        const transformer = new Transformer(scene);
+        const transformer = getRenderObject(Transformer, scene);
         const started = vi.fn();
         const subscription = transformer.changeStart$.subscribe(started);
         const ended = vi.fn();
@@ -840,11 +901,11 @@ describe('Transformer', () => {
     });
 
     it.each(['move', 'resize'])('does not start a %s gesture when every selected object is locked', (gesture) => {
-        const engine = new Engine('all-locked-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
-        const scene = new Scene('all-locked-scene', engine, { width: 800, height: 800 });
-        const rect = new Rect('all-locked-rect', { left: 100, top: 100, width: 100, height: 100 });
+        const engine = getRenderObject(Engine, 'all-locked-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
+        const scene = getRenderObject(Scene, 'all-locked-scene', engine, { width: 800, height: 800 });
+        const rect = getRenderObject(Rect, 'all-locked-rect', { left: 100, top: 100, width: 100, height: 100 });
         scene.addObject(rect);
-        const transformer = new Transformer(scene);
+        const transformer = getRenderObject(Transformer, scene);
         const started = vi.fn();
         const subscription = transformer.changeStart$.subscribe(started);
         try {
@@ -872,13 +933,13 @@ describe('Transformer', () => {
     });
 
     it.each(['move', 'resize'])('preserves the independent crop %s path outside the ordinary selection', (gesture) => {
-        const engine = new Engine('crop-lock-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
-        const scene = new Scene('crop-lock-scene', engine, { width: 800, height: 800 });
-        const viewport = new Viewport('crop-lock-viewport', scene, { width: 800, height: 800 });
-        const crop = new Rect('crop-lock-frame', { left: 100, top: 100, width: 100, height: 100 });
+        const engine = getRenderObject(Engine, 'crop-lock-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
+        const scene = getRenderObject(Scene, 'crop-lock-scene', engine, { width: 800, height: 800 });
+        const viewport = getRenderObject(Viewport, 'crop-lock-viewport', scene, { width: 800, height: 800 });
+        const crop = getRenderObject(Rect, 'crop-lock-frame', { left: 100, top: 100, width: 100, height: 100 });
         crop.transformerConfig = { isCropper: true, moveEnabled: false };
         scene.addObject(crop);
-        const transformer = new Transformer(scene);
+        const transformer = getRenderObject(Transformer, scene);
         try {
             transformer.attachTo(crop);
             transformer.createControlForCopper(crop);
@@ -904,15 +965,15 @@ describe('Transformer', () => {
     });
 
     it('keeps read-only objects selectable without starting a move gesture', () => {
-        const engine = new Engine('transformer-readonly-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
-        const scene = new Scene('transformer-readonly-scene', engine);
-        const rect = new Rect('transformer-readonly-rect', { width: 10, height: 10 });
+        const engine = getRenderObject(Engine, 'transformer-readonly-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
+        const scene = getRenderObject(Scene, 'transformer-readonly-scene', engine);
+        const rect = getRenderObject(Rect, 'transformer-readonly-rect', { width: 10, height: 10 });
         rect.transformerConfig = {
             moveEnabled: false,
             resizeEnabled: false,
             rotateEnabled: false,
         };
-        const transformer = new Transformer(scene);
+        const transformer = getRenderObject(Transformer, scene);
         const changeStart = vi.fn();
         const subscription = transformer.changeStart$.subscribe(changeStart);
 
@@ -930,11 +991,11 @@ describe('Transformer', () => {
     });
 
     it('moves an object only on a gesture that starts after selection', () => {
-        const engine = new Engine('transformer-selection-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
-        const scene = new Scene('transformer-selection-scene', engine);
-        const rect = new Rect('transformer-selection-rect', { width: 10, height: 10 });
+        const engine = getRenderObject(Engine, 'transformer-selection-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
+        const scene = getRenderObject(Scene, 'transformer-selection-scene', engine);
+        const rect = getRenderObject(Rect, 'transformer-selection-rect', { width: 10, height: 10 });
         scene.addObject(rect);
-        const transformer = new Transformer(scene, { moveOnlyWhenSelected: true });
+        const transformer = getRenderObject(Transformer, scene, { moveOnlyWhenSelected: true });
         const changeStart = vi.fn();
         const changeStartSubscription = transformer.changeStart$.subscribe(changeStart);
         const reattachSubscription = transformer.createControl$.subscribe(() => transformer.attachTo(rect));

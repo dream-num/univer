@@ -234,7 +234,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                     `
                     : `
                       univer-flex univer-w-full univer-min-w-0 univer-max-w-80 univer-flex-col univer-gap-4
-                      univer-rounded-lg univer-bg-gray-0 univer-p-4 univer-shadow-lg
+                      univer-rounded-lg univer-bg-gray-0 univer-p-3 univer-shadow-lg
                       dark:!univer-bg-gray-700
                     `,
                 className

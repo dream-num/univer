@@ -15,11 +15,17 @@
  */
 
 import type { IMouseEvent } from '@univerjs/engine-render';
-import type { IOpenTableFilterPanelOperationParams } from '../../../commands/operations/open-table-filter-dialog.opration';
 import { CommandType, ICommandService, Univer } from '@univerjs/core';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { SheetsTableButtonStateEnum } from '@univerjs/sheets-table';
 import { afterEach, describe, expect, it } from 'vitest';
-import { OpenTableFilterPanelOperation } from '../../../commands/operations/open-table-filter-dialog.opration';
+import type {
+    IOpenTableFilterPanelOperationParams,
+} from '../../../commands/operations/open-table-filter-dialog.opration';
+import {
+    OpenTableFilterPanelOperation,
+    RequestOpenTableFilterPanelOperation,
+} from '../../../commands/operations/open-table-filter-dialog.opration';
 import { SheetsTableFilterButtonShape } from '../table-filter-button.shape';
 
 function createPointerEvent(button: number): IMouseEvent {
@@ -41,7 +47,9 @@ describe('sheet table filter button shape', () => {
 
     function createShape(executedParams: IOpenTableFilterPanelOperationParams[]): SheetsTableFilterButtonShape {
         univer = new Univer();
+        univer.registerPlugin(UniverRenderEnginePlugin);
         const commandService = univer.__getInjector().get(ICommandService);
+        commandService.registerCommand(RequestOpenTableFilterPanelOperation);
         commandService.registerCommand({
             id: OpenTableFilterPanelOperation.id,
             type: CommandType.OPERATION,
@@ -53,7 +61,7 @@ describe('sheet table filter button shape', () => {
             },
         });
 
-        return new SheetsTableFilterButtonShape('filter-button', {
+        return univer.__getInjector().createInstance(SheetsTableFilterButtonShape, 'filter-button', {
             width: 16,
             height: 16,
             cellWidth: 72,
@@ -69,7 +77,7 @@ describe('sheet table filter button shape', () => {
                 buttonState: SheetsTableButtonStateEnum.FilterNoneSortNone,
                 tableId: 'table-orders',
             },
-        }, commandService);
+        });
     }
 
     it('opens the table filter panel with the current cell and table parameters on primary pointer down', async () => {
@@ -85,6 +93,7 @@ describe('sheet table filter button shape', () => {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             tableId: 'table-orders',
+            renderId: 'unit-1',
         }]);
     });
 
@@ -111,6 +120,7 @@ describe('sheet table filter button shape', () => {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             tableId: 'table-archive',
+            renderId: 'unit-1',
         }]);
     });
 

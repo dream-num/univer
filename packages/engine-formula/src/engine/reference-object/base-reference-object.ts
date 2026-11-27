@@ -34,6 +34,7 @@ import {
     moveRangeByOffset,
     ObjectMatrix,
 } from '@univerjs/core';
+import { CLEAR_IMPORTED_SPILL_CELL } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
 import { getCellValue } from '../utils/cell';
@@ -64,6 +65,7 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     private _dateSystem = DateSystem.Date1900;
+    private _readRegion?: () => string;
 
     private _forcedSheetId: Nullable<string> = '';
 
@@ -154,25 +156,22 @@ export class BaseReferenceObject extends ObjectClassType {
 
     getRangePosition() {
         const { x, y } = this.getRefOffset();
-        const newRange = moveRangeByOffset(this.getRangeData(), x, y);
-
-        if (Number.isNaN(newRange.startRow)) {
-            newRange.startRow = 0;
+        const range = moveRangeByOffset(this.getRangeData(), x, y);
+        const openStartRow = Number.isNaN(range.startRow);
+        const openStartColumn = Number.isNaN(range.startColumn);
+        const openEndRow = Number.isNaN(range.endRow);
+        const openEndColumn = Number.isNaN(range.endColumn);
+        if (!openStartRow && !openStartColumn && !openEndRow && !openEndColumn) {
+            return range;
         }
 
-        if (Number.isNaN(newRange.startColumn)) {
-            newRange.startColumn = 0;
-        }
-
-        if (Number.isNaN(newRange.endRow)) {
-            newRange.endRow = this.getActiveSheetRowCount() - 1;
-        }
-
-        if (Number.isNaN(newRange.endColumn)) {
-            newRange.endColumn = this.getActiveSheetColumnCount() - 1;
-        }
-
-        return newRange;
+        return {
+            ...range,
+            startRow: openStartRow ? 0 : range.startRow,
+            startColumn: openStartColumn ? 0 : range.startColumn,
+            endRow: openEndRow ? this.getActiveSheetRowCount() - 1 : range.endRow,
+            endColumn: openEndColumn ? this.getActiveSheetColumnCount() - 1 : range.endColumn,
+        };
     }
 
     override isReferenceObject() {
@@ -183,7 +182,8 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._dateSystem;
     }
 
-    withDateSystem(dateSystem: DateSystem): this {
+    withDateSystem(dateSystem: DateSystem, readRegion?: () => string): this {
+        this._readRegion = readRegion;
         this._dateSystem = dateSystem;
         return this;
     }
@@ -232,6 +232,20 @@ export class BaseReferenceObject extends ObjectClassType {
                 }
             }
         }
+    }
+
+    getImplicitIntersectionValue(row: number, column: number): BaseValueObject {
+        const { startRow, startColumn, endRow, endColumn } = this.getRangePosition();
+        if (startRow === endRow && startColumn === endColumn) {
+            return this.getCellByPosition();
+        }
+        if (startRow === endRow && column >= startColumn && column <= endColumn) {
+            return this.getCellByColumn(column);
+        }
+        if (startColumn === endColumn && row >= startRow && row <= endRow) {
+            return this.getCellByRow(row);
+        }
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     getFirstCell() {
@@ -504,20 +518,21 @@ export class BaseReferenceObject extends ObjectClassType {
             const pattern = this._getPatternByCell(cell);
 
             if (isTextFormat(pattern)) {
-                return StringValueObject.create(value.toString()).withDateSystem(this._dateSystem);
+                return StringValueObject.create(value.toString()).withDateSystem(this._dateSystem, this._readRegion);
             }
 
             return createNumberValueObjectByRawValue(value, pattern).withDateSystem(this._dateSystem);
         }
         if (cellValueType === CellValueType.STRING || cellValueType === CellValueType.FORCE_STRING) {
             // A1 is `"test"`, =A1 also needs to get `"test"`
-            return StringValueObject.create(value.toString()).withDateSystem(this._dateSystem);
+            return StringValueObject.create(value.toString()).withDateSystem(this._dateSystem, this._readRegion);
         }
         if (cellValueType === CellValueType.BOOLEAN) {
             return createBooleanValueObjectByRawValue(value);
         }
 
-        return ValueObjectFactory.create(value, false, this._dateSystem);
+        const result = ValueObjectFactory.create(value, false, this._dateSystem);
+        return result.isString() ? result.withDateSystem(this._dateSystem, this._readRegion) : result;
     }
 
     private _getPatternByCell(cell: ICellData) {
@@ -566,6 +581,11 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getCellData(row: number, column: number) {
+        const readCycleCell = this._calculationCache?.readCycleCell;
+        const cycleCell = readCycleCell?.(this.getUnitId(), this.getSheetId(), row, column);
+        if (cycleCell != null) {
+            return cycleCell;
+        }
         const activeSheetData = this.getCurrentActiveSheetData();
 
         const activeRuntimeData = this.getCurrentRuntimeSheetData();
@@ -574,11 +594,9 @@ export class BaseReferenceObject extends ObjectClassType {
 
         const activeRuntimeArrayFormulaCellData = this.getCurrentRuntimeActiveArrayFormulaCellData();
 
-        const activeArrayFormulaRangeMatrix = new ObjectMatrix<IRange>(this.getCurrentActiveArrayFormulaRange());
-
-        const activeRuntimeArrayFormulaRangeMatrix = new ObjectMatrix<IRange>(this.getCurrentRuntimeActiveArrayFormulaRange());
-
-        let cellData: Nullable<ICellData> = activeRuntimeData?.getValue(row, column) ||
+        const runtimeCell = activeRuntimeData?.getValue(row, column);
+        const clearsImportedSpill = runtimeCell === CLEAR_IMPORTED_SPILL_CELL;
+        let cellData: Nullable<ICellData> = (clearsImportedSpill ? null : runtimeCell) ||
             activeRuntimeArrayFormulaCellData?.getValue(row, column) ||
             this.getRuntimeFeatureCellValue(row, column);
 
@@ -586,32 +604,44 @@ export class BaseReferenceObject extends ObjectClassType {
             return cellData;
         }
 
-        cellData = activeArrayFormulaCellData?.getValue(row, column);
-
-        if (cellData) {
-            // Check if the cell is in the runtime array formula range. if so, do not return the original array formula cell data.
-            let isInRuntimeArrayFormulaRange = false;
-
-            activeArrayFormulaRangeMatrix.forValue((_row, _column, range) => {
-                if (!(row >= range.startRow && row <= range.endRow && column >= range.startColumn && column <= range.endColumn)) {
-                    return;
-                }
-                const runtimeAnchor = activeRuntimeData?.getValue(_row, _column);
-                const anchorCalculated = runtimeAnchor && !isFormulaString(runtimeAnchor.f) && !isFormulaId(runtimeAnchor.si);
-                if (activeRuntimeArrayFormulaRangeMatrix.getValue(_row, _column) || anchorCalculated) {
-                    isInRuntimeArrayFormulaRange = true;
-                    return false;
-                }
-            });
-
-            if (!isInRuntimeArrayFormulaRange) {
-                return cellData;
-            }
-
+        if (clearsImportedSpill) {
             return null;
         }
 
+        cellData = activeArrayFormulaCellData?.getValue(row, column);
+
+        if (cellData) {
+            const runtimeRanges = this.getCurrentRuntimeActiveArrayFormulaRange();
+            for (const [anchorRow, anchorColumn] of this._getImportedSpillAnchors(row, column)) {
+                const runtimeAnchor = activeRuntimeData?.getValue(anchorRow, anchorColumn);
+                const anchorCalculated = runtimeAnchor && !isFormulaString(runtimeAnchor.f) && !isFormulaId(runtimeAnchor.si);
+                if (runtimeRanges?.[anchorRow]?.[anchorColumn] || anchorCalculated) {
+                    return null;
+                }
+            }
+            return cellData;
+        }
+
         return activeSheetData?.cellData.getValue(row, column);
+    }
+
+    private _getImportedSpillAnchors(row: number, column: number): Iterable<[number, number]> {
+        const source = this.getCurrentActiveArrayFormulaRange();
+        if (!source) {
+            return [];
+        }
+        const cache = this._calculationCache;
+        if (cache && !cache.closed) {
+            return cache.getImportedSpillAnchors(this.getUnitId(), this.getSheetId(), source, row, column);
+        }
+
+        const anchors: [number, number][] = [];
+        new ObjectMatrix<IRange>(source).forValue((anchorRow, anchorColumn, range) => {
+            if (row >= range.startRow && row <= range.endRow && column >= range.startColumn && column <= range.endColumn) {
+                anchors.push([anchorRow, anchorColumn]);
+            }
+        });
+        return anchors;
     }
 
     getRuntimeFeatureCellValue(row: number, column: number) {

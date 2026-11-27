@@ -63,6 +63,12 @@ export class DocHyperLinkResourceController extends Disposable {
                 resource.links.forEach((link) => {
                     const customRange = customRangeMap.get(link.id);
                     if (customRange) {
+                        const properties = customRange.properties;
+                        if ((properties?.bookmarkId || properties?.headingId) &&
+                            (properties.referenceFieldLink === true || (properties.url === undefined && link.payload === ''))) {
+                            // Legacy URL-only resources do not own typed reference targets or absent internal URLs.
+                            return;
+                        }
                         customRange.properties = {
                             ...customRange.properties,
                             url: link.payload,

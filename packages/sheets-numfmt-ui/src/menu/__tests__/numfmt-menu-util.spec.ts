@@ -16,6 +16,8 @@
 
 import { getNumfmtParseValueFilter } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import { createMobileNumberFormatMenuConfig } from '../mobile-menu';
+import { MENU_OPTIONS } from '../number-format-options';
 import { getNumberFormatLabelKey } from '../numfmt-menu-util';
 
 describe('getNumberFormatLabelKey', () => {
@@ -24,6 +26,14 @@ describe('getNumberFormatLabelKey', () => {
         expect(parsed?.v).toBe(100.11);
         expect(getNumberFormatLabelKey(parsed?.z, '$')).toBe('sheets-numfmt-ui.currency');
         expect(getNumberFormatLabelKey(parsed?.z, '¥')).toBe('sheets-numfmt-ui.currency');
+    });
+
+    it('uses the same regional date for desktop, mobile quick actions and mobile detail', () => {
+        const pattern = 'dd/mm/yyyy;@';
+        const config = createMobileNumberFormatMenuConfig('₹', 'enIN');
+        expect(MENU_OPTIONS('₹', 'en-IN')).toContainEqual({ label: 'sheets-numfmt-ui.date', pattern });
+        expect(config.detailOptions).toContainEqual({ label: 'sheets-numfmt-ui.date', value: pattern });
+        expect(config.quickOptions).toContainEqual(expect.objectContaining({ label: 'sheets-numfmt-ui.date', value: pattern }));
     });
 
     it('preserves specific presets while recognizing other patterns by type', () => {

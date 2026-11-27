@@ -21,7 +21,7 @@ import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import { createSkeletonPage } from '../model/page';
+import { createSkeletonPage, getNextSkeletonPageNumber } from '../model/page';
 import { dealWithBlockError } from './block-error';
 import { appendColumnGroupBlockLine, createColumnGroupSkeleton } from './column';
 import { dealWidthParagraph } from './paragraph/paragraph-layout';
@@ -86,7 +86,7 @@ export function dealWithSection(
                     ctx,
                     sectionBreakConfig,
                     ctx.skeletonResourceReference,
-                    currentPageCache.pageNumber + 1,
+                    getNextSkeletonPageNumber(currentPageCache, sectionBreakConfig),
                     undefined,
                     currentPageCache
                 );

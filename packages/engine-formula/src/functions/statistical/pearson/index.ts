@@ -23,6 +23,8 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Pearson extends BaseFunction {
+    protected readonly numbersOnly: boolean = false;
+
     override minParams = 2;
 
     override maxParams = 2;
@@ -54,7 +56,8 @@ export class Pearson extends BaseFunction {
             return _array2;
         }
 
-        if (array1RowCount * array1ColumnCount === 1 || array2RowCount * array2ColumnCount === 1) {
+        const singletonSize = this.numbersOnly ? Math.max : Math.min;
+        if (singletonSize(array1RowCount * array1ColumnCount, array2RowCount * array2ColumnCount) === 1) {
             if (_array1.isNull() || _array2.isNull()) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
@@ -77,7 +80,8 @@ export class Pearson extends BaseFunction {
             array2,
             array1RowCount * array1ColumnCount,
             array1ColumnCount,
-            array2ColumnCount
+            array2ColumnCount,
+            this.numbersOnly
         );
 
         if (isError) {

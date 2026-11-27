@@ -31,6 +31,20 @@ describe('table layout viewport width', () => {
         expect(getDocsTableLayoutViewportWidth(page, 0, importedTable, DocumentFlavor.TRADITIONAL)).toBe(741);
     });
 
+    it.each([DocumentSkeletonPageType.HEADER, DocumentSkeletonPageType.FOOTER])(
+        'keeps negatively indented story tables visible through their content edge (type %s)',
+        (type) => {
+            const story = { pageWidth: 554.2, marginLeft: 0, marginRight: 0, type };
+            const table = { size: { width: { v: 564.8 } } };
+            const left = -7.2;
+            const width = getDocsTableLayoutViewportWidth(story, left, table, DocumentFlavor.TRADITIONAL);
+
+            expect(width).toBeCloseTo(561.4);
+            expect(119.8 + left + width).toBeCloseTo(674);
+            expect(119.8 + left + width).toBeGreaterThan(670.2);
+        }
+    );
+
     it.each([DocumentFlavor.MODERN, undefined])('keeps ordinary content bounds for flavor %s', (flavor) => {
         expect(getDocsTableLayoutViewportWidth(page, 0, importedTable, flavor)).toBe(681);
     });

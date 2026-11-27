@@ -17,13 +17,24 @@
 import type { CellValue, ICellData, IRange, IStyleData, Nullable, Worksheet } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { IAutoFilter, IColorFilters, ICustomFilter, ICustomFilters, IFilterColumn, IFilters } from './types';
-import { CellValueType, ColorKit, Disposable, extractPureTextFromCell, mergeSets, Rectangle, Tools } from '@univerjs/core';
+import {
+    CellValueType,
+    ColorKit,
+    DataStreamTreeTokenType,
+    Disposable,
+    extractPureTextFromCell,
+    mergeSets,
+    Rectangle,
+    regexp,
+    Tools,
+} from '@univerjs/core';
 import { COLOR_BLACK_RGB } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
-import { ensureNumeric, getCustomFilterFn, isNumericFilterFn, notEquals } from './custom-filters';
+import { createTextNotEqualsFilter, ensureNumeric, getCustomFilterFn, isNumericFilterFn } from './custom-filters';
 import { CustomFilterOperator, FilterBy } from './types';
 
 const EMPTY = () => new Set<number>();
+const DOCUMENT_END = `${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
 
 /**
  * This is the in-memory model of filter.
@@ -124,6 +135,10 @@ export class FilterModel extends Disposable {
         this._emitHasCriteria();
     }
 
+    get hasCriteria(): boolean {
+        return this._hasCriteria$.value;
+    }
+
     isRowFiltered(row: number): boolean {
         return this._alreadyFilteredOutRows.has(row);
     }
@@ -141,14 +156,24 @@ export class FilterModel extends Disposable {
      * another word it would not change `filteredOutRows` on `FilterModel` nor `FilterColumn`.
      * @param col
      */
-    getFilteredOutRowsExceptCol(col: number): Set<number> {
-        return this._getAllFilterColumns(true)
-            .filter(([colOffset]) => colOffset !== col)
-            .reduce((acc, [, filterColumn]) => {
-                const newResult = filterColumn.calc({ getAlreadyFilteredOutRows: () => acc });
-                if (newResult) return mergeSets(acc, newResult);
-                return acc;
-            }, new Set<number>());
+    getFilteredOutRowsExceptCol(col: number, cachedRows?: ReadonlyMap<number, ReadonlySet<number>>): Set<number> {
+        const rows = new Set<number>();
+        let useCache = !!cachedRows;
+        for (const [column, filter] of this._getAllFilterColumns(true)) {
+            if (column === col) {
+                // Later columns originally skipped rows hidden by this column.
+                useCache = false;
+                continue;
+            }
+            const cached = useCache ? cachedRows?.get(column) : undefined;
+            const filtered = cached ?? filter.calc({ getAlreadyFilteredOutRows: () => rows });
+            if (filtered) {
+                for (const row of filtered) {
+                    rows.add(row);
+                }
+            }
+        }
+        return rows;
     }
 
     /**
@@ -555,11 +580,18 @@ function isCompoundCustomFilter(filter: FilterFn[]): filter is [FilterFn, Filter
 function generateCustomFilterFn(filter: ICustomFilter): FilterFn {
     const compare = filter.val;
 
-    // Not NOT_EQUALS, if the compare cannot be ensured as number, we should treat it like test not matching.
-    // Otherwise it goes to numeric match.
-    if (filter.operator === CustomFilterOperator.NOT_EQUALS) {
-        const ensured = ensureNumeric(compare);
-        if (!ensured) return (value) => notEquals.fn(value, compare);
+    if (filter.compareAsText && typeof compare === 'string' &&
+        (!filter.operator || filter.operator === CustomFilterOperator.EQUAL || filter.operator === CustomFilterOperator.NOT_EQUALS)) {
+        const pattern = regexp.createFromWildcard(compare);
+        const negate = filter.operator === CustomFilterOperator.NOT_EQUALS;
+        return (value) => {
+            const matches = value == null ? compare === '' : pattern.test(String(value));
+            return negate ? !matches : matches;
+        };
+    }
+
+    if (filter.operator === CustomFilterOperator.NOT_EQUALS && typeof compare === 'string' && !ensureNumeric(compare)) {
+        return createTextNotEqualsFilter(compare);
     }
 
     // numeric match
@@ -599,9 +631,12 @@ function getFilterValueForConditionalFiltering(worksheet: Worksheet, row: number
     return extractFilterValueFromCell(rawCell);
 }
 
-function extractFilterValueFromCell(cell: ICellData): string | number {
+function extractFilterValueFromCell(cell: ICellData): Nullable<string | number> {
     const richTextValue = cell.p?.body?.dataStream;
-    if (richTextValue) return richTextValue.trimEnd();
+    if (richTextValue) {
+        const text = richTextValue.endsWith(DOCUMENT_END) ? richTextValue.slice(0, -DOCUMENT_END.length) : richTextValue;
+        return text || null;
+    }
 
     const rawValue = cell.v;
 
@@ -617,5 +652,5 @@ function extractFilterValueFromCell(cell: ICellData): string | number {
 
     if (typeof rawValue === 'boolean') return rawValue ? 'TRUE' : 'FALSE';
 
-    return '';
+    return null;
 }

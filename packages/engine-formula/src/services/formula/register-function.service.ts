@@ -15,12 +15,12 @@
  */
 
 import type { IDisposable, ILocales } from '@univerjs/core';
+import { createIdentifier, Disposable, DisposableCollection, Inject, LocaleService, toDisposable } from '@univerjs/core';
 import type { IFunctionInfo } from '../../basics/function';
 import type {
     FormulaFunctionResultValueType,
     FormulaFunctionValueType,
 } from '../../engine/value-object/primitive-object';
-import { createIdentifier, Disposable, DisposableCollection, Inject, LocaleService, toDisposable } from '@univerjs/core';
 import { FunctionType } from '../../basics/function';
 import { AsyncCustomFunction, CustomFunction } from '../../functions/custom-function';
 import { IFunctionService } from '../function.service';
@@ -178,14 +178,13 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
 
     private _registerSingleFunction(params: ISingleFunctionRegisterParams): IDisposable {
         const { name, func, description, locales, async = false } = params;
-        const disposables = new DisposableCollection();
-
         // Handle i18n
         if (locales) {
             this._localeService.load(locales);
         }
 
         // Handle description
+        let descriptionRegistration: IDisposable;
         if (typeof description === 'string') {
             const functionInfo: IFunctionInfo = {
                 functionName: name,
@@ -194,31 +193,32 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
                 abstract: description || '',
                 functionParameter: [],
             };
-            disposables.add(this._descriptionService.registerDescriptions([functionInfo]));
+            descriptionRegistration = this._descriptionService.registerDescriptions([functionInfo]);
         } else {
-            disposables.add(this._descriptionService.registerDescriptions([description]));
+            descriptionRegistration = this._descriptionService.registerDescriptions([description]);
         }
 
         // Handle function registration
-        const instance = async ? new AsyncCustomFunction(name) : new CustomFunction(name);
-        instance.calculateCustom = func;
-        this._functionService.registerExecutors(instance);
-        disposables.add(toDisposable(() => this._functionService.unregisterExecutors(name)));
-        disposables.add(toDisposable(() => this._functionService.unregisterDescriptions(name)));
-        disposables.add(toDisposable(() => this._functionService.deleteFormulaAstCacheKey(name)));
-
-        return disposables;
+        const registration = this._functionService.registerFunctionFactories({ name, create: () => {
+            const instance = async ? new AsyncCustomFunction(name) : new CustomFunction(name);
+            instance.calculateCustom = func;
+            return instance;
+        } });
+        const executor = this._functionService.getExecutor(name);
+        return toDisposable(() => {
+            if (this._functionService.getExecutor(name) === executor) {
+                descriptionRegistration.dispose();
+                this._functionService.unregisterDescriptions(name);
+            }
+            registration.dispose();
+        });
     }
 
     private _registerLocalExecutors(list: IRegisterFunctionList): IDisposable {
-        const names = list.map(([_func, name]) => name);
-        const functions = list.map(([func, name]) => {
+        return this._functionService.registerFunctionFactories(...list.map(([func, name]) => ({ name, create: () => {
             const instance = new CustomFunction(name);
             instance.calculateCustom = func;
             return instance;
-        });
-
-        this._functionService.registerExecutors(...functions);
-        return toDisposable(() => this._functionService.unregisterExecutors(...names));
+        } })));
     }
 }

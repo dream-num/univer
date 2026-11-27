@@ -15,13 +15,19 @@
  */
 
 import type { IDiscreteRange } from '@univerjs/sheets';
-import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
-import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
+import {
+    convertTransformToOffsetX,
+    convertTransformToOffsetY,
+    getFocusedRenderForUnit,
+    getOffsetRectForDom,
+    IRenderManagerService,
+} from '@univerjs/engine-render';
 import { MoreDownIcon, PasteSpecialDoubleIcon } from '@univerjs/icons';
 import { ILayoutService, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
+import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { SheetOptionalPasteCommand } from '../../commands/commands/clipboard.command';
 import { getViewportByCell } from '../../common/utils';
 import { getSheetObject } from '../../controllers/utils/component-tools';
@@ -43,6 +49,7 @@ const SheetPasteOptions = [
 const useMenuPosition = (range?: IDiscreteRange) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
+    const layoutService = useDependency(ILayoutService);
 
     const workbook = useActiveWorkbook();
     if (!range || !workbook) return null;
@@ -58,7 +65,7 @@ const useMenuPosition = (range?: IDiscreteRange) => {
         return null;
     }
 
-    const ru = renderManagerService.getRenderUnitById(workbook.getUnitId());
+    const ru = getFocusedRenderForUnit(renderManagerService, workbook.getUnitId());
     const sheetSkeletonManagerService = ru?.with(SheetSkeletonManagerService);
 
     const sheetObject = getSheetObject(univerInstanceService, renderManagerService);
@@ -100,9 +107,15 @@ const useMenuPosition = (range?: IDiscreteRange) => {
         positionY = canvasHeight - 100;
     }
 
+    if (positionX < 50 || positionY < 30) return null;
+
+    const canvasElement = scene.getEngine()?.getCanvasElement();
+    const contentElement = layoutService.getContentElement();
+    const canvasOffset = canvasElement ? getOffsetRectForDom(canvasElement) : { left: 0, top: 0 };
+    const contentOffset = contentElement ? getOffsetRectForDom(contentElement) : { left: 0, top: 0 };
     return {
-        positionX,
-        positionY,
+        positionX: positionX + canvasOffset.left - contentOffset.left,
+        positionY: positionY + canvasOffset.top - contentOffset.top,
     };
 };
 
@@ -129,8 +142,6 @@ export const ClipboardPopupMenu = ({ DropdownMenuComponent = DropdownMenu }: ICl
     const relativePosition = useMenuPosition(range);
 
     if (!relativePosition || !showMenu) return null;
-
-    if (relativePosition.positionX < 50 || relativePosition.positionY < 30) return null;
 
     const showMore = menuHovered || visible;
 

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -24,7 +25,17 @@ import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Quotient } from '../index';
 
 describe('Test quotient function', () => {
-    const testFunction = new Quotient(FUNCTION_NAMES_MATH.QUOTIENT);
+    let injector: Injector;
+    let testFunction: Quotient;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [Quotient, { useFactory: () => injector.createInstance(Quotient, FUNCTION_NAMES_MATH.QUOTIENT) }],
+        ]);
+        testFunction = injector.get(Quotient);
+    });
+
+    afterEach(() => injector.dispose());
 
     describe('Quotient', () => {
         it('Value is normal number', () => {
@@ -91,7 +102,10 @@ describe('Test quotient function', () => {
             });
             const denominator = NumberValueObject.create(2);
             const result = testFunction.calculate(numerator, denominator);
-            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual([
+                [0, 0, 0, ErrorType.VALUE, ErrorType.VALUE, 0],
+                [0, 50, 1, ErrorType.VALUE, -1, ErrorType.NAME],
+            ]);
         });
     });
 });

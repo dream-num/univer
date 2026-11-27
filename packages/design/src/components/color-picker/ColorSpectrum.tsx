@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import type { PointerEvent } from 'react';
+import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { focusClassName } from '../../helper/class-utilities';
+import { clsx } from '../../helper/clsx';
+import { hsvToHex } from './color-conversion';
 
 interface IColorSpectrumProps {
     hsv: [number, number, number];
@@ -26,8 +29,13 @@ interface IColorSpectrumProps {
 export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const hsvRef = useRef(hsv);
     const [isDragging, setIsDragging] = useState(false);
     const [hue] = hsv;
+
+    useEffect(() => {
+        hsvRef.current = hsv;
+    }, [hsv]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -49,21 +57,33 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }, [hue]);
 
-    const handlePointerEvent = (e: PointerEvent) => {
-        e.stopPropagation();
+    const updateFromClientPoint = useCallback((clientX: number, clientY: number) => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
         const rect = canvas.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return;
 
-        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-        const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+        const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+        const y = Math.max(0, Math.min(clientY - rect.top, rect.height));
 
         const s = (x / rect.width) * 100;
         const v = 100 - (y / rect.height) * 100;
 
-        onChange(hsv[0], s, v);
+        onChange(hsvRef.current[0], s, v);
+    }, [onChange]);
+
+    const handlePointerDown = (e: ReactPointerEvent<HTMLCanvasElement>) => {
+        e.stopPropagation();
+        setIsDragging(true);
+        updateFromClientPoint(e.clientX, e.clientY);
     };
+
+    const handleWindowPointerMove = useCallback((e: PointerEvent) => {
+        if (!isDragging) return;
+        e.stopPropagation();
+        updateFromClientPoint(e.clientX, e.clientY);
+    }, [isDragging, updateFromClientPoint]);
 
     const handlePointerUp = useCallback(() => {
         setIsDragging(false);
@@ -71,25 +91,68 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
 
     useEffect(() => {
         const container = containerRef.current;
-        const handleChange = () => onChanged?.(...hsv);
+        const handleChange = () => onChanged?.(...hsvRef.current);
         container?.addEventListener('mouseup', handleChange);
-        window.addEventListener('pointerup', handlePointerUp);
-        window.addEventListener('mouseup', handlePointerUp);
 
         return () => {
             container?.removeEventListener('mouseup', handleChange);
-            window.removeEventListener('pointerup', handlePointerUp);
-            window.removeEventListener('mouseup', handlePointerUp);
         };
-    }, [hsv, onChanged, handlePointerUp]);
+    }, [onChanged]);
 
-    // Calculate the position of the indicator
+    useEffect(() => {
+        if (!isDragging) {
+            return;
+        }
+
+        const handleRelease = () => {
+            handlePointerUp();
+            onChanged?.(...hsvRef.current);
+        };
+
+        window.addEventListener('pointermove', handleWindowPointerMove);
+        window.addEventListener('pointerup', handleRelease);
+        window.addEventListener('mouseup', handleRelease);
+        window.addEventListener('pointercancel', handleRelease);
+
+        return () => {
+            window.removeEventListener('pointermove', handleWindowPointerMove);
+            window.removeEventListener('pointerup', handleRelease);
+            window.removeEventListener('mouseup', handleRelease);
+            window.removeEventListener('pointercancel', handleRelease);
+        };
+    }, [isDragging, handleWindowPointerMove, handlePointerUp, onChanged]);
+
+    const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+        const step = e.shiftKey ? 10 : 1;
+        const [h, s, v] = hsvRef.current;
+        let nextS = s;
+        let nextV = v;
+
+        if (e.key === 'ArrowRight') {
+            nextS = Math.min(100, s + step);
+        } else if (e.key === 'ArrowLeft') {
+            nextS = Math.max(0, s - step);
+        } else if (e.key === 'ArrowUp') {
+            nextV = Math.min(100, v + step);
+        } else if (e.key === 'ArrowDown') {
+            nextV = Math.max(0, v - step);
+        } else {
+            return;
+        }
+
+        e.preventDefault();
+        onChange(h, nextS, nextV);
+        onChanged?.(h, nextS, nextV);
+    };
+
+    const currentColor = hsvToHex(...hsv);
+
     const getIndicatorStyles = () => {
         return {
             left: `${hsv[1]}%`,
             top: `${100 - hsv[2]}%`,
-            transform: 'translate(-50%, -50%)',
-            transition: isDragging ? 'none' : 'left 0.1s ease-out, top 0.1s ease-out',
+            backgroundColor: currentColor,
+            transform: isDragging ? 'translate(-50%, -50%) scale(1.1)' : 'translate(-50%, -50%)',
         };
     };
 
@@ -97,28 +160,41 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
         <div
             data-u-comp="color-picker-spectrum"
             ref={containerRef}
-            className="univer-relative univer-size-full univer-overflow-hidden"
+            tabIndex={0}
+            aria-label="Color spectrum"
+            className={clsx(
+                `
+                  univer-relative univer-size-full univer-touch-none univer-select-none univer-overflow-hidden
+                  univer-rounded-md
+                  after:univer-pointer-events-none after:univer-absolute after:univer-inset-0 after:univer-rounded-md
+                  after:univer-ring-1 after:univer-ring-inset after:univer-ring-gray-200
+                  dark:after:!univer-ring-gray-600
+                `,
+                focusClassName
+            )}
+            onKeyDown={handleKeyDown}
         >
             <canvas
                 ref={canvasRef}
                 data-u-comp="color-picker-spectrum-canvas"
-                className="univer-size-full univer-cursor-crosshair univer-rounded"
-                onPointerDown={(e) => {
-                    setIsDragging(true);
-                    handlePointerEvent(e);
-                }}
-                onPointerMove={(e) => isDragging && handlePointerEvent(e)}
+                className="univer-block univer-size-full univer-cursor-crosshair"
+                onPointerDown={handlePointerDown}
             />
 
             {/* Indicator */}
             <div
-                className={`
-                  univer-pointer-events-none univer-absolute univer-left-0 univer-top-0 univer-size-4
-                  univer-rounded-full univer-border-2 univer-border-gray-0 univer-shadow-md univer-ring-2
-                  univer-ring-gray-0 univer-will-change-transform
-                `}
+                className={clsx(
+                    `
+                      univer-pointer-events-none univer-absolute univer-left-0 univer-top-0 univer-box-border
+                      univer-size-4 univer-rounded-full univer-border-2 univer-border-solid univer-border-gray-0
+                      univer-shadow-md univer-ring-1 univer-ring-gray-400 univer-will-change-transform
+                      motion-reduce:univer-transition-none
+                      dark:!univer-ring-gray-900
+                    `,
+                    !isDragging && 'univer-transition-[left,top,transform] univer-duration-100'
+                )}
                 style={getIndicatorStyles()}
             />
         </div>
     );
-};
+}

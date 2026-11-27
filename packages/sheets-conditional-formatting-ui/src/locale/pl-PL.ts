@@ -169,11 +169,6 @@ const locale: typeof enUS = {
             formulaError: 'Błędna formuła',
             rangeError: 'Nieprawidłowy wybór',
         },
-        permission: {
-            dialog: {
-                setStyleErr: 'Zakres jest chroniony i nie masz uprawnień do ustawiania stylów. Aby ustawić style, skontaktuj się z twórcą.',
-            },
-        },
     },
 };
 

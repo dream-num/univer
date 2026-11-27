@@ -241,7 +241,7 @@ describe('SheetDrawingAnchor', () => {
             drawingId: drawing.drawingId,
         });
         expect(updated?.anchorType).toBe(SheetDrawingAnchorType.Position);
-        expect(updated?.sheetTransform.from).toEqual(expected.from);
+        expect(updated?.axisAlignSheetTransform.from).toEqual(expected.from);
 
         const twoCellOption = container.querySelectorAll<HTMLInputElement>('input[type="radio"]')[0];
         await act(async () => {
@@ -254,7 +254,7 @@ describe('SheetDrawingAnchor', () => {
             drawingId: drawing.drawingId,
         });
         expect(resized?.anchorType).toBe(SheetDrawingAnchorType.Both);
-        expect(resized?.sheetTransform).toEqual(expected);
+        expect(resized?.axisAlignSheetTransform).toEqual({ from: expected.from, to: expected.to });
         testBed.univer.dispose();
     });
 

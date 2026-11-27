@@ -15,7 +15,6 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverThreadCommentConfig } from './config/config';
 import {
     ICommandService,
     IConfigService,
@@ -26,6 +25,7 @@ import {
     Plugin,
     UniverInstanceType,
 } from '@univerjs/core';
+import type { IUniverThreadCommentConfig } from './config/config';
 import pkg from '../package.json';
 import {
     AddCommentCommand,
@@ -43,6 +43,7 @@ import {
 } from './commands/mutations/comment.mutation';
 import { defaultPluginConfig, THREAD_COMMENT_PLUGIN_CONFIG_KEY } from './config/config';
 import { ThreadCommentModel } from './models/thread-comment.model';
+import { IThreadCommentAuthzService, ThreadCommentAuthzService } from './services/tc-authz.service';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
 import { ThreadCommentFacadeService } from './services/thread-comment-api.service';
 import { TC_PLUGIN_NAME } from './types/const';
@@ -73,6 +74,7 @@ export class UniverThreadCommentPlugin extends Plugin {
     override onStarting(): void {
         (mergeOverrideWithDependencies([
             [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
+            [IThreadCommentAuthzService, { useClass: ThreadCommentAuthzService }],
             [ThreadCommentModel],
             [ThreadCommentFacadeService],
         ], this._config?.overrides) as Dependency[]).forEach(

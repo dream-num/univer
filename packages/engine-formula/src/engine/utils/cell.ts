@@ -16,7 +16,7 @@
 
 import type { ICellData, Nullable } from '@univerjs/core';
 import type { ErrorType } from '../../basics/error-type';
-import { BuildTextUtils, isFormulaId, isFormulaString } from '@univerjs/core';
+import { BuildTextUtils, CustomRangeType, isFormulaId, isFormulaString } from '@univerjs/core';
 import { ERROR_TYPE_SET } from '../../basics/error-type';
 
 export function getCellValue(cell: Nullable<ICellData>) {
@@ -29,6 +29,11 @@ export function getCellValue(cell: Nullable<ICellData>) {
 
         if (body == null) {
             return 0;
+        }
+
+        // A calculated hyperlink can have a typed scalar alongside its display text.
+        if (cell.t != null && cell.v != null && body.customRanges?.some((range) => range.rangeType === CustomRangeType.HYPERLINK)) {
+            return cell.v;
         }
 
         const data = body.dataStream;

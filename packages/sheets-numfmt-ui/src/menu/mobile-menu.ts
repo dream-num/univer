@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { Observable } from 'rxjs';
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuSelectorItem } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
 import {
     DEFAULT_TEXT_FORMAT_EXCEL,
+    getCurrencySymbolByLocale,
     LocaleService,
     RegionService,
     UniverInstanceType,
@@ -32,7 +33,7 @@ import {
 import {
     AddDecimalCommand,
     CURRENCYFORMAT,
-    getCurrencySymbolByLocale,
+    getDefaultDateFormat,
     NUMBERFORMAT,
     SetCurrencyCommand,
     SetPercentCommand,
@@ -41,6 +42,7 @@ import {
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, distinctUntilChanged, map } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import { SetMobileNumfmtCommand } from '../commands/commands/set-mobile-numfmt.command';
 import { MENU_OPTIONS } from './number-format-options';
 import { getCurrentNumfmtPattern$, getNumberFormatLabelKey } from './numfmt-menu-util';
@@ -73,8 +75,8 @@ export interface IMobileNumberFormatMenuConfig {
     customPatterns: string[];
 }
 
-export function createMobileNumberFormatMenuConfig(currencySymbol: string): IMobileNumberFormatMenuConfig {
-    const detailOptions: IMobileNumberFormatMenuConfig['detailOptions'] = MENU_OPTIONS(currencySymbol)
+export function createMobileNumberFormatMenuConfig(currencySymbol: string, region?: string): IMobileNumberFormatMenuConfig {
+    const detailOptions: IMobileNumberFormatMenuConfig['detailOptions'] = MENU_OPTIONS(currencySymbol, region)
         .slice(0, -1)
         .map((item) => item === '|'
             ? { divider: true }
@@ -91,7 +93,7 @@ export function createMobileNumberFormatMenuConfig(currencySymbol: string): IMob
         quickOptions: [
             { label: 'sheets-numfmt-ui.percent', commandId: SetPercentCommand.id },
             { label: 'sheets-numfmt-ui.currency', commandId: SetCurrencyCommand.id },
-            { label: 'sheets-numfmt-ui.date', commandId: SetMobileNumfmtCommand.id, value: 'yyyy-mm-dd;@' },
+            { label: 'sheets-numfmt-ui.date', commandId: SetMobileNumfmtCommand.id, value: region ? `${getDefaultDateFormat(region)};@` : 'yyyy-mm-dd;@' },
             {
                 label: 'sheets-numfmt-ui.text',
                 commandId: SetMobileNumfmtCommand.id,
@@ -112,9 +114,13 @@ export function createMobileNumberFormatMenuConfig(currencySymbol: string): IMob
 
 export function FactoryMobileOtherMenuItem(
     accessor: IAccessor
-): IMenuSelectorItem<LocaleKey, string> & { mobileNumberFormat: IMobileNumberFormatMenuConfig } {
+): IMenuSelectorItem<LocaleKey, string> & { mobileNumberFormat: IMobileNumberFormatMenuConfig; mobileNumberFormat$: Observable<IMobileNumberFormatMenuConfig> } {
     const localeService = accessor.get(LocaleService);
     const regionService = accessor.get(RegionService);
+    const readConfig = () => createMobileNumberFormatMenuConfig(
+        getCurrencySymbolByLocale(regionService.getCurrentRegion()),
+        regionService.getExplicitRegion()
+    );
     const value$ = combineLatest([
         getCurrentNumfmtPattern$(accessor),
         regionService.currentRegion$,
@@ -137,8 +143,9 @@ export function FactoryMobileOtherMenuItem(
             worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         }),
-        mobileNumberFormat: createMobileNumberFormatMenuConfig(
-            getCurrencySymbolByLocale(regionService.getCurrentRegion())
-        ),
+        mobileNumberFormat$: regionService.currentRegion$.pipe(map(readConfig)),
+        get mobileNumberFormat() {
+            return readConfig();
+        },
     };
 }

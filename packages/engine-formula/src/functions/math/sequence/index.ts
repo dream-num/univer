@@ -15,6 +15,7 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { MAX_ROW_COUNT } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
@@ -124,19 +125,12 @@ export class Sequence extends BaseFunction {
         const stepValue = +_stepObject.getValue();
 
         // max count of cells is 10^7
-        if (rowsValue < 0 || columnsValue < 0 || rowsValue * columnsValue > 10 ** 7) {
+        if (rowsValue < 0 || columnsValue < 0 || rowsValue > MAX_ROW_COUNT || columnsValue > MAX_ROW_COUNT || rowsValue * columnsValue > 10 ** 7) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         if (rowsValue === 0 || columnsValue === 0) {
             return ErrorValueObject.create(ErrorType.CALC);
-        }
-
-        const maxRows = this._rowCount - this.row;
-        const maxColumns = this._columnCount - this.column;
-
-        if (rowsValue > maxRows || columnsValue > maxColumns) {
-            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const result: number[][] = [];

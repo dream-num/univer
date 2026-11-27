@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         message: {
             refError: 'Rango no válido',
         },
+        permission: {
+            editErr: 'El rango está protegido y no tienes permiso de edición. Para editar, contacta al creador.',
+        },
     },
 };
 

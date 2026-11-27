@@ -44,6 +44,8 @@ import { Month } from '../date/month';
 import { NetworkdaysIntl } from '../date/networkdays-intl';
 import { Today } from '../date/today';
 import { Year } from '../date/year';
+import { FUNCTION_NAMES_INFORMATION } from '../information/function-names';
+import { Isref } from '../information/isref';
 import { FUNCTION_NAMES_LOGICAL } from '../logical/function-names';
 import { If } from '../logical/if';
 import { Iferror } from '../logical/iferror';
@@ -79,6 +81,7 @@ import { Max } from '../statistical/max';
 import { Median } from '../statistical/median';
 import { Min } from '../statistical/min';
 import { Concatenate } from '../text/concatenate';
+import { Euroconvert } from '../text/euroconvert';
 import { FUNCTION_NAMES_TEXT } from '../text/function-names';
 import { Left } from '../text/left';
 import { Len } from '../text/len';
@@ -648,6 +651,7 @@ describe('Test nested functions', () => {
         functionService.registerExecutors(
             new If(FUNCTION_NAMES_LOGICAL.IF),
             new Iferror(FUNCTION_NAMES_LOGICAL.IFERROR),
+            testBed.univer.__getInjector().createInstance(Isref, FUNCTION_NAMES_INFORMATION.ISREF),
             new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP),
             new Max(FUNCTION_NAMES_STATISTICAL.MAX),
             new Median(FUNCTION_NAMES_STATISTICAL.MEDIAN),
@@ -667,6 +671,7 @@ describe('Test nested functions', () => {
             new Plus(FUNCTION_NAMES_META.PLUS),
             new Minus(FUNCTION_NAMES_META.MINUS),
             new Concatenate(FUNCTION_NAMES_TEXT.CONCATENATE),
+            testBed.univer.__getInjector().createInstance(Euroconvert, FUNCTION_NAMES_TEXT.EUROCONVERT),
             new Sum(FUNCTION_NAMES_MATH.SUM),
             new Sumproduct(FUNCTION_NAMES_MATH.SUMPRODUCT),
             new Choose(FUNCTION_NAMES_LOOKUP.CHOOSE),
@@ -728,6 +733,10 @@ describe('Test nested functions', () => {
     });
 
     describe('Normal', () => {
+        it('EUROCONVERT writes #VALUE! for a referenced error', () => {
+            expect(calculateByRuntime('=EUROCONVERT(D14,"DEM","EUR")')?.v).toBe(ErrorType.VALUE);
+        });
+
         it('LET combines unique values and counts before descending sort', () => {
             const result = calculate('=LET(u,UNIQUE(data[]),SORT(CHOOSE({1,2},u,COUNTIF(data[],u)),2,-1))');
 
@@ -788,10 +797,10 @@ describe('Test nested functions', () => {
             expect(result).toBe(0);
         });
 
-        it('Nested functions IF,INDEX converts selected blank referenced cells to zero', () => {
-            const result = calculate('=IF(FALSE,1,INDEX(Z99:Z99,1))');
+        it('Nested functions IF,INDEX preserves the selected blank reference', () => {
+            const result = calculate('=ISREF(IF(FALSE,1,INDEX(Z99:Z99,1)))');
 
-            expect(result).toBe(0);
+            expect(result).toBe(true);
         });
 
         it('Nested functions IF,INDEX writes selected style-only blank references as zero', () => {
@@ -818,10 +827,12 @@ describe('Test nested functions', () => {
             expect(result).toBe(3);
         });
 
-        it('Nested functions IF keeps selected single-cell references scalar', () => {
-            const result = calculate('=IF(TRUE,B2,0)');
+        it('Nested functions IF preserves a single-cell reference and writes its scalar value', () => {
+            expect(calculate('=ISREF(IF(TRUE,B2,0))')).toBe(true);
 
-            expect(result).toBe(101);
+            const result = calculateByRuntime('=IF(TRUE,B2,0)');
+            expect(result?.v).toBe(101);
+            expect(result?.t).toBe(CellValueType.NUMBER);
         });
 
         it('Nested INDEX selects from a vertical array constant using MATCH', () => {
@@ -839,7 +850,7 @@ describe('Test nested functions', () => {
                 formulaRuntimeService.currentUnitId
             );
 
-            expect(calculate('=">="&OFFSET(X21,1,0,1,1)')).toStrictEqual([['>=']]);
+            expect(calculate('=">="&OFFSET(X21,1,0,1,1)')).toBe('>=');
             expect(calculate('=COUNTIF(D2:D4,">="&OFFSET(X21,1,0,1,1))')).toBe(0);
             expect(calculate('=COUNTIF(D2:D4,">="&X21)-COUNTIF(D2:D4,">="&OFFSET(X21,1,0,1,1))')).toBe(0);
         });
@@ -942,7 +953,7 @@ describe('Test nested functions', () => {
         it('Nested functions ADDRESS,XMATCH,MIN,SUMIFS,EDATE,TODAY,DAY', () => {
             const result = calculate('=ADDRESS(XMATCH(MIN(SUMIFS(C2:C10, A2:A10, ">=" & EDATE(TODAY(), -1) + 1 - DAY(TODAY()), A2:A10, "<" & TODAY() - DAY(TODAY()) + 1)), SUMIFS(C2:C10, A2:A10, ">=" & EDATE(TODAY(), -1) + 1 - DAY(TODAY()), A2:A10, "<" & TODAY() - DAY(TODAY()) + 1), 0) + 1, 2)');
 
-            expect(result).toStrictEqual([['$B$2']]);
+            expect(result).toBe('$B$2');
         });
 
         it('SUM, CHOOSE', () => {

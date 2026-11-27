@@ -47,6 +47,17 @@ describe('getDateFormatOptions', () => {
         }
     });
 
+    it('preserves the existing first preset until a region is explicitly selected', () => {
+        expect(getDateFormatOptions(LocaleType.EN_US)[0].value).toBe('yyyy-MM-dd');
+        expect(getDateFormatOptions(LocaleType.EN_US, undefined, 'en-US')[0].value).toBe('m/d/yyyy');
+        const belgian = getDateFormatOptions(LocaleType.EN_US, undefined, 'fr-BE');
+        expect(belgian[0].value).toBe('dd/mm/yyyy');
+        const namedMonth = belgian.find(({ value }) => value === '[$-fr-BE]d mmmm');
+        expect(namedMonth?.label).toBe('5 août');
+        expect(numfmt.format(namedMonth!.value, 11175, { locale: 'en' })).toBe(namedMonth!.label);
+        expect(getDateFormatOptions(LocaleType.EN_US, 'd mmmm', 'fr-BE')[0]).toEqual({ label: '5 August', value: 'd mmmm' });
+    });
+
     it('does not offer Chinese literals in English presets', () => {
         for (const option of getDateFormatOptions(LocaleType.EN_US)) {
             expect(option.label).not.toMatch(/[年月日]|上午|下午/);
@@ -58,6 +69,11 @@ describe('getDateFormatOptions', () => {
         const persian = getDateFormatOptions(LocaleType.FA_IR);
         expect(persian.some((option) => option.label === '1930/08/05')).toBe(true);
         expect(persian.some((option) => option.label === '8/5/1930')).toBe(false);
+    });
+
+    it.each(['en-IN', 'enIN', 'en-GB', 'ml-IN'])('starts with day-first presets for %s', (region) => {
+        expect(getDateFormatOptions(region)[0]).toEqual({ label: '05/08/1930', value: 'dd/mm/yyyy' });
+        expect(getDateFormatOptions(region, 'dd-mmm-yyyy')[0].value).toBe('dd-mmm-yyyy');
     });
 
     it('falls back to language-neutral date patterns for an unsupported locale', () => {

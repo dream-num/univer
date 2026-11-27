@@ -27,6 +27,8 @@ export class Devsq extends BaseFunction {
 
     override maxParams = 255;
 
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
+
     override calculate(...variants: BaseValueObject[]): BaseValueObject {
         const values: number[] = [];
         let sum = 0;

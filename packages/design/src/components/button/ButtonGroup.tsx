@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-/* eslint-disable react/no-children-map */
-/* eslint-disable react/no-children-count */
+/* eslint-disable react/no-children-to-array */
 /* eslint-disable react/no-clone-element */
 
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { Children, cloneElement, isValidElement, useContext } from 'react';
 import type { IButtonProps } from './Button';
-import { Children, cloneElement, useContext } from 'react';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
 export interface IButtonGroupProps {
     className?: string;
     orientation?: 'horizontal' | 'vertical';
-    children: ReactElement<IButtonProps>[];
+    children: ReactNode;
 }
 
 export const ButtonGroup = ({
@@ -36,24 +35,34 @@ export const ButtonGroup = ({
     children,
 }: IButtonGroupProps) => {
     const { direction } = useContext(ConfigContext);
-    const totalButtons = Children.count(children);
+    const validChildren = Children.toArray(children).filter(
+        (child): child is ReactElement<IButtonProps> => isValidElement(child)
+    );
+    const totalButtons = validChildren.length;
     const isHorizontal = orientation === 'horizontal';
     const isVertical = orientation === 'vertical';
     const isRtl = direction === 'rtl';
 
     return (
         <div
+            role="group"
+            data-u-comp="button-group"
+            dir={direction}
             className={clsx('univer-grid', {
-                'univer-grid-flow-row': isVertical,
-                'univer-w-fit': isVertical,
+                'univer-grid-flow-col': isHorizontal,
+                'univer-w-fit univer-grid-flow-row': isVertical,
             }, className)}
         >
-            {Children.map(children, (child, index) => {
+            {validChildren.map((child, index) => {
                 const isFirst = index === 0;
                 const isLast = index === totalButtons - 1;
 
                 return cloneElement(child, {
                     className: clsx(
+                        `
+                          univer-relative
+                          focus-visible:univer-z-10
+                        `,
                         {
                             '!univer-rounded-l-none': isHorizontal && (isRtl ? !isLast : !isFirst),
                             '!univer-rounded-r-none': isHorizontal && (isRtl ? !isFirst : !isLast),

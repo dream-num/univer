@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import { ColorWheelMultiIcon } from '@univerjs/icons';
 import { memo, useCallback, useContext, useEffect, useState } from 'react';
 import type { IColorPickerProps } from './ColorPicker';
+import { borderClassName } from '../../helper/class-utilities';
+import { clsx } from '../../helper/clsx';
 import { isBrowser } from '../../helper/is-browser';
 import { MobileActionRowGroup } from '../action-row/MobileActionRowGroup';
 import { Button } from '../button/Button';
@@ -23,7 +26,16 @@ import { ConfigContext } from '../config-provider/ConfigProvider';
 import { MobileDialog } from '../dialog/MobileDialog';
 import { MobileDropdownCloseContext } from '../dropdown/MobileDropdown';
 import { AlphaSlider } from './AlphaSlider';
-import { hexToHsv, hsvToHex, hsvToRgb, hsvToRgba, parseRgba, rgbToHex, rgbToHsv } from './color-conversion';
+import {
+    CHECKERBOARD_BACKGROUND_STYLE,
+    hexToHsv,
+    hsvToHex,
+    hsvToRgb,
+    hsvToRgba,
+    parseRgba,
+    rgbToHex,
+    rgbToHsv,
+} from './color-conversion';
 import { ColorInput } from './ColorInput';
 import { ColorSpectrum } from './ColorSpectrum';
 import { HueSlider } from './HueSlider';
@@ -88,12 +100,14 @@ export function MobileColorPicker({ format = 'hex', value, onChange }: IMobileCo
         handleColorChanged(h, s, v, alpha);
     }
 
+    const previewColor = format === 'hex' ? hsvToHex(...hsv) : hsvToRgba(...hsv, alpha);
+
     return (
         <div
             data-u-comp="color-picker"
             data-presentation="mobile"
             dir={direction}
-            className="univer-cursor-default univer-space-y-2 univer-rounded-lg"
+            className="univer-cursor-default univer-space-y-2.5 univer-rounded-lg"
             onClick={(event) => event.stopPropagation()}
         >
             <MemoizedMobileColorPresets
@@ -119,29 +133,43 @@ export function MobileColorPicker({ format = 'hex', value, onChange }: IMobileCo
                     "
                     onClick={() => setVisible(true)}
                 >
+                    <ColorWheelMultiIcon aria-hidden="true" className="univer-size-4 univer-shrink-0" />
                     {locale?.ColorPicker.more}
                 </Button>
             </div>
 
             <MobileDialog
-                className="!univer-z-[1420] !univer-p-2.5"
+                className="!univer-z-[1420] !univer-p-3"
                 overlayClassName="!univer-z-[1410]"
                 closable={false}
                 maskClosable={false}
                 open={visible}
                 onOpenChange={setVisible}
             >
-                <div data-u-comp="mobile-color-picker-custom" className="univer-grid univer-w-full univer-gap-2">
-                    <div className="univer-h-44 univer-w-full univer-overflow-hidden univer-rounded-lg">
+                <div data-u-comp="mobile-color-picker-custom" className="univer-grid univer-w-full univer-gap-3">
+                    <div className="univer-h-44 univer-w-full univer-rounded-md">
                         <MemoizedColorSpectrum hsv={hsv} onChange={handleColorChange} />
                     </div>
 
-                    <div className="univer-flex univer-items-center univer-gap-2">
+                    <div className="univer-flex univer-items-center univer-gap-3">
                         <div
-                            className="univer-size-6 univer-flex-shrink-0 univer-rounded-sm"
-                            style={{ backgroundColor: format === 'hex' ? hsvToHex(...hsv) : hsvToRgba(...hsv, alpha) }}
-                        />
-                        <div className="univer-flex-1 univer-space-y-2">
+                            aria-hidden="true"
+                            className={clsx(
+                                `
+                                  univer-relative univer-box-border univer-size-9 univer-flex-shrink-0
+                                  univer-overflow-hidden univer-rounded-md univer-bg-gray-0
+                                  dark:!univer-bg-gray-700
+                                `,
+                                borderClassName
+                            )}
+                            style={CHECKERBOARD_BACKGROUND_STYLE}
+                        >
+                            <span
+                                className="univer-block univer-size-full"
+                                style={{ backgroundColor: previewColor }}
+                            />
+                        </div>
+                        <div className="univer-flex-1 univer-space-y-2.5">
                             <MemoizedHueSlider hsv={hsv} onChange={handleColorChange} />
                             {format === 'rgba' && (
                                 <MemoizedAlphaSlider hsv={hsv} alpha={alpha} onChange={setAlpha} />

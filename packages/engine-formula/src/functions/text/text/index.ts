@@ -21,16 +21,31 @@ import { ErrorType } from '../../../basics/error-type';
 import { getFormatPreview } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { StringValueObject } from '../../../engine/value-object/primitive-object';
-import { BaseFunction } from '../../base-function';
+import { parseFormulaNumericText, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { RegionalNumberFormatFunction } from '../regional-number-format.function';
 
-export class Text extends BaseFunction {
+export class Text extends RegionalNumberFormatFunction {
     override minParams = 2;
 
     override maxParams = 2;
 
     override isArgumentsIgnoreNumberPattern() {
         return true;
+    }
+
+    protected getFormatInput(value: BaseValueObject): number | string {
+        if (value.isNull()) return 0;
+        if (value.isBoolean()) return value.getValue() ? 'TRUE' : 'FALSE';
+        if (value.isNumber()) return Number(value.getValue());
+        const raw = String(value.getValue());
+        if (isRealNum(raw)) return Number(raw);
+        if (raw.includes(',')) {
+            const region = this.getNumberFormatRegion();
+            const parsed = parseFormulaNumericText(raw, region ? () => region : undefined);
+            if (parsed) return 'v' in parsed ? parsed.v : raw;
+        }
+        const parsed = getNumfmtParseValueFilter(raw, { dateSystem: value.getDateSystem() });
+        return typeof parsed?.v === 'number' ? parsed.v : raw;
     }
 
     override calculate(text: BaseValueObject, formatText: BaseValueObject) {
@@ -76,28 +91,6 @@ export class Text extends BaseFunction {
                 return textValue;
             }
 
-            let textValueNumber = textValue.getValue() as number;
-
-            if (textValue.isNull()) {
-                textValueNumber = 0;
-            }
-
-            if (textValue.isString()) {
-                if (isRealNum(textValueNumber)) {
-                    textValueNumber = Number(textValueNumber);
-                } else {
-                    // The text parameter needs to check if it can be converted to a number format. If convertible, format it as the converted number.
-                    // The format text does not need this check and is processed directly as a string.
-                    const parsedValue = getNumfmtParseValueFilter(`${textValueNumber}`, {
-                        dateSystem: textValue.getDateSystem(),
-                    });
-
-                    if (parsedValue && parsedValue.v != null && typeof parsedValue.v === 'number') {
-                        textValueNumber = parsedValue.v;
-                    }
-                }
-            }
-
             if (formatTextValue.isNull()) {
                 formatTextValue = StringValueObject.create(' ');
             }
@@ -107,8 +100,9 @@ export class Text extends BaseFunction {
 
             const previewText = getFormatPreview(
                 normalizedFormatTextValueString,
-                textValueNumber,
-                textValue.getDateSystem()
+                this.getFormatInput(textValue),
+                textValue.getDateSystem(),
+                this.getNumberFormatRegion()
             );
 
             return StringValueObject.create(formatTextValueString === ' ' ? previewText.trimEnd() : previewText);
@@ -122,7 +116,7 @@ export class Text extends BaseFunction {
     }
 }
 
-function normalizeExcelWeekdayFormat(formatText: string): string {
+export function normalizeExcelWeekdayFormat(formatText: string): string {
     if (!formatText.includes('\u00C5')) {
         return formatText;
     }

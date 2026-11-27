@@ -77,7 +77,8 @@ export class Eomonth extends BaseFunction {
         const startYear = isDate1900SerialZero ? 1900 : startDateDate.getUTCFullYear();
         const startMonth = isDate1900SerialZero ? 0 : startDateDate.getUTCMonth();
 
-        const monthsValue = Math.floor(+_months.getValue());
+        // Excel truncates a fractional months argument toward zero, so -1.5 is -1, not -2.
+        const monthsValue = Math.trunc(+_months.getValue());
 
         if (Number.isNaN(monthsValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);

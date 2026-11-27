@@ -24,6 +24,7 @@ import { BorderStyleTypes, ThemeColorType } from '../../types/enum';
 import {
     BaselineOffset,
     HorizontalAlign,
+    TextDecoration,
     TextDirection,
     VerticalAlign,
     WrapStrategy,
@@ -158,6 +159,24 @@ describe('Test common', () => {
         expect(isCellCoverable({ v: '', p: null, coverable: false } as never)).toBe(false);
     });
 
+    it('should write underline and strikethrough as one text-decoration', () => {
+        // A `text-decoration-line` written after the `text-decoration` shorthand would replace the underline.
+        expect(handleStyleToString({ ul: { s: 1 }, st: { s: 1 } } as never)).toBe('text-decoration: underline line-through; ');
+        expect(handleStyleToString({ st: { s: 1 }, ul: { s: 1 } } as never)).toBe('text-decoration-line: line-through underline; ');
+        expect(handleStyleToString({ ul: { s: 1 }, st: { s: 1 }, ol: { s: 1 } } as never)).toBe('text-decoration: underline line-through overline; ');
+    });
+
+    it('should end the text-decoration-style declaration before the next one', () => {
+        // Without the `;` the next declaration becomes part of the line style value and is lost.
+        const cl = { rgb: '#ff0000' };
+        expect(handleStyleToString({ ul: { s: 1, t: TextDecoration.DOUBLE }, cl }))
+            .toBe('text-decoration: underline; text-decoration-style: 10; color: #ff0000; ');
+        expect(handleStyleToString({ st: { s: 1, t: TextDecoration.DOUBLE }, cl }))
+            .toBe('text-decoration-line: line-through; text-decoration-style: 10; color: #ff0000; ');
+        expect(handleStyleToString({ ol: { s: 1, t: TextDecoration.DOUBLE }, cl }))
+            .toBe('text-decoration-line: overline; text-decoration-style: 10; color: #ff0000; ');
+    });
+
     it('should resolve colors and style strings', () => {
         expect(getColorStyle({ rgb: 'rgb(255, 0, 0)' })).toBe('#ff0000');
         expect(getColorStyle({ th: ThemeColorType.ACCENT1 })).toBe('rgb(68,114,196)');
@@ -252,6 +271,16 @@ describe('Test common', () => {
 
         expect(covertCellValue('=SUM(1,2)')).toEqual({ f: '=SUM(1,2)', v: null, p: null, si: null });
         expect(covertCellValue(1)).toEqual({ v: 1, p: null, f: null, si: null });
+        // Unformatted accounting negatives behave like a plain negative number:
+        // the string is preserved, only values with an explicit format convert.
+        expect(covertCellValue('(5)')).toEqual({ v: '(5)', p: null, f: null, si: null });
+        expect(covertCellValue('(1,000)')).toEqual({
+            v: -1000,
+            p: null,
+            f: null,
+            si: null,
+            s: { n: { pattern: '#,##0' } },
+        });
         const cell = { v: 'text', p: null, f: null, si: null } as ICellData;
         expect(covertCellValue(cell)).toBe(cell);
 

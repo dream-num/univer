@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         message: {
             refError: 'Plage invalide',
         },
+        permission: {
+            editErr: 'La plage est protégée, et vous n\'avez pas la permission de modifier. Pour modifier, veuillez contacter le créateur.',
+        },
     },
 };
 

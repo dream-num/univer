@@ -413,7 +413,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                   univer-flex univer-w-fit univer-cursor-pointer univer-flex-row univer-items-center
                                   univer-rounded univer-p-1 univer-px-2 univer-text-sm univer-text-primary-600
                                   hover:univer-bg-primary-50
-                                  dark:!univer-text-primary-500
+                                  dark:!univer-text-primary-100
                                   dark:hover:!univer-bg-gray-800
                                 `}
                                 onClick={handleAdd}

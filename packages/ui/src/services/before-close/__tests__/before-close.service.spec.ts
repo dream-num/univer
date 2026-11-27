@@ -15,9 +15,9 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { INotificationOptions } from '../../../views/notification/Notification';
 import { Injector, LocaleService, LocaleType } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { INotificationOptions } from '../../../views/notification/Notification';
 import { DesktopNotificationService } from '../../notification/desktop-notification.service';
 import { INotificationService } from '../../notification/notification.service';
 import { BuiltInUIPart, IUIPartsService, UIPartsService } from '../../parts/parts.service';
@@ -58,16 +58,18 @@ describe('DesktopBeforeCloseService', () => {
         service.registerBeforeClose(() => 'Unsaved sheet');
         const disposable = service.registerBeforeClose(() => 'Pending upload');
 
-        const event = new Event('beforeunload') as BeforeUnloadEvent;
+        const event = new Event('beforeunload');
+        Object.defineProperty(event, 'returnValue', { value: '', writable: true });
         windowTarget.dispatchEvent(event);
 
         expect(event.returnValue).toBe('Unsaved sheet\nPending upload');
 
         disposable.dispose();
         (service as DesktopBeforeCloseService).dispose();
-        const nextEvent = new Event('beforeunload') as BeforeUnloadEvent;
+        const nextEvent = new Event('beforeunload');
+        Object.defineProperty(nextEvent, 'returnValue', { value: '', writable: true });
         windowTarget.dispatchEvent(nextEvent);
-        expect(nextEvent.returnValue).toBeUndefined();
+        expect(nextEvent.returnValue).toBe('');
     });
 
     it('runs close callbacks when the page unloads and stops after disposal', () => {

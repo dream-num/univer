@@ -25,7 +25,7 @@ import { Concat } from './concat';
 import { Concatenate } from './concatenate';
 import { Dbcs } from './dbcs';
 import { Dollar } from './dollar';
-// import { Euroconvert } from './euroconvert';
+import { Euroconvert } from './euroconvert';
 import { Exact } from './exact';
 import { Find } from './find';
 import { Findb } from './findb';
@@ -44,6 +44,7 @@ import { Numbervalue } from './numbervalue';
 import { Proper } from './proper';
 import { Regexextract } from './regexextract';
 import { Regexmatch } from './regexmatch';
+import { Regextest } from './regextest';
 import { Regexreplace } from './regexreplace';
 // import { RegisterId } from './register-id';
 import { Replace } from './replace';
@@ -80,7 +81,7 @@ export const functionText = [
     [Dbcs, FUNCTION_NAMES_TEXT.DBCS],
     [Dollar, FUNCTION_NAMES_TEXT.DOLLAR],
     [Exact, FUNCTION_NAMES_TEXT.EXACT],
-    // [Euroconvert, FUNCTION_NAMES_TEXT.EUROCONVERT],
+    [Euroconvert, FUNCTION_NAMES_TEXT.EUROCONVERT],
     [Find, FUNCTION_NAMES_TEXT.FIND],
     [Findb, FUNCTION_NAMES_TEXT.FINDB],
     [Fixed, FUNCTION_NAMES_TEXT.FIXED],
@@ -96,7 +97,7 @@ export const functionText = [
     // [Phonetic, FUNCTION_NAMES_TEXT.PHONETIC],
     [Regexextract, FUNCTION_NAMES_TEXT.REGEXEXTRACT],
     [Regexmatch, FUNCTION_NAMES_TEXT.REGEXMATCH],
-    [Regexmatch, FUNCTION_NAMES_TEXT.REGEXTEST],
+    [Regextest, FUNCTION_NAMES_TEXT.REGEXTEST],
     [Regexreplace, FUNCTION_NAMES_TEXT.REGEXREPLACE],
     [Proper, FUNCTION_NAMES_TEXT.PROPER],
     [Replace, FUNCTION_NAMES_TEXT.REPLACE],

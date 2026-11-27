@@ -24,6 +24,9 @@ const locale: typeof enUS = {
         msg: {
             'filter-header-forbidden': 'Nie można przenieść wiersza nagłówka filtra.',
         },
+        permission: {
+            filterErr: 'Zakres jest chroniony i nie masz uprawnień do filtrowania. Aby filtrować, skontaktuj się z twórcą.',
+        },
     },
 };
 

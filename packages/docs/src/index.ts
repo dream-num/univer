@@ -134,6 +134,7 @@ export {
     canEditDocumentTargets,
     createDocumentPermissionPoint,
     DOCUMENT_UNIT_PERMISSION_ACTIONS,
+    getDocumentCommentPermission,
     getDocumentEntityPermissionObjectId,
     getDocumentParagraphPermissionObjectId,
     getDocumentPermissionValue,

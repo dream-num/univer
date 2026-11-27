@@ -48,7 +48,7 @@ const EMPTY_ARRAY_RESULT: ISetArrayFormulaDataMutationParams = {
 };
 
 function createCommandFixture() {
-    // Canvas drawing is unavailable in happy-dom; the renderer stays inactive throughout these command tests.
+    // Canvas drawing is unavailable in jsdom; the renderer stays inactive throughout these command tests.
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
         return {
             canvas: this,

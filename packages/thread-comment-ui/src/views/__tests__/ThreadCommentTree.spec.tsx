@@ -52,9 +52,11 @@ import {
     DeleteCommentCommand,
     DeleteCommentMutation,
     DeleteCommentTreeCommand,
+    IThreadCommentAuthzService,
     IThreadCommentDataSourceService,
     ResolveCommentCommand,
     ResolveCommentMutation,
+    ThreadCommentAuthzService,
     ThreadCommentDataSourceService,
     ThreadCommentModel,
     UpdateCommentCommand,
@@ -353,6 +355,10 @@ class TestUniverInstanceService {
         return new BehaviorSubject({ id: 'workbook' });
     }
 
+    getUnitType() {
+        return UniverInstanceType.UNIVER_SHEET;
+    }
+
     setCurrentUnitForType(): void {
     }
 }
@@ -401,6 +407,7 @@ function createTreeTestBed(localeDependency: Dependency = [LocaleService, { useC
         [IShortcutService, { useClass: TestShortcutService as never }],
         [ISidebarService, { useClass: TestSidebarService as never }],
         [IUniverInstanceService, { useClass: TestUniverInstanceService as never }],
+        [IThreadCommentAuthzService, { useClass: ThreadCommentAuthzService }],
         [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
         [LifecycleService],
         [UserManagerService],
@@ -651,13 +658,21 @@ describe('ThreadCommentTree', () => {
         expect(dateText).not.toMatch(/[\u0660-\u0669\u06F0-\u06F9]/u);
     });
 
-    it('does not render a timestamp for a new comment', () => {
-        const testBed = createTreeTestBed();
+    it('opens an anonymous draft without displaying an author or timestamp before submission', () => {
+        const testBed = createTreeTestBed([LocaleService]);
+        const locale = testBed.injector.get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: enUS });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+        testBed.injector.get(UserManagerService).setCurrentUser({ userID: '', name: '' });
+        testBed.injector.get(ComponentManager).register(USER_INFO_COMPONENT, OpaqueAuthor, { override: true });
 
         const rendered = renderDefaultTree(testBed.injector);
         root = rendered.root;
         container = rendered.container;
 
+        expect(container.textContent).toContain(enUS['thread-comment-ui'].panel.addComment);
+        expect(container.querySelector('[data-part="avatar"]')).toBeNull();
         expect(container.querySelector('time')).toBeNull();
     });
 
@@ -885,7 +900,7 @@ describe('ThreadCommentTree', () => {
             await waitForFrame();
         });
         await act(async () => {
-            getButton(container!, REPLY_LABEL).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            getButton(container!, 'thread-comment-ui.panel.addComment').dispatchEvent(new MouseEvent('click', { bubbles: true }));
             await waitForTreeRefresh();
         });
 

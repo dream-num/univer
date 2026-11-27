@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { ITable, ITextStyle } from '@univerjs/core';
+import type { IDocumentStyle, ITable, ITextStyle, Nullable } from '@univerjs/core';
+import { BaselineOffset, DEFAULT_STYLES, DocumentFlavor } from '@univerjs/core';
 import type {
     IDocumentSkeletonBoundingBox,
     IDocumentSkeletonFontStyle,
 } from '../../basics/i-document-skeleton-cached';
-import { DocumentFlavor } from '@univerjs/core';
 import { cjk } from '../../basics/cjk-regexp';
 import { getFontStyleString } from '../../basics/tools';
 
@@ -163,6 +163,13 @@ export function applyFontMetricCompatibility(
 
     const adjustedWidth = width * (rule?.widthScale ?? 1);
     let normalLineHeight = bBox.normalLineHeight;
+    let lineLeading = bBox.lineLeading;
+    if (policy.mode === 'traditional' && /^(?:SimSun|宋体)$/i.test(fontFamilies[0])
+        && Math.abs(bBox.ba + bBox.bd - em) < 0.01) {
+        // Native Word probes at 7.5, 11, 12 and 16pt add roughly 30% auto-leading
+        // to SimSun's one-em box, including Latin text. Retain ink and exact spacing.
+        normalLineHeight = Math.max(normalLineHeight ?? 0, em * 1.3);
+    }
     if (policy.mode === 'traditional' && /^(?:Microsoft YaHei|微软雅黑)$/i.test(fontFamilies[0])
         && Math.abs((bBox.ba + bBox.bd) / (fontStyle.originFontSize / 0.75) - 2703 / 2048) < 0.001) {
         // Word's single spacing adds leading to YaHei's font box. Isolated native
@@ -170,6 +177,17 @@ export function applyFontMetricCompatibility(
         // Guard the actual font metrics so a missing/substituted font is not inflated.
         // AUTO and AT_LEAST consume this value; keep ink and exact line metrics.
         normalLineHeight = Math.max(normalLineHeight ?? 0, (bBox.ba + bBox.bd) * 1.3);
+    }
+    if (policy.mode === 'traditional'
+        && fontFamilies.some((family) => /^(?:DengXian|等线)$/i.test(family))
+        && Math.abs((bBox.ba + bBox.bd) / (fontStyle.originFontSize / 0.75) - 2134 / 2048) < 0.001) {
+        // Word uses the same DengXian leading for Latin text and paragraph marks.
+        // Inline objects share that line box; retain the actual font and ink metrics.
+        const wordLineHeight = (bBox.ba + bBox.bd) * 1.3;
+        if ((normalLineHeight ?? 0) < wordLineHeight) {
+            normalLineHeight = wordLineHeight;
+            lineLeading = wordLineHeight - bBox.ba - bBox.bd;
+        }
     }
     if (policy.mode === 'traditional' && /^(?:MS Gothic|ＭＳ ゴシック)$/i.test(fontFamilies[0])
         && Math.abs(bBox.ba + bBox.bd - fontStyle.originFontSize / 0.75) < 0.01) {
@@ -186,7 +204,39 @@ export function applyFontMetricCompatibility(
         ...bBox,
         width: adjustedWidth,
         ...(normalLineHeight != null ? { normalLineHeight } : {}),
+        ...(lineLeading != null ? { lineLeading } : {}),
     };
+}
+
+export function getDocumentFontStyle(
+    textStyle?: Nullable<ITextStyle>,
+    fontFamilyFallbacks?: Record<string, string>,
+    fontFamilyClasses?: IDocumentStyle['fontFamilyClasses'],
+    policy?: IDocumentCompatibilityPolicy
+): IDocumentSkeletonFontStyle {
+    let wordScriptSizeRatio: number | undefined;
+    if ((policy?.mode === 'traditional' || policy?.mode === 'modern') &&
+        (textStyle?.va === BaselineOffset.SUPERSCRIPT || textStyle?.va === BaselineOffset.SUBSCRIPT)) {
+        const family = (textStyle.ff || DEFAULT_STYLES.ff).split(',')[0].trim().replace(/^['"]|['"]$/g, '');
+        if (/^(?:SimSun|宋体|DengXian|等线|PMingLiU)$/i.test(family)) {
+            wordScriptSizeRatio = 0.5;
+        } else if (/^(?:Arial|Arial Narrow|Times|Times New Roman|Calibri|Cambria|Segoe UI|Consolas|Microsoft YaHei|微软雅黑|Franklin Gothic Book|Georgia|Lucida Sans Unicode|Open Sans|Symbol|Tahoma)$/i.test(family)) {
+            wordScriptSizeRatio = 1331 / 2048;
+        } else if (/^Aptos$/i.test(family)) {
+            wordScriptSizeRatio = 1229 / 2048;
+        } else if (/^Palatino Linotype$/i.test(family)) {
+            wordScriptSizeRatio = 1230 / 2048;
+        } else if (/^Sylfaen$/i.test(family)) {
+            wordScriptSizeRatio = 1220 / 2048;
+        } else if (/^Gungsuh$/i.test(family)) {
+            wordScriptSizeRatio = 665 / 1024;
+        } else if (/^(?:MS Mincho|HGS明朝E)$/i.test(family)) {
+            // Word uses its legacy script scale for these faces despite their OS/2 size.
+            wordScriptSizeRatio = 0.6;
+        }
+        // shortcut: unverified faces retain existing metrics until their Word script metrics are available.
+    }
+    return getFontStyleString(textStyle, fontFamilyFallbacks, fontFamilyClasses, wordScriptSizeRatio);
 }
 
 export function getSmallCapsFontStyle(
@@ -203,7 +253,7 @@ export function getSmallCapsFontStyle(
     const size = fontStyle.originFontSize * 0.8;
     const fs = policy.mode === 'drawingml' ? size : Math.max(0.5, Math.round(size * 2) / 2);
     return {
-        ...getFontStyleString({ ...textStyle, fs }),
+        ...getDocumentFontStyle({ ...textStyle, fs }, undefined, undefined, policy),
         originFontSize: fontStyle.originFontSize,
         fontKerning: fontStyle.fontKerning,
     };

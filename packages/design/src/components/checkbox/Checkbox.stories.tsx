@@ -37,10 +37,13 @@ export const CheckboxBasic = {
         }
 
         return (
-            <>
-                <Checkbox checked={checked} onChange={handleChange}>checkbox 1</Checkbox>
-                <Checkbox checked onChange={handleChange}>checkbox 1</Checkbox>
-            </>
+            <div className="univer-flex univer-flex-col univer-gap-2.5">
+                <Checkbox checked={checked} onChange={handleChange}>Show gridlines</Checkbox>
+                <Checkbox checked onChange={handleChange}>Freeze header row</Checkbox>
+                <Checkbox checked={checked} onChange={handleChange} className="univer-max-w-56">
+                    Automatically wrap long labels so the indicator stays aligned with the first line
+                </Checkbox>
+            </div>
         );
     },
 };
@@ -48,14 +51,11 @@ export const CheckboxBasic = {
 export const CheckboxDisabled = {
     render() {
         return (
-            <>
-                <Checkbox disabled>
-                    checkbox 1
-                </Checkbox>
-                <Checkbox disabled checked>
-                    checkbox 2
-                </Checkbox>
-            </>
+            <div className="univer-flex univer-flex-col univer-gap-2.5">
+                <Checkbox disabled>Disabled unchecked</Checkbox>
+                <Checkbox disabled checked>Disabled checked</Checkbox>
+                <Checkbox disabled indeterminate>Disabled indeterminate</Checkbox>
+            </div>
         );
     },
 };
@@ -68,12 +68,10 @@ export const CheckboxIndeterminate = {
         }
 
         return (
-            <>
-                <Checkbox checked={checked} onChange={handleChange} indeterminate>checkbox 1</Checkbox>
-                <Checkbox disabled indeterminate>
-                    checkbox 2
-                </Checkbox>
-            </>
+            <div className="univer-flex univer-flex-col univer-gap-2.5">
+                <Checkbox checked={checked} onChange={handleChange} indeterminate>Select all columns</Checkbox>
+                <Checkbox disabled indeterminate>Partially selected (disabled)</Checkbox>
+            </div>
         );
     },
 };

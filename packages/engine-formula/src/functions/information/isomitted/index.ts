@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-import { NotImplementedFunction } from '../../not-implemented-function';
+import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import { BooleanValueObject, NullValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
-export class Isomitted extends NotImplementedFunction {
+export class Isomitted extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
 
-    // TODO: Implement omitted-argument metadata propagation for LAMBDA evaluation.
+    override needsReferenceObject = true;
+
+    override calculate(value: FunctionVariantType): BooleanValueObject {
+        return BooleanValueObject.create(value instanceof NullValueObject && value.isOmitted());
+    }
 }

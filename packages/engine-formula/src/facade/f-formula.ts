@@ -33,7 +33,7 @@ import type {
     ISetFormulaStringBatchCalculationResultMutation,
     ISetQueryFormulaDependencyAllResultMutation,
 } from '@univerjs/engine-formula';
-import { ICommandService, IConfigService, Inject, Injector } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector, Optional, RegionService } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import {
     ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
@@ -70,7 +70,8 @@ export class FFormula extends FBase {
         @IConfigService protected readonly _configService: IConfigService,
         @IFunctionService private readonly _functionService: IFunctionService,
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
-        @ISuperTableService private readonly _superTableService: ISuperTableService
+        @ISuperTableService private readonly _superTableService: ISuperTableService,
+        @Optional(RegionService) private readonly _regionService?: RegionService
 
     ) {
         super();
@@ -357,9 +358,10 @@ export class FFormula extends FBase {
                 reject(new Error('Formula batch calculation timeout'));
             }, timeout);
 
+            const region = this._regionService?.getCurrentRegion();
             this._commandService.executeCommand(
                 SetFormulaStringBatchCalculationMutation.id,
-                { formulas },
+                { formulas, ...(region === undefined ? {} : { region }) },
                 { onlyLocal: true }
             );
         });

@@ -43,6 +43,15 @@ import {
     Liquid,
 } from '@univerjs/engine-render';
 
+export function isDocVerticalTableCell(page: IDocumentSkeletonPage): boolean {
+    return page.cellTextDirection === 'tbRlV';
+}
+
+export function getDocRangeBorderBoxBottom(line: IDocumentSkeletonLine, top: number): number {
+    const { contentHeight, lineHeight, marginBottom, marginTop, paddingBottom, paddingTop } = line;
+    return contentHeight == null ? top + lineHeight - marginTop - marginBottom : top + paddingTop + contentHeight + paddingBottom;
+}
+
 export function findDocRangeNodePositions(
     skeleton: DocumentSkeleton,
     startIndex: number,
@@ -300,7 +309,8 @@ export class NodePositionConvertToCursor {
 
     constructor(
         private _documentOffsetConfig: IDocumentOffsetConfig,
-        private _docSkeleton: DocumentSkeleton
+        private _docSkeleton: DocumentSkeleton,
+        private _renderMode: 'editor' | 'printing' = 'editor'
     ) {
         // super
     }
@@ -332,7 +342,7 @@ export class NodePositionConvertToCursor {
 
         // eslint-disable-next-line complexity
         this._selectionIterator(start, end, (start_sp, end_sp, isFirst, isLast, divide, line) => {
-            const { lineHeight, asc, paddingTop, paddingBottom, contentHeight, marginTop, marginBottom } = line;
+            const { asc, paddingTop } = line;
             const { glyphGroup, st } = divide;
             if (glyphGroup.length === 0) {
                 // The divide is empty, and no need to set selection.
@@ -364,7 +374,7 @@ export class NodePositionConvertToCursor {
 
             const collapsed = start === end;
             const rawAnchorGlyph = isStartBack ? (preGlyph ?? firstGlyph) : firstGlyph;
-            const anchorGlyph = this._getCaretGlyph(rawAnchorGlyph, glyphGroup, start_sp);
+            const anchorGlyph = this._getCaretGlyph(rawAnchorGlyph, glyphGroup);
             const caretAscent = anchorGlyph.bBox.fontAscent ?? anchorGlyph.bBox.ba;
             const caretDescent = anchorGlyph.bBox.fontDescent ?? anchorGlyph.bBox.bd;
             const selectedGlyphs = glyphGroup.slice(start_sp, end_sp + 1);
@@ -372,9 +382,7 @@ export class NodePositionConvertToCursor {
                 selectedGlyphs.length > 0 &&
                 selectedGlyphs.every((glyph) => this._isNonInlineDrawingGlyph(glyph));
             const borderBoxStartY = startY;
-            const borderBoxEndY = contentHeight == null
-                ? startY + lineHeight - marginTop - marginBottom
-                : startY + paddingTop + contentHeight + paddingBottom;
+            const borderBoxEndY = getDocRangeBorderBoxBottom(line, startY);
 
             if (start_sp === 0 && end_sp === glyphGroup.length - 1) {
                 borderBoxPosition = {
@@ -447,15 +455,18 @@ export class NodePositionConvertToCursor {
 
     private _getCaretGlyph(
         glyph: IDocumentSkeletonGlyph | undefined,
-        glyphGroup: IDocumentSkeletonGlyph[],
-        glyphIndex: number
+        glyphGroup: IDocumentSkeletonGlyph[]
     ): IDocumentSkeletonGlyph {
-        if (!glyph || !this._isNonInlineDrawingGlyph(glyph)) {
+        if (!glyph || (!this._isNonInlineDrawingGlyph(glyph) && !this._isCaretMarkerGlyph(glyph))) {
             return glyph!;
         }
 
-        const neighbor = this._findTextLikeGlyph(glyphGroup, glyphIndex - 1, -1) ??
-            this._findTextLikeGlyph(glyphGroup, glyphIndex + 1, 1);
+        const glyphIndex = glyphGroup.indexOf(glyph);
+        const previous = this._findTextLikeGlyph(glyphGroup, glyphIndex - 1, -1);
+        const next = this._findTextLikeGlyph(glyphGroup, glyphIndex + 1, 1);
+        const neighbor = glyph.raw === DataStreamTreeTokenType.CUSTOM_RANGE_START || glyph.raw === DataStreamTreeTokenType.PAGE_BREAK
+            ? next ?? previous
+            : previous ?? next;
 
         return neighbor ?? {
             ...glyph,
@@ -466,12 +477,18 @@ export class NodePositionConvertToCursor {
     private _findTextLikeGlyph(glyphGroup: IDocumentSkeletonGlyph[], startIndex: number, step: 1 | -1): IDocumentSkeletonGlyph | undefined {
         for (let index = startIndex; index >= 0 && index < glyphGroup.length; index += step) {
             const glyph = glyphGroup[index];
-            if (!this._isNonInlineDrawingGlyph(glyph)) {
+            if (!this._isNonInlineDrawingGlyph(glyph) && !this._isCaretMarkerGlyph(glyph)) {
                 return glyph;
             }
         }
 
         return undefined;
+    }
+
+    private _isCaretMarkerGlyph(glyph: IDocumentSkeletonGlyph): boolean {
+        return glyph.raw === DataStreamTreeTokenType.CUSTOM_RANGE_START ||
+            glyph.raw === DataStreamTreeTokenType.CUSTOM_RANGE_END ||
+            glyph.raw === DataStreamTreeTokenType.PAGE_BREAK;
     }
 
     private _isNonInlineDrawingGlyph(glyph: IDocumentSkeletonGlyph | undefined): boolean {
@@ -490,6 +507,10 @@ export class NodePositionConvertToCursor {
         const { segmentPage: endPage, pageType: endPageType } = endOrigin;
 
         if (startPageType !== endPageType) {
+            return false;
+        }
+
+        if (startOrigin.segmentId != null && endOrigin.segmentId != null && startOrigin.segmentId !== endOrigin.segmentId) {
             return false;
         }
 
@@ -684,7 +705,7 @@ export class NodePositionConvertToCursor {
             } else if (pageType === DocumentSkeletonPageType.CELL) {
                 segmentPage = path[0] === 'pages'
                     ? getPageFromPath(skeletonData, path)
-                    : getCellPageFromSegmentPath(skeletonData, page, path);
+                    : getCellPageFromSegmentPath(skeletonData, page, path, startPosition.segmentId);
             }
 
             if (segmentPage == null) {
@@ -733,7 +754,7 @@ export class NodePositionConvertToCursor {
                     break;
             }
 
-            if (segmentPage.cellTextDirection === 'tbRlV') {
+            if (isDocVerticalTableCell(segmentPage)) {
                 this._verticalCellOrigin = {
                     x: this._liquid.x - segmentPage.marginLeft,
                     y: this._liquid.y - segmentPage.marginTop,
@@ -876,7 +897,10 @@ export class NodePositionConvertToCursor {
 
         for (const { cell, row, table } of ancestors) {
             const sourceTableId = getTableIdAndSliceIndex(table.tableId).tableId;
-            const viewport = getDocsTableRenderViewport(getDocumentUnitId(skeleton), sourceTableId);
+            // Match Documents._drawTable: paper geometry excludes editor clipping and scrolling.
+            const viewport = this._renderMode === 'printing'
+                ? null
+                : getDocsTableRenderViewport(getDocumentUnitId(skeleton), sourceTableId);
             const hasHorizontalViewport = hasHorizontalTableViewport(viewport);
             const scrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
 
@@ -929,7 +953,8 @@ function clipPositionToHorizontalRange(position: IPosition, clip: Nullable<{ lef
 function getCellPageFromSegmentPath(
     skeletonData: Parameters<typeof getPageFromPath>[0],
     rootPage: IDocumentSkeletonPage,
-    path: (string | number)[]
+    path: (string | number)[],
+    segmentId?: string
 ): Nullable<IDocumentSkeletonPage> {
     if (path[0] === 'pages') {
         return null;
@@ -940,11 +965,11 @@ function getCellPageFromSegmentPath(
     const headerPage = headerId == null ? null : skeletonData.skeHeaders.get(headerId)?.get(rootPage.headerLayoutKey ?? pageWidth);
     const footerPage = footerId == null ? null : skeletonData.skeFooters.get(footerId)?.get(rootPage.footerLayoutKey ?? pageWidth);
 
-    if (headerPage != null) {
+    if (headerPage != null && (segmentId == null || segmentId === headerId)) {
         segmentPages.push(headerPage);
     }
 
-    if (footerPage != null) {
+    if (footerPage != null && (segmentId == null || segmentId === footerId)) {
         segmentPages.push(footerPage);
     }
 

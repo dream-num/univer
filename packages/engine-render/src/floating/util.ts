@@ -15,8 +15,6 @@
  */
 
 import { getOverflowAncestors } from '@floating-ui/dom';
-import { floor, max, min } from '@floating-ui/utils';
-import { getDocumentElement } from '@floating-ui/utils/dom';
 import { Observable } from 'rxjs';
 
 /**
@@ -43,7 +41,7 @@ function observeMove(element: Element, onMove: () => void) {
     let io: IntersectionObserver | null = null;
     let timeoutId: NodeJS.Timeout;
 
-    const root = getDocumentElement(element);
+    const root = element.ownerDocument.documentElement;
 
     function cleanup() {
         clearTimeout(timeoutId);
@@ -64,15 +62,15 @@ function observeMove(element: Element, onMove: () => void) {
             return;
         }
 
-        const insetTop = floor(top);
-        const insetRight = floor(root.clientWidth - (left + width));
-        const insetBottom = floor(root.clientHeight - (top + height));
-        const insetLeft = floor(left);
+        const insetTop = Math.floor(top);
+        const insetRight = Math.floor(root.clientWidth - (left + width));
+        const insetBottom = Math.floor(root.clientHeight - (top + height));
+        const insetLeft = Math.floor(left);
         const rootMargin = `${-insetTop}px ${-insetRight}px ${-insetBottom}px ${-insetLeft}px`;
 
         const options = {
             rootMargin,
-            threshold: max(0, min(1, threshold)) || 1,
+            threshold: Math.max(0, Math.min(1, threshold)) || 1,
         };
 
         let isFirstUpdate = true;
@@ -107,7 +105,7 @@ function observeMove(element: Element, onMove: () => void) {
                 // Handle <iframe>s
                 root: root.ownerDocument,
             });
-        } catch (e) {
+        } catch {
             io = new IntersectionObserver(handleObserve, options);
         }
 

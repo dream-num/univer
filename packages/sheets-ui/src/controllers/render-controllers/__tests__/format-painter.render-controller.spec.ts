@@ -170,6 +170,7 @@ describe('FormatPainterRenderController header targets', () => {
         injector.get(FormatPainterController);
         renderManager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [FormatPainterRenderController]);
         const canvas = render.engine.getCanvasElement();
+        canvas.hasPointerCapture ??= () => false;
         const session = injector.get(FormatPainterSessionService);
         const selections = injector.get(SheetsSelectionsService);
         const eventAt = (row: number, column: number) => {

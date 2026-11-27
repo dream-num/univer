@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         message: {
             refError: 'Nieprawidłowy zakres',
         },
+        permission: {
+            editErr: 'Zakres jest chroniony i nie masz uprawnień do edycji. Aby edytować, skontaktuj się z twórcą.',
+        },
     },
 };
 

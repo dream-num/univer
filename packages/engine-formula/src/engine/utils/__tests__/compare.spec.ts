@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { compareToken } from '../../../basics/token';
-import { compareWithWildcard, isMatchWildcard, isWildcard, replaceWildcard } from '../compare';
+import { compareWithWildcard, isMatchWildcard, isWildcard, parseWildcardPattern, replaceWildcard, searchWildcard } from '../compare';
 
 describe('Test compare', () => {
     it('Function isWildcard', () => {
@@ -58,5 +58,44 @@ describe('Test compare', () => {
         expect(compareWithWildcard('test12', 'test*', compareToken.GREATER_THAN_OR_EQUAL)).toBe(true);
         expect(compareWithWildcard('hello', 'test*', compareToken.LESS_THAN)).toBe(true);
         expect(compareWithWildcard('hello', 'test*', compareToken.LESS_THAN_OR_EQUAL)).toBe(true);
+    });
+
+    it('Function parseWildcardPattern', () => {
+        expect(parseWildcardPattern('test').literal).toBe('test');
+        expect(parseWildcardPattern('test*').literal).toBeNull();
+        // ~ makes whatever follows it literal, and a trailing ~ adds nothing.
+        expect(parseWildcardPattern('a~*b').literal).toBe('a*b');
+        expect(parseWildcardPattern('a~?b').literal).toBe('a?b');
+        expect(parseWildcardPattern('a~~b').literal).toBe('a~b');
+        expect(parseWildcardPattern('a~~~*b').literal).toBe('a~*b');
+        expect(parseWildcardPattern('a~b').literal).toBe('ab');
+        expect(parseWildcardPattern('a~').literal).toBe('a');
+    });
+
+    it('Function searchWildcard', () => {
+        const search = (text: string, pattern: string, fromIndex = 0) => searchWildcard(text, parseWildcardPattern(pattern), fromIndex);
+
+        // The earliest match wins, and a leading * still reports where the match starts.
+        expect(search('abc', 'b')).toBe(1);
+        expect(search('abc', 'b*')).toBe(1);
+        expect(search('abc', '*c')).toBe(0);
+        expect(search('abc', '?c')).toBe(1);
+        expect(search('abc', 'a?c')).toBe(0);
+        // start_num moves the search start, it does not accept an earlier match.
+        expect(search('abc', 'b', 2)).toBe(-1);
+        expect(search('abc', 'c', 2)).toBe(2);
+        expect(search('abc', '*', 2)).toBe(2);
+        // Escapes are literal, and a trailing ~ matches nothing.
+        expect(search('a*b', 'a~*b')).toBe(0);
+        expect(search('a~b', '~~')).toBe(1);
+        expect(search('a~*b', '~~~*')).toBe(1);
+        expect(search('a~xb', '~x')).toBe(2);
+        expect(search('a~b', '~')).toBe(0);
+        expect(search('abc', 'x?z')).toBe(-1);
+        // A ? covers one character: a surrogate pair such as an emoji is a single ?.
+        expect(search('😀', '?')).toBe(0);
+        expect(search('😀b', '?b')).toBe(0);
+        expect(search('😀', '??')).toBe(-1);
+        expect(search('abc', '????')).toBe(-1);
     });
 });

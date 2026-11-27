@@ -27,7 +27,7 @@ const locale: typeof enUS = {
             'smart-toggle-filter': 'Inverser le filtre',
         },
         permission: {
-            filterErr: 'Vous n’avez pas l’autorisation d’utiliser le filtre.',
+            filterErr: 'La plage est protégée et vous n\'avez pas l\'autorisation de filtrer. Pour filtrer, veuillez contacter le créateur.',
         },
         panel: {
             'clear-filter': 'Effacer le filtre',

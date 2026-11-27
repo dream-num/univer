@@ -26,6 +26,7 @@ import {
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
 import { Interpreter } from '../interpreter/interpreter';
+import { getLambdaParameterDeclaration, isFirstChildParameter, normalizeLambdaVariable } from '../utils/function-definition';
 import { updateLambdaStatement } from '../utils/update-lambda-statement';
 import { LambdaValueObjectObject } from '../value-object/lambda-value-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
@@ -39,7 +40,8 @@ export class LambdaNode extends BaseAstNode {
         token: string,
         private _lambdaId: string,
         private _interpreter: Interpreter,
-        private _lambdaPrivacyVarKeys: string[],
+        private _scope: LambdaPrivacyVarType,
+        private _optionalParameters: ReadonlySet<string>,
         private _runtimeService: IFormulaRuntimeService
     ) {
         super(token);
@@ -61,13 +63,21 @@ export class LambdaNode extends BaseAstNode {
         return this._lambdaId === null;
     }
 
+    override preservesReferenceInRangeEndpoint(_child: BaseAstNode): boolean {
+        return !this.isEmptyParamFunction();
+    }
+
     getLambdaId() {
         return this._lambdaId;
     }
 
+    getScope(): LambdaPrivacyVarType {
+        return this._scope;
+    }
+
     override execute() {
         if (this.isEmptyParamFunction()) {
-            this.setValue(LambdaValueObjectObject.create(this, this._interpreter, this._lambdaPrivacyVarKeys));
+            this.setValue(LambdaValueObjectObject.create(this, this._interpreter, this._optionalParameters));
         } else {
             const children = this.getChildren();
             const childrenCount = children.length;
@@ -106,15 +116,16 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
         const children = param.getChildren();
         const lambdaVar = children[0];
         let parameterArray = children.slice(1, -1);
+        let argumentCount: number | undefined;
         const functionStatementNode = children[children.length - 1];
         if (!(lambdaVar instanceof LexerNode && functionStatementNode instanceof LexerNode)) {
             return ErrorNode.create(ErrorType.NAME);
         }
 
         if (lambdaVar.getToken() === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
-            const lambdaVarChildren = lambdaVar.getChildren();
-
-            if (parameterArray.length !== lambdaVarChildren.length) {
+            const argumentsAndCall = lambdaVar.getChildren();
+            argumentCount = argumentsAndCall.length - Number(isFirstChildParameter(argumentsAndCall[0]));
+            if (argumentCount > parameterArray.length) {
                 return ErrorNode.create(ErrorType.VALUE);
             }
         } else {
@@ -126,12 +137,19 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
 
         // const lambdaRuntime = parserDataLoader.getLambdaRuntime();
         const currentLambdaPrivacyVar = new Map<string, Nullable<BaseAstNode>>();
+        const optionalParameters = new Set<string>();
 
         for (let i = 0; i < parameterArray.length; i++) {
             const parameter = parameterArray[i];
             if (parameter instanceof LexerNode) {
-                const variant = getLambdaParameterName(parameter);
-                if (variant == null) {
+                const declaration = getLambdaParameterDeclaration(parameter);
+                if (declaration == null) {
+                    return ErrorNode.create(ErrorType.VALUE);
+                }
+                const variant = normalizeLambdaVariable(declaration);
+                const optional = /^_xlop\./i.test(declaration) || (declaration.startsWith('[') && declaration.endsWith(']'));
+                if (optional) optionalParameters.add(variant);
+                if (argumentCount != null && i >= argumentCount && !optional) {
                     return ErrorNode.create(ErrorType.VALUE);
                 }
                 parameter.setToken(DEFAULT_TOKEN_TYPE_LAMBDA_OMIT_PARAMETER);
@@ -145,7 +163,7 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
 
         this._updateLambdaStatement(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
 
-        return new LambdaNode(param.getToken(), lambdaId, this._interpreter, [...currentLambdaPrivacyVar.keys()], this._runtimeService);
+        return new LambdaNode(param.getToken(), lambdaId, this._interpreter, currentLambdaPrivacyVar, optionalParameters, this._runtimeService);
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {
@@ -168,24 +186,4 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
     ) {
         updateLambdaStatement(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
     }
-}
-
-function getLambdaParameterName(parameter: LexerNode): Nullable<string> {
-    const children = parameter.getChildren();
-    for (let i = 0; i < children.length; i++) {
-        const child = children[i];
-        if (typeof child === 'string') {
-            const token = child.trim();
-            if (token.length > 0) {
-                return token;
-            }
-        } else {
-            const token = getLambdaParameterName(child);
-            if (token != null) {
-                return token;
-            }
-        }
-    }
-
-    return null;
 }

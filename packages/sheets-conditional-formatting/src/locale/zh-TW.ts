@@ -24,6 +24,11 @@ const locale: typeof enUS = {
             mark: '標記',
             rank: '等級',
         },
+        permission: {
+            dialog: {
+                setStyleErr: '該範圍已被保護，目前無設定樣式權限。如需設定樣式，請聯絡建立者。 ',
+            },
+        },
     },
 };
 

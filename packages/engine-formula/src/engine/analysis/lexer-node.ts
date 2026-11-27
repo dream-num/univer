@@ -25,6 +25,8 @@ interface ILexerNodeJson {
 }
 
 export class LexerNode {
+    declare outerParenthesized?: true;
+
     private _parent: Nullable<LexerNode>;
 
     private _token: string = DEFAULT_TOKEN_TYPE_ROOT;

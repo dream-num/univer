@@ -27,6 +27,8 @@ export class Lookup extends BaseFunction {
 
     override maxParams = 3;
 
+    override lazyIfReferenceArrayArgumentIndexes = [1, 2];
+
     override needsExpandParams = true;
 
     override calculate(

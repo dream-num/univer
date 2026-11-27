@@ -35,6 +35,7 @@ export class NumberCellDisplayController extends Disposable {
     private _initInterceptorCellContent() {
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+                displayOnly: true,
                 priority: 11,
                 effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
                 handler: (cell, location, next) => {

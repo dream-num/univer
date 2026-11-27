@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../locale/types';
-import type { DocPasteMode } from '../services/clipboard/paste-options';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, DropdownMenu } from '@univerjs/design';
-import { DocPasteOptionsIcon } from '@univerjs/icons';
+import { DocPasteOptionsIcon, DownIcon } from '@univerjs/icons';
 import { ILayoutService, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../locale/types';
+import type { DocPasteMode } from '../services/clipboard/paste-options';
 import { DocChangePasteModeCommand } from '../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 import { DOC_PASTE_OPTIONS } from '../services/clipboard/paste-options';
@@ -97,9 +97,7 @@ export function DocPasteOptions() {
                 className="univer-shadow-sm"
             >
                 <DocPasteOptionsIcon className="!univer-size-5" aria-hidden="true" />
-                <svg className="!univer-size-2" width="8" height="8" viewBox="0 0 8 8" aria-hidden="true">
-                    <path d="m1 2 3 4 3-4Z" fill="currentColor" />
-                </svg>
+                <DownIcon className="!univer-size-2" aria-hidden="true" />
             </Button>
         </DropdownMenu>
     );

@@ -15,13 +15,28 @@
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { keepTextSelected, startSheetTabNameEditor } from '../sheet-tab-name-editor';
+import { keepLastTextIndex, keepTextSelected, startSheetTabNameEditor } from '../sheet-tab-name-editor';
 
-describe('keepTextSelected', () => {
+describe('sheet tab name selection', () => {
     afterEach(() => {
         vi.useRealTimers();
         window.getSelection()?.removeAllRanges();
         document.body.replaceChildren();
+    });
+
+    it.each([keepLastTextIndex, keepTextSelected])('preserves the new selection when the previous editor closes before %s runs', (scheduleSelection) => {
+        vi.useFakeTimers();
+        const editor = document.createElement('span');
+        const current = document.createTextNode('Current sheet');
+        document.body.append(editor, current);
+        scheduleSelection(editor);
+        editor.remove();
+
+        const selection = window.getSelection()!;
+        selection.setBaseAndExtent(current, 0, current, 7);
+        vi.runAllTimers();
+
+        expect(selection.toString()).toBe('Current');
     });
 
     it.each(['', '<br>'])('restores a collapsed caret after refocusing an empty editor containing %j', (html) => {

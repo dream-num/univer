@@ -15,7 +15,6 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import type { LocaleKey } from '../locale/types';
 import { Disposable, ICommandService, Inject, LocaleService } from '@univerjs/core';
 import {
     RangeProtectionPermissionEditPoint,
@@ -25,6 +24,7 @@ import {
     WorksheetInsertHyperlinkPermission,
     WorksheetSetCellValuePermission,
 } from '@univerjs/sheets';
+import type { LocaleKey } from '../locale/types';
 import { InsertLinkShortcut } from '../menu/menu';
 
 export class SheetsHyperLinkPermissionController extends Disposable {
@@ -49,7 +49,7 @@ export class SheetsHyperLinkPermissionController extends Disposable {
                     });
                     if (!permission) {
                         this._sheetPermissionCheckController.blockExecuteWithoutPermission(
-                            this._localeService.t<LocaleKey>('sheets-hyper-link-ui.permission.hyperLinkErr')
+                            this._localeService.t<LocaleKey>('sheets-hyper-link-ui.permission.editErr')
                         );
                     }
                 }

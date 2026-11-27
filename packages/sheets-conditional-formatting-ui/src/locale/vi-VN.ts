@@ -168,11 +168,6 @@ const locale: typeof enUS = {
             formulaError: 'Lỗi công thức',
             rangeError: 'Lựa chọn không hợp lệ',
         },
-        permission: {
-            dialog: {
-                setStyleErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền thiết lập kiểu. Nếu cần thiết lập kiểu, vui lòng liên hệ với người tạo.',
-            },
-        },
     },
 };
 

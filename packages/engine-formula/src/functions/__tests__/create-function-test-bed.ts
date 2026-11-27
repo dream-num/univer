@@ -63,6 +63,8 @@ import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/ru
 import { ISheetRowFilteredService, SheetRowFilteredService } from '../../services/sheet-row-filtered.service';
 import { ISuperTableService, SuperTableService } from '../../services/super-table.service';
 import { FormulaUnitReferenceResolver, IFormulaUnitReferenceResolver } from '../../services/unit-reference-resolver.service';
+import { FUNCTION_NAMES_META } from '../meta/function-names';
+import { Minus } from '../meta/minus';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -223,6 +225,8 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT); // change this to `true` to debug tests via logs
+
+    get(IFunctionService).registerExecutors(injector.createInstance(Minus, FUNCTION_NAMES_META.MINUS));
 
     const sheetData: ISheetData = {};
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;

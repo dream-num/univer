@@ -15,13 +15,22 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsDataValidationUIConfig } from './config/config';
-import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import {
+    DependentOn,
+    ICommandService,
+    IConfigService,
+    Inject,
+    Injector,
+    merge,
+    Plugin,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import type { IUniverSheetsDataValidationUIConfig } from './config/config';
 import pkg from '../package.json';
 import {
     AddSheetDataValidationAndOpenCommand,
@@ -40,7 +49,6 @@ import { ComponentsController } from './controllers/components.controller';
 import { DataValidationAlertController } from './controllers/dv-alert.controller';
 import { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
 import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
-import { DataValidationPermissionController } from './controllers/dv-permission.controller';
 import { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
 import { SheetsDataValidationRenderController } from './controllers/dv-render.controller';
 import { SheetsDataValidationReRenderController } from './controllers/dv-rerender.controller';
@@ -90,7 +98,6 @@ export class UniverSheetsDataValidationUIPlugin extends Plugin {
             [DataValidationAlertController],
             [DataValidationAutoFillController],
             [SheetsDataValidationRenderController],
-            [DataValidationPermissionController],
             [DataValidationCopyPasteController],
             [DataValidationRejectInputController],
             [SheetsDataValidationUIController],
@@ -114,7 +121,6 @@ export class UniverSheetsDataValidationUIPlugin extends Plugin {
 
     override onReady(): void {
         this._injector.get(DataValidationCopyPasteController);
-        this._injector.get(DataValidationPermissionController);
         this._injector.get(DataValidationRejectInputController);
         this._injector.get(DataValidationAlertController);
 

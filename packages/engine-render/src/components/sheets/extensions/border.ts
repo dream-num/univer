@@ -164,7 +164,7 @@ export class Border extends SheetExtension {
         const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
         if (!isMerged) {
-            const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
+            const visibleRow = spreadsheetSkeleton.getRowVisible(row);
             if (!visibleRow) return true;
 
             const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);

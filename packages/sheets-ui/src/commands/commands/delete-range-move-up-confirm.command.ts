@@ -15,9 +15,22 @@
  */
 
 import type { ICommand, IRange } from '@univerjs/core';
+import {
+    CommandType,
+    getIntersectRange,
+    ICommandService,
+    IConfirmService,
+    IUniverInstanceService,
+    LocaleService,
+    Rectangle,
+} from '@univerjs/core';
+import {
+    DeleteRangeMoveUpCommand,
+    getSheetCommandTarget,
+    SheetSkeletonService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import type { LocaleKey } from '../../locale/types';
-import { CommandType, getIntersectRange, ICommandService, IConfirmService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { DeleteRangeMoveUpCommand, getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
 
 export const DeleteRangeMoveUpConfirmCommand: ICommand = {
     type: CommandType.COMMAND,
@@ -35,23 +48,27 @@ export const DeleteRangeMoveUpConfirmCommand: ICommand = {
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
 
-        const { worksheet } = target;
-        let range = selection[0].range;
+        const { worksheet, unitId, subUnitId } = target;
+        const skeletonService = accessor.get(SheetSkeletonService);
+        if (skeletonService.isDisplayProjectionPending(unitId, subUnitId)) {
+            return false;
+        }
+        const skeleton = skeletonService.getDisplaySkeleton(unitId, subUnitId);
+        const isRowFiltered = (row: number) => skeleton?.getRowFiltered(row) ?? worksheet.getRowFiltered(row);
+        let range = selectionManagerService.getCurrentLastSelection()?.range;
         if (!range) return false;
 
         range = { ...range, endRow: worksheet.getRowCount() - 1 };
 
         for (let i = range.startRow; i <= range.endRow; i++) {
-            if (worksheet.getRowFiltered(i)) {
-                const result = await confirmService.confirm({
+            if (isRowFiltered(i)) {
+                await confirmService.confirm({
                     id: DeleteRangeMoveUpConfirmCommand.id,
                     title: { title: localeService.t<LocaleKey>('sheets-ui.filter.confirm.error') },
                     children: { title: localeService.t<LocaleKey>('sheets-ui.filter.confirm.notAllowedToInsertRange') },
                     confirmText: localeService.t<LocaleKey>('sheets-ui.button.confirm'),
                 });
-                if (result) {
-                    return false;
-                }
+                return false;
             }
         }
 
@@ -65,6 +82,8 @@ export const DeleteRangeMoveUpConfirmCommand: ICommand = {
             return commandService.executeCommand(DeleteRangeMoveUpCommand.id);
         }
 
+        const selectedRanges = selection.map(({ range }) => ({ ...range }));
+        const projection = skeleton?.getDisplayProjection();
         const result = await confirmService.confirm({
             id: DeleteRangeMoveUpConfirmCommand.id,
             title: { title: localeService.t<LocaleKey>('sheets-ui.merge.confirm.warning') },
@@ -73,6 +92,21 @@ export const DeleteRangeMoveUpConfirmCommand: ICommand = {
             confirmText: localeService.t<LocaleKey>('sheets-ui.button.confirm'),
         });
         if (result) {
+            const currentTarget = getSheetCommandTarget(univerInstanceService);
+            const currentSelection = selectionManagerService.getCurrentSelections();
+            if (currentTarget?.worksheet !== worksheet
+                || skeletonService.isDisplayProjectionPending(unitId, subUnitId)
+                || skeletonService.getDisplaySkeleton(unitId, subUnitId) !== skeleton
+                || skeleton?.getDisplayProjection() !== projection
+                || currentSelection.length !== selectedRanges.length
+                || currentSelection.some(({ range }, index) => !Rectangle.equals(range, selectedRanges[index]))) {
+                return false;
+            }
+            for (let i = range.startRow; i <= range.endRow; i++) {
+                if (isRowFiltered(i)) {
+                    return false;
+                }
+            }
             return commandService.executeCommand(DeleteRangeMoveUpCommand.id);
         }
         return true;

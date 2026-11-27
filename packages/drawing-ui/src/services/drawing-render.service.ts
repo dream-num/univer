@@ -190,7 +190,7 @@ export class DrawingRenderService {
             }
 
             const shouldWaitForInlineTransform =
-                docxHeaderFooterDrawing === true && layoutType === PositionedObjectLayoutType.INLINE;
+                options?.interactive !== false && docxHeaderFooterDrawing === true && layoutType === PositionedObjectLayoutType.INLINE;
             if (hidden || shouldWaitForInlineTransform) {
                 imageConfig.visible = false;
             }

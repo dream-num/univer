@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { LocaleService, LocaleType, Univer } from '@univerjs/core';
-import { FunctionService, FunctionType, IFunctionService } from '@univerjs/engine-formula';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Injector, LocaleService, LocaleType, Univer } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { FunctionType } from '../../../basics/function';
 import { FormulaCacheService } from '../../formula-cache.service';
+import { FunctionService, IFunctionService } from '../../function.service';
 import { DescriptionService, IDescriptionService } from '../description.service';
 import { IRegisterFunctionService, RegisterFunctionService } from '../register-function.service';
 
@@ -41,13 +42,38 @@ describe('RegisterFunctionService', () => {
         univer.dispose();
     });
 
+    it.each([false, true])('retains a factory for callback registrations (async=%s)', async (asyncMode) => {
+        const injector = univer.__getInjector();
+        injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
+        const registration = injector.get(IRegisterFunctionService).registerFunction({
+            name: 'SCALE',
+            description: '',
+            async: asyncMode,
+            func: asyncMode ? (value) => Promise.resolve(Number(value) * 2) : (value) => Number(value) * 2,
+        });
+        const target = new Injector();
+        target.add([FormulaCacheService]);
+        target.add([IFunctionService, { useClass: FunctionService }]);
+        try {
+            const host = injector.get(IFunctionService);
+            const functions = target.get(IFunctionService);
+            functions.registerFunctionFactories(...host.getFunctionRegistrations());
+            expect(await functions.getExecutor('SCALE')!.calculateCustom(7)).toBe(14);
+            expect(functions.getExecutor('SCALE')!.isAsync()).toBe(asyncMode);
+            expect(functions.getExecutor('SCALE')).not.toBe(host.getExecutor('SCALE'));
+            registration.dispose();
+            expect(host.getFunctionRegistrations()).toEqual([]);
+        } finally {
+            target.dispose();
+        }
+    });
+
     it('registers and disposes a single synchronous function with generated description', () => {
         const injector = univer.__getInjector();
         injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
 
         const registerFunctionService = injector.get(IRegisterFunctionService);
         const functionService = injector.get(IFunctionService);
-        const deleteFormulaAstCacheKeySpy = vi.spyOn(functionService, 'deleteFormulaAstCacheKey');
 
         const disposable = registerFunctionService.registerFunction({
             name: 'DOUBLE',
@@ -67,7 +93,6 @@ describe('RegisterFunctionService', () => {
 
         expect(functionService.hasExecutor('DOUBLE')).toBe(false);
         expect(functionService.hasDescription('DOUBLE')).toBe(false);
-        expect(deleteFormulaAstCacheKeySpy).toHaveBeenCalledWith('DOUBLE');
     });
 
     it('registers grouped functions with fallback descriptions when custom descriptions are omitted', () => {

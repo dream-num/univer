@@ -15,8 +15,8 @@
  */
 
 import type { Meta } from '@storybook/react';
-import type { ISelectProps } from './Select';
 import { useState } from 'react';
+import type { ISelectProps } from './Select';
 import { MultipleSelect } from './MultipleSelect';
 import { Select } from './Select';
 

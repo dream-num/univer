@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -24,7 +25,17 @@ import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Chooserows } from '../index';
 
 describe('Test chooserows function', () => {
-    const testFunction = new Chooserows(FUNCTION_NAMES_LOOKUP.CHOOSEROWS);
+    let injector: Injector;
+    let testFunction: Chooserows;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [Chooserows, { useFactory: () => injector.createInstance(Chooserows, FUNCTION_NAMES_LOOKUP.CHOOSEROWS) }],
+        ]);
+        testFunction = injector.get(Chooserows);
+    });
+
+    afterEach(() => injector.dispose());
 
     describe('Chooserows', () => {
         it('Value is normal', async () => {
@@ -82,7 +93,7 @@ describe('Test chooserows function', () => {
 
             const rowNum6 = ArrayValueObject.create('{1;2}');
             const resultObject6 = testFunction.calculate(array, rowNum6);
-            expect(getObjectValue(resultObject6)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(resultObject6)).toStrictEqual([[1, 2, 3], [2, 3, 4]]);
         });
     });
 });

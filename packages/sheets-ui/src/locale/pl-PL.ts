@@ -381,6 +381,7 @@ const locale: typeof enUS = {
                 searchEmptyDescription: 'Spróbuj innego imienia lub wyczyść wyszukiwanie.',
                 commonErr: 'Zakres jest chroniony i nie masz uprawnień do tej operacji. Aby edytować, skontaktuj się z twórcą.',
                 editErr: 'Zakres jest chroniony i nie masz uprawnień do edycji. Aby edytować, skontaktuj się z twórcą.',
+                operatorSheetErr: 'Nie masz uprawnień do operowania na arkuszu. Aby operować na arkuszu, skontaktuj się z twórcą.',
                 pasteErr: 'Zakres jest chroniony i nie masz uprawnień do wklejania. Aby wkleić, skontaktuj się z twórcą.',
                 setStyleErr: 'Zakres jest chroniony i nie masz uprawnień do ustawiania stylów. Aby ustawić style, skontaktuj się z twórcą.',
                 copyErr: 'Zakres jest chroniony i nie masz uprawnień do kopiowania. Aby skopiować, skontaktuj się z twórcą.',

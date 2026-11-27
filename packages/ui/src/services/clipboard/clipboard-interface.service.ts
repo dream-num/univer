@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
 import { createIdentifier, Disposable, ILogService, Inject, LocaleService, Optional } from '@univerjs/core';
+import type { LocaleKey } from '../../locale/types';
 import { sanitizeParsedHtml } from '../../utils/html';
 import { INotificationService } from '../notification/notification.service';
 import { supportClipboardAPI } from './clipboard-utils';
@@ -382,7 +382,8 @@ function serializeSanitizedHtmlForClipboard(html: string): string {
         return sanitizedHtml;
     }
 
-    return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="ProgId" content="Excel.Sheet"><meta name="Generator" content="Univer"></head><body><!--StartFragment-->${sanitizedHtml}<!--EndFragment--></body></html>`;
+    // Restore the fixed Excel line-break rule after the sanitizer removes the original head.
+    return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="ProgId" content="Excel.Sheet"><meta name="Generator" content="Univer"><style>br { mso-data-placement: same-cell; }</style></head><body><!--StartFragment-->${sanitizedHtml}<!--EndFragment--></body></html>`;
 }
 
 function sanitizeHtmlNode(node: Node): Node | null {

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import type { KeyboardEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { focusClassName } from '../../helper/class-utilities';
+import { clsx } from '../../helper/clsx';
 
 interface IHueSliderProps {
     hsv: [number, number, number];
@@ -32,20 +35,19 @@ export function HueSlider({ hsv, onChange, onChanged }: IHueSliderProps) {
         const slider = sliderRef.current;
         if (!slider) return;
 
-        const thumbSize = thumbRef.current?.clientWidth ?? 0;
+        const thumbSize = thumbRef.current?.clientWidth || 16;
 
         const rect = slider.getBoundingClientRect();
         const maxX = rect.width - thumbSize;
         if (maxX <= 0) {
-            onChange(0, hsv[1], hsv[2]);
+            onChange(0, hsvRef.current[1], hsvRef.current[2]);
             return;
         }
 
-        const x = Math.max(0, Math.min(clientX - rect.left, maxX));
-
+        const x = Math.max(0, Math.min(clientX - rect.left - thumbSize / 2, maxX));
         const newHue = Math.round((x / maxX) * 360);
-        onChange(newHue, hsv[1], hsv[2]);
-    }, [hsv, onChange]);
+        onChange(newHue, hsvRef.current[1], hsvRef.current[2]);
+    }, [onChange]);
 
     const handlePointerMove = useCallback((e: PointerEvent) => {
         e.stopPropagation();
@@ -68,34 +70,63 @@ export function HueSlider({ hsv, onChange, onChanged }: IHueSliderProps) {
             window.addEventListener('pointermove', handlePointerMove);
             window.addEventListener('pointerup', handlePointerUp);
             window.addEventListener('mouseup', handlePointerUp);
+            window.addEventListener('pointercancel', handlePointerUp);
         }
 
         return () => {
             window.removeEventListener('pointermove', handlePointerMove);
             window.removeEventListener('pointerup', handlePointerUp);
             window.removeEventListener('mouseup', handlePointerUp);
+            window.removeEventListener('pointercancel', handlePointerUp);
         };
     }, [isDragging, handlePointerMove, handlePointerUp]);
 
-    const getThumbPosition = () => {
-        const safeHue = Math.min(Math.max(hsv[0], 0), 360);
-        const thumbSize = thumbRef.current?.clientWidth ?? 0;
-        const sliderWidth = sliderRef.current?.clientWidth ?? 0;
-        const thumbOffsetPercent = sliderWidth > 0 ? (thumbSize / sliderWidth) * 100 : 0;
+    const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+        const step = e.shiftKey ? 10 : 1;
+        const [h, s, v] = hsvRef.current;
+        let nextHue = h;
 
-        return `${(safeHue / 360) * (100 - thumbOffsetPercent)}%`;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+            nextHue = Math.min(360, h + step);
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+            nextHue = Math.max(0, h - step);
+        } else if (e.key === 'Home') {
+            nextHue = 0;
+        } else if (e.key === 'End') {
+            nextHue = 360;
+        } else {
+            return;
+        }
+
+        e.preventDefault();
+        onChange(nextHue, s, v);
+        onChanged?.(nextHue, s, v);
     };
+
+    const safeHue = Math.min(Math.max(hsv[0], 0), 360);
+    const ratio = safeHue / 360;
 
     return (
         <div
             data-u-comp="color-picker-hue-slider"
-            className="univer-relative univer-w-full univer-select-none"
+            className="univer-relative univer-w-full univer-touch-none univer-select-none"
         >
             <div
                 ref={sliderRef}
-                className={`
-                  univer-relative univer-h-2 univer-w-full univer-cursor-pointer univer-rounded-full univer-shadow-inner
-                `}
+                role="slider"
+                tabIndex={0}
+                aria-label="Hue"
+                aria-valuemin={0}
+                aria-valuemax={360}
+                aria-valuenow={Math.round(safeHue)}
+                className={clsx(
+                    `
+                      univer-relative univer-h-3 univer-w-full univer-cursor-pointer univer-rounded-full univer-ring-1
+                      univer-ring-inset univer-ring-gray-200
+                      dark:!univer-ring-gray-600
+                    `,
+                    focusClassName
+                )}
                 style={{
                     background: `linear-gradient(to right,
                         hsl(0, 100%, 50%),
@@ -107,25 +138,32 @@ export function HueSlider({ hsv, onChange, onChanged }: IHueSliderProps) {
                         hsl(360, 100%, 50%))`,
                 }}
                 onPointerDown={(e) => {
+                    e.stopPropagation();
                     setIsDragging(true);
                     calculateHue(e.clientX);
                 }}
+                onKeyDown={handleKeyDown}
             >
                 <div
                     ref={thumbRef}
                     data-u-comp="color-picker-hue-slider-thumb"
-                    className={`
-                      univer-absolute univer-top-1/2 univer-box-border univer-size-2 univer-rounded-full
-                      univer-bg-transparent univer-shadow-md univer-ring-2 univer-ring-gray-0
-                      univer-transition-transform univer-duration-75 univer-will-change-transform
-                    `}
+                    className={clsx(
+                        `
+                          univer-pointer-events-none univer-absolute univer-top-1/2 univer-box-border univer-size-4
+                          univer-rounded-full univer-border-2 univer-border-solid univer-border-gray-0 univer-shadow-md
+                          univer-ring-1 univer-ring-gray-400 univer-will-change-transform
+                          motion-reduce:univer-transition-none
+                          dark:!univer-ring-gray-900
+                        `,
+                        !isDragging && 'univer-transition-[left,transform] univer-duration-100'
+                    )}
                     style={{
-                        left: getThumbPosition(),
-                        transform: 'translateY(-50%)',
-                        transition: isDragging ? 'none' : 'all 0.1s ease-out',
+                        left: `calc(8px + (100% - 16px) * ${ratio})`,
+                        backgroundColor: `hsl(${safeHue}, 100%, 50%)`,
+                        transform: isDragging ? 'translate(-50%, -50%) scale(1.1)' : 'translate(-50%, -50%)',
                     }}
                 />
             </div>
         </div>
     );
-};
+}

@@ -156,3 +156,24 @@ it('accepts pasted hex colors with a hash and rejects incomplete alpha values', 
     fireEvent.change(view.getByRole('textbox', { name: 'A' }), { target: { value: '.' } });
     expect(onChange).not.toHaveBeenCalled();
 });
+
+it('expands pasted 3-digit hex, preserves decimal alpha drafting, and steps RGB/A channels with arrow keys', () => {
+    const onChange = vi.fn();
+    const view = render(<ColorInput hsv={[0, 100, 100]} alpha={0.5} format="rgba" onChange={onChange} />);
+
+    const hexInput = view.getByRole('textbox', { name: 'HEX' });
+    fireEvent.paste(hexInput, { clipboardData: { getData: () => '#f0a' } });
+    expect(hexInput).toHaveValue('ff00aa');
+    expect(onChange).toHaveBeenLastCalledWith(...hexToHsv('#ff00aa'));
+
+    const alphaInput = view.getByRole('textbox', { name: 'A' });
+    fireEvent.change(alphaInput, { target: { value: '0.' } });
+    expect(alphaInput).toHaveValue('0.');
+
+    fireEvent.keyDown(alphaInput, { key: 'ArrowUp', shiftKey: true });
+    expect(onChange).toHaveBeenLastCalledWith(0, 100, 100, 0.1);
+
+    const redInput = view.getByRole('textbox', { name: 'R' });
+    fireEvent.keyDown(redInput, { key: 'ArrowDown', shiftKey: true });
+    expect(redInput).toHaveValue('245');
+});

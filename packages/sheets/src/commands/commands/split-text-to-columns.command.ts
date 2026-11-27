@@ -15,11 +15,14 @@
  */
 
 import type { IAccessor, ICellData, IRange, Nullable } from '@univerjs/core';
+import { CommandType, ICommandService, IPermissionService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute } from '@univerjs/core';
 import type { IInsertColMutationParams, IRemoveColMutationParams } from '../../basics';
 import type { SplitDelimiterEnum } from '../../basics/split-range-text';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute } from '@univerjs/core';
 import { splitRangeText } from '../../basics/split-range-text';
+import { WorkbookEditablePermission } from '../../services/permission/permission-point/workbook/editable';
+import { WorkbookInsertColumnPermission } from '../../services/permission/permission-point/workbook/insert-column';
+import { WorksheetInsertColumnPermission } from '../../services/permission/permission-point/worksheet/insert-column';
 import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation } from '../mutations/remove-row-col.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
@@ -60,6 +63,16 @@ export const SplitTextToColumnsCommand = {
         // insert columns if needed
         const insertColCount = startColumn + maxLength + 1 - maxColumn;
         if (insertColCount > 0) {
+            const permissionService = accessor.get(IPermissionService);
+            const canInsertColumn = [
+                new WorkbookEditablePermission(unitId),
+                new WorkbookInsertColumnPermission(unitId),
+                new WorksheetInsertColumnPermission(unitId, subUnitId),
+            ].every((point) => permissionService.getPermissionPoint(point.id)?.value !== false);
+            if (!canInsertColumn) {
+                return false;
+            }
+
             const insertColParams: IInsertColMutationParams = {
                 unitId,
                 subUnitId,

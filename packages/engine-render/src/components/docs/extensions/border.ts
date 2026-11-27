@@ -15,9 +15,9 @@
  */
 
 import type { BorderStyleTypes, IBorderData, IBorderStyleData, IScale, Nullable } from '@univerjs/core';
+import { getColorStyle } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import type { UniverRenderingContext } from '../../../context';
-import { getColorStyle } from '@univerjs/core';
 import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
 import { Vector2 } from '../../../basics/vector2';
@@ -30,10 +30,6 @@ export class Border extends docExtension {
     override uKey = UNIQUE_KEY;
 
     override Z_INDEX = 50;
-
-    private _preBorderStyle: Nullable<BorderStyleTypes>;
-
-    private _preBorderColor = '';
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, glyph: IDocumentSkeletonGlyph) {
         const line = glyph.parent?.parent;
@@ -62,6 +58,9 @@ export class Border extends docExtension {
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
         const { spanStartPoint = Vector2.create(0, 0) } = this.extensionOffset;
+        // Canvas restores stroke styles after each glyph, so reuse them only in this saved state.
+        let previousStyle: BorderStyleTypes | null = null;
+        let previousColor = '';
 
         for (const type of borderCache.keys()) {
             const borderCacheValue = borderCache.get(type);
@@ -73,15 +72,15 @@ export class Border extends docExtension {
 
             const lineWidth = getLineWidth(style);
 
-            if (style !== this._preBorderStyle) {
+            if (style !== previousStyle) {
                 setLineType(ctx, style);
                 ctx.setLineWidthByPrecision(lineWidth);
-                this._preBorderStyle = style;
+                previousStyle = style;
             }
 
-            if (color !== this._preBorderColor) {
-                ctx.strokeStyle = color || COLOR_BLACK_RGB;
-                this._preBorderColor = color;
+            if (color !== previousColor) {
+                ctx.strokeStyle = color;
+                previousColor = color;
             }
 
             drawLineByBorderType(ctx, type as BORDER_TYPE, (lineWidth - 1) / 2 / precisionScale, {
@@ -93,11 +92,6 @@ export class Border extends docExtension {
         }
 
         ctx.restore();
-    }
-
-    override clearCache() {
-        this._preBorderStyle = null;
-        this._preBorderColor = '';
     }
 
     private _createBorderCache(borderData: IBorderData) {

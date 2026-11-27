@@ -169,11 +169,6 @@ const locale: typeof enUS = {
             formulaError: 'Formula errata',
             rangeError: 'Selezione non valida',
         },
-        permission: {
-            dialog: {
-                setStyleErr: 'L\'intervallo è protetto e non hai l\'autorizzazione per impostare gli stili. Per impostare gli stili, contatta il creatore.',
-            },
-        },
     },
 };
 

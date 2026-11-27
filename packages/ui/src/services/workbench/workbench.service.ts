@@ -55,9 +55,12 @@ export class WorkbenchService extends Disposable implements IWorkbenchService {
                 return;
             }
 
-            const unit = univerInstanceService.getUnit(unitId);
-            if (unit && isWorkbenchRootUnit(unitId, univerInstanceService.getUnitCreateOptions(unitId) ?? undefined)) {
-                this._setRootUnit(unitId, unit.type);
+            const options = univerInstanceService.getUnitCreateOptions(unitId);
+            const rootId = options?.workbenchHostUnitId ?? unitId;
+            const root = univerInstanceService.getUnit(rootId);
+            const rootOptions = rootId === unitId ? options : univerInstanceService.getUnitCreateOptions(rootId);
+            if (root && isWorkbenchRootUnit(rootId, rootOptions ?? undefined)) {
+                this._setRootUnit(rootId, root.type);
             }
         }));
 
@@ -104,5 +107,5 @@ export class WorkbenchService extends Disposable implements IWorkbenchService {
 }
 
 function isWorkbenchRootUnit(unitId: string, options?: ICreateUnitOptions): boolean {
-    return !isInternalEditorID(unitId) && !options?.skipAutoRender && !options?.embeddedRender;
+    return !options?.workbenchHostUnitId && !isInternalEditorID(unitId) && !options?.skipAutoRender && !options?.embeddedRender;
 }

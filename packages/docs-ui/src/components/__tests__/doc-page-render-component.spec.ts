@@ -16,7 +16,7 @@
 
 import type { IDocumentBody, IDocumentData } from '@univerjs/core';
 import { DocumentDataModel, DocumentFlavor, LocaleService, SpacingRule, Univer } from '@univerjs/core';
-import { Canvas, Documents, DocumentSkeleton, DocumentViewModel, DrawingGroupObject, Engine, Image, invalidateDocumentFontMetrics, MAIN_VIEW_PORT_KEY, Rect, Scene, setDocsTableRenderViewportProvider, Vector2, Viewport } from '@univerjs/engine-render';
+import { Canvas, Documents, DocumentSkeleton, DocumentViewModel, DrawingGroupObject, Engine, Image, invalidateDocumentFontMetrics, MAIN_VIEW_PORT_KEY, Rect, Scene, ScrollBar, setDocsTableRenderViewportProvider, Vector2, Viewport } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { genEmptyTable, genTableSource } from '../../commands/commands/table/table';
 import { DocPageRenderComponent } from '../doc-page-render-component';
@@ -209,6 +209,57 @@ describe('document page picking', () => {
         } finally {
             documents.dispose();
             rear.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it('skips offscreen tables while scrolling the full document page', () => {
+        const emptyTable = genEmptyTable(1, 1).dataStream;
+        const first = emptyTable.replace('\r', 'A\r');
+        const second = emptyTable.replace('\r', 'B\r');
+        const gap = 'gap\r'.repeat(70);
+        const secondStart = first.length + gap.length;
+        const dataStream = `${first}${gap}${second}\r\n`;
+        const bed = createParagraphLayoutTestBed('', {
+            documentStyle: { documentFlavor: DocumentFlavor.MODERN },
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream.matchAll(/\r/g), (match) => ({ startIndex: match.index, paragraphId: `p-${match.index}` })),
+                sectionBreaks: Array.from(dataStream.matchAll(/\n/g), (match) => ({ startIndex: match.index, sectionId: `s-${match.index}` })),
+                tables: [
+                    { tableId: 'first', startIndex: 0, endIndex: first.length },
+                    { tableId: 'second', startIndex: secondStart, endIndex: secondStart + second.length },
+                ],
+            },
+            tableSource: {
+                first: { ...genTableSource(1, 1, 120), tableId: 'first' },
+                second: { ...genTableSource(1, 1, 120), tableId: 'second' },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, localeService);
+        skeleton.calculate();
+        const documents = new DocPageRenderComponent('scrollable-doc-page', skeleton, { pageMarginLeft: 0, pageMarginTop: 0 });
+        scene.addObject(documents, 1);
+        scene.transformByState({ height: 10_000 });
+        const scrollbar = new ScrollBar(viewport);
+        const ctx = canvas.getContext();
+        const text = vi.spyOn(ctx, 'fillText');
+        try {
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const secondTable = page.skeTables.get('second')!;
+            expect(secondTable.top).toBeGreaterThan(viewport.height!);
+            for (const [scrollY, expected] of [[0, 'A'], [secondTable.top, 'B'], [0, 'A']] as const) {
+                text.mockClear();
+                viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: scrollY });
+                viewport.render(ctx, [documents]);
+                const tableText = text.mock.calls.map(([value]) => value).filter((value) => value === 'A' || value === 'B');
+                expect(tableText).toEqual([expected]);
+            }
+        } finally {
+            scrollbar.dispose();
+            documents.dispose();
             skeleton.dispose();
             bed.viewModel.dispose();
             bed.dataModel.dispose();

@@ -16,7 +16,7 @@
 
 export interface IBusinessComponentProps {
     onChange: (result: string) => void;
-    onActionChange: (action: () => string | null) => void;
+    onActionChange: (getPattern: () => string | null, onConfirm?: () => void) => void;
     defaultValue: number;
     defaultPattern: string;
 }

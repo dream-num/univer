@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IFilterColumn } from '@univerjs/sheets-filter';
 import { BooleanNumber } from '@univerjs/core';
 import { CustomFilterOperator } from '@univerjs/sheets-filter';
 import { describe, expect, it } from 'vitest';
@@ -21,6 +22,22 @@ import { FilterConditionItems } from '../conditions';
 import { ExtendCustomFilterOperator } from '../extended-operators';
 
 describe('test "FilterConditionItems"', () => {
+    it.each([
+        { pattern: 'a~*', condition: FilterConditionItems.EQUALS, value: 'a~*' },
+        { pattern: '*a~*', condition: FilterConditionItems.ENDS_WITH, value: 'a~*' },
+        { pattern: '*a~~*', condition: FilterConditionItems.TEXT_CONTAINS, value: 'a~~' },
+        { pattern: 'a~~*', condition: FilterConditionItems.STARTS_WITH, value: 'a~~' },
+        { pattern: '**', condition: FilterConditionItems.EQUALS, value: '**' },
+        { pattern: '*a~*', condition: FilterConditionItems.NOT_EQUAL, value: '*a~*', operator: CustomFilterOperator.NOT_EQUALS },
+        { pattern: '*a~~*', condition: FilterConditionItems.DOES_NOT_CONTAIN, value: 'a~~', operator: CustomFilterOperator.NOT_EQUALS },
+    ])('reopens $pattern without changing its meaning or saved pattern', ({ pattern, condition, value, operator }) => {
+        const column: Omit<IFilterColumn, 'colId'> = { customFilters: { customFilters: [{ val: pattern, operator }] } };
+        const [restored, params] = FilterConditionItems.testMappingFilterColumn(column);
+        expect(restored).toBe(condition);
+        expect(params).toEqual({ operator1: condition.operator, val1: value });
+        expect(restored.mapToFilterColumn(params)).toEqual(column);
+    });
+
     describe('test utils work as expected in different condition format situations', () => {
         describe('test NONE condition', () => {
             it('should load NONE condition from empty filter column', () => {

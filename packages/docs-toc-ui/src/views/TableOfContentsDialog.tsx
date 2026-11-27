@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { Radio, RadioGroup } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../locale/types';
 
 export const TABLE_OF_CONTENTS_DIALOG_COMPONENT = 'doc.table-of-contents-dialog';
 
@@ -36,7 +36,7 @@ export function TableOfContentsDialog(props: ITableOfContentsDialogProps) {
     ] as const;
 
     return (
-        <div className="univer-grid univer-gap-4 univer-py-2" data-testid="table-of-contents-update-dialog">
+        <div className="univer-grid univer-gap-4">
             <p className="univer-m-0 univer-text-sm">
                 {localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.updateHint')}
             </p>

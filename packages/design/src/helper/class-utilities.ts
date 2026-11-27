@@ -30,7 +30,7 @@ export const divideYClassName = 'univer-divide-gray-200 dark:!univer-divide-gray
 export const divideXClassName = 'univer-divide-gray-200 dark:!univer-divide-gray-600 univer-divide-x univer-divide-y-0 univer-divide-solid';
 export const resetButtonClassName = 'univer-m-0 univer-flex univer-appearance-none univer-items-center univer-justify-center univer-border-0 univer-bg-transparent univer-p-0 univer-leading-none univer-outline-none univer-cursor-pointer';
 
-export const focusClassName = 'focus:univer-outline focus:univer-outline-2 focus:univer-outline-offset-2 focus:univer-outline-primary-600 dark:focus:!univer-outline-primary-300';
+export const focusClassName = 'univer-outline-none focus-visible:univer-outline focus-visible:univer-outline-2 focus-visible:univer-outline-offset-2 focus-visible:univer-outline-primary-600 dark:focus-visible:!univer-outline-primary-300';
 
 export const inputStateClassName = `
   focus:!univer-border-primary-600 focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-50

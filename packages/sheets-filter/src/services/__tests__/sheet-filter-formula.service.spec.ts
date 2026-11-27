@@ -22,10 +22,14 @@ import { SheetsFilterService } from '../sheet-filter.service';
 
 describe('SheetsFilterFormulaService', () => {
     let dirtyConverters: Map<string, { getDirtyData: (commandInfo: unknown) => unknown }>;
-    let rowFilteredCallback: ((unitId: string, subUnitId: string, row: number) => boolean) | undefined;
+    let rowFilteredCallback: ((unitId: string, subUnitId: string, row: number, forSubtotal?: boolean) => boolean) | undefined;
+    let active: boolean;
+    let removed: boolean;
 
     beforeEach(() => {
         dirtyConverters = new Map();
+        active = true;
+        removed = false;
         class TestActiveDirtyManagerService {
             register = (commandId: string, converter: never) => dirtyConverters.set(commandId, converter);
         }
@@ -40,11 +44,11 @@ describe('SheetsFilterFormulaService', () => {
         }
 
         class TestSheetsFilterService {
-            getFilterModel = vi.fn(() => ({ getRange: () => ({ startRow: 2, endRow: 5 }), isRowFiltered: (row: number) => row === 3 }));
+            getFilterModel = vi.fn(() => removed ? null : { hasCriteria: active, getRange: () => ({ startRow: 2, endRow: 5 }), isRowFiltered: (row: number) => row === 3 });
         }
 
         class TestUniverInstanceService {
-            getUnit = () => ({ getSheetBySheetId: () => ({ getColumnCount: () => 10 }) });
+            getUnit = () => ({ getSheetBySheetId: () => ({ getColumnCount: () => 10, getRowRawVisible: (row: number) => row !== 7, getConfig: () => ({ rowData: { 7: { hd: 1 } } }) }) });
         }
 
         const injector = new Injector();
@@ -64,6 +68,10 @@ describe('SheetsFilterFormulaService', () => {
                 unitId: 'book-1',
                 sheetId: 'sheet-1',
                 range: { startRow: 2, startColumn: 0, endRow: 5, endColumn: 9 },
+            }, {
+                unitId: 'book-1',
+                sheetId: 'sheet-1',
+                range: { startRow: 7, startColumn: 0, endRow: 7, endColumn: 9 },
             }],
             clearDependencyTreeCache: { 'book-1': { 'sheet-1': '1' } },
         });
@@ -72,5 +80,17 @@ describe('SheetsFilterFormulaService', () => {
     it('registers formula row-filter lookups against the active sheet filter model', () => {
         expect(rowFilteredCallback?.('book-1', 'sheet-1', 3)).toBe(true);
         expect(rowFilteredCallback?.('book-1', 'sheet-1', 4)).toBe(false);
+        expect(rowFilteredCallback?.('book-1', 'sheet-1', 7)).toBe(false);
+        expect(rowFilteredCallback?.('book-1', 'sheet-1', 7, true)).toBe(true);
+        active = false;
+        expect(rowFilteredCallback?.('book-1', 'sheet-1', 7, true)).toBe(false);
+    });
+
+    it('invalidates both row spans when the worksheet filter is removed', () => {
+        removed = true;
+        const converter = [...dirtyConverters.values()][0];
+        expect(converter.getDirtyData({
+            params: { unitId: 'book-1', subUnitId: 'sheet-1', removedFilterRange: { startRow: 2, endRow: 5 } },
+        })).toMatchObject({ dirtyRanges: [{ range: { startRow: 2, endRow: 5 } }, { range: { startRow: 7, endRow: 7 } }] });
     });
 });

@@ -15,12 +15,14 @@
  */
 
 import type { IMouseEvent, IPointerEvent, IShapeProps, UniverRenderingContext2D } from '@univerjs/engine-render';
-import type { IOpenTableFilterPanelOperationParams } from '../../commands/operations/open-table-filter-dialog.opration';
-import { ICommandService } from '@univerjs/core';
-import { Shape } from '@univerjs/engine-render';
+import { ICommandService, IUniverInstanceService, Workbook } from '@univerjs/core';
+import { getFocusedRenderForUnit, IRenderManagerService, Shape } from '@univerjs/engine-render';
+import { drawCanvasIcon } from '@univerjs/icons-svg';
 import { SheetsTableButtonStateEnum } from '@univerjs/sheets-table';
-import { OpenTableFilterPanelOperation } from '../../commands/operations/open-table-filter-dialog.opration';
-import { filterPartial } from './icons';
+import type {
+    IRequestOpenTableFilterPanelOperationParams,
+} from '../../commands/operations/open-table-filter-dialog.opration';
+import { RequestOpenTableFilterPanelOperation } from '../../commands/operations/open-table-filter-dialog.opration';
 
 export const FILTER_ICON_SIZE = 16;
 export const FILTER_ICON_PADDING = 1;
@@ -48,12 +50,14 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
     private _hoverIconColor = '#202124';
 
     private _hovered = false;
-    private _filteredIconPath: Path2D | null = null;
+    private _openTimer: ReturnType<typeof setTimeout> | undefined;
 
     constructor(
         key: string,
         props: ISheetsTableFilterButtonShapeProps,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super(key, props);
 
@@ -63,6 +67,12 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
         this.onPointerDown$.subscribeEvent((evt) => this.onPointerDown(evt));
         this.onPointerEnter$.subscribeEvent(() => this.onPointerEnter());
         this.onPointerLeave$.subscribeEvent(() => this.onPointerLeave());
+    }
+
+    override dispose(): void {
+        clearTimeout(this._openTimer);
+        this._openTimer = undefined;
+        super.dispose();
     }
 
     setShapeProps(props: Partial<ISheetsTableFilterButtonShapeProps>): void {
@@ -126,53 +136,44 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
         const hasFilter = buttonState === SheetsTableButtonStateEnum.FilteredSortNone
             || buttonState === SheetsTableButtonStateEnum.FilteredSortAsc
             || buttonState === SheetsTableButtonStateEnum.FilteredSortDesc;
-        if (hasFilter) {
-            this._filteredIconPath ??= new Path2D(filterPartial[0]);
-            ctx.fillStyle = iconColor;
-            ctx.fill(this._filteredIconPath);
-        } else {
-            this._drawChevron(ctx, iconColor);
-        }
-        ctx.restore();
-    }
-
-    private _drawChevron(ctx: UniverRenderingContext2D, color: string): void {
-        const centerX = FILTER_ICON_SIZE / 2;
-        const centerY = FILTER_ICON_SIZE / 2;
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.8;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.moveTo(centerX - 4.5, centerY - 2.5);
-        ctx.lineTo(centerX, centerY + 2);
-        ctx.lineTo(centerX + 4.5, centerY - 2.5);
-        ctx.stroke();
+        drawCanvasIcon(ctx, hasFilter ? 'filter-applied-icon' : 'more-down-icon', 0, 0, FILTER_ICON_SIZE, iconColor);
         ctx.restore();
     }
 
     onPointerDown(evt: IPointerEvent | IMouseEvent): void {
         // Right click not trigger this event.
-        if (evt.button === 2) {
+        if (evt.button === 2 || this._disposed) {
             return;
         }
 
-        const { row, col, unitId, subUnitId, tableId } = this._filterParams!;
-        if (!this._commandService.hasCommand(OpenTableFilterPanelOperation.id)) {
+        const filterParams = this._filterParams!;
+        const { row, col, unitId, subUnitId, tableId } = filterParams;
+        if (!this._commandService.hasCommand(RequestOpenTableFilterPanelOperation.id)) {
             return;
         }
 
-        setTimeout(() => {
-            const cmdParams: IOpenTableFilterPanelOperationParams = {
+        const scene = this.getScene();
+        clearTimeout(this._openTimer);
+        this._openTimer = setTimeout(() => {
+            this._openTimer = undefined;
+            const render = getFocusedRenderForUnit(this._renderManagerService, unitId);
+            const unit = this._univerInstanceService.getFocusedUnit();
+            if (this._disposed || this._filterParams !== filterParams || (scene && (
+                !(unit instanceof Workbook) || unit.getUnitId() !== unitId
+                || unit.getActiveSheet()?.getSheetId() !== subUnitId || this.getScene() !== scene
+                || render?.scene !== scene
+            ))) {
+                return;
+            }
+            const cmdParams: IRequestOpenTableFilterPanelOperationParams = {
                 row,
                 col,
                 unitId,
                 subUnitId,
                 tableId,
+                renderId: render?.renderId ?? unitId,
             };
-            this._commandService.executeCommand(OpenTableFilterPanelOperation.id, cmdParams);
+            return this._commandService.executeCommand(RequestOpenTableFilterPanelOperation.id, cmdParams);
         }, 200);
     }
 

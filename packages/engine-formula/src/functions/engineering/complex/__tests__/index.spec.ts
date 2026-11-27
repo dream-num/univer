@@ -35,7 +35,7 @@ describe('Test complex function', () => {
 
             const iNum2 = NumberValueObject.create(0);
             const result2 = testFunction.calculate(realNum, iNum2, suffix);
-            expect(result2.getValue()).toBe(3);
+            expect(result2.getValue()).toBe('3');
         });
 
         it('Formats a tiny real part like Excel', () => {

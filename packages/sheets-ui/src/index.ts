@@ -182,6 +182,7 @@ export {
     getCurrentExclusiveRangeInterest$,
     getCurrentRangeDisable$,
     getObservableWithExclusiveRange$,
+    getWorkbookPermissionDisable$,
 } from './menu/menu-util';
 export { menuSchema as SheetsUIMenuSchema } from './menu/schema';
 export { UniverSheetsMobileUIPlugin } from './mobile-plugin';

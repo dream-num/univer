@@ -151,6 +151,7 @@ const locale: typeof enUS = {
                 formulas: 'Vzorce',
                 rules: 'Pravidlá',
                 organization: 'Usporiadanie údajov',
+                analysis: 'Analýza údajov',
                 display: 'Zobrazenie',
                 visibility: 'Viditeľnosť',
             },

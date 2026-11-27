@@ -24,6 +24,8 @@ export class Sum extends BaseFunction {
 
     override maxParams = 255;
 
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
+
     override calculate(...variants: BaseValueObject[]) {
         let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         for (let i = 0; i < variants.length; i++) {
@@ -56,7 +58,7 @@ export class Sum extends BaseFunction {
         return accumulatorAll;
     }
 
-    private _legacyImplicitDerivedArray(variant: BaseValueObject): BaseValueObject {
+    protected _legacyImplicitDerivedArray(variant: BaseValueObject): BaseValueObject {
         if (!variant.isArray()) {
             return variant;
         }

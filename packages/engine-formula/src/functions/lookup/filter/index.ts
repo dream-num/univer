@@ -16,8 +16,10 @@
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { BooleanValueObject, NullValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Filter extends BaseFunction {
@@ -26,7 +28,7 @@ export class Filter extends BaseFunction {
     override maxParams = 3;
 
     override calculate(array: BaseValueObject, include: BaseValueObject, ifEmpty?: BaseValueObject) {
-        const _ifEmpty = ifEmpty ?? ErrorValueObject.create(ErrorType.CALC);
+        const _ifEmpty = ifEmpty == null || ifEmpty.isNull() ? ErrorValueObject.create(ErrorType.CALC) : ifEmpty;
 
         if (array.isError()) {
             return array;
@@ -42,11 +44,9 @@ export class Filter extends BaseFunction {
         const includeRowCount = include.isArray() ? (include as ArrayValueObject).getRowCount() : 1;
         const includeColumnCount = include.isArray() ? (include as ArrayValueObject).getColumnCount() : 1;
 
-        if (includeRowCount > 1 && includeColumnCount > 1) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        if ((includeRowCount === 1 && includeColumnCount !== arrayColumnCount) || (includeColumnCount === 1 && includeRowCount !== arrayRowCount)) {
+        const filterColumns = includeRowCount === 1 && includeColumnCount === arrayColumnCount;
+        const filterRows = includeColumnCount === 1 && includeRowCount === arrayRowCount;
+        if (!filterColumns && !filterRows) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -54,41 +54,28 @@ export class Filter extends BaseFunction {
             return this._getResultArrayByR1C1(array, include, _ifEmpty);
         }
 
-        if (includeRowCount === 1) {
-            if (includeColumnCount !== arrayColumnCount) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
+        return filterColumns
+            ? this._getResultArrayByR1(arrayRowCount, arrayColumnCount, array, include, _ifEmpty)
+            : this._getResultArrayByC1(arrayRowCount, arrayColumnCount, array, include, _ifEmpty);
+    }
 
-            return this._getResultArrayByR1(arrayRowCount, arrayColumnCount, array, include, _ifEmpty);
+    private _getIncludeValue(include: BaseValueObject, row: number, column: number): BaseValueObject {
+        const value = include.isArray()
+            ? (include as ArrayValueObject).getValueOrDefault(row, column) ?? NullValueObject.create()
+            : include;
+        if (!value.isString()) {
+            return value;
         }
 
-        if (includeColumnCount === 1) {
-            if (includeRowCount !== arrayRowCount) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            return this._getResultArrayByC1(arrayRowCount, arrayColumnCount, array, include, _ifEmpty);
+        const text = String(value.getValue()).toUpperCase();
+        if (text === 'TRUE' || text === 'FALSE') {
+            return BooleanValueObject.create(text === 'TRUE');
         }
-
-        return _ifEmpty;
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     private _getResultArrayByR1C1(array: BaseValueObject, include: BaseValueObject, ifEmpty: BaseValueObject): BaseValueObject {
-        let _array = array;
-        let _include = include;
-
-        if (_array.isArray()) {
-            _array = (_array as ArrayValueObject).get(0, 0) as BaseValueObject;
-        }
-
-        if (_include.isArray()) {
-            _include = (_include as ArrayValueObject).get(0, 0) as BaseValueObject;
-        }
-
-        if (_include.isString()) {
-            _include = _include.convertToNumberObjectValue();
-        }
-
+        const _include = this._getIncludeValue(include, 0, 0);
         if (_include.isError()) {
             return _include;
         }
@@ -96,7 +83,7 @@ export class Filter extends BaseFunction {
         const includeValue = +_include.getValue();
 
         if (includeValue) {
-            return _array;
+            return expandArrayValueObject(1, 1, array);
         }
 
         return ifEmpty;
@@ -106,14 +93,9 @@ export class Filter extends BaseFunction {
         const resultArray: Array<Array<BaseValueObject>> = [];
 
         for (let c = 0; c < arrayColumnCount; c++) {
-            let includeObject = (include as ArrayValueObject).get(0, c) as BaseValueObject;
-
-            if (includeObject.isString()) {
-                includeObject = includeObject.convertToNumberObjectValue();
-            }
-
+            const includeObject = this._getIncludeValue(include, 0, c);
             if (includeObject.isError()) {
-                return includeObject as ErrorValueObject;
+                return includeObject;
             }
 
             const includeValue = +includeObject.getValue();
@@ -152,12 +134,7 @@ export class Filter extends BaseFunction {
         const resultArray: Array<Array<BaseValueObject>> = [];
 
         for (let r = 0; r < arrayRowCount; r++) {
-            let includeObject = (include as ArrayValueObject).get(r, 0) as BaseValueObject;
-
-            if (includeObject.isString()) {
-                includeObject = includeObject.convertToNumberObjectValue();
-            }
-
+            const includeObject = this._getIncludeValue(include, r, 0);
             if (includeObject.isError()) {
                 return includeObject;
             }

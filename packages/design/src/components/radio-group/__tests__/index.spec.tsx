@@ -15,7 +15,7 @@
  */
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Radio } from '../../radio/Radio';
 import { RadioGroup } from '../RadioGroup';
 
@@ -41,5 +41,28 @@ describe('RadioGroup', () => {
         fireEvent.click(screen.getByText('1'));
 
         expect(active).toBe('1');
+    });
+
+    it('assigns a shared name, radiogroup role, and preserves per-item disabled state', () => {
+        const onChange = vi.fn();
+        render(
+            <RadioGroup aria-label="Mode" direction="vertical" value="a" onChange={onChange}>
+                <Radio value="a">Option A</Radio>
+                <Radio value="b" disabled>Option B</Radio>
+            </RadioGroup>
+        );
+
+        const groupEl = screen.getByRole('radiogroup', { name: 'Mode' });
+        expect(groupEl.getAttribute('aria-orientation')).toBe('vertical');
+
+        const optionA = screen.getByLabelText('Option A') as HTMLInputElement;
+        const optionB = screen.getByLabelText('Option B') as HTMLInputElement;
+        expect(optionA.name).toBeTruthy();
+        expect(optionA.name).toBe(optionB.name);
+        expect(optionA.checked).toBe(true);
+        expect(optionB.disabled).toBe(true);
+
+        fireEvent.click(optionB);
+        expect(onChange).not.toHaveBeenCalled();
     });
 });

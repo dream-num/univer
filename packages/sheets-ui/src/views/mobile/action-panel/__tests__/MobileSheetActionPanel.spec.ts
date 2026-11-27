@@ -310,6 +310,35 @@ describe('mobile sheet action panel visibility', () => {
         }
     });
 
+    it('applies updated quick and detailed presets while the number format drawer stays open', async () => {
+        const ribbon = createNumberFormatRibbon();
+        const item = ribbon[0].children![0].children![0].item as MobileNumberFormatItem;
+        const initial = item.mobileNumberFormat!;
+        const preset = (value: string) => ({
+            ...initial,
+            quickOptions: [{ label: 'Date', commandId: TEST_NUMFMT_COMMAND_ID, value }],
+            detailOptions: [{ label: 'Short date', value }],
+        });
+        const presets = new BehaviorSubject(preset('m/d/yyyy;@'));
+        item.mobileNumberFormat$ = presets;
+        const { commandService, container, root, univer } = await renderMobileSheetActionPanel(ribbon);
+        const execute = vi.fn(() => true);
+        commandService.registerCommand({ id: TEST_NUMFMT_COMMAND_ID, type: CommandType.COMMAND, handler: execute });
+        try {
+            for (const detailed of [false, true]) {
+                act(() => presets.next(preset('m/d/yyyy;@')));
+                clickButton(container, 'Open sheet tools');
+                clickButton(container, 'Style');
+                if (detailed) clickButton(container, 'More formats');
+                act(() => presets.next(preset('dd/mm/yyyy;@')));
+                clickButton(container, detailed ? 'Short date' : 'Date');
+                expect(execute.mock.lastCall).toContainEqual(expect.objectContaining({ value: 'dd/mm/yyyy;@' }));
+            }
+        } finally {
+            disposeRenderedPanel(root, container, univer);
+        }
+    });
+
     it('closes the sheet drawer after selecting a detailed number format', async () => {
         const execute = vi.fn(() => true);
         const { commandService, container, root, univer } = await renderMobileSheetActionPanel(createNumberFormatRibbon());

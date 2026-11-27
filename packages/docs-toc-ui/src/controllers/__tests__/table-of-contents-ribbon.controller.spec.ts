@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import { CustomRangeType, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
+import { CustomRangeType, DocumentFlavor, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, UniverDocsPlugin } from '@univerjs/docs';
 import { DesktopRibbonService, IMenuManagerService, IRibbonService, MenuManagerService } from '@univerjs/ui';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -27,7 +27,7 @@ describe('TableOfContentsRibbonController', () => {
 
     afterEach(() => univer?.dispose());
 
-    function setup() {
+    function setup(documentFlavor = DocumentFlavor.TRADITIONAL) {
         univer = new Univer();
         univer.registerPlugin(UniverDocsPlugin);
         const injector = univer.__getInjector();
@@ -48,7 +48,7 @@ describe('TableOfContentsRibbonController', () => {
                     properties: { fieldType: 'TOC' },
                 }],
             },
-            documentStyle: {},
+            documentStyle: { documentFlavor },
         });
         injector.get(IUniverInstanceService).focusUnit('doc-1');
         const selection = injector.get(DocSelectionManagerService);
@@ -85,6 +85,13 @@ describe('TableOfContentsRibbonController', () => {
         select(8);
         expect(tabs[tabs.length - 1]).toContain(DOC_TABLE_OF_CONTENTS_RIBBON_TAB);
         controller.dispose();
+        expect(tabs[tabs.length - 1]).not.toContain(DOC_TABLE_OF_CONTENTS_RIBBON_TAB);
+    });
+
+    it('does not activate contextual controls for imported contents in modern docs', () => {
+        const { select, tabs, active } = setup(DocumentFlavor.MODERN);
+        select(8);
+        expect(active).not.toContain(DOC_TABLE_OF_CONTENTS_RIBBON_TAB);
         expect(tabs[tabs.length - 1]).not.toContain(DOC_TABLE_OF_CONTENTS_RIBBON_TAB);
     });
 });

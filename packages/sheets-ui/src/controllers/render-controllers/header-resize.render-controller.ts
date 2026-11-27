@@ -38,6 +38,7 @@ import {
     Inject,
     InterceptorManager,
     RANGE_TYPE,
+    Tools,
 } from '@univerjs/core';
 import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import {
@@ -357,13 +358,9 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
                 const { columnTotalWidth, rowHeaderWidthAndMarginLeft, rowTotalHeight, columnHeaderHeightAndMarginTop } = skeleton;
 
-                const shapeWidth = canvasMaxWidth > columnTotalWidth + rowHeaderWidthAndMarginLeft
-                    ? canvasMaxWidth
-                    : columnTotalWidth + rowHeaderWidthAndMarginLeft;
+                const shapeWidth = Math.max(canvasMaxWidth / scaleX, columnTotalWidth + rowHeaderWidthAndMarginLeft);
 
-                const shapeHeight = canvasMaxHeight > rowTotalHeight + columnHeaderHeightAndMarginTop
-                    ? canvasMaxHeight
-                    : rowTotalHeight + columnHeaderHeightAndMarginTop;
+                const shapeHeight = Math.max(canvasMaxHeight / scaleY, rowTotalHeight + columnHeaderHeightAndMarginTop);
 
                 const scale = Math.max(scaleX, scaleY);
 
@@ -417,12 +414,19 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                         isStartMove = true;
                     }
 
-                    if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                        if (moveChangeY > canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY) {
-                            moveChangeY = canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY;
-                        }
+                    // Canvas and scrollbar sizes are in screen pixels, while cell offsets and scroll values are in
+                    // scene units, so convert the visible area to scene units before clamping.
+                    // https://github.com/dream-num/univer/issues/5483
+                    const visibleSceneBottom = (canvasMaxHeight - scrollBarHorizontalHeight) / scaleY + scrollXY.y;
+                    const visibleSceneRight = (canvasMaxWidth - scrollBarVerticalWidth) / scaleX + scrollXY.x;
 
-                        moveChangeY = Math.max(moveChangeY, -(cell.endY - cell.startY));
+                    // Keep the growth limit at zero for an edge that is already outside the viewport.
+                    if (initialType === HEADER_RESIZE_TYPE.ROW) {
+                        moveChangeY = Tools.clamp(
+                            moveChangeY,
+                            cell.startY - cell.endY,
+                            Math.max(0, visibleSceneBottom - cell.endY)
+                        );
 
                         if (isStartMove) {
                             this._resizeHelperShape?.transformByState({
@@ -438,11 +442,11 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                             scene.setCursor(CURSOR_TYPE.ROW_RESIZE);
                         }
                     } else {
-                        if (moveChangeX > canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX) {
-                            moveChangeX = canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX;
-                        }
-
-                        moveChangeX = Math.max(moveChangeX, -(cell.endX - cell.startX));
+                        moveChangeX = Tools.clamp(
+                            moveChangeX,
+                            cell.startX - cell.endX,
+                            Math.max(0, visibleSceneRight - cell.endX)
+                        );
 
                         if (isStartMove) {
                             this._resizeHelperShape?.transformByState({

@@ -39,7 +39,7 @@ const locale: typeof enUS = {
             add: '링크 삽입',
         },
         permission: {
-            hyperLinkErr: '링크를 삽입할 권한이 없습니다.',
+            editErr: '해당 범위는 보호되어 있어 편집 권한이 없습니다. 편집하려면 작성자에게 문의하세요.',
         },
         message: {
             noSheet: '대상 워크시트가 삭제되었습니다',

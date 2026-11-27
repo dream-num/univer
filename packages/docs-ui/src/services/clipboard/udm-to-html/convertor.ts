@@ -17,7 +17,6 @@
 import type { IDocumentBody, IDocumentData, IParagraph, ITable, ITableCell, ITextRun, ITextStyle } from '@univerjs/core';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { DataStreamTreeNode } from '@univerjs/engine-render';
-import type { DocHtmlExportService } from './doc-html-export.service';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -31,9 +30,11 @@ import {
     ImageSourceType,
     NamedStyleType,
     PresetListType,
+    resolveDocumentParagraphBullet,
     Tools,
 } from '@univerjs/core';
 import { parseDataStreamToTree } from '@univerjs/engine-render';
+import type { DocHtmlExportService } from './doc-html-export.service';
 
 const DEFAULT_CLIPBOARD_FONT_FAMILY = 'Arial';
 function stripFieldBoundaryMarkers(value: string): string {
@@ -463,7 +464,7 @@ function renderHeadingParagraphHtml(paragraph: IParagraph, innerHtml: string, st
 }
 
 function renderListParagraphItemHtml(doc: IDocumentData, paragraph: IParagraph, innerHtml: string, style: string[]): { tag: 'ol' | 'ul'; level: number; listType: string; listStyle: string | null; html: string } | null {
-    const bullet = paragraph.bullet;
+    const bullet = resolveDocumentParagraphBullet(doc, paragraph);
     if (!bullet) {
         return null;
     }

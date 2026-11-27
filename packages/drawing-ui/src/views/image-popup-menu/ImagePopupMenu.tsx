@@ -30,7 +30,11 @@ import {
     AutofillDoubleIcon,
     ChartIcon,
     MoreDownIcon,
-    TextWrapShapeIcon,
+    WrapBehindTextIcon,
+    WrapInFrontOfTextIcon,
+    WrapInlineIcon,
+    WrapSquareIcon,
+    WrapTopBottomIcon,
 } from '@univerjs/icons';
 import { IconManager, useDependency } from '@univerjs/ui';
 import { useState } from 'react';
@@ -282,11 +286,10 @@ function ToolbarDropdownButton<T extends string | number>(props: {
             }}
             overlay={(
                 <div
-                    className={`
-                      univer-min-w-32 univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
-                      univer-bg-gray-0 univer-p-1 univer-shadow-lg
-                      dark:!univer-border-gray-700 dark:!univer-bg-gray-900
-                    `}
+                    className="
+                      univer-min-w-32 univer-p-1
+                      dark:!univer-bg-gray-900
+                    "
                 >
                     {props.options.map((option) => (
                         <button
@@ -359,27 +362,27 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.inline'),
             value: TextWrappingStyle.INLINE,
-            icon: <TextWrapShapeIcon />,
+            icon: <WrapInlineIcon />,
         },
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.square'),
             value: TextWrappingStyle.WRAP_SQUARE,
-            icon: <TextWrapShapeIcon />,
+            icon: <WrapSquareIcon />,
         },
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.topAndBottom'),
             value: TextWrappingStyle.WRAP_TOP_AND_BOTTOM,
-            icon: <TextWrapShapeIcon />,
+            icon: <WrapTopBottomIcon />,
         },
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.behindText'),
             value: TextWrappingStyle.BEHIND_TEXT,
-            icon: <TextWrapShapeIcon />,
+            icon: <WrapBehindTextIcon />,
         },
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.inFrontText'),
             value: TextWrappingStyle.IN_FRONT_OF_TEXT,
-            icon: <TextWrapShapeIcon />,
+            icon: <WrapInFrontOfTextIcon />,
         },
     ];
 

@@ -20,6 +20,22 @@ import type {
     IRange,
     Workbook,
 } from '@univerjs/core';
+import {
+    createInterceptorKey,
+    Dimension,
+    Disposable,
+    DisposableCollection,
+    ICommandService,
+    Inject,
+    Injector,
+    InterceptorManager,
+    IUniverInstanceService,
+    Rectangle,
+    toDisposable,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { filter, take } from 'rxjs';
 import type {
     IAddWorksheetMergeMutationParams,
     IInsertColMutationParams,
@@ -39,22 +55,6 @@ import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../commands
 import type { IMoveRowsMutationParams } from '../commands/mutations/move-rows-cols.mutation';
 import type { ISetWorksheetActiveOperationParams } from '../commands/operations/set-worksheet-active.operation';
 import type { EffectRefRangeParams } from '../services/ref-range/type';
-import {
-    createInterceptorKey,
-    Dimension,
-    Disposable,
-    DisposableCollection,
-    ICommandService,
-    Inject,
-    Injector,
-    InterceptorManager,
-    IUniverInstanceService,
-    Rectangle,
-    toDisposable,
-    Tools,
-    UniverInstanceType,
-} from '@univerjs/core';
-import { filter, take } from 'rxjs';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
 import { DeleteRangeMoveLeftCommand } from '../commands/commands/delete-range-move-left.command';
@@ -786,7 +786,7 @@ export class MergeCellController extends Disposable {
         const redos = [{ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams }];
         const preUndos = [{ id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams }];
         const undos = [{ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams }];
-        return { preUndos, undos, preRedos, redos };
+        return { preUndos, undos, preRedos, redos, rollbackMutations: [undos, preUndos] };
     }
 
     private _handleInsertRangeMoveRightCommand(

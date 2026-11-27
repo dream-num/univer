@@ -93,7 +93,7 @@ export function createChartDrawingTestBed(snapshot?: IWorkbookData, initial?: IS
     onTestFinished(() => {
         vi.useRealTimers();
     });
-    // Happy DOM provides no canvas backend; document, render, selection and drawing providers stay real.
+    // jsdom provides no canvas backend; document, render, selection and drawing providers stay real.
     const canvas = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
         return new Proxy({
             canvas: this,

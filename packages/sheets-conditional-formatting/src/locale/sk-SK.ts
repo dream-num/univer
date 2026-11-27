@@ -24,6 +24,11 @@ const locale: typeof enUS = {
             mark: 'Značka',
             rank: 'Poradie',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'Rozsah je chránený a nemáte oprávnenie nastavovať štýly. Ak chcete nastavovať štýly, kontaktujte autora.',
+            },
+        },
     },
 };
 

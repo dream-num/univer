@@ -40,12 +40,14 @@ import { Offset } from './offset';
 import { Row } from './row';
 import { Rows } from './rows';
 // import { Rtd } from './rtd';
+import { Single } from './single';
 import { Sort } from './sort';
 import { Sortby } from './sortby';
 import { Take } from './take';
 import { Tocol } from './tocol';
 import { Torow } from './torow';
 import { Transpose } from './transpose';
+import { Trimrange, TrimReferenceOperator } from './trimrange';
 import { Unique } from './unique';
 import { Vlookup } from './vlookup';
 import { Vstack } from './vstack';
@@ -80,12 +82,17 @@ export const functionLookup = [
     // [Rtd, FUNCTION_NAMES_LOOKUP.RTD],
     [Row, FUNCTION_NAMES_LOOKUP.ROW],
     [Rows, FUNCTION_NAMES_LOOKUP.ROWS],
+    [Single, FUNCTION_NAMES_LOOKUP.SINGLE],
     [Sort, FUNCTION_NAMES_LOOKUP.SORT],
     [Sortby, FUNCTION_NAMES_LOOKUP.SORTBY],
     [Take, FUNCTION_NAMES_LOOKUP.TAKE],
     [Tocol, FUNCTION_NAMES_LOOKUP.TOCOL],
     [Torow, FUNCTION_NAMES_LOOKUP.TOROW],
     [Transpose, FUNCTION_NAMES_LOOKUP.TRANSPOSE],
+    [Trimrange, FUNCTION_NAMES_LOOKUP.TRIMRANGE],
+    [TrimReferenceOperator, FUNCTION_NAMES_LOOKUP._TRO_LEADING],
+    [TrimReferenceOperator, FUNCTION_NAMES_LOOKUP._TRO_TRAILING],
+    [TrimReferenceOperator, FUNCTION_NAMES_LOOKUP._TRO_ALL],
     [Unique, FUNCTION_NAMES_LOOKUP.UNIQUE],
     [Vlookup, FUNCTION_NAMES_LOOKUP.VLOOKUP],
     [Vstack, FUNCTION_NAMES_LOOKUP.VSTACK],

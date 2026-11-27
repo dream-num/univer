@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { ILogService, LocaleService } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { BrowserClipboardService } from '../clipboard-interface.service';
+import { DesktopLogService, ILogService, Injector, LocaleService, LocaleType, toDisposable } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
+import enUS from '../../../locale/en-US';
+import { INotificationService } from '../../notification/notification.service';
+import { BrowserClipboardService, HTML_CLIPBOARD_MIME_TYPE } from '../clipboard-interface.service';
 import { supportClipboardAPI } from '../clipboard-utils';
 
 vi.mock('../clipboard-utils', () => ({
@@ -28,19 +30,25 @@ class MockClipboardItem {
 }
 
 function createService() {
-    const localeService = {
-        t: vi.fn((key: string) => key),
-    } as unknown as LocaleService;
-    const logService = {
-        error: vi.fn(),
-    } as unknown as ILogService;
     const notificationService = {
-        show: vi.fn(),
+        show: vi.fn(() => toDisposable(() => {})),
     };
+    const injector = new Injector([
+        [BrowserClipboardService],
+        [LocaleService],
+        [ILogService, { useClass: DesktopLogService }],
+        [INotificationService, { useValue: notificationService }],
+    ]);
+    onTestFinished(() => injector.dispose());
 
-    const service = new BrowserClipboardService(localeService, logService, notificationService as any);
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.EN_US]: enUS });
+    localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
+    const logService = injector.get(ILogService);
+    vi.spyOn(logService, 'error').mockImplementation(() => {});
 
-    return { service, localeService, logService, notificationService };
+    return { service: injector.get(BrowserClipboardService), logService, notificationService };
 }
 
 describe('BrowserClipboardService', () => {
@@ -132,7 +140,7 @@ describe('BrowserClipboardService', () => {
         expect(document.body.lastElementChild?.textContent).not.toBe('rich');
     });
 
-    it('should preserve Univer Excel metadata while sanitizing legacy html', async () => {
+    it('keeps Excel multiline cell markup in sanitized legacy clipboard HTML', async () => {
         vi.mocked(supportClipboardAPI).mockReturnValue(false);
         const { service } = createService();
         const clipboardData = {
@@ -149,17 +157,19 @@ describe('BrowserClipboardService', () => {
         });
 
         await service.write(
-            'merged',
-            '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="ProgId" content="Excel.Sheet"><meta name="Generator" content="Univer"><script>alert(1)</script></head><body><!--StartFragment--><table data-copy-id="copy-id"><tbody><tr><td rowspan="3" onclick="alert(1)">merged</td></tr></tbody></table><!--EndFragment--></body></html>'
+            '"a\nb\nc"',
+            '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="ProgId" content="Excel.Sheet"><meta name="Generator" content="Univer"><style>br { mso-data-placement: same-cell; } td { color: red; }</style><script>alert(1)</script></head><body><!--StartFragment--><table data-copy-id="copy-id"><tbody><tr><td rowspan="3" onclick="alert(1)">a<br>b<br>c</td></tr></tbody></table><!--EndFragment--></body></html>'
         );
 
-        const copiedHtml = clipboardData.setData.mock.calls.find(([type]) => type === 'text/html')?.[1];
+        const copiedHtml = clipboardData.setData.mock.calls.find(([type]) => type === HTML_CLIPBOARD_MIME_TYPE)?.[1];
 
         expect(copiedHtml).toContain('xmlns:x="urn:schemas-microsoft-com:office:excel"');
         expect(copiedHtml).toContain('<meta name="ProgId" content="Excel.Sheet">');
+        expect(copiedHtml).toContain('<style>br { mso-data-placement: same-cell; }</style>');
         expect(copiedHtml).toContain('<!--StartFragment--><table data-copy-id="copy-id">');
-        expect(copiedHtml).toContain('<td rowspan="3">merged</td>');
+        expect(copiedHtml).toContain('<td rowspan="3">a<br>b<br>c</td>');
         expect(copiedHtml).toContain('</table><!--EndFragment-->');
+        expect(copiedHtml).not.toContain('td { color: red; }');
         expect(copiedHtml).not.toContain('<script');
         expect(copiedHtml).not.toContain('onclick');
     });
@@ -206,8 +216,8 @@ describe('BrowserClipboardService', () => {
         expect(logService.error).toHaveBeenCalledTimes(2);
         expect(notificationService.show).toHaveBeenCalledWith({
             type: 'warning',
-            title: 'ui.clipboard.authentication.title',
-            content: 'ui.clipboard.authentication.content',
+            title: enUS.ui.clipboard.authentication.title,
+            content: enUS.ui.clipboard.authentication.content,
         });
     });
 

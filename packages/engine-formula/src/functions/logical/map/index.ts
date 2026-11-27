@@ -25,6 +25,8 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Map extends BaseFunction {
+    protected readonly excelCompatibility: boolean = false;
+
     override minParams = 2;
 
     override maxParams = 255;
@@ -64,13 +66,21 @@ export class Map extends BaseFunction {
             }
         }
 
+        if (this.excelCompatibility && (
+            !lambda?.acceptsArity(_variants.length) ||
+            ((maxRowLength > 1 || maxColumnLength > 1) &&
+                _variants.some((value) => !value.isReferenceObject() && !value.isArray()))
+        )) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
         const resultArray = this._getResultArray(_variants, lambda as LambdaValueObjectObject, maxRowLength, maxColumnLength);
 
         if (resultArray instanceof ErrorValueObject) {
             return resultArray;
         }
 
-        if (maxRowLength === 1 && maxColumnLength === 1) {
+        if (!this.excelCompatibility && maxRowLength === 1 && maxColumnLength === 1) {
             return resultArray[0][0];
         }
 

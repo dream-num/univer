@@ -20,10 +20,19 @@ import { ArrayValueObject, transformToValueObject } from '../../../../engine/val
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
-import { Dollarde } from '../index';
+import { Dollarde, ExcelDollarde } from '../index';
 
 describe('Test dollarde function', () => {
     const testFunction = new Dollarde(FUNCTION_NAMES_FINANCIAL.DOLLARDE);
+
+    it.each([
+        [1.1, 3, 4 / 3],
+        [1e-7, 16, 6.25e-7],
+    ])('retains the Excel conversion override for %s with denominator %s', (amount, fraction, expected) => {
+        const excelFunction = new ExcelDollarde(FUNCTION_NAMES_FINANCIAL.DOLLARDE);
+        const result = excelFunction.calculate(NumberValueObject.create(amount), NumberValueObject.create(fraction));
+        expect(result.getValue()).toBeCloseTo(expected, 14);
+    });
 
     describe('Dollarde', () => {
         it.each([

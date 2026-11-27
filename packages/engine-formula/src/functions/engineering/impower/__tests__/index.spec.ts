@@ -52,7 +52,7 @@ describe('Test impower function', () => {
             const inumber = StringValueObject.create('1.5');
             const number = NumberValueObject.create(3);
             const result = testFunction.calculate(inumber, number);
-            expect(result.getValue()).toBe(3.375);
+            expect(result.getValue()).toBe('3.375');
         });
 
         it('Value is normal string', () => {
@@ -97,7 +97,7 @@ describe('Test impower function', () => {
             });
             const number = NumberValueObject.create(3);
             const result = testFunction.calculate(inumber, number);
-            expect(result.getValue()).toBe(0);
+            expect(result.getValue()).toBe('0');
 
             const inumber2 = StringValueObject.create('5+12i');
             const number2 = ArrayValueObject.create({
@@ -112,7 +112,7 @@ describe('Test impower function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(inumber2, number2);
-            expect(result2.getValue()).toBe(1);
+            expect(result2.getValue()).toBe('1');
 
             const inumber3 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

@@ -82,16 +82,26 @@ export class TInv extends BaseFunction {
         const probabilityValue = +_probabilityObject.getValue();
         const degFreedomValue = Math.floor(+_degFreedomObject.getValue());
 
-        if (probabilityValue <= 0 || probabilityValue > 1 || degFreedomValue < 1 || degFreedomValue > 10 ** 10) {
+        if (degFreedomValue < 1 || degFreedomValue > 10 ** 10) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
+        const probabilityError = this._probabilityError(probabilityValue, degFreedomValue);
+        if (probabilityError) return ErrorValueObject.create(probabilityError);
 
-        const result = studentTINV(probabilityValue, degFreedomValue);
+        const result = this._quantile(probabilityValue, degFreedomValue);
 
         if (Number.isNaN(result) || !Number.isFinite(result)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
         return NumberValueObject.create(result);
+    }
+
+    protected _quantile(probability: number, degrees: number): number {
+        return studentTINV(probability, degrees);
+    }
+
+    protected _probabilityError(probability: number, _degrees: number): ErrorType | undefined {
+        return probability <= 0 || probability > 1 ? ErrorType.NUM : undefined;
     }
 }

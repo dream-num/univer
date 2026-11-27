@@ -39,7 +39,7 @@ const locale: typeof enUS = {
             add: 'Insereix enllaç',
         },
         permission: {
-            hyperLinkErr: 'No teniu permís per inserir un enllaç.',
+            editErr: 'L\'interval està protegit i no teniu permís d\'edició. Per editar, contacteu amb el creador.',
         },
         message: {
             noSheet: 'El full de destinació ha estat eliminat',

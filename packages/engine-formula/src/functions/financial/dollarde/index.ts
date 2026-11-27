@@ -51,6 +51,10 @@ export class Dollarde extends BaseFunction {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
+        return NumberValueObject.create(this._convert(fractionalDollarValue, fractionValue));
+    }
+
+    protected _convert(fractionalDollarValue: number, fractionValue: number): number {
         const scaleDigits = Math.ceil(Math.log(fractionValue) / Math.LN10);
         let result = Math.trunc(fractionalDollarValue);
         result += ((fractionalDollarValue % 1) * 10 ** scaleDigits) / fractionValue;
@@ -60,7 +64,7 @@ export class Dollarde extends BaseFunction {
         const scaled = result * power;
 
         if (Number.isFinite(scaled) || !Number.isFinite(fractionalDollarValue) || !Number.isFinite(fractionValue)) {
-            return NumberValueObject.create(Math.round(scaled) / power);
+            return Math.round(scaled) / power;
         }
 
         // An overflowing conversion or rounding scale must not erase a finite price.
@@ -70,6 +74,13 @@ export class Dollarde extends BaseFunction {
                 new Decimal(fractionalDollarValue % 1).mul(Decimal.pow(10, scaleDigits)).div(fractionValue)
             );
 
-        return NumberValueObject.create(preciseResult.toDecimalPlaces(roundingDigits, Decimal.ROUND_HALF_CEIL).toNumber());
+        return preciseResult.toDecimalPlaces(roundingDigits, Decimal.ROUND_HALF_CEIL).toNumber();
+    }
+}
+
+export class ExcelDollarde extends Dollarde {
+    protected override _convert(value: number, fraction: number): number {
+        const integer = Math.trunc(value);
+        return integer + ((value - integer) * 10 ** Math.ceil(Math.log10(fraction))) / fraction;
     }
 }

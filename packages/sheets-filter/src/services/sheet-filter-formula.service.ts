@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
-import { Disposable, Inject, IUniverInstanceService } from '@univerjs/core';
+import { BooleanNumber, Disposable, Inject, IUniverInstanceService } from '@univerjs/core';
 import { IActiveDirtyManagerService, ISheetRowFilteredService } from '@univerjs/engine-formula';
 import { FILTER_MUTATIONS } from '../common/const';
 import { SheetsFilterService } from './sheet-filter.service';
@@ -44,10 +44,9 @@ export class SheetsFilterFormulaService extends Disposable {
                 {
                     commandId,
                     getDirtyData: (commandInfo) => {
-                        const params = commandInfo.params as ISheetCommandSharedParams;
-                        const { unitId, subUnitId } = params;
+                        const { unitId, subUnitId, removedFilterRange } = commandInfo.params as ISheetCommandSharedParams & { removedFilterRange?: IRange };
                         return {
-                            dirtyRanges: this._getHideRowMutation(unitId, subUnitId),
+                            dirtyRanges: this._getHideRowMutation(unitId, subUnitId, removedFilterRange),
                             clearDependencyTreeCache: {
                                 [unitId]: {
                                     [subUnitId]: '1',
@@ -60,35 +59,45 @@ export class SheetsFilterFormulaService extends Disposable {
         });
     }
 
-    private _getHideRowMutation(unitId: string, subUnitId: string) {
-        const range = this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange();
-
+    private _getHideRowMutation(unitId: string, subUnitId: string, removedRange?: IRange) {
+        const range = this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange() ?? removedRange;
         const sheet = this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
-
-        if (range == null || sheet == null) {
+        if (!range || !sheet) {
             return [];
         }
 
         const { startRow, endRow } = range;
-
-        // covert hidden rows to dirtyRanges
+        const endColumn = sheet.getColumnCount() - 1;
         const dirtyRanges = [{
             unitId,
             sheetId: subUnitId,
-            range: {
-                startRow,
-                startColumn: 0,
-                endRow,
-                endColumn: sheet.getColumnCount() - 1,
-            },
+            range: { startRow, endRow, startColumn: 0, endColumn },
         }];
-
+        // SUBTOTAL also observes manually hidden rows outside the filter range when criteria change.
+        for (const [key, data] of Object.entries(sheet.getConfig().rowData ?? {})) {
+            const row = Number(key);
+            if (data?.hd === BooleanNumber.TRUE && (row < startRow || row > endRow)) {
+                dirtyRanges.push({
+                    unitId,
+                    sheetId: subUnitId,
+                    range: { startRow: row, endRow: row, startColumn: 0, endColumn },
+                });
+            }
+        }
         return dirtyRanges;
     }
 
     private _registerSheetRowFiltered() {
-        this.disposeWithMe(this._sheetRowFilteredService.register((unitId, subUnitId, row) => {
-            return this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.isRowFiltered(row) ?? false;
+        this.disposeWithMe(this._sheetRowFilteredService.register((unitId, subUnitId, row, forSubtotal) => {
+            const model = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
+            if (model?.isRowFiltered(row)) {
+                return true;
+            }
+            if (!forSubtotal || !model?.hasCriteria) {
+                return false;
+            }
+            const sheet = this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
+            return sheet?.getRowRawVisible(row) === false;
         }));
     }
 }

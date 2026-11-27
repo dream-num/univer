@@ -164,4 +164,48 @@ describe('HeaderResizeRenderController', () => {
         expect(columnResizeRect.top).toBeCloseTo(40 + 20 / 2 - (20 * 0.7) / 2);
         expect(columnResizeRect.size).toBeCloseTo(20 * 0.7);
     });
+
+    it.each([
+        // At 50%, the starting scene offsets exceed the canvas dimensions in screen pixels (#5483).
+        { type: RANGE_TYPE.COLUMN, zoom: 0.5, index: 9, from: 498, to: 523, before: 100, after: 146 },
+        { type: RANGE_TYPE.ROW, zoom: 0.5, index: 40, from: 409, to: 429, before: 20, after: 56 },
+        // At 200%, the visible right and bottom edges in scene units are 395 and 295, respectively.
+        { type: RANGE_TYPE.COLUMN, zoom: 2, index: 1, from: 399, to: 1000, before: 100, after: 295 },
+        { type: RANGE_TYPE.ROW, zoom: 2, index: 1, from: 79, to: 1000, before: 20, after: 275 },
+        // At 100%, an edge past the visible area should keep its size when dragged farther out.
+        { type: RANGE_TYPE.COLUMN, zoom: 1, index: 7, from: 799, to: 850, before: 100, after: 100 },
+    ])('resizes at $zoom× from $from to $to', ({ type, zoom, index, from, to, before, after }) => {
+        const { context, injector, scene, sheet } = testBed;
+        const worksheet = sheet.getActiveSheet()!;
+        const isRow = type === RANGE_TYPE.ROW;
+        if (isRow) {
+            worksheet.getRowManager().setRowHeight(index, before);
+        } else {
+            worksheet.getColumnManager().setColumnWidth(index, before);
+        }
+        scene.scale(zoom, zoom);
+
+        const controller = injector.get(HeaderResizeRenderController);
+        cleanups.push(() => controller.dispose());
+        controller.interceptor.intercept(controller.interceptor.getInterceptPoints().HEADER_RESIZE_PERMISSION_CHECK, {
+            handler: () => true,
+        });
+
+        const header = context.components.get(isRow ? SHEET_VIEW_KEY.ROW : SHEET_VIEW_KEY.COLUMN) as unknown as {
+            onPointerMove$: ITestEvent<Partial<IMouseEvent>, object>;
+        };
+        const shapes = controller as unknown as {
+            _rowResizeRect: HeaderMenuResizeShape;
+            _columnResizeRect: HeaderMenuResizeShape;
+        };
+        const shape = isRow ? shapes._rowResizeRect : shapes._columnResizeRect;
+        const start = isRow ? { offsetX: 10, offsetY: from, button: 0 } : { offsetX: from, offsetY: 10, button: 0 };
+        const end = isRow ? { offsetX: 10, offsetY: to, button: 0 } : { offsetX: to, offsetY: 10, button: 0 };
+        header.onPointerMove$.emit(start, {});
+        shape.onPointerDown$.emitEvent(start as IMouseEvent);
+        scene.onPointerMove$.emit(end, { stopPropagation: () => undefined });
+        scene.onPointerUp$.emit(end, { stopPropagation: () => undefined });
+
+        expect(isRow ? worksheet.getRowHeight(index) : worksheet.getColumnWidth(index)).toBe(after);
+    });
 });

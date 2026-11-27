@@ -545,7 +545,10 @@ export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRang
     const operators: IOperator[] = [];
 
     // check the remove range contains the filtered rows, if so, we need to skip the filtered rows
-    if (rangeFilteredRows && rangeFilteredRows.length > 0) {
+    const removedRanges = (param.params as IRemoveRowColCommandInterceptParams)?.ranges;
+    if (removedRanges) {
+        removedRanges.forEach(_handleBaseRemoveRange);
+    } else if (rangeFilteredRows && rangeFilteredRows.length > 0) {
         let startRow = range.startRow;
 
         for (let r = range.startRow; r <= range.endRow; r++) {

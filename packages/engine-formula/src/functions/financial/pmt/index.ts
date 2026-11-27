@@ -82,7 +82,7 @@ export class Pmt extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = calculatePMT(rateValue, nperValue, pvValue, fvValue, typeValue ? 1 : 0);
+            const result = this._calculateValue(rateValue, nperValue, pvValue, fvValue, typeValue ? 1 : 0);
 
             if (Number.isNaN(result) || !Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);
@@ -100,5 +100,9 @@ export class Pmt extends BaseFunction {
         }
 
         return resultArray;
+    }
+
+    protected _calculateValue(...args: Parameters<typeof calculatePMT>): number {
+        return calculatePMT(...args);
     }
 }

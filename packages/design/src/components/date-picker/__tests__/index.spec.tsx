@@ -84,5 +84,16 @@ describe('DatePicker', () => {
 
         const dateButton = screen.getByText('2026-01-01').closest('button') as HTMLButtonElement;
         expect(dateButton.className).toContain('custom-date-picker');
+        expect(dateButton).toHaveAttribute('aria-haspopup', 'dialog');
+    });
+
+    it('supports placeholder and disabled state without opening', () => {
+        render(<DatePicker placeholder="Choose a date" disabled />);
+        const trigger = screen.getByText('Choose a date').closest('button') as HTMLButtonElement;
+        expect(trigger).toBeDisabled();
+        expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+        fireEvent.click(screen.getByTestId('mock-dropdown-toggle'));
+        expect(screen.getByTestId('mock-dropdown')).toHaveAttribute('data-open', 'false');
     });
 });

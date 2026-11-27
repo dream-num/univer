@@ -24,6 +24,9 @@ const locale: typeof enUS = {
         msg: {
             'filter-header-forbidden': 'Riadok hlavičky filtra sa nedá presunúť.',
         },
+        permission: {
+            filterErr: 'Rozsah je chránený a nemáte oprávnenie na filtrovanie. Ak chcete filtrovať, kontaktujte tvorcu.',
+        },
     },
 };
 

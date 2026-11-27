@@ -31,6 +31,7 @@ import {
 } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { MORE_NUMFMT_TYPE_KEY, MoreNumfmtType, Options, OPTIONS_KEY } from '../views/components/MoreNumfmtType';
+import { RegionalCurrencyIcon } from '../views/components/RegionalCurrencyIcon';
 import { SheetNumfmtPanel } from '../views/SheetNumfmtPanel';
 
 const SHEET_NUMFMT_PANEL = 'SHEET_NUMFMT_PANEL';
@@ -54,6 +55,7 @@ export class ComponentsController extends Disposable {
             EuroIcon,
             PercentIcon,
             ReduceDigitsIcon,
+            RegionalCurrencyIcon,
             RialIcon,
             RmbIcon,
             RoubleIcon,

@@ -17,7 +17,11 @@
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Iferror extends BaseFunction {
@@ -47,19 +51,21 @@ export class Iferror extends BaseFunction {
             valueIfError.isArray() ? (valueIfError as ArrayValueObject).getColumnCount() : 1
         );
 
-        const valueArray = expandArrayValueObject(maxRowLength, maxColumnLength, value);
-        const valueIfErrorArray = expandArrayValueObject(maxRowLength, maxColumnLength, valueIfError);
+        const valueArray = expandArrayValueObject(maxRowLength, maxColumnLength, value, ErrorValueObject.create(ErrorType.NA));
+        const valueIfErrorArray = expandArrayValueObject(maxRowLength, maxColumnLength, valueIfError, ErrorValueObject.create(ErrorType.NA));
 
         valueArray.iterator((value, rowIndex, columnIndex) => {
-            if (value?.isError()) {
-                valueArray.set(rowIndex, columnIndex, valueIfErrorArray.get(rowIndex, columnIndex));
-            }
+            const result = value?.isError() ? valueIfErrorArray.get(rowIndex, columnIndex) : value;
+            valueArray.set(rowIndex, columnIndex, result == null || result.isNull() ? NumberValueObject.create(0) : result);
         });
 
         return valueArray;
     }
 
     private _toValueObject(value: FunctionVariantType): BaseValueObject {
+        if (value instanceof MultiAreaReferenceObject && value.isArrayOfReferences()) {
+            return value.toReferenceErrorGrid();
+        }
         if (!value.isReferenceObject()) {
             return value as BaseValueObject;
         }

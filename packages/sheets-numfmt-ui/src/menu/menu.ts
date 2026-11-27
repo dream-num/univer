@@ -16,8 +16,8 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
 import {
+    getCurrencySymbolByLocale,
     LocaleService,
     RegionService,
     UniverInstanceType,
@@ -30,7 +30,6 @@ import {
 } from '@univerjs/sheets';
 import {
     AddDecimalCommand,
-    getCurrencySymbolByLocale,
     getCurrencySymbolIconByLocale,
     getCurrencyType,
     getPatternType,
@@ -41,6 +40,7 @@ import {
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, distinctUntilChanged, map } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 import { MORE_NUMFMT_TYPE_KEY, OPTIONS_KEY } from '../views/components/MoreNumfmtType';
 import { getCurrentNumfmtPattern$, getNumberFormatLabelKey } from './numfmt-menu-util';

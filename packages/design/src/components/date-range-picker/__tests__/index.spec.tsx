@@ -93,4 +93,19 @@ describe('DateRangePicker', () => {
         ]);
         expect(screen.getByTestId('mock-dropdown')).toHaveAttribute('data-open', 'false');
     });
+
+    it('respects disabled state and exposes dialog popup attributes', () => {
+        const value = [
+            new Date('2026-02-01T00:00:00.000Z'),
+            new Date('2026-02-10T00:00:00.000Z'),
+        ] as [Date, Date];
+
+        render(<DateRangePicker value={value} disabled />);
+        const trigger = screen.getByText('2026-02-01').closest('button') as HTMLButtonElement;
+        expect(trigger).toBeDisabled();
+        expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
+
+        fireEvent.click(screen.getByTestId('mock-dropdown-toggle'));
+        expect(screen.getByTestId('mock-dropdown')).toHaveAttribute('data-open', 'false');
+    });
 });

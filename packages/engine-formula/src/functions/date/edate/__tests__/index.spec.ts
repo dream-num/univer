@@ -45,6 +45,20 @@ describe('Test edate function', () => {
             testFunction.setDateSystem(DateSystem.Date1900);
         });
 
+        it('truncates a fractional months argument toward zero', () => {
+            // EDATE(DATE(2011,1,15),...): 40558 is 2011-01-15.
+            const startDate = NumberValueObject.create(40558);
+            const cases: [number, number][] = [
+                [1.5, 40589], // 2011-02-15
+                [-1.5, 40527], // 2010-12-15, not 2010-11-15
+                [-0.5, 40558], // the start date
+            ];
+            for (const [months, expected] of cases) {
+                const result = testFunction.calculate(startDate, NumberValueObject.create(months));
+                expect(transformToValue(result.getArrayValue())).toStrictEqual([[expected]]);
+            }
+        });
+
         it('Clamps month-end overflow to the target month last day', () => {
             const startDate = NumberValueObject.create(excelDateSerial(new Date(Date.UTC(2025, 7, 31))));
             const months = NumberValueObject.create(-2);

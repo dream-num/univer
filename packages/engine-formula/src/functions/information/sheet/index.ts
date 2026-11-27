@@ -28,6 +28,8 @@ export class Sheet extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override lazyIfReferenceArrayArgumentIndexes = [0];
+
     override needsSheetsInfo = true;
 
     override calculate(value?: FunctionVariantType): BaseValueObject {

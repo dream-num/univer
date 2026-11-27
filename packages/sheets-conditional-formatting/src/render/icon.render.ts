@@ -18,12 +18,17 @@ import type { IRange, IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import { Range } from '@univerjs/core';
 import { SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
+import { drawCanvasIcon } from '@univerjs/icons-svg';
+import type { IConditionalFormattingIcon } from '../models/icon-map';
 import type { IConditionalFormattingRenderRangeResolver, IIconSetCellData } from './type';
-import { iconMap, IIconSetType } from '../models/icon-map';
+import { conditionalFormattingIcons } from '../models/icon-map';
 import { ConditionalFormattingRasterCache } from './conditional-formatting-raster-cache';
 import { resolveRenderRanges } from './resolve-render-ranges';
 
 export const IconUKey = 'sheet-conditional-rule-icon';
+const canvasIcons = new Map<string, IConditionalFormattingIcon>(Object.entries(conditionalFormattingIcons).flatMap(([type, icons]) =>
+    icons.map((icon, index) => [`${type}_${index}`, icon] as const)));
+
 const EXTENSION_Z_INDEX = 35;
 export const DEFAULT_WIDTH = 15;
 export const DEFAULT_PADDING = 2;
@@ -40,18 +45,12 @@ export class ConditionalFormattingIcon extends SheetExtension {
 
     private _width = DEFAULT_WIDTH;
 
-    private _imageMap: Map<string, HTMLImageElement> = new Map();
     private readonly _rasterCache = new ConditionalFormattingRasterCache();
-    private readonly _pendingImages = new Set<HTMLImageElement>();
     private _renderRangeResolver: IConditionalFormattingRenderRangeResolver | null = null;
     override uKey = IconUKey;
 
     override Z_INDEX = EXTENSION_Z_INDEX;
     _radius = 1;
-    constructor() {
-        super();
-        this._init();
-    }
 
     setRenderRangeResolver(resolver: IConditionalFormattingRenderRangeResolver | null) {
         this._renderRangeResolver = resolver;
@@ -94,15 +93,6 @@ export class ConditionalFormattingIcon extends SheetExtension {
                 }
 
                 const { iconType, iconId } = cellData.iconSet;
-                if (iconType === IIconSetType.empty) {
-                    return;
-                }
-
-                const icon = this._imageMap.get(this._createKey(iconType, iconId));
-                if (!icon) {
-                    return;
-                }
-
                 if (!this.isRenderDiffRangesByCell(mergeInfo, diffRanges)) {
                     return;
                 }
@@ -125,7 +115,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
 
                 // Highly centered processing
                 const y = (borderHeight - this._width) / 2 + startY;
-                this._drawIcon(ctx, icon, startX + this._paddingRightAndLeft, y);
+                this._drawIcon(ctx, `${iconType}_${iconId}`, startX + this._paddingRightAndLeft, y);
             });
         });
         ctx.restore();
@@ -133,45 +123,22 @@ export class ConditionalFormattingIcon extends SheetExtension {
 
     override dispose(): void {
         this._rasterCache.dispose();
-        for (const image of this._pendingImages) {
-            image.onload = null;
-        }
-        this._pendingImages.clear();
-        this._imageMap.clear();
         this._renderRangeResolver = null;
         super.dispose();
     }
 
-    private _drawIcon(ctx: UniverRenderingContext, image: HTMLImageElement, x: number, y: number): void {
-        if (!ctx._context || ctx.__mode === 'printing' || ctx.getSystemType() !== 'Linux') {
-            ctx.drawImage(image, x, y, this._width, this._width);
+    private _drawIcon(ctx: UniverRenderingContext, key: string, x: number, y: number): void {
+        const icon = canvasIcons.get(key);
+        if (!icon) {
             return;
         }
-        this._rasterCache.draw(ctx, x, y, this._width, this._width, image.src, (paint, left, top) => {
-            paint.drawImage(image, left, top, this._width, this._width);
-        });
-    }
-
-    private _init() {
-        for (const type in iconMap) {
-            const list = iconMap[type as IIconSetType];
-            list.forEach((base64, index) => {
-                const key = this._createKey(type as IIconSetType, String(index));
-                const image = new Image();
-                image.onload = () => {
-                    image.onload = null;
-                    this._pendingImages.delete(image);
-                    this._imageMap.set(key, image);
-                    this.parent?.makeDirty(true);
-                };
-                this._pendingImages.add(image);
-                image.src = base64;
-            });
+        if (ctx.__mode === 'printing' || ctx.getSystemType() !== 'Linux') {
+            drawCanvasIcon(ctx._context, icon.name, x, y, this._width, icon.colors);
+            return;
         }
-    }
-
-    private _createKey(iconType: IIconSetType, iconIndex: string) {
-        return `${iconType}_${iconIndex}`;
+        this._rasterCache.draw(ctx, x, y, this._width, this._width, key, (paint, left, top) => {
+            drawCanvasIcon(paint._context, icon.name, left, top, this._width, icon.colors);
+        });
     }
 }
 

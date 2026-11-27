@@ -15,7 +15,7 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { RangeProtectionPermissionViewPoint, SheetPermissionCheckController, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionViewPoint, SheetPermissionCheckController, WorkbookViewPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { HoverManagerService } from '@univerjs/sheets-ui';
 import { debounceTime } from 'rxjs';
@@ -44,7 +44,7 @@ export class SheetsThreadCommentHoverController extends Disposable {
 
                     if (commentId) {
                         const commentPermission = this._sheetPermissionCheckController.permissionCheckWithRanges({
-                            workbookTypes: [WorkbookCommentPermission],
+                            workbookTypes: [WorkbookViewPermission],
                             worksheetTypes: [WorksheetViewPermission],
                             rangeTypes: [RangeProtectionPermissionViewPoint],
                         }, [{ startRow: row, startColumn: col, endRow: row, endColumn: col }], unitId, subUnitId);

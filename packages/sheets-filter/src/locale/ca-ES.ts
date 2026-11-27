@@ -24,6 +24,9 @@ const locale: typeof enUS = {
         msg: {
             'filter-header-forbidden': 'No pots moure la fila de capçalera d\'un filtre.',
         },
+        permission: {
+            filterErr: 'El rang està protegit i no tens permís per filtrar. Per filtrar, contacta amb el creador.',
+        },
     },
 };
 

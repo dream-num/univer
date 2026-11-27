@@ -112,10 +112,6 @@ export class Bycol extends BaseFunction {
             result[0].push(value);
         }
 
-        if (columnCount === 1) {
-            return result[0][0];
-        }
-
         return ArrayValueObject.create({
             calculateValueList: result,
             rowCount: 1,

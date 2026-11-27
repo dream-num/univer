@@ -100,6 +100,10 @@ const getTestWorkbookData = (): IWorkbookData => {
                             t: CellValueType.NUMBER,
                         },
                     },
+                    3: Object.fromEntries(
+                        [41, 60, 55.00000000000001, 43, 55.99999999999999, 43.00000000000001, 76, 63.000000000000014]
+                            .map((v, column) => [column, { v, t: CellValueType.NUMBER }])
+                    ),
                 },
             },
         },
@@ -187,7 +191,7 @@ describe('Test rank function', () => {
         });
 
         it('Integer rank values are not tied with near-integer floating tails', async () => {
-            const result = await calculate('=RANK(43,{41,60,55.00000000000001,43,55.99999999999999,43.00000000000001,76,63.000000000000014},0)');
+            const result = await calculate('=RANK(43,A4:H4,0)');
             expect(result).toStrictEqual(7);
         });
 

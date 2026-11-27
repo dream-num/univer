@@ -16,6 +16,7 @@
 
 import type { IDisposable, ITextRangeParam } from '@univerjs/core';
 import {
+    CustomRangeType,
     Disposable,
     DocumentDataModel,
     ICommandService,
@@ -356,6 +357,14 @@ export class DocHyperLinkPopupService extends Disposable {
             return canEditDocumentTargets(this._permissionService, unitId, []);
         }
         const segmentId = linkInfo.segmentId ?? '';
+        const body = document.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+        const link = body?.customRanges?.find((range) => range.rangeId === linkInfo.linkId);
+        // Generated field results are edited through their owning reference command.
+        if (link?.properties?.referenceFieldLink === true || (link && body?.customRanges?.some((range) => range.rangeType === CustomRangeType.FIELD &&
+            range.startIndex <= link.startIndex && range.endIndex >= link.endIndex &&
+            ['TOC', 'INDEX', 'TOA', 'REF', 'PAGEREF', 'NOTEREF', 'CITATION', 'BIBLIOGRAPHY'].includes(String(range.properties?.fieldType))))) {
+            return false;
+        }
         return canEditDocumentTargets(this._permissionService, unitId, [
             ...getDocumentEntityParentPermissionObjectIds(document, segmentId, 'custom-range', linkInfo.linkId),
             getDocumentEntityPermissionObjectId(segmentId, 'custom-range', linkInfo.linkId),

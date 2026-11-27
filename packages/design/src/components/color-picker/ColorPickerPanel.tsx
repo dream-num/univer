@@ -15,6 +15,8 @@
  */
 
 import { useContext, useState } from 'react';
+import { borderClassName } from '../../helper/class-utilities';
+import { clsx } from '../../helper/clsx';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import { hexToHsv, hsvToHex } from './color-conversion';
@@ -35,17 +37,23 @@ export function ColorPickerPanel({ value = '#000000', confirmText, onConfirm }: 
     const color = hsvToHex(...hsv);
 
     return (
-        <div data-u-comp="color-picker-panel" className="univer-grid univer-gap-4">
-            <div className="univer-h-44 univer-overflow-hidden univer-rounded-lg">
+        <div
+            data-u-comp="color-picker-panel"
+            className="univer-grid univer-gap-4"
+            onKeyDown={(event) => {
+                if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {
+                    event.preventDefault();
+                    onConfirm?.(color);
+                }
+            }}
+        >
+            <div className="univer-h-44 univer-rounded-md">
                 <ColorSpectrum hsv={hsv} onChange={(h, s, v) => setHsv([h, s, v])} />
             </div>
             <div className="univer-flex univer-items-center univer-gap-3">
                 <span
-                    className="
-                      univer-size-10 univer-shrink-0 univer-rounded-lg univer-border univer-border-solid
-                      univer-border-gray-200
-                      dark:!univer-border-gray-600
-                    "
+                    aria-hidden="true"
+                    className={clsx('univer-box-border univer-size-10 univer-shrink-0 univer-rounded-md', borderClassName)}
                     style={{ backgroundColor: color }}
                 />
                 <div className="univer-flex-1">

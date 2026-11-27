@@ -23,6 +23,8 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Factdouble extends BaseFunction {
+    override rejectsMultiCellReference = true;
+
     override minParams = 1;
 
     override maxParams = 1;
@@ -35,7 +37,7 @@ export class Factdouble extends BaseFunction {
             const columnCount = (number as ArrayValueObject).getColumnCount();
 
             if (rowCount > 1 || columnCount > 1) {
-                return ErrorValueObject.create(ErrorType.VALUE);
+                return (number as ArrayValueObject).mapValue((value) => this._handleSingleObject(value));
             }
 
             _number = (number as ArrayValueObject).get(0, 0) as BaseValueObject;
@@ -45,6 +47,9 @@ export class Factdouble extends BaseFunction {
     }
 
     private _handleSingleObject(number: BaseValueObject): BaseValueObject {
+        if (number.isBoolean()) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
         let _number = number;
 
         if (_number.isString()) {
@@ -56,6 +61,9 @@ export class Factdouble extends BaseFunction {
         }
 
         const numberValue = Math.floor(+_number.getValue());
+        if (numberValue === -1) {
+            return NumberValueObject.create(1);
+        }
 
         const result = calculateFactorial(numberValue, 2);
 

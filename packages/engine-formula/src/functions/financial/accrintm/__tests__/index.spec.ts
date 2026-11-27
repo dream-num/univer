@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { DateSystem } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { DateSystem, Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -25,7 +25,17 @@ import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Accrintm } from '../index';
 
 describe('Test accrintm function', () => {
-    const testFunction = new Accrintm(FUNCTION_NAMES_FINANCIAL.ACCRINTM);
+    let injector: Injector;
+    let testFunction: Accrintm;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [Accrintm, { useFactory: () => injector.createInstance(Accrintm, FUNCTION_NAMES_FINANCIAL.ACCRINTM) }],
+        ]);
+        testFunction = injector.get(Accrintm);
+    });
+
+    afterEach(() => injector.dispose());
 
     describe('Accrintm', () => {
         it('value is normal', () => {
@@ -137,7 +147,10 @@ describe('Test accrintm function', () => {
             const rate = NumberValueObject.create(0.1);
             const par = NumberValueObject.create(1000);
             const result = testFunction.calculate(issue, settlement, rate, par);
-            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+            // Excel COM Formula2 preserves each array element and its error.
+            const values = getObjectValue(result) as (number | string)[][];
+            expect(values[0][0]).toBeCloseTo(975.5555555555557, 12);
+            expect(values[0].slice(1)).toEqual([ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME]);
         });
         it('checks the serial-zero boundary in both date systems', () => {
             const args = [

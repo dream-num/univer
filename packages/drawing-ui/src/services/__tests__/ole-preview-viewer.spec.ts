@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// @vitest-environment happy-dom
-
 import { IConfigService, IImageIoService, LocaleService, ThemeService, Univer, UniverInstanceType } from '@univerjs/core';
 import { UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';

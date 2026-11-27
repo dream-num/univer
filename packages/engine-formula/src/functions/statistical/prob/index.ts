@@ -14,28 +14,41 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
-import { getTwoArrayNumberValues } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
+// Excel accepts probability totals within rounding at 15 significant digits.
+const PROBABILITY_SUM_TOLERANCE = 5e-15 + Number.EPSILON / 2;
+
+interface IProbabilityPairs {
+    values: number[];
+    weights: number[];
+}
+
 export class Prob extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 4;
 
-    override calculate(xRange: BaseValueObject, probRange: BaseValueObject, lowerLimit: BaseValueObject, upperLimit?: BaseValueObject): BaseValueObject {
-        const { isError, errorObject, xRangeValues, probRangeValues } = this._handleXRangeAndProbRange(xRange, probRange);
+    override needsReferenceObject = true;
 
-        let _upperLimit = upperLimit ?? lowerLimit;
+    override calculate(xInput: FunctionVariantType, probInput: FunctionVariantType, lowerInput: FunctionVariantType, upperInput?: FunctionVariantType): BaseValueObject {
+        const xRange = this._resolveInput(xInput);
+        const probRange = this._resolveInput(probInput);
+        const lowerLimit = this._resolveInput(lowerInput);
+        const upperLimit = upperInput && this._resolveInput(upperInput, true);
+        const _upperLimit = upperLimit == null || upperLimit.isNull() ? lowerLimit : upperLimit;
 
-        if (upperLimit?.isNull()) {
-            _upperLimit = lowerLimit;
+        const probabilities = this._getProbabilityPairs(xRange, probRange);
+        if (!lowerLimit.isArray() && !_upperLimit.isArray()) {
+            return this._handleSingleObject(probabilities, lowerLimit, _upperLimit);
         }
 
         const maxRowLength = Math.max(
@@ -54,27 +67,7 @@ export class Prob extends BaseFunction {
         const resultArray = lowerLimitArray.mapValue((lowerLimitObject, rowIndex, columnIndex) => {
             const upperLimitObject = upperLimitArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            if (xRange.isError()) {
-                return xRange;
-            }
-
-            if (probRange.isError()) {
-                return probRange;
-            }
-
-            if (lowerLimitObject.isError()) {
-                return lowerLimitObject;
-            }
-
-            if (upperLimitObject.isError()) {
-                return upperLimitObject;
-            }
-
-            if (isError) {
-                return errorObject as ErrorValueObject;
-            }
-
-            return this._handleSingleObject(xRangeValues as number[], probRangeValues as number[], lowerLimitObject, upperLimitObject);
+            return this._handleSingleObject(probabilities, lowerLimitObject, upperLimitObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -85,8 +78,7 @@ export class Prob extends BaseFunction {
     }
 
     private _handleSingleObject(
-        xRangeValues: number[],
-        probRangeValues: number[],
+        probabilities: IProbabilityPairs | ErrorValueObject,
         lowerLimit: BaseValueObject,
         upperLimit: BaseValueObject
     ): BaseValueObject {
@@ -101,116 +93,74 @@ export class Prob extends BaseFunction {
         const lowerLimitValue = +lowerLimitObject.getValue();
         const upperLimitValue = +upperLimitObject.getValue();
 
-        if (probRangeValues.reduce((acc, val) => acc + val, 0) !== 1) {
-            return ErrorValueObject.create(ErrorType.NUM);
+        if (probabilities instanceof ErrorValueObject) {
+            return probabilities;
         }
 
         let sum = 0;
-
-        for (let i = 0; i < xRangeValues.length; i++) {
-            if (xRangeValues[i] >= lowerLimitValue && xRangeValues[i] <= upperLimitValue) {
-                sum += probRangeValues[i];
+        const { values, weights } = probabilities;
+        for (let index = 0; index < values.length; index++) {
+            if (values[index] >= lowerLimitValue && values[index] <= upperLimitValue) {
+                sum += weights[index];
             }
         }
 
         return NumberValueObject.create(sum);
     }
 
-    // eslint-disable-next-line
-    private _handleXRangeAndProbRange(xRange: BaseValueObject, probRange: BaseValueObject) {
-        const xRangeRowCount = xRange.isArray() ? (xRange as ArrayValueObject).getRowCount() : 1;
-        const xRangeColumnCount = xRange.isArray() ? (xRange as ArrayValueObject).getColumnCount() : 1;
-
-        const probRangeRowCount = probRange.isArray() ? (probRange as ArrayValueObject).getRowCount() : 1;
-        const probRangeColumnCount = probRange.isArray() ? (probRange as ArrayValueObject).getColumnCount() : 1;
-
-        let _xRange = xRange;
-
-        if (xRange.isArray() && xRangeRowCount === 1 && xRangeColumnCount === 1) {
-            _xRange = (xRange as ArrayValueObject).get(0, 0) as BaseValueObject;
+    private _resolveInput(input: FunctionVariantType, blankAsZero = false): BaseValueObject {
+        if (!input.isReferenceObject()) {
+            return input as BaseValueObject;
         }
-
-        if (_xRange.isError()) {
-            return {
-                isError: true,
-                errorObject: _xRange as ErrorValueObject,
-                xRangeValues: [],
-                probRangeValues: [],
-            };
+        const values = (input as BaseReferenceObject).toArrayValueObject();
+        if (values.getRowCount() !== 1 || values.getColumnCount() !== 1) {
+            return values;
         }
+        const cell = values.getFirstCell();
+        return blankAsZero && cell.isNull() ? NumberValueObject.create(0) : cell;
+    }
 
-        let _probRange = probRange;
-
-        if (probRange.isArray() && probRangeRowCount === 1 && probRangeColumnCount === 1) {
-            _probRange = (probRange as ArrayValueObject).get(0, 0) as BaseValueObject;
-        }
-
-        if (_probRange.isError()) {
-            return {
-                isError: true,
-                errorObject: _probRange as ErrorValueObject,
-                xRangeValues: [],
-                probRangeValues: [],
-            };
-        }
-
-        if (xRangeRowCount * xRangeColumnCount === 1 || probRangeRowCount * probRangeColumnCount === 1) {
-            if (_xRange.isNull() || _probRange.isNull()) {
-                return {
-                    isError: true,
-                    errorObject: ErrorValueObject.create(ErrorType.VALUE),
-                    xRangeValues: [],
-                    probRangeValues: [],
-                };
+    private _getProbabilityPairs(xInput: BaseValueObject, probInput: BaseValueObject): IProbabilityPairs | ErrorValueObject {
+        const x = xInput.isArray() ? (xInput as ArrayValueObject).getArrayValue() : [[xInput]];
+        const probabilities = probInput.isArray() ? (probInput as ArrayValueObject).getArrayValue() : [[probInput]];
+        const xWidth = x[0]?.length ?? 0;
+        const probabilityWidth = probabilities[0]?.length ?? 0;
+        for (const range of [x, probabilities]) {
+            if (range.length === 1 && range[0].length === 1) {
+                const cell = range[0][0];
+                if (cell?.isError()) {
+                    return cell as ErrorValueObject;
+                }
+                if (cell?.isNull()) {
+                    return ErrorValueObject.create(ErrorType.VALUE);
+                }
             }
         }
-
-        if (xRangeRowCount * xRangeColumnCount !== probRangeRowCount * probRangeColumnCount) {
-            return {
-                isError: true,
-                errorObject: ErrorValueObject.create(ErrorType.NA),
-                xRangeValues: [],
-                probRangeValues: [],
-            };
+        const count = x.length * xWidth;
+        if (count !== probabilities.length * probabilityWidth) {
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
-        const {
-            isError,
-            errorObject,
-            array1Values: xRangeValues,
-            array2Values: probRangeValues,
-            noCalculate,
-        } = getTwoArrayNumberValues(
-            xRange,
-            probRange,
-            xRangeRowCount * xRangeColumnCount,
-            xRangeColumnCount,
-            probRangeColumnCount
-        );
-
-        if (isError) {
-            return {
-                isError: true,
-                errorObject,
-                xRangeValues: [],
-                probRangeValues: [],
-            };
+        let total = 0;
+        const values: number[] = [];
+        const weights: number[] = [];
+        for (let index = 0; index < count; index++) {
+            const value = x[Math.floor(index / xWidth)][index % xWidth];
+            const weight = probabilities[Math.floor(index / probabilityWidth)][index % probabilityWidth];
+            if (value?.isError()) {
+                return value as ErrorValueObject;
+            }
+            if (weight?.isError()) {
+                return weight as ErrorValueObject;
+            }
+            if (!value?.isNumber() || !weight?.isNumber()) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+            const probability = Number(weight.getValue());
+            total += probability;
+            values.push(Number(value.getValue()));
+            weights.push(probability);
         }
-
-        if (noCalculate) {
-            return {
-                isError: true,
-                errorObject: ErrorValueObject.create(ErrorType.DIV_BY_ZERO),
-                xRangeValues: [],
-                probRangeValues: [],
-            };
-        }
-
-        return {
-            isError: false,
-            errorObject: null,
-            xRangeValues,
-            probRangeValues,
-        };
+        return Math.abs(total - 1) > PROBABILITY_SUM_TOLERANCE ? ErrorValueObject.create(ErrorType.NUM) : { values, weights };
     }
 }

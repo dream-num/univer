@@ -22,6 +22,8 @@ export class VarS extends BaseFunction {
 
     override maxParams = 255;
 
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
+
     override calculate(...variants: BaseValueObject[]) {
         const flattenArray = this.flattenArray(variants);
 

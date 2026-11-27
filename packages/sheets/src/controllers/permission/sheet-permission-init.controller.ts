@@ -15,7 +15,7 @@
  */
 
 import type { IMutationCommonParams, Workbook } from '@univerjs/core';
-import type { UnitAction } from '@univerjs/protocol';
+import type { IAllowedResponse, UnitAction } from '@univerjs/protocol';
 import {
     Disposable,
     IAuthzIoService,
@@ -193,20 +193,35 @@ export class SheetPermissionInitController extends Disposable {
         if (!unitId) {
             return;
         }
+        const actionList = await this.fetchWorkbookPermissionActions(unitId);
+        this.applyWorkbookPermissionActions(unitId, actionList);
+    }
+
+    /**
+     * Fetch the workbook permission actions without applying them. Collaboration may prefetch
+     * this in parallel with loading a document and apply the result once the workbook exists.
+     */
+    public fetchWorkbookPermissionActions(unitId: string): Promise<IAllowedResponse['actions']> {
         return this._authzIoService.allowed({
             objectID: unitId,
             objectType: UnitObject.Workbook,
             unitID: unitId,
             actions: defaultWorkbookPermissionPoints,
-        }).then((actionList) => {
-            getAllWorkbookPermissionPoint().forEach((F) => {
-                const instance = new F(unitId);
-                const unitActionName = instance.subType;
-                const action = actionList.find((item) => item.action === unitActionName);
-                if (action) {
-                    this._permissionService.updatePermissionPoint(instance.id, action.allowed);
-                }
-            });
+        });
+    }
+
+    /**
+     * Apply the actions returned by {@link fetchWorkbookPermissionActions} to the workbook
+     * permission points. The workbook must already be registered.
+     */
+    public applyWorkbookPermissionActions(unitId: string, actionList: IAllowedResponse['actions']): void {
+        getAllWorkbookPermissionPoint().forEach((F) => {
+            const instance = new F(unitId);
+            const unitActionName = instance.subType;
+            const action = actionList.find((item) => item.action === unitActionName);
+            if (action) {
+                this._permissionService.updatePermissionPoint(instance.id, action.allowed);
+            }
         });
     }
 

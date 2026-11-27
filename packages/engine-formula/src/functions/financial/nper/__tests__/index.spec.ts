@@ -27,6 +27,54 @@ describe('Test nper function', () => {
     const testFunction = new Nper(FUNCTION_NAMES_FINANCIAL.NPER);
 
     describe('Nper', () => {
+        it('Preserves the Excel result for a representable small rate', () => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(1e-10),
+                NumberValueObject.create(-10),
+                NumberValueObject.create(1000)
+            );
+            expect(result.getValue()).toBeCloseTo(99.9999906232166, 12);
+        });
+
+        // Sub-precision rates use 90-digit annuity values; representable rates retain the original formula's rounding.
+        it.each([
+            [1e-18, -10, 1000, 0, 0, 100],
+            [-1e-18, -10, 1000, 0, 0, 100],
+            [1e-10, -10, 1000, 500, 0, 149.99998778027074],
+            [1e-10, -10, 1000, 500, 1, 149.99998778027074],
+            [-1e-10, -10, 1000, 500, 1, 149.99998668460177],
+            [1e-18, 0, 1000, -1100, 0, 9.531017980432485e16],
+            [1e-8, -100, -1000, 10000, 0, 89.99995149013242],
+            [0.01, -100, -1000, 10000, 1, 59.673865674294625],
+        ])('retains periods for rate=%s, payment=%s, present=%s, future=%s, type=%s', (rate, pmt, pv, fv, type, expected) => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(rate),
+                NumberValueObject.create(pmt),
+                NumberValueObject.create(pv),
+                NumberValueObject.create(fv),
+                NumberValueObject.create(type)
+            );
+
+            expect(result.isNumber()).toBe(true);
+            expect(+result.getValue() / expected).toBeCloseTo(1, 12);
+        });
+
+        it.each([
+            [0, -10, 1000, 500, 150],
+            [0, 0, 1000, 0, ErrorType.DIV_BY_ZERO],
+            [-2, -10, 1000, 0, ErrorType.NUM],
+            [0.01, 0, 1000, 1000, ErrorType.NUM],
+            [0.01, -10, 1000, 0, ErrorType.NUM],
+        ])('keeps zero-rate and invalid annuity behavior (%s, %s, %s, %s)', (rate, pmt, pv, fv, expected) => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(rate as number),
+                NumberValueObject.create(pmt as number),
+                NumberValueObject.create(pv as number),
+                NumberValueObject.create(fv as number)
+            );
+            expect(result.getValue()).toBe(expected);
+        });
+
         it('Value is normal', () => {
             const rate = NumberValueObject.create(0.12 / 12);
             const pmt = NumberValueObject.create(-100);

@@ -80,10 +80,11 @@ export function Accordion(props: IAccordionProps) {
                             className={clsx(focusClassName, `
                               univer-box-border univer-flex univer-w-full univer-cursor-pointer univer-items-center
                               univer-gap-2 univer-rounded univer-border-none univer-bg-transparent univer-px-3
-                              univer-py-2.5 univer-text-start univer-text-sm univer-text-gray-700
+                              univer-py-2.5 univer-text-left univer-text-sm univer-text-gray-700
                               univer-transition-colors univer-duration-200
                               hover:univer-bg-gray-100 hover:univer-text-gray-900
                               motion-reduce:univer-transition-none
+                              rtl:univer-text-right
                               dark:!univer-text-gray-200
                               dark:hover:!univer-bg-gray-600 dark:hover:!univer-text-gray-0
                             `)}

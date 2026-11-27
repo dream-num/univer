@@ -80,6 +80,7 @@ import {
     DeleteRangeMoveUpCommand,
     DeleteWorksheetRangeThemeStyleCommand,
     getAddMergeMutationRangeByType,
+    getCellValue,
     getPrimaryForRange,
     InsertRangeMoveDownCommand,
     InsertRangeMoveRightCommand,
@@ -481,6 +482,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Returns the unformatted value of the top-left cell, including calculated results and plain text from rich text.
+     * Boolean cells return `true` or `false`. Use {@link FRange.getRawValue} for their stored `1` or `0`.
      * Use {@link FRange.getDisplayValue} for formatted text.
      *
      * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
@@ -652,6 +654,9 @@ export class FRange extends FBaseInitialable {
         }
 
         const value = cell?.v;
+        if (cell?.t === CellValueType.BOOLEAN && value != null) {
+            return getCellValue(CellValueType.BOOLEAN, cell) === BooleanNumber.TRUE;
+        }
         // Older snapshots can store a numeric cell's value as a string.
         if (cell?.t === CellValueType.NUMBER && typeof value === 'string' && isRealNum(value)) {
             return Number(value);
@@ -785,12 +790,13 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Return first cell model data in this range
+     * Returns the stored cell data of the top-left cell, using the same raw data as {@link FRange.getCellDataGrid}.
+     * Use {@link FRange.getValue} for the effective value or {@link FRange.getDisplayValue} for formatted text.
      *
      * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
      * {@link FRange.getCellDataGrid} once instead of calling this method for each cell.
      *
-     * @returns {ICellData | null} The cell model data
+     * @returns {ICellData | null} The stored cell data, or `null` if there is no stored record.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -801,20 +807,20 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getCellData(): ICellData | null {
-        return this._worksheet.getCell(this._range.startRow, this._range.startColumn) ?? null;
+        return this._worksheet.getCellRaw(this._range.startRow, this._range.startColumn) ?? null;
     }
 
     /**
      * @deprecated Use {@link FRange.getCellDataGrid} instead.
-     * @returns {Nullable<ICellData>[][]} A two-dimensional array of cell data.
+     * @returns {Nullable<ICellData>[][]} A two-dimensional array of stored cell data.
      */
     getCellDatas(): Nullable<ICellData>[][] {
         return this.getCellDataGrid();
     }
 
     /**
-     * Returns the cell data for the cells in the range.
-     * @returns {Nullable<ICellData>[][]} A two-dimensional array of cell data.
+     * Returns the stored cell data for the cells in the range.
+     * @returns {Nullable<ICellData>[][]} A two-dimensional array of stored cell data.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();

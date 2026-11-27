@@ -9,7 +9,7 @@ describe('Test formula correctness', () => {
         await expectCalculationResultMatchesSnapshot();
     });
 
-    it('reads the array spill value from a cell with percentage formatting', async () => {
+    it('distinguishes effective values, display text and stored cell data', async () => {
         const testBed = createFormulaTestBed();
         testBed.univer.registerPlugin(UniverSheetsNumfmtPlugin);
 
@@ -24,7 +24,11 @@ describe('Test formula correctness', () => {
                         rowCount: 5,
                         columnCount: 5,
                         cellData: {
-                            0: { 0: { f: '=SEQUENCE(2,1,0.125,0.125)' } },
+                            0: {
+                                0: { f: '=SEQUENCE(2,1,0.125,0.125)' },
+                                2: { f: '=TRUE()' },
+                            },
+                            1: { 2: { f: '=FALSE()' } },
                         },
                     },
                 },
@@ -37,6 +41,13 @@ describe('Test formula correctness', () => {
             expect(spillCell.getRawValue() ?? null).toBeNull();
             expect(spillCell.getValue()).toBe(0.25);
             expect(sheet.getRange('A1:A2').getValues()).toEqual([[0.125], [0.25]]);
+            expect(spillCell.getCellData()).toStrictEqual(spillCell.getCellDataGrid()[0][0]);
+
+            const storedCell = sheet.getRange('B1').setValue(0.25).setNumberFormat('0%');
+            expect(storedCell.getDisplayValue()).toBe('25%');
+            expect(storedCell.getCellData()?.v).toBe(0.25);
+            expect(storedCell.getCellData()).toStrictEqual(storedCell.getCellDataGrid()[0][0]);
+            expect(sheet.getRange('C1:C2').getValues()).toEqual([[true], [false]]);
         } finally {
             testBed.univer.dispose();
         }

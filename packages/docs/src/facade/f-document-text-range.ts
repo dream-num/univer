@@ -19,7 +19,7 @@ import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
 import { DataStreamTreeTokenType, ICommandService, Tools, UpdateDocsAttributeType } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
-import { buildPlainTextInsertBody, replaceBodyRange, retainBodyRange } from './utils';
+import { buildPlainTextInsertBody, normalizePlainTextDataStream, replaceBodyRange, retainBodyRange } from './utils';
 
 /** A clipped text-style run in document offsets. */
 export interface IFDocumentTextStyleRun {
@@ -222,22 +222,30 @@ export class FDocumentTextRange extends FBaseInitialable {
      * entire replacement. Identical text succeeds without editing any character styles.
      * At a caret, insertion takes the previous character's style within the paragraph,
      * or the following character's style at the start of a paragraph.
+     * This range keeps its original offsets. To edit the replacement, resolve its new bounds.
      * @param {string} text Replacement text. An empty string deletes even a mixed-style range.
      * @returns {boolean} Whether the edit succeeded.
      * @example
      * ```ts
-     * const paragraph = univerAPI.getActiveDocument()?.getParagraphs()[0];
-     * paragraph?.findText('30%')?.replaceText('32%');
+     * const doc = univerAPI.getActiveDocument();
+     * const rate = doc?.getParagraphs()[0]?.findText('9%');
+     * if (doc && rate) {
+     *     const { startOffset, segmentId } = rate.getRange();
+     *     if (rate.replaceText('100%')) {
+     *         doc.getTextRange(startOffset, startOffset + '100%'.length, segmentId).setTextStyle({ bl: 1 });
+     *     }
+     * }
      * ```
      */
     replaceText(text: string): boolean {
         this._validateRange();
         const body = this._document.getBody(this._segmentId);
-        const insertBody = buildPlainTextInsertBody(text);
-        if (this.getText() === insertBody.dataStream) {
+        const replacement = normalizePlainTextDataStream(text);
+        if (replacement.length === this._endOffset - this._startOffset && body.dataStream.startsWith(replacement, this._startOffset)) {
             return true;
         }
 
+        const insertBody = buildPlainTextInsertBody(replacement);
         if (insertBody.dataStream.length > 0) {
             let styleOffset = this._startOffset;
             if (styleOffset === this._endOffset && styleOffset > 0 && body.dataStream[styleOffset - 1] !== DataStreamTreeTokenType.PARAGRAPH) {

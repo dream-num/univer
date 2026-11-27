@@ -30,6 +30,7 @@ import {
     LogLevel,
     ObjectMatrix,
     Plugin,
+    RegionService,
     ThemeService,
     Univer,
     UniverInstanceType,
@@ -207,6 +208,26 @@ describe('SheetsNumfmtCellContentController', () => {
         numfmtService.setValues('test', 'sheet1', [{ pattern: '0.0', ranges: [cellToRange(1, 1)] }]);
         expect(getInterceptedCell(worksheet, workbook, 1, 1, get)?.v).toBe('1234.5');
         expect(getInterceptedCell(worksheet, workbook, 1, 0, get)?.v).toBe('123');
+    });
+
+    it('refreshes already formatted cells when the number grouping region changes', async () => {
+        get(SheetsNumfmtCellContentController);
+        const worksheet = workbook.getSheetBySheetId('sheet1')!;
+        await commandService.executeCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 0: { 0: { v: 100000, t: CellValueType.NUMBER } } },
+        }, { onlyLocal: true });
+        numfmtService.setValues('test', 'sheet1', [{ pattern: '#,##0', ranges: [cellToRange(0, 0)] }]);
+        const view = () => getInterceptedCell(worksheet, workbook, 0, 0, get)?.v;
+        expect(view()).toBe('100,000');
+
+        const region = get(RegionService);
+        region.setRegion('en-IN');
+        expect(view()).toBe('1,00,000');
+
+        region.setRegion(LocaleType.EN_US);
+        expect(view()).toBe('100,000');
     });
 
     it('keeps legacy number-format lookup when no table dxf is present', () => {

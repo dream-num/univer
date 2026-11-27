@@ -26,9 +26,12 @@ import {
 } from '@univerjs/design';
 import { MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import { FilterBy, SheetsFilterSyncController } from '@univerjs/sheets-filter';
+import { SheetsUIPart } from '@univerjs/sheets-ui';
 import {
+    ComponentContainer,
     IMessageService,
     MobileDrawer,
+    useComponentsOfPart,
     useDependency,
     useObservable,
 } from '@univerjs/ui';
@@ -46,6 +49,7 @@ import {
     FILTER_PANEL_OPENED_KEY,
 } from '../../commands/operations/sheets-filter.operation';
 import { ISheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
+import { useWorkbookEditable } from '../components/use-workbook-editable';
 import { MobileFilterByColor } from './MobileFilterByColor';
 import { MobileFilterByCondition } from './MobileFilterByCondition';
 import { MobileFilterByValue } from './MobileFilterByValue';
@@ -60,10 +64,11 @@ function MobileFilterSyncSwitch() {
     const localeService = useDependency(LocaleService);
     const messageService = useDependency(IMessageService);
     const filterSyncController = useDependency(SheetsFilterSyncController);
+    const editable = useWorkbookEditable();
     const visible = useObservable(filterSyncController.visible$, false, true);
     const enabled = useObservable(filterSyncController.enabled$, true, true);
 
-    if (!visible) {
+    if (!visible || !editable) {
         return null;
     }
 
@@ -126,6 +131,7 @@ export function MobileSheetsFilterPanel() {
 }
 
 function MobileSheetsFilterPanelContent() {
+    const filterPanelEmbedPointPart = useComponentsOfPart(SheetsUIPart.FILTER_PANEL_EMBED_POINT);
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const panelService = useDependency(ISheetsFilterPanelService);
@@ -197,7 +203,7 @@ function MobileSheetsFilterPanelContent() {
                 role="dialog"
                 ariaLabel={title}
                 panelClassName="univer-pointer-events-auto"
-                contentClassName="univer-min-h-0 univer-px-4 univer-pb-4"
+                contentClassName="univer-min-h-0"
                 header={(
                     <div
                         className="
@@ -247,6 +253,18 @@ function MobileSheetsFilterPanelContent() {
                     )
                     : undefined}
             >
+                {!detailOpen && (
+                    <ComponentContainer
+                        components={filterPanelEmbedPointPart}
+                        sharedProps={{
+                            range: filterRange,
+                            colIndex: col,
+                            unitId: panelService.filterModel?.unitId,
+                            subUnitId: panelService.filterModel?.subUnitId,
+                            onClose: closePanel,
+                        }}
+                    />
+                )}
                 {detailOpen
                     ? (
                         <div className="univer-flex univer-min-h-full univer-flex-col">

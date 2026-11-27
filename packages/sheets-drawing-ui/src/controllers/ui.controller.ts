@@ -19,11 +19,9 @@ import { IDrawingManagerService } from '@univerjs/drawing';
 import { IShortcutService, ISidebarService } from '@univerjs/ui';
 import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
 import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
-import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { InsertCellImageCommand, InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 import { MoveDrawingsCommand } from '../commands/commands/move-drawings.command';
 import { SaveCellImagesCommand } from '../commands/commands/save-cell-images.command';
-import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import {
     AddWorksheetBackgroundImageCommand,
     DeleteWorksheetBackgroundImageCommand,
@@ -63,8 +61,6 @@ export class SheetDrawingUIController extends Disposable {
             DeleteWorksheetBackgroundImageCommand,
             SidebarSheetDrawingOperation,
             EditSheetDrawingOperation,
-            GroupSheetDrawingCommand,
-            UngroupSheetDrawingCommand,
             MoveDrawingsCommand,
             DeleteDrawingsCommand,
             SaveCellImagesCommand,

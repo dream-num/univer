@@ -16,7 +16,6 @@
 
 import type { IWorkbookData } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import type { ISheetNote } from '../../../models/sheets-note.model';
 import {
     ICommandService,
     ILogService,
@@ -35,6 +34,7 @@ import {
 } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { ISheetNote } from '../../../models/sheets-note.model';
 import { SheetsNoteModel } from '../../../models/sheets-note.model';
 import { RemoveNoteMutation, ToggleNotePopupMutation, UpdateNoteMutation } from '../../mutations/note.mutation';
 import { SheetDeleteNoteCommand, SheetToggleNotePopupCommand, SheetUpdateNoteCommand } from '../note.command';
@@ -203,6 +203,24 @@ describe('sheets-note commands', () => {
 
         expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
         expect(model.getNote(unitId, subUnitId, { row: 2, col: 3 })?.note).toBe('to delete');
+    });
+
+    it('SheetDeleteNoteCommand deletes the note at the requested cell instead of the selection', () => {
+        const model = get(SheetsNoteModel);
+        model.updateNote(unitId, subUnitId, 2, 3, { id: 'n5', row: 2, col: 3, width: 160, height: 72, note: 'target' });
+        model.updateNote(unitId, subUnitId, 5, 5, { id: 'n6', row: 5, col: 5, width: 160, height: 72, note: 'other' });
+        setSingleCellSelection(get, 5, 5);
+
+        const res = commandService.syncExecuteCommand(SheetDeleteNoteCommand.id, {
+            unitId,
+            sheetId: subUnitId,
+            row: 2,
+            col: 3,
+        });
+
+        expect(res).toBeTruthy();
+        expect(model.getNote(unitId, subUnitId, { row: 2, col: 3 })).toBeUndefined();
+        expect(model.getNote(unitId, subUnitId, { row: 5, col: 5 })?.note).toBe('other');
     });
 
     it('SheetToggleNotePopupCommand toggles show state at current selection and supports undo', async () => {

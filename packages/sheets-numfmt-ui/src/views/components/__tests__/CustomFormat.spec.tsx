@@ -15,7 +15,7 @@
  */
 
 import type { Root } from 'react-dom/client';
-import { ILocalStorageService, Injector, LocaleService, LocaleType } from '@univerjs/core';
+import { ILocalStorageService, Injector, LocaleService, LocaleType, RegionService } from '@univerjs/core';
 import { DesktopLocalStorageService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -42,6 +42,7 @@ describe('CustomFormat', () => {
     it('refreshes date presets without dropping user history or editing the active pattern', async () => {
         const injector = new Injector([
             [LocaleService],
+            [RegionService],
             [ILocalStorageService, { useClass: DesktopLocalStorageService }],
             [UserHabitController],
         ]);
@@ -84,5 +85,11 @@ describe('CustomFormat', () => {
         expect((container.querySelector('input') as HTMLInputElement).value).toBe(historicPattern);
         expect(onChange).not.toHaveBeenCalled();
         expect(await storage.getItem('numfmt_custom_pattern')).toEqual([historicPattern]);
+
+        await act(async () => injector.get(RegionService).setRegion('enIN'));
+        expect(container.textContent).toContain('dd/mm/yyyy');
+        expect(container.textContent).toContain('₹');
+        expect(container.querySelector('input')?.value).toBe(historicPattern);
+        expect(onChange).not.toHaveBeenCalled();
     });
 });

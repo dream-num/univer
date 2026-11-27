@@ -86,7 +86,7 @@ export class Numbervalue extends BaseFunction {
     }
 
     // eslint-disable-next-line
-    private _handleSingleObject(text: BaseValueObject, decimalSeparator: BaseValueObject, groupSeparator: BaseValueObject | undefined): BaseValueObject {
+    protected _handleSingleObject(text: BaseValueObject, decimalSeparator: BaseValueObject, groupSeparator: BaseValueObject | undefined): BaseValueObject {
         let textValue = `${text.getValue()}`;
         textValue = textValue.replace(/\s+/g, '');
 

@@ -20,15 +20,17 @@ import { InfoIcon } from '@univerjs/icons';
 import { SheetsFilterSyncController } from '@univerjs/sheets-filter';
 import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import type { LocaleKey } from '../../locale/types';
+import { useWorkbookEditable } from './use-workbook-editable';
 
 export function FilterSyncSwitch() {
     const sheetsFilterSyncController = useDependency(SheetsFilterSyncController);
+    const editable = useWorkbookEditable();
     const visible = useObservable(sheetsFilterSyncController.visible$, undefined, true);
     const localeService = useDependency(LocaleService);
     const messageService = useDependency(IMessageService);
     const enabled = useObservable(sheetsFilterSyncController.enabled$, undefined, true);
 
-    if (!visible) {
+    if (!visible || !editable) {
         return null;
     }
 

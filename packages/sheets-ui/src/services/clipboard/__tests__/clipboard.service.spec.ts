@@ -18,6 +18,7 @@ import type { ICellData, IRange, IStyleData, Nullable, Univer, Workbook } from '
 import type { IClipboardInterfaceService } from '@univerjs/ui';
 import {
     BooleanNumber,
+    CellValueType,
     CommandType,
     CustomCommandExecutionError,
     extractPureTextFromCell,
@@ -27,6 +28,8 @@ import {
     IPermissionService,
     IUndoRedoService,
     IUniverInstanceService,
+    LocaleService,
+    LocaleType,
     ObjectMatrix,
     RANGE_TYPE,
     Rectangle,
@@ -37,6 +40,7 @@ import {
     UniverInstanceType,
     WrapStrategy,
 } from '@univerjs/core';
+import { CanvasColorService, FontCache, ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
 import {
     AddWorksheetMergeMutation,
     discreteRangeToRange,
@@ -53,18 +57,21 @@ import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
     SheetInterceptorService,
+    SheetSkeletonService,
     SheetsSelectionsService,
     WorkbookCopyPermission,
     WorkbookEditablePermission,
     WorksheetCopyPermission,
     WorksheetEditPermission,
 } from '@univerjs/sheets';
+import { PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import type { IClipboardItem } from './mock-clipboard';
 import { SheetCopyCommand, SheetCutCommand } from '../../../commands/commands/clipboard.command';
 import {
     SheetPermissionInterceptorClipboardController,
 } from '../../../controllers/permission/sheet-permission-interceptor-clipboard.controller';
+import enUS from '../../../locale/en-US';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE } from '../clipboard.service';
 import { COPY_TYPE } from '../type';
@@ -257,33 +264,283 @@ describe('Test clipboard', () => {
         expect(getValues(0, 1, 0, 1)).toEqual(originalPeer);
     });
 
-    it('recalculates auto height when pasting into a row that already has a measured auto height', async () => {
+    it.each(['focus switch', 'unit switch', 'pending projection', 'changed projection', 'disposed pane', 'optional pending', 'optional changed', 'optional disposed', 'optional focus', 'optional recalc'] as const)(
+        'keeps a delayed paste bound to its initiating pane after a %s',
+        async (change) => {
+            // jsdom has no canvas backend. Both renderers and their skeleton managers are real.
+            const canvasContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+                return {
+                    canvas: this,
+                    setTransform: vi.fn(),
+                    clearRect: vi.fn(),
+                    measureText: () => ({
+                        width: 10,
+                        fontBoundingBoxAscent: 10,
+                        fontBoundingBoxDescent: 2,
+                        actualBoundingBoxAscent: 10,
+                        actualBoundingBoxDescent: 2,
+                    }),
+                } as unknown as CanvasRenderingContext2D;
+            });
+            try {
+                univer.__getInjector().add([ICanvasColorService, { useClass: CanvasColorService }]);
+                const renders = get(IRenderManagerService);
+                renders.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService]);
+                const primary = renders.createRender('test');
+                const companion = renders.createRender('test', undefined, 'paste-companion');
+                primary.with(SheetSkeletonManagerService).setCurrent({ sheetId: 'sheet1' });
+                const initiatingView = companion.with(SheetSkeletonManagerService);
+                initiatingView.setCurrent({ sheetId: 'sheet1' });
+                initiatingView.setProjection('sheet1', {
+                    viewId: 'paste-view',
+                    isRowFiltered: (row) => row === 30 || row === 32,
+                    getCell: () => undefined,
+                });
+                const mutationListener = commandService.onCommandExecuted((command) => {
+                    if (change === 'optional recalc' && command.id === SetRangeValuesMutation.id) {
+                        initiatingView.setProjectionPending('sheet1', true);
+                    }
+                });
+                onTestFinished(() => mutationListener.dispose());
+                renders.focusRender?.('paste-companion');
+                get(SheetsSelectionsService).setSelections('test', 'sheet1', [{
+                    range: { startRow: 30, endRow: 31, startColumn: 0, endColumn: 0 },
+                    primary: null,
+                    style: null,
+                }]);
+
+                let releaseRead = () => {};
+                const readGate = new Promise<void>((resolve) => {
+                    releaseRead = resolve;
+                });
+                const pending = sheetClipboardService.paste({
+                    presentationStyle: 'unspecified',
+                    types: ['text/html'],
+                    getType: async () => {
+                        await readGate;
+                        return new Blob(['<table><tr><td>A</td></tr><tr><td>B</td></tr></table>'], { type: 'text/html' });
+                    },
+                });
+                sheetClipboardService.setShowMenu(true);
+                if (change === 'unit switch') {
+                    const instances = get(IUniverInstanceService);
+                    const snapshot = Tools.deepClone(instances.getUnit<Workbook>('test')!.getSnapshot());
+                    instances.createUnit(UniverInstanceType.UNIVER_SHEET, { ...snapshot, id: 'paste-peer' });
+                    instances.focusUnit('paste-peer');
+                } else {
+                    renders.focusRender?.('test');
+                }
+                expect(sheetClipboardService.getPasteMenuVisible()).toBe(false);
+                if (change === 'pending projection') {
+                    initiatingView.setProjectionPending('sheet1', true);
+                } else if (change === 'changed projection') {
+                    initiatingView.setProjection('sheet1', { isRowFiltered: () => false, getCell: () => undefined });
+                } else if (change === 'disposed pane') {
+                    renders.removeRender('paste-companion');
+                }
+                releaseRead();
+
+                const succeeds = change === 'focus switch' || change === 'unit switch' || change.startsWith('optional');
+                expect(await pending).toBe(succeeds);
+                expect(sheetClipboardService.getPasteMenuVisible()).toBe(false);
+                expect(getValues(30, 0, 33, 0)?.map(([cell]) => cell?.v)).toEqual(
+                    succeeds ? [undefined, 'A', undefined, 'B'] : [undefined, undefined, undefined, undefined]
+                );
+                if (change.startsWith('optional')) {
+                    if (change !== 'optional focus' && change !== 'optional disposed') {
+                        renders.focusRender?.('paste-companion');
+                    }
+                    if (change === 'optional recalc') {
+                        initiatingView.setProjection('sheet1', {
+                            viewId: 'paste-view',
+                            isRowFiltered: (row) => row === 30 || row === 32,
+                            getCell: () => undefined,
+                        });
+                        initiatingView.setProjectionPending('sheet1', false);
+                    } else if (change === 'optional pending') {
+                        initiatingView.setProjectionPending('sheet1', true);
+                    } else if (change === 'optional changed') {
+                        initiatingView.setProjection('sheet1', { isRowFiltered: () => false, getCell: () => undefined });
+                    } else if (change === 'optional disposed') {
+                        renders.removeRender('paste-companion');
+                    }
+                    expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(change === 'optional recalc');
+                    expect(getValues(30, 0, 33, 0)?.map(([cell]) => cell?.v)).toEqual([undefined, 'A', undefined, 'B']);
+                    expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+                    expect(getValues(30, 0, 33, 0)?.map(([cell]) => cell?.v)).toEqual([undefined, undefined, undefined, undefined]);
+                }
+            } finally {
+                canvasContext.mockRestore();
+            }
+        }
+    );
+
+    it('rejects optional paste after the current workbook changes without consuming its history', async () => {
+        const location = { unitId: 'test', subUnitId: 'sheet1', range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0 } };
+        expect(await sheetClipboardService.legacyPaste('<table><tr><td>A</td></tr></table>', undefined, undefined, undefined, location)).toBe(true);
+        const instances = get(IUniverInstanceService);
+        const snapshot = Tools.deepClone(instances.getUnit<Workbook>('test')!.getSnapshot());
+        instances.createUnit(UniverInstanceType.UNIVER_SHEET, { ...snapshot, id: 'optional-peer' });
+        const peer = instances.getUnit<Workbook>('optional-peer')!;
+        const peerTarget = { unitId: 'optional-peer', subUnitId: 'sheet1' };
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, { ...peerTarget, cellValue: { 31: { 0: { v: 'PEER' } } } });
+        get(IUndoRedoService).pushUndoRedo({
+            unitID: 'optional-peer',
+            undoMutations: [{ id: SetRangeValuesMutation.id, params: { ...peerTarget, cellValue: { 31: { 0: null } } } }],
+            redoMutations: [{ id: SetRangeValuesMutation.id, params: { ...peerTarget, cellValue: { 31: { 0: { v: 'PEER' } } } } }],
+        });
+        const history = get(IUndoRedoService).getUndoRedoStatus('optional-peer');
+        expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(false);
+        expect(get(IUndoRedoService).getUndoRedoStatus('optional-peer')).toEqual(history);
+        expect(peer.getActiveSheet()!.getCellRaw(31, 0)?.v).toBe('PEER');
+        expect(getValues(30, 0, 30, 0)?.[0][0]?.v).toBe('A');
+    });
+
+    it.each(['separate', 'grouped'] as const)('rejects optional paste after another edit adds %s history in the same workbook', async (mode) => {
+        const target = { unitId: 'test', subUnitId: 'sheet1' };
+        const group = mode === 'grouped' ? get(IUndoRedoService).beginUndoRedoGroup('test', 'paste-history', 'append') : undefined;
+        onTestFinished(() => group?.dispose());
+        expect(await sheetClipboardService.legacyPaste('<table><tr><td>A</td></tr></table>', undefined, undefined, undefined, {
+            ...target,
+            range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0 },
+        })).toBe(true);
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, { ...target, cellValue: { 31: { 0: { v: 'LATER' } } } });
+        get(IUndoRedoService).pushUndoRedo({
+            unitID: 'test',
+            undoMutations: [{ id: SetRangeValuesMutation.id, params: { ...target, cellValue: { 31: { 0: null } } } }],
+            redoMutations: [{ id: SetRangeValuesMutation.id, params: { ...target, cellValue: { 31: { 0: { v: 'LATER' } } } } }],
+        });
+        group?.dispose();
+        expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(false);
+        expect(getValues(30, 0, 31, 0)?.map(([cell]) => cell?.v)).toEqual(['A', 'LATER']);
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getValues(30, 0, 31, 0)?.map(([cell]) => cell?.v)).toEqual([mode === 'grouped' ? undefined : 'A', undefined]);
+    });
+
+    it('changes paste type while the original paste is the current history entry', async () => {
+        expect(await sheetClipboardService.legacyPaste('<table><tr><td>A</td></tr></table>', undefined, undefined, undefined, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0 },
+        })).toBe(true);
+        expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(true);
+        expect(getValues(30, 0, 30, 0)?.[0][0]?.v).toBe('A');
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getValues(30, 0, 30, 0)?.[0][0]?.v).toBeUndefined();
+    });
+
+    it.each(['rejected', 'throwing', 'after paste'] as const)('restores the original paste when changing paste type is %s', async (failure) => {
+        expect(await sheetClipboardService.legacyPaste('<table><tr><td>A</td></tr></table>', undefined, undefined, undefined, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0 },
+        })).toBe(true);
+        const hook = sheetClipboardService.addClipboardHook({
+            id: 'reject-replacement',
+            onBeforePaste: () => {
+                if (failure === 'throwing') throw new Error('replacement rejected');
+                return failure !== 'rejected';
+            },
+            onAfterPaste: (success) => {
+                if (failure === 'after paste' && success) throw new Error('replacement rejected');
+            },
+        });
+        onTestFinished(() => hook.dispose());
+        if (failure !== 'rejected') {
+            expect(() => sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toThrow('replacement rejected');
+        } else {
+            expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(false);
+        }
+        expect(getValues(30, 0, 30, 0)?.[0][0]?.v).toBe('A');
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getValues(30, 0, 30, 0)?.[0][0]?.v).toBeUndefined();
+    });
+
+    it('preserves a later undone edit for redo when changing paste type is rejected', async () => {
+        const target = { unitId: 'test', subUnitId: 'sheet1' };
+        expect(await sheetClipboardService.legacyPaste('<table><tr><td>A</td></tr></table>', undefined, undefined, undefined, {
+            ...target,
+            range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0 },
+        })).toBe(true);
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, { ...target, cellValue: { 31: { 0: { v: 'LATER' } } } });
+        get(IUndoRedoService).pushUndoRedo({
+            unitID: 'test',
+            undoMutations: [{ id: SetRangeValuesMutation.id, params: { ...target, cellValue: { 31: { 0: null } } } }],
+            redoMutations: [{ id: SetRangeValuesMutation.id, params: { ...target, cellValue: { 31: { 0: { v: 'LATER' } } } } }],
+        });
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        const hook = sheetClipboardService.addClipboardHook({ id: 'reject-replacement', onBeforePaste: () => false });
+        onTestFinished(() => hook.dispose());
+        expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(false);
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getValues(30, 0, 31, 0)?.map(([cell]) => cell?.v)).toEqual(['A', 'LATER']);
+    });
+
+    it.each(['public', 'pending', 'private value'] as const)('persists public auto height after a paste in a %s display', async (display) => {
         const row = 30;
-        const worksheet = get(IUniverInstanceService)
-            .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!
-            .getSheetBySheetId('sheet1')!;
+        const locale = get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: enUS });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+        const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!.getSheetBySheetId('sheet1')!;
         worksheet.getRowManager().getRowOrCreate(row).ah = 24;
-        const skeleton = get(SheetSkeletonManagerService).ensureSkeleton('sheet1')!;
-        vi.spyOn(skeleton, 'calculateAutoHeightInRange').mockReturnValue([{ row, autoHeight: 34 }]);
-        const copyId = 'existing-auto-height';
+        const canvas = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            setTransform: () => {},
+            clearRect: () => {},
+        } as unknown as CanvasRenderingContext2D);
+        onTestFinished(() => canvas.mockRestore());
+        const metrics = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
+            width: text.length * 8,
+            fontBoundingBoxAscent: 16,
+            fontBoundingBoxDescent: 4,
+            actualBoundingBoxAscent: 16,
+            actualBoundingBoxDescent: 4,
+        }));
+        onTestFinished(() => metrics.mockRestore());
+        univer.__getInjector().add([ICanvasColorService, { useClass: CanvasColorService }]);
+        const renders = get(IRenderManagerService);
+        renders.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService]);
+        const primary = renders.createRender('test');
+        const companion = renders.createRender('test', undefined, 'autoheight-companion');
+        primary.with(SheetSkeletonManagerService).setCurrent({ sheetId: 'sheet1' });
+        const manager = companion.with(SheetSkeletonManagerService);
+        manager.setCurrent({ sheetId: 'sheet1' });
+        if (display !== 'public') {
+            manager.setProjection('sheet1', {
+                isRowFiltered: () => false,
+                getCell: () => display === 'private value' ? { v: 'short', t: CellValueType.STRING } : undefined,
+            });
+        }
+        const listener = commandService.onCommandExecuted((command) => {
+            if (display === 'pending' && command.id === SetRangeValuesMutation.id) {
+                manager.setProjectionPending('sheet1', true);
+                manager.setProjection('sheet1', { placeholder: true, isRowFiltered: () => true, getCell: () => null });
+            }
+        });
+        onTestFinished(() => listener.dispose());
+        renders.focusRender?.('autoheight-companion');
+        const copyId = 'public-auto-height';
+        const value = 'wrapped text '.repeat(25);
         sheetClipboardService.copyContentCache().set(copyId, {
             unitId: 'test',
             subUnitId: 'sheet1',
             range: { rows: [0], cols: [0] },
-            matrix: new ObjectMatrix({ 0: { 0: { v: 'line 1\nline 2' } } }),
+            matrix: new ObjectMatrix({ 0: { 0: { v: value, s: { fs: 12, tb: WrapStrategy.WRAP } } } }),
             copyType: COPY_TYPE.COPY,
         });
-
         expect(await sheetClipboardService.pasteByCopyId(copyId, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, {
             unitId: 'test',
             subUnitId: 'sheet1',
             range: { startRow: row, endRow: row, startColumn: 0, endColumn: 0 },
         })).toBe(true);
-        expect(worksheet.getRowManager().getRow(row)?.ah).toBe(34);
+        const publicSkeleton = get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const expected = publicSkeleton.calculateAutoHeightInRange([{ startRow: row, endRow: row, startColumn: 0, endColumn: 0 }])[0].autoHeight;
+        expect(expected).toBeGreaterThan(24);
+        expect(worksheet.getRowManager().getRow(row)?.ah).toBe(expected);
         expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
         expect(worksheet.getRowManager().getRow(row)?.ah).toBe(24);
         expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
-        expect(worksheet.getRowManager().getRow(row)?.ah).toBe(34);
+        expect(worksheet.getRowManager().getRow(row)?.ah).toBe(expected);
     });
 
     it.each([
@@ -961,6 +1218,218 @@ describe('Test clipboard', () => {
         });
     });
 
+    it('copies displayed formula values to text, HTML and values-only paste without changing public values', async () => {
+        const target = { unitId: 'test', subUnitId: 'sheet2', range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0 } };
+        expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 30: { 0: { f: '=SUBTOTAL(109,A2:A4)', v: 180, t: CellValueType.NUMBER } } },
+        })).toBe(true);
+        const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
+        const before = Tools.deepClone(workbook.getSnapshot());
+        get(SheetSkeletonManagerService).setProjection('sheet1', {
+            isRowFiltered: () => false,
+            getCell: (row, column) => row === 30 && column === 0 ? { v: 150, t: CellValueType.NUMBER } : undefined,
+        });
+        const range = { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.NORMAL };
+        const content = sheetClipboardService.generateCopyContent('test', 'sheet1', range)!;
+        expect(content.plain).toBe('150');
+        const document = new DOMParser().parseFromString(content.html, 'text/html');
+        expect(document.querySelector('td')?.textContent).toBe('150');
+        expect(content.matrixFragment.getValue(0, 0)).toMatchObject({ f: '=SUBTOTAL(109,A2:A4)', v: 150, t: CellValueType.NUMBER });
+        expect(workbook.getSnapshot()).toEqual(before);
+        get(SheetsSelectionsService).addSelections([{ range, primary: null, style: null }]);
+        expect(await sheetClipboardService.copy()).toBe(true);
+        const copyId = sheetClipboardService.copyContentCache().getLastCopyId()!;
+        expect(await sheetClipboardService.pasteByCopyId(copyId, PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE, target)).toBe(true);
+        expect(getValues(30, 0, 30, 0, 'sheet2')?.[0][0]).toMatchObject({ v: 150 });
+        expect(getValues(30, 0, 30, 0, 'sheet2')?.[0][0]?.f).toBeFalsy();
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getValues(30, 0, 30, 0, 'sheet2')?.[0][0]?.v).toBeFalsy();
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getValues(30, 0, 30, 0, 'sheet2')?.[0][0]?.v).toBe(150);
+        expect(workbook.getSheetBySheetId('sheet1')!.getCellRaw(30, 0)?.v).toBe(180);
+    });
+
+    it('copies new and cleared projected spill cells instead of public spill values', () => {
+        expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 30: { 0: { v: 180 } } },
+        })).toBe(true);
+        get(SheetSkeletonManagerService).setProjection('sheet1', {
+            isRowFiltered: () => false,
+            getCell: (row, column) => {
+                if (column !== 0) {
+                    return undefined;
+                }
+                if (row === 30) {
+                    return null;
+                }
+                return row === 31 ? { v: 151, t: CellValueType.NUMBER } : undefined;
+            },
+        });
+        const content = sheetClipboardService.generateCopyContent('test', 'sheet1', { startRow: 30, endRow: 31, startColumn: 0, endColumn: 0 })!;
+        expect(content.matrixFragment.getValue(0, 0)?.v ?? null).toBeNull();
+        expect(content.matrixFragment.getValue(1, 0)?.v).toBe(151);
+        const document = new DOMParser().parseFromString(content.html, 'text/html');
+        expect(Array.from(document.querySelectorAll('td'), (cell) => cell.textContent)).toEqual(['', '151']);
+    });
+
+    it('keeps covered merged values out of projected clipboard content', () => {
+        const target = { unitId: 'test', subUnitId: 'sheet1' };
+        const range = { startRow: 30, endRow: 30, startColumn: 0, endColumn: 1 };
+        expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            ...target,
+            cellValue: { 30: { 0: { v: 'Anchor' }, 1: { v: 'Covered' } } },
+        })).toBe(true);
+        expect(commandService.syncExecuteCommand(AddWorksheetMergeMutation.id, { ...target, ranges: [range] })).toBe(true);
+        get(SheetSkeletonManagerService).setProjection('sheet1', {
+            isRowFiltered: () => false,
+            getCell: () => undefined,
+        });
+        const content = sheetClipboardService.generateCopyContent('test', 'sheet1', range)!;
+        expect(content.plain).toBe('Anchor\t');
+        expect(content.matrixFragment.getValue(0, 1)?.v).toBeFalsy();
+        expect(content.matrixFragment.getValue(0, 0)).toMatchObject({ v: 'Anchor', colSpan: 2 });
+    });
+
+    it.each(['outside selection', 'filtered'] as const)('omits covered HTML values when the merge anchor is %s', (anchor) => {
+        const target = { unitId: 'test', subUnitId: 'sheet1' };
+        const range = { startRow: 30, endRow: 31, startColumn: 0, endColumn: 0 };
+        expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            ...target,
+            cellValue: { 30: { 0: { v: 'Anchor' } }, 31: { 0: { v: 'Covered' } } },
+        })).toBe(true);
+        expect(commandService.syncExecuteCommand(AddWorksheetMergeMutation.id, { ...target, ranges: [range] })).toBe(true);
+        get(SheetSkeletonManagerService).setProjection('sheet1', {
+            isRowFiltered: (row) => anchor === 'filtered' && row === 30,
+            getCell: () => undefined,
+        });
+        const content = sheetClipboardService.generateCopyContent('test', 'sheet1', {
+            ...range,
+            startRow: anchor === 'outside selection' ? 31 : 30,
+        })!;
+        const document = new DOMParser().parseFromString(content.html, 'text/html');
+        expect(document.querySelector('td')?.textContent).toBe('');
+        expect(content.matrixFragment.getValue(0, 0)?.v).toBeFalsy();
+    });
+
+    it('copies only projected visible rows and compacts a merge across a hidden row', async () => {
+        const target = { unitId: 'test', subUnitId: 'sheet1' };
+        const range = { startRow: 30, endRow: 33, startColumn: 0, endColumn: 0 };
+        expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            ...target,
+            cellValue: { 30: { 0: { v: 'Merged' } }, 33: { 0: { v: 'Next' } } },
+        })).toBe(true);
+        expect(commandService.syncExecuteCommand(AddWorksheetMergeMutation.id, {
+            ...target,
+            ranges: [{ ...range, endRow: 32 }],
+        })).toBe(true);
+        get(SheetSkeletonManagerService).setProjection('sheet1', {
+            isRowFiltered: (row) => row === 31,
+            getCell: () => undefined,
+        });
+        const sheet = get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+        const read = vi.spyOn(sheet, 'getCellRaw');
+        try {
+            const content = sheetClipboardService.generateCopyContent('test', 'sheet1', range)!;
+            expect(read.mock.calls.some(([row]) => row === 31)).toBe(false);
+            expect(content.discreteRange.rows).toEqual([30, 32, 33]);
+            expect(content.matrixFragment.getValue(0, 0)).toMatchObject({ v: 'Merged', rowSpan: 2 });
+            expect(content.matrixFragment.getValue(2, 0)?.v).toBe('Next');
+            const document = new DOMParser().parseFromString(content.html, 'text/html');
+            expect(Array.from(document.querySelectorAll('td'), (cell) => cell.textContent)).toEqual(['Merged', 'Next']);
+            expect(document.querySelector('td')?.getAttribute('rowspan')).toBe('2');
+        } finally {
+            read.mockRestore();
+        }
+        get(SheetsSelectionsService).addSelections([{ range, primary: null, style: null }]);
+        expect(await sheetClipboardService.copy()).toBe(true);
+        const copyId = sheetClipboardService.copyContentCache().getLastCopyId()!;
+        expect(await sheetClipboardService.pasteByCopyId(copyId, undefined, {
+            unitId: 'test',
+            subUnitId: 'sheet2',
+            range: { startRow: 35, endRow: 35, startColumn: 0, endColumn: 0 },
+        })).toBe(true);
+        expect(getMergedCells(35, 0, 37, 0, 'sheet2')).toEqual([
+            expect.objectContaining({ startRow: 35, endRow: 36, startColumn: 0, endColumn: 0 }),
+        ]);
+        expect(getValues(37, 0, 37, 0, 'sheet2')?.[0][0]?.v).toBe('Next');
+    });
+
+    it('shares projected source rows with metadata copy hooks', () => {
+        const rows: number[][] = [];
+        sheetClipboardService.addClipboardHook({
+            id: 'metadata-source-rows',
+            onBeforeCopy: (...args) => rows.push(args[4]?.rows ?? []),
+        });
+        get(SheetSkeletonManagerService).setProjection('sheet1', {
+            isRowFiltered: (row) => row === 31,
+            getCell: () => undefined,
+        });
+        const content = sheetClipboardService.generateCopyContent('test', 'sheet1', {
+            startRow: 30,
+            endRow: 32,
+            startColumn: 0,
+            endColumn: 0,
+        })!;
+        expect(rows).toEqual([content.discreteRange.rows]);
+        expect(rows[0]).toEqual([30, 32]);
+    });
+
+    it('copies a publicly filtered row with its visible projected height', () => {
+        const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+        worksheet.__interceptViewModel((viewModel) => {
+            viewModel.registerRowFilteredInterceptor({ getRowFiltered: (row) => row === 32 });
+        });
+        get(SheetSkeletonManagerService).setProjection('sheet1', { isRowFiltered: () => false, getCell: () => undefined });
+        const content = sheetClipboardService.generateCopyContent('test', 'sheet1', {
+            startRow: 32,
+            endRow: 32,
+            startColumn: 0,
+            endColumn: 0,
+        })!;
+        expect(content.html).toContain(`height: ${worksheet.getRowManager().getRowHeight(32)}px;`);
+        expect(worksheet.getRowHeight(32)).toBe(0);
+    });
+
+    it.each([
+        { copyType: COPY_TYPE.COPY, filteredRow: 31, expected: ['A', undefined, 'C'], remaining: ['A', 'B', 'C'] },
+        { copyType: COPY_TYPE.CUT, filteredRow: 31, expected: ['A', 'B', 'C'], remaining: [undefined, undefined, undefined] },
+        { copyType: COPY_TYPE.CUT, filteredRow: 30, expected: ['B', 'C', undefined], remaining: ['A', undefined, undefined] },
+    ])('uses projected coordinates for $copyType with filtered row $filteredRow', async ({ copyType, filteredRow, expected, remaining }) => {
+        const source = { unitId: 'test', subUnitId: 'sheet1' };
+        const target = { unitId: 'test', subUnitId: 'sheet2' };
+        expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            ...source,
+            cellValue: { 30: { 0: { v: 'A' } }, 31: { 0: { v: 'B' } }, 32: { 0: { v: 'C' } } },
+        })).toBe(true);
+        const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+        worksheet.__interceptViewModel((viewModel) => {
+            viewModel.registerRowFilteredInterceptor({ getRowFiltered: (row) => row === 32 });
+        });
+        expect(worksheet.getRowFiltered(32)).toBe(true);
+        const display = get(SheetSkeletonManagerService);
+        display.setProjection('sheet1', { isRowFiltered: (row) => row === filteredRow, getCell: () => undefined });
+        if (copyType === COPY_TYPE.COPY) {
+            display.setProjection('sheet2', { isRowFiltered: (row) => row === 36, getCell: () => undefined });
+        }
+        get(SheetsSelectionsService).addSelections([{
+            range: { startRow: 30, endRow: 32, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
+            primary: null,
+            style: null,
+        }]);
+        expect(await (copyType === COPY_TYPE.COPY ? sheetClipboardService.copy() : sheetClipboardService.cut())).toBe(true);
+        const copyId = sheetClipboardService.copyContentCache().getLastCopyId()!;
+        expect(await sheetClipboardService.pasteByCopyId(copyId, undefined, {
+            ...target,
+            range: { startRow: 35, endRow: 35, startColumn: 0, endColumn: 0 },
+        })).toBe(true);
+        expect(getValues(35, 0, 37, 0, 'sheet2')?.map(([cell]) => cell?.v ?? undefined)).toEqual(expected);
+        expect(getValues(30, 0, 32, 0)?.map(([cell]) => cell?.v ?? undefined)).toEqual(remaining);
+    });
+
     describe('Test cut command in single selection', () => {
         it('checks range movement before resource hooks and keeps a rejected cut available for retry', async () => {
             const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
@@ -1162,6 +1631,148 @@ describe('Test clipboard', () => {
             expect(getValues(24, 0, 24, 0)![0][0]).toBe(null);
             expect(getValues(24, 1, 24, 1)![0][0]!.v).toBe('A25');
         });
+    });
+});
+
+describe('Multiline clipboard cells', () => {
+    let univer: Univer;
+    let workbook: Workbook;
+    let commands: ICommandService;
+    let clipboard: ISheetClipboardService;
+    let writes: Array<{ text: string; html: string }>;
+
+    beforeEach(() => {
+        writes = [];
+        const boundary: IClipboardInterfaceService = {
+            supportClipboard: true,
+            write: async (text, html) => { writes.push({ text, html }); },
+            writeText: async (text) => { writes.push({ text, html: '' }); },
+            readText: async () => '',
+            read: async () => [],
+        };
+        const bed = clipboardTestBed(undefined, undefined, boundary);
+        univer = bed.univer;
+        workbook = bed.sheet;
+        commands = bed.get(ICommandService);
+        for (const command of [
+            SetRangeValuesMutation,
+            SetWorksheetRowHeightMutation,
+            SetWorksheetColWidthMutation,
+            AddWorksheetMergeMutation,
+            RemoveWorksheetMergeMutation,
+            SetSelectionsOperation,
+            SetWorksheetRowAutoHeightMutation,
+        ]) {
+            commands.registerCommand(command);
+        }
+        bed.get(SheetSkeletonManagerService).setCurrent({ sheetId: 'sheet1' });
+        clipboard = bed.get(ISheetClipboardService);
+    });
+
+    afterEach(() => univer.dispose());
+
+    function select(range: IRange) {
+        return commands.executeCommand(SetSelectionsOperation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            selections: [{ range: { ...range, rangeType: RANGE_TYPE.NORMAL }, primary: null, style: null }],
+        });
+    }
+
+    it('exports multiline cells as Excel-compatible HTML and quoted TSV', async () => {
+        await commands.executeCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: {
+                0: {
+                    0: {
+                        p: {
+                            id: 'doc-multiline',
+                            body: {
+                                dataStream: 'line1\rline2\r\n',
+                                paragraphs: [
+                                    { startIndex: 5, paragraphId: 'p1' },
+                                    { startIndex: 11, paragraphId: 'p2' },
+                                ],
+                                sectionBreaks: [{ startIndex: 12, sectionId: 's1' }],
+                            },
+                            documentStyle: {},
+                        },
+                    },
+                    1: { v: 'plain1\nplain2', t: CellValueType.STRING },
+                },
+                1: { 0: { v: 'quote "here"' }, 1: { v: '\n', t: CellValueType.STRING } },
+            },
+        });
+        await select({ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 });
+
+        expect(await commands.executeCommand(SheetCopyCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+        })).toBe(true);
+
+        const [{ text, html }] = writes;
+        expect(html).toContain('br { mso-data-placement: same-cell; }');
+        expect(html).toMatch(/<td[^>]*>line1<br>line2<\/td>/);
+        expect(html).toMatch(/<td[^>]*>plain1<br>plain2<\/td>/);
+        expect(html).toMatch(/<td[^>]*><br><\/td>/);
+        expect(text).toBe('"line1\nline2"\t"plain1\nplain2"\n"quote ""here"""\t"\n"');
+    });
+
+    it('round-trips a quoted single cell through plain text', async () => {
+        const value = 'quote "here"';
+        await commands.executeCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 0: { 0: { v: value } } },
+        });
+        await select({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 });
+        expect(await commands.executeCommand(SheetCopyCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+        })).toBe(true);
+
+        await select({ startRow: 3, endRow: 3, startColumn: 0, endColumn: 0 });
+        expect(await clipboard.legacyPaste(undefined, writes[0].text)).toBe(true);
+        expect(workbook.getActiveSheet().getCellRaw(3, 0)?.v).toBe(value);
+    });
+
+    it('pastes multiline Excel HTML without splitting cells or inserting leading spaces', async () => {
+        await select({ startRow: 3, endRow: 3, startColumn: 0, endColumn: 0 });
+        const html = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office"
+                  xmlns:x="urn:schemas-microsoft-com:office:excel">
+            <head><style>br { mso-data-placement: same-cell; } .xl65 { color: #ff0000; }</style></head>
+            <body><table><tr>
+                <td class="xl65">first<br>\r\n  second</td>
+                <td><span style="font-weight:bold">alpha<br>beta</span></td>
+            </tr></table></body></html>
+        `;
+
+        expect(await clipboard.legacyPaste(html)).toBe(true);
+
+        const sheet = workbook.getActiveSheet();
+        expect(sheet.getCellRaw(3, 0)?.p?.body?.dataStream).toBe('first\rsecond\r\n');
+        expect(sheet.getCellRaw(3, 1)?.p?.body?.dataStream).toBe('alpha\rbeta\r\n');
+    });
+
+    it.each(['keyboard', 'clipboard item'])('pastes quoted multiline TSV through the %s entry point', async (entry) => {
+        await select({ startRow: 12, endRow: 12, startColumn: 0, endColumn: 0 });
+        const tsv = '"row1-a\nrow1-b"\tcol2\r\nrow2-a\trow2-b\r\n';
+        const pasted = entry === 'keyboard'
+            ? await clipboard.legacyPaste(undefined, tsv)
+            : await clipboard.paste({
+                presentationStyle: 'unspecified',
+                types: [PLAIN_TEXT_CLIPBOARD_MIME_TYPE],
+                getType: async () => new Blob([tsv], { type: PLAIN_TEXT_CLIPBOARD_MIME_TYPE }),
+            });
+        expect(pasted).toBe(true);
+
+        const sheet = workbook.getActiveSheet();
+        expect(sheet.getCellRaw(12, 0)?.p?.body?.dataStream).toBe('row1-a\rrow1-b\r\n');
+        expect(sheet.getCellRaw(12, 1)?.v).toBe('col2');
+        expect(sheet.getCellRaw(13, 0)?.v).toBe('row2-a');
+        expect(sheet.getCellRaw(13, 1)?.v).toBe('row2-b');
     });
 });
 

@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { getDateSerialNumberByObject, getNormalYearDaysByBasis, getTwoDateDaysByBasis } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
+import { getMaturityBondActualYearDays } from '../../../basics/financial';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsNullorArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -35,7 +38,36 @@ export class Yieldmat extends BaseFunction {
         pr: BaseValueObject,
         basis?: BaseValueObject
     ): BaseValueObject {
-        let _basis = basis ?? NumberValueObject.create(0);
+        const args = [settlement, maturity, issue, rate, pr, basis ?? NumberValueObject.create(0)] as const;
+        const arrays = args.filter((item): item is ArrayValueObject => item.isArray());
+        if (arrays.every((item) => item.getRowCount() === 1 && item.getColumnCount() === 1)) {
+            return this._calculateSingle(...args);
+        }
+
+        const rowCount = Math.max(...arrays.map((item) => item.getRowCount()));
+        const columnCount = Math.max(...arrays.map((item) => item.getColumnCount()));
+        const missing = ErrorValueObject.create(ErrorType.NA);
+        const zero = NumberValueObject.create(0);
+        const expanded = args.map((item) => expandArrayValueObject(rowCount, columnCount, item, missing));
+        const result = expanded[0].map((_, row, column) => {
+            const [settlementCell, maturityCell, issueCell, rateCell, quoteCell, basisCell] = expanded.map((item, index) => {
+                const value = item.get(row, column);
+                return args[index].isArray() && (value == null || value.isNull()) ? zero : value ?? missing;
+            });
+            return this._calculateSingle(settlementCell, maturityCell, issueCell, rateCell, quoteCell, basisCell);
+        });
+        return rowCount === 1 && columnCount === 1 ? (result as ArrayValueObject).getFirstCell() : result;
+    }
+
+    private _calculateSingle(
+        settlement: BaseValueObject,
+        maturity: BaseValueObject,
+        issue: BaseValueObject,
+        rate: BaseValueObject,
+        pr: BaseValueObject,
+        basis: BaseValueObject
+    ): BaseValueObject {
+        let _basis = basis;
 
         if (_basis.isNull()) {
             _basis = NumberValueObject.create(0);
@@ -91,7 +123,9 @@ export class Yieldmat extends BaseFunction {
         // DSM = number of days from settlement to maturity.
         // DIM = number of days from issue to maturity.
         // A = number of days from issue to settlement.
-        const B = getNormalYearDaysByBasis(settlementSerialNumber, basisValue, this.getDateSystem());
+        const B = basisValue === 1
+            ? getMaturityBondActualYearDays(issueSerialNumber, settlementSerialNumber, this.getDateSystem())
+            : getNormalYearDaysByBasis(settlementSerialNumber, basisValue, this.getDateSystem());
         const { days: DSM } = getTwoDateDaysByBasis(settlementSerialNumber, maturitySerialNumber, basisValue, this.getDateSystem());
         const { days: DIM } = getTwoDateDaysByBasis(issueSerialNumber, maturitySerialNumber, basisValue, this.getDateSystem());
         const { days: A } = getTwoDateDaysByBasis(issueSerialNumber, settlementSerialNumber, basisValue, this.getDateSystem());

@@ -110,7 +110,7 @@ describe('Test xnpv function', () => {
             const values = ArrayValueObject.create('{-10000,2750,4250,3250,2750}');
             const dates = ArrayValueObject.create('{39448,39508,39751,39859,39904}');
             const result = testFunction.calculate(rate, values, dates);
-            expect(getObjectValue(result)).toBe(ErrorType.NA);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Value is array', () => {
@@ -143,7 +143,7 @@ describe('Test xnpv function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(rate2, values2, dates);
-            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
 
             const values3 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -157,7 +157,7 @@ describe('Test xnpv function', () => {
                 column: 0,
             });
             const result3 = testFunction.calculate(rate2, values3, dates);
-            expect(getObjectValue(result3)).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result3)).toBe(ErrorType.NUM);
 
             const values4 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

@@ -30,7 +30,8 @@ import {
     UniverInstanceService,
     Workbook,
 } from '@univerjs/core';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ReCalcSheetsFilterMutationId } from '../../common/const';
 import { SheetsFilterService } from '../sheet-filter.service';
 
 const injectors: Injector[] = [];
@@ -138,6 +139,70 @@ describe('SheetsFilterService', () => {
         expect(service.getFilterModel('unit-1', 'sheet-1')).toBeNull();
         expect((model as never as { _disposed: boolean })._disposed).toBe(true);
         expect(completions).toEqual(['loaded', 'error', 'active']);
+    });
+
+    it('tracks whether remote filter mutations are suppressed per worksheet', () => {
+        const service = createService();
+
+        expect(service.isRemoteFilterMutationsSuppressed('unit-1', 'sheet-1')).toBe(false);
+        service.setRemoteFilterMutationsSuppressed('unit-1', 'sheet-1', true);
+        expect(service.isRemoteFilterMutationsSuppressed('unit-1', 'sheet-1')).toBe(true);
+        expect(service.isRemoteFilterMutationsSuppressed('unit-1', 'sheet-2')).toBe(false);
+        service.setRemoteFilterMutationsSuppressed('unit-1', 'sheet-1', false);
+        expect(service.isRemoteFilterMutationsSuppressed('unit-1', 'sheet-1')).toBe(false);
+    });
+
+    it('tracks personal filter mode per worksheet', () => {
+        const service = createService();
+
+        expect(service.isPersonalFilterMode('unit-1', 'sheet-1')).toBe(false);
+        service.enablePersonalFilterMode('unit-1', 'sheet-1');
+        expect(service.isPersonalFilterMode('unit-1', 'sheet-1')).toBe(true);
+        expect(service.isPersonalFilterMode('unit-1', 'sheet-2')).toBe(false);
+        service.disablePersonalFilterMode('unit-1', 'sheet-1');
+        expect(service.isPersonalFilterMode('unit-1', 'sheet-1')).toBe(false);
+    });
+
+    it('tracks the initial shared-filter catch-up separately from personal mode', () => {
+        const service = createService();
+
+        service.beginInitialFilterCatchUp('unit-1');
+        expect(service.isInitialFilterCatchUp('unit-1')).toBe(true);
+        service.completeInitialFilterCatchUp('unit-1');
+        expect(service.isInitialFilterCatchUp('unit-1')).toBe(false);
+    });
+
+    it('defers remote filter recalculation until the changeset is fully applied', () => {
+        const service = createService();
+        service.ensureFilterModel('unit-1', 'sheet-1');
+        const commandService = (service as unknown as { _commandService: ICommandService })._commandService;
+        const execute = vi.spyOn(commandService, 'syncExecuteCommand').mockReturnValue(true);
+
+        service.markRemoteFilterRecalc('unit-1', 'sheet-1');
+        expect(execute).not.toHaveBeenCalled();
+
+        service.flushRemoteFilterRecalc();
+        expect(execute).toHaveBeenCalledWith(
+            ReCalcSheetsFilterMutationId,
+            { unitId: 'unit-1', subUnitId: 'sheet-1' },
+            { onlyLocal: true }
+        );
+    });
+
+    it('removes a filter model when its worksheet is disposed', () => {
+        const service = createService();
+        service.ensureFilterModel('unit-1', 'sheet-1');
+        const invalidated = vi.fn();
+        service.filterHistoryInvalidated$.subscribe(invalidated);
+        const workbook = (service as unknown as { _univerInstanceService: IUniverInstanceService })
+            ._univerInstanceService
+            .getUnit<Workbook>('unit-1')!;
+
+        workbook.removeSheet('sheet-1');
+
+        expect(service.getFilterModel('unit-1', 'sheet-1')).toBeNull();
+        // Local delete/undo/redo must not rewrite the redo stack while the command is running.
+        expect(invalidated).not.toHaveBeenCalled();
     });
 
     it('loads and unloads filter models from snapshot resources and updates active model', () => {

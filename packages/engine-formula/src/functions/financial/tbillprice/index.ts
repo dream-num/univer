@@ -23,6 +23,7 @@ import { getCurrencyFormat } from '../../../engine/utils/numfmt-kit';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { isExcelTBillPeriod } from '../tbill-period';
 
 export class Tbillprice extends BaseFunction {
     override minParams = 3;
@@ -30,6 +31,10 @@ export class Tbillprice extends BaseFunction {
     override maxParams = 3;
 
     override needsLocale = true;
+
+    protected _isPeriodValid(settlement: number, maturity: number, yearDays: number): boolean {
+        return Math.floor(maturity) - Math.floor(settlement) <= yearDays;
+    }
 
     override calculate(settlement: BaseValueObject, maturity: BaseValueObject, discount: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsNullorArrayOrBoolean(settlement, maturity, discount);
@@ -76,7 +81,7 @@ export class Tbillprice extends BaseFunction {
         const yearDays = getDaysInYear(year);
 
         // if maturity is more than one year after settlement, TBILLPRICE returns the #NUM! error value.
-        if (DSM > yearDays) {
+        if (!this._isPeriodValid(settlementSerialNumber, maturitySerialNumber, yearDays)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
@@ -88,5 +93,11 @@ export class Tbillprice extends BaseFunction {
         }
 
         return NumberValueObject.create(result, getCurrencyFormat(this.getLocale()));
+    }
+}
+
+export class ExcelTbillprice extends Tbillprice {
+    protected override _isPeriodValid(settlement: number, maturity: number): boolean {
+        return isExcelTBillPeriod(settlement, maturity, this.getDateSystem());
     }
 }

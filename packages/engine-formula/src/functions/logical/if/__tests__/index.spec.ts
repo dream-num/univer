@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
@@ -23,7 +24,17 @@ import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { If } from '../index';
 
 describe('Test if function', () => {
-    const testFunction = new If(FUNCTION_NAMES_LOGICAL.IF);
+    let injector: Injector;
+    let testFunction: If;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [If, { useFactory: () => injector.createInstance(If, FUNCTION_NAMES_LOGICAL.IF) }],
+        ]);
+        testFunction = injector.get(If);
+    });
+
+    afterEach(() => injector.dispose());
 
     describe('If', () => {
         it('LogicalTest and valueIfTrue', () => {
@@ -640,13 +651,13 @@ describe('Test if function', () => {
             const valueIfTrue2 = NullValueObject.create();
             const valueIfFalse2 = NumberValueObject.create(2);
             const result2 = testFunction.calculate(logicTest2, valueIfTrue2, valueIfFalse2);
-            expect(getObjectValue(result2)).toBe(0);
+            expect(result2.isNull()).toBe(true);
 
             const logicTest3 = BooleanValueObject.create(false);
             const valueIfTrue3 = NumberValueObject.create(1);
             const valueIfFalse3 = NullValueObject.create();
             const result3 = testFunction.calculate(logicTest3, valueIfTrue3, valueIfFalse3);
-            expect(getObjectValue(result3)).toBe(0);
+            expect(result3.isNull()).toBe(true);
         });
     });
 });

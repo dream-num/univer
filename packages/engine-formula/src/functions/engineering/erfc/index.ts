@@ -15,7 +15,7 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { erfc } from '../../../basics/engineering';
+import { erfc, excelErfc } from '../../../basics/engineering';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -26,6 +26,8 @@ export class Erfc extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
+
+    protected _erfc = erfc;
 
     override calculate(x: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(x);
@@ -42,9 +44,17 @@ export class Erfc extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const result = erfc(xValue);
+        const result = this._erfc(xValue);
 
         // Excel worksheets flush subnormal results to positive zero.
         return NumberValueObject.create(Math.abs(result) < 2 ** -1022 ? 0 : result);
+    }
+}
+
+export class ExcelErfc extends Erfc {
+    protected override _erfc = excelErfc;
+
+    override calculate(x: BaseValueObject): BaseValueObject {
+        return super.calculate(x.isString() ? x.convertToNumberObjectValue() : x);
     }
 }

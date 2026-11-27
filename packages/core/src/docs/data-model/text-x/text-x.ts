@@ -19,6 +19,8 @@ import type { ICustomRange, IDocumentBody } from '../../../types/interfaces/i-do
 import type { IDeleteAction, IInsertAction, IRetainAction, TextXAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
+import { CustomRangeType } from '../../../types/interfaces/i-document-data';
+import { isManagedBookmark } from '../../bookmark-id';
 import { DataStreamTreeTokenType } from '../types';
 import { ActionIterator } from './action-iterator';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from './action-types';
@@ -63,6 +65,74 @@ function withoutValueRangeMetadata(actions: TextXAction[], suppressed: Set<strin
     });
 }
 
+function restoreComposedFieldRanges(inserted: TextXAction[], changes: TextXAction[], composed: TextXAction[]): TextXAction[] {
+    const complete = new Map<string, number>();
+    for (const actions of [inserted, changes]) {
+        for (const action of actions) {
+            if (action.t !== TextXActionType.INSERT) {
+                continue;
+            }
+            for (const range of action.body.customRanges ?? []) {
+                if (range.rangeType === CustomRangeType.FIELD &&
+                    action.body.dataStream[range.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START &&
+                    action.body.dataStream[range.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
+                    complete.set(range.rangeId, (complete.get(range.rangeId) ?? 0) + 1);
+                }
+            }
+        }
+    }
+    if (!complete.size) {
+        return composed;
+    }
+    const fragments = new Map<string, { range: ICustomRange; count: number; startToken: string; endToken: string }>();
+    let offset = 0;
+    for (const action of composed) {
+        if (action.t === TextXActionType.INSERT) {
+            for (const range of action.body.customRanges ?? []) {
+                if (complete.get(range.rangeId) !== 1) {
+                    continue;
+                }
+                const startIndex = offset + range.startIndex;
+                const endIndex = offset + range.endIndex;
+                const previous = fragments.get(range.rangeId);
+                if (previous) {
+                    previous.range.endIndex = endIndex;
+                    previous.endToken = action.body.dataStream[range.endIndex];
+                    previous.count++;
+                } else {
+                    fragments.set(range.rangeId, { range: { ...Tools.deepClone(range), startIndex, endIndex }, count: 1, startToken: action.body.dataStream[range.startIndex], endToken: action.body.dataStream[range.endIndex] });
+                }
+            }
+        }
+        if (action.t !== TextXActionType.DELETE) {
+            offset += action.len;
+        }
+    }
+    const restored = [...fragments.values()].filter((item) => item.count > 1 &&
+        item.startToken === DataStreamTreeTokenType.CUSTOM_RANGE_START && item.endToken === DataStreamTreeTokenType.CUSTOM_RANGE_END);
+    if (!restored.length) {
+        return composed;
+    }
+    const updates = new Map(getRangeUpdates(composed).map((update) => [update.rangeId, update]));
+    const ids = new Set(restored.map(({ range }) => range.rangeId));
+    const pending = new Set(ids);
+    const actions = composed.map((action) => {
+        if (!action.body?.customRanges?.some((range) => ids.has(range.rangeId))) {
+            return action;
+        }
+        // Keep the first fragment's position in the metadata array, then restore its bounds.
+        const body = { ...action.body, customRanges: action.body.customRanges.filter((range) => !ids.has(range.rangeId) || pending.delete(range.rangeId)) };
+        if (!body.customRanges.length) {
+            Reflect.deleteProperty(body, 'customRanges');
+        }
+        return { ...action, body };
+    });
+    // A new field's delimiters can be split by its first result insertion.
+    return appendRangeUpdates(actions, restored.map(({ range }) => updates.has(range.rangeId)
+        ? composeRangeUpdate({ rangeId: range.rangeId, range }, updates.get(range.rangeId)!)
+        : { rangeId: range.rangeId, range }));
+}
+
 function insertedAnchorPriority(first: TextXAction, second: TextXAction, priority: TPriority): boolean {
     if (first?.t !== TextXActionType.INSERT || second?.t !== TextXActionType.INSERT) {
         return priority === 'left';
@@ -89,12 +159,17 @@ function normalizeInsertActionParagraphIds(
     currentIndex: number,
     reservedParagraphIds: Set<string>
 ) {
-    normalizeInsertedParagraphIdsForDocument(doc.paragraphs, body.paragraphs, currentIndex, {
+    const splitsParagraph = normalizeInsertedParagraphIdsForDocument(doc.paragraphs, body.paragraphs, currentIndex, {
         freshenSplitParagraph: false,
         preserveExplicitParagraphIds: Boolean((body as IDocumentBody & Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS]),
         reservedParagraphIds,
         dataStream: doc.dataStream,
     });
+    // Concurrent inline input can move a paragraph-boundary insertion inside the
+    // paragraph. Preserve its resolved identities instead of treating it as a split.
+    if (body.paragraphs?.length && !splitsParagraph) {
+        Reflect.set(body, PRESERVE_INSERTED_PARAGRAPH_IDS, true);
+    }
 }
 
 export type TPriority = 'left' | 'right';
@@ -121,7 +196,7 @@ export class TextX {
             for (const update of otherUpdates) {
                 updates.set(update.rangeId, composeRangeUpdate(updates.get(update.rangeId), update));
             }
-            return appendRangeUpdates(TextX.compose(thisText, otherText), Array.from(updates.values()));
+            return restoreComposedFieldRanges(thisActions, otherActions, appendRangeUpdates(TextX.compose(thisText, otherText), Array.from(updates.values())));
         }
         const thisIter = new ActionIterator(thisActions);
         const otherIter = new ActionIterator(otherActions);
@@ -178,7 +253,7 @@ export class TextX {
 
         textX.trimEndUselessRetainAction();
 
-        return textX.serialize();
+        return restoreComposedFieldRanges(thisActions, otherActions, textX.serialize());
     }
 
     /**
@@ -276,7 +351,8 @@ export class TextX {
 
                 // handle this-retain + other-retain case.
                 if (thisAction.body == null || otherAction.body == null) {
-                    textX.push(otherAction);
+                    // An exhausted iterator represents the remaining source with an unbounded retain.
+                    textX.push({ ...otherAction, len: length });
                 } else {
                     const { coverType, body } = transformBody(thisAction as IRetainAction, otherAction as IRetainAction, priority === 'left');
                     textX.push({
@@ -391,16 +467,50 @@ export class TextX {
         let index = 0;
         const reservedParagraphIds = new Set<string>();
         const reservedSectionIds = new Set<string>();
+        const changesText = actions.some((action) => action.t !== TextXActionType.RETAIN || action.body?.customRanges?.length);
+        const ranges = doc.customRanges ?? [];
+        let rangeIndices: Map<string, number> | undefined;
+        let originalOrder: string[] | undefined;
+        let bookmarkOrders: IRetainAction['bookmarkOrders'];
+        let originalOrderIndex: number | undefined;
 
         for (const action of actions) {
+            if (action.t === TextXActionType.RETAIN && action.bookmarkOrders) {
+                bookmarkOrders = action.bookmarkOrders;
+                originalOrderIndex = undefined;
+            }
             if (action.t === TextXActionType.RETAIN && action.rangeUpdates) {
-                action.oldRangeUpdates = action.rangeUpdates.map(({ rangeId, propertyPaths }) => {
-                    const index = doc.customRanges?.findIndex((range) => range.rangeId === rangeId) ?? -1;
+                const positions = rangeIndices ??= new Map(ranges.map((range, index) => [range.rangeId, index]));
+                action.oldRangeUpdates = action.rangeUpdates.map((update) => {
+                    const { rangeId, range, propertyPaths } = update;
+                    const index = positions.get(rangeId) ?? -1;
+                    const previous = ranges[index];
+                    let nextRangeId = previous ? ranges[index + 1]?.rangeId ?? null : undefined;
+                    if (previous?.rangeType === CustomRangeType.BOOKMARK && !propertyPaths) {
+                        if (isManagedBookmark(previous)) {
+                            nextRangeId = undefined;
+                        } else if (range?.rangeType === CustomRangeType.BOOKMARK && update.nextRangeId === undefined) {
+                            // A peer may delete the old target before applying this move.
+                            if (update.fallbackNextRangeId === undefined) {
+                                update.fallbackNextRangeId = nextRangeId;
+                                bookmarkOrders ??= action.bookmarkOrders = [];
+                                if (originalOrderIndex === undefined) {
+                                    // Managed bookmarks have their own stable ordering.
+                                    originalOrder ??= ranges.filter((item) => !isManagedBookmark(item)).map((item) => item.rangeId);
+                                    originalOrderIndex = bookmarkOrders.push(originalOrder) - 1;
+                                }
+                                update.fallbackOrderIndex = originalOrderIndex;
+                            }
+                            if (!changesText) {
+                                nextRangeId = undefined;
+                            }
+                        }
+                    }
                     return {
                         rangeId,
-                        range: index < 0 ? null : Tools.deepClone(doc.customRanges![index]),
-                        nextRangeId: index < 0 ? undefined : doc.customRanges![index + 1]?.rangeId ?? null,
-                        propertyPaths: index < 0 ? undefined : propertyPaths,
+                        range: previous ? Tools.deepClone(previous) : null,
+                        nextRangeId,
+                        propertyPaths: previous ? propertyPaths : undefined,
                     };
                 });
             }

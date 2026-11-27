@@ -31,7 +31,6 @@ import type {
     ISetWorkbookNameCommandParams,
     ISetWorksheetNameCommandParams,
 } from '@univerjs/sheets';
-import type { IFormulaReferenceMoveParam } from './ref-range-formula';
 import { RANGE_TYPE } from '@univerjs/core';
 import {
     DeleteRangeMoveLeftCommand,
@@ -51,6 +50,7 @@ import {
     SetWorkbookNameCommand,
     SetWorksheetNameCommand,
 } from '@univerjs/sheets';
+import type { IFormulaReferenceMoveParam } from './ref-range-formula';
 import { FormulaReferenceMoveType } from './ref-range-formula';
 
 const SET_SHEET_TABLE_COMMAND_ID = 'sheet.command.set-table-config';
@@ -329,13 +329,29 @@ function handleRefRemoveRow(command: ICommandInfo<IRemoveRowColCommandInterceptP
     if (!params) return null;
 
     const { range, unitId, subUnitId: sheetId } = params;
+    let rangeFilteredRows: number[];
+    if (params.ranges) {
+        rangeFilteredRows = [];
+        let nextRow = range.startRow;
+        for (const removed of [...params.ranges].sort((first, second) => first.startRow - second.startRow)) {
+            for (; nextRow < removed.startRow; nextRow++) {
+                rangeFilteredRows.push(nextRow);
+            }
+            nextRow = Math.max(nextRow, removed.endRow + 1);
+        }
+        for (; nextRow <= range.endRow; nextRow++) {
+            rangeFilteredRows.push(nextRow);
+        }
+    } else {
+        rangeFilteredRows = workbook.getSheetBySheetId(sheetId)?.getRangeFilterRows(range) ?? [];
+    }
 
     return {
         type: FormulaReferenceMoveType.RemoveRow,
         range,
         unitId,
         sheetId,
-        rangeFilteredRows: workbook.getSheetBySheetId(sheetId)?.getRangeFilterRows(range) ?? [],
+        rangeFilteredRows,
     };
 }
 

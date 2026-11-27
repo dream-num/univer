@@ -23,6 +23,7 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
+    CommandShortcut,
 } from '../Command';
 
 afterEach(cleanup);
@@ -36,7 +37,10 @@ describe('Command', () => {
                 <CommandList>
                     <CommandEmpty>None</CommandEmpty>
                     <CommandGroup heading="Actions">
-                        <CommandItem value="run" onSelect={onSelect}>Run</CommandItem>
+                        <CommandItem value="run" onSelect={onSelect}>
+                            Run
+                            <CommandShortcut>⌘R</CommandShortcut>
+                        </CommandItem>
                     </CommandGroup>
                 </CommandList>
             </Command>
@@ -44,5 +48,16 @@ describe('Command', () => {
 
         fireEvent.click(screen.getByText('Run'));
         expect(onSelect).toHaveBeenCalledWith('run');
+
+        const inputWrapper = document.querySelector('[data-slot="command-input-wrapper"]');
+        expect(inputWrapper?.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+
+        const list = document.querySelector('[data-slot="command-list"]');
+        expect(list?.className).toContain('univer-max-h-72');
+        expect(list?.className).not.toContain('max-h-[300px]');
+
+        const shortcut = screen.getByText('⌘R');
+        expect(shortcut.className).toContain('rtl:univer-mr-auto');
+        expect(shortcut.className).toContain('univer-text-gray-500');
     });
 });

@@ -27,6 +27,8 @@ export class Geomean extends BaseFunction {
 
     override maxParams = 255;
 
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
+
     override calculate(...variants: BaseValueObject[]): BaseValueObject {
         let sum = 1;
         let len = 0;

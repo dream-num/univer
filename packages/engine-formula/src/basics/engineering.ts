@@ -17,10 +17,17 @@
 // eslint-disable-next-line ts/no-namespace
 export namespace BESSEL {
     interface IFunctionType {
-        (x: number): number;
+        (x: number, excel: boolean): number;
     }
 
     const W = 0.636619772;
+
+    const BESSEL_ORDER_LIMIT = 10_000_000;
+    const BESSEL_PHASE_LIMIT = 134_217_727;
+
+    function normalBesselValue(value: number): number {
+        return Math.abs(value) < 2 ** -1022 ? 0 : value;
+    }
 
     function _horner(arr: number[], v: number): number {
         let z = 0;
@@ -32,7 +39,7 @@ export namespace BESSEL {
         return z;
     }
 
-    function _bessel_iter(x: number, n: number, f0: number, f1: number, sign: number): number {
+    function _bessel_iter(x: number, n: number, f0: number, f1: number, sign: number, flushUnderflow = false): number {
         if (n === 0) {
             return f0;
         }
@@ -42,12 +49,15 @@ export namespace BESSEL {
         }
 
         const tdx = 2 / x;
-        let _f0 = f0;
-        let _f1 = f1;
-        let f2 = f1;
+        let _f0 = flushUnderflow ? normalBesselValue(f0) : f0;
+        let _f1 = flushUnderflow ? normalBesselValue(f1) : f1;
+        let f2 = _f1;
 
         for (let o = 1; o < n; ++o) {
-            f2 = _f1 * o * tdx + sign * _f0;
+            const term = _f1 * o * tdx;
+            // Excel drops subnormal increments before adding the previous BESSELK term.
+            f2 = (flushUnderflow ? normalBesselValue(term) : term) + sign * _f0;
+            if (!Number.isFinite(f2)) return f2;
             _f0 = _f1;
             _f1 = f2;
         }
@@ -56,7 +66,8 @@ export namespace BESSEL {
     }
 
     function _bessel_wrap(bessel0: IFunctionType, bessel1: IFunctionType, nonzero: number, sign: number) {
-        return function bessel(x: number, n: number): number {
+        return function bessel(x: number, n: number, excel = false): number {
+            if (excel && n > BESSEL_ORDER_LIMIT) return Number.NaN;
             if (nonzero) {
                 if (x === 0) {
                     return nonzero === 1 ? -Infinity : Infinity;
@@ -66,11 +77,11 @@ export namespace BESSEL {
             }
 
             if (n === 0) {
-                return bessel0(x);
+                return bessel0(x, excel);
             }
 
             if (n === 1) {
-                return bessel1(x);
+                return bessel1(x, excel);
             }
 
             if (n < 0) {
@@ -79,10 +90,10 @@ export namespace BESSEL {
 
             const _n = n | 0;
 
-            const b0 = bessel0(x);
-            const b1 = bessel1(x);
+            const b0 = bessel0(x, excel);
+            const b1 = bessel1(x, excel);
 
-            return _bessel_iter(x, _n, b0, b1, sign);
+            return _bessel_iter(x, _n, b0, b1, sign, excel && sign > 0);
         };
     }
 
@@ -91,8 +102,9 @@ export namespace BESSEL {
         const b0_a2a = [1.0, 267.8532712, 59272.64853, 9494680.718, 1029532985.0, 57568490411.0];
         const b0_a1b = [0.2093887211e-6, -0.2073370639e-5, 0.2734510407e-4, -0.1098628627e-2, 1.0];
         const b0_a2b = [-0.934935152e-7, 0.7621095161e-6, -0.6911147651e-5, 0.1430488765e-3, -0.1562499995e-1];
+        const excelB0A1B = [0.2093887211e-6, -0.2073370639e-5, 0.2734510407e-4, -0.001098628267, 1.0];
 
-        function bessel0(x: number): number {
+        function bessel0(x: number, excel: boolean): number {
             let a = 0;
             let a1 = 0;
             let a2 = 0;
@@ -104,8 +116,9 @@ export namespace BESSEL {
                 a = a1 / a2;
             } else {
                 const xx = x - 0.785398164;
+                if (excel && xx > BESSEL_PHASE_LIMIT) return Number.NaN;
                 y = 64 / y;
-                a1 = _horner(b0_a1b, y);
+                a1 = _horner(excel ? excelB0A1B : b0_a1b, y);
                 a2 = _horner(b0_a2b, y);
                 a = Math.sqrt(W / x) * (Math.cos(xx) * a1 - Math.sin(xx) * a2 * 8 / x);
             }
@@ -117,8 +130,10 @@ export namespace BESSEL {
         const b1_a2a = [1.0, 376.9991397, 99447.43394, 18583304.74, 2300535178.0, 144725228442.0];
         const b1_a1b = [-0.240337019e-6, 0.2457520174e-5, -0.3516396496e-4, 0.183105e-2, 1.0];
         const b1_a2b = [0.105787412e-6, -0.88228987e-6, 0.8449199096e-5, -0.2002690873e-3, 0.04687499995];
+        // Excel's large-argument polynomial uses the same coefficient at degrees two and three.
+        const excelB1A1B = [-0.240337019e-6, 0.2457520174e-5, -0.3516396496e-4, -0.3516396496e-4, 0.183105e-2, 1.0];
 
-        function bessel1(x: number): number {
+        function bessel1(x: number, excel: boolean): number {
             let a = 0;
             let a1 = 0;
             let a2 = 0;
@@ -130,8 +145,9 @@ export namespace BESSEL {
                 a2 = _horner(b1_a2a, y);
                 a = a1 / a2;
             } else {
+                if (excel && xx > BESSEL_PHASE_LIMIT) return Number.NaN;
                 y = 64 / y;
-                a1 = _horner(b1_a1b, y);
+                a1 = _horner(excel ? excelB1A1B : b1_a1b, y);
                 a2 = _horner(b1_a2b, y);
                 a = Math.sqrt(W / Math.abs(x)) * (Math.cos(xx) * a1 - Math.sin(xx) * a2 * 8 / Math.abs(x));
 
@@ -143,79 +159,81 @@ export namespace BESSEL {
             return a;
         }
 
-        return function besselj(x: number, n: number): number {
+        function backwardRecurrence(x: number, order: number, excel: boolean): number {
+            let ret = 0;
+            const m = 2 * Math.floor((order + Math.floor(Math.sqrt(40 * order))) / 2);
+            let jsum = false;
+            let bjp = 0.0;
+            let sum = 0.0;
+            let bj = 1.0;
+            const tox = 2 / x;
+
+            for (let j = m; j > 0; j--) {
+                const bjm = j * tox * bj - bjp;
+                if (excel && !Number.isFinite(bjm)) return Number.NaN;
+                bjp = bj;
+                bj = bjm;
+
+                if (Math.abs(bj) > 1e10) {
+                    bj *= 1e-10;
+                    bjp *= 1e-10;
+                    ret *= 1e-10;
+                    if (excel) ret = normalBesselValue(ret);
+                    sum *= 1e-10;
+                }
+
+                if (jsum) {
+                    sum += bj;
+                }
+
+                jsum = !jsum;
+
+                if (j === order) {
+                    ret = bjp;
+                }
+
+                // Preserve the default engine's historical iteration limit.
+                if (!excel && (m - j) > 100 && ret === 0) {
+                    return Number.NaN;
+                }
+            }
+
+            return ret / (2.0 * sum - bj);
+        }
+
+        return function besselj(x: number, n: number, excel = false): number {
             const _n = Math.round(n);
+            if (excel && _n > BESSEL_ORDER_LIMIT) return Number.NaN;
 
             if (!Number.isFinite(x)) {
                 return Number.isNaN(x) ? x : 0;
             }
 
             if (_n < 0) {
-                return ((_n % 2) ? -1 : 1) * besselj(x, -_n);
+                return ((_n % 2) ? -1 : 1) * besselj(x, -_n, excel);
             }
 
             if (x < 0) {
-                return ((_n % 2) ? -1 : 1) * besselj(-x, _n);
+                return ((_n % 2) ? -1 : 1) * besselj(-x, _n, excel);
             }
 
             if (_n === 0) {
-                return bessel0(x);
+                return bessel0(x, excel);
             }
 
             if (_n === 1) {
-                return bessel1(x);
+                const result = bessel1(x, excel);
+                return excel ? normalBesselValue(result) : result;
             }
 
             if (x === 0) {
                 return 0;
             }
 
-            let ret = 0.0;
-
-            if (x > _n) {
-                ret = _bessel_iter(x, _n, bessel0(x), bessel1(x), -1);
-            } else {
-                const m = 2 * Math.floor((_n + Math.floor(Math.sqrt(40 * _n))) / 2);
-                let jsum = false;
-                let bjp = 0.0;
-                let sum = 0.0;
-                let bj = 1.0;
-                let bjm = 0.0;
-                const tox = 2 / x;
-
-                for (let j = m; j > 0; j--) {
-                    bjm = j * tox * bj - bjp;
-                    bjp = bj;
-                    bj = bjm;
-
-                    if (Math.abs(bj) > 1e10) {
-                        bj *= 1e-10;
-                        bjp *= 1e-10;
-                        ret *= 1e-10;
-                        sum *= 1e-10;
-                    }
-
-                    if (jsum) {
-                        sum += bj;
-                    }
-
-                    jsum = !jsum;
-
-                    if (j === _n) {
-                        ret = bjp;
-                    }
-
-                    // After more than 100 iterations, the result is 0
-                    if ((m - j) > 100 && ret === 0) {
-                        return Number.NaN;
-                    }
-                }
-
-                sum = 2.0 * sum - bj;
-                ret /= sum;
-            }
-
-            return ret;
+            const result = x > _n
+                ? _bessel_iter(x, _n, bessel0(x, excel), bessel1(x, excel), -1)
+                : backwardRecurrence(x, _n, excel);
+            return excel ? normalBesselValue(result) : result;
         };
     })();
 
@@ -225,7 +243,7 @@ export namespace BESSEL {
         const b0_a1b = [0.2093887211e-6, -0.2073370639e-5, 0.2734510407e-4, -0.1098628627e-2, 1.0];
         const b0_a2b = [-0.934945152e-7, 0.7621095161e-6, -0.6911147651e-5, 0.1430488765e-3, -0.1562499995e-1];
 
-        function bessel0(x: number): number {
+        function bessel0(x: number, excel: boolean): number {
             let a = 0;
             let a1 = 0;
             let a2 = 0;
@@ -237,6 +255,7 @@ export namespace BESSEL {
                 a2 = _horner(b0_a2a, y);
                 a = a1 / a2 + W * besselj(x, 0) * Math.log(x);
             } else {
+                if (excel && xx > BESSEL_PHASE_LIMIT) return Number.NaN;
                 y = 64 / y;
                 a1 = _horner(b0_a1b, y);
                 a2 = _horner(b0_a2b, y);
@@ -251,7 +270,7 @@ export namespace BESSEL {
         const b1_a1b = [-0.240337019e-6, 0.2457520174e-5, -0.3516396496e-4, 0.183105e-2, 1.0];
         const b1_a2b = [0.105787412e-6, -0.88228987e-6, 0.8449199096e-5, -0.2002690873e-3, 0.04687499995];
 
-        function bessel1(x: number): number {
+        function bessel1(x: number, excel: boolean): number {
             let a = 0;
             let a1 = 0;
             let a2 = 0;
@@ -263,6 +282,7 @@ export namespace BESSEL {
                 a2 = _horner(b1_a2a, y);
                 a = a1 / a2 + W * (besselj(x, 1) * Math.log(x) - 1 / x);
             } else {
+                if (excel && xx > BESSEL_PHASE_LIMIT) return Number.NaN;
                 y = 64 / y;
                 a1 = _horner(b1_a1b, y);
                 a2 = _horner(b1_a2b, y);
@@ -279,8 +299,8 @@ export namespace BESSEL {
         const b0_a = [0.45813e-2, 0.360768e-1, 0.2659732, 1.2067492, 3.0899424, 3.5156229, 1.0];
         const b0_b = [0.392377e-2, -0.1647633e-1, 0.2635537e-1, -0.2057706e-1, 0.916281e-2, -0.157565e-2, 0.225319e-2, 0.1328592e-1, 0.39894228];
 
-        function bessel0(x: number): number {
-            if (x <= 3.75) {
+        function bessel0(x: number, excel: boolean): number {
+            if (excel ? Math.abs(x) < 3.75 : x <= 3.75) {
                 return _horner(b0_a, x * x / (3.75 * 3.75));
             }
 
@@ -290,23 +310,61 @@ export namespace BESSEL {
         const b1_a = [0.32411e-3, 0.301532e-2, 0.2658733e-1, 0.15084934, 0.51498869, 0.87890594, 0.5];
         const b1_b = [-0.420059e-2, 0.1787654e-1, -0.2895312e-1, 0.2282967e-1, -0.1031555e-1, 0.163801e-2, -0.362018e-2, -0.3988024e-1, 0.39894228];
 
-        function bessel1(x: number): number {
-            if (x < 3.75) {
+        function bessel1(x: number, excel: boolean): number {
+            if ((excel ? Math.abs(x) : x) < 3.75) {
                 return x * _horner(b1_a, x * x / (3.75 * 3.75));
             }
 
             return (x < 0 ? -1 : 1) * Math.exp(Math.abs(x)) / Math.sqrt(Math.abs(x)) * _horner(b1_b, 3.75 / Math.abs(x));
         }
 
-        return function besseli(x: number, n: number): number {
+        function backwardRecurrence(x: number, order: number, excel: boolean): number {
+            let ret = 0.0;
+            const tox = 2 / Math.abs(x);
+            let bip = 0.0;
+            let bi = 1.0;
+
+            const root = Math.sqrt(40 * order);
+            const m = excel
+                ? 2 * (order + Math.floor(root))
+                : 2 * Math.round((order + Math.round(root)) / 2);
+
+            for (let j = m; j > 0; j--) {
+                const bim = j * tox * bi + bip;
+                if (excel && !Number.isFinite(bim)) return Number.NaN;
+                bip = bi;
+                bi = bim;
+
+                if (Math.abs(bi) > 1e10) {
+                    bi *= 1e-10;
+                    bip *= 1e-10;
+                    ret *= 1e-10;
+                    if (excel) ret = normalBesselValue(ret);
+                }
+
+                if (j === order) ret = bip;
+
+                // Preserve the default engine's historical iteration limit.
+                if (!excel && (m - j) > 100 && ret === 0) {
+                    return Number.NaN;
+                }
+            }
+
+            ret *= bessel0(x, excel) / bi;
+            return excel ? normalBesselValue(ret) : ret;
+        }
+
+        return function besseli(x: number, n: number, excel = false): number {
             const _n = Math.round(n);
+            if (excel && _n > BESSEL_ORDER_LIMIT) return Number.NaN;
 
             if (_n === 0) {
-                return bessel0(x);
+                return bessel0(x, excel);
             }
 
             if (_n === 1) {
-                return bessel1(x);
+                const result = bessel1(x, excel);
+                return excel ? normalBesselValue(result) : result;
             }
 
             if (_n < 0) {
@@ -321,36 +379,7 @@ export namespace BESSEL {
                 return Infinity;
             }
 
-            let ret = 0.0;
-            let j;
-            const tox = 2 / Math.abs(x);
-            let bip = 0.0;
-            let bi = 1.0;
-            let bim = 0.0;
-
-            const m = 2 * Math.round((_n + Math.round(Math.sqrt(40 * _n))) / 2);
-
-            for (j = m; j > 0; j--) {
-                bim = j * tox * bi + bip;
-                bip = bi;
-                bi = bim;
-
-                if (Math.abs(bi) > 1e10) {
-                    bi *= 1e-10;
-                    bip *= 1e-10;
-                    ret *= 1e-10;
-                }
-
-                if (j === _n) ret = bip;
-
-                // After more than 100 iterations, the result is 0
-                if ((m - j) > 100 && ret === 0) {
-                    return Number.NaN;
-                }
-            }
-
-            ret *= besseli(x, 0) / bi;
-
+            const ret = backwardRecurrence(x, _n, excel);
             return x < 0 && (_n % 2) ? -ret : ret;
         };
     })();
@@ -395,14 +424,15 @@ export function isValidHexadecimalNumber(number: string): boolean {
 }
 
 export function erf(x: number): number {
-    return x < 0 ? erfc(-x) - 1 : 1 - erfc(x);
-}
-
-export function erfc(x: number): number {
     if (x === 0) {
-        return 1;
+        return 0;
     }
 
+    const complement = erfComplement(Math.abs(x));
+    return x < 0 ? complement - 1 : 1 - complement;
+}
+
+function erfComplement(x: number): number {
     const cof = [
         -1.3026537197817094,
         // eslint-disable-next-line no-loss-of-precision
@@ -435,15 +465,7 @@ export function erfc(x: number): number {
         -2.8e-17,
     ];
 
-    let _x = x;
-    let isNeg = false;
-
-    if (_x < 0) {
-        _x = -_x;
-        isNeg = true;
-    }
-
-    const t = 2 / (2 + _x);
+    const t = 2 / (2 + x);
     const ty = 4 * t - 2;
 
     let d = 0;
@@ -456,10 +478,18 @@ export function erfc(x: number): number {
         dd = tmp;
     }
 
-    const res = t * Math.exp(-_x * _x + 0.5 * (cof[0] + ty * d) - dd);
+    return t * Math.exp(-x * x + 0.5 * (cof[0] + ty * d) - dd);
+}
 
-    return isNeg ? 2 - res : res;
-};
+export function excelErfc(x: number): number {
+    if (x === 0) return 1;
+    const complement = erfComplement(Math.abs(x));
+    return x < 0 ? 2 - complement : complement;
+}
+
+export function erfc(x: number): number {
+    return excelErfc(x);
+}
 
 export function erfcINV(p: number): number {
     if (p >= 2) {

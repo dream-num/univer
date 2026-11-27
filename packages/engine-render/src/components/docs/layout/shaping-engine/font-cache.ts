@@ -30,10 +30,10 @@ export interface IMeasureTextCache {
     width: number;
 }
 
-const getDefaultBaselineOffset = (fontSize: number) => ({
-    sbr: 0.6,
+const getDefaultBaselineOffset = (fontSize: number, scriptSizeRatio = 0.6) => ({
+    sbr: scriptSizeRatio,
     sbo: fontSize,
-    spr: 0.6,
+    spr: scriptSizeRatio,
     spo: fontSize,
 });
 
@@ -174,9 +174,9 @@ export class FontCache {
         return false;
     }
 
-    static getBaselineOffsetInfo(fontFamily: string, fontSize: number) {
+    static getBaselineOffsetInfo(fontFamily: string, fontSize: number, defaultScriptSizeRatio = 0.6) {
         if (this._fontDataMap.size === 0) {
-            return getDefaultBaselineOffset(fontSize);
+            return getDefaultBaselineOffset(fontSize, defaultScriptSizeRatio);
         }
 
         const fontFamilyList = fontFamily.split(',');
@@ -197,7 +197,7 @@ export class FontCache {
                 spo: superscriptOffset * fontSize,
             };
         }
-        return getDefaultBaselineOffset(fontSize);
+        return getDefaultBaselineOffset(fontSize, defaultScriptSizeRatio);
     }
 
     static getTextSizeByDom(text: string, fontStyle: string) {

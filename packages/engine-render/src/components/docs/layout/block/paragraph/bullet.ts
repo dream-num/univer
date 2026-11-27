@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { IBullet, ILists, INestingLevel, ITextStyle, LocaleService, Nullable } from '@univerjs/core';
-import type { IDocumentSkeletonBullet } from '../../../../../basics/i-document-skeleton-cached';
+import type { IBullet, IDocumentStyle, ILists, INestingLevel, ITextStyle, LocaleService, Nullable } from '@univerjs/core';
 import { ListGlyphType } from '@univerjs/core';
-import { getFontStyleString } from '../../../../../basics/tools';
+import type { IDocumentSkeletonBullet } from '../../../../../basics/i-document-skeleton-cached';
+import type { IDocumentCompatibilityPolicy } from '../../../document-compatibility';
+import { getDocumentFontStyle } from '../../../document-compatibility';
 import { getBulletOrderedSymbol } from './bullet-ruler';
 
 export function dealWithBullet(
@@ -26,7 +27,9 @@ export function dealWithBullet(
     listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
     localeService?: LocaleService,
     compactSpacing = false,
-    paragraphTextStyle?: ITextStyle
+    paragraphTextStyle?: ITextStyle,
+    fontPolicy?: Pick<IDocumentStyle, 'fontFamilyClasses' | 'fontFamilyFallbacks'>,
+    documentCompatibilityPolicy?: IDocumentCompatibilityPolicy
 ): IDocumentSkeletonBullet | undefined {
     if (!bullet || !lists) {
         return;
@@ -57,7 +60,9 @@ export function dealWithBullet(
         localeService,
         compactSpacing,
         preserveTextLineHeight,
-        image?.source
+        image?.source,
+        fontPolicy,
+        documentCompatibilityPolicy
     );
     return bulletSke;
 }
@@ -98,7 +103,9 @@ function _getBulletSke(
     _localeService?: LocaleService,
     compactSpacing = false,
     preserveTextLineHeight = false,
-    imageSource?: string
+    imageSource?: string,
+    fontPolicy?: Pick<IDocumentStyle, 'fontFamilyClasses' | 'fontFamilyFallbacks'>,
+    documentCompatibilityPolicy?: IDocumentCompatibilityPolicy
 ): IDocumentSkeletonBullet {
     const nesting = nestings[nestingLevel];
     const {
@@ -111,7 +118,7 @@ function _getBulletSke(
     } = nesting;
 
     const textStyle = { ...textStyleConfig, ...textStyleFirst };
-    const fontStyle = getFontStyleString(textStyle); // Get font style in canvas.font format
+    const fontStyle = getDocumentFontStyle(textStyle, fontPolicy?.fontFamilyFallbacks, fontPolicy?.fontFamilyClasses, documentCompatibilityPolicy);
 
     const previousAtLevel = listLevelAncestors?.[nestingLevel];
     const startIndex = paragraphStartNumber === undefined
@@ -120,12 +127,14 @@ function _getBulletSke(
     const effectiveStartNumber = paragraphStartNumber ?? previousAtLevel?.startNumber ?? nesting.startNumber;
 
     let symbolContent: string;
-    if (glyphSymbol) {
+    if (glyphType === ListGlyphType.NONE && !glyphSymbol) {
+        symbolContent = '';
+    } else if (glyphSymbol) {
         // Unordered list uses directly
         symbolContent = normalizeLegacySymbolFontGlyph(glyphSymbol, textStyle.ff);
     } else {
         // Ordered list
-        symbolContent = __generateOrderedListSymbol(
+        symbolContent = generateOrderedListSymbol(
             glyphFormat,
             nestingLevel,
             nestings,
@@ -181,14 +190,14 @@ function normalizeLegacySymbolFontGlyph(symbol: string, fontFamily?: Nullable<st
     }).join('');
 }
 
-function __generateOrderedListSymbol(
+export function generateOrderedListSymbol(
     glyphFormat: string,
     nestingLevel: number,
     nestings: INestingLevel[],
     listLevelAncestors: Array<Nullable<IDocumentSkeletonBullet>> | undefined,
     currentStartIndex: number,
     currentStartNumber: number
-) {
+): string {
     // const indexNumber = startNumber + startIndex;
     // parse  <prefix>%[nestingLevelMinusOne]<suffix>, return symbolContent
     // <w:lvl w:ilvl="0">
@@ -198,14 +207,12 @@ function __generateOrderedListSymbol(
     //     <w:lvlJc w:val="left"/>
     // </w:lvl>
 
-    const glyphFormatSplit = glyphFormat.split('%');
-    const prefix = glyphFormatSplit[0];
-    const resultSymbol = [prefix];
-
-    for (let i = 1; i < glyphFormatSplit.length; i++) {
-        const levelAndSuffixPre = glyphFormatSplit[i];
-        const { level, suffix } = ___getLevelAndSuffix(levelAndSuffixPre);
-
+    return glyphFormat.replace(/%([1-9])/g, (_placeholder, digit: string) => {
+        const level = Number(digit) - 1;
+        const placeholderNesting = nestings[level];
+        if (!placeholderNesting || level > nestingLevel) {
+            return '';
+        }
         const ancestor = listLevelAncestors?.[level];
         let startIndexItem = level === nestingLevel ? currentStartIndex : ancestor?.startIndexItem || 1;
 
@@ -215,27 +222,13 @@ function __generateOrderedListSymbol(
 
         const startNumber = level === nestingLevel
             ? currentStartNumber
-            : ancestor?.startNumber ?? nestings[level].startNumber;
-        const placeholderNesting = nestings[level];
+            : ancestor?.startNumber ?? placeholderNesting.startNumber;
         const glyphType = nestings[nestingLevel]?.isLegal
             && placeholderNesting.glyphType !== ListGlyphType.DECIMAL_ZERO
             ? ListGlyphType.DECIMAL
             : placeholderNesting.glyphType;
-        const singleSymbol = ___getSymbolByBesting(startIndexItem, placeholderNesting, startNumber, glyphType);
-        // console.log(
-        //     '___getSymbolByBesting',
-        //     singleSymbol,
-        //     level,
-        //     suffix,
-        //     listLevelAncestors?.length,
-        //     listLevelAncestors?.[level]?.startIndexItem,
-        //     listLevelAncestors?.[level]?.symbol,
-        //     nestings
-        // );
-        resultSymbol.push(singleSymbol, suffix);
-    }
-
-    return resultSymbol.join('');
+        return ___getSymbolByBesting(startIndexItem, placeholderNesting, startNumber, glyphType);
+    });
 }
 
 function ___getSymbolByBesting(
@@ -256,32 +249,4 @@ function ___getSymbolByBesting(
     }
 
     return getBulletOrderedSymbol(startIndex, startNumber, glyphType);
-}
-
-function ___getLevelAndSuffix(levelAndSuffixPre: string) {
-    if (levelAndSuffixPre === '') {
-        return {
-            level: 0,
-            suffix: '',
-        };
-    }
-
-    const levelAndSuffixPreSpit = levelAndSuffixPre.split('');
-    let level = '';
-    let suffix = '';
-    let isSuffixState = false;
-    const digitReg = /[0-9]/g;
-    levelAndSuffixPreSpit.forEach((w: string) => {
-        if (!isSuffixState && digitReg.test(`${level}${w}`)) {
-            level += w;
-        } else {
-            isSuffixState = true;
-            suffix += w;
-        }
-    });
-
-    return {
-        level: Number.parseInt(level) - 1,
-        suffix,
-    };
 }

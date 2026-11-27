@@ -27,9 +27,9 @@ import { DeleteWorksheetProtectionMutation } from '../mutations/delete-worksheet
 import { SetRangeProtectionMutation } from '../mutations/set-range-protection.mutation';
 import { SetWorksheetProtectionMutation } from '../mutations/set-worksheet-protection.mutation';
 
-type IPermissionRule = (IRangeProtectionRule | IWorksheetProtectionRule) & { ranges: IRange[]; id: string };
+export type IPermissionRule = (IRangeProtectionRule | IWorksheetProtectionRule) & { ranges: IRange[]; id: string };
 
-interface ISetProtectionParams {
+export interface ISetProtectionParams {
     rule: IPermissionRule;
     oldRule: IPermissionRule;
 }

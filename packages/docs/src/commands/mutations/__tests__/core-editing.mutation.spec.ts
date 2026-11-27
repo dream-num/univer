@@ -89,6 +89,26 @@ describe('transformDocumentTextRanges', () => {
     });
 });
 
+describe('RichTextEditingMutation without a renderer', () => {
+    it('edits and reverses text with only the Docs plugin dependencies', () => {
+        const bed = createTestBed(createDocumentData('headless-docs', { dataStream: 'Body\r\n' }), { render: false });
+        try {
+            const commands = bed.get(ICommandService);
+            const unitId = bed.doc.getUnitId();
+            const actions = JSONX.getInstance().editOp(new TextX().insert(3, { dataStream: 'Hi ' }).serialize(), ['body']);
+            const undo = commands.syncExecuteCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(
+                RichTextEditingMutation.id,
+                { unitId, actions, textRanges: null }
+            );
+            expect(bed.doc.getBody()?.dataStream).toBe('Hi Body\r\n');
+            commands.syncExecuteCommand(RichTextEditingMutation.id, undo);
+            expect(bed.doc.getBody()?.dataStream).toBe('Body\r\n');
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
 describe('RichTextEditingMutation selection scheduling', () => {
     it.each(['before', 'after'])('keeps an inactive comment draft without restoring its caret when updated %s switching editors', async (timing) => {
         const bed = createTestBed(createDocumentData('comment-sidebar', { dataStream: 'Draft\r\n' }));

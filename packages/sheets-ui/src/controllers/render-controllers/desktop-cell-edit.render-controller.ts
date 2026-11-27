@@ -17,8 +17,6 @@
 import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import type { IEditorInputConfig } from '@univerjs/docs-ui';
 import type { IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import type { ISheetObjectParam } from '../utils/component-tools';
 import {
     DisposableCollection,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -38,6 +36,8 @@ import { DeviceInputEventType, IRenderManagerService, SHEET_VIEWPORT_KEY } from 
 import { isCellImage, REF_SELECTIONS_ENABLED, SheetsSelectionsService } from '@univerjs/sheets';
 import { DISABLE_AUTO_FOCUS_KEY, getEmbedChildUnitId, IPlatformService } from '@univerjs/ui';
 import { filter } from 'rxjs';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+import type { ISheetObjectParam } from '../utils/component-tools';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { isSheetContextMenuGesture } from '../../common/selection-input';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -46,7 +46,7 @@ import {
     SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
 } from '../../services/sheet-embed-integration.service';
 import { getEditCellInputPosition } from '../editor/utils/get-edit-cell-input-position';
-import { getSheetObject } from '../utils/component-tools';
+import { getSheetObject, isFocusedSheetRender } from '../utils/component-tools';
 
 export class DesktopCellEditRenderController extends RxDisposable implements IRenderModule {
     private _d: Nullable<IDisposable>;
@@ -76,6 +76,11 @@ export class DesktopCellEditRenderController extends RxDisposable implements IRe
                 }
             })
         );
+    }
+
+    override dispose(): void {
+        this._disposeCurrent();
+        super.dispose();
     }
 
     private _init(): IDisposable {
@@ -217,7 +222,7 @@ export class DesktopCellEditRenderController extends RxDisposable implements IRe
         const viewportMain = this._context.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (viewportMain) {
             d.add(viewportMain.onScrollEnd$.subscribeEvent(() => {
-                if (this._editorBridgeService.isVisible().visible) {
+                if (!isFocusedSheetRender(this._context, this._renderManagerService) || this._editorBridgeService.isVisible().visible) {
                     return;
                 }
 
@@ -228,7 +233,7 @@ export class DesktopCellEditRenderController extends RxDisposable implements IRe
     }
 
     private _updateInputPosition(): void {
-        if (this._editorBridgeService.isVisible().visible) {
+        if (!isFocusedSheetRender(this._context, this._renderManagerService) || this._editorBridgeService.isVisible().visible) {
             return;
         }
 
@@ -337,8 +342,9 @@ export class DesktopCellEditRenderController extends RxDisposable implements IRe
     }
 
     private _isCurrentSheetFocused(): boolean {
-        return this._instanceService.getFocusedUnit()?.getUnitId() === this._context.unitId ||
-            this._embedRuntimeFocusCoordinator?.isChildUnitInActiveSession(this._context.unitId) === true;
+        return isFocusedSheetRender(this._context, this._renderManagerService) &&
+            (this._instanceService.getFocusedUnit()?.getUnitId() === this._context.unitId ||
+            this._embedRuntimeFocusCoordinator?.isChildUnitInActiveSession(this._context.unitId) === true);
     }
 }
 

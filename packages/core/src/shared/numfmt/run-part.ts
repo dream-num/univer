@@ -40,6 +40,7 @@ import {
 import { dec2frac } from './dec-to-frac';
 import { decimalFromNumber, roundDecimal, roundScientificDecimal, shiftDecimal } from './decimal';
 import { general } from './general';
+import { isGroupingBoundary } from './grouping';
 import { defaultLocale } from './locale';
 import { getExponent, getSignificand } from './number-props';
 import { pad } from './pad';
@@ -186,10 +187,6 @@ export function runPart(
             integer += roundedInteger < 1 ? '' : Math.floor(roundedInteger);
         }
     }
-    // integer grouping
-    const primaryGroup = options.grouping[0] ?? 3;
-    const secondaryGroup = options.grouping[1] ?? primaryGroup;
-
     // fraction to text
     if (section.dec_fractions) {
         fraction = roundedNumber
@@ -437,13 +434,10 @@ export function runPart(
                     const digit = integer.charAt(integer.length - index);
                     const patternDigit = digit ? '' : pattern.charAt(pattern.length - index) || pattern[0];
                     let separator = '';
-                    if (section.grouping) {
-                        const groupIndex = (index - 1) - primaryGroup;
-                        if (groupIndex >= 0 && !(groupIndex % secondaryGroup)) {
-                            separator = digit || patternDigit === '0'
-                                ? l10n.group
-                                : pad('?', options.nbsp);
-                        }
+                    if (section.grouping && isGroupingBoundary(index - 1, options.grouping)) {
+                        separator = digit || patternDigit === '0'
+                            ? l10n.group
+                            : pad('?', options.nbsp);
                     }
                     digits += (digit || pad(patternDigit, options.nbsp)) + separator;
                 }

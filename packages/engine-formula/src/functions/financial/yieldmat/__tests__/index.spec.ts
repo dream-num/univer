@@ -184,7 +184,9 @@ describe('Test yieldmat function', () => {
             const pr = NumberValueObject.create(98.45);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, issue, rate, pr, basis);
-            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+            const [row] = getObjectValue(result) as (number | string)[][];
+            expect(row[0]).toBeCloseTo(0.06391395373181309, 10);
+            expect(row.slice(1)).toEqual([ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME]);
         });
         it('checks the serial-zero boundary in both date systems', () => {
             const args = [

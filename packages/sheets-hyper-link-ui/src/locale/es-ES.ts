@@ -39,7 +39,7 @@ const locale: typeof enUS = {
             add: 'Insertar enlace',
         },
         permission: {
-            hyperLinkErr: 'No tiene permiso para insertar un enlace.',
+            editErr: 'El rango está protegido y no tienes permiso de edición. Para editar, contacta al creador.',
         },
         message: {
             noSheet: 'La hoja de destino ha sido eliminada',

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
@@ -27,7 +28,13 @@ export class Take extends BaseFunction {
 
     override maxParams = 3;
 
-    override calculate(array: BaseValueObject, rows: BaseValueObject, columns?: BaseValueObject): BaseValueObject {
+    override needsReferenceObject = true;
+
+    override calculate(input: FunctionVariantType, rowCount: FunctionVariantType, columnCount?: FunctionVariantType): FunctionVariantType {
+        const reference = input.isReferenceObject() ? input as BaseReferenceObject : undefined;
+        const array = reference?.toArrayValueObject() ?? input as BaseValueObject;
+        const rows = rowCount.isReferenceObject() ? (rowCount as BaseReferenceObject).toArrayValueObject() : rowCount as BaseValueObject;
+        const columns = columnCount?.isReferenceObject() ? (columnCount as BaseReferenceObject).toArrayValueObject() : columnCount as BaseValueObject | undefined;
         const arrayRowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
         const arrayColumnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
 
@@ -98,7 +105,25 @@ export class Take extends BaseFunction {
             return errorObject as ErrorValueObject;
         }
 
-        return this._getResultArray(array, rowsValue as number, columnsValue as number, arrayRowCount, arrayColumnCount);
+        const takeRows = rowsValue as number;
+        const takeColumns = columnsValue as number;
+        return reference
+            ? this._takeReference(reference, takeRows, takeColumns, arrayRowCount, arrayColumnCount)
+            : this._getResultArray(array, takeRows, takeColumns, arrayRowCount, arrayColumnCount);
+    }
+
+    private _takeReference(reference: BaseReferenceObject, rows: number, columns: number, rowCount: number, columnCount: number): BaseReferenceObject | ErrorValueObject {
+        const range = reference.getRangePosition();
+        const takenRows = Math.min(Math.abs(rows), rowCount);
+        const takenColumns = Math.min(Math.abs(columns), columnCount);
+        const startRow = range.startRow + (rows < 0 ? rowCount - takenRows : 0);
+        const startColumn = range.startColumn + (columns < 0 ? columnCount - takenColumns : 0);
+        return this.createReferenceObject(reference, {
+            startRow,
+            startColumn,
+            endRow: startRow + takenRows - 1,
+            endColumn: startColumn + takenColumns - 1,
+        });
     }
 
     private _checkRowsColumns(rowsObject: BaseValueObject, columnsObject: BaseValueObject, arrayRowCount: number, arrayColumnCount: number) {
@@ -150,7 +175,7 @@ export class Take extends BaseFunction {
 
     private _getResultArray(array: BaseValueObject, rows: number, columns: number, arrayRowCount: number, arrayColumnCount: number): BaseValueObject {
         if (!array.isArray()) {
-            return array;
+            return expandArrayValueObject(1, 1, array);
         }
 
         const rowParam = rows >= 0 ? [0, rows] : [arrayRowCount + rows, arrayRowCount];
@@ -169,10 +194,6 @@ export class Take extends BaseFunction {
         }
 
         resultArray = resultArray.map((valueObject) => valueObject.isNull() ? NumberValueObject.create(0) : valueObject) as ArrayValueObject;
-
-        if (rows === 1 && columns === 1) {
-            return resultArray.get(0, 0) as BaseValueObject;
-        }
 
         return resultArray;
     };

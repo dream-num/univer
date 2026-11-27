@@ -21,7 +21,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
 import zhCN from '../../../locale/zh-CN';
 import { connectInjector } from '../../../utils/di';
-import { SymbolPicker } from '../../symbol-picker/SymbolPicker';
 import { EmojiPicker } from '../EmojiPicker';
 
 class TestLocalStorageService implements ILocalStorageService {
@@ -66,6 +65,7 @@ function renderWithDependencies(element: ReactElement, locale = LocaleType.EN_US
     const localeService = injector.get(LocaleService);
     localeService.load({ [LocaleType.EN_US]: enUS, [LocaleType.ZH_CN]: zhCN });
     localeService.setLocale(locale);
+    localeService.setDirection('ltr');
 
     const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
     return render(<ConnectedTestRoot />);
@@ -95,7 +95,7 @@ describe('picker callbacks', () => {
 
     it('keeps random selection and applies an icon-only skin tone preference', async () => {
         const onChange = vi.fn();
-        const { container, getAllByRole, getByRole, queryAllByRole } = renderWithDependencies(<EmojiPicker onChange={onChange} />);
+        const { getAllByRole, getByRole, queryAllByRole } = renderWithDependencies(<EmojiPicker onChange={onChange} />);
 
         expect(getByRole('button', { name: 'Random emoji' })).toBeTruthy();
         fireEvent.click(getByRole('button', { name: 'raised hand' }));
@@ -104,7 +104,7 @@ describe('picker callbacks', () => {
         expect(skinToneOptions).toHaveLength(6);
         expect(skinToneOptions.map((option) => option.textContent)).toEqual(['✋', '✋🏻', '✋🏼', '✋🏽', '✋🏾', '✋🏿']);
 
-        fireEvent.click(container.querySelector('[data-u-comp="ui.emoji-picker"]')!);
+        fireEvent.click(getByRole('textbox', { name: 'Search' }));
         await waitFor(() => expect(queryAllByRole('radio')).toHaveLength(0));
 
         fireEvent.click(getByRole('button', { name: 'raised hand' }));
@@ -151,14 +151,5 @@ describe('picker callbacks', () => {
 
         expect(getByText('Symbols')).toBeTruthy();
         expect(container.querySelectorAll('button').length).toBeLessThan(150);
-    });
-
-    it('reports a symbol through the direct change callback', () => {
-        const onChange = vi.fn();
-        const { getByRole } = renderWithDependencies(<SymbolPicker onChange={onChange} />);
-
-        fireEvent.click(getByRole('button', { name: '∞' }));
-
-        expect(onChange).toHaveBeenCalledWith('∞');
     });
 });

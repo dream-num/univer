@@ -1,4 +1,4 @@
-import type { IDocumentBody } from '@univerjs/core';
+import type { IBullet, IDocumentBody } from '@univerjs/core';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -10,14 +10,14 @@ import {
     NamedStyleType,
     PositionedObjectLayoutType,
     PresetListType,
+    resolveDocumentParagraphBullet,
     TextDirection,
     validateDocumentStructure,
     WrapTextType,
 } from '@univerjs/core';
 import { getSectionContentWidth } from '@univerjs/docs';
 import { DOCS_DRAWING_PLUGIN } from '@univerjs/preset-docs-drawing';
-import { describe, expect, it } from 'vitest';
-
+import { describe, expect, expectTypeOf, it } from 'vitest';
 import { readGeneratedSvgSize } from '../../generated-svg';
 import { createDocumentFixture } from '../create-document-fixture';
 
@@ -26,7 +26,7 @@ describe('createDocumentFixture', () => {
         const snapshot = createDocumentFixture(LocaleType.EN_US);
         const body = snapshot.body!;
         const paragraphStyles = body.paragraphs?.flatMap(({ paragraphStyle }) => paragraphStyle ? [paragraphStyle] : []) ?? [];
-        const bullets = body.paragraphs?.flatMap(({ bullet }) => bullet ? [bullet] : []) ?? [];
+        const bullets = body.paragraphs?.flatMap((paragraph) => resolveDocumentParagraphBullet(snapshot, paragraph) ?? []) ?? [];
         const textStyles = body.textRuns?.flatMap(({ ts }) => ts ? [ts] : []) ?? [];
         const tableRange = body.tables?.[0];
         const table = tableRange ? snapshot.tableSource?.[tableRange.tableId] : undefined;
@@ -62,6 +62,7 @@ describe('createDocumentFixture', () => {
         expect(paragraphStyles.some(({ hanging }) => hanging != null)).toBe(true);
         expect(paragraphStyles.some(({ borderLeft, shading }) => borderLeft && shading)).toBe(true);
         expect(paragraphStyles.some(({ tabStops }) => tabStops?.length)).toBe(true);
+        expectTypeOf(bullets).toEqualTypeOf<IBullet[]>();
         expect([...new Set(bullets.map(({ listType }) => listType))]).toEqual(expect.arrayContaining([
             PresetListType.BULLET_LIST,
             PresetListType.ORDER_LIST,

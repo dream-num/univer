@@ -641,7 +641,7 @@ describe('FormulaBar', () => {
         container = rendered.container;
 
         const editorHost = rendered.container.querySelector('[data-editor-id]')?.parentElement;
-        expect(editorHost?.style.backgroundColor).toBe('#000000');
+        expect(editorHost?.style.backgroundColor).toBe('rgb(0, 0, 0)');
         expect(rendered.container.querySelector('[data-editor-id]')?.getAttribute('data-canvas-background')).toBeNull();
     });
 

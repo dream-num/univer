@@ -30,20 +30,61 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { createCommandTestBed } from '../../commands/commands/__tests__/create-command-test-bed';
 import { ClearSelectionAllCommand } from '../../commands/commands/clear-selection-all.command';
 import { ClearSelectionFormatCommand } from '../../commands/commands/clear-selection-format.command';
+import { RemoveRowByRangeCommand, RemoveRowCommand } from '../../commands/commands/remove-row-col.command';
 import { AddWorksheetMergeMutation } from '../../commands/mutations/add-worksheet-merge.mutation';
+import { InsertRowMutation } from '../../commands/mutations/insert-row-col.mutation';
+import { RemoveRowMutation } from '../../commands/mutations/remove-row-col.mutation';
 import { RemoveWorksheetMergeMutation } from '../../commands/mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
+import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
 import { RefRangeService } from '../../services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
+import { INTERCEPTOR_POINT } from '../../services/sheet-interceptor/interceptor-const';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { MergeCellController } from '../merge-cell.controller';
 
 const TARGET_RANGE: IRange = { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 };
 const PEER_RANGE: IRange = { startRow: 5, endRow: 6, startColumn: 5, endColumn: 6 };
 
-describe('MergeCellController clear-command ownership', () => {
+describe('MergeCellController', () => {
     let univer: Univer;
 
     afterEach(() => univer.dispose());
+
+    it('preserves merges on filtered rows and shrinks crossing merges using actual deletions', async () => {
+        const snapshot = workbookSnapshot('test');
+        const merges = [
+            { startRow: 1, endRow: 1, startColumn: 1, endColumn: 2 },
+            { startRow: 1, endRow: 3, startColumn: 4, endColumn: 5 },
+        ];
+        snapshot.sheets.sheet1.mergeData = merges;
+        const bed = createCommandTestBed(snapshot, [[MergeCellController], [RefRangeService]]);
+        univer = bed.univer;
+        bed.get(MergeCellController);
+        bed.get(SheetInterceptorService).intercept(INTERCEPTOR_POINT.ROW_FILTERED, {
+            handler: (_filtered, location) => location.row === 1,
+        });
+        const commands = bed.get(ICommandService);
+        for (const command of [RemoveRowCommand, RemoveRowByRangeCommand, RemoveRowMutation, InsertRowMutation, AddWorksheetMergeMutation, RemoveWorksheetMergeMutation, SetRangeValuesMutation, SetSelectionsOperation]) {
+            commands.registerCommand(command);
+        }
+        const worksheet = bed.sheet.getActiveSheet();
+        expect(await commands.executeCommand(RemoveRowCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 9 },
+        })).toBe(true);
+        const expected = [
+            { startRow: 0, endRow: 0, startColumn: 1, endColumn: 2 },
+            { startRow: 0, endRow: 1, startColumn: 4, endColumn: 5 },
+        ];
+        expect(worksheet.getMergeData()).toEqual(expect.arrayContaining(expected));
+        expect(worksheet.getMergeData()).toHaveLength(2);
+        await commands.executeCommand(UndoCommand.id);
+        expect(worksheet.getMergeData()).toEqual(expect.arrayContaining(merges));
+        await commands.executeCommand(RedoCommand.id);
+        expect(worksheet.getMergeData()).toEqual(expect.arrayContaining(expected));
+    });
 
     for (const command of [ClearSelectionFormatCommand, ClearSelectionAllCommand]) {
         for (const current of ['none', 'other-workbook', 'other-worksheet'] as const) {

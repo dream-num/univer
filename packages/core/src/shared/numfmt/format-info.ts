@@ -25,7 +25,6 @@ import type {
     ParsedFormatSection,
 } from './types';
 import {
-    reCurrencySymbols,
     u_DAY,
     u_HOUR,
     u_MIN,
@@ -33,6 +32,18 @@ import {
     u_SEC,
     u_YEAR,
 } from './constants';
+import { currencySymbolFromLiteral } from './currency-symbols';
+
+export function hasCurrencyToken(part: FormatSection, currencyId?: string | null): boolean {
+    let afterDigits = false;
+    for (const token of part.tokens) {
+        if (token.type === 'int') afterDigits = true;
+        if (token.type === 'string' && typeof token.value === 'string') {
+            if (currencyId ? token.value === currencyId : token.currency || currencySymbolFromLiteral(token.value, afterDigits)) return true;
+        }
+    }
+    return false;
+}
 
 function isParsedSection(part: FormatSection | undefined): part is ParsedFormatSection {
     return !!part && 'scale' in part;
@@ -126,11 +137,7 @@ export function info(
     };
 
     // Currency identifier may be passed in, but otherwise report known glyphs.
-    const isCurrency = !output.isDate && !output.isText && !isError && partPositive.tokens.some((token) => (
-        token.type === 'string' &&
-        typeof token.value === 'string' &&
-        (currencyId ? token.value === currencyId : reCurrencySymbols.test(token.value))
-    ));
+    const isCurrency = !output.isDate && !output.isText && !isError && hasCurrencyToken(partPositive, currencyId);
 
     let codeType = 'G';
     let codeNumber: number | '' = fracMax !== undefined && fracMax >= 0 ? Math.min(15, fracMax) : '';

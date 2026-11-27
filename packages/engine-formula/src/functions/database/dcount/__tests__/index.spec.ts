@@ -187,7 +187,7 @@ describe('Test dcount function', () => {
 
             const field2 = NullValueObject.create();
             const result2 = testFunction.calculate(database, field2, criteria);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toStrictEqual(2);
 
             const field3 = BooleanValueObject.create(true);
             const result3 = testFunction.calculate(database, field3, criteria);

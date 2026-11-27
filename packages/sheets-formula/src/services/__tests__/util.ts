@@ -56,10 +56,14 @@ export interface ITestBed {
     sheet: Workbook;
 }
 
-export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
+export function createFormulaTestBed() {
     const univer = new Univer();
     const injector = univer.__getInjector();
-    const get = injector.get.bind(injector);
+    return { univer, injector, get: injector.get.bind(injector) };
+}
+
+export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
+    const { univer, injector, get } = createFormulaTestBed();
 
     class TestPlugin extends UniverFormulaEnginePlugin {
         static override pluginName = 'test-plugin';

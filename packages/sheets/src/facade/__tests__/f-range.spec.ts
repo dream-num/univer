@@ -40,6 +40,7 @@ import {
     ILogService,
     IUniverInstanceService,
     LifecycleStages,
+    LocaleType,
     TestConfirmService,
     Tools,
     UniverInstanceType,
@@ -87,6 +88,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FRange } from '../f-range';
 import type { FWorksheet } from '../f-worksheet';
 import { SetBorderBasicCommand, SetBorderCommand } from '../../commands/commands/set-border.command';
+import { NumberCellDisplayController } from '../../controllers/number-cell.controller';
 import { BorderStyleManagerService } from '../../services/border-style-manager.service';
 import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from '../const';
 import { createFacadeTestBed } from './create-test-bed';
@@ -160,6 +162,43 @@ describe('FRange style-only text preservation', () => {
                 expect(worksheet.getRange('A2').getCellStyleData()?.bd?.r).toBeUndefined();
                 expect(worksheet.getRange('J2').getCellStyleData()?.bd?.l).toBeUndefined();
             }
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('FRange effective values', () => {
+    it('reads legacy typed cells without display formatting', () => {
+        const bed = createFacadeTestBed({
+            id: 'test',
+            appVersion: '3.0.0-alpha',
+            locale: LocaleType.EN_US,
+            name: 'test',
+            sheetOrder: ['sheet1'],
+            sheets: {
+                sheet1: {
+                    id: 'sheet1',
+                    name: 'Sheet1',
+                    rowCount: 20,
+                    columnCount: 20,
+                    cellData: {
+                        0: {
+                            0: { v: '1e+21', t: CellValueType.NUMBER },
+                            1: { v: '001', t: CellValueType.FORCE_STRING },
+                            2: { v: 'FALSE', t: CellValueType.BOOLEAN },
+                        },
+                    },
+                },
+            },
+            styles: {},
+        }, [[NumberCellDisplayController]]);
+        try {
+            bed.get(NumberCellDisplayController);
+            const sheet = bed.univerAPI.getActiveWorkbook()!.getActiveSheet();
+            expect(sheet.getRange('A1').getDisplayValue()).toBe('1E+21');
+            expect(sheet.getRange('A1').getValue()).toBe(1e21);
+            expect(sheet.getRange('A1:C1').getValues()).toEqual([[1e21, '001', false]]);
         } finally {
             bed.univer.dispose();
         }
@@ -283,6 +322,21 @@ describe('Test FRange', () => {
         expect(range?.getHeight()).toBe(1);
     });
 
+    it('reads boolean cells as booleans and preserves them when written back', () => {
+        const sheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const range = sheet.getRange('A1:D1').setValues([[true, false, 1, 0]]);
+        const trueCell = sheet.getRange('A1');
+        const falseCell = sheet.getRange('B1');
+
+        expect(trueCell.getValue()).toBe(true);
+        expect(falseCell.getValue()).toBe(false);
+        expect(range.getValues()).toEqual([[true, false, 1, 0]]);
+        expect(range.getRawValues()).toEqual([[1, 0, 1, 0]]);
+
+        falseCell.setValue(falseCell.getValue()!);
+        expect(falseCell.getCellData()).toMatchObject({ v: 0, t: CellValueType.BOOLEAN });
+    });
+
     it('Range setValue', () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
 
@@ -395,8 +449,8 @@ describe('Test FRange', () => {
         const range1 = activeSheet?.getRange(0, 0, 4, 4);
         const values1 = range1?.getValues();
         expect(values1).toEqual([
-            [1, 'text', 1, ''],
-            [2.5, '', 0, ''],
+            [1, 'text', true, ''],
+            [2.5, '', false, ''],
             ['', null, '', 0],
             ['', '', '', ''],
         ]);
@@ -405,7 +459,7 @@ describe('Test FRange', () => {
         const range2 = activeSheet?.getRange(1, 1, 2, 2);
         const values2 = range2?.getValues();
         expect(values2).toEqual([
-            ['', 0],
+            ['', false],
             [null, ''],
         ]);
 
@@ -847,8 +901,10 @@ describe('Test FRange', () => {
         const richText = univerAPI.newRichTextValue({ body: { dataStream: 'Hello\r\n' } } as IDocumentData);
         const docData = { body: { dataStream: 'World\r\n' } } as IDocumentData;
 
-        activeSheet.getRange('H1:I1').setRichTextValues([[richText, docData]]);
-        const values = activeSheet.getRange('H1:I1').getValues(true);
+        const range = activeSheet.getRange('H1:I1').setRichTextValues([[richText, docData]]);
+        expect(range.getValue()).toBe('Hello');
+        expect(range.getValues()).toEqual([['Hello', 'World']]);
+        const values = range.getValues(true);
         expect((values[0][0] as RichTextValue).toPlainText()).toBe('Hello');
         expect((values[0][1] as RichTextValue).toPlainText()).toBe('World');
 

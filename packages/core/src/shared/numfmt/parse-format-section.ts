@@ -428,7 +428,7 @@ export function parseFormatSection(inputTokens: FormatToken[]): ParsedFormatSect
 
             const currency = bits[0];
             if (currency) {
-                add(currency, outputTokens);
+                add({ type: 'string', value: currency, currency: true }, outputTokens);
             }
 
             const locale = resolveLocale(code);

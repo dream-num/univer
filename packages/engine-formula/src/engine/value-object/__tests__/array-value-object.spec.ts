@@ -20,13 +20,60 @@ import { DateSystem, Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { compareToken } from '../../../basics/token';
+import { Compare } from '../../../functions/meta/compare';
+import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
+import { Plus } from '../../../functions/meta/plus';
 import { getObjectValue } from '../../../functions/util';
 import { FormulaCacheService } from '../../../services/formula-cache.service';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../array-value-object';
 import { ErrorValueObject } from '../base-value-object';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../primitive-object';
 
 describe('arrayValueObject test', () => {
+    it('compares blank references and empty text symmetrically', () => {
+        const injector = new Injector([[Compare, { useFactory: () => injector.createInstance(Compare, FUNCTION_NAMES_META.COMPARE) }]]);
+        try {
+            const compare = injector.get(Compare);
+            for (const [token, expected] of [
+                [compareToken.EQUALS, true],
+                [compareToken.NOT_EQUAL, false],
+                [compareToken.LESS_THAN, false],
+                [compareToken.LESS_THAN_OR_EQUAL, true],
+                [compareToken.GREATER_THAN, false],
+                [compareToken.GREATER_THAN_OR_EQUAL, true],
+            ] as const) {
+                compare.setCompareType(token);
+                expect(getObjectValue(compare.calculate(StringValueObject.create(''), NullValueObject.create()))).toBe(expected);
+                expect(getObjectValue(compare.calculate(NullValueObject.create(), StringValueObject.create('')))).toBe(expected);
+            }
+        } finally {
+            injector.dispose();
+        }
+    });
+
+    it('pads missing operands with errors while retaining singleton expansion', () => {
+        const injector = new Injector([[Plus, { useFactory: () => injector.createInstance(Plus, FUNCTION_NAMES_META.PLUS) }]]);
+        try {
+            const plus = injector.get(Plus);
+            for (const [left, right, expected] of [
+                ['{1,2,3}', '{10,20}', [[11, 22, ErrorType.NA]]],
+                ['{10,20}', '{1,2,3}', [[11, 22, ErrorType.NA]]],
+                ['{1;2;3}', '{10;20}', [[11], [22], [ErrorType.NA]]],
+                ['{1,2,3}', '{10;20}', [[11, 12, 13], [21, 22, 23]]],
+                ['{#DIV/0!,2,3}', '{10,#REF!}', [[ErrorType.DIV_BY_ZERO, ErrorType.REF, ErrorType.NA]]],
+            ] as const) {
+                expect(getObjectValue(plus.calculate(ArrayValueObject.create(left), ArrayValueObject.create(right)))).toEqual(expected);
+            }
+        } finally {
+            injector.dispose();
+        }
+    });
+
+    it('preserves line breaks inside quoted array constants and ignores formatting outside them', () => {
+        const value = ValueObjectFactory.create('{\n"a\nb", "c\rd";\n"\r\n", "a""\nb"\n}') as ArrayValueObject;
+        expect(value.toValue()).toEqual([['a\nb', 'c\rd'], ['\r\n', 'a"\nb']]);
+    });
+
     it('matches uncached comparisons after repeated formula-result updates', () => {
         const values = [[1], [3], [5], [7], [9]];
         const injector = new Injector([[FormulaCacheService]]);
@@ -449,6 +496,9 @@ describe('arrayValueObject test', () => {
             ['+.5', 0.5],
             ['007', 7],
             ['1.5e-2', 0.015],
+            ['572363714.5093731', 572363714.509373],
+            ['0.00001234567890123456', 0.0000123456789012345],
+            ['2.2250738585072014E-308', 0],
         ])('parses decimal formula number literals: %s', (token, expected) => {
             const value = ValueObjectFactory.createNumberLiteral(token, DateSystem.Date1904);
 

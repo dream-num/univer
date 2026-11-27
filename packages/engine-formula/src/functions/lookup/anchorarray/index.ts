@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { IRange } from '@univerjs/core';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import { isFormulaId, isFormulaString } from '@univerjs/core';
+import { ErrorType } from '../../../basics/error-type';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Anchorarray extends BaseFunction {
@@ -25,6 +29,36 @@ export class Anchorarray extends BaseFunction {
     override needsReferenceObject = true;
 
     override calculate(reference: FunctionVariantType) {
-        return reference;
+        if (reference.isError()) {
+            return reference;
+        }
+        if (!reference.isReferenceObject()) {
+            return ErrorValueObject.create(ErrorType.REF);
+        }
+
+        const anchor = reference as BaseReferenceObject;
+        return resolveSpillAnchor(anchor, (range) => this.createReferenceObject(anchor, range));
     }
+}
+
+export function resolveSpillAnchor(
+    anchor: BaseReferenceObject,
+    createReference: (range: IRange) => BaseReferenceObject | ErrorValueObject
+): BaseReferenceObject | ErrorValueObject {
+    const { startRow, startColumn, endRow, endColumn } = anchor.getRangePosition();
+    if (startRow !== endRow || startColumn !== endColumn || (anchor.getForcedSheetName() && !anchor.getForcedSheetId())) {
+        return ErrorValueObject.create(ErrorType.REF);
+    }
+
+    const current = anchor.getCurrentRuntimeActiveArrayFormulaRange()?.[startRow]?.[startColumn];
+    // An anchor already recalculated as a scalar must not reuse its old spill extent.
+    const range = current || anchor.getCurrentRuntimeSheetData()?.getValue(startRow, startColumn) != null
+        ? current
+        : anchor.getCurrentActiveArrayFormulaRange()?.[startRow]?.[startColumn];
+    if (range != null && anchor.getCellData(startRow, startColumn)?.v !== ErrorType.SPILL) {
+        return createReference(range);
+    }
+
+    const source = anchor.getCurrentActiveSheetData()?.cellData.getValue(startRow, startColumn);
+    return isFormulaString(source?.f) || isFormulaId(source?.si) ? anchor : ErrorValueObject.create(ErrorType.REF);
 }

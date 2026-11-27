@@ -19,7 +19,7 @@
  */
 
 import type { ComponentType } from 'react';
-import { act, cleanup, render } from '@testing-library/react';
+import { act, cleanup, render, within } from '@testing-library/react';
 import {
     ContextService,
     DesktopLogService,
@@ -51,11 +51,9 @@ function KeyboardBar() {
     const bottom = useContext(MobileKeyboardInsetContext);
     const { mobileKeyboardViewport } = useContext(ConfigContext);
     return (
-        <div
-            data-testid="keyboard-bar"
-            data-viewport={JSON.stringify(mobileKeyboardViewport)}
-            style={{ bottom }}
-        />
+        <output aria-label="Keyboard viewport" style={{ bottom }}>
+            {JSON.stringify(mobileKeyboardViewport)}
+        </output>
     );
 }
 
@@ -121,9 +119,9 @@ describe('MobileWorkbench keyboard positioning', () => {
         vi.spyOn(secondMount, 'getBoundingClientRect').mockReturnValue({ height: 600, width: 400 } as DOMRect);
         const first = render(<ConnectedWorkbench mountContainer={firstMount} contextMenu={false} />);
         const second = render(<ConnectedWorkbench mountContainer={secondMount} contextMenu={false} />);
-        const firstBar = first.container.querySelector<HTMLElement>('[data-testid="keyboard-bar"]')!;
-        const secondBar = second.container.querySelector<HTMLElement>('[data-testid="keyboard-bar"]')!;
-        const portalBars = portal.querySelectorAll<HTMLElement>('[data-testid="keyboard-bar"]');
+        const firstBar = within(first.container).getByRole('status', { name: 'Keyboard viewport' });
+        const secondBar = within(second.container).getByRole('status', { name: 'Keyboard viewport' });
+        const portalBars = within(portal).getAllByRole('status', { name: 'Keyboard viewport' });
         const rootStyle = document.documentElement.getAttribute('style');
         const bodyStyle = document.body.getAttribute('style');
         const input = document.createElement('input');
@@ -138,8 +136,8 @@ describe('MobileWorkbench keyboard positioning', () => {
         expect(secondBar.style.bottom).toBe('100px');
         expect(portalBars[0].style.bottom).toBe('300px');
         expect(portalBars[1].style.bottom).toBe('100px');
-        expect(firstBar.dataset.viewport).toBe(JSON.stringify({ top: 0, bottom: 500, height: 500, stableHeight: 800 }));
-        expect(secondBar.dataset.viewport).toBe(JSON.stringify({ top: 0, bottom: 500, height: 500, stableHeight: 600 }));
+        expect(firstBar.textContent).toBe(JSON.stringify({ top: 0, bottom: 500, height: 500, stableHeight: 800 }));
+        expect(secondBar.textContent).toBe(JSON.stringify({ top: 0, bottom: 500, height: 500, stableHeight: 600 }));
 
         act(() => {
             viewport.offsetTop = 20;
@@ -147,7 +145,7 @@ describe('MobileWorkbench keyboard positioning', () => {
         });
         expect(firstBar.style.bottom).toBe('280px');
         expect(secondBar.style.bottom).toBe('80px');
-        expect(firstBar.dataset.viewport).toBe(JSON.stringify({ top: 20, bottom: 520, height: 500, stableHeight: 800 }));
+        expect(firstBar.textContent).toBe(JSON.stringify({ top: 20, bottom: 520, height: 500, stableHeight: 800 }));
 
         act(() => {
             viewport.height = 800;

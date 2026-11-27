@@ -27,6 +27,8 @@ export class Besselk extends BaseFunction {
 
     override maxParams = 2;
 
+    protected _besselk = BESSEL.besselk;
+
     override calculate(x: BaseValueObject, n: BaseValueObject): BaseValueObject {
         if (x.isNull() || n.isNull()) {
             return ErrorValueObject.create(ErrorType.NA);
@@ -51,7 +53,7 @@ export class Besselk extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = BESSEL.besselk(xValue, nValue);
+        const result = this._besselk(xValue, nValue);
 
         if (Number.isNaN(result) || !Number.isFinite(result)) {
             return ErrorValueObject.create(ErrorType.NUM);
@@ -59,4 +61,8 @@ export class Besselk extends BaseFunction {
 
         return NumberValueObject.create(result);
     }
+}
+
+export class ExcelBesselk extends Besselk {
+    protected override _besselk = (x: number, order: number): number => BESSEL.besselk(x, order, true);
 }

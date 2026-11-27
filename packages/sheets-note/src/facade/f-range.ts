@@ -16,7 +16,8 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { ISheetNote } from '@univerjs/sheets-note';
-import { RemoveNoteMutation, SheetsNoteModel, UpdateNoteMutation } from '@univerjs/sheets-note';
+import { generateRandomId } from '@univerjs/core';
+import { SheetDeleteNoteCommand, SheetsNoteModel, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
 import { FRange } from '@univerjs/sheets/facade';
 
 export interface ICreateOrUpdateNoteOptions {
@@ -87,14 +88,28 @@ export interface IFRangeSheetsNoteMixin {
 
 export class FRangeSheetsNoteMixin extends FRange implements IFRangeSheetsNoteMixin {
     override createOrUpdateNote(note: ICreateOrUpdateNoteOptions): FRange {
+        const unitId = this.getUnitId();
+        const sheetId = this.getSheetId();
+        const row = this.getRow();
+        const col = this.getColumn();
+        const oldNote = this._injector.get(SheetsNoteModel).getNote(unitId, sheetId, { row, col });
+
         this._commandService.syncExecuteCommand(
-            UpdateNoteMutation.id,
+            SheetUpdateNoteCommand.id,
             {
-                unitId: this.getUnitId(),
-                sheetId: this.getSheetId(),
-                row: this.getRow(),
-                col: this.getColumn(),
-                note,
+                unitId,
+                sheetId,
+                row,
+                col,
+                note: {
+                    id: oldNote?.id ?? note.id ?? generateRandomId(6),
+                    row,
+                    col,
+                    width: note.width,
+                    height: note.height,
+                    note: note.note,
+                    show: note.show,
+                },
             }
         );
 
@@ -103,7 +118,7 @@ export class FRangeSheetsNoteMixin extends FRange implements IFRangeSheetsNoteMi
 
     override deleteNote(): FRange {
         this._commandService.syncExecuteCommand(
-            RemoveNoteMutation.id,
+            SheetDeleteNoteCommand.id,
             {
                 unitId: this.getUnitId(),
                 sheetId: this.getSheetId(),

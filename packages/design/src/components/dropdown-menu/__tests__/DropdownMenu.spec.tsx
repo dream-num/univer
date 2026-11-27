@@ -17,6 +17,7 @@
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DropdownMenu } from '../DropdownMenu';
+import { DropdownMenuShortcut } from '../DropdownMenuPrimitive';
 import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
@@ -125,5 +126,46 @@ describe('DropdownMenu', () => {
                 </DropdownMenu>
             )
         ).toThrow('[DropdownMenu]: `value` is required');
+    });
+
+    it('uses logical RTL-safe classes for checkbox, radio, sub-trigger and shortcut primitives', () => {
+        const { getByRole, getByText } = render(
+            <DropdownMenu
+                open
+                items={[
+                    { type: 'checkbox', value: 'c1', label: 'Check Item', checked: true },
+                    { type: 'radio', value: 'a', options: [{ label: 'Radio Item', value: 'a' }] },
+                    { type: 'subItem', children: 'Sub Menu', options: [{ type: 'item', children: 'Leaf' }] },
+                    {
+                        type: 'item',
+                        children: (
+                            <>
+                                Save
+                                <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                            </>
+                        ),
+                    },
+                ]}
+            >
+                <button type="button">Trigger</button>
+            </DropdownMenu>
+        );
+
+        const checkboxItem = getByRole('menuitemcheckbox', { name: 'Check Item' });
+        expect(checkboxItem).toHaveClass('univer-pl-8', 'univer-pr-2', 'rtl:univer-pr-8', 'rtl:univer-pl-2');
+        expect(checkboxItem.querySelector('.rtl\\:univer-right-2')).not.toBeNull();
+        expect(checkboxItem.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+
+        const radioItem = getByRole('menuitemradio', { name: 'Radio Item' });
+        expect(radioItem).toHaveClass('univer-pl-8', 'univer-pr-2', 'rtl:univer-pr-8', 'rtl:univer-pl-2');
+        expect(radioItem.querySelector('.rtl\\:univer-right-2')).not.toBeNull();
+
+        const subTrigger = getByRole('menuitem', { name: 'Sub Menu' });
+        const subArrow = subTrigger.querySelector('svg');
+        expect(subArrow).toHaveAttribute('aria-hidden', 'true');
+        expect(subArrow?.getAttribute('class')).toContain('rtl:univer-rotate-180');
+
+        const shortcut = getByText('⌘S');
+        expect(shortcut).toHaveClass('univer-ml-auto', 'rtl:univer-mr-auto', 'univer-text-xs', 'univer-text-gray-500');
     });
 });

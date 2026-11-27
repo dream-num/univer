@@ -15,11 +15,11 @@
  */
 
 import type { TableOfContentsFormat, TableOfContentsTabLeader } from '@univerjs/docs-toc';
-import type { LocaleKey } from '../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { Checkbox, clsx, Select } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../locale/types';
 
 export const INSERT_TABLE_OF_CONTENTS_DIALOG_COMPONENT = 'doc.insert-table-of-contents-dialog';
 
@@ -62,7 +62,7 @@ export function InsertTableOfContentsDialog(props: IInsertTableOfContentsDialogP
     const indent = { fromTemplate: 18, classic: 14, modern: 20, simple: 12 }[value.format];
 
     return (
-        <div className="univer-grid univer-gap-4 univer-py-2" data-testid="table-of-contents-insert-dialog">
+        <div className="univer-grid univer-gap-4">
             <div className="univer-grid univer-grid-cols-2 univer-gap-3">
                 <label className="univer-grid univer-gap-1 univer-text-sm">
                     <span>{localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.levels')}</span>

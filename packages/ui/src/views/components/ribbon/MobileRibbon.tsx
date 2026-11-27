@@ -363,7 +363,7 @@ function MobileRibbonToolbar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
                                               [&_input]:!univer-outline-none
                                             `)}
                                         >
-                                            <MobileToolbarItem {...child.item} preserveStrokeWidth />
+                                            <MobileToolbarItem {...child.item} />
                                         </div>
                                     )
                                 ))}
@@ -446,7 +446,7 @@ function MobileCompactTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
                           [&_button]:!univer-rounded-xl [&_button]:!univer-px-4
                         "
                     >
-                        <MobileToolbarItem {...schema.item!} grid showLabel preserveStrokeWidth />
+                        <MobileToolbarItem {...schema.item!} grid showLabel />
                     </div>
                 ))}
             </div>

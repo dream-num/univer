@@ -1,0 +1,341 @@
+{
+    "provenance": "Word COM readonly first PDF, before field/story metadata access; authored controls, not genuine sample documents.",
+    "wordProofSha256": "2e3359196c00e0d3582d3bf50ac3e433506e022d488914bacf08c41c1c5e4187",
+    "actualAuthoredControls": 24,
+    "fonts": [
+        {
+            "family": "Arial",
+            "unitsPerEm": 2048,
+            "ascent": 1854,
+            "descent": 434,
+            "hheaAscent": 1854,
+            "hheaDescent": -434,
+            "hheaLineGap": 67,
+            "sourceFontSha256": "b3658eadae55e682b5f69eb64c439c1ecc8f196c0bb8d4756d145d13bc86476a"
+        },
+        {
+            "family": "等线",
+            "unitsPerEm": 2048,
+            "ascent": 1659,
+            "descent": 475,
+            "hheaAscent": 1659,
+            "hheaDescent": -475,
+            "hheaLineGap": 0,
+            "sourceFontSha256": "e051009b42b454352a90ae0c9b8adb58bbdbcd168768750b35bc3357510de141"
+        }
+    ],
+    "cases": [
+        {
+            "id": "801",
+            "fontFamily": "Arial",
+            "fontSize": 11,
+            "lineSpacing": 1.0,
+            "snapToGrid": false,
+            "imageTops": [
+                72.0,
+                136.0
+            ],
+            "wordPdfSha256": "7ab1ff6b12f7d353245e07c2d208bc2a68c2c4fe0bb0856c4f8c5163774a018c",
+            "sourceDocxSha256": "4eb79cdc2f4708aa900011b455d62e9d580384c8537f5c65b4a9fc378cc99454"
+        },
+        {
+            "id": "802",
+            "fontFamily": "Arial",
+            "fontSize": 11,
+            "lineSpacing": 1.0,
+            "snapToGrid": true,
+            "imageTops": [
+                81.60001627604167,
+                163.239990234375
+            ],
+            "wordPdfSha256": "7ff2f963fa8595aa6bae2b396ca883ef6b1f770a20e3a352d98ac3f0de3d4b15",
+            "sourceDocxSha256": "0d56af8d98281d5bff4b1797d166892ef2d5ddd6c449ed0f60d4c4fdc36cb589"
+        },
+        {
+            "id": "803",
+            "fontFamily": "Arial",
+            "fontSize": 11,
+            "lineSpacing": 1.1583333333333334,
+            "snapToGrid": false,
+            "imageTops": [
+                72.0,
+                138.66666666666666
+            ],
+            "wordPdfSha256": "ee509ef609d874857867ae065e04f55c3b4c1075b2b3101f4146259f14cfea71",
+            "sourceDocxSha256": "d94d07a6814265a4a5e4348afeb4d87d7c7595e0ebf43b9191321fdcdb834845"
+        },
+        {
+            "id": "804",
+            "fontFamily": "Arial",
+            "fontSize": 11,
+            "lineSpacing": 1.1583333333333334,
+            "snapToGrid": true,
+            "imageTops": [
+                81.60001627604167,
+                163.239990234375
+            ],
+            "wordPdfSha256": "e85a55b84e097ea7c750faee93c85d38f741d326cba69c09869c601ff1679d1b",
+            "sourceDocxSha256": "fb2839b12ef2b95bfc581b933f70445dc8a743c726b045b22b5708e1d1d3cbd5"
+        },
+        {
+            "id": "805",
+            "fontFamily": "Arial",
+            "fontSize": 11,
+            "lineSpacing": 1.5,
+            "snapToGrid": false,
+            "imageTops": [
+                72.0,
+                144.42667643229166
+            ],
+            "wordPdfSha256": "a7fce261f7bd76e22b4ce5878903459c8c5dd31001306d4aedb15ca47a620213",
+            "sourceDocxSha256": "468bc3cc0048b85e8249e84d01ac220e62b2a8f1991bd4d6693020fbbb156a45"
+        },
+        {
+            "id": "806",
+            "fontFamily": "Arial",
+            "fontSize": 11,
+            "lineSpacing": 1.5,
+            "snapToGrid": true,
+            "imageTops": [
+                81.60001627604167,
+                163.239990234375
+            ],
+            "wordPdfSha256": "4eebd24fcbf2b29d3bc83d94d382d68d4a78e7f4de0035890bbab8b3aff5d56f",
+            "sourceDocxSha256": "ebb215da7374b1f5b7275e7160d7d3a242efdc78b083e0c27ea50c4b19c275fb"
+        },
+        {
+            "id": "807",
+            "fontFamily": "Arial",
+            "fontSize": 20,
+            "lineSpacing": 1.0,
+            "snapToGrid": false,
+            "imageTops": [
+                72.0,
+                136.0
+            ],
+            "wordPdfSha256": "704d27c3c3e44c8c8ebf7eeaaf7d1ca7d704771ff4ea6754651ae9f07de5c392",
+            "sourceDocxSha256": "64f48905e48bb836620b74f0a20c775dd09205b562846f7e0b2a9bc949d4f3d5"
+        },
+        {
+            "id": "808",
+            "fontFamily": "Arial",
+            "fontSize": 20,
+            "lineSpacing": 1.0,
+            "snapToGrid": true,
+            "imageTops": [
+                81.60001627604167,
+                161.97330729166666
+            ],
+            "wordPdfSha256": "c00f22cd5880048e65293e45bea19765536bd3c063042ba291535ba5cdc98f72",
+            "sourceDocxSha256": "48644f52cca971529bbdb23de313d1d27afa45a1a5fb1a0946672054ab7c504a"
+        },
+        {
+            "id": "809",
+            "fontFamily": "Arial",
+            "fontSize": 20,
+            "lineSpacing": 1.1583333333333334,
+            "snapToGrid": false,
+            "imageTops": [
+                72.0,
+                140.853271484375
+            ],
+            "wordPdfSha256": "3bc0f2bee3f188e61383f212dd02e847611b1f30df3ce67098e0d49b2eca34e5",
+            "sourceDocxSha256": "d2940e1304d3df2ea6004da71045c99f0c06aa040579794d711d16e952ceee8f"
+        },
+        {
+            "id": "810",
+            "fontFamily": "Arial",
+            "fontSize": 20,
+            "lineSpacing": 1.1583333333333334,
+            "snapToGrid": true,
+            "imageTops": [
+                81.60001627604167,
+                161.97330729166666
+            ],
+            "wordPdfSha256": "204916835d49c263118e316cef4b42a9db20cd036d6c434d6ced18a6e15db13b",
+            "sourceDocxSha256": "24d10a8b6434085ee6e61a1e12fa5815ee4f0124da9663dba371f79002e7db78"
+        },
+        {
+            "id": "811",
+            "fontFamily": "Arial",
+            "fontSize": 20,
+            "lineSpacing": 1.5,
+            "snapToGrid": false,
+            "imageTops": [
+                72.0,
+                151.33333333333334
+            ],
+            "wordPdfSha256": "5cd98b75aad98c124baa57bd960559e34603fab7c475cc750576ea291dfd985a",
+            "sourceDocxSha256": "94b5949f7be74e480ae6a31972feb2154d2ea94ffbccee7d4f5b88dab6818c53"
+        },
+        {
+            "id": "812",
+            "fontFamily": "Arial",
+            "fontSize": 20,
+            "lineSpacing": 1.5,
+            "snapToGrid": true,
+            "imageTops": [
+                81.60001627604167,
+                161.97330729166666
+            ],
+            "wordPdfSha256": "c97cb4c2893172b43356f418e99d5e9f65e63640a0cf01d919ad789e18b85483",
+            "sourceDocxSha256": "716182dddea9f49baa0c218b99546c012fd744e2d8a0b90e1655d34afce91c96"
+        },
+        {
+            "id": "813",
+            "fontFamily": "等线",
+            "fontSize": 11,
+            "lineSpacing": 1.0,
+            "snapToGrid": false,
+            "imageTops": [
+                72.0,
+                136.0
+            ],
+            "wordPdfSha256": "f2830f9ed81051350480c52ce512ed96c4a499a2714a369f5cff9c97f1129190",
+            "sourceDocxSha256": "6e07d348f42e61e8b1986ea0546724f95e8257b0b887dea30760c7e631066476"
+        },
+        {
+            "id": "814",
+            "fontFamily": "等线",
+            "fontSize": 11,
+            "lineSpacing": 1.0,
+            "snapToGrid": true,
+            "imageTops": [
+                81.60001627604167,
+                161.94661458333334
+            ],
+            "wordPdfSha256": "619cc3ebc07437e4b250320d8b5f4dc4c69dcb47bbb163c29d58a1a1a2764b08",
+            "sourceDocxSha256": "726a05d128080c1311184439d9ba9c61fe67c3165fb82ba96355419ad085f299"
+        },
+        {
+            "id": "815",
+            "fontFamily": "等线",
+            "fontSize": 11,
+            "lineSpacing": 1.1583333333333334,
+            "snapToGrid": false,
+            "imageTops": [
+                72.0,
+                139.14664713541666
+            ],
+            "wordPdfSha256": "75fd6be935a6bc5e9d268b137d65b534fd35386fc6d2c59854d1c1689e55dd4b",
+            "sourceDocxSha256": "21329ae08a4c5a0e03cb02d36310d34fe0df7e0e07c64c2e8e1bc6b5ae0bf315"
+        },
+        {
+            "id": "816",
+            "fontFamily": "等线",
+            "fontSize": 11,
+            "lineSpacing": 1.1583333333333334,
+            "snapToGrid": true,
+            "imageTops": [
+                81.60001627604167,
+                161.94661458333334
+            ],
+            "wordPdfSha256": "0c24b20f06dcf3c7fba8db8184ce45994aa096576cdd31ff9425b2fe2fd2fa9b",
+            "sourceDocxSha256": "e2541acb9643be739ab53142ff521d3691155b8ed167171bbae900ba123f9fec"
+        },
+        {
+            "id": "817",
+            "fontFamily": "等线",
+            "fontSize": 11,
+            "lineSpacing": 1.5,
+            "snapToGrid": false,
+            "imageTops": [
+                72.0,
+                145.933349609375
+            ],
+            "wordPdfSha256": "a834cecfecd4c4fe371d377eb5504be4436ae8bc27cd72626ed049bca24dbcbe",
+            "sourceDocxSha256": "659e93f6ffe1b156e055cac6a852013e7b5c5890847ead186ef3df13914f8a95"
+        },
+        {
+            "id": "818",
+            "fontFamily": "等线",
+            "fontSize": 11,
+            "lineSpacing": 1.5,
+            "snapToGrid": true,
+            "imageTops": [
+                81.60001627604167,
+                161.94661458333334
+            ],
+            "wordPdfSha256": "ff51fec4a946657a4f3f37a5b3d9b28d00bec07a474c70b1f28a4ff7ee872e29",
+            "sourceDocxSha256": "a3b6ee64da2f00a33515c5036e8827e290e35204f5147e66cf95ad249c18d843"
+        },
+        {
+            "id": "819",
+            "fontFamily": "等线",
+            "fontSize": 20,
+            "lineSpacing": 1.0,
+            "snapToGrid": false,
+            "imageTops": [
+                72.0,
+                136.0
+            ],
+            "wordPdfSha256": "bf9a0d8445f3a797498e97ed9c4ea95f8904e4ad749e447e269345aa8d2bfd61",
+            "sourceDocxSha256": "747cf318a8f48b1e750e0901348e5aac4a84c0c772fa19301e70c805772d57d4"
+        },
+        {
+            "id": "820",
+            "fontFamily": "等线",
+            "fontSize": 20,
+            "lineSpacing": 1.0,
+            "snapToGrid": true,
+            "imageTops": [
+                81.60001627604167,
+                159.62662760416666
+            ],
+            "wordPdfSha256": "cad216cb9d26ba2a3e7f49c8c50967d814a1e66fa5de21da57cfcda2c47a9dcd",
+            "sourceDocxSha256": "5cb7625f75e555acc4401b6e27986e3390cf77eea57ffe2eaee03373c9c35fe6"
+        },
+        {
+            "id": "821",
+            "fontFamily": "等线",
+            "fontSize": 20,
+            "lineSpacing": 1.1583333333333334,
+            "snapToGrid": false,
+            "imageTops": [
+                72.0,
+                141.719970703125
+            ],
+            "wordPdfSha256": "f1bb7957231178b6762f41db9dddaab2a2bac3f871f5ac7afa34fee9eee8778e",
+            "sourceDocxSha256": "853338ba9c1a74d46275e8f5894a8ab010be63d962326279510a948cd6dd44f2"
+        },
+        {
+            "id": "822",
+            "fontFamily": "等线",
+            "fontSize": 20,
+            "lineSpacing": 1.1583333333333334,
+            "snapToGrid": true,
+            "imageTops": [
+                81.60001627604167,
+                159.62662760416666
+            ],
+            "wordPdfSha256": "4ec7afd632a074dc424d69f74bd1f1f325011cf520324ff66cb01b1543fcb111",
+            "sourceDocxSha256": "0cd552cce96564a0243873a59820261567ec249c4ef0d9b922aaa635b9981764"
+        },
+        {
+            "id": "823",
+            "fontFamily": "等线",
+            "fontSize": 20,
+            "lineSpacing": 1.5,
+            "snapToGrid": false,
+            "imageTops": [
+                72.0,
+                154.05330403645834
+            ],
+            "wordPdfSha256": "764c7c9c809c8c1fe6fb24b0f7678978a43974066002fb5edbfd39a4bc78e85f",
+            "sourceDocxSha256": "3b999286b089e7654b7e49539e4393eeacd17868d3691fe05e8780ad98092e32"
+        },
+        {
+            "id": "824",
+            "fontFamily": "等线",
+            "fontSize": 20,
+            "lineSpacing": 1.5,
+            "snapToGrid": true,
+            "imageTops": [
+                81.60001627604167,
+                159.62662760416666
+            ],
+            "wordPdfSha256": "24c5d5cd45207c1e104da07237701e9c7db289f93b643e5619edc5f6a9704483",
+            "sourceDocxSha256": "846b5ad6bc599401ee798abb76e2b1209f5329d2b90e089e41bad02e597a8c06"
+        }
+    ]
+}

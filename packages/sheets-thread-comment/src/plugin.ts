@@ -15,7 +15,6 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsThreadCommentConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -29,11 +28,14 @@ import {
 } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
+import type { IUniverSheetsThreadCommentConfig } from './config/config';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_THREAD_COMMENT_PLUGIN_CONFIG_KEY } from './config/config';
+import { SheetsThreadCommentPermissionController } from './controllers/sheets-thread-comment-permission.controller';
 import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
 import { SheetsThreadCommentResourceController } from './controllers/sheets-thread-comment-resource.controller';
 import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
+import { SheetsThreadCommentAuthz } from './services/sheets-thread-comment-authz.service';
 import { SHEET_THREAD_COMMENT_BASE } from './types/const';
 
 @DependentOn(UniverThreadCommentPlugin, UniverSheetsPlugin)
@@ -64,6 +66,8 @@ export class UniverSheetsThreadCommentPlugin extends Plugin {
             [SheetsThreadCommentModel],
             [SheetsThreadCommentRefRangeController],
             [SheetsThreadCommentResourceController],
+            [SheetsThreadCommentAuthz],
+            [SheetsThreadCommentPermissionController],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
         });
@@ -71,6 +75,8 @@ export class UniverSheetsThreadCommentPlugin extends Plugin {
         touchDependencies(this._injector, [
             [SheetsThreadCommentRefRangeController],
             [SheetsThreadCommentResourceController],
+            [SheetsThreadCommentAuthz],
+            [SheetsThreadCommentPermissionController],
         ]);
     }
 }

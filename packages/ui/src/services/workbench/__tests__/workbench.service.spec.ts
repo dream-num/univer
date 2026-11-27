@@ -20,20 +20,17 @@ import { IWorkbenchService, WorkbenchService } from '../workbench.service';
 
 describe('WorkbenchService', () => {
     let univer: Univer;
-    let instanceService: IUniverInstanceService;
-    let service: IWorkbenchService;
 
     beforeEach(() => {
         univer = new Univer();
         const injector = univer.__getInjector();
         injector.add([IWorkbenchService, { useClass: WorkbenchService }]);
-        instanceService = injector.get(IUniverInstanceService);
-        service = injector.get(IWorkbenchService);
     });
 
     afterEach(() => univer.dispose());
 
     it('keeps the skeleton visible until every loading token is disposed', () => {
+        const service = univer.__getInjector().get(IWorkbenchService);
         const states: boolean[] = [];
         service.skeletonVisible$.subscribe((visible) => states.push(visible));
 
@@ -48,6 +45,9 @@ describe('WorkbenchService', () => {
     });
 
     it('identifies root units without treating editors or embedded units as workbench roots', () => {
+        const injector = univer.__getInjector();
+        const instanceService = injector.get(IUniverInstanceService);
+        const service = injector.get(IWorkbenchService);
         const states: Array<UniverInstanceType | null> = [];
         service.rootUnitType$.subscribe((unitType) => states.push(unitType));
 
@@ -67,11 +67,19 @@ describe('WorkbenchService', () => {
             { makeCurrent: false, skipAutoRender: true, embeddedRender: true }
         );
         instanceService.focusUnit(embeddedDoc.getUnitId());
+        instanceService.focusUnit(rootDoc.getUnitId());
+        const inlineEditor = instanceService.createUnit(
+            UniverInstanceType.UNIVER_DOC,
+            { id: 'inline-editor' },
+            { makeCurrent: false, workbenchHostUnitId: backgroundSheet.getUnitId() }
+        );
+        instanceService.focusUnit(inlineEditor.getUnitId());
         instanceService.disposeUnit(backgroundSheet.getUnitId());
 
-        expect(rootDoc.getUnitId()).toBe('root-doc');
         expect(states).toEqual([
             null,
+            UniverInstanceType.UNIVER_DOC,
+            UniverInstanceType.UNIVER_SHEET,
             UniverInstanceType.UNIVER_DOC,
             UniverInstanceType.UNIVER_SHEET,
             null,

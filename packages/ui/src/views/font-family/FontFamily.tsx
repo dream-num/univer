@@ -113,7 +113,10 @@ export const FontFamily = ({ className, disabled: disabledProp, value, disabled$
 
     return (
         <div
-            className={clsx('univer-w-32 univer-truncate univer-text-sm', className)}
+            className={clsx(`
+              univer-w-32 univer-truncate univer-rounded univer-text-sm
+              focus-within:univer-ring-2 focus-within:univer-ring-inset focus-within:univer-ring-primary-600
+            `, className)}
             style={{ fontFamily: value as string }}
         >
             <input

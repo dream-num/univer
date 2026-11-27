@@ -150,6 +150,7 @@ const locale = {
                 formulas: 'Formulas',
                 rules: 'Rules',
                 organization: 'Data organization',
+                analysis: 'Data analysis',
                 display: 'Display',
                 visibility: 'Visibility',
             },

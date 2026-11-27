@@ -15,13 +15,40 @@
  */
 
 import type { Injector, IWorkbookData, Workbook } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { FilterColumn, generateFilterFn } from '../filter-model';
+import {
+    BooleanNumber,
+    CellValueType,
+    ILogService,
+    IUniverInstanceService,
+    LocaleType,
+    LogLevel,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { FilterColumn, FilterModel, generateFilterFn } from '../filter-model';
 import { CustomFilterOperator } from '../types';
 
 describe('Test filter model and related utils', () => {
     describe('Test "FilterFn"s', () => {
+        it.each([undefined, CustomFilterOperator.EQUAL])('honors text equality with operator %s', (operator) => {
+            const text = generateFilterFn({ colId: 0, customFilters: {
+                customFilters: [{ operator, val: '01', compareAsText: true }],
+            } });
+            expect(['01', '1', 1].map((value) => text(value))).toEqual([true, false, false]);
+        });
+
+        it('preserves explicit text comparison without changing numeric inequality', () => {
+            const numeric = generateFilterFn({ colId: 0, customFilters: {
+                customFilters: [{ operator: CustomFilterOperator.NOT_EQUALS, val: '01' }],
+            } });
+            const text = generateFilterFn({ colId: 0, customFilters: {
+                customFilters: [{ operator: CustomFilterOperator.NOT_EQUALS, val: '01', compareAsText: true }],
+            } });
+            expect(['1', '01', 'Other', 1].map((value) => numeric(value))).toEqual([true, true, true, false]);
+            expect(['1', '01', 'Other', 1].map((value) => text(value))).toEqual([true, false, true, true]);
+        });
+
         it('should AND work', () => {
             // equivalent to "between"
             const fn = generateFilterFn({
@@ -86,10 +113,84 @@ describe('Test filter model and related utils', () => {
         });
     });
 
+    it.each([
+        { pattern: 'a~*', hiddenRows: [2, 3, 4, 5, 6, 7, 8, 9] },
+        { pattern: 'tail?', hiddenRows: [1, 2, 5, 6, 7, 8, 9] },
+        { pattern: 'A~*', operator: CustomFilterOperator.NOT_EQUALS, hiddenRows: [1] },
+        { pattern: '*', hiddenRows: [7, 8, 9] },
+        { pattern: '*', operator: CustomFilterOperator.NOT_EQUALS, hiddenRows: [1, 2, 3, 4, 5, 6] },
+        { pattern: '', hiddenRows: [1, 2, 3, 4, 5] },
+        { pattern: '', operator: CustomFilterOperator.NOT_EQUALS, hiddenRows: [6, 7, 8, 9] },
+        { pattern: ' ', operator: CustomFilterOperator.NOT_EQUALS, hiddenRows: [6, 7, 8, 9] },
+    ])('recalculates filtered rows for $pattern', ({ pattern, operator, hiddenRows }) => {
+        const { univer, get } = createFilterModelTestBed({
+            id: 'test',
+            appVersion: '3.0.0-alpha',
+            locale: LocaleType.EN_US,
+            name: '',
+            sheetOrder: ['sheet1'],
+            styles: {},
+            sheets: {
+                sheet1: {
+                    id: 'sheet1',
+                    name: 'Sheet1',
+                    cellData: {
+                        0: { 0: { v: 'Header' } },
+                        1: { 0: { v: 'a*' } },
+                        2: { 0: { v: 'a~tail' } },
+                        3: { 0: { v: 'tail\n' } },
+                        4: { 0: { p: { id: 'rich', documentStyle: {}, body: { dataStream: 'tail\n\r\n' } } } },
+                        5: { 0: { v: 'tail' } },
+                        6: { 0: { f: '=""', v: '', t: CellValueType.STRING } },
+                        7: { 0: { s: { bl: BooleanNumber.TRUE } } },
+                        8: { 0: { p: { id: 'blank-rich', documentStyle: {}, body: { dataStream: '\r\n' } } } },
+                    },
+                },
+            },
+        });
+        const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const worksheet = workbook.getActiveSheet()!;
+        const model = FilterModel.deserialize('test', 'sheet1', worksheet, {
+            ref: { startRow: 0, endRow: 9, startColumn: 0, endColumn: 0 },
+        });
+        try {
+            model.setCriteria(0, { colId: 0, customFilters: { customFilters: [{ val: pattern, operator }] } });
+            model.reCalc();
+            expect(Array.from(model.filteredOutRows)).toEqual(hiddenRows);
+        } finally {
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
     describe('Test "FilterColumn"', () => {
         let univer: Univer;
         let filterColumn: FilterColumn;
         let get: Injector['get'];
+
+        it('reuses column results only before the excluded filter column', () => {
+            const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
+            const sheet = workbook.getSheetBySheetId('sheet1')!;
+            const model = FilterModel.deserialize('test', 'sheet1', sheet, {
+                ref: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 1 },
+                filterColumns: [
+                    { colId: 0, filters: { filters: ['nonempty'] } },
+                    { colId: 1, filters: { filters: ['123'] } },
+                ],
+            });
+            try {
+                const cachedRows = new Map(model.getAllFilterColumns().map(([column, filter]) => [column, filter.filteredOutRows!]));
+                const firstCalc = vi.spyOn(model.getFilterColumn(0)!, 'calc');
+                const secondCalc = vi.spyOn(model.getFilterColumn(1)!, 'calc');
+                expect(model.getFilteredOutRowsExceptCol(1, cachedRows)).toEqual(new Set([1, 2]));
+                expect(firstCalc).not.toHaveBeenCalled();
+                expect(secondCalc).not.toHaveBeenCalled();
+                expect(model.getFilteredOutRowsExceptCol(0, cachedRows)).toEqual(new Set([2]));
+                expect(secondCalc).toHaveBeenCalledOnce();
+            } finally {
+                model.dispose();
+            }
+        });
 
         beforeEach(() => {
             const testBed = createFilterModelTestBed({
@@ -124,7 +225,7 @@ describe('Test filter model and related utils', () => {
 
         afterEach(() => {
             univer.dispose();
-            filterColumn.dispose();
+            filterColumn?.dispose();
         });
 
         it('should not calc when filter fn or range is not set', () => {

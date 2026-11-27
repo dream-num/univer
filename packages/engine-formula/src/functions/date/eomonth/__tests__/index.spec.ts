@@ -39,6 +39,18 @@ describe('Test eomonth function', () => {
             expect(result.getValue()).toStrictEqual(40482);
         });
 
+        it('truncates a fractional months argument toward zero', () => {
+            const startDate = StringValueObject.create('2011/1/15');
+            const cases: [number, number][] = [
+                [1.5, 40602], // 2011-02-28
+                [-1.5, 40543], // 2010-12-31, not 2010-11-30
+                [-0.5, 40574], // 2011-01-31
+            ];
+            for (const [months, expected] of cases) {
+                expect(testFunction.calculate(startDate, NumberValueObject.create(months)).getValue()).toStrictEqual(expected);
+            }
+        });
+
         it('value is error', () => {
             const startDate = StringValueObject.create('2011/1/1');
             const months = ErrorValueObject.create(ErrorType.NAME);

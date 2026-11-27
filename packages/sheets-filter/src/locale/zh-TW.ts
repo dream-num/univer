@@ -24,6 +24,9 @@ const locale: typeof enUS = {
         msg: {
             'filter-header-forbidden': '無法移動篩選列頭',
         },
+        permission: {
+            filterErr: '該範圍已被保護，目前沒有篩選權限。如需篩選，請聯絡建立者。',
+        },
     },
 };
 

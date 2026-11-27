@@ -15,7 +15,7 @@
  */
 
 import type { DateSystem, ICellData, Nullable, Styles } from '@univerjs/core';
-import { currencySymbols, getNumfmtParseValueFilter, LocaleType, numfmt } from '@univerjs/core';
+import { getCurrencySymbolByLocale, getNumfmtParseValueFilter, numfmt } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { operatorToken } from '../../basics/token';
 
@@ -190,17 +190,13 @@ export function clearNumberFormatTypeCache() {
  * @returns
  */
 function getNumberFormatTypeRaw(pattern: string): NumberFormatType {
-    if (isAccounting(pattern)) {
+    const type = numfmt.getFormatInfo(pattern).type as FormatType || 'unknown';
+    if (type === 'currency' && pattern.startsWith('_(')) {
         return NumberFormatType.Accounting;
     }
 
-    const type = numfmt.getFormatInfo(pattern).type as FormatType || 'unknown';
     return NumberFormatTypeMap[type];
 }
-
-function isAccounting(pattern: string) {
-    return !!currencySymbols.find((code) => pattern.includes(code)) && pattern.startsWith('_(');
-};
 
 /**
  * The number format of the formula inherits the number format of the referenced cell, usually taking the format of the cell at the front position, but some formats have higher priority, there are some special cases.
@@ -251,36 +247,7 @@ export function comparePatternPriority(previousPattern: string, nextPattern: str
     return previousPattern || nextPattern;
 }
 
-/**
- * Get the currency symbol based on the locale
- */
-const localeCurrencySymbolMap = new Map<LocaleType, string>([
-    [LocaleType.EN_US, '$'],
-    [LocaleType.RU_RU, '₽'],
-    [LocaleType.VI_VN, '₫'],
-    [LocaleType.ZH_CN, '¥'],
-    [LocaleType.ZH_TW, 'NT$'],
-    [LocaleType.ZH_HK, 'HK$'],
-    [LocaleType.FR_FR, '€'],
-    [LocaleType.FA_IR, '﷼'],
-    [LocaleType.KO_KR, '₩'],
-    [LocaleType.ES_ES, '€'],
-    [LocaleType.CA_ES, '€'],
-    [LocaleType.SK_SK, '€'],
-    [LocaleType.JA_JP, '¥'],
-    [LocaleType.PT_BR, 'R$'],
-    [LocaleType.DE_DE, '€'],
-    [LocaleType.IT_IT, '€'],
-    [LocaleType.ID_ID, 'Rp'],
-    [LocaleType.PL_PL, 'zł'],
-    [LocaleType.AR_SA, '﷼'],
-]);
-
-function getCurrencySymbol(locale: LocaleType): string {
-    return localeCurrencySymbolMap.get(locale) || '$';
-}
-
-export function getCurrencyFormat(locale: LocaleType, numberDigits: number = 2): string {
+export function getCurrencyFormat(locale: string, numberDigits: number = 2): string {
     let _numberDigits = numberDigits;
 
     if (numberDigits > 127) {
@@ -293,11 +260,12 @@ export function getCurrencyFormat(locale: LocaleType, numberDigits: number = 2):
         decimal = `.${'0'.repeat(_numberDigits)}`;
     }
 
-    return `"${getCurrencySymbol(locale)}"#,##0${decimal}_);[Red]("${getCurrencySymbol(locale)}"#,##0${decimal})`;
+    const symbol = getCurrencySymbolByLocale(locale);
+    return `"${symbol}"#,##0${decimal}_);[Red]("${symbol}"#,##0${decimal})`;
 }
 
-export function applyCurrencyFormat(locale: LocaleType, number: number, numberDigits: number = 2): string {
-    return numfmt.format(getCurrencyFormat(locale, numberDigits), number);
+export function applyCurrencyFormat(locale: string, number: number, numberDigits: number = 2): string {
+    return numfmt.format(getCurrencyFormat(locale, numberDigits), number, { region: locale });
 }
 
 /**

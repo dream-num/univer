@@ -15,12 +15,13 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsDrawingConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import type { IUniverSheetsDrawingConfig } from './config/config';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_DRAWING_PLUGIN_CONFIG_KEY } from './config/config';
+import { SheetDrawingPermissionController } from './controllers/sheet-drawing-permission.controller';
 import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
 import { SHEET_DRAWING_PLUGIN, SheetsDrawingLoadController } from './controllers/sheet-drawing.controller';
 import { SheetDrawingTransformPlanService } from './services/sheet-drawing-transform-plan.service';
@@ -54,10 +55,12 @@ export class UniverSheetsDrawingPlugin extends Plugin {
             [SheetsDrawingLoadController],
             [SheetDrawingTransformPlanService],
             [SheetDrawingTransformAffectedController],
+            [SheetDrawingPermissionController],
             [ISheetDrawingService, { useClass: SheetDrawingService }],
         ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
 
         this._injector.get(SheetsDrawingLoadController);
         this._injector.get(SheetDrawingTransformAffectedController);
+        this._injector.get(SheetDrawingPermissionController);
     }
 }

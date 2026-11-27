@@ -439,7 +439,12 @@ export class HtmlToUSMService {
                             i--;
                         }
                     }
-                    if (value?.richTextParma?.p?.body?.textRuns?.length === 0) {
+                    if (
+                        value?.richTextParma?.p?.body?.textRuns?.length === 0 &&
+                        (value.richTextParma.p.body.paragraphs?.length ?? 0) < 2 &&
+                        !value.richTextParma.p.body.customRanges?.length &&
+                        !value.richTextParma.p.body.customBlocks?.length
+                    ) {
                         value.content = value?.richTextParma?.v;
                         delete value.richTextParma;
                     }
@@ -699,7 +704,7 @@ export class HtmlToUSMService {
         let cellText = '';
         let cellRichStyle;
         const isRichText = /<[^>]+>/.test(cellHtml);
-        if (isRichText && skeleton) {
+        if (isRichText && (skeleton || /<br\b/i.test(cellHtml))) {
             const newDocBody: IDocumentBody = {
                 dataStream: '',
                 textRuns: [],
@@ -986,7 +991,12 @@ function decodeHTMLEntities(input: string): string {
         '&nbsp;': ' ',
     };
 
-    return input.replace(/&lt;|&gt;|&amp;|&quot;|&#39;|&nbsp;|<br>/g, (match) => entities[match]);
+    return input.replace(/&lt;|&gt;|&amp;|&quot;|&#39;|&nbsp;|<br\s*\/?>/gi, (match) => {
+        if (/^<br/i.test(match)) {
+            return '\r';
+        }
+        return entities[match];
+    });
 }
 
 function normalizePlainCellText(input: string): string {

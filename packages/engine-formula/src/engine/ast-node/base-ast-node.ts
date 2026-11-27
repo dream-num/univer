@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { DateSystem, Nullable } from '@univerjs/core';
+import type { DateSystem, IRange, Nullable } from '@univerjs/core';
+
 import type { ErrorType } from '../../basics/error-type';
-import type { FunctionVariantType } from '../reference-object/base-reference-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import { AstNodePromiseType } from '../../basics/common';
+import { operatorToken } from '../../basics/token';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NodeType } from './node-type';
 
@@ -85,8 +87,43 @@ export class BaseAstNode {
         return this._address;
     }
 
+    /** Resolved dependency targets. Undefined uses the node's reference result. */
+    getAddressDependencyReferences(): readonly BaseReferenceObject[] | undefined {
+        return undefined;
+    }
+
+    resolveAddressDependencyReferences(
+        _argument: (node: BaseAstNode) => Promise<BaseReferenceObject | null>
+    ): Promise<readonly BaseReferenceObject[]> | undefined {
+        return undefined;
+    }
+
+    /** A cached formula may not have been executed since opening the workbook. */
+    mayReadCalculationRegion(): boolean {
+        switch (this.nodeType) {
+            case NodeType.LAMBDA:
+            case NodeType.LAMBDA_PARAMETER:
+            case NodeType.UNION:
+            case NodeType.ROOT:
+                return Boolean(this._definedNames?.length) || this._children.some((child) => child.mayReadCalculationRegion());
+            case NodeType.OPERATOR:
+            case NodeType.PREFIX:
+            case NodeType.SUFFIX:
+            case NodeType.FUNCTION:
+                return this._children.some((child) => child.nodeType === NodeType.VALUE
+                    ? child.getToken().includes('"')
+                    : child.nodeType !== NodeType.NULL && child.nodeType !== NodeType.ERROR);
+            default:
+                return Boolean(this._definedNames?.length);
+        }
+    }
+
     isForcedCalculateFunction() {
         return this._isForcedCalculateFunction;
+    }
+
+    needsFilteredOutRows() {
+        return false;
     }
 
     setAsync() {
@@ -130,8 +167,26 @@ export class BaseAstNode {
         return this._valueObject;
     }
 
+    getImplicitIntersectionReference(_child: BaseAstNode, _reference: BaseReferenceObject, _range: IRange): FunctionVariantType | undefined {
+        return undefined;
+    }
+
     preservesLazyIfReferenceArray(_child: BaseAstNode): boolean {
         return false;
+    }
+
+    preservesReferenceInRangeEndpoint(_child: BaseAstNode): boolean {
+        return false;
+    }
+
+    isUsedAsRangeEndpoint(): boolean {
+        let child: BaseAstNode = this;
+        let parent = child.getParent();
+        while (parent?.preservesReferenceInRangeEndpoint(child)) {
+            child = parent;
+            parent = child.getParent();
+        }
+        return parent?.nodeType === NodeType.UNION || parent?.getToken() === operatorToken.INTERSECTION;
     }
 
     isCalculated() {
@@ -142,7 +197,7 @@ export class BaseAstNode {
         this._calculateState = true;
     }
 
-    execute(_dateSystem?: DateSystem) {
+    execute(_dateSystem?: DateSystem, _readRegion?: () => string) {
         /* abstract */
     }
 
@@ -150,7 +205,7 @@ export class BaseAstNode {
         /* abstract */
     }
 
-    async executeAsync(_dateSystem?: DateSystem): Promise<AstNodePromiseType> {
+    async executeAsync(_dateSystem?: DateSystem, _readRegion?: () => string): Promise<AstNodePromiseType> {
         /* abstract */
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }

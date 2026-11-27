@@ -17,8 +17,8 @@
 import type { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import type { ICustomRange, IDocumentBody } from '../../../types/interfaces/i-document-data';
 
-// Internal TextX structural-replacement marker. Inserted paragraphs replace the
-// same logical paragraphs later in the operation, so their ids must stay stable.
+// Internal TextX identity marker for structural replacements and insertions at
+// paragraph boundaries. Replays must not reinterpret them as interior splits.
 export const PRESERVE_INSERTED_PARAGRAPH_IDS = '__textXPreserveParagraphIds';
 
 export enum TextXActionType {
@@ -26,6 +26,13 @@ export enum TextXActionType {
     INSERT = 'i',
     DELETE = 'd',
 }
+
+export type BookmarkOrderSegment = string | [start: number, count: number];
+
+export type BookmarkOrder =
+    | string[]
+    | [prefixCount: number, suffixCount: number, inserted: string[]]
+    | { segments: BookmarkOrderSegment[] };
 
 /**
  * Retain mutation is used to move the cursor or to update properties of the text in the given range.
@@ -45,9 +52,17 @@ export interface IRetainAction {
         rangeId: string;
         range: ICustomRange | null;
         nextRangeId?: string | null;
+        /** Where to reinsert a moved bookmark if a concurrent text edit removed its old target. */
+        fallbackNextRangeId?: string | null;
+        /** Index in the latest bookmarkOrders table in this operation. */
+        fallbackOrderIndex?: number;
+        /** Position used when a range-bearing insertion sorted the old ranges. */
+        bookmarkOrderPosition?: number;
         /** Only these property paths are written; missing values remove properties. Arrays are atomic. */
         propertyPaths?: string[][];
     }>;
+    /** Shared orders for this and following retains. Splices and copy segments refer to the preceding order in the table. */
+    bookmarkOrders?: BookmarkOrder[];
     /** Before-document values captured by makeInvertible; never persisted in a document body. */
     oldRangeUpdates?: IRetainAction['rangeUpdates'];
 }

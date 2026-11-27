@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+export { transformSheetDrawingReference } from './basics/drawing-reference';
 export {
     drawingPositionToTransform,
     transformToAxisAlignPosition,
     transformToDrawingPosition,
 } from './basics/transform-position';
+export { GroupSheetDrawingCommand } from './commands/commands/group-sheet-drawing.command';
 export { InsertSheetDrawingCommand } from './commands/commands/insert-sheet-drawing.command';
 export type { IInsertSheetDrawingCommandParams } from './commands/commands/insert-sheet-drawing.command';
 export { RemoveSheetDrawingCommand } from './commands/commands/remove-sheet-drawing.command';
@@ -31,6 +33,7 @@ export { SetSheetDrawingCommand } from './commands/commands/set-sheet-drawing.co
 export type { ISetDrawingCommandParams } from './commands/commands/set-sheet-drawing.command';
 export { SetWorksheetBackgroundImageCommand } from './commands/commands/set-worksheet-background-image.command';
 export type { ISetWorksheetBackgroundImageCommandParams } from './commands/commands/set-worksheet-background-image.command';
+export { UngroupSheetDrawingCommand } from './commands/commands/ungroup-sheet-drawing.command';
 export { DrawingApplyType, SetDrawingApplyMutation } from './commands/mutations/set-drawing-apply.mutation';
 export type { ISetDrawingApplyMutationParams } from './commands/mutations/set-drawing-apply.mutation';
 export { SetWorksheetBackgroundImageMutation } from './commands/mutations/set-worksheet-background-image.mutation';
@@ -40,8 +43,10 @@ export { isKnownSheetNonRotatableDrawingType, resolveSheetDrawingRotateEnabled }
 export type { IUniverSheetsDrawingConfig } from './config/config';
 export { SHEET_DRAWING_PLUGIN } from './controllers/sheet-drawing.controller';
 export { UniverSheetsDrawingPlugin } from './plugin';
+export { assertCurrentSheetDrawingEdit } from './services/sheet-drawing-changeset';
 export {
     applySheetDrawingPlacement,
+    getLegacySheetDrawingPosition,
     getSheetDrawingPlacement,
     normalizeSheetDrawingPlacement,
     refreshSheetDrawingPlacement,

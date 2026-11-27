@@ -20,6 +20,7 @@ import { IPermissionService, IUniverInstanceService, UniverInstanceType } from '
 import {
     RangeProtectionPermissionViewPoint,
     WorkbookCommentPermission,
+    WorkbookViewPermission,
     WorksheetViewPermission,
 } from '@univerjs/sheets';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
@@ -88,9 +89,8 @@ export const threadPanelMenuFactory = (accessor: IAccessor) => {
         title: 'sheets-thread-comment-ui.menu.openComments',
         tooltip: 'sheets-thread-comment-ui.menu.openComments',
         disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookCommentPermission],
+            workbookTypes: [WorkbookViewPermission],
             worksheetTypes: [WorksheetViewPermission],
-            rangeTypes: [RangeProtectionPermissionViewPoint],
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };

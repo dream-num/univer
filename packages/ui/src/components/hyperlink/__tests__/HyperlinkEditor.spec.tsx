@@ -31,7 +31,7 @@ it.each([false, true])('connects labels and errors and submits through the calle
     expect(address.getAttribute('aria-invalid')).toBe('true');
     expect(document.getElementById(address.getAttribute('aria-describedby')!)?.textContent).toBe('Invalid address');
     const label = view.getByRole('textbox', { name: 'Label' });
-    expect(document.activeElement).toBe(label);
+    expect(document.activeElement).toBe(mobile ? label : address);
     fireEvent.change(label, { target: { value: 'Next label' } });
     fireEvent.change(address, { target: { value: 'https://example.com' } });
     expect(onLabelChange).toHaveBeenCalledWith('Next label');
@@ -43,9 +43,9 @@ it.each([false, true])('connects labels and errors and submits through the calle
     expect(onConfirm).toHaveBeenCalledOnce();
 });
 
-it('hides the label for insertion and blocks whitespace-only submission', () => {
+it.each([false, true])('focuses the address for insertion and blocks whitespace-only submission with mobile=%s', (mobile) => {
     const confirm = vi.fn();
-    const view = render(<HyperlinkEditor labels={labels} url="  " onConfirm={confirm} onCancel={() => {}} onUrlChange={() => {}} />);
+    const view = render(<HyperlinkEditor mobile={mobile} labels={labels} url="  " onConfirm={confirm} onCancel={() => {}} onUrlChange={() => {}} />);
     expect(view.queryByRole('textbox', { name: 'Label' })).toBeNull();
     expect(document.activeElement).toBe(view.getByRole('textbox', { name: 'Address' }));
     fireEvent.submit(view.container.querySelector('form')!);

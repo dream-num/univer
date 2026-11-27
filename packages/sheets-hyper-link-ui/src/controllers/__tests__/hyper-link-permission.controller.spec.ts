@@ -44,7 +44,7 @@ describe('SheetsHyperLinkPermissionController', () => {
         const controller = new SheetsHyperLinkPermissionController(localeService, commandService, sheetPermissionCheckController);
 
         beforeCommandExecuted({ id: InsertLinkShortcut.id });
-        expect(blockExecuteWithoutPermission).toHaveBeenCalledWith('sheets-hyper-link-ui.permission.hyperLinkErr');
+        expect(blockExecuteWithoutPermission).toHaveBeenCalledWith('sheets-hyper-link-ui.permission.editErr');
 
         controller.dispose();
     });

@@ -19,7 +19,6 @@ import type { LexerNode } from '../../../../engine/analysis/lexer-node';
 
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 import type { BaseReferenceObject } from '../../../../engine/reference-object/base-reference-object';
-import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
@@ -136,17 +135,13 @@ describe('Test indirect', () => {
         });
 
         it('array', () => {
-            const lexerNode = lexer.treeBuilder('=Indirect(A1:D3)');
+            const lexerNode = lexer.treeBuilder('=INDIRECT({"A1","B2",""})');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
             const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
-            expect((result as ArrayValueObject).toValue()).toStrictEqual([
-                [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE],
-                [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE],
-                [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE],
-            ]);
+            expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[1, 4, ErrorType.REF]]);
         });
     });
 

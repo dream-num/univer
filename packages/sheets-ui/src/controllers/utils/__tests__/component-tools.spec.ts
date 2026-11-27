@@ -78,6 +78,16 @@ describe('component tools', () => {
         });
     });
 
+    it('uses the focused companion geometry when both panes render the workbook', () => {
+        const instance = { getCurrentUnitOfType: () => ({ getUnitId: () => 'unit-1' }) };
+        const primary = { ...createSheetComponents(), mainComponent: { id: 'primary' }, scene: {}, engine: {} };
+        const companion = { ...createSheetComponents(), mainComponent: { id: 'companion' }, scene: {}, engine: {} };
+        const renders = { getRenderUnitById: () => primary, getFocusedRenderByUnitId: () => companion };
+
+        expect(getSheetObject(instance as any, renders as any)?.spreadsheet).toBe(companion.mainComponent);
+        expect(getSheetObject(instance as any, renders as any)?.scene).toBe(companion.scene);
+    });
+
     it('getSheetObject supports render context input', () => {
         const workbook = { getUnitId: () => 'unit-1' };
         const { components, rowHeader, columnHeader, leftTop } = createSheetComponents();

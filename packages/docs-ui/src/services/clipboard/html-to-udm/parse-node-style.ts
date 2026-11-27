@@ -15,7 +15,7 @@
  */
 
 import type { ITextStyle } from '@univerjs/core';
-import { BaselineOffset, BooleanNumber, ColorKit } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, ColorKit, setTextDecorationLines } from '@univerjs/core';
 import { pixelToPt } from '@univerjs/engine-render';
 
 // eslint-disable-next-line max-lines-per-function, complexity
@@ -62,7 +62,7 @@ export function extractNodeStyle(node: HTMLElement): ITextStyle {
         const cssRule = styles[i];
         const cssValue = styles.getPropertyValue(cssRule);
 
-        switch (cssRule) {
+        switch (cssRule === 'text-decoration-line' ? 'text-decoration' : cssRule) {
             case 'font-family': {
                 docStyles.ff = cssValue.replace(/^"/g, '').replace(/"$/g, '');
 
@@ -103,20 +103,7 @@ export function extractNodeStyle(node: HTMLElement): ITextStyle {
             }
 
             case 'text-decoration': {
-                // TODO: @JOCS， Parse CSS values like: underline dotted;
-                if (/underline/.test(cssValue)) {
-                    docStyles.ul = {
-                        s: BooleanNumber.TRUE,
-                    };
-                } else if (/overline/.test(cssValue)) {
-                    docStyles.ol = {
-                        s: BooleanNumber.TRUE,
-                    };
-                } else if (/line-through/.test(cssValue)) {
-                    docStyles.st = {
-                        s: BooleanNumber.TRUE,
-                    };
-                }
+                setTextDecorationLines(docStyles, cssValue);
 
                 break;
             }

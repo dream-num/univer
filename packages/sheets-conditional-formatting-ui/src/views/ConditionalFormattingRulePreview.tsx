@@ -17,17 +17,17 @@
 import type { IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
 import { BooleanNumber, ColorKit } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { SlashDoubleIcon } from '@univerjs/icons';
 import {
     CFRuleType,
+    conditionalFormattingIcons,
     DEFAULT_BG_COLOR,
     DEFAULT_FONT_COLOR,
     defaultDataBarNativeColor,
     defaultDataBarPositiveColor,
     getColorScaleFromValue,
-    iconMap,
 } from '@univerjs/sheets-conditional-formatting';
 import { useMemo } from 'react';
+import { ConditionalFormattingPresetIcon } from './ConditionalFormattingPresetIcon';
 
 export interface IConditionalFormattingRulePreviewProps {
     rule?: IConditionalFormattingRuleConfig;
@@ -50,8 +50,7 @@ export function ConditionalFormattingRulePreview(props: IConditionalFormattingRu
     const iconSet = useMemo(() => {
         if (rule?.type === CFRuleType.iconSet) {
             return rule.config.map((item) => {
-                const iconList = iconMap[item.iconType];
-                return iconList && iconList[Number(item.iconId)];
+                return conditionalFormattingIcons[item.iconType]?.[Number(item.iconId)];
             });
         }
     }, [rule]);
@@ -105,10 +104,13 @@ export function ConditionalFormattingRulePreview(props: IConditionalFormattingRu
         case CFRuleType.iconSet: {
             return iconSet && (
                 <div className={previewClassName}>
-                    {iconSet.map((base64, index) => (
-                        base64 ?
-                            <img key={index} className="univer-h-full" src={base64} draggable={false} />
-                            : <SlashDoubleIcon key={index} />))}
+                    {iconSet.map((icon, index) => (
+                        <ConditionalFormattingPresetIcon
+                            key={index}
+                            icon={icon}
+                            className="univer-size-5"
+                        />
+                    ))}
                 </div>
             );
         }

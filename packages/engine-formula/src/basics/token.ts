@@ -15,6 +15,10 @@
  */
 
 export enum operatorToken {
+    INTERSECTION = '\u0001',
+    UNARY_PLUS = '\u0002',
+    UNARY_MINUS = '\u0003',
+    IMPLICIT_INTERSECTION = '\u0004',
     PLUS = '+',
     MINUS = '-',
     MULTIPLY = '*',
@@ -51,6 +55,10 @@ export const OPERATOR_TOKEN_PRIORITY = new Map([
     [operatorToken.DIVIDED as string, 1],
     [operatorToken.MULTIPLY as string, 1],
     [operatorToken.POWER as string, 0], // ^
+    [operatorToken.UNARY_PLUS as string, -1],
+    [operatorToken.UNARY_MINUS as string, -1],
+    [operatorToken.IMPLICIT_INTERSECTION as string, -1],
+    [operatorToken.INTERSECTION as string, -2],
 ]);
 
 export const OPERATOR_TOKEN_SET = new Set(OPERATOR_TOKEN_PRIORITY.keys());

@@ -15,7 +15,7 @@
  */
 
 import { Injector } from '@univerjs/core';
-import { Rect, UniverRenderingContext } from '@univerjs/engine-render';
+import { UniverRenderingContext } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConditionalFormattingIcon } from '../icon.render';
 
@@ -35,6 +35,10 @@ function nativeContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
         save: vi.fn(() => smoothing.push(context.imageSmoothingEnabled)),
         restore: vi.fn(() => { context.imageSmoothingEnabled = smoothing.pop()!; }),
         drawImage: vi.fn(),
+        fill: vi.fn(),
+        stroke: vi.fn(),
+        translate: vi.fn(),
+        scale: vi.fn(),
         getLineDash: () => [],
         setLineDash: vi.fn(),
     } as unknown as CanvasRenderingContext2D;
@@ -43,19 +47,16 @@ function nativeContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
 
 describe('conditional formatting icon assets', () => {
     let injector: Injector;
-    let images: HTMLImageElement[];
 
     beforeEach(() => {
         injector = new Injector([[ConditionalFormattingIcon]]);
-        images = [];
-        vi.spyOn(HTMLImageElement.prototype, 'src', 'set').mockImplementation(function (this: HTMLImageElement) {
-            images.push(this);
-        });
+        vi.stubGlobal('Path2D', class {});
     });
 
     afterEach(() => {
         injector.dispose();
         vi.restoreAllMocks();
+        vi.unstubAllGlobals();
     });
 
     function createContext(native: CanvasRenderingContext2D): UniverRenderingContext {
@@ -64,48 +65,6 @@ describe('conditional formatting icon assets', () => {
         }]);
         return injector.get(UniverRenderingContext);
     }
-
-    it('invalidates the cached parent when icons finish loading', () => {
-        const extension = injector.get(ConditionalFormattingIcon);
-        injector.add([Rect, { useFactory: () => injector.createInstance(Rect, 'icon-parent', {}) }]);
-        const parent = injector.get(Rect);
-        const dirty = vi.spyOn(parent, 'makeDirty');
-        extension.parent = parent;
-        try {
-            expect(images.length).toBeGreaterThan(0);
-            for (const image of images) {
-                image.dispatchEvent(new Event('load'));
-            }
-            expect(dirty).toHaveBeenCalledTimes(images.length);
-            expect(dirty).toHaveBeenLastCalledWith(true);
-            for (const image of images) {
-                image.dispatchEvent(new Event('load'));
-            }
-            expect(dirty).toHaveBeenCalledTimes(images.length);
-        } finally {
-            extension.dispose();
-            parent.dispose();
-        }
-    });
-
-    it('disconnects pending image loads when disposed', () => {
-        const extension = injector.get(ConditionalFormattingIcon);
-        injector.add([Rect, { useFactory: () => injector.createInstance(Rect, 'disposed-icon-parent', {}) }]);
-        const parent = injector.get(Rect);
-        const dirty = vi.spyOn(parent, 'makeDirty');
-        extension.parent = parent;
-        extension.dispose();
-        try {
-            expect(images.length).toBeGreaterThan(0);
-            for (const image of images) {
-                expect(image.onload).toBeNull();
-                image.dispatchEvent(new Event('load'));
-            }
-            expect(dirty).not.toHaveBeenCalled();
-        } finally {
-            parent.dispose();
-        }
-    });
 
     it('preserves native resolution and fractional placement, reuses one bitmap and releases it on disposal', () => {
         const native = nativeContext(document.createElement('canvas'));
@@ -118,17 +77,18 @@ describe('conditional formatting icon assets', () => {
             return paint;
         });
         const extension = injector.get(ConditionalFormattingIcon);
-        const image = images[0];
+
         try {
             const draw = Reflect.get(extension, '_drawIcon').bind(extension);
-            draw(context, image, 10, 20);
+            draw(context, '3Arrows_0', 10, 20);
             const bitmap = vi.mocked(native.drawImage).mock.calls[0][0] as HTMLCanvasElement;
             expect([bitmap.width, bitmap.height]).toEqual([50, 50]);
             expect(native.drawImage).toHaveBeenCalledWith(bitmap, -135, 158);
             const paint = bitmap.getContext('2d')!;
             expect(paint.setTransform).toHaveBeenCalledWith(3, 0, 0, 3, 2.5, 2.5);
-            expect(paint.drawImage).toHaveBeenCalledWith(image, 0, 0, 15, 15);
-            draw(context, image, 30, 40);
+            expect(paint.stroke).toHaveBeenCalledOnce();
+            expect(paint.strokeStyle).toBe('#59D01E');
+            draw(context, '3Arrows_0', 30, 40);
             expect(vi.mocked(native.drawImage).mock.calls[1][0]).toBe(bitmap);
             extension.dispose();
             expect([bitmap.width, bitmap.height]).toEqual([0, 0]);
@@ -170,8 +130,10 @@ describe('conditional formatting icon assets', () => {
         });
         const extension = injector.get(ConditionalFormattingIcon);
         try {
-            Reflect.get(extension, '_drawIcon').call(extension, context, images[0], 10, 20);
-            expect(native.drawImage).toHaveBeenCalledExactlyOnceWith(images[0], 10, 20, 15, 15);
+            Reflect.get(extension, '_drawIcon').call(extension, context, '3Arrows_0', 10, 20);
+            expect(native.translate).toHaveBeenCalledWith(10, 20);
+            expect(native.stroke).toHaveBeenCalledOnce();
+            expect(native.drawImage).not.toHaveBeenCalled();
         } finally {
             extension.dispose();
         }
@@ -189,7 +151,7 @@ describe('conditional formatting icon assets', () => {
         });
         const extension = injector.get(ConditionalFormattingIcon);
         try {
-            expect(() => Reflect.get(extension, '_drawIcon').call(extension, context, images[0], 10, 20)).toThrow('Icon submission failed');
+            expect(() => Reflect.get(extension, '_drawIcon').call(extension, context, '3Arrows_0', 10, 20)).toThrow('Icon submission failed');
             expect(native.save).toHaveBeenCalledOnce();
             expect(native.restore).toHaveBeenCalledOnce();
         } finally {

@@ -6,7 +6,7 @@
 
 <p align="center">Start with open-source Sheets and Docs, then connect your own application or agent.</p>
 
-<p align="center"><a href="#quick-start">🚀 Quick start</a> · <a href="https://github.com/dream-num/univer-workspace">💼 Workspace</a> · <a href="https://docs.univer.ai/">📚 Documentation</a> · <a href="https://univer.ai/compare/">⚖️ Feature comparison</a> · <a href="https://univer.ai/">🌐 Website</a> · <a href="https://docs.univer.ai/showcase">🎮 Showcase</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 API Reference</a> · <a href="https://docs.univer.ai/blog">📝 Blog</a></p>
+<p align="center"><a href="#quick-start">🚀 Quick start</a> · <a href="https://github.com/dream-num/univer-workspace">💼 Workspace</a> · <a href="https://docs.univer.ai/">📚 Documentation</a> · <a href="https://univer.ai/compare/">⚖️ Feature comparison</a> · <a href="https://univer.ai/">🌐 Website</a> · <a href="https://office.univer.ai/showcase">🎮 Showcase</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 API Reference</a> · <a href="https://docs.univer.ai/blog">📝 Blog</a></p>
 
 <p align="center"><strong>English</strong> · <a href="./docs/readme/fr-FR.md">Français</a> · <a href="./docs/readme/de-DE.md">Deutsch</a> · <a href="./docs/readme/es-ES.md">Español</a> · <a href="./docs/readme/zh-CN.md">简体中文</a> · <a href="./docs/readme/zh-TW.md">繁體中文</a> · <a href="./docs/readme/ja-JP.md">日本語</a> · <a href="./docs/readme/ko-KR.md">한국어</a></p>
 
@@ -40,6 +40,7 @@
 
 - [💡 What is Univer?](#what-is-univer)
   - [Open-source capabilities](#open-source-capabilities)
+- [❓ Common questions](#common-questions)
 - [🚀 Build on the open-source foundation](#what-you-can-build)
   - [Quick start: an open-source spreadsheet editor](#quick-start)
   - [Connect your application to editable content](#connect-your-application-to-editable-content)
@@ -140,6 +141,87 @@ The demos below showcase the wider **Univer Office SDK**, including commercial c
 </table>
 
 </div>
+
+<p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20Back%20to%20top-30363D?style=flat-square" alt="Back to top" height="20" /></a></p>
+
+<a id="common-questions"></a>
+
+## ❓ Common questions
+
+<a id="how-univer-compares"></a>
+
+### How does Univer compare with SpreadJS, Handsontable, ONLYOFFICE, and Syncfusion?
+
+Univer is an Office SDK: one SDK puts spreadsheets, documents, and slides in your web app, and gives your existing agents the tools to create, edit, and check those files. The other SDKs each have a different focus.
+
+<div align="center" style="overflow-x: auto;">
+
+<table align="center" style="display: table; width: auto; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th>SDK</th>
+<th>Best for</th>
+<th>License</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Univer</strong></td>
+<td>Products that need spreadsheets, documents, and slides from one SDK, with agents that edit and check the files.</td>
+<td>Apache-2.0 core, including Sheets and Docs editing. Commercial modules under a Business or Enterprise license.</td>
+</tr>
+<tr>
+<td><strong>SpreadJS</strong> (MESCIUS)</td>
+<td>Excel-like spreadsheet apps, such as financial, budgeting, and reporting tools.</td>
+<td>Commercial.</td>
+</tr>
+<tr>
+<td><strong>Handsontable</strong></td>
+<td>Editable data grids with a spreadsheet look and feel in React, Angular, and Vue apps.</td>
+<td>Commercial for commercial use; free for non-commercial use and evaluation.</td>
+</tr>
+<tr>
+<td><strong>ONLYOFFICE Docs</strong></td>
+<td>A complete office suite served from its own document server and embedded through its APIs.</td>
+<td>Docs Community under AGPL-3.0; Docs Developer under a commercial license.</td>
+</tr>
+<tr>
+<td><strong>Syncfusion</strong> Spreadsheet Editor</td>
+<td>Excel-like editing in apps that already use Syncfusion's UI components.</td>
+<td>Commercial, with a free Community License for those who meet its terms.</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+Licenses and editions change. See the [full comparison](https://univer.ai/compare/#sdk-comparison), checked against each vendor's own pages.
+
+<a id="agent-edits-with-human-review"></a>
+
+### How can I let an AI agent edit Excel files, with human review before changes are saved?
+
+Add the Univer CLI skill to the agent you already run, such as Claude Code, Codex, or OpenCode. Univer CLI needs Node.js 24 or later.
+
+```sh
+npx skills add dream-num/skills -s univer-cli -g
+```
+
+The agent imports XLSX, DOCX, or PPTX files, edits them, and reads back the calculated values, without desktop Office. Each task writes to its own Worktree draft and the original stays untouched: you compare the draft with the original, including content, formatting, and formulas, then merge it, reopen it, or discard it. See [AI agents and Office files](https://univer.ai/agents/) and [Worktree](https://docs.univer.ai/ai/worktree).
+
+### Can an agent update a financial model in Excel without breaking its formulas?
+
+Formulas are calculated by Univer's own engine, so the agent reads back the calculated values after each edit and fixes what is off before you review. The Worktree comparison covers formulas as well as content and formatting, and the original does not change until you merge. Complex formulas, charts, fonts, and embedded objects can differ from Excel, so check with your real files.
+
+### Can I self-host and white-label the editors in my own product?
+
+Yes. The editors run in your front end in React, Vue, or plain web pages, with no iframe, and you can theme the toolbar, menus, and sidebar. Collaboration, file conversion, and Headless services run on-prem, in a private cloud, or on your own servers, with your accounts, database, and storage, and can run without internet access. Business and Enterprise licenses carry no watermark, so you can ship your product under your own brand; the SDK itself cannot be resold. See [integration and self-hosting](https://univer.ai/self-hosting/).
+
+### What is open source, and what needs a license?
+
+The core in this repository is Apache-2.0, including Sheets and Docs editing, formulas, formatting, filtering, and sorting. Charts, pivot tables, printing, Office file conversion, and real-time collaboration are commercial. Freemium is free for development and testing, with watermarks and usage limits; production use needs a Business or Enterprise license. See [scope and licensing](#scope-and-licensing) and [plans and licensing](https://univer.ai/pricing/).
+
+For the main facts about Univer on one page, see [About Univer](https://univer.ai/about/).
 
 <p align="right"><a href="#readme-top"><img src="https://img.shields.io/badge/%E2%86%91%20Back%20to%20top-30363D?style=flat-square" alt="Back to top" height="20" /></a></p>
 

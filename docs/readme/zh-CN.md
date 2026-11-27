@@ -6,7 +6,7 @@
 
 <p align="center">从开源的 Sheets 和 Docs 开始，再连接你自己的应用或 Agent。</p>
 
-<p align="center"><a href="#quick-start">🚀 快速开始</a> · <a href="https://github.com/dream-num/univer-workspace">💼 Workspace</a> · <a href="https://docs.univer.ai/">📚 开发文档</a> · <a href="https://univer.ai/compare/">⚖️ 功能对比</a> · <a href="https://univer.ai/">🌐 官网</a> · <a href="https://docs.univer.ai/showcase">🎮 示例</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 API 参考</a> · <a href="https://docs.univer.ai/blog">📝 博客</a></p>
+<p align="center"><a href="#quick-start">🚀 快速开始</a> · <a href="https://github.com/dream-num/univer-workspace">💼 Workspace</a> · <a href="https://docs.univer.ai/">📚 开发文档</a> · <a href="https://univer.ai/compare/">⚖️ 功能对比</a> · <a href="https://univer.ai/">🌐 官网</a> · <a href="https://office.univer.ai/showcase">🎮 示例</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 API 参考</a> · <a href="https://docs.univer.ai/blog">📝 博客</a></p>
 
 <p align="center"><a href="../../README.md">English</a> · <a href="../../docs/readme/fr-FR.md">Français</a> · <a href="../../docs/readme/de-DE.md">Deutsch</a> · <a href="../../docs/readme/es-ES.md">Español</a> · <strong>简体中文</strong> · <a href="../../docs/readme/zh-TW.md">繁體中文</a> · <a href="../../docs/readme/ja-JP.md">日本語</a> · <a href="../../docs/readme/ko-KR.md">한국어</a></p>
 

@@ -134,7 +134,8 @@ const DialogHeader = ({
         className={clsx(
             `
               univer-flex univer-flex-col univer-gap-1.5 univer-text-center
-              sm:!univer-text-start
+              sm:!univer-text-left
+              sm:rtl:!univer-text-right
             `,
             className
         )}

@@ -177,12 +177,16 @@ export class InvertedIndexCache {
 
             const rowsForZero = columnMap.get(0);
             if (rowsForZero) {
-                rows.push(...rowsForZero);
+                for (const row of rowsForZero) {
+                    rows.push(row);
+                }
             }
 
             const rowsForEmpty = columnMap.get(DEFAULT_EMPTY_CELL_KEY);
             if (rowsForEmpty) {
-                rows.push(...rowsForEmpty);
+                for (const row of rowsForEmpty) {
+                    rows.push(row);
+                }
             }
 
             result.matchingRows = rows.filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));

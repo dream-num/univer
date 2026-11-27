@@ -163,3 +163,27 @@ describe('InvertedIndexCache', () => {
         expect(cache.getCellPositions(unitId, sheetId, column, '', rows)?.matchingRows).toEqual([1, 2]);
     });
 });
+
+describe('Large inverted-index zero and empty buckets', () => {
+    const count = 200000;
+
+    it.each([0, null])('filters a large %s bucket without exceeding the argument limit', (value) => {
+        const cache = new InvertedIndexCache();
+        for (let row = 0; row < count; row++) cache.set('unit', 'sheet', 0, value, row);
+        const result = cache.getCellPositions('unit', 'sheet', 0, 0, [[10, 12], [count - 2, count - 1]]);
+        expect(result).toEqual({ errorType: null, matchingRows: [10, 11, 12, count - 2, count - 1] });
+    });
+
+    it('preserves bucket order and disjoint-range filtering', () => {
+        const cache = new InvertedIndexCache();
+        for (const [row, value] of [[9, null], [3, 0], [1, ''], [8, 0], [5, undefined], [0, 0]] as const) {
+            cache.set('unit', 'sheet', 0, value, row);
+        }
+        expect(cache.getCellPositions('unit', 'sheet', 0, 0, [[0, 3], [8, 9]])).toEqual({
+            errorType: null,
+            matchingRows: [3, 8, 0, 9, 1],
+        });
+        expect(cache.getCellPositions('unit', 'sheet', 0, 0, [])).toEqual({ errorType: null, matchingRows: [] });
+        expect(cache.getCellPositions('unit', 'sheet', 0, '', [[0, 9]])?.matchingRows).toEqual([9, 1, 5]);
+    });
+});

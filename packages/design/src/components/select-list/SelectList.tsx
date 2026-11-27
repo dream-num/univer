@@ -145,10 +145,11 @@ export function SelectList(props: ISelectListProps) {
                                 `
                                   univer-relative univer-flex univer-w-full univer-cursor-pointer univer-select-none
                                   univer-items-center univer-rounded univer-border-none univer-bg-transparent
-                                  univer-py-1.5 univer-text-start univer-text-sm univer-text-gray-900
+                                  univer-py-1.5 univer-text-left univer-text-sm univer-text-gray-900
                                   univer-transition-colors univer-duration-200
                                   hover:univer-bg-gray-100
                                   motion-reduce:univer-transition-none
+                                  rtl:univer-text-right
                                   dark:!univer-text-gray-0
                                   dark:hover:!univer-bg-gray-600
                                 `,

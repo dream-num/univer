@@ -162,11 +162,13 @@ export function CascaderList(props: ICascaderListProps) {
                 wrapperClassName
             )}
         >
-            {activeOptions.map((colOptions, index) =>
-                colOptions.length
+            {activeOptions.map((colOptions, index) => {
+                const columnKey = index === 0 ? 'root' : `col-${value.slice(0, index).join('/') || 'empty'}`;
+
+                return colOptions.length
                     ? (
                         <ul
-                            key={index}
+                            key={columnKey}
                             role="listbox"
                             className={clsx(
                                 `
@@ -200,10 +202,11 @@ export function CascaderList(props: ICascaderListProps) {
                                                   univer-relative univer-flex univer-h-8 univer-w-full
                                                   univer-cursor-pointer univer-select-none univer-items-center
                                                   univer-gap-2 univer-rounded univer-border-none univer-bg-transparent
-                                                  univer-text-start univer-text-sm univer-text-gray-900
+                                                  univer-text-left univer-text-sm univer-text-gray-900
                                                   univer-transition-colors univer-duration-200
                                                   hover:univer-bg-gray-100
                                                   motion-reduce:univer-transition-none
+                                                  rtl:univer-text-right
                                                   dark:!univer-text-gray-0
                                                   dark:hover:!univer-bg-gray-600
                                                 `,
@@ -242,9 +245,9 @@ export function CascaderList(props: ICascaderListProps) {
                                                     aria-hidden="true"
                                                     preserveStrokeWidth
                                                     className={`
-                                                      univer-ms-auto univer-size-3.5 univer-shrink-0
+                                                      univer-ml-auto univer-size-3.5 univer-shrink-0
                                                       univer-text-gray-500
-                                                      rtl:univer-rotate-180
+                                                      rtl:univer-ml-0 rtl:univer-mr-auto rtl:univer-rotate-180
                                                       dark:!univer-text-gray-300
                                                     `}
                                                 />
@@ -256,9 +259,9 @@ export function CascaderList(props: ICascaderListProps) {
                         </ul>
                     )
                     : (
-                        <Empty key={index} emptyText={locale?.CascaderList.empty} />
-                    )
-            )}
+                        <Empty key={columnKey} emptyText={locale?.CascaderList.empty} />
+                    );
+            })}
             {value.length <= 0 && (
                 <Empty emptyText={locale?.CascaderList.empty} />
             )}

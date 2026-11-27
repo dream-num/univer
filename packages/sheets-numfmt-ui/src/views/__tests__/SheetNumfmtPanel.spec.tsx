@@ -15,7 +15,6 @@
  */
 
 import type { Root } from 'react-dom/client';
-import type { ISheetNumfmtPanelProps } from '../SheetNumfmtPanel';
 import { DesktopLogService, ILocalStorageService, ILogService, Injector, LocaleService, LocaleType, RegionService } from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
 import designEnUS from '@univerjs/design/locale/en-US';
@@ -24,6 +23,7 @@ import { ComponentManager, DesktopLocalStorageService, IconManager, RediContext 
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ISheetNumfmtPanelProps } from '../SheetNumfmtPanel';
 import { ComponentsController } from '../../controllers/components.controller';
 import { UserHabitController } from '../../controllers/user-habit.controller';
 import enUS from '../../locale/en-US';
@@ -114,7 +114,7 @@ describe('SheetNumfmtPanel', () => {
         await act(async () => injector.get(RegionService).setRegion('enIN'));
         await selectCategory(container, category);
         if (nextRegion && category === 'Currency') {
-            const styles = container.querySelectorAll<HTMLAnchorElement>('li > a');
+            const styles = container.querySelectorAll<HTMLButtonElement>('[role="option"]');
             expect(styles.length).toBeGreaterThan(1);
             await act(async () => styles[1].click());
         }
@@ -184,7 +184,7 @@ describe('SheetNumfmtPanel', () => {
             col: 0,
         });
 
-        const option = Array.from(container.querySelectorAll('li a')).find((element) =>
+        const option = Array.from(container.querySelectorAll('[role="option"]')).find((element) =>
             element.textContent?.trim() === '1:30 PM');
         expect(option).toBeDefined();
         act(() => option!.dispatchEvent(new MouseEvent('click', { bubbles: true })));

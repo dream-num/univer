@@ -15,8 +15,8 @@
  */
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { NullValueObject } from '../../../engine/value-object/primitive-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import type { NullValueObject } from '../../../engine/value-object/primitive-object';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -43,6 +43,10 @@ export class Randbetween extends BaseFunction {
             _bottom = (_bottom as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
+        if (_bottom.isString()) {
+            _bottom = _bottom.convertToNumberObjectValue();
+        }
+
         if (_bottom.isError()) {
             return _bottom;
         }
@@ -58,6 +62,10 @@ export class Randbetween extends BaseFunction {
             }
 
             _top = (_top as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        if (_top.isString()) {
+            _top = _top.convertToNumberObjectValue();
         }
 
         if (_top.isError()) {

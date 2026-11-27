@@ -56,6 +56,10 @@ export class Mround extends BaseFunction {
             _number = (_number as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
+        if (_number.isString()) {
+            _number = _number.convertToNumberObjectValue();
+        }
+
         if (_number.isError()) {
             return _number;
         }
@@ -71,6 +75,10 @@ export class Mround extends BaseFunction {
             }
 
             _multiple = (_multiple as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        if (_multiple.isString()) {
+            _multiple = _multiple.convertToNumberObjectValue();
         }
 
         if (_multiple.isError()) {

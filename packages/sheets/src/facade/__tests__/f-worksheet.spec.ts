@@ -671,7 +671,7 @@ describe('Test FWorksheet', () => {
         const initialMaxRows = activeSheet.getMaxRows();
         const initialLastRow = activeSheet.getLastRow();
         activeSheet.appendRow(['North', 100, true]);
-        expect(activeSheet.getRange(initialLastRow + 1, 0, 1, 3).getValues()).toEqual([['North', 100, 1]]);
+        expect(activeSheet.getRange(initialLastRow + 1, 0, 1, 3).getValues()).toEqual([['North', 100, true]]);
         expect(activeSheet.getDataRange().getA1Notation()).toBe(`A1:C${initialLastRow + 2}`);
         expect(activeSheet.getMaxRows()).toBe(initialMaxRows);
 

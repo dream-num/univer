@@ -93,12 +93,20 @@ describe('regional formula editing', () => {
         try {
             const us = syntaxFor(univer, 'en-US');
             const es = syntaxFor(univer, 'es-ES');
+            expect(us.toStandard('=1,234')).toBeNull();
+            expect(es.toStandard('=1,234')).toBe('=1.234');
+            const dv = syntaxFor(univer, 'dv-MV');
+            expect(dv.toStandard('=SUM(1,234)')).toBe('=SUM(1,234)');
+            expect(dv.toStandard('=SUM(A1,A2)')).toBe('=SUM(A1,A2)');
+            expect(dv.toLocal('=SUM(A1,A2)')).toBe('=SUM(A1،A2)');
+            expect(dv.toStandard('=1,234')).toBeNull();
+            expect(dv.toStandard('=SUM({1,2}،3)')).toBe('=SUM({1,2},3)');
             expect(us.toStandard('=SUM(1,5)')).toBe('=SUM(1,5)');
             expect(es.toStandard('=SUM(1,5)')).toBe('=SUM(1.5)');
             expect(es.toLocal('=SUM(1,5)')).toBe('=SUM(1;5)');
             expect(us.toStandard('=SUM(1;5)')).toBeNull();
             expect(us.toStandard('=SUM(1،5)')).toBeNull();
-            expect(syntaxFor(univer, 'dv-MV').toStandard('=SUM(1،2,3)')).toBeNull();
+            expect(dv.toStandard('=SUM(1،2,3)')).toBeNull();
             expect(syntaxFor(univer, 'de-CH').toStandard("=SUM(1'234.5;2)")).toBeNull();
             expect(syntaxFor(univer, 'fr-FR').toStandard('=SUM(1\u202F234,5;2)')).toBeNull();
             expect(syntaxFor(univer, 'ar-SA').toStandard('=SUM(1٬234٫5;2)')).toBeNull();

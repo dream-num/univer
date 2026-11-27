@@ -108,6 +108,7 @@ function followsValue(text: string, index: number): boolean {
 function translate(text: string, from: ISeparators, to: ISeparators, aliases: IAliases | undefined, strict: boolean): string | null {
     const scopes: (IBindingScope | null)[] = [];
     const trackBindings = aliases?.local.size && /(?:LET|LAMBDA)\(/i.test(text);
+    let argumentUsed: string | undefined;
     let nextCall = '';
     let result = '';
     let inArray = false;
@@ -142,6 +143,8 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
             const end = number.lastIndex;
             // A decimal comma following a reference cannot start another numeric literal.
             if (strict && char === from.decimal && followsValue(text, i)) return null;
+            // A list separator cannot turn a standalone number into a reference union.
+            if (strict && /^[,;،؛]/.test(text.slice(end).trimStart()) && /^=\s*[+-]?\s*$/.test(text.slice(0, i))) return null;
             // Number grouping is not formula syntax. A space after a row range may be an intersection.
             if (strict && /^(?:['’٬\u00A0\u202F]| +)\d/.test(text.slice(end)) && !text.slice(0, i).trimEnd().endsWith(':')) return null;
             if (strict && value.endsWith(from.decimal) && /^\s*[\p{L}\p{N}_$"[(]/u.test(text.slice(end))) return null;
@@ -150,19 +153,25 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
             continue;
         }
 
+        // Excel accepts an ASCII comma keyboard entry for the Divehi list separator.
+        const isArgument = !inArray && (char === from.argument || (from.argument === '،' && char === ','));
+        if (isArgument && strict) {
+            if (argumentUsed && argumentUsed !== char) return null;
+            argumentUsed = char;
+        }
         if (trackBindings && !inArray) {
             if (char === '(') {
                 scopes.push(nextCall === 'LET' || nextCall === 'LAMBDA' ? { name: nextCall, start: i + 1, bindings: new Set() } : null);
                 nextCall = '';
             } else if (char === ')') {
                 scopes.pop();
-            } else if (char === from.argument) {
+            } else if (isArgument) {
                 const scope = scopes[scopes.length - 1];
                 if (scope) endBindingArgument(scope, text, i);
             }
         }
 
-        if (char === (inArray ? from.column : from.argument)) {
+        if (isArgument || (inArray && char === from.column)) {
             result += inArray ? to.column : to.argument;
         } else {
             if (strict && separator.test(char) && !(inArray && char === ';')) {

@@ -18,7 +18,7 @@ import type { Dependency, Injector, IWorkbookData, Workbook } from '@univerjs/co
 import { ICommandService, ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { CalculateFormulaService, FormulaCurrentConfigService, FormulaDataModel, FormulaResultService, FormulaRuntimeService, ICalculateFormulaService, IFormulaCurrentConfigService, IFormulaRuntimeService, UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-import { DefinedNameDataController, InsertColByRangeCommand, InsertColCommand, InsertRowByRangeCommand, IRefSelectionsService, MoveColsCommand, MoveRangeCommand, RangeProtectionRuleModel, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { DefinedNameDataController, InsertColByRangeCommand, InsertColCommand, InsertRowByRangeCommand, InsertRowCommand, IRefSelectionsService, MoveColsCommand, MoveRangeCommand, RangeProtectionRuleModel, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { FormulaRefRangeService } from '../formula-ref-range.service';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
@@ -103,6 +103,8 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
                 MoveRangeCommand,
                 RemoveColCommand,
                 InsertColCommand,
+                RemoveRowCommand,
+                InsertRowCommand,
                 MoveColsCommand,
                 RemoveColByRangeCommand,
                 RemoveRowByRangeCommand,

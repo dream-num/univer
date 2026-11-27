@@ -16,7 +16,7 @@
 
 import type { IDisposable, IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import type { EffectRefRangeParams, IInsertColCommandParams, IInsertRowCommandParams } from '@univerjs/sheets';
-import { AbsoluteRefType, Disposable, DisposableCollection, getIntersectRange, Inject, Injector, isFormulaString, IUniverInstanceService, moveRangeByOffset, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { AbsoluteRefType, Disposable, DisposableCollection, getIntersectRange, Inject, Injector, isFormulaString, IUniverInstanceService, moveRangeByOffset, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import { deserializeRangeWithSheetWithCache, ErrorType, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { EffectRefRangId, getSeparateEffectedRangesOnCommand, handleCommonDefaultRangeChangeWithEffectRefCommands, handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 
@@ -129,10 +129,13 @@ export class FormulaRefRangeService extends Disposable {
 
     transformFormulaByEffectCommand(unitId: string, subUnitId: string, formula: string, params: EffectRefRangeParams) {
         const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formula);
-        const currentUnit = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const currentSheet = currentUnit.getActiveSheet();
-        const currentUnitId = currentUnit.getUnitId();
-        const currentSheetId = currentSheet.getSheetId();
+        const effectedRanges = getSeparateEffectedRangesOnCommand(this._injector, params);
+
+        if (effectedRanges == null) {
+            return formula;
+        }
+
+        const { unitId: effectedUnitId, subUnitId: effectedSubUnitId } = effectedRanges;
 
         const transformSequenceNodes = sequenceNodes?.map((node) => {
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
@@ -146,16 +149,25 @@ export class FormulaRefRangeService extends Disposable {
 
                 const realUnitId = workbook!.getUnitId();
                 const realSheetId = worksheet.getSheetId();
-                if ((realUnitId !== currentUnitId) || (realSheetId !== currentSheetId)) {
+                // Only the cells of the edited sheet move, so a reference on another sheet is
+                // left alone even though the command may have triggered the callback.
+                if ((realUnitId !== effectedUnitId) || (realSheetId !== effectedSubUnitId)) {
                     return node;
                 }
                 const newRange = handleDefaultRangeChangeWithEffectRefCommands(range, params);
                 let newToken = '';
 
                 if (newRange) {
-                    const offsetX = newRange.startColumn - range.startColumn;
-                    const offsetY = newRange.startRow - range.startRow;
-                    const finalRange = moveRangeByOffset(range, offsetX, offsetY);
+                    // The handlers move the whole range, so use their result directly: taking
+                    // only the offset of its first cell would drop a range that grows or
+                    // shrinks. Absolute flags are part of the reference text and do not change
+                    // when rows or columns are inserted, removed or moved.
+                    const finalRange = {
+                        ...newRange,
+                        startAbsoluteRefType: range.startAbsoluteRefType,
+                        endAbsoluteRefType: range.endAbsoluteRefType,
+                        rangeType: range.rangeType,
+                    };
                     if (rangeUnitId && rangeSheetName) {
                         newToken = serializeRangeWithSpreadsheet(rangeUnitId, rangeSheetName, finalRange);
                     } else if (rangeSheetName) {
@@ -184,15 +196,16 @@ export class FormulaRefRangeService extends Disposable {
         const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formula);
         const disposableCollection = new DisposableCollection();
         const handleChange = (params: EffectRefRangeParams) => {
-            const currentUnit = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-            const currentSheet = currentUnit.getActiveSheet();
-            const currentUnitId = currentUnit.getUnitId();
-            const currentSheetId = currentSheet.getSheetId();
+            const effectedRanges = getSeparateEffectedRangesOnCommand(this._injector, params);
+
+            if (effectedRanges == null) {
+                return callback(formula);
+            }
 
             const transformSequenceNodes = sequenceNodes?.map((node) => {
                 if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                     const rangeInfo = rangeMap.get(node.token)!;
-                    if ((rangeInfo.unitId !== currentUnitId) || (rangeInfo.subUnitId !== currentSheetId)) {
+                    if ((rangeInfo.unitId !== effectedRanges.unitId) || (rangeInfo.subUnitId !== effectedRanges.subUnitId)) {
                         return node;
                     }
 
@@ -200,9 +213,12 @@ export class FormulaRefRangeService extends Disposable {
                     let newToken = '';
 
                     if (newRange) {
-                        const offsetX = newRange.startColumn - rangeInfo.range.startColumn;
-                        const offsetY = newRange.startRow - rangeInfo.range.startRow;
-                        const finalRange = moveRangeByOffset(rangeInfo.range, offsetX, offsetY);
+                        const finalRange = {
+                            ...newRange,
+                            startAbsoluteRefType: rangeInfo.range.startAbsoluteRefType,
+                            endAbsoluteRefType: rangeInfo.range.endAbsoluteRefType,
+                            rangeType: rangeInfo.range.rangeType,
+                        };
                         if (rangeInfo.unitId && rangeInfo.sheetName) {
                             newToken = serializeRangeWithSpreadsheet(rangeInfo.unitId, rangeInfo.sheetName, finalRange);
                         } else if (rangeInfo.sheetName) {
@@ -254,15 +270,11 @@ export class FormulaRefRangeService extends Disposable {
     private _getFormulaDependcy(unitId: string, subUnitId: string, formula: string | undefined, ranges: IRange[]) {
         const nodes = isFormulaString(formula) ? this._lexerTreeBuilder.sequenceNodesBuilder(formula!) : null;
 
-        const dependencyRanges: { unitId: string; subUnitId: string; ranges: IRange[] }[] = [];
+        const dependencyRanges: { unitId: string; subUnitId: string; ranges: IRange[]; affectsRuleRanges: boolean }[] = [];
         nodes?.forEach((node) => {
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                 const gridRangeName = deserializeRangeWithSheetWithCache(node.token);
                 const { range, unitId: rangeUnitId, sheetName: rangeSheetName } = gridRangeName;
-                // ignore all absolute reference
-                if (range.startAbsoluteRefType === AbsoluteRefType.ALL && range.endAbsoluteRefType === AbsoluteRefType.ALL) {
-                    return;
-                }
                 const workbook = this._univerInstanceService.getUnit<Workbook>(rangeUnitId || unitId);
                 const worksheet = rangeSheetName ? workbook?.getSheetBySheetName(rangeSheetName) : workbook?.getSheetBySheetId(subUnitId);
                 if (!worksheet) {
@@ -275,17 +287,25 @@ export class FormulaRefRangeService extends Disposable {
                 const currentStartRow = range.startRow;
                 const currentStartColumn = range.startColumn;
 
-                const offsetRanges = ranges.map((range) => ({
-                    startRow: range.startRow - orginStartRow + currentStartRow,
-                    endRow: range.endRow - orginStartRow + currentStartRow,
-                    startColumn: range.startColumn - orginStartColumn + currentStartColumn,
-                    endColumn: range.endColumn - orginStartColumn + currentStartColumn,
-                }));
+                // An absolute reference is pinned against copy and fill, not against row and
+                // column insertion or deletion, so it has to be watched as well. It stays one
+                // range for every cell of the rule, though, and therefore does not split the
+                // rule ranges the way a relative reference does.
+                const isAbsolute = range.startAbsoluteRefType === AbsoluteRefType.ALL && range.endAbsoluteRefType === AbsoluteRefType.ALL;
+                const offsetRanges = isAbsolute
+                    ? [range]
+                    : ranges.map((range) => ({
+                        startRow: range.startRow - orginStartRow + currentStartRow,
+                        endRow: range.endRow - orginStartRow + currentStartRow,
+                        startColumn: range.startColumn - orginStartColumn + currentStartColumn,
+                        endColumn: range.endColumn - orginStartColumn + currentStartColumn,
+                    }));
 
                 dependencyRanges.push({
                     unitId: realUnitId,
                     subUnitId: realSheetId,
                     ranges: offsetRanges,
+                    affectsRuleRanges: !isAbsolute,
                 });
             }
         });
@@ -297,13 +317,8 @@ export class FormulaRefRangeService extends Disposable {
     registerRangeFormula(unitId: string, subUnitId: string, oldRanges: IRange[], formulas: string[], callback: RangeFormulaChangeCallback): IDisposable {
         const disposableCollection = new DisposableCollection();
         const formulaDeps = formulas.map((formula) => this._getFormulaDependcy(unitId, subUnitId, formula, oldRanges));
-        // eslint-disable-next-line max-lines-per-function
+        // eslint-disable-next-line max-lines-per-function, complexity
         const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
-            const wholeRangeResult = this._transformWholeRangeFormulas(unitId, subUnitId, oldRanges, formulas, commandInfo);
-            if (wholeRangeResult) {
-                return callback(wholeRangeResult);
-            }
-
             const effectedRanges = getSeparateEffectedRangesOnCommand(this._injector, commandInfo);
             if (!effectedRanges) {
                 return {
@@ -312,9 +327,23 @@ export class FormulaRefRangeService extends Disposable {
                 };
             }
 
+            // A command on another sheet never moves the rule's own ranges. The rule may still
+            // reference the edited sheet, in which case only the formula follows the cells.
+            if (effectedRanges.unitId !== unitId || effectedRanges.subUnitId !== subUnitId) {
+                return this._transformFormulasOnly(unitId, subUnitId, oldRanges, formulas, commandInfo, callback);
+            }
+
+            const wholeRangeResult = this._transformWholeRangeFormulas(unitId, subUnitId, oldRanges, formulas, commandInfo);
+            if (wholeRangeResult) {
+                return callback(wholeRangeResult);
+            }
+
             const originStartRow = oldRanges[0].startRow;
             const originStartColumn = oldRanges[0].startColumn;
-            const deps = [{ unitId, subUnitId, ranges: oldRanges }, ...formulaDeps.flat()];
+            const deps = [
+                { unitId, subUnitId, ranges: oldRanges },
+                ...formulaDeps.flat().filter((dep) => dep.affectsRuleRanges),
+            ];
             const matchedEffectedRanges: IRange[][] = [];
 
             // 1. calculate effected ranges
@@ -412,8 +441,14 @@ export class FormulaRefRangeService extends Disposable {
                     const noEffectFormulas = [];
                     for (let i = 0; i < formulas.length; i++) {
                         const formula = formulas[i];
+                        const isFormulaFormulaString = isFormulaString(formula);
+                        // a segment outside the effected ranges keeps its cells, but its
+                        // references still follow the command, for example when a removed
+                        // row shrinks them or an absolute reference shifts with an insert
+                        const formulaString = isFormulaFormulaString ? this._lexerTreeBuilder.moveFormulaRefOffset(formula, currentColumn - originStartColumn, currentRow - originStartRow) : formula;
+                        const newFormula = isFormulaFormulaString ? this.transformFormulaByEffectCommand(unitId, subUnitId, formulaString!, commandInfo) : formulaString;
                         noEffectFormulas.push({
-                            newFormula: isFormulaString(formula) ? this._lexerTreeBuilder.moveFormulaRefOffset(formula, currentColumn - originStartColumn, currentRow - originStartRow) : formula,
+                            newFormula,
                             orginFormula: formula,
                         });
                     }
@@ -458,10 +493,9 @@ export class FormulaRefRangeService extends Disposable {
                 return callback(res);
             }
 
-            return {
-                undos: [],
-                redos: [],
-            };
+            // No rule range moves, but a reference on the edited sheet may still have moved,
+            // for example when the command is above a referenced cell but below the rule range.
+            return this._transformFormulasOnly(unitId, subUnitId, oldRanges, formulas, commandInfo, callback);
         };
 
         oldRanges.forEach((range) => {
@@ -477,6 +511,30 @@ export class FormulaRefRangeService extends Disposable {
         });
 
         return disposableCollection;
+    }
+
+    /**
+     * Keeps the rule ranges in place and only rewrites the formulas, for commands that move
+     * referenced cells without touching the rule itself.
+     */
+    private _transformFormulasOnly(
+        unitId: string,
+        subUnitId: string,
+        ranges: IRange[],
+        formulas: string[],
+        commandInfo: EffectRefRangeParams,
+        callback: RangeFormulaChangeCallback
+    ) {
+        const newFormulas = formulas.map((formula) => (isFormulaString(formula) ? this.transformFormulaByEffectCommand(unitId, subUnitId, formula, commandInfo) : formula));
+
+        if (newFormulas.every((formula, index) => formula === formulas[index])) {
+            return {
+                undos: [],
+                redos: [],
+            };
+        }
+
+        return callback([{ formulas: newFormulas, ranges }]);
     }
 
     /**

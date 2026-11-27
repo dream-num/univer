@@ -17,10 +17,12 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 import type { IFormulaSeparators } from './formula-separators';
+import type { IRegionalNumberFormat } from './number-format';
 import { Inject } from '../../common/di';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { LocaleService } from '../locale/locale.service';
 import { getFormulaSeparators } from './formula-separators';
+import { getRegionalNumberFormat } from './number-format';
 
 export class RegionService extends Disposable {
     private readonly _currentRegion$: BehaviorSubject<string>;
@@ -36,12 +38,13 @@ export class RegionService extends Disposable {
         this.currentRegion$ = this._currentRegion$.asObservable();
         this.explicitRegion$ = this.currentRegion$.pipe(map(() => this.getExplicitRegion()), distinctUntilChanged());
 
-        this.disposeWithMe(this._localeService.currentLocale$.subscribe((locale) => {
-            if (!this._hasExplicitRegion && locale !== this._currentRegion$.value) {
-                this._currentRegion$.next(locale);
-            }
-        }));
+        this.disposeWithMe(this._localeService.currentLocale$.subscribe((locale) => this.setDefaultRegion(locale)));
         this.disposeWithMe(toDisposable(() => this._currentRegion$.complete()));
+    }
+
+    /** Provide a locale-derived default until the caller explicitly selects a region. */
+    setDefaultRegion(region: string): void {
+        if (!this._hasExplicitRegion && region !== this._currentRegion$.value) this._currentRegion$.next(region);
     }
 
     setRegion(region: string): void {
@@ -52,6 +55,10 @@ export class RegionService extends Disposable {
     /** Excel formula punctuation for the current region, independent of the interface language packs. */
     getFormulaSeparators(): IFormulaSeparators {
         return getFormulaSeparators(this.getCurrentRegion());
+    }
+
+    getNumberFormat(): IRegionalNumberFormat {
+        return getRegionalNumberFormat(this.getCurrentRegion());
     }
 
     getExplicitRegion(): string | undefined {

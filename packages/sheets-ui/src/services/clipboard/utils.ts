@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { IAccessor, ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IDiscreteRange, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { ObjectMatrix } from '@univerjs/core';
+import { getNumfmtLocaleTag, ObjectMatrix, RegionService } from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
+
+export function getPasteNumberOptions(workbook: Nullable<Workbook>, accessor: IAccessor) {
+    if (!workbook) return undefined;
+    return {
+        region: accessor.get(RegionService).getCurrentRegion(),
+        locale: getNumfmtLocaleTag(workbook.getSnapshot().locale),
+        dateSystem: workbook.getDateSystem(),
+    };
+}
 
 /**
  *

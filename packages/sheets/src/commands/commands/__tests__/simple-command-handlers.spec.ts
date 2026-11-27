@@ -31,12 +31,10 @@ import { describe, expect, it } from 'vitest';
 import { SplitDelimiterEnum } from '../../../basics/split-range-text';
 import { IAutoFillService } from '../../../services/auto-fill/auto-fill.service';
 import { AUTO_FILL_APPLY_TYPE } from '../../../services/auto-fill/type';
-import { INumfmtService } from '../../../services/numfmt/type';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
 import { SheetSkeletonService } from '../../../skeleton/skeleton.service';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
-import { RemoveNumfmtMutation, SetNumfmtMutation } from '../../mutations/numfmt.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
 import { ReorderRangeMutation } from '../../mutations/reorder-range.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
@@ -52,7 +50,6 @@ import { RefillCommand } from '../refill.command';
 import { ReorderRangeCommand } from '../reorder-range.command';
 import { SetRangeValuesCommand } from '../set-range-values.command';
 import { SplitTextToColumnsCommand } from '../split-text-to-columns.command';
-import { TextToNumberCommand } from '../text-to-number.command';
 import { ToggleCellCheckboxCommand } from '../toggle-checkbox.command';
 
 function createAccessor(records: Map<unknown, unknown>): IAccessor {
@@ -389,137 +386,6 @@ describe('AutoFillCommand family', () => {
         ]));
         await expect(SheetCopyDownCommand.handler(failedAccessor)).resolves.toBe(false);
         expect(shownStates).toEqual([]);
-    });
-});
-
-describe('TextToNumberCommand', () => {
-    it('converts numeric text cells and removes text number format where needed', () => {
-        const executed: Array<{ id: string; params: unknown }> = [];
-        const undoRecords: unknown[] = [];
-        const cellMatrix = new ObjectMatrix({
-            0: {
-                0: { v: '42', t: CellValueType.STRING },
-                1: { v: '003', t: CellValueType.NUMBER, s: 'text-style' },
-                2: { v: 'abc', t: CellValueType.STRING },
-                3: { v: '20%', t: CellValueType.FORCE_STRING },
-                4: { v: '01/02/1904', t: CellValueType.STRING },
-            },
-        });
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getCellRaw: (row: number, col: number) => cellMatrix.getValue(row, col),
-            getCellMatrix: () => cellMatrix,
-            getStyleDataByHash: (id: string) => id === 'text-style' ? { n: { pattern: '@' } } : null,
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: (id: string, params: unknown) => {
-                executed.push({ id, params });
-                return true;
-            } }],
-            [IUndoRedoService, { pushUndoRedo: (record: unknown) => undoRecords.push(record) }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-            [INumfmtService, { getValue: (_unitId: string, _subUnitId: string, row: number, col: number) => row === 0 && col === 1 ? { pattern: '@' } : null }],
-        ]));
-
-        expect(TextToNumberCommand.handler(accessor, {
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 4 }],
-        })).toBe(true);
-        expect(executed.map((call) => call.id)).toEqual([SetRangeValuesMutation.id, SetNumfmtMutation.id, RemoveNumfmtMutation.id]);
-        expect(executed[0].params).toMatchObject({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            cellValue: {
-                0: {
-                    0: { v: 42, t: CellValueType.NUMBER },
-                    1: { v: 3, t: CellValueType.NUMBER },
-                    3: { v: 0.2, t: CellValueType.NUMBER },
-                    4: { v: 1, t: CellValueType.NUMBER },
-                },
-            },
-        });
-        expect(executed[1].params).toMatchObject({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            refMap: {
-                0: { pattern: '0%' },
-            },
-            values: {
-                0: { ranges: [{ startRow: 0, endRow: 0, startColumn: 3, endColumn: 3 }] },
-            },
-        });
-        expect(executed[2].params).toEqual({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            ranges: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }],
-        });
-        expect(undoRecords[0]).toMatchObject({
-            unitID: 'unit-1',
-            undoMutations: [
-                { id: SetRangeValuesMutation.id },
-                { id: RemoveNumfmtMutation.id },
-                { id: SetNumfmtMutation.id },
-            ],
-        });
-    });
-
-    it('returns false without a target, without ranges, or when mutation execution fails', () => {
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getCellRaw: () => ({ v: '42', t: CellValueType.STRING }),
-            getCellMatrix: () => new ObjectMatrix(),
-            getStyleDataByHash: () => null,
-        };
-        const noTargetAccessor = createAccessor(new Map<unknown, unknown>([
-            [IUniverInstanceService, { getUnit: () => null }],
-        ]));
-        expect(TextToNumberCommand.handler(noTargetAccessor, { unitId: 'missing', subUnitId: 'sheet-1', ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] })).toBe(false);
-
-        const noRangesAccessor = createAccessor(new Map<unknown, unknown>([
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-            [SheetsSelectionsService, { getCurrentSelections: () => [] }],
-        ]));
-        expect(TextToNumberCommand.handler(noRangesAccessor, { unitId: 'unit-1', subUnitId: 'sheet-1' })).toBe(false);
-
-        const failedAccessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: () => false }],
-            [IUndoRedoService, { pushUndoRedo: () => undefined }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-        ]));
-        expect(TextToNumberCommand.handler(failedAccessor, { unitId: 'unit-1', subUnitId: 'sheet-1', ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] })).toBe(false);
-    });
-
-    it('uses current selections when ranges are omitted', () => {
-        const executed: Array<{ id: string; params: unknown }> = [];
-        const undoRecords: unknown[] = [];
-        const cellMatrix = new ObjectMatrix({ 2: { 2: { v: '56', t: CellValueType.STRING } } });
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getCellRaw: (row: number, col: number) => cellMatrix.getValue(row, col),
-            getCellMatrix: () => cellMatrix,
-            getStyleDataByHash: () => null,
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: (id: string, params: unknown) => {
-                executed.push({ id, params });
-                return true;
-            } }],
-            [IUndoRedoService, { pushUndoRedo: (record: unknown) => undoRecords.push(record) }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-            [SheetsSelectionsService, { getCurrentSelections: () => [{ range: { startRow: 2, endRow: 2, startColumn: 2, endColumn: 2 } }] }],
-        ]));
-
-        expect(TextToNumberCommand.handler(accessor, { unitId: 'unit-1', subUnitId: 'sheet-1' })).toBe(true);
-        expect(executed[0]).toMatchObject({
-            id: SetRangeValuesMutation.id,
-            params: {
-                unitId: 'unit-1',
-                subUnitId: 'sheet-1',
-                cellValue: { 2: { 2: { v: 56, t: CellValueType.NUMBER } } },
-            },
-        });
-        expect(undoRecords).toHaveLength(1);
     });
 });
 

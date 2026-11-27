@@ -24,6 +24,7 @@ import type {
     ParsedPattern,
     ResolvedFormatOptions,
 } from './types';
+import { getRegionalNumberFormat } from '../../services/region/number-format';
 import { indexColors, TOKEN_TEXT } from './constants';
 import { decimalFromNumber } from './decimal';
 import { defaultLocale, getLocale } from './locale';
@@ -139,5 +140,12 @@ export function formatValue(
 
     if (!part) return options.overflow;
 
+    if (options.region) {
+        const { decimal, group } = getRegionalNumberFormat(options.region);
+        const base = locale ?? defaultLocale;
+        if (decimal !== base.decimal || group !== base.group) {
+            return runPart(value, part, options, { ...base, decimal, group }, decimalValue);
+        }
+    }
     return runPart(value, part, options, locale, decimalValue);
 }

@@ -16,7 +16,7 @@
 
 import type { DateSystem, INumfmtLocaleTag } from '@univerjs/core';
 import type { FormatType } from '@univerjs/sheets';
-import { DEFAULT_NUMBER_FORMAT, numfmt } from '@univerjs/core';
+import { DEFAULT_NUMBER_FORMAT, getRegionalNumberFormat, numfmt } from '@univerjs/core';
 import { stripErrorMargin } from '@univerjs/engine-formula';
 
 export const getPatternType = (pattern: string): FormatType => {
@@ -65,7 +65,7 @@ export const getPatternPreviewIgnoreGeneral = (
 ): IPatternPreview => {
     if (pattern === DEFAULT_NUMBER_FORMAT) {
         return {
-            result: String(stripErrorMargin(value)), // In Excel, the default General format also needs to handle numeric precision.
+            result: String(stripErrorMargin(value)).replace('.', getRegionalNumberFormat(region).decimal), // In Excel, the default General format also needs to handle numeric precision.
         };
     }
     return getPatternPreview(pattern, value, locale, dateSystem, region);

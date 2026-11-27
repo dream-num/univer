@@ -48,7 +48,6 @@ import {
     extractPureTextFromCell,
     generateRandomId,
     getEmptyCell,
-    getNumfmtLocaleTag,
     ICommandService,
     ILogService,
     Inject,
@@ -123,6 +122,7 @@ import { USMToHtmlService } from './usm-to-html/convertor';
 import {
     convertTextToTable,
     discreteRangeContainsRange,
+    getPasteNumberOptions,
     htmlContainsImage,
     htmlIsFromExcel,
     mergeSetRangeValues,
@@ -317,9 +317,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             },
             getNumfmtParseOptions: () => {
                 const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-                return workbook
-                    ? { locale: getNumfmtLocaleTag(workbook.getSnapshot().locale), dateSystem: workbook.getDateSystem() }
-                    : undefined;
+                return getPasteNumberOptions(workbook, this._injector);
             },
         });
 

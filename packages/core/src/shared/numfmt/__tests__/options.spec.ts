@@ -104,18 +104,17 @@ numfmtTest('option: nbsp', (t) => {
 
 numfmtTest('preserves number grouping and currency for built-in locale IDs and tags', (t) => {
     for (const [locale, { tag }] of Object.entries(LOCALE_META)) {
-        t.format('#,##0', 1234567890, '1,234,567,890', { region: locale });
-        t.format('#,##0', 1234567890, '1,234,567,890', { region: tag });
+        t.format('#,##0', 1234567890, format('#,##0', 1234567890, { region: tag }), { region: locale });
         expect(getCurrencySymbolByLocale(tag)).toBe(getCurrencySymbolByLocale(locale));
     }
 });
 
 numfmtTest('uses Excel monetary grouping for both numbers and currency', (t) => {
-    for (const region of ['ml-IN', 'mlIN', 'mr-IN', 'or-IN']) {
+    for (const region of ['en-US', 'enUS']) {
         t.format('#,##0', 1234567890, '1,234,567,890', { region });
         t.format('"₹"#,##0', 1234567890, '₹1,234,567,890', { region });
     }
-    for (const region of ['bn-BD', 'hi-IN', 'enIN']) {
+    for (const region of ['ml-IN', 'mlIN', 'mr-IN', 'or-IN', 'bn-BD', 'hi-IN', 'enIN']) {
         t.format('#,##0', 1234567890, '1,23,45,67,890', { region });
         t.format('"₹"#,##0', 1234567890, '₹1,23,45,67,890', { region });
     }
@@ -126,7 +125,7 @@ numfmtTest('uses the same currency tokens for classification, selection and mone
         const pattern = `"${symbol}"#,##0`;
         expect(getFormatInfo(pattern).type, symbol).toBe('currency');
         expect(getNumfmtCurrencySymbol(pattern), symbol).toBe(symbol);
-        t.format(pattern, 123456789, `${symbol}123,456,789`, { region: 'ml-IN' });
+        t.format(pattern, 123456789, `${symbol}12,34,56,789`, { region: 'ml-IN' });
     }
     expect(getNumfmtCurrencySymbol('0.00,"K"')).toBeUndefined();
     expect(getFormatInfo('#,##0"L"').type).toBe('grouped');
@@ -134,7 +133,7 @@ numfmtTest('uses the same currency tokens for classification, selection and mone
     t.format('0" hours"', 12, '12 hours');
     expect(getFormatInfo('#,##0" Reports"').type).toBe('grouped');
     expect(getNumfmtCurrencySymbol('[$-409]#,##0;[Red]-#,##0')).toBeUndefined();
-    t.format('[$ABC-409]#,##0', 123456789, 'ABC123,456,789', { region: 'ml-IN' });
+    t.format('[$ABC-409]#,##0', 123456789, 'ABC12,34,56,789', { region: 'ml-IN' });
     expect(getFormatInfo('"Rp"#,##0', { currency: 'USD' }).type).toBe('grouped');
     expect(getFormatInfo('"Rp"#,##0').type).toBe('currency');
 });
@@ -144,7 +143,7 @@ numfmtTest('keeps grouping for equivalent regional tags and scripts', (t) => {
         t.format('#,##0', 123456789, '12,34,56,789', { region });
     }
     t.format('#,##0', 123456789, '12,34,56,789', { region: 'en-IN-x-test' });
-    t.format('#,##0', 123456789, '123,456,789', { region: 'pa-Arab-PK' });
+    t.format('#,##0', 123456789, '123٬456٬789', { region: 'pa-Arab-PK' });
 });
 
 numfmtTest('uses regional currency symbols including language and script variants', () => {

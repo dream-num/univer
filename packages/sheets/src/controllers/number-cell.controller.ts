@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import { CellValueType, Disposable, Inject, InterceptorEffectEnum, isDefaultFormat, isRealNum } from '@univerjs/core';
+import { CellValueType, Disposable, Inject, InterceptorEffectEnum, isDefaultFormat, isRealNum, RegionService } from '@univerjs/core';
 import { stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT } from '../services/sheet-interceptor/interceptor-const';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 
 export class NumberCellDisplayController extends Disposable {
     constructor(
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService
+        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
+        @Inject(RegionService) private readonly _regionService: RegionService
     ) {
         super();
 
@@ -63,8 +64,9 @@ export class NumberCellDisplayController extends Disposable {
 
                         // If the cell format is General and the value is a scientific notation number, prevent it from displaying lowercase e.
                         const text = String(cell.v);
-                        if (text.includes('e')) {
-                            cell.v = text.toUpperCase();
+                        const display = text.toUpperCase().replace('.', this._regionService.getNumberFormat().decimal);
+                        if (display !== text) {
+                            cell.v = display;
                         }
 
                         return next(cell);

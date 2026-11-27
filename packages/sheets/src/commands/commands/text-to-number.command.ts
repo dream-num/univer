@@ -15,22 +15,22 @@
  */
 
 import type { IAccessor, ICellData, ICommand, IRange } from '@univerjs/core';
-import type { IRemoveNumfmtMutationParams, ISetCellsNumfmt } from '../mutations/numfmt.mutation';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     CellValueType,
     CommandType,
     getNumfmtLocaleTag,
     getNumfmtParseValueFilter,
     ICommandService,
-    isRealNum,
     isTextFormat,
     IUndoRedoService,
     IUniverInstanceService,
     ObjectMatrix,
+    RegionService,
     sequenceExecute,
 } from '@univerjs/core';
+import type { IRemoveNumfmtMutationParams, ISetCellsNumfmt } from '../mutations/numfmt.mutation';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import {
     factoryRemoveNumfmtUndoMutation,
@@ -70,6 +70,7 @@ export const TextToNumberCommand: ICommand = {
         const parseOptions = {
             locale: getNumfmtLocaleTag(workbook.getSnapshot().locale),
             dateSystem: workbook.getDateSystem(),
+            region: accessor.get(RegionService).getCurrentRegion(),
         };
 
         const newCellValue = new ObjectMatrix<ICellData>();
@@ -86,8 +87,8 @@ export const TextToNumberCommand: ICommand = {
                     const cell = worksheet.getCellRaw(r, c);
                     const pattern = typeof cell?.s === 'string' ? worksheet.getStyleDataByHash(cell.s)?.n?.pattern : cell?.s?.n?.pattern;
                     const parsedValue = typeof cell?.v === 'string' ? getNumfmtParseValueFilter(cell.v, parseOptions) : null;
-                    const numberValue = isRealNum(cell?.v)
-                        ? Number(cell?.v)
+                    const numberValue = typeof cell?.v === 'number'
+                        ? cell.v
                         : typeof parsedValue?.v === 'number' ? parsedValue.v : null;
 
                     if (cell && cell.v && (cell.t !== CellValueType.NUMBER || isTextFormat(pattern)) && numberValue !== null) {

@@ -145,6 +145,8 @@ export type { DependencyOverride } from './services/plugin/plugin-override';
 export type { PluginCtor } from './services/plugin/plugin.service';
 export { DependentOn, Plugin, PluginService } from './services/plugin/plugin.service';
 export type { IFormulaSeparators } from './services/region/formula-separators';
+export type { IRegionalNumberFormat } from './services/region/number-format';
+export { getRegionalNumberFormat } from './services/region/number-format';
 export { RegionService } from './services/region/region.service';
 export { IResourceLoaderService } from './services/resource-loader/type';
 export { ResourceManagerService } from './services/resource-manager/resource-manager.service';

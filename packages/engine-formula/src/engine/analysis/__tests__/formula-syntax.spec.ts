@@ -93,6 +93,9 @@ describe('regional formula editing', () => {
         try {
             const us = syntaxFor(univer, 'en-US');
             const es = syntaxFor(univer, 'es-ES');
+            expect(us.toStandard('=1,234')).toBeNull();
+            expect(es.toStandard('=1,234')).toBe('=1.234');
+            expect(syntaxFor(univer, 'dv-MV').toStandard('=SUM(1,234)')).toBe('=SUM(1,234)');
             expect(us.toStandard('=SUM(1,5)')).toBe('=SUM(1,5)');
             expect(es.toStandard('=SUM(1,5)')).toBe('=SUM(1.5)');
             expect(es.toLocal('=SUM(1,5)')).toBe('=SUM(1;5)');

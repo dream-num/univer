@@ -16,11 +16,13 @@
 
 import type { ICellData, IWorkbookData, Workbook } from '@univerjs/core';
 import {
+    CellValueType,
     ICommandService,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
     RedoCommand,
+    RegionService,
     Tools,
     UndoCommand,
     Univer,
@@ -134,6 +136,38 @@ describe('NumfmtEditorController explicit command targets', () => {
             });
         }
     }
+
+    it('uses the active region when committing text in the same workbook', async () => {
+        const injector = univer.__getInjector();
+        const workbook = injector.get(IUniverInstanceService).createUnit<IWorkbookData, Workbook>(
+            UniverInstanceType.UNIVER_SHEET,
+            workbookData('regions')
+        );
+        injector.get(NumfmtEditorController);
+        const region = injector.get(RegionService);
+        const worksheet = workbook.getSheetBySheetId('sheet2')!;
+        const edit = injector.get(SheetInterceptorService).writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT);
+        const commands = injector.get(ICommandService);
+        const samples = [
+            ['en-US', '1,234', 1234, CellValueType.NUMBER],
+            ['de-DE', '1,234', 1.234, CellValueType.NUMBER],
+            ['fr-CH', '1,234', '1,234', CellValueType.STRING],
+            ['de-DE', '1234.56', '1234.56', CellValueType.STRING],
+            ['en-IN', '1,23,456.70', 123456.7, CellValueType.NUMBER],
+            ['fr-FR', '123456789123456789,01', '123456789123456789,01', CellValueType.FORCE_STRING],
+        ] as const;
+        for (const [row, [tag, input, expected, type]] of samples.entries()) {
+            region.setRegion(tag);
+            const target = { unitId: 'regions', subUnitId: 'sheet2' };
+            const value = edit({ v: input }, { ...target, row, col: 1, workbook, worksheet, origin: null });
+            await commands.executeCommand(SetRangeValuesCommand.id, {
+                ...target,
+                range: { startRow: row, endRow: row, startColumn: 1, endColumn: 1 },
+                value,
+            });
+            expect(worksheet.getCellRaw(row, 1)).toMatchObject({ v: expected, t: type });
+        }
+    });
 
     it('writes accounting negatives without inventing a number format', async () => {
         const injector = univer.__getInjector();

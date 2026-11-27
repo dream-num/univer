@@ -195,7 +195,10 @@ const CURRENCY_SYMBOL_PREFIX_REG = new RegExp(`^${reCurrencySymbols.source}+`);
  * Get the numfmt parse value, and filter out the parse error.
  */
 export const getNumfmtParseValueFilter = (value: string, options: ParseOptions = {}): ParseData | null => {
-    const parseData = parseDate(value, options) ?? parseTime(value, options) ?? parseNumber(value, options);
+    // A space or period can be a date separator as well as a regional thousands separator.
+    const parseData = options.region
+        ? parseNumber(value, options) ?? parseDate(value, options) ?? parseTime(value, options)
+        : parseDate(value, options) ?? parseTime(value, options) ?? parseNumber(value, options);
 
     if (!parseData) return null;
 
@@ -222,7 +225,7 @@ export const getNumfmtParseValueFilter = (value: string, options: ParseOptions =
          * '1000,1.00' => '#,##0.00' ----- error
          * '$1000' => '$#,##0' ----- true
          */
-        if (z.includes('#,##0')) {
+        if (!options.region && z.includes('#,##0')) {
             if (/[.,]$/.test(value)) return null;
 
             // Accounting negatives wrap the number, e.g. "(1,000)" or "($1,000)",

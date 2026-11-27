@@ -102,7 +102,7 @@ export function Options() {
                     item.pattern.includes('#,##0') ? 123456 : 1220,
                     sheetsNumfmtCellContentController.locale,
                     undefined,
-                    region
+                    sheetsNumfmtCellContentController.region
                 ).result.trim();
 
                 return (

@@ -43,6 +43,7 @@ import {
     Rectangle,
     RedoCommand,
     RegionService,
+
     SheetTypes,
     ThemeService,
     Tools,
@@ -2447,6 +2448,7 @@ describe('SheetClipboardService', () => {
         injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
         injector.add([ThemeService]);
         injector.add([LocaleService]);
+        injector.add([RegionService]);
         injector.add([ErrorService]);
         injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
         const localeService = injector.get(LocaleService);

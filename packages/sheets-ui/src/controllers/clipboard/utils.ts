@@ -32,8 +32,9 @@ import {
     CustomRangeType,
     ErrorService,
     generateRandomId,
-    getNumfmtLocaleTag,
     getNumfmtParseValueFilter,
+    getRegionalNumberFormat,
+    isRealNum,
     isTextFormat,
     IUniverInstanceService,
     LocaleService,
@@ -57,6 +58,7 @@ import {
 } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 import { COPY_TYPE } from '../../services/clipboard/type';
+import { getPasteNumberOptions } from '../../services/clipboard/utils';
 import { isRichText } from '../editor/editing.render-controller';
 import { virtualizeDiscreteRanges } from '../utils/range-tools';
 
@@ -174,7 +176,7 @@ export function getMoveRangeMutations(
         };
 }
 
-function getExternalPasteNumberFormatResult(
+export function getExternalPasteNumberFormatResult(
     value: ICellData['v'],
     currentCellStyle: Nullable<IStyleData> | undefined,
     parseOptions?: Parameters<typeof getNumfmtParseValueFilter>[1]
@@ -186,6 +188,7 @@ function getExternalPasteNumberFormatResult(
         };
     }
 
+    if (typeof value === 'number') return { v: value, t: CellValueType.NUMBER };
     const content = String(value).trim();
     const numfmtValue = getNumfmtParseValueFilter(content, parseOptions);
     const result: IExternalPasteNumberFormatResult = {};
@@ -194,11 +197,14 @@ function getExternalPasteNumberFormatResult(
         // If the numeric string will lose precision when converted to a number, set the cell type to force string
         // e.g. 123456789123456789
         // e.g. 1212121212121212.2345
-        if (!numfmtValue.z && willLoseNumericPrecision(content)) {
+        if (!numfmtValue.z && willLoseNumericPrecision(content.replace(getRegionalNumberFormat(parseOptions?.region).decimal, '.'))) {
             result.t = CellValueType.FORCE_STRING;
         } else {
             result.v = numfmtValue.v;
+            result.t = CellValueType.NUMBER;
         }
+    } else if (isRealNum(content)) {
+        result.t = CellValueType.STRING;
     }
 
     if (numfmtValue?.z) {
@@ -220,9 +226,7 @@ export function getSetCellDataMutations(
     const { unitId, subUnitId, range } = pasteTo;
     const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
     const worksheet = target?.worksheet;
-    const parseOptions = target
-        ? { locale: getNumfmtLocaleTag(target.workbook.getSnapshot().locale), dateSystem: target.workbook.getDateSystem() }
-        : undefined;
+    const parseOptions = getPasteNumberOptions(target?.workbook, accessor);
     const { mapFunc } = virtualizeDiscreteRanges([range]);
 
     const cellValueMatrix = new ObjectMatrix<ICellData>();
@@ -313,9 +317,7 @@ export function getSetCellValueMutations(
     const { unitId, subUnitId, range } = pasteTo;
     const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
     const worksheet = target?.worksheet;
-    const parseOptions = target
-        ? { locale: getNumfmtLocaleTag(target.workbook.getSnapshot().locale), dateSystem: target.workbook.getDateSystem() }
-        : undefined;
+    const parseOptions = getPasteNumberOptions(target?.workbook, accessor);
     const { mapFunc } = virtualizeDiscreteRanges([range]);
 
     const cellValueMatrix = new ObjectMatrix<ICellData>();
@@ -390,9 +392,7 @@ export function getSetCellStyleMutations(
     const { unitId, subUnitId, range } = pasteTo;
     const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
     const worksheet = target?.worksheet;
-    const parseOptions = target
-        ? { locale: getNumfmtLocaleTag(target.workbook.getSnapshot().locale), dateSystem: target.workbook.getDateSystem() }
-        : undefined;
+    const parseOptions = getPasteNumberOptions(target?.workbook, accessor);
     const { mapFunc } = virtualizeDiscreteRanges([range]);
 
     const cellValueMatrix = new ObjectMatrix<ICellData>();

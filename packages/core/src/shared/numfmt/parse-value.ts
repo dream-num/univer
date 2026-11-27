@@ -18,14 +18,17 @@
 // See packages/core/src/shared/numfmt/LICENSE.
 
 import type { LocaleData, ParseData } from './types';
+import { getRegionalNumberFormat } from '../../services/region/number-format';
 import { DateSystem } from '../../types/enum/date-system';
 import { currencyInputCharacters, reCurrencySymbols } from './constants';
+import { groupIntegerDigits } from './grouping';
 import { defaultLocale, getLocale } from './locale';
 import { excelDateTimePartsToSerial } from './serial-date';
 
 // eslint-disable-next-line ts/naming-convention
 export interface ParseOptions {
     locale?: string;
+    region?: string;
     dateSystem?: DateSystem;
 }
 
@@ -205,10 +208,11 @@ const isDigit = (digit: string | undefined): boolean =>
 // eslint-disable-next-line max-lines-per-function, complexity
 export function parseNumber(value: string, options: ParseOptions = {}): ParseData<number> | null {
     const l10n = getLocale(options.locale || '') || defaultLocale;
-    const decimal = l10n.decimal;
-    const groupingChars = [...(dec2group[decimal] || [AP, AG])];
+    const regional = options.region ? getRegionalNumberFormat(options.region) : undefined;
+    const decimal = regional?.decimal ?? l10n.decimal;
+    const groupingChars = regional ? [regional.group] : [...(dec2group[decimal] || [AP, AG])];
     if (
-        !groupingChars.includes(l10n.group) &&
+        !regional && !groupingChars.includes(l10n.group) &&
         l10n.group !== SP &&
         l10n.group !== decimal
     ) {
@@ -266,11 +270,14 @@ export function parseNumber(value: string, options: ParseOptions = {}): ParseDat
         index++;
     }
 
+    const integerStart = index;
+    let integerEnd = -1;
     let haveDecimal = false;
     let grouping: string | undefined;
     if (value.charAt(index) === decimal || isDigit(value.charAt(index))) {
         while (index < value.length) {
             const char = value.charAt(index);
+            if (regional && char === regional.group && (haveDecimal || !isDigit(value[index + 1]))) break;
             if (!grouping && groupingChars.includes(char)) {
                 grouping = char;
             } else if (grouping && grouping === char) {
@@ -279,6 +286,7 @@ export function parseNumber(value: string, options: ParseOptions = {}): ParseDat
                 if (haveDecimal) {
                     break;
                 }
+                integerEnd = index;
                 number += '.';
                 haveDecimal = true;
             } else if (isDigit(char)) {
@@ -288,6 +296,11 @@ export function parseNumber(value: string, options: ParseOptions = {}): ParseDat
             }
             index++;
         }
+    }
+
+    if (regional && grouping) {
+        const integer = value.slice(integerStart, integerEnd < 0 ? index : integerEnd);
+        if (integer !== groupIntegerDigits(integer.split(grouping).join(''), grouping, regional.grouping)) return null;
     }
 
     if (value.charAt(index) === 'e' || value.charAt(index) === 'E') {

@@ -26,6 +26,7 @@ import {
     CellValueType,
     Disposable,
     getNumfmtParseValueFilter,
+    getRegionalNumberFormat,
     Inject,
     Injector,
     isRealNum,
@@ -140,7 +141,9 @@ export class NumfmtEditorController extends Disposable {
                                 case 'number': {
                                     const cell: Nullable<ICellData> = { ...context.worksheet.getCellRaw(row, col) };
                                     if (cell?.t === CellValueType.NUMBER && isRealNum(cell.v)) {
-                                        cell.v = stripErrorMargin(Number(cell.v));
+                                        const raw = stripErrorMargin(Number(cell.v));
+                                        const decimal = getRegionalNumberFormat(this._sheetsNumfmtCellContentController.region).decimal;
+                                        cell.v = decimal === '.' ? raw : String(raw).replace('.', decimal);
                                     }
                                     return next && next(cell);
                                 }
@@ -152,7 +155,8 @@ export class NumfmtEditorController extends Disposable {
                                 case 'percent': {
                                     const cell: Nullable<ICellDataForSheetInterceptor> = { ...context.worksheet.getCellRaw(row, col) };
                                     if (cell?.t === CellValueType.NUMBER && isRealNum(cell.v)) {
-                                        cell.v = `${stripErrorMargin(Number(cell.v) * 100)}%`;
+                                        const decimal = getRegionalNumberFormat(this._sheetsNumfmtCellContentController.region).decimal;
+                                        cell.v = `${String(stripErrorMargin(Number(cell.v) * 100)).replace('.', decimal)}%`;
                                         cell.isPercentFormat = true;
                                     }
                                     return next && next(cell);
@@ -211,7 +215,8 @@ export class NumfmtEditorController extends Disposable {
                         const content = value?.p?.body?.dataStream ? value.p.body.dataStream.replace(/\r\n$/, '') : String(value.v);
                         const locale = this._sheetsNumfmtCellContentController.getLocale(context.workbook);
                         const dateSystem = context.workbook.getDateSystem();
-                        const numfmtInfo = getNumfmtParseValueFilter(content, { locale, dateSystem });
+                        const region = this._sheetsNumfmtCellContentController.region;
+                        const numfmtInfo = getNumfmtParseValueFilter(content, { locale, dateSystem, region });
 
                         if (body) {
                             if (!canConvertRichTextToNumfmt(body)) {
@@ -250,7 +255,7 @@ export class NumfmtEditorController extends Disposable {
                                 !currentNumfmtValue?.pattern &&
                                 originCell?.t !== CellValueType.STRING &&
                                 originCell?.t !== CellValueType.FORCE_STRING &&
-                                willLoseNumericPrecision(content)
+                                willLoseNumericPrecision(content.replace(getRegionalNumberFormat(region).decimal, '.'))
                             ) {
                                 return next({
                                     ...value,
@@ -281,6 +286,7 @@ export class NumfmtEditorController extends Disposable {
                             return next({ ...value, p: undefined, v, t: CellValueType.NUMBER });
                         }
 
+                        if (!value.f && isRealNum(content)) return next({ ...value, t: CellValueType.STRING });
                         return next(value);
                     },
                 })

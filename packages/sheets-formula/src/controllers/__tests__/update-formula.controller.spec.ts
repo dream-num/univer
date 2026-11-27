@@ -1320,9 +1320,9 @@ describe('UpdateFormulaController spill cache integration', () => {
             expect(sheet.getRange('F9:G9').getValues()).toEqual([[2 * input, 0]]);
             expect(sheet.getRange('K9:L9').getValues()).toEqual([[2 * input, null]]);
             expect(sheet.getRange('D13').getValue()).toBe(input + 7);
-            expect(sheet.getRange('E13').getValue()).toBe(0);
+            expect(sheet.getRange('E13').getValue()).toBe(false);
             expect(sheet.getRange('G13:I15').getValues()).toEqual([[5, input, 0], [0, 0, 0], [0, 0, 2]]);
-            expect(sheet.getRange('K13:R13').getValues()).toEqual([[1, '#VALUE!', '#REF!', 4, Math.ceil((-input - 0.3) / 2) * 2 + 0, input + 1, 0, 5]]);
+            expect(sheet.getRange('K13:R13').getValues()).toEqual([[true, '#VALUE!', '#REF!', 4, Math.ceil((-input - 0.3) / 2) * 2 + 0, input + 1, 0, 5]]);
             expect(sheet.getRange('T13').getValue()).toBe(1);
             expect(sheet.getRange('U13:Y13').getValues()).toEqual([[input, '#REF!', '#VALUE!', 57, 3]]);
             expect(sheet.getRange('C20:E20').getValues()).toEqual([['#NAME?', null, null]]);
@@ -1772,8 +1772,8 @@ describe('Grouped dynamic array formulas', () => {
                 '{"West",10;,2;"Total",#VALUE!}',
                 64,
                 64,
-                1,
-                0,
+                true,
+                false,
                 64,
                 '{9.64572444143}',
                 '{"West",#VALUE!;,#VALUE!;"Total",#VALUE!}',
@@ -1793,38 +1793,38 @@ describe('Grouped dynamic array formulas', () => {
             await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
             check(9);
             expect(sheet.getRange('L1:L4').getValues()).toEqual([[null], [null], [null], [null]]);
-            expect(sheet.getRange('R11:V11').getValues()).toEqual([[1, 0, 1, 64, -3.59]]);
-            expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, 1]]);
+            expect(sheet.getRange('R11:V11').getValues()).toEqual([[true, false, true, 64, -3.59]]);
+            expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, true]]);
             expect(sheet.getRange('H15').getValue()).toBe('#VALUE!');
-            expect(sheet.getRange('F17:M17').getValues()).toEqual([[1, 1, 64, 1, 0, 2, 19, 0]]);
+            expect(sheet.getRange('F17:M17').getValues()).toEqual([[1, 1, 64, true, false, 2, 19, false]]);
             await calculate(() => sheet.getRange('F9').setValue(7));
-            expect(sheet.getRange('F17:M17').getValues()).toEqual([[1, 1, 64, 1, 0, 7, 19, 0]]);
-            expect(sheet.getRange('F15:G15').getValues()).toEqual([[7, 1]]);
+            expect(sheet.getRange('F17:M17').getValues()).toEqual([[1, 1, 64, true, false, 7, 19, false]]);
+            expect(sheet.getRange('F15:G15').getValues()).toEqual([[7, true]]);
             await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
-            expect(sheet.getRange('F17:M17').getValues()).toEqual([[1, 1, 64, 1, 0, 2, 19, 0]]);
+            expect(sheet.getRange('F17:M17').getValues()).toEqual([[1, 1, 64, true, false, 2, 19, false]]);
             await calculate(() => sheet.getRange('H8').setValue('invalid'));
-            expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, 0]]);
+            expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, false]]);
             await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
-            expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, 1]]);
+            expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, true]]);
             expect(sheet.getRange('A18:B19').getValues()).toEqual([[45173, 45173], [45174, 45174]]);
-            expect(sheet.getRange('D18:G18').getValues()).toEqual([[61, 2, 1, 23]]);
+            expect(sheet.getRange('D18:G18').getValues()).toEqual([[61, 2, true, 23]]);
             expect(sheet.getRange('H18:J18').getValues()).toEqual([[46, '#NULL!', '#REF!']]);
             expect(sheet.getRange('A20:B20').getValues()).toEqual([['#NAME?', '#NAME?']]);
-            expect(sheet.getRange('P20:Q20').getValues()).toEqual([['#NAME?', 0]]);
+            expect(sheet.getRange('P20:Q20').getValues()).toEqual([['#NAME?', false]]);
             const savedCells = workbook.save().sheets[sheet.getSheetId()]?.cellData;
             expect(savedCells?.[19]?.[0]?.f).toBe('=CUBEVALUE("NoSuchConnection")');
             expect(Number(sheet.getRange('C20').getValue())).toBeCloseTo(122.5804, 10);
             expect(sheet.getRange('D20:F20').getValues()).toEqual([['#DIV/0!', '#DIV/0!', '#CALC!']]);
             expect(sheet.getRange('G20:J20').getValues()).toEqual([[4200, '#VALUE!', 45364, 45365]]);
             expect(sheet.getRange('K20').getValue()).toBe('100|39.3700787401575|3.28083989501312');
-            expect(sheet.getRange('L20:N20').getValues()).toEqual([['{19;31}', 0, 4]]);
+            expect(sheet.getRange('L20:N20').getValues()).toEqual([['{19;31}', false, 4]]);
             expect(sheet.getRange('O20').getValue()).toBeCloseTo(0.04519223562916916, 12);
 
             const source = workbook.getSheetByName('Source')!;
             expect(source.getRange('C2:C3').getValues()).toEqual([[19], [23]]);
             await calculate(() => source.getRange('A1:B1').setValues([[45173, 29]]));
             expect(sheet.getRange('A18:B19').getValues()).toEqual([[45170, 45170], [45174, 45174]]);
-            expect(sheet.getRange('D18:G18').getValues()).toEqual([[81, 2, 1, 23]]);
+            expect(sheet.getRange('D18:G18').getValues()).toEqual([[81, 2, true, 23]]);
             expect(Number(sheet.getRange('C20').getValue())).toBeCloseTo(187.0964, 10);
             expect(sheet.getRange('D20:F20').getValues()).toEqual([[29, 29, '#CALC!']]);
             expect(sheet.getRange('G20:J20').getValues()).toEqual([[5200, '#VALUE!', 45364, 45365]]);
@@ -1833,12 +1833,12 @@ describe('Grouped dynamic array formulas', () => {
             expect(source.getRange('C2:C3').getValues()).toEqual([[29], [23]]);
             await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
             expect(sheet.getRange('A18:B19').getValues()).toEqual([[45173, 45173], [45174, 45174]]);
-            expect(sheet.getRange('D18:G18').getValues()).toEqual([[61, 2, 1, 23]]);
+            expect(sheet.getRange('D18:G18').getValues()).toEqual([[61, 2, true, 23]]);
             expect(Number(sheet.getRange('C20').getValue())).toBeCloseTo(122.5804, 10);
             expect(sheet.getRange('D20:F20').getValues()).toEqual([['#DIV/0!', '#DIV/0!', '#CALC!']]);
             expect(sheet.getRange('G20:J20').getValues()).toEqual([[4200, '#VALUE!', 45364, 45365]]);
             expect(sheet.getRange('K20').getValue()).toBe('100|39.3700787401575|3.28083989501312');
-            expect(sheet.getRange('L20:N20').getValues()).toEqual([['{19;31}', 0, 4]]);
+            expect(sheet.getRange('L20:N20').getValues()).toEqual([['{19;31}', false, 4]]);
             expect(sheet.getRange('O20').getValue()).toBeCloseTo(0.04519223562916916, 12);
             expect(source.getRange('C2:C3').getValues()).toEqual([[19], [23]]);
         } finally {

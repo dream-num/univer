@@ -139,14 +139,16 @@ export class Trend extends BaseFunction {
         const knownYsValuesFlat = knownYsValues.flat();
         const knownXsValuesFlat = knownXsValues.flat();
 
-        const { slope: m, intercept: b } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, false);
+        const { slope: m, intercept: b, centered } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, false);
 
         if (Number.isNaN(m)) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
         const result = newXsValues.map((row) => {
-            return row.map((value) => m * value + b);
+            return row.map((value) => centered && m !== 0
+                ? centered.yAnchor + (centered.meanYOffset + m * ((value - centered.xAnchor) - centered.meanXOffset))
+                : m * value + b);
         });
 
         return ArrayValueObject.createByArray(result);

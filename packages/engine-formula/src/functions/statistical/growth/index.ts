@@ -139,10 +139,12 @@ export class Growth extends BaseFunction {
         const knownYsValuesFlat = knownYsValues.flat();
         const knownXsValuesFlat = knownXsValues.flat();
 
-        const { slope, intercept } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, true);
+        const { slope, intercept, centered } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, true);
 
         const result = newXsValues.map((row) => {
-            return row.map((value) => intercept * (slope ** value));
+            return row.map((value) => centered && centered.slope !== 0
+                ? Math.exp(centered.yAnchor + (centered.meanYOffset + centered.slope * ((value - centered.xAnchor) - centered.meanXOffset)))
+                : intercept * (slope ** value));
         });
 
         return ArrayValueObject.createByArray(result);

@@ -167,12 +167,15 @@ export class Linest extends BaseFunction {
         const knownYsValuesFlat = knownYsValues.flat();
         const knownXsValuesFlat = knownXsValues.flat();
         const fit = this.useExcelResidualArithmetic ? fitSinglePredictor(knownXsValuesFlat, knownYsValuesFlat, constb, true) : null;
-        const { slope: m, intercept: b } = fit ?? getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, false);
+        const { slope: m, intercept: b, isConstantPredictor, centered } = fit
+            ? { ...fit, isConstantPredictor: false, centered: undefined }
+            : getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, false);
 
         if (Number.isNaN(m)) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
+        const useCenteredFit = centered !== undefined || isConstantPredictor;
         let result: Array<Array<number | string>> = [];
 
         if (stats) {
@@ -183,26 +186,37 @@ export class Linest extends BaseFunction {
             let df = Math.max(0, n - 1);
 
             if (constb) {
-                let sumY = 0;
-                let sumX = 0;
+                if (useCenteredFit) {
+                    meanY = centered ? centered.yAnchor + centered.meanYOffset : b;
+                    meanX = centered ? centered.xAnchor + centered.meanXOffset : knownXsValuesFlat[0];
+                    df = Math.max(0, n - (isConstantPredictor ? 1 : 2));
+                } else {
+                    let sumY = 0;
+                    let sumX = 0;
 
-                for (let i = 0; i < n; i++) {
-                    sumY += knownYsValuesFlat[i];
-                    sumX += knownXsValuesFlat[i];
+                    for (let i = 0; i < n; i++) {
+                        sumY += knownYsValuesFlat[i];
+                        sumX += knownXsValuesFlat[i];
+                    }
+
+                    meanY = sumY / n;
+                    meanX = sumX / n;
+                    df = Math.max(0, n - 2);
                 }
-
-                meanY = sumY / n;
-                meanX = sumX / n;
-                df = Math.max(0, n - 2);
             }
 
             let sstotal = 0;
-            const ssresid = df > 0 ? (fit ?? fitSinglePredictor(knownXsValuesFlat, knownYsValuesFlat, constb)).squaredError : 0;
+            let ssresid = !useCenteredFit && df > 0 ? (fit ?? fitSinglePredictor(knownXsValuesFlat, knownYsValuesFlat, constb)).squaredError : 0;
             let ssx = 0;
 
             for (let i = 0; i < n; i++) {
-                sstotal += (knownYsValuesFlat[i] - meanY) ** 2;
-                ssx += (knownXsValuesFlat[i] - meanX) ** 2;
+                const dy = centered ? (knownYsValuesFlat[i] - centered.yAnchor) - centered.meanYOffset : knownYsValuesFlat[i] - meanY;
+                const dx = centered ? (knownXsValuesFlat[i] - centered.xAnchor) - centered.meanXOffset : knownXsValuesFlat[i] - meanX;
+                sstotal += dy ** 2;
+                if (useCenteredFit && df > 0) {
+                    ssresid += (centered ? dy - m * dx : knownYsValuesFlat[i] - (m * knownXsValuesFlat[i] + b)) ** 2;
+                }
+                ssx += dx ** 2;
             }
 
             const ssreg = sstotal - ssresid;
@@ -224,7 +238,7 @@ export class Linest extends BaseFunction {
                 sey = Math.sqrt(ssresid / df);
             }
 
-            const F = df > 0 ? (ssreg / 1) / (ssresid / df) : ErrorType.NUM;
+            const F = df > 0 && !isConstantPredictor ? (ssreg / 1) / (ssresid / df) : ErrorType.NUM;
 
             // seb = #N/A when const is FALSE
             if (!constb) {

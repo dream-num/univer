@@ -172,14 +172,15 @@ export class Logest extends BaseFunction {
         const knownXsValuesFlat = knownXsValues.flat();
         const knownLogs = this.useExcelResidualArithmetic ? knownYsValuesFlat.map((value) => Math.log(value)) : null;
         const fit = knownLogs && fitSinglePredictor(knownXsValuesFlat, knownLogs, constb, true);
-        const { slope: m, intercept: b, Y } = fit && knownLogs
-            ? { slope: Math.exp(fit.slope), intercept: Math.exp(fit.intercept), Y: knownLogs }
+        const { slope: m, intercept: b, Y, isConstantPredictor, centered } = fit && knownLogs
+            ? { slope: Math.exp(fit.slope), intercept: Math.exp(fit.intercept), Y: knownLogs, isConstantPredictor: false, centered: undefined }
             : getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, true);
 
         if (Number.isNaN(m)) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
+        const useCenteredFit = centered !== undefined || isConstantPredictor;
         let result: Array<Array<number | string>> = [];
 
         if (stats) {
@@ -190,26 +191,37 @@ export class Logest extends BaseFunction {
             let df = Math.max(0, n - 1);
 
             if (constb) {
-                let sumY = 0;
-                let sumX = 0;
+                if (useCenteredFit) {
+                    meanY = centered ? centered.yAnchor + centered.meanYOffset : Y.every((value) => value === Y[0]) ? Y[0] : Y.reduce((sum, value) => sum + value, 0) / n;
+                    meanX = centered ? centered.xAnchor + centered.meanXOffset : knownXsValuesFlat[0];
+                    df = Math.max(0, n - (isConstantPredictor ? 1 : 2));
+                } else {
+                    let sumY = 0;
+                    let sumX = 0;
 
-                for (let i = 0; i < n; i++) {
-                    sumY += Y[i];
-                    sumX += knownXsValuesFlat[i];
+                    for (let i = 0; i < n; i++) {
+                        sumY += Y[i];
+                        sumX += knownXsValuesFlat[i];
+                    }
+
+                    meanY = sumY / n;
+                    meanX = sumX / n;
+                    df = Math.max(0, n - 2);
                 }
-
-                meanY = sumY / n;
-                meanX = sumX / n;
-                df = Math.max(0, n - 2);
             }
 
             let sstotal = 0;
-            const ssresid = df > 0 ? (fit ?? fitSinglePredictor(knownXsValuesFlat, Y, constb)).squaredError : 0;
+            let ssresid = !useCenteredFit && df > 0 ? (fit ?? fitSinglePredictor(knownXsValuesFlat, Y, constb)).squaredError : 0;
             let ssx = 0;
 
             for (let i = 0; i < n; i++) {
-                sstotal += (Y[i] - meanY) ** 2;
-                ssx += (knownXsValuesFlat[i] - meanX) ** 2;
+                const dy = centered ? (Y[i] - centered.yAnchor) - centered.meanYOffset : Y[i] - meanY;
+                const dx = centered ? (knownXsValuesFlat[i] - centered.xAnchor) - centered.meanXOffset : knownXsValuesFlat[i] - meanX;
+                sstotal += dy ** 2;
+                if (useCenteredFit && df > 0) {
+                    ssresid += (centered ? dy - centered.slope * dx : Y[i] - Math.log(b * (m ** knownXsValuesFlat[i]))) ** 2;
+                }
+                ssx += dx ** 2;
             }
 
             const ssreg = sstotal - ssresid;
@@ -218,7 +230,7 @@ export class Logest extends BaseFunction {
             let se = 0;
             let seb: number | ErrorType = 0;
             let sey = 0;
-            let F: number | ErrorType = this.useExcelResidualArithmetic ? ErrorType.NUM : 0;
+            let F: number | ErrorType = this.useExcelResidualArithmetic || isConstantPredictor ? ErrorType.NUM : 0;
 
             if (df > 0) {
                 if (ssx > 0) {
@@ -230,7 +242,7 @@ export class Logest extends BaseFunction {
                     seb = Math.sqrt(ssresid / df / n);
                 }
                 sey = Math.sqrt(ssresid / df);
-                F = (ssreg / 1) / (ssresid / df);
+                F = isConstantPredictor ? ErrorType.NUM : (ssreg / 1) / (ssresid / df);
             }
 
             // seb = #N/A when const is FALSE

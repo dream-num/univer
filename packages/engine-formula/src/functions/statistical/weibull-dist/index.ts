@@ -17,6 +17,7 @@
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { exponentialCDF } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -107,20 +108,21 @@ export class WeibullDist extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const exp = Math.exp(-((xValue / betaValue) ** alphaValue));
+        const exponent = (xValue / betaValue) ** alphaValue;
 
         let result;
 
         if (cumulativeValue) {
-            result = 1 - exp;
+            result = exponentialCDF(exponent, 1);
         } else {
-            result = alphaValue / (betaValue ** alphaValue) * (xValue ** (alphaValue - 1)) * exp;
+            result = alphaValue / (betaValue ** alphaValue) * (xValue ** (alphaValue - 1)) * Math.exp(-exponent);
         }
 
         if (Number.isNaN(result) || !Number.isFinite(result)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return NumberValueObject.create(result);
+        // Excel worksheets flush subnormal cumulative probabilities to positive zero.
+        return NumberValueObject.create(cumulativeValue && Math.abs(result) < 2 ** -1022 ? 0 : result);
     }
 }

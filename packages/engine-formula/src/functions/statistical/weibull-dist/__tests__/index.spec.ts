@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_COMPATIBILITY } from '../../../compatibility/function-names';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { WeibullDist } from '../index';
@@ -27,6 +28,77 @@ describe('Test weibullDist function', () => {
     const testFunction = new WeibullDist(FUNCTION_NAMES_STATISTICAL.WEIBULL_DIST);
 
     describe('WeibullDist', () => {
+        it('Preserves small positive cumulative probabilities in both function aliases', () => {
+            // References evaluated with 400-digit decimal arithmetic.
+            const cases = [
+                [1e-20, 1, 2, 5e-21],
+                [1e-10, 2, 1, 1.0000000000000001e-20],
+                [1e-40, 0.5, 1, 1e-20],
+                [1e-6, 3, 2, 1.2499999999999998e-19],
+                [1e-100, 2, 1e50, 9.999999999999999e-301],
+            ];
+            for (const name of [FUNCTION_NAMES_STATISTICAL.WEIBULL_DIST, FUNCTION_NAMES_COMPATIBILITY.WEIBULL]) {
+                const fn = new WeibullDist(name);
+                for (const [x, alpha, beta, expected] of cases) {
+                    const result = fn.calculate(
+                        NumberValueObject.create(x),
+                        NumberValueObject.create(alpha),
+                        NumberValueObject.create(beta),
+                        BooleanValueObject.create(true)
+                    );
+                    const actual = getObjectValue(result) as number;
+                    expect(Math.abs(actual / expected - 1)).toBeLessThan(1e-14);
+                }
+            }
+        });
+
+        it('Flushes subnormal cumulative results to positive zero in both aliases', () => {
+            for (const name of [FUNCTION_NAMES_STATISTICAL.WEIBULL_DIST, FUNCTION_NAMES_COMPATIBILITY.WEIBULL]) {
+                const fn = new WeibullDist(name);
+                for (const [x, alpha] of [[1e-155, 2], [Number.MIN_VALUE, 1]]) {
+                    const result = fn.calculate(
+                        NumberValueObject.create(x),
+                        NumberValueObject.create(alpha),
+                        NumberValueObject.create(1),
+                        BooleanValueObject.create(true)
+                    );
+                    expect(getObjectValue(result)).toBe(0);
+                }
+            }
+        });
+
+        it('Preserves the smallest normal cumulative result while broadcasting inputs', () => {
+            const factor = 2 ** -511;
+            const x = ArrayValueObject.createByArray([[factor * (1 - Number.EPSILON), factor, factor * (1 + Number.EPSILON)]]);
+            const result = testFunction.calculate(x, NumberValueObject.create(2), NumberValueObject.create(1), BooleanValueObject.create(true));
+            expect(getObjectValue(result)).toEqual([[0, 2 ** -1022, 2 ** -1022 + 2 * Number.MIN_VALUE]]);
+        });
+
+        it('Preserves small cumulative probabilities while broadcasting shape parameters', () => {
+            const x = ArrayValueObject.createByArray([[1e-10, 1e-8], [1e-20, 1e-18]]);
+            const alpha = ArrayValueObject.createByArray([[2], [1]]);
+            const result = testFunction.calculate(x, alpha, NumberValueObject.create(1), BooleanValueObject.create(true));
+            const actual = getObjectValue(result) as number[][];
+            const expected = [[1.0000000000000001e-20, 1e-16], [1e-20, 1e-18]];
+            for (let r = 0; r < expected.length; r++) {
+                for (let c = 0; c < expected[r].length; c++) {
+                    expect(Math.abs(actual[r][c] / expected[r][c] - 1)).toBeLessThan(1e-14);
+                }
+            }
+        });
+
+        it('Retains positive zero at the origin and saturation for large inputs', () => {
+            for (const x of [0, -0, 1000]) {
+                const result = testFunction.calculate(
+                    NumberValueObject.create(x),
+                    NumberValueObject.create(1),
+                    NumberValueObject.create(1),
+                    BooleanValueObject.create(true)
+                );
+                expect(getObjectValue(result)).toBe(x === 1000 ? 1 : 0);
+            }
+        });
+
         it('Value is normal', () => {
             const x = NumberValueObject.create(10);
             const alpha = NumberValueObject.create(8);

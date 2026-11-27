@@ -31,7 +31,12 @@ export class PercentileInc extends BaseFunction {
         const arrayValues = getArrayValuesByAggregateIgnoreOptions(array);
 
         if (k.isArray()) {
-            const resultArray = (k as ArrayValueObject).mapValue((kObject) => this._handleSingleObject(arrayValues, kObject));
+            let alreadySorted = false;
+            const resultArray = (k as ArrayValueObject).mapValue((kObject) => {
+                const result = this._handleSingleObject(arrayValues, kObject, alreadySorted);
+                alreadySorted ||= result.isNumber();
+                return result;
+            });
 
             if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
                 return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
@@ -43,7 +48,7 @@ export class PercentileInc extends BaseFunction {
         return this._handleSingleObject(arrayValues, k);
     }
 
-    private _handleSingleObject(array: number[] | ErrorValueObject, k: BaseValueObject): BaseValueObject {
+    private _handleSingleObject(array: number[] | ErrorValueObject, k: BaseValueObject, alreadySorted = false): BaseValueObject {
         if (!Array.isArray(array)) {
             return array as ErrorValueObject;
         }
@@ -57,6 +62,6 @@ export class PercentileInc extends BaseFunction {
         const [kObject] = variants as BaseValueObject[];
         const kValue = +kObject.getValue();
 
-        return getPercentileIncResult(array, kValue);
+        return getPercentileIncResult(array, kValue, alreadySorted);
     }
 }

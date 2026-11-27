@@ -1947,12 +1947,15 @@ export function getMedianResult(array: number[]): BaseValueObject {
 }
 
 // LARGE(array, k): returns the k-th largest value in a data set.
-export function getLargeResult(array: number[], k: number): BaseValueObject {
+// alreadySorted requires descending order; reuse it only for the same array.
+export function getLargeResult(array: number[], k: number, alreadySorted = false): BaseValueObject {
     if (k < 1 || k > array.length) {
         return ErrorValueObject.create(ErrorType.NUM);
     }
 
-    array.sort((a, b) => b - a);
+    if (!alreadySorted) {
+        array.sort((a, b) => b - a);
+    }
 
     const _k = Math.ceil(k);
 
@@ -1960,12 +1963,15 @@ export function getLargeResult(array: number[], k: number): BaseValueObject {
 }
 
 // SMALL(array, k): returns the k-th smallest value in a data set.
-export function getSmallResult(array: number[], k: number): BaseValueObject {
+// alreadySorted requires ascending order; reuse it only for the same array.
+export function getSmallResult(array: number[], k: number, alreadySorted = false): BaseValueObject {
     if (k < 1 || k > array.length) {
         return ErrorValueObject.create(ErrorType.NUM);
     }
 
-    array.sort((a, b) => a - b);
+    if (!alreadySorted) {
+        array.sort((a, b) => a - b);
+    }
 
     const _k = Math.floor(k);
 
@@ -1973,14 +1979,17 @@ export function getSmallResult(array: number[], k: number): BaseValueObject {
 }
 
 // PERCENTILE.INC(array, k): returns the k-th percentile of values in a range, where k is in the range 0..1, inclusive.
-export function getPercentileIncResult(array: number[], k: number): BaseValueObject {
+// alreadySorted requires ascending order; reuse it only for the same array.
+export function getPercentileIncResult(array: number[], k: number, alreadySorted = false): BaseValueObject {
     const n = array.length;
 
     if (k < 0 || k > 1) {
         return ErrorValueObject.create(ErrorType.NUM);
     }
 
-    array.sort((a, b) => a - b);
+    if (!alreadySorted) {
+        array.sort((a, b) => a - b);
+    }
 
     const kIndex = k * (n - 1);
     const integerPart = Math.floor(kIndex);
@@ -1996,14 +2005,17 @@ export function getPercentileIncResult(array: number[], k: number): BaseValueObj
 }
 
 // PERCENTILE.EXC(array, k): returns the k-th percentile of values in a range, where k is in the range 0..1, exclusive.
-export function getPercentileExcResult(array: number[], k: number): BaseValueObject {
+// alreadySorted requires ascending order; reuse it only for the same array.
+export function getPercentileExcResult(array: number[], k: number, alreadySorted = false): BaseValueObject {
     const n = array.length;
 
     if (k < 1 / (n + 1) || k > 1 - 1 / (n + 1)) {
         return ErrorValueObject.create(ErrorType.NUM);
     }
 
-    array.sort((a, b) => a - b);
+    if (!alreadySorted) {
+        array.sort((a, b) => a - b);
+    }
 
     const kIndex = k * (n + 1) - 1;
     const integerPart = Math.floor(kIndex);
@@ -2019,14 +2031,17 @@ export function getPercentileExcResult(array: number[], k: number): BaseValueObj
 }
 
 // QUARTILE.INC(array, quart): returns the quartile of a data set, based on percentile values from 0..1, inclusive.
-export function getQuartileIncResult(array: number[], quart: number): BaseValueObject {
+// alreadySorted requires ascending order; reuse it only for the same array.
+export function getQuartileIncResult(array: number[], quart: number, alreadySorted = false): BaseValueObject {
     const n = array.length;
 
     if (quart < 0 || quart > 4) {
         return ErrorValueObject.create(ErrorType.NUM);
     }
 
-    array.sort((a, b) => a - b);
+    if (!alreadySorted) {
+        array.sort((a, b) => a - b);
+    }
 
     const k = quart / 4;
     const kIndex = k * (n - 1);
@@ -2043,14 +2058,17 @@ export function getQuartileIncResult(array: number[], quart: number): BaseValueO
 }
 
 // QUARTILE.EXC(array, quart): returns the quartile of a data set, based on percentile values from 0..1, exclusive.
-export function getQuartileExcResult(array: number[], quart: number): BaseValueObject {
+// alreadySorted requires ascending order; reuse it only for the same array.
+export function getQuartileExcResult(array: number[], quart: number, alreadySorted = false): BaseValueObject {
     const n = array.length;
 
     if (quart <= 0 || quart >= 4) {
         return ErrorValueObject.create(ErrorType.NUM);
     }
 
-    array.sort((a, b) => a - b);
+    if (!alreadySorted) {
+        array.sort((a, b) => a - b);
+    }
 
     const k = quart / 4;
 

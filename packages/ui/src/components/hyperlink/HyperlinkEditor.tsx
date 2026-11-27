@@ -43,8 +43,8 @@ export function HyperlinkEditor({ url, label, urlError, labelError, labels, onUr
               univer-box-border univer-bg-gray-0
               dark:!univer-bg-gray-900
             `, mobile
-                ? 'univer-w-full univer-py-2'
-                : ['univer-w-[328px] univer-rounded-xl univer-px-6 univer-py-5 univer-shadow', borderClassName], className)}
+                ? 'univer-w-full'
+                : ['univer-w-[328px] univer-rounded-xl univer-p-3 univer-shadow', borderClassName], className)}
             onSubmit={async (event) => {
                 event.preventDefault();
                 if (url.trim()) {
@@ -60,7 +60,7 @@ export function HyperlinkEditor({ url, label, urlError, labelError, labels, onUr
                         aria-describedby={labelError ? `${id}-label-error` : undefined}
                         value={label}
                         onChange={onLabelChange}
-                        autoFocus
+                        autoFocus={mobile}
                         size={mobile ? 'small' : undefined}
                     />
                 </FormLayout>
@@ -72,7 +72,7 @@ export function HyperlinkEditor({ url, label, urlError, labelError, labels, onUr
                     aria-describedby={urlError ? `${id}-url-error` : undefined}
                     value={url}
                     onChange={onUrlChange}
-                    autoFocus={!hasLabel}
+                    autoFocus={!mobile || !hasLabel}
                     size={mobile ? 'small' : undefined}
                 />
             </FormLayout>

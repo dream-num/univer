@@ -79,5 +79,30 @@ describe('Test trim function', () => {
             const result3 = testFunction.calculate(text3);
             expect(getObjectValue(result3)).toStrictEqual('t est te st');
         });
+
+        it('Keeps tabs, line feeds and non-breaking spaces (160), as Excel does', () => {
+            // Those characters are not spaces for Excel; CLEAN or SUBSTITUTE remove them.
+            const cases: [string, string][] = [
+                ['a\tb', 'a\tb'],
+                ['a\n b', 'a\n b'],
+                ['\u00A0a\u00A0', '\u00A0a\u00A0'],
+                ['  a \t  b  ', 'a \t b'],
+            ];
+            for (const [text, expected] of cases) {
+                expect(getObjectValue(testFunction.calculate(StringValueObject.create(text)))).toStrictEqual(expected);
+            }
+        });
+
+        it.each([
+            ['\u3000a\u3000', 'a'],
+            [' \u3000a', 'a'],
+            ['\u3000\u3000', ''],
+            ['a\u3000\u3000b', 'a\u3000b'],
+            ['a \u3000b', 'a b'],
+            ['a\u3000 b', 'a\u3000b'],
+        ])('Treats the ideographic space (12288) as a space, as Excel does: %s', (input, expected) => {
+            const result = testFunction.calculate(StringValueObject.create(input));
+            expect(getObjectValue(result)).toStrictEqual(expected);
+        });
     });
 });

@@ -136,6 +136,11 @@ const locale: typeof enUS = {
             title: '複選框',
             error: '此儲存格的內容違反了驗證規則',
         },
+        permission: {
+            dialog: {
+                setStyleErr: '該範圍已被保護，目前無設定樣式權限。如需設定樣式，請聯絡建立者。 ',
+            },
+        },
     },
 };
 

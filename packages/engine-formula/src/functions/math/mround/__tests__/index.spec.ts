@@ -14,16 +14,28 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Mround } from '../index';
 
 describe('Test mround function', () => {
-    const testFunction = new Mround(FUNCTION_NAMES_MATH.MROUND);
+    let injector: Injector;
+    let testFunction: Mround;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [Mround, { useFactory: () => injector.createInstance(Mround, FUNCTION_NAMES_MATH.MROUND) }],
+        ]);
+        testFunction = injector.get(Mround);
+    });
+
+    afterEach(() => injector.dispose());
 
     describe('Mround', () => {
         it('Value is normal number', () => {
@@ -92,7 +104,9 @@ describe('Test mround function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(number, multiple);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual([
+                [2, ErrorType.VALUE, ErrorType.NUM, ErrorType.VALUE, ErrorType.NUM, ErrorType.NUM, -51, ErrorType.NA, ErrorType.NA],
+            ]);
         });
     });
 });

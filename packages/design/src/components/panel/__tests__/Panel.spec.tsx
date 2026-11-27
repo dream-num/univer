@@ -58,7 +58,7 @@ describe('PanelField', () => {
                 {(controlProps) => <input {...controlProps} />}
             </PanelField>
         );
-        const control = screen.getByRole('textbox', { name: 'Name *' });
+        const control = screen.getByRole('textbox', { name: /^Name\s*\*$/ });
         expect(control).toHaveAccessibleDescription('Enter a name');
         expect(control).toHaveAttribute('aria-invalid', 'true');
     });

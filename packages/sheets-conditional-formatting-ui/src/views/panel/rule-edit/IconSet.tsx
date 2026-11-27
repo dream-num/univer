@@ -19,17 +19,17 @@ import type { IIconSet } from '@univerjs/sheets-conditional-formatting';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Dropdown, Select } from '@univerjs/design';
-import { MoreDownIcon, SlashDoubleIcon } from '@univerjs/icons';
+import { MoreDownIcon } from '@univerjs/icons';
 import {
     CFNumberOperator,
     CFRuleType,
     CFSubRuleType,
     CFValueType,
     compareWithNumber,
+    conditionalFormattingIconGroups,
+    conditionalFormattingIcons,
     createDefaultValue,
     getOppositeOperator,
-    iconGroup,
-    iconMap,
     IIconSetType,
 } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
@@ -37,12 +37,8 @@ import { useDependency, useObservable, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import type { IStyleEditorProps } from './type';
+import { ConditionalFormattingPresetIcon } from '../../ConditionalFormattingPresetIcon';
 import { RuleNumberInput } from './RuleNumberInput';
-
-const getIcon = (iconType: IIconSetType, iconId: string | number) => {
-    const arr = iconMap[iconType] || [];
-    return arr[Number(iconId)] || '';
-};
 
 const TextInput = (props: {
     id: number;
@@ -122,7 +118,7 @@ const IconGroupList = (props: IIconGroupListProps) => {
 
     return (
         <div dir={direction} className="univer-w-80">
-            {iconGroup.map((group) => {
+            {conditionalFormattingIconGroups.map((group) => {
                 return (
                     <div
                         key={group.title}
@@ -173,13 +169,11 @@ const IconGroupList = (props: IIconGroupListProps) => {
                                         onClick={() => { onClick(groupItem.name); }}
                                     >
                                         <span dir={direction} className="univer-flex univer-items-center univer-gap-0.5">
-                                            {groupItem.list.map((base64, index) => (
-                                                <img
+                                            {groupItem.list.map((icon, index) => (
+                                                <ConditionalFormattingPresetIcon
                                                     key={index}
-                                                    alt=""
+                                                    icon={icon}
                                                     className="univer-size-5"
-                                                    src={base64}
-                                                    draggable={false}
                                                 />
                                             ))}
                                         </span>
@@ -199,25 +193,8 @@ const IconItemList = (props: { onClick: (iconType: IIconSetType, iconId: string)
     const localeService = useDependency(LocaleService);
     const direction = useObservable(localeService.direction$, localeService.getDirection());
 
-    const list = useMemo(() => {
-        const result: { iconType: IIconSetType; iconId: string; base64: string }[] = [];
-        for (const key in iconMap) {
-            const iconType = key as IIconSetType;
-            const list = iconMap[iconType];
-            list.forEach((base64, index) => {
-                result.push({
-                    iconType,
-                    base64,
-                    iconId: String(index),
-                });
-            });
-        }
-        return result;
-    }, []);
-
-    const handleClick = (item: typeof list[0]) => {
-        onClick(item.iconType, item.iconId);
-    };
+    const list = useMemo(() => Object.entries(conditionalFormattingIcons).flatMap(([type, icons]) =>
+        icons.map((icon, index) => ({ icon, iconType: type as IIconSetType, iconId: String(index) }))), []);
 
     return (
         <div dir={direction}>
@@ -226,7 +203,7 @@ const IconItemList = (props: { onClick: (iconType: IIconSetType, iconId: string)
                 className="
                   univer-mb-2.5 univer-flex univer-cursor-pointer univer-items-center univer-gap-2 univer-text-sm
                 "
-                onClick={() => handleClick({ iconType: IIconSetType.empty, iconId: '', base64: '' })}
+                onClick={() => onClick(IIconSetType.empty, '')}
             >
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.noCellIcon')}
             </div>
@@ -234,7 +211,10 @@ const IconItemList = (props: { onClick: (iconType: IIconSetType, iconId: string)
                 className="univer-flex univer-w-64 univer-flex-wrap univer-gap-2"
             >
                 {list.map((item) => (
-                    <div
+                    <button
+                        type="button"
+                        aria-label={`${item.iconType} ${Number(item.iconId) + 1}`}
+                        onClick={() => onClick(item.iconType, item.iconId)}
                         key={`${item.iconType}_${item.iconId}`}
                         className={`
                           univer-mb-2 univer-flex univer-cursor-pointer univer-items-center univer-justify-center
@@ -243,13 +223,8 @@ const IconItemList = (props: { onClick: (iconType: IIconSetType, iconId: string)
                           dark:hover:!univer-bg-gray-700
                         `}
                     >
-                        <img
-                            className="univer-size-5"
-                            src={item.base64}
-                            draggable={false}
-                            onClick={() => handleClick(item)}
-                        />
-                    </div>
+                        <ConditionalFormattingPresetIcon icon={item.icon} className="univer-size-5" />
+                    </button>
                 ))}
             </div>
         </div>
@@ -318,7 +293,7 @@ const IconSetRuleEdit = (props: {
     const render = useMemo(() => {
         return configList.map((item, index) => {
             const error = errorMap[index];
-            const icon = getIcon(item.iconType, item.iconId);
+            const icon = conditionalFormattingIcons[item.iconType]?.[Number(item.iconId)];
             const isEnd = index === configList.length - 1;
             const isFirst = index === 0;
             const preItem = configList[index - 1];
@@ -392,9 +367,7 @@ const IconSetRuleEdit = (props: {
                                       dark:!univer-bg-gray-700 dark:!univer-text-gray-0
                                     `, borderClassName)}
                                 >
-                                    {icon
-                                        ? <img src={icon} className="univer-size-4" draggable={false} />
-                                        : <SlashDoubleIcon />}
+                                    <ConditionalFormattingPresetIcon icon={icon} className="univer-size-4" />
                                     <MoreDownIcon />
                                 </div>
                             </DropdownComponent>
@@ -486,7 +459,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         iconId: String(index),
     });
     const [currentIconType, setCurrentIconType] = useState<IIconSetType>(() => {
-        const defaultV = Object.keys(iconMap)[0] as IIconSetType;
+        const defaultV = Object.keys(conditionalFormattingIcons)[0] as IIconSetType;
         if (rule && rule.config.length) {
             const type = rule.config[0].iconType;
             const isNotSame = rule.config.some((item) => item.iconType !== type);
@@ -501,7 +474,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         if (rule && rule.config.length) {
             return Tools.deepClone(rule?.config);
         }
-        const list = iconMap[currentIconType] || [];
+        const list = conditionalFormattingIcons[currentIconType] || [];
         return new Array(list.length).fill('').map((_e, index, list) => {
             if (index === list.length - 1) {
                 // The last condition is actually the complement of the above conditions,
@@ -526,7 +499,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
 
     const previewIcon = useMemo(() => {
         const list = configList.map((item) => {
-            return getIcon(item.iconType, item.iconId);
+            return conditionalFormattingIcons[item.iconType]?.[Number(item.iconId)];
         });
         return (
             <div
@@ -536,15 +509,13 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                   rtl:univer-flex-row-reverse
                 "
             >
-                {list.map((icon, index) => (icon
-                    ? (
-                        <img
-                            className="univer-size-5"
-                            key={index}
-                            src={icon}
-                        />
-                    )
-                    : <SlashDoubleIcon className="univer-size-5" key={index} />))}
+                {list.map((icon, index) => (
+                    <ConditionalFormattingPresetIcon
+                        key={index}
+                        icon={icon}
+                        className="univer-size-5"
+                    />
+                ))}
             </div>
         );
     }, [configList]);
@@ -600,7 +571,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     };
     const handleClickIconList = (iconType: IIconSetType) => {
         setCurrentIconType(iconType);
-        const list = iconMap[iconType] || [];
+        const list = conditionalFormattingIcons[iconType] || [];
         const config = new Array(list.length).fill('').map((_e, index, list) => createDefaultConfigItem(iconType, index, list));
         setConfigList(config);
         setErrorMap(checkResult(config));
@@ -682,19 +653,15 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                   rtl:univer-flex-row-reverse rtl:univer-justify-end
                 "
             >
-                <div
-                    data-u-comp="cf-icon-set-option-row"
-                    className="univer-flex univer-items-center univer-text-xs"
-                >
-                    <Checkbox onChange={reverseIcon} />
-                    {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.reverseIconOrder')}
+                <div data-u-comp="cf-icon-set-option-row" className="univer-flex">
+                    <Checkbox className="univer-text-xs" onChange={reverseIcon}>
+                        {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.reverseIconOrder')}
+                    </Checkbox>
                 </div>
-                <div
-                    data-u-comp="cf-icon-set-option-row"
-                    className="univer-flex univer-items-center univer-text-xs"
-                >
-                    <Checkbox checked={!isShowValue} onChange={(v) => { setIsShowValue(!v); }} />
-                    {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.onlyShowIcon')}
+                <div data-u-comp="cf-icon-set-option-row" className="univer-flex">
+                    <Checkbox className="univer-text-xs" checked={!isShowValue} onChange={(v) => { setIsShowValue(!v); }}>
+                        {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.onlyShowIcon')}
+                    </Checkbox>
                 </div>
             </div>
             <IconSetRuleEdit

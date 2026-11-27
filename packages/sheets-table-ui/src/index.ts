@@ -16,7 +16,11 @@
 
 import './global.css';
 
+export type { IRequestOpenTableFilterPanelOperationParams } from './commands/operations/open-table-filter-dialog.opration';
+export { RequestOpenTableFilterPanelOperation } from './commands/operations/open-table-filter-dialog.opration';
 export type { IUniverSheetsTableUIConfig } from './config/config';
+
+export { SheetsTableFilterButtonRenderController } from './controllers/sheet-table-filter-button-render.controller';
 export { menuSchema as SheetsTableUIMenuSchema } from './menu/schema';
 export { UniverSheetsTableMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsTableUIPlugin } from './plugin';

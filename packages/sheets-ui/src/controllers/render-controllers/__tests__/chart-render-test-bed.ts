@@ -66,7 +66,7 @@ export function createChartRenderTestBed(modules: Dependency[] = [], initialChar
     onTestFinished(() => {
         vi.useRealTimers();
     });
-    // Happy DOM has no Canvas backend. Keep all document and render providers real.
+    // jsdom has no Canvas backend. Keep all document and render providers real.
     const canvas = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
         return new Proxy({
             canvas: this,

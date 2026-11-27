@@ -63,7 +63,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
     private _initCopyPaste() {
         this._sheetClipboardService.addClipboardHook({
             id: SHEET_HYPER_LINK_UI_PLUGIN,
-            onBeforeCopy: (unitId, subUnitId, range) => this._collect(unitId, subUnitId, range),
+            onBeforeCopy: (unitId, subUnitId, range, _copyType, discreteRange) => this._collect(unitId, subUnitId, range, discreteRange),
             onPasteCells: (pasteFrom, pasteTo, data, payload) => {
                 const { copyType = COPY_TYPE.COPY, pasteType } = payload;
                 const { range: copyRange } = pasteFrom || {};
@@ -111,7 +111,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
         });
     }
 
-    private _collect(unitId: string, subUnitId: string, range: IRange) {
+    private _collect(unitId: string, subUnitId: string, range: IRange, sourceRange?: IDiscreteRange) {
         const matrix = new ObjectMatrix<string>();
         this._copyInfo = {
             unitId,
@@ -119,7 +119,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
             matrix,
         };
 
-        const discreteRange = this._injector.invoke((accessor) => {
+        const discreteRange = sourceRange ?? this._injector.invoke((accessor) => {
             return rangeToDiscreteRange(range, accessor, unitId, subUnitId);
         });
         if (!discreteRange) {

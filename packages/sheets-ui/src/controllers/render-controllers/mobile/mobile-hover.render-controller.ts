@@ -135,16 +135,16 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
         disposeSet.add(fromEventSubject(mainComponent.onPointerMove$).subscribe((event) => {
             this._active = true;
             this._updateTapState(event);
-            this._hoverManagerService.triggerMouseMove(unitId, event);
+            this._hoverManagerService.triggerMouseMove(unitId, event, this._context.renderId);
         }));
         disposeSet.add(mainComponent.onPointerDown$.subscribeEvent((event) => {
             this._startTap(event);
-            this._hoverManagerService.triggerPointerDown(unitId, event);
+            this._hoverManagerService.triggerPointerDown(unitId, event, this._context.renderId);
         }));
         disposeSet.add(mainComponent.onPointerUp$.subscribeEvent((event) => {
-            this._hoverManagerService.triggerPointerUp(unitId, event);
+            this._hoverManagerService.triggerPointerUp(unitId, event, this._context.renderId);
             if (this._finishTap(event)) {
-                this._hoverManagerService.triggerClick(unitId, event.offsetX, event.offsetY);
+                this._hoverManagerService.triggerClick(unitId, event.offsetX, event.offsetY, this._context.renderId);
                 this._completeTap(unitId, event);
             }
         }));
@@ -162,7 +162,7 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
                 }
 
                 this._resetCompletedTap();
-                this._hoverManagerService.triggerDbClick(unitId, event);
+                this._hoverManagerService.triggerDbClick(unitId, event, this._context.renderId);
             },
             priority: -1,
         }));
@@ -175,19 +175,19 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
 
     private _bindRowHeaderEvents(disposeSet: DisposableCollection, rowHeader: SpreadsheetHeader, unitId: string): void {
         disposeSet.add(rowHeader.onPointerMove$.subscribeEvent((event) => {
-            this._hoverManagerService.triggerRowHeaderMouseMove(unitId, event.offsetX, event.offsetY);
+            this._hoverManagerService.triggerRowHeaderMouseMove(unitId, event.offsetX, event.offsetY, this._context.renderId);
         }));
         disposeSet.add(rowHeader.onPointerDown$.subscribeEvent((event) => {
-            this._hoverManagerService.triggerRowHeaderPoniterDown(unitId, event.offsetX, event.offsetY);
+            this._hoverManagerService.triggerRowHeaderPoniterDown(unitId, event.offsetX, event.offsetY, this._context.renderId);
         }));
         disposeSet.add(rowHeader.onPointerUp$.subscribeEvent((event) => {
-            this._hoverManagerService.triggerRowHeaderPoniterUp(unitId, event.offsetX, event.offsetY);
+            this._hoverManagerService.triggerRowHeaderPoniterUp(unitId, event.offsetX, event.offsetY, this._context.renderId);
             if (!this._contextService.getContextValue(MOBILE_TRIGGER_CONTEXT_MENU)) {
-                this._hoverManagerService.triggerRowHeaderClick(unitId, event.offsetX, event.offsetY);
+                this._hoverManagerService.triggerRowHeaderClick(unitId, event.offsetX, event.offsetY, this._context.renderId);
             }
         }));
         disposeSet.add(rowHeader.onDblclick$.subscribeEvent((event) => {
-            this._hoverManagerService.triggerRowHeaderDbClick(unitId, event.offsetX, event.offsetY);
+            this._hoverManagerService.triggerRowHeaderDbClick(unitId, event.offsetX, event.offsetY, this._context.renderId);
         }));
     }
 
@@ -197,19 +197,19 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
         unitId: string
     ): void {
         disposeSet.add(columnHeader.onPointerMove$.subscribeEvent((event) => {
-            this._hoverManagerService.triggerColHeaderMouseMove(unitId, event.offsetX, event.offsetY);
+            this._hoverManagerService.triggerColHeaderMouseMove(unitId, event.offsetX, event.offsetY, this._context.renderId);
         }));
         disposeSet.add(columnHeader.onPointerDown$.subscribeEvent((event) => {
-            this._hoverManagerService.triggerColHeaderPoniterDown(unitId, event.offsetX, event.offsetY);
+            this._hoverManagerService.triggerColHeaderPoniterDown(unitId, event.offsetX, event.offsetY, this._context.renderId);
         }));
         disposeSet.add(columnHeader.onPointerUp$.subscribeEvent((event) => {
-            this._hoverManagerService.triggerColHeaderPoniterUp(unitId, event.offsetX, event.offsetY);
+            this._hoverManagerService.triggerColHeaderPoniterUp(unitId, event.offsetX, event.offsetY, this._context.renderId);
             if (!this._contextService.getContextValue(MOBILE_TRIGGER_CONTEXT_MENU)) {
-                this._hoverManagerService.triggerColHeaderClick(unitId, event.offsetX, event.offsetY);
+                this._hoverManagerService.triggerColHeaderClick(unitId, event.offsetX, event.offsetY, this._context.renderId);
             }
         }));
         disposeSet.add(columnHeader.onDblclick$.subscribeEvent((event) => {
-            this._hoverManagerService.triggerColHeaderDbClick(unitId, event.offsetX, event.offsetY);
+            this._hoverManagerService.triggerColHeaderDbClick(unitId, event.offsetX, event.offsetY, this._context.renderId);
         }));
     }
 
@@ -304,7 +304,7 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
                 this._suppressEngineDoubleClick = false;
                 this._suppressEngineDoubleClickTimer = null;
             });
-            this._hoverManagerService.triggerDbClick(unitId, event);
+            this._hoverManagerService.triggerDbClick(unitId, event, this._context.renderId);
             return;
         }
 

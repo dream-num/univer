@@ -14,12 +14,25 @@
  * limitations under the License.
  */
 
-import type { ITransformState } from '@univerjs/core';
+import type { IGroupBaseBound, ITransformState } from '@univerjs/core';
 import type { IRect } from './interfaces';
 import { degToRad, precisionTo, radToDeg } from './tools';
 import { Vector2 } from './vector2';
 
 export const INITIAL_MATRIX: number[] = [1, 0, 0, 1, 0, 0];
+
+/** Bounds of a drawing frame transformed around its center, as rendered by Office drawings. */
+export function getTransformBoundingBox(state: ITransformState): IGroupBaseBound {
+    const { left = 0, top = 0, width = 0, height = 0 } = state;
+    const matrix = Transform.create().composeMatrix({ ...state, left: 0, top: 0 });
+    const box = matrix.makeBoundingBoxFromPoints([
+        new Vector2(-width / 2, -height / 2),
+        new Vector2(width / 2, -height / 2),
+        new Vector2(width / 2, height / 2),
+        new Vector2(-width / 2, height / 2),
+    ]);
+    return { left: left + width / 2 + box.left!, top: top + height / 2 + box.top!, width: box.width!, height: box.height! };
+}
 
 export class Transform {
     dirty = false;

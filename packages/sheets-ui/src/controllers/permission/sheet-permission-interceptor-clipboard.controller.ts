@@ -15,7 +15,6 @@
  */
 
 import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
-import type { LocaleKey } from '../../locale/types';
 import {
     Disposable,
     Inject,
@@ -26,11 +25,14 @@ import {
 import { UnitAction } from '@univerjs/protocol';
 import {
     discreteRangeToRange,
-    RangeProtectionPermissionEditPoint,
     SheetPermissionCheckController,
-    WorkbookEditablePermission,
-    WorksheetEditPermission,
+    WorkbookInsertColumnPermission,
+    WorkbookInsertRowPermission,
+    WorksheetInsertColumnPermission,
+    WorksheetInsertRowPermission,
 } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
+import { getSheetPastePermissions } from '../../commands/commands/clipboard.command';
 import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
@@ -51,7 +53,7 @@ export class SheetPermissionInterceptorClipboardController extends Disposable {
         this.disposeWithMe(
             this._sheetClipboardService.addClipboardHook({
                 id: SHEET_PERMISSION_PASTE_PLUGIN,
-                onBeforePaste: (pasteTo) => {
+                onBeforePaste: (pasteTo, payload) => {
                     const { unitId, subUnitId, range } = pasteTo;
                     const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
                     const worksheet = workbook?.getSheetBySheetId(subUnitId);
@@ -59,11 +61,17 @@ export class SheetPermissionInterceptorClipboardController extends Disposable {
                         return false;
                     }
 
-                    if (!this._sheetPermissionCheckController.permissionCheckWithRanges({
-                        workbookTypes: [WorkbookEditablePermission],
-                        worksheetTypes: [WorksheetEditPermission],
-                        rangeTypes: [RangeProtectionPermissionEditPoint],
-                    }, [discreteRangeToRange(range)], unitId, subUnitId)) {
+                    const bounds = discreteRangeToRange(range);
+                    const permissions = getSheetPastePermissions(payload?.pasteType);
+                    if (bounds.endRow >= worksheet.getMaxRows()) {
+                        permissions.workbookTypes.push(WorkbookInsertRowPermission);
+                        permissions.worksheetTypes.push(WorksheetInsertRowPermission);
+                    }
+                    if (bounds.endColumn >= worksheet.getMaxColumns()) {
+                        permissions.workbookTypes.push(WorkbookInsertColumnPermission);
+                        permissions.worksheetTypes.push(WorksheetInsertColumnPermission);
+                    }
+                    if (!this._sheetPermissionCheckController.permissionCheckWithRanges(permissions, [bounds], unitId, subUnitId)) {
                         this._sheetPermissionCheckController.blockExecuteWithoutPermission(
                             this._localService.t<LocaleKey>('sheets-ui.permission.dialog.pasteErr')
                         );

@@ -27,7 +27,7 @@ const locale: typeof enUS = {
             'smart-toggle-filter': 'تبديل التصفية',
         },
         permission: {
-            filterErr: 'ليس لديك إذن لاستخدام التصفية.',
+            filterErr: 'النطاق محمي، وليس لديك إذن بالتصفية. للتصفية، يرجى التواصل مع المنشئ.',
         },
         panel: {
             'clear-filter': 'مسح التصفية',

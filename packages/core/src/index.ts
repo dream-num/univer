@@ -20,7 +20,6 @@ installShims();
 
 export * from './bases';
 export { dedupe, dedupeBy, groupBy, makeArray, remove, rotate } from './common/array';
-export * from './common/async';
 export { isBooleanString } from './common/boolean';
 export * from './common/const';
 export * from './common/di';
@@ -57,11 +56,19 @@ export { Registry, RegistryAsMap } from './common/registry';
 export { requestImmediateMacroTask } from './common/request-immediate-macro-task';
 export { sequence, sequenceAsync } from './common/sequence';
 export type { ISequenceExecuteResult } from './common/sequence';
+export { SerialTaskQueue } from './common/serial-task-queue';
 export { mergeSets } from './common/set';
 export { UnitModel, UniverInstanceType } from './common/unit';
 export { isSafeUrl, normalizeUrl, resolveWithBasePath } from './common/url';
 export * from './docs';
-export { resolveDocumentParagraphWordWrap } from './docs/data-model/paragraph-style';
+export {
+    getDocumentParagraphStyleForUpdate,
+    resolveDocumentParagraphBullet,
+    resolveDocumentParagraphStyle,
+    resolveDocumentParagraphWordWrap,
+    resolveDocumentTextStyle,
+} from './docs/data-model/paragraph-style';
+export type { IResolveDocumentParagraphStyleOptions } from './docs/data-model/paragraph-style';
 export { getSdtBindingKey, getSdtBindingValue } from './docs/sdt-binding';
 export { EventState, EventSubject, fromEventSubject } from './observer/observable';
 export type { IEventObserver } from './observer/observable';
@@ -103,6 +110,7 @@ export type { ICreateUnitOptions } from './services/instance/instance.service';
 export { LifecycleStages } from './services/lifecycle/lifecycle';
 export { LifecycleService, LifecycleUnreachableError } from './services/lifecycle/lifecycle.service';
 export { ILocalStorageService } from './services/local-storage/local-storage.service';
+export { getCurrencySymbolByLocale } from './services/locale/currency-symbol';
 export { LocaleService } from './services/locale/locale.service';
 export { DesktopLogService, ILogService, LogLevel } from './services/log/log.service';
 export { MentionIOLocalService } from './services/mention-io/mention-io-local.service';
@@ -164,10 +172,12 @@ export { ImageCacheMap } from './shared/cache/image-cache';
 export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
 export { customNameCharacterCheck, nameCharacterCheck } from './shared/name';
-export { RBush, RTree } from './shared/r-tree';
-export type { BBox, IRTreeItem } from './shared/r-tree';
+export { RTree } from './shared/r-tree';
+export type { IRTreeItem } from './shared/r-tree';
 export { generateRandomId } from './shared/random-id';
 export { getIntersectRange } from './shared/range';
+export { RBush } from './shared/rbush';
+export type { IBoundingBox as BBox } from './shared/rbush';
 export { getRecordValueKey } from './shared/record-value';
 export type { RecordSelection, RecordValue } from './shared/record-value';
 export {
@@ -177,6 +187,7 @@ export {
     fromCallback,
     takeAfter,
 } from './shared/rxjs';
+export { getTextChangeRange } from './shared/text-diff';
 export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { isNodeEnv } from './shared/tools';
 export { cssPxToEmu, EMU_PER_CSS_PX, emuToCssPx } from './shared/units';

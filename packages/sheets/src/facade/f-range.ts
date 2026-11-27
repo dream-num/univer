@@ -21,6 +21,7 @@ import type {
     CellValue,
     CustomData,
     ICellData,
+    ICellInterceptor,
     IColorStyle,
     IDocumentData,
     IObjectMatrixPrimitiveType,
@@ -49,6 +50,7 @@ import type {
 } from '@univerjs/sheets';
 import {
     BooleanNumber,
+    CellValueType,
     covertCellValue,
     covertCellValues,
     DEFAULT_STYLES,
@@ -60,6 +62,7 @@ import {
     Inject,
     Injector,
     isNullCell,
+    isRealNum,
     Rectangle,
     RichTextValue,
     TextStyleValue,
@@ -77,9 +80,11 @@ import {
     DeleteRangeMoveUpCommand,
     DeleteWorksheetRangeThemeStyleCommand,
     getAddMergeMutationRangeByType,
+    getCellValue,
     getPrimaryForRange,
     InsertRangeMoveDownCommand,
     InsertRangeMoveRightCommand,
+    isCellImage,
     RemoveWorksheetMergeCommand,
     SetBorderBasicCommand,
     SetHorizontalTextAlignCommand,
@@ -107,6 +112,8 @@ import {
     transformFacadeHorizontalAlignment,
     transformFacadeVerticalAlignment,
 } from './utils';
+
+const EFFECTIVE_CELL_VALUE_INTERCEPTOR_KEY = 'facade.effective-cell-value';
 
 export type FontLine = 'none' | 'underline' | 'line-through';
 export type FontStyle = 'normal' | 'italic';
@@ -461,7 +468,7 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getCellStyles(type: GetStyleType = 'row'): Array<Array<TextStyleValue | null>> {
-        const cells = this.getCellDatas();
+        const cells = this.getCellDataGrid();
         return cells.map((row, rowIndex) => row.map((cell, colIndex) => {
             if (!cell) return null;
             const style = type !== 'cell'
@@ -474,12 +481,14 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Return first cell value in this range
+     * Returns the unformatted value of the top-left cell, including calculated results and plain text from rich text.
+     * Boolean cells return `true` or `false`. Use {@link FRange.getRawValue} for their stored `1` or `0`.
+     * Use {@link FRange.getDisplayValue} for formatted text.
      *
      * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
      * {@link FRange.getValues} once instead of calling this method for each cell.
      *
-     * @returns {CellValue | null} The cell value
+     * @returns {CellValue | null} The cell value, or `null` for an empty cell.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -495,7 +504,7 @@ export class FRange extends FBaseInitialable {
      */
     getValue(): CellValue | null;
     /**
-     * Return first cell value in this range
+     * Returns the unformatted value of the top-left cell in the range or its rich-text content.
      *
      * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
      * {@link FRange.getValues} once instead of calling this method for each cell.
@@ -521,11 +530,7 @@ export class FRange extends FBaseInitialable {
      */
     getValue(includeRichText: true): Nullable<CellValue | RichTextValue>;
     getValue(includeRichText?: boolean): Nullable<CellValue | RichTextValue> {
-        if (includeRichText) {
-            return this.getValueAndRichTextValue();
-        }
-
-        return this._worksheet.getCell(this._range.startRow, this._range.startColumn)?.v ?? null;
+        return this._getEffectiveCellValue(this._range.startRow, this._range.startColumn, includeRichText);
     }
 
     /**
@@ -587,8 +592,9 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Returns the cell values for the cells in the range.
-     * @returns {Nullable<CellValue>[][]} A two-dimensional array of cell values.
+     * Returns the effective values for the cells in the range, using the same rules as {@link FRange.getValue}.
+     * Use {@link FRange.getDisplayValues} for formatted text.
+     * @returns {Nullable<CellValue>[][]} A two-dimensional array of cell values. Empty cells return `null`.
      * @example
      * ```ts
      * // Get plain values
@@ -601,7 +607,7 @@ export class FRange extends FBaseInitialable {
      */
     getValues(): Nullable<CellValue>[][];
     /**
-     * Returns the cell values for the cells in the range.
+     * Returns the effective values or rich-text content for the cells in the range.
      * @param {true} includeRichText Pass `true` to return `RichTextValue` entries for rich-text content instead of plain text.
      * @returns {Nullable<RichTextValue | CellValue>[][]} A two-dimensional array of cell values.
      * @example
@@ -616,23 +622,46 @@ export class FRange extends FBaseInitialable {
      */
     getValues(includeRichText: true): (Nullable<RichTextValue | CellValue>)[][];
     getValues(includeRichText?: true): (Nullable<RichTextValue | CellValue>)[][] {
-        if (includeRichText) {
-            return this.getValueAndRichTextValues();
-        }
-
         const { startRow, endRow, startColumn, endColumn } = this._range;
-        const range: Array<Array<Nullable<CellValue>>> = [];
+        const range: Nullable<CellValue | RichTextValue>[][] = [];
 
         for (let r = startRow; r <= endRow; r++) {
-            const row: Array<Nullable<CellValue>> = [];
+            const row: Nullable<CellValue | RichTextValue>[] = [];
 
             for (let c = startColumn; c <= endColumn; c++) {
-                row.push(this._worksheet.getCell(r, c)?.v ?? null);
+                row.push(this._getEffectiveCellValue(r, c, includeRichText));
             }
 
             range.push(row);
         }
         return range;
+    }
+
+    private _getEffectiveCellValue(row: number, column: number, includeRichText?: boolean): Nullable<CellValue | RichTextValue> {
+        const cell = this._worksheet.getCellWithFilteredInterceptors(
+            row,
+            column,
+            EFFECTIVE_CELL_VALUE_INTERCEPTOR_KEY,
+            (interceptor: ICellInterceptor<unknown, unknown>) => !interceptor.displayOnly
+        );
+        if (cell?.p) {
+            if (includeRichText) {
+                return new RichTextValue(cell.p);
+            }
+            if (cell.p.body && !isCellImage(cell.p)) {
+                return getOriginCellValue(cell);
+            }
+        }
+
+        const value = cell?.v;
+        if (cell?.t === CellValueType.BOOLEAN && value != null) {
+            return getCellValue(CellValueType.BOOLEAN, cell) === BooleanNumber.TRUE;
+        }
+        // Older snapshots can store a numeric cell's value as a string.
+        if (cell?.t === CellValueType.NUMBER && typeof value === 'string' && isRealNum(value)) {
+            return Number(value);
+        }
+        return includeRichText ? value : (value ?? null);
     }
 
     /**
@@ -761,12 +790,13 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Return first cell model data in this range
+     * Returns the stored cell data of the top-left cell, using the same raw data as {@link FRange.getCellDataGrid}.
+     * Use {@link FRange.getValue} for the effective value or {@link FRange.getDisplayValue} for formatted text.
      *
      * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
      * {@link FRange.getCellDataGrid} once instead of calling this method for each cell.
      *
-     * @returns {ICellData | null} The cell model data
+     * @returns {ICellData | null} The stored cell data, or `null` if there is no stored record.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -777,28 +807,20 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getCellData(): ICellData | null {
-        return this._worksheet.getCell(this._range.startRow, this._range.startColumn) ?? null;
+        return this._worksheet.getCellRaw(this._range.startRow, this._range.startColumn) ?? null;
     }
 
     /**
-     * Alias for getCellDataGrid.
-     * @returns {Nullable<ICellData>[][]} A two-dimensional array of cell data.
-     * @example
-     * ```ts
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
-     * if (!fWorksheet) return;
-     * const fRange = fWorksheet.getRange('A1:B2');
-     * console.log(fRange.getCellDatas());
-     * ```
+     * @deprecated Use {@link FRange.getCellDataGrid} instead.
+     * @returns {Nullable<ICellData>[][]} A two-dimensional array of stored cell data.
      */
     getCellDatas(): Nullable<ICellData>[][] {
         return this.getCellDataGrid();
     }
 
     /**
-     * Returns the cell data for the cells in the range.
-     * @returns {Nullable<ICellData>[][]} A two-dimensional array of cell data.
+     * Returns the stored cell data for the cells in the range.
+     * @returns {Nullable<ICellData>[][]} A two-dimensional array of stored cell data.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -865,27 +887,8 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Returns the value and rich text value for the cell at the start of this range.
-     * @returns {Nullable<CellValue | RichTextValue>} The value and rich text value
-     * @internal
-     * @beta
-     * @example
-     * ```ts
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
-     * if (!fWorksheet) return;
-     * const fRange = fWorksheet.getRange('A1:B2');
-     * console.log(fRange.getValueAndRichTextValue());
-     * ```
-     */
-    private getValueAndRichTextValue(): Nullable<CellValue | RichTextValue> {
-        const cell = this.getCellData();
-        return cell?.p ? new RichTextValue(cell.p) : cell?.v;
-    }
-
-    /**
-     * Returns the value and rich text value for the cells in the range.
-     * @returns {Nullable<CellValue | RichTextValue>[][]} A two-dimensional array of value and rich text value
+     * Returns the effective values or rich-text content for the cells in the range.
+     * @returns {Nullable<CellValue | RichTextValue>[][]} A two-dimensional array of values.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -896,8 +899,7 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getValueAndRichTextValues(): Nullable<CellValue | RichTextValue>[][] {
-        const dataGrid = this.getCellDatas();
-        return dataGrid.map((row) => row.map((data) => data?.p ? new RichTextValue(data.p) : data?.v));
+        return this.getValues(true);
     }
 
     /**
@@ -1000,7 +1002,7 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getWraps(): boolean[][] {
-        const cells = this.getCellDatas();
+        const cells = this.getCellDataGrid();
         const styles = this._workbook.getStyles();
         return cells.map((row) => row.map((cell) => styles.getStyleByCell(cell)?.tb === WrapStrategy.WRAP));
     }

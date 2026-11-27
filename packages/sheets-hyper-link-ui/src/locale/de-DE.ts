@@ -39,7 +39,7 @@ const locale: typeof enUS = {
             add: 'Link einfügen',
         },
         permission: {
-            hyperLinkErr: 'Sie haben keine Berechtigung, einen Link einzufügen.',
+            editErr: 'Der Bereich ist geschützt, und Sie haben keine Bearbeitungsberechtigung. Um zu bearbeiten, wenden Sie sich bitte an den Ersteller.',
         },
         message: {
             noSheet: 'Zielblatt wurde gelöscht',

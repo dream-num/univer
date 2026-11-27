@@ -158,7 +158,7 @@ function prepareSheetDrawings(drawings: ISheetDrawing[], skeleton?: SpreadsheetS
     const failures: Array<Pick<ISheetDrawing, 'drawingId' | 'drawingType' | 'anchorType'> & { error: unknown }> = [];
 
     for (const drawing of drawings) {
-        if (skeleton && drawing.sheetTransform && drawing.anchorType !== SheetDrawingAnchorType.None) {
+        if (skeleton && (drawing.axisAlignSheetTransform || drawing.sheetTransform) && drawing.anchorType !== SheetDrawingAnchorType.None) {
             try {
                 const refreshed = refreshSheetDrawingPlacement(drawing, skeleton);
                 refreshedDrawings.push(refreshed);

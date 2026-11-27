@@ -75,6 +75,7 @@ interface IEmojiPickerPopupProps {
 
 export interface IEmojiPickerProps {
     embedded?: boolean;
+    horizontalPadding?: boolean;
     onChange?: (emoji: string) => void;
     popup?: IPopup<IEmojiPickerPopupProps>;
     DropdownComponent?: typeof Dropdown;
@@ -88,7 +89,8 @@ type EmojiVirtualRow =
     | { items: IEmojiItem[]; key: string; type: 'emojis' };
 
 export function EmojiPicker(props: IEmojiPickerProps) {
-    const { DropdownComponent = Dropdown } = props;
+    const { DropdownComponent = Dropdown, horizontalPadding = true } = props;
+    const contentInset = horizontalPadding && 'univer-px-2.5';
     const extraProps = props.popup?.extraProps;
     const localeService = useDependency(LocaleService);
     const localStorageService = useDependency(ILocalStorageService);
@@ -278,15 +280,17 @@ export function EmojiPicker(props: IEmojiPickerProps) {
                 setSkinToneMenuOpen(false);
             }}
             className={clsx(
-                'univer-flex univer-h-[340px] univer-w-[420px] univer-flex-col univer-overflow-hidden',
-                !props.embedded && `
-                  univer-rounded-[10px] univer-border univer-border-solid univer-border-gray-200 univer-bg-gray-0
-                  univer-shadow-lg
-                  dark:!univer-border-gray-600 dark:!univer-bg-gray-900
-                `
+                'univer-flex univer-h-[340px] univer-max-w-full univer-flex-col univer-overflow-hidden',
+                props.embedded
+                    ? 'univer-w-[min(420px,calc(100vw-2px))]'
+                    : `
+                      univer-w-[min(420px,calc(100vw-16px))] univer-rounded-[10px] univer-border univer-border-solid
+                      univer-border-gray-200 univer-bg-gray-0 univer-shadow-lg
+                      dark:!univer-border-gray-600 dark:!univer-bg-gray-900
+                    `
             )}
         >
-            <div className="univer-flex univer-items-center univer-gap-1 univer-px-3 univer-pb-2 univer-pt-3">
+            <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-pb-2 univer-pt-2.5', contentInset)}>
                 <Input
                     aria-label={localeService.t<LocaleKey>('ui.emojiPicker.search')}
                     placeholder={localeService.t<LocaleKey>('ui.emojiPicker.search')}
@@ -327,7 +331,8 @@ export function EmojiPicker(props: IEmojiPickerProps) {
             <div
                 ref={scrollRef}
                 className={clsx(
-                    'univer-relative univer-min-h-0 univer-flex-1 univer-overflow-y-auto univer-px-3',
+                    'univer-relative univer-min-h-0 univer-flex-1 univer-overflow-y-auto',
+                    contentInset,
                     scrollbarClassName
                 )}
                 onScroll={handleScroll}
@@ -376,10 +381,10 @@ export function EmojiPicker(props: IEmojiPickerProps) {
 
             <div
                 className={clsx(`
-                  univer-flex univer-h-10 univer-shrink-0 univer-items-center univer-border-gray-200 univer-px-2.5
+                  univer-flex univer-h-10 univer-shrink-0 univer-items-center univer-border-gray-200
                   dark:!univer-border-gray-600
                   [&_svg]:univer-size-5
-                `, borderTopClassName)}
+                `, borderTopClassName, contentInset)}
             >
                 <CategoryButton
                     selected={!isSearching && activeTab === 'recent'}
@@ -454,8 +459,9 @@ function EmojiButton(props: {
             title={title}
             className={clsx(
                 `
-                  univer-flex univer-size-7 univer-cursor-pointer univer-items-center univer-justify-center
-                  univer-rounded-lg univer-border-0 univer-bg-transparent univer-p-0 univer-text-lg
+                  univer-flex univer-size-7 univer-max-w-full univer-cursor-pointer univer-items-center
+                  univer-justify-center univer-rounded-lg univer-border-0 univer-bg-transparent univer-p-0
+                  univer-text-lg
                   focus-visible:univer-outline-none focus-visible:univer-ring-1 focus-visible:univer-ring-primary-600
                   dark:!univer-text-gray-200
                 `,
@@ -481,7 +487,7 @@ function EmojiButton(props: {
 
     const variants = getEmojiFamilyVariants(props.item.emoji);
     return (
-        <div className="univer-relative univer-size-7">
+        <div className="univer-relative univer-size-7 univer-max-w-full">
             {button}
             <props.DropdownComponent
                 align="end"

@@ -42,10 +42,8 @@ function getEditorText(input: HTMLElement): string {
 
 export function keepLastTextIndex(inputHtml: HTMLElement) {
     setTimeout(() => {
-        const range = window.getSelection();
-        if (range) {
-            range.selectAllChildren(inputHtml);
-            range.collapseToEnd();
+        if (inputHtml.isConnected) {
+            window.getSelection()?.collapse(inputHtml, inputHtml.childNodes.length);
         }
     });
 }
@@ -53,7 +51,7 @@ export function keepLastTextIndex(inputHtml: HTMLElement) {
 export function keepTextSelected(inputHtml: HTMLElement) {
     setTimeout(() => {
         const selection = window.getSelection();
-        if (!selection) {
+        if (!selection || !inputHtml.isConnected) {
             return;
         }
 

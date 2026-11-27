@@ -33,6 +33,7 @@ import {
     IPermissionService,
     LocaleService,
     toDisposable,
+    Tools,
 } from '@univerjs/core';
 import { CURSOR_TYPE, DRAWING_OBJECT_LOWER_LAYER_INDEX, Vector2 } from '@univerjs/engine-render';
 import {
@@ -51,6 +52,7 @@ import {
 } from '@univerjs/sheets-table';
 import {
     ExpandSelectionCommand,
+    getViewportByCell,
     ISheetSelectionRenderService,
     MoveSelectionCommand,
     MoveSelectionEnterAndTabCommand,
@@ -77,7 +79,11 @@ import {
     SHEET_TABLE_THEME_PANEL,
     SHEET_TABLE_THEME_PANEL_ID,
 } from '../const';
-import { TABLE_CONTROL_INSERT_BUTTON_SIZE, TABLE_CONTROL_TOP_GAP_SIZE } from '../views/widgets/table-controls-util';
+import {
+    TABLE_CONTROL_ANCHOR_HEIGHT,
+    TABLE_CONTROL_INSERT_BUTTON_SIZE,
+    TABLE_CONTROL_TOP_GAP_SIZE,
+} from '../views/widgets/table-controls-util';
 import { SheetTableControlsShape } from '../views/widgets/table-controls.shape';
 import { SheetTableThemeUIController } from './sheet-table-theme-ui.controller';
 
@@ -226,7 +232,6 @@ export class SheetTableControlsRenderController extends Disposable implements IR
             return;
         }
 
-        this._syncTopTableGap(skeleton);
         const unitId = this._context.unit.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const items = this._tableManager.getTablesBySubunitId(unitId, subUnitId).map((table) => {
@@ -240,6 +245,8 @@ export class SheetTableControlsRenderController extends Disposable implements IR
             };
         });
 
+        const firstTableRow = items.reduce((row, { range }) => Math.min(row, range.startRow), Infinity);
+        this._syncTopTableGap(skeleton, firstTableRow);
         this._shape.setItems(items);
         this._shape.refreshBounds();
         this._shape.makeDirty(true);
@@ -532,11 +539,13 @@ export class SheetTableControlsRenderController extends Disposable implements IR
                 for (let row = range.startRow + 1; row <= range.endRow; row++) {
                     const cell = skeleton.getNoMergeCellWithCoordByIndex(row, range.startColumn);
                     if (y >= cell.startY && y <= cell.endY) {
+                        const viewport = getViewportByCell(row, range.startColumn, this._context.scene, worksheet);
+                        const gridLeft = Math.max(skeleton.rowHeaderWidthAndMarginLeft, viewport?.viewBound.left ?? 0);
                         return {
                             type: 'insert-row',
                             tableId: table.getId(),
                             index: row + 1,
-                            left: tableBounds.left - TABLE_CONTROL_INSERT_BUTTON_SIZE / 2,
+                            left: Tools.clamp(gridLeft, tableBounds.left - TABLE_CONTROL_INSERT_BUTTON_SIZE / 2, tableBounds.left),
                             top: cell.endY - TABLE_CONTROL_INSERT_BUTTON_SIZE / 2,
                             width: TABLE_CONTROL_INSERT_BUTTON_SIZE,
                             height: TABLE_CONTROL_INSERT_BUTTON_SIZE,
@@ -560,23 +569,18 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         };
     }
 
-    private _syncTopTableGap(skeleton: SpreadsheetSkeleton): void {
-        const worksheet = this._context.unit.getActiveSheet();
-        if (!worksheet) {
-            return;
-        }
-
-        const unitId = this._context.unit.getUnitId();
-        const subUnitId = worksheet.getSheetId();
-        const hasTopTable = this._tableManager
-            .getTablesBySubunitId(unitId, subUnitId)
-            .some((table) => table.getRange().startRow === 0);
+    private _syncTopTableGap(skeleton: SpreadsheetSkeleton, firstTableRow: number): void {
+        const tableTop = firstTableRow === Infinity
+            ? Infinity
+            : skeleton.getNoMergeCellWithCoordByIndex(firstTableRow, 0, false).startY;
+        // Exclude the top gap itself so repeated layout passes reserve the same space.
+        const spaceAbove = tableTop - skeleton.getRowGapSize(TABLE_CONTROL_GAP_ROW);
         const current = skeleton.gapConfig;
         const rowGaps = { ...current.rowGaps };
         const previousTopGap = rowGaps[TABLE_CONTROL_GAP_ROW] ? { ...rowGaps[TABLE_CONTROL_GAP_ROW] } : null;
         let shouldSync = false;
 
-        if (hasTopTable) {
+        if (spaceAbove < TABLE_CONTROL_ANCHOR_HEIGHT) {
             if (!this._topGapBaseBySkeleton.has(skeleton)) {
                 this._topGapBaseBySkeleton.set(
                     skeleton,
@@ -587,7 +591,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
             const baseGap = this._topGapBaseBySkeleton.get(skeleton);
             rowGaps[TABLE_CONTROL_GAP_ROW] = {
                 ...(baseGap ?? rowGaps[TABLE_CONTROL_GAP_ROW]),
-                size: (baseGap?.size ?? 0) + TABLE_CONTROL_TOP_GAP_SIZE,
+                size: (baseGap?.size ?? 0) + TABLE_CONTROL_TOP_GAP_SIZE - spaceAbove,
             };
             shouldSync = true;
         } else if (this._topGapBaseBySkeleton.has(skeleton)) {

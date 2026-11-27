@@ -14,19 +14,39 @@
  * limitations under the License.
  */
 
-import { DateSystem } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { DateSystem, Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { Yearfrac } from '../index';
 
 describe('Test yearfrac function', () => {
-    const testFunction = new Yearfrac(FUNCTION_NAMES_DATE.YEARFRAC);
+    let injector: Injector;
+    let testFunction: Yearfrac;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [Yearfrac, { useFactory: () => injector.createInstance(Yearfrac, FUNCTION_NAMES_DATE.YEARFRAC) }],
+        ]);
+        testFunction = injector.get(Yearfrac);
+    });
+
+    afterEach(() => injector.dispose());
 
     describe('Yearfrac', () => {
+        it.each([
+            [44985, 45016, 0, 31 / 360],
+            [43890, 45351, 1, 1461 / 365.4],
+            [36525, 36526, 1, 1 / 365],
+            [59, 60, 0, -1 / 360],
+            [60, 61, 4, 2 / 360],
+        ])('matches Excel dates %s through %s on basis %s', (start, end, basis, expected) => {
+            expect(testFunction.calculate(NumberValueObject.create(start), NumberValueObject.create(end), NumberValueObject.create(basis)).getValue()).toBeCloseTo(expected, 12);
+        });
+
         it('value is normal', () => {
             const startDate = StringValueObject.create('2012/2/2');
             const endDate = StringValueObject.create('2021/3/11');
@@ -122,8 +142,10 @@ describe('Test yearfrac function', () => {
                 column: 0,
             });
             const endDate = StringValueObject.create('2021-12-31');
-            const result = testFunction.calculate(startDate, endDate);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            const result = testFunction.calculate(startDate, endDate) as ArrayValueObject;
+            const [row] = transformToValue(result.getArrayValue());
+            expect(row[0]).toBeCloseTo(9.755555555555556, 12);
+            expect(row.slice(1)).toEqual([ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME]);
         });
         it('checks the serial-zero boundary in both date systems', () => {
             const startDate = NumberValueObject.create(0);

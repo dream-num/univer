@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// @vitest-environment happy-dom
-
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import { ICommandService, IPermissionService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
 import { setDocumentPermissionValue, UniverDocsPlugin } from '@univerjs/docs';

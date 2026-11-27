@@ -32,6 +32,16 @@ describe('handleRegExp', () => {
         expect(result.regExp).toBeNull();
     });
 
+    it('accepts named captures and fixed-width lookbehind in Excel mode', () => {
+        const options = { excelSyntax: true };
+        const named = handleRegExp('(?<year>\\d+)-(?<month>\\d+)', false, false, options);
+        expect(named.regExp?.exec('2024-03')?.slice(1)).toEqual(['2024', '03']);
+        expect(handleRegExp('(?<=@).+', false, false, options).regExp?.exec('a@example.com')?.[0]).toBe('example.com');
+        expect(handleRegExp('(?<!x)a', false, false, options).regExp?.exec('xa ba')?.index).toBe(4);
+        expect(handleRegExp('(?<=a+)b', false, false, options).isError).toBe(true);
+        expect(handleRegExp('(?<name>a+)+$', false, false, options).isError).toBe(true);
+    });
+
     it('should reject unsafe regex with nested catastrophic repetition', () => {
         const result = handleRegExp('(a+)+$', false);
 

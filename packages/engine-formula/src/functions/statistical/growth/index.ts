@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { matrixTranspose } from '../../../basics/math';
-import { checkKnownsArrayDimensions, getKnownsArrayCoefficients, getKnownsArrayValues, getSerialNumbersByRowsColumns, getSlopeAndIntercept } from '../../../basics/statistical';
+import { checkKnownsArrayDimensions, getKnownsArrayCoefficients, getKnownsArrayValues, getSerialNumbersByRowsColumns, getSlopeAndIntercept, resolveRegressionInput } from '../../../basics/statistical';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
@@ -28,7 +29,13 @@ export class Growth extends BaseFunction {
 
     override maxParams = 4;
 
-    override calculate(knownYs: BaseValueObject, knownXs?: BaseValueObject, newXs?: BaseValueObject, constb?: BaseValueObject): BaseValueObject {
+    override needsReferenceObject = true;
+
+    override calculate(yInput: FunctionVariantType, xInput?: FunctionVariantType, newInput?: FunctionVariantType, constInput?: FunctionVariantType): BaseValueObject {
+        const knownYs = resolveRegressionInput(yInput)!;
+        const knownXs = resolveRegressionInput(xInput);
+        const newXs = resolveRegressionInput(newInput);
+        const constb = resolveRegressionInput(constInput, true);
         const { isError, errorObject } = checkKnownsArrayDimensions(knownYs, knownXs, newXs);
 
         if (isError) {
@@ -53,23 +60,20 @@ export class Growth extends BaseFunction {
             return newXsValues;
         }
 
-        let _constb = constb ?? BooleanValueObject.create(true);
-
-        if (_constb.isArray()) {
-            _constb = (_constb as ArrayValueObject).get(0, 0) as BaseValueObject;
+        const calculate = (value: BaseValueObject): BaseValueObject => {
+            const logical = value.isString() ? value.convertToNumberObjectValue() : value;
+            if (logical.isError()) {
+                return logical;
+            }
+            return this._getResult(knownYsValues, knownXsValues, newXsValues, +logical.getValue());
+        };
+        if (constb?.isArray()) {
+            return (constb as ArrayValueObject).map((value) => {
+                const result = calculate(value);
+                return result.isArray() ? (result as ArrayValueObject).getFirstCell() : result;
+            });
         }
-
-        if (_constb.isString()) {
-            _constb = _constb.convertToNumberObjectValue();
-        }
-
-        if (_constb.isError()) {
-            return _constb;
-        }
-
-        const constbValue = +_constb.getValue();
-
-        return this._getResult(knownYsValues, knownXsValues, newXsValues, constbValue);
+        return calculate(constb == null || constb.isNull() ? BooleanValueObject.create(true) : constb);
     }
 
     private _getResult(knownYsValues: number[][], knownXsValues: number[][], newXsValues: number[][], constb: number): BaseValueObject {

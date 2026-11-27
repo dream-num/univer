@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         message: {
             refError: '無効な範囲です',
         },
+        permission: {
+            editErr: 'この範囲は保護されており、編集権限がありません。編集するには作成者に連絡してください。',
+        },
     },
 };
 

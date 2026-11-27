@@ -87,6 +87,7 @@ import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine
 import {
     convertTextRotation,
     DeviceInputEventType,
+    getFocusedRenderForUnit,
     IRenderManagerService,
     NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
 } from '@univerjs/engine-render';
@@ -260,7 +261,7 @@ export class EditingRenderController extends Disposable {
 
                 if (!unit) return;
 
-                const editorBridgeRenderController = this._renderManagerService.getRenderUnitById(unit.getUnitId())?.with(EditorBridgeRenderController);
+                const editorBridgeRenderController = getFocusedRenderForUnit(this._renderManagerService, unit.getUnitId())?.with(EditorBridgeRenderController);
                 if (editorBridgeRenderController) {
                     editorBridgeRenderController.refreshEditorPosition();
                 }
@@ -424,7 +425,8 @@ export class EditingRenderController extends Disposable {
                 } else {
                     // Keep the hidden input on the selected cell, so the IME candidate window opens next to it
                     // when the user starts typing before the cell editor is visible.
-                    const { x, y } = getEditCellInputPosition(state, this._renderManagerService.getRenderUnitById(state.unitId)?.engine);
+                    const render = getFocusedRenderForUnit(this._renderManagerService, state.unitId);
+                    const { x, y } = getEditCellInputPosition(state, render?.engine);
                     cellSelectionRenderManager?.activate(x, y, true);
                 }
             }
@@ -681,7 +683,7 @@ export class EditingRenderController extends Disposable {
             replaceSelection({ startOffset: endOffset, endOffset, collapsed: true });
         }
 
-        this._renderManagerService.getRenderUnitById(unitId)?.scene.resetCursor();
+        getFocusedRenderForUnit(this._renderManagerService, unitId)?.scene.resetCursor();
     }
 
     private _resizeEditorOnOpen(param: IEditorBridgeServiceVisibleParam, editorObject: IDocObjectParam, isInArrayFormulaRange: boolean) {

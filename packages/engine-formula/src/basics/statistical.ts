@@ -15,17 +15,17 @@
  */
 
 import type { ICellData, IObjectArrayPrimitiveType, IRowData, Nullable, ObjectMatrix } from '@univerjs/core';
-import { BooleanNumber, isRealNum } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { MultiAreaReferenceObject } from '../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { FormulaDataModel } from '../models/formula-data.model';
+import { BooleanNumber, isRealNum } from '@univerjs/core';
 import { createNewArray } from '../engine/utils/array-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { NumberValueObject } from '../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_MATH } from '../functions/math/function-names';
-import { erf, erfcINV } from './engineering';
+import { erf, erfcINV, excelErfc } from './engineering';
 import { ErrorType } from './error-type';
 import {
     calculateCombin,
@@ -145,14 +145,13 @@ function incompleteBetaFunction(x: number, alpha: number, beta: number): number 
     return 1 - bt * betaContinuedFraction(1 - x, beta, alpha) / beta;
 }
 
-function betaContinuedFraction(x: number, alpha: number, beta: number): number {
+export function betaContinuedFraction(x: number, alpha: number, beta: number, epsilon = 1e-8): number {
     const MAX_ITER = 100;
-    const EPSILON = 1e-8;
 
     let d = 1 - (alpha + beta) * x / (alpha + 1);
 
-    if (Math.abs(d) < EPSILON) {
-        d = EPSILON;
+    if (Math.abs(d) < epsilon) {
+        d = epsilon;
     }
 
     d = 1 / d;
@@ -165,14 +164,14 @@ function betaContinuedFraction(x: number, alpha: number, beta: number): number {
 
         d = 1 + temp * d;
 
-        if (Math.abs(d) < EPSILON) {
-            d = EPSILON;
+        if (Math.abs(d) < epsilon) {
+            d = epsilon;
         }
 
         c = 1 + temp / c;
 
-        if (Math.abs(c) < EPSILON) {
-            c = EPSILON;
+        if (Math.abs(c) < epsilon) {
+            c = epsilon;
         }
 
         d = 1 / d;
@@ -182,20 +181,20 @@ function betaContinuedFraction(x: number, alpha: number, beta: number): number {
 
         d = 1 + temp * d;
 
-        if (Math.abs(d) < EPSILON) {
-            d = EPSILON;
+        if (Math.abs(d) < epsilon) {
+            d = epsilon;
         }
 
         c = 1 + temp / c;
 
-        if (Math.abs(c) < EPSILON) {
-            c = EPSILON;
+        if (Math.abs(c) < epsilon) {
+            c = epsilon;
         }
 
         d = 1 / d;
         h *= d * c;
 
-        if (Math.abs(d * c - 1) < EPSILON) {
+        if (Math.abs(d * c - 1) < epsilon) {
             break;
         }
     }
@@ -255,6 +254,12 @@ export function chisquareCDF(x: number, degFreedom: number): number {
     }
 
     return lowRegGamma(degFreedom / 2, x / 2);
+}
+
+export function chisquareSurvival(x: number, degFreedom: number): number {
+    if (x === 0) return 1;
+    if (degFreedom === 1) return excelErfc(Math.sqrt(x / 2));
+    return lowRegGamma(degFreedom / 2, x / 2, true);
 }
 
 export function chisquarePDF(x: number, degFreedom: number): number {
@@ -500,7 +505,7 @@ export function gammaln(x: number): number {
     return -tmp + Math.log(2.5066282746310005 * ser / x);  // eslint-disable-line
 }
 
-function lowRegGamma(a: number, x: number): number {
+function lowRegGamma(a: number, x: number, upperTail = false): number {
     if (x < 0 || a <= 0) {
         return Number.NaN;
     }
@@ -518,7 +523,7 @@ function lowRegGamma(a: number, x: number): number {
 
     if (x < a + 1) {
         if (exp === 0) {
-            return 0;
+            return upperTail ? 1 : 0;
         }
 
         for (let i = 1; i <= MAX_ITER; i++) {
@@ -529,11 +534,12 @@ function lowRegGamma(a: number, x: number): number {
             }
         }
 
-        return sum * exp;
+        const lower = sum * exp;
+        return upperTail ? 1 - lower : lower;
     }
 
     if (exp === 0) {
-        return 1;
+        return upperTail ? 0 : 1;
     }
 
     let b = x + 1 - a;
@@ -565,7 +571,8 @@ function lowRegGamma(a: number, x: number): number {
         }
     }
 
-    return 1 - h * exp;
+    const upper = h * exp;
+    return upperTail ? upper : 1 - upper;
 };
 
 function lowRegGammaInverse(p: number, a: number): number {
@@ -742,12 +749,242 @@ export function studentTINV(probability: number, degFreedom: number): number {
     return (probability > 0.5) ? x : -x;
 }
 
+export function studentTDensityFromSquare(square: number, degrees: number): number {
+    const halfDegrees = degrees / 2;
+    const logDensity = -0.5 * Math.log(degrees) - logStudentTBeta(halfDegrees) -
+        (halfDegrees + 0.5) * Math.log1p(square / degrees);
+    return Math.exp(logDensity);
+}
+
+export function studentTPositiveTailFromSquare(square: number, degrees: number): number {
+    if (square === 0) return 0.5;
+    if (degrees === 1) return Math.atan(1 / Math.sqrt(square)) / Math.PI;
+    if (degrees === 2) {
+        const root = Math.sqrt(square + 2);
+        return (1 / root) / (root + Math.sqrt(square));
+    }
+
+    const halfDegrees = degrees / 2;
+    const ratio = square / degrees;
+    const logRatio = Math.log1p(ratio);
+    const logBeta = logStudentTBeta(halfDegrees);
+    if (degrees >= 4096 && ratio <= 1 / 32) {
+        return studentTNormalTail(degrees, logRatio, logBeta);
+    }
+
+    const center = ratio / (1 + ratio);
+    if (center === 0) return 0.5;
+    const weight = Math.exp(-logBeta - halfDegrees * logRatio + 0.5 * Math.log(center));
+    if (center < 1.5 / (halfDegrees + 2.5)) {
+        return 0.5 - weight * betaContinuedFraction(center, 0.5, halfDegrees, 1e-15);
+    }
+    return 0.5 * weight * betaContinuedFraction(1 / (1 + ratio), halfDegrees, 0.5, 1e-15) / halfDegrees;
+}
+
+// Coefficients of sqrt(w / (1 - exp(-w))) at w = 0. Using the transformed
+// density avoids a beta continued fraction evaluated just below 1.
+const STUDENT_T_TAIL_COEFFICIENTS = [
+    1 / 4,
+    1 / 96,
+    -1 / 384,
+    -1 / 10240,
+    19 / 368640,
+    79 / 61931520,
+    -55 / 49545216,
+    -2339 / 118908518400,
+];
+
+function studentTNormalTail(degrees: number, logRatio: number, logBeta: number): number {
+    const square = degrees * logRatio;
+    const z = Math.sqrt(square);
+    const logSqrtTwoPi = 0.5 * Math.log(2 * Math.PI);
+    let boundary = z * Math.exp(-square / 2 - logSqrtTwoPi) / degrees;
+    let tail = excelErfc(z / Math.SQRT2) / 2;
+    let term = tail;
+    // Integrate each transformed Gaussian moment by parts.
+    for (let index = 0; index < STUDENT_T_TAIL_COEFFICIENTS.length; index++) {
+        term = boundary + ((2 * index + 1) / degrees) * term;
+        tail += STUDENT_T_TAIL_COEFFICIENTS[index] * term;
+        boundary *= logRatio;
+    }
+    return Math.exp(logSqrtTwoPi - 0.5 * Math.log(degrees) - logBeta) * tail;
+}
+
+export function studentTQuantile(probability: number, degrees: number): number {
+    if (!(probability > 0 && probability < 1)) return Number.NaN;
+    if (probability === 0.5) return 0;
+    const tail = Math.min(probability, 1 - probability);
+    const twoTails = 2 * tail;
+    let magnitude: number;
+    if (degrees === 1) {
+        magnitude = 1 / Math.tan(Math.PI * tail);
+    } else if (degrees === 2) {
+        magnitude = Math.SQRT2 * (1 - twoTails) / Math.sqrt(twoTails * (2 - twoTails));
+    } else {
+        magnitude = studentTQuantileMagnitude(tail, degrees);
+        if (twoTails <= 0.9 && Number.isFinite(magnitude)) {
+            // Round the beta inverse before converting it to the t quantile.
+            const ratio = magnitude * magnitude / degrees;
+            const inverseBeta = ratio <= 1 ? 1 - ratio / (1 + ratio) : 1 / (1 + ratio);
+            magnitude = Math.sqrt(degrees * (1 / inverseBeta - 1));
+        }
+    }
+    return probability < 0.5 ? -magnitude : magnitude;
+}
+
+function studentTQuantileMagnitude(tail: number, degrees: number): number {
+    const normal = normalQuantileMagnitude(tail);
+    const square = normal * normal;
+    if (degrees >= 4096 && degrees >= 256 * square) {
+        // Abramowitz and Stegun 26.7.5, evaluated in powers of 1 / degrees.
+        const first = (square + 1) / 4;
+        const second = ((5 * square + 16) * square + 3) / 96;
+        const third = (((3 * square + 19) * square + 17) * square - 15) / 384;
+        const fourth = ((((79 * square + 776) * square + 1482) * square - 1920) * square - 945) / 92160;
+        return normal * (1 + (first + (second + (third + fourth / degrees) / degrees) / degrees) / degrees);
+    }
+
+    const halfDegrees = degrees / 2;
+    const logBeta = logStudentTBeta(halfDegrees);
+    const twoTails = 2 * tail;
+    const residual = (value: number) => {
+        const ratio = value * value / degrees;
+        const normalized = ratio / (1 + ratio);
+        const complement = 1 / (1 + ratio);
+        const weight = Math.exp(-logBeta - halfDegrees * Math.log1p(ratio) + 0.5 * Math.log(normalized));
+        const useCenter = normalized < 1.5 / (halfDegrees + 2.5);
+        const mass = useCenter
+            ? 2 * weight * betaContinuedFraction(normalized, 0.5, halfDegrees, 1e-15)
+            : weight * betaContinuedFraction(complement, halfDegrees, 0.5, 1e-15) / halfDegrees;
+        return twoTails > 0.9
+            ? (useCenter ? mass : 1 - mass) - (1 - twoTails)
+            : twoTails - (useCenter ? 1 - mass : mass);
+    };
+
+    const seed = normal * (1 + (square + 1) / (4 * degrees));
+    let upper = Math.max(1, seed * 2);
+    let lower = 0;
+    for (let step = 0; step < 512; step++) {
+        if (residual(upper) >= 0) {
+            const logDensityAtZero = Math.LN2 - 0.5 * Math.log(degrees) - logBeta;
+            let estimate = seed > lower ? seed : lower + (upper - lower) / 2;
+            for (let iteration = 0; iteration < 96; iteration++) {
+                const error = residual(estimate);
+                if (error === 0) break;
+                if (error < 0) {
+                    lower = estimate;
+                } else {
+                    upper = estimate;
+                }
+                const logDensity = logDensityAtZero - (halfDegrees + 0.5) * Math.log1p(estimate * estimate / degrees);
+                const next = estimate - error / Math.exp(logDensity);
+                if (next === estimate) break;
+                const candidate = lower < next && next < upper ? next : lower + (upper - lower) / 2;
+                if (candidate === estimate) break;
+                estimate = candidate;
+            }
+            return estimate;
+        }
+        lower = upper;
+        upper *= 2;
+    }
+    return Number.NaN;
+}
+
+export function normalQuantileMagnitude(tail: number): number {
+    // Wichura AS 241. The two tail forms avoid subtracting a tiny probability from 1.
+    const polynomial = (coefficients: readonly number[], x: number) =>
+        coefficients.reduceRight((result, coefficient) => result * x + coefficient, 0);
+    const fromCenter = 0.5 - tail;
+    if (fromCenter <= 0.425) {
+        const t = 0.180625 - fromCenter * fromCenter;
+        return fromCenter * polynomial([
+            3.3871328727963665,
+            133.14166789178438,
+            1971.5909503065513,
+            13731.69376550946,
+            45921.95393154987,
+            67265.7709270087,
+            33430.57558358813,
+            2509.0809287301227,
+        ], t) / polynomial([
+            1,
+            42.31333070160091,
+            687.1870074920579,
+            5394.196021424751,
+            21213.794301586597,
+            39307.89580009271,
+            28729.085735721943,
+            5226.495278852854,
+        ], t);
+    }
+    const scale = Math.sqrt(-Math.log(tail));
+    if (scale <= 5) {
+        const t = scale - 1.6;
+        return polynomial([
+            1.4234371107496837,
+            4.630337846156545,
+            5.769497221460691,
+            3.6478483247632045,
+            1.2704582524523684,
+            0.2417807251774506,
+            0.022723844989269184,
+            0.0007745450142783414,
+        ], t) / polynomial([
+            1,
+            2.053191626637759,
+            1.676384830183804,
+            0.6897673349851,
+            0.14810397642748008,
+            0.015198666563616457,
+            0.0005475938084995345,
+            1.0507500716444169e-9,
+        ], t);
+    }
+    const t = scale - 5;
+    return polynomial([
+        6.657904643501104,
+        5.463784911164114,
+        1.7848265399172913,
+        0.2965605718285049,
+        0.026532189526576124,
+        0.0012426609473880784,
+        0.000027115555687434876,
+        2.010334399292288e-7,
+    ], t) / polynomial([
+        1,
+        0.5998322065558879,
+        0.1369298809227358,
+        0.014875361290850615,
+        0.0007868691311456133,
+        0.000018463183175100548,
+        1.421511758316446e-7,
+        2.0442631033899397e-15,
+    ], t);
+}
+
+function logStudentTBeta(halfDegrees: number): number {
+    const halfLogPi = 0.5 * Math.log(Math.PI);
+    if (halfDegrees < 16) {
+        return halfLogPi + gammaln(halfDegrees) - gammaln(halfDegrees + 0.5);
+    }
+    const correction = (value: number) => {
+        const reciprocal = 1 / value;
+        const square = reciprocal * reciprocal;
+        return reciprocal * (1 / 12 + square * (-1 / 360 + square * (1 / 1260 - square / 1680)));
+    };
+    // Difference of the two Stirling expansions, without subtracting large log-gamma values.
+    return halfLogPi - 0.5 * Math.log(halfDegrees) - halfDegrees * Math.log1p(0.5 / halfDegrees) + 0.5 +
+        correction(halfDegrees) - correction(halfDegrees + 0.5);
+}
+
 export function getTwoArrayNumberValues(
     array1: BaseValueObject,
     array2: BaseValueObject,
     count: number,
     array1ColumnCount: number,
-    array2ColumnCount: number
+    array2ColumnCount: number,
+    numbersOnly = false
 ) {
     const array1Values: number[] = [];
     const array2Values: number[] = [];
@@ -783,7 +1020,15 @@ export function getTwoArrayNumberValues(
             };
         }
 
-        if (array1Object.isNull() || array2Object.isNull() || array1Object.isBoolean() || array2Object.isBoolean()) {
+        if (
+            array1Object.isNull() || array2Object.isNull() ||
+            array1Object.isBoolean() || array2Object.isBoolean() ||
+            array1Object.isString() || array2Object.isString()
+        ) {
+            continue;
+        }
+
+        if (numbersOnly && (!array1Object.isNumber() || !array2Object.isNumber())) {
             continue;
         }
 
@@ -808,7 +1053,18 @@ export function getTwoArrayNumberValues(
     };
 }
 
-// eslint-disable-next-line
+export function resolveRegressionInput(input: FunctionVariantType | undefined, isOption = false): BaseValueObject | undefined {
+    if (!input?.isReferenceObject()) {
+        return input as BaseValueObject | undefined;
+    }
+    const array = (input as BaseReferenceObject).toArrayValueObject();
+    if (!isOption) {
+        return array;
+    }
+    const values = array.map((value) => value.isNull() ? NumberValueObject.create(0) : value) as ArrayValueObject;
+    return values.getRowCount() === 1 && values.getColumnCount() === 1 ? values.getFirstCell() : values;
+}
+
 export function checkKnownsArrayDimensions(knownYs: BaseValueObject, knownXs?: BaseValueObject, newXs?: BaseValueObject) {
     const knownYsRowCount = knownYs.isArray() ? (knownYs as ArrayValueObject).getRowCount() : 1;
     const knownYsColumnCount = knownYs.isArray() ? (knownYs as ArrayValueObject).getColumnCount() : 1;
@@ -853,7 +1109,7 @@ export function checkKnownsArrayDimensions(knownYs: BaseValueObject, knownXs?: B
     };
 }
 
-export function getKnownsArrayValues(array: BaseValueObject): number[][] | ErrorValueObject {
+export function getKnownsArrayValues(array: BaseValueObject, requirePositive = false): number[][] | ErrorValueObject {
     const rowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
     const columnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
 
@@ -869,7 +1125,11 @@ export function getKnownsArrayValues(array: BaseValueObject): number[][] | Error
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            values[r].push(+valueObject.getValue());
+            const value = Number(valueObject.getValue());
+            if (requirePositive && value <= 0) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+            values[r].push(value);
         }
     }
 
@@ -970,7 +1230,7 @@ function getSlopeAndInterceptOfConstbIsTrue(knownXsValues: number[], knownYsValu
         sumXY += centeredX * ((knownYsValues[i] - yAnchor) - meanYOffset);
     }
 
-    const slope = sumXY / sumX2;
+    const slope = sumX2 === 0 && Number.isFinite(sumXY) ? 0 : sumXY / sumX2;
     let intercept = (yAnchor - slope * xAnchor) + (meanYOffset - slope * meanXOffset);
     if (!Number.isFinite(intercept)) {
         intercept = (yAnchor + meanYOffset) - slope * (xAnchor + meanXOffset);
@@ -1065,7 +1325,7 @@ function getSlopeAndInterceptOfConstbIsFalse(knownXsValues: number[], knownYsVal
     };
 }
 
-function solveLeastSquaresByQR(matrix: number[][], values: number[]): number[] | null {
+function solveLeastSquaresByQR(matrix: number[][], values: number[]): { coefficients: number[]; squaredError: number } | null {
     const rows = matrix.length;
     const columns = matrix[0]?.length ?? 0;
 
@@ -1102,19 +1362,17 @@ function solveLeastSquaresByQR(matrix: number[][], values: number[]): number[] |
             return null;
         }
         const alpha = qr[pivot][pivot] >= 0 ? -norm : norm;
-        const reflector = Array.from({ length: rows - pivot }, (_, offset) => qr[pivot + offset][pivot]);
-        reflector[0] -= alpha;
-        const reflectorNorm = reflector.reduce((sum, value) => sum + value ** 2, 0);
-        if (!Number.isFinite(reflectorNorm) || reflectorNorm === 0) {
-            return null;
-        }
-
+        const pivotValue = qr[pivot][pivot];
+        const divisor = pivotValue - alpha;
+        const reflector = Array.from({ length: rows - pivot }, (_, offset) => qr[pivot + offset][pivot] / divisor);
+        reflector[0] = 1;
+        const tau = (alpha - pivotValue) / alpha;
         for (let column = pivot; column < columns; column++) {
             let projection = 0;
             for (let offset = 0; offset < reflector.length; offset++) {
                 projection += reflector[offset] * qr[pivot + offset][column];
             }
-            const factor = 2 * projection / reflectorNorm;
+            const factor = tau * projection;
             for (let offset = 0; offset < reflector.length; offset++) {
                 qr[pivot + offset][column] -= factor * reflector[offset];
             }
@@ -1123,7 +1381,7 @@ function solveLeastSquaresByQR(matrix: number[][], values: number[]): number[] |
         for (let offset = 0; offset < reflector.length; offset++) {
             projection += reflector[offset] * transformed[pivot + offset];
         }
-        const factor = 2 * projection / reflectorNorm;
+        const factor = tau * projection;
         for (let offset = 0; offset < reflector.length; offset++) {
             transformed[pivot + offset] -= factor * reflector[offset];
         }
@@ -1141,10 +1399,58 @@ function solveLeastSquaresByQR(matrix: number[][], values: number[]): number[] |
         }
         coefficients[row] = (transformed[row] - remainder) / diagonal;
     }
-    return coefficients.map((coefficient, index) => coefficient / scales[index]);
+    return {
+        coefficients: coefficients.map((coefficient, index) => coefficient / scales[index]),
+        squaredError: transformed.slice(columns).reduce((sum, value) => sum + value * value, 0),
+    };
 }
 
-export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsValues: number[][], newXsValues: number[][], constb: number, isExponentialTransform: boolean) {
+export function fitSinglePredictor(x: number[], y: number[], constb: number, useExcelResidualArithmetic = false) {
+    const center = constb && useExcelResidualArithmetic;
+    const meanX = center ? x.reduce((sum, value) => sum + value, 0) / x.length : 0;
+    const meanY = center ? y.reduce((sum, value) => sum + value, 0) / y.length : 0;
+    const matrix = x.map((value) => constb ? [1, value - meanX] : [value]);
+    const transformed = center ? y.map((value) => value - meanY) : [...y];
+    const columns = constb ? 2 : 1;
+    for (let pivot = 0; pivot < Math.min(columns, y.length); pivot++) {
+        const vector = matrix.slice(pivot).map((row) => row[pivot]);
+        const norm = Math.sqrt(vector.reduce((sum, value) => sum + value * value, 0));
+        if (norm === 0) {
+            continue;
+        }
+        const diagonal = vector[0] >= 0 ? -norm : norm;
+        vector[0] -= diagonal;
+        // Excel accumulates the non-pivot terms before adding the changed pivot.
+        let divisor = 0;
+        for (let index = useExcelResidualArithmetic ? 1 : 0; index < vector.length; index++) {
+            divisor += vector[index] * vector[index];
+        }
+        if (useExcelResidualArithmetic) {
+            divisor += vector[0] * vector[0];
+        }
+        for (let column = pivot + 1; column < columns; column++) {
+            const factor = 2 * vector.reduce((sum, value, offset) => sum + value * matrix[pivot + offset][column], 0) / divisor;
+            for (let offset = 0; offset < vector.length; offset++) {
+                matrix[pivot + offset][column] -= factor * vector[offset];
+            }
+        }
+        const factor = 2 * vector.reduce((sum, value, offset) => sum + value * transformed[pivot + offset], 0) / divisor;
+        for (let offset = 0; offset < vector.length; offset++) {
+            transformed[pivot + offset] -= factor * vector[offset];
+        }
+        matrix[pivot][pivot] = diagonal;
+    }
+    const predictor = columns - 1;
+    const divisor = matrix[predictor]?.[predictor];
+    const slope = divisor ? transformed[predictor] / divisor : 0;
+    return {
+        slope,
+        intercept: meanY - slope * meanX,
+        squaredError: transformed.slice(columns).reduce((sum, value) => sum + value * value, 0),
+    };
+}
+
+export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsValues: number[][], newXsValues: number[][], constb: number, isExponentialTransform: boolean, useExcelResidualArithmetic = false) {
     const isOneRow = knownYsValues.length === 1 && knownYsValues[0].length > 1;
 
     let Y = knownYsValues;
@@ -1166,24 +1472,45 @@ export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsVal
         X = X.map((row) => [...row, 1]);
     }
 
-    const XT = matrixTranspose(X);
-    const XTX = calculateMmult(XT, X);
-    let XTXInverse = inverseMatrixByLUD(XTX);
-
-    if (!XTXInverse) {
-        XTXInverse = inverseMatrixByUSV(XTX);
-
-        if (!XTXInverse) {
-            return ErrorValueObject.create(ErrorType.NA);
+    let independent = X[0].map((_, column) => column);
+    let solved = solveLeastSquaresByQR(X, Y.map((row) => row[0]));
+    let fitX = X;
+    if (!solved) {
+        const intercept = X[0].length - 1;
+        const norm = (column: number) => X.reduce((sum, row) => sum + row[column] * row[column], 0);
+        const candidates = X[0].map((_, column) => column).filter((column) => !constb || column !== intercept);
+        candidates.sort((left, right) => norm(right) - norm(left) || right - left);
+        if (constb) {
+            candidates.unshift(intercept);
+        }
+        independent = [];
+        solved = { coefficients: [], squaredError: Y.reduce((sum, row) => sum + row[0] * row[0], 0) };
+        for (const column of candidates) {
+            const trial = [...independent, column];
+            const trialX = X.map((row) => trial.map((index) => row[index]));
+            const result = solveLeastSquaresByQR(trialX, Y.map((row) => row[0]));
+            if (result) {
+                independent = trial;
+                solved = result;
+            }
+        }
+        fitX = X.map((row) => independent.map((column) => row[column]));
+    }
+    const XT = matrixTranspose(fitX);
+    const XTX = calculateMmult(XT, fitX);
+    const reducedInverse = inverseMatrixByLUD(XTX) ?? inverseMatrixByUSV(XTX);
+    if (!reducedInverse) {
+        return ErrorValueObject.create(ErrorType.NA);
+    }
+    const XTXInverse = X[0].map(() => X[0].map(() => 0));
+    const coefficientValues = X[0].map(() => 0);
+    for (let row = 0; row < independent.length; row++) {
+        coefficientValues[independent[row]] = solved.coefficients[row];
+        for (let column = 0; column < independent.length; column++) {
+            XTXInverse[independent[row]][independent[column]] = reducedInverse[row][column];
         }
     }
-
-    const solved = solveLeastSquaresByQR(X, Y.map((row) => row[0]));
-
-    // Preserve the pseudoinverse solution for rank-deficient input.
-    const coefficients = solved
-        ? [solved]
-        : matrixTranspose(calculateMmult(XTXInverse, calculateMmult(XT, Y)));
+    const coefficients = [coefficientValues];
 
     if (!constb) {
         coefficients[0].push(0);
@@ -1206,6 +1533,15 @@ export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsVal
         X,
         newX,
         XTXInverse,
+        rank: independent.length,
+        squaredError: (constb || useExcelResidualArithmetic) && independent.length === 1 + Number(Boolean(constb))
+            ? fitSinglePredictor(
+                X.map((row) => row[independent.find((column) => !constb || column !== X[0].length - 1)!]),
+                Y.map((row) => row[0]),
+                constb,
+                useExcelResidualArithmetic
+            ).squaredError
+            : solved.squaredError,
     };
 }
 
@@ -1215,7 +1551,7 @@ export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsVal
  * Parse aggregate data references into multi-area refs and normal refs, currently only used in functions like SUBTOTAL and AGGREGATE.
  * If there is any invalid reference, return isError as true.
  */
-export function parseAggregateDataRefs(refs: FunctionVariantType[]) {
+export function parseAggregateDataRefs(refs: FunctionVariantType[], allowReferenceUnions = false) {
     const multiAreaRefs: MultiAreaReferenceObject[] = [];
     const normalRefs: BaseReferenceObject[] = [];
 
@@ -1226,7 +1562,18 @@ export function parseAggregateDataRefs(refs: FunctionVariantType[]) {
 
         if (ref.isReferenceObject()) {
             if ((ref as BaseReferenceObject).isMultiArea()) {
-                multiAreaRefs.push(ref as MultiAreaReferenceObject);
+                const multiArea = ref as MultiAreaReferenceObject;
+                if (allowReferenceUnions && !multiArea.isArrayOfReferences() && !multiArea.isSheetSpan) {
+                    for (const area of multiArea.getAreas().flat()) {
+                        if (area.isReferenceObject()) {
+                            normalRefs.push(area as BaseReferenceObject);
+                        } else {
+                            isError = true;
+                        }
+                    }
+                } else {
+                    multiAreaRefs.push(multiArea);
+                }
             } else {
                 normalRefs.push(ref as BaseReferenceObject);
             }
@@ -1349,6 +1696,7 @@ export function getModeSnglResult(valueCountMap: modeSnglValueCountMapType, valu
 
 export interface IAggregateIgnoreOptions {
     ignoreRowHidden: boolean; // whether to ignore hidden rows
+    ignoreFilteredRows?: boolean;
     ignoreErrorValues: boolean; // whether to ignore error values
     ignoreNested: boolean; // whether to ignore nested SUBTOTAL or AGGREGATE results
 }
@@ -1361,7 +1709,7 @@ export function getAggregateResult(
     } & IAggregateIgnoreOptions,
     refs: BaseReferenceObject[]
 ): BaseValueObject {
-    const { type, ignoreRowHidden, ignoreErrorValues, ignoreNested, formulaDataModel } = options;
+    const { type, ignoreRowHidden, ignoreFilteredRows = true, ignoreErrorValues, ignoreNested, formulaDataModel } = options;
     const valueObjects: BaseValueObject[] = [];
 
     let count = 0;
@@ -1389,8 +1737,7 @@ export function getAggregateResult(
         let errorValueObject: Nullable<BaseValueObject>;
 
         ref.iterator((valueObject, rowIndex, columnIndex) => {
-            // Filtered rows are always excluded.
-            if (filteredOutRows.includes(rowIndex)) {
+            if (ignoreFilteredRows && filteredOutRows.includes(rowIndex)) {
                 return true; // continue
             }
 
@@ -1410,6 +1757,7 @@ export function getAggregateResult(
 
             // COUNTA function counts all non-blank cells.
             if (type === AggregateFunctionType.COUNTA) {
+                if (ignoreErrorValues && valueObject?.isError()) return true;
                 if (valueObject !== null && valueObject !== undefined && !valueObject.isNull()) counta++;
                 return true; // continue
             }
@@ -1526,7 +1874,7 @@ export function getArrayValuesByAggregateIgnoreOptions(
     options?: IAggregateIgnoreOptions,
     formulaDataModel?: FormulaDataModel
 ): number[] | ErrorValueObject {
-    const { ignoreRowHidden = false, ignoreErrorValues = false, ignoreNested = false } = options ?? {};
+    const { ignoreRowHidden = false, ignoreFilteredRows = true, ignoreErrorValues = false, ignoreNested = false } = options ?? {};
     const values: number[] = [];
 
     if (array.isReferenceObject()) {
@@ -1540,8 +1888,7 @@ export function getArrayValuesByAggregateIgnoreOptions(
         let errorValueObject: Nullable<BaseValueObject>;
 
         (array as BaseReferenceObject).iterator((valueObject, rowIndex, columnIndex) => {
-            // Filtered rows are always excluded.
-            if (filteredOutRows.includes(rowIndex)) {
+            if (ignoreFilteredRows && filteredOutRows.includes(rowIndex)) {
                 return true; // continue
             }
 

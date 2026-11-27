@@ -39,7 +39,7 @@ export function HyperlinkPreview({ title, icon, description, invalid, copyDisabl
             {...attributes}
             className={clsx(`
               univer-box-border univer-grid univer-max-w-80 univer-grid-cols-[minmax(0,1fr)_auto] univer-items-center
-              univer-gap-2 univer-overflow-hidden univer-rounded-lg univer-bg-gray-0 univer-p-3 univer-shadow
+              univer-gap-2 univer-overflow-hidden univer-rounded-lg univer-bg-gray-0 univer-p-2 univer-shadow
               dark:!univer-bg-gray-900
             `, borderClassName, className)}
             onClick={onDismiss}

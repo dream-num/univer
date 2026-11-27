@@ -22,11 +22,16 @@ import { checkVariantsErrorIsNullorArrayOrBoolean } from '../../../engine/utils/
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { isExcelTBillPeriod } from '../tbill-period';
 
 export class Tbillyield extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 3;
+
+    protected _isPeriodValid(settlement: number, maturity: number, yearDays: number): boolean {
+        return Math.floor(maturity) - Math.floor(settlement) <= yearDays;
+    }
 
     override calculate(settlement: BaseValueObject, maturity: BaseValueObject, pr: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsNullorArrayOrBoolean(settlement, maturity, pr);
@@ -73,7 +78,7 @@ export class Tbillyield extends BaseFunction {
         const yearDays = getDaysInYear(year);
 
         // if maturity is more than one year after settlement, TBILLYIELD returns the #NUM! error value.
-        if (DSM > yearDays) {
+        if (!this._isPeriodValid(settlementSerialNumber, maturitySerialNumber, yearDays)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
@@ -81,5 +86,11 @@ export class Tbillyield extends BaseFunction {
         const result = (100 - prValue) / prValue * 360 / DSM;
 
         return NumberValueObject.create(result);
+    }
+}
+
+export class ExcelTbillyield extends Tbillyield {
+    protected override _isPeriodValid(settlement: number, maturity: number): boolean {
+        return isExcelTBillPeriod(settlement, maturity, this.getDateSystem());
     }
 }

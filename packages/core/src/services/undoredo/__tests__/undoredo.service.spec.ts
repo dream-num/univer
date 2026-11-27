@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '../../command/command.service';
-import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { ICommand } from '../../command/command.service';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '../../../common/const';
 import { Injector } from '../../../common/di';
 import { UniverInstanceType } from '../../../common/unit';
@@ -26,7 +25,7 @@ import { CommandService, CommandType, ICommandService } from '../../command/comm
 import { ConfigService, IConfigService } from '../../config/config.service';
 import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHAPE_TEXT_EDITOR, FOCUSING_SHEET } from '../../context/context';
 import { ContextService, IContextService } from '../../context/context.service';
-import { IUniverInstanceService } from '../../instance/instance.service';
+import { IUniverInstanceService, UniverInstanceService } from '../../instance/instance.service';
 import { DesktopLogService, ILogService, LogLevel } from '../../log/log.service';
 import {
     DEFAULT_UNDO_REDO_HISTORY_LIMIT,
@@ -71,6 +70,26 @@ describe('unit-specific undo redo status', () => {
             expect(historyService.getUndoRedoStatus(child.getUnitId())).toEqual({ undos: 0, redos: 0 });
             expect(historyService.getUndoRedoStatus(host.getUnitId())).toEqual({ undos: 1, redos: 0 });
             expect(instanceService.getFocusedUnit()).toBe(host);
+            historyService.pushUndoRedo({ unitID: child.getUnitId(), undoMutations: [{ id: MUTATION_ID, params: {} }], redoMutations: [{ id: MUTATION_ID, params: {} }] });
+            historyService.pushUndoRedo({ unitID: child.getUnitId(), undoMutations: [{ id: MUTATION_ID, params: {} }], redoMutations: [{ id: MUTATION_ID, params: {} }] });
+            instanceService.focusUnit(child.getUnitId());
+            historyService.popUndoToRedo();
+            instanceService.focusUnit(host.getUnitId());
+            const oldGroup = historyService.beginUndoRedoGroup(child.getUnitId(), 'old-group');
+            expect(instanceService.disposeUnit(child.getUnitId())).toBe(true);
+            expect(historyService.getUndoRedoStatus(child.getUnitId())).toEqual({ undos: 0, redos: 0 });
+            const replacement = injector.createInstance(DocumentDataModel, { id: child.getUnitId() });
+            instanceService.__addUnit(replacement);
+            instanceService.focusUnit(replacement.getUnitId());
+            expect(injector.get(ICommandService).syncExecuteCommand(UndoCommandId)).toBe(false);
+            expect(injector.get(ICommandService).syncExecuteCommand(RedoCommandId)).toBe(false);
+            const replacementGroup = historyService.beginUndoRedoGroup(replacement.getUnitId(), 'new-group');
+            historyService.pushUndoRedo({ unitID: replacement.getUnitId(), undoMutations: [{ id: MUTATION_ID, params: {} }], redoMutations: [{ id: MUTATION_ID, params: {} }] });
+            oldGroup.dispose();
+            historyService.pushUndoRedo({ unitID: replacement.getUnitId(), undoMutations: [{ id: MUTATION_ID, params: {} }], redoMutations: [{ id: MUTATION_ID, params: {} }] });
+            replacementGroup.dispose();
+            expect(historyService.getUndoRedoStatus(replacement.getUnitId())).toEqual({ undos: 1, redos: 0 });
+            expect(historyService.getUndoRedoStatus(host.getUnitId())).toEqual({ undos: 1, redos: 0 });
         } finally {
             subscription.unsubscribe();
             univer.dispose();
@@ -136,20 +155,11 @@ describe('shape editor undo routing', () => {
     );
 });
 
-class FocusedUnit {
-    constructor(private readonly _unitId: string) {}
-
-    getUnitId() {
-        return this._unitId;
-    }
-}
-
 describe('LocalUndoRedoService', () => {
     let injector: Injector;
     let commandService: ICommandService;
     let contextService: ContextService;
     let logService: DesktopLogService;
-    let focused$: BehaviorSubject<FocusedUnit | null>;
     let undoRedoService: LocalUndoRedoService;
     let mutationLog: string[];
 
@@ -165,16 +175,11 @@ describe('LocalUndoRedoService', () => {
         logService = injector.get(ILogService) as DesktopLogService;
         logService.setLogLevel(LogLevel.SILENT);
 
-        focused$ = new BehaviorSubject<FocusedUnit | null>(new FocusedUnit('unit-1'));
-        class TestUniverInstanceService {
-            focused$ = focused$.asObservable();
-
-            getFocusedUnit() {
-                return focused$.value;
-            }
-        }
-
-        injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+        injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+        const instanceService = injector.get(IUniverInstanceService);
+        const document = injector.createInstance(DocumentDataModel, { id: 'unit-1' });
+        instanceService.__addUnit(document);
+        instanceService.focusUnit(document.getUnitId());
         injector.add([IUndoRedoService, { useClass: LocalUndoRedoService }]);
         undoRedoService = injector.get(IUndoRedoService) as LocalUndoRedoService;
 
@@ -190,10 +195,7 @@ describe('LocalUndoRedoService', () => {
     });
 
     afterEach(() => {
-        undoRedoService.dispose();
-        focused$.complete();
-        logService.dispose();
-        contextService.dispose();
+        injector.dispose();
     });
 
     it('should push undo items, clear redo stack and expose focused status', () => {

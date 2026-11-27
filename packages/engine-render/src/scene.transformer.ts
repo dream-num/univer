@@ -33,6 +33,7 @@ import { DeviceType } from './basics/i-events';
 import { offsetRotationAxis } from './basics/offset-rotation-axis';
 import { getCurrentScrollXY } from './basics/scroll-xy';
 import { degToRad, precisionTo, radToDeg } from './basics/tools';
+import { getTransformBoundingBox } from './basics/transform';
 import { DEFAULT_TRANSFORMER_CONFIG } from './basics/transformer-config';
 import { Vector2 } from './basics/vector2';
 import { Group } from './group';
@@ -647,16 +648,19 @@ export class Transformer extends Disposable implements ITransformerConfig {
         let maxY = Infinity;
         for (const object of objects) {
             if (this._getConfig(object).moveBoundaryEnabled === false) continue;
-            minX = Math.max(minX, this.zeroLeft - object.left - ancestorLeft);
-            minY = Math.max(minY, this.zeroTop - object.top - ancestorTop);
-            maxX = Math.min(maxX, topSceneWidth - object.left - object.width - ancestorLeft);
-            maxY = Math.min(maxY, topSceneHeight - object.top - object.height - ancestorTop);
+            // Drag constraints use the rendered affine box, including rotation,
+            // rather than Excel's major-axis cell anchor rectangle.
+            const bounds = getTransformBoundingBox(this._getControlState(object));
+            minX = Math.max(minX, this.zeroLeft - bounds.left! - ancestorLeft);
+            minY = Math.max(minY, this.zeroTop - bounds.top! - ancestorTop);
+            maxX = Math.min(maxX, topSceneWidth - bounds.left! - bounds.width! - ancestorLeft);
+            maxY = Math.min(maxY, topSceneHeight - bounds.top! - bounds.height! - ancestorTop);
         }
 
         // Keep the leading edge reachable when the selection is larger than the scene.
         return {
-            moveLeft: Math.max(minX, Math.min(moveLeft, maxX)),
-            moveTop: Math.max(minY, Math.min(moveTop, maxY)),
+            moveLeft: precisionTo(Math.max(minX, Math.min(moveLeft, maxX)), 6),
+            moveTop: precisionTo(Math.max(minY, Math.min(moveTop, maxY)), 6),
         };
     }
 

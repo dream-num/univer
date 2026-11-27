@@ -27,7 +27,7 @@ const locale: typeof enUS = {
             'smart-toggle-filter': '切换筛选',
         },
         permission: {
-            filterErr: '你没有权限使用筛选。',
+            filterErr: '该范围已被保护，目前无筛选权限。如需筛选，请联系创建者。',
         },
         panel: {
             'clear-filter': '清除筛选',

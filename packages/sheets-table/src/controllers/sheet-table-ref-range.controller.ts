@@ -16,6 +16,7 @@
 
 import type { IMutationInfo, Workbook } from '@univerjs/core';
 import type {
+    ICommandMutationGroup,
     IInsertColCommandParams,
     IInsertRowCommandParams,
     IInsertRowMutationParams,
@@ -225,50 +226,30 @@ export class SheetTableRefRangeController extends Disposable {
     }
 
     private _generateTableMutationWithRemoveRow(removeParams: IRemoveRowColCommandParams) {
-        const undos: IMutationInfo[] = [];
-        const redos: IMutationInfo[] = [];
-        const preRedos: IMutationInfo[] = [];
-        const preUndos: IMutationInfo[] = [];
+        const groups: ICommandMutationGroup[] = [];
 
-        const target = getSheetCommandTarget(this._univerInstanceService);
+        const target = getSheetCommandTarget(this._univerInstanceService, removeParams);
         if (!target) {
-            return { undos, redos, preRedos, preUndos };
+            return groups;
         }
         const { unitId, subUnitId } = target;
         const allSubUnitTables = this._tableManager.getTablesBySubunitId(unitId, subUnitId);
         if (!allSubUnitTables.length) {
-            return { undos, redos, preRedos, preUndos };
+            return groups;
         }
         const { range } = removeParams;
         const removeRowCount = range.endRow - range.startRow + 1;
 
         allSubUnitTables.forEach((table) => {
+            const undos: IMutationInfo[] = [];
+            const redos: IMutationInfo[] = [];
+            const preRedos: IMutationInfo[] = [];
+            const preUndos: IMutationInfo[] = [];
             const tableRange = table.getRange();
             if (Rectangle.intersects(tableRange, range)) {
                 if (range.startRow <= tableRange.startRow && range.endRow >= tableRange.startRow) {
-                    preRedos.push({
-                        id: DeleteSheetTableMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId,
-                            tableId: table.getId(),
-                        },
-                    });
-                    const tableJson = table.toJSON();
-                    undos.push({
-                        id: AddSheetTableMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId,
-                            tableId: tableJson.id,
-                            name: tableJson.name,
-                            range: tableJson.range,
-                            ...(hasTableDxfStyles(tableJson) ? { meta: Tools.deepClone(tableJson.meta) } : {}),
-                            options: hasTableDxfStyles(tableJson)
-                                ? { ...tableJson.options, columns: Tools.deepClone(tableJson.columns) }
-                                : tableJson.options,
-                        },
-                    });
+                    preRedos.push(this._getDeleteTableMutation(unitId, subUnitId, table.getId()));
+                    undos.push(this._getAddTableMutation(unitId, subUnitId, table.toJSON()));
                 } else if (range.startRow > tableRange.startRow && range.startRow <= tableRange.endRow) {
                     redos.push({
                         id: SetSheetTableMutation.id,
@@ -337,9 +318,10 @@ export class SheetTableRefRangeController extends Disposable {
                     });
                 }
             }
+            groups.push({ undos, redos, preRedos, preUndos });
         });
 
-        return { undos, redos, preRedos, preUndos };
+        return groups;
     }
 
     private _generateTableMutationWithRemoveCol(removeParams: IRemoveRowColCommandParams) {
@@ -625,11 +607,7 @@ export class SheetTableRefRangeController extends Disposable {
                             startColumn: tableRange.startColumn + insertCount,
                             endColumn: tableRange.endColumn + insertCount,
                         };
-                        if (hasTableDxfStyles(table.toJSON())) {
-                            this._tableManager.moveTable(unitId, table.getId(), subUnitId, newRange);
-                        } else {
-                            this._tableManager.updateTableRange(unitId, table.getId(), { newRange });
-                        }
+                        this._tableManager.moveTable(unitId, table.getId(), subUnitId, newRange);
                     }
                 });
             } else if (commandInfo.id === RemoveRowMutation.id) {
@@ -662,7 +640,7 @@ export class SheetTableRefRangeController extends Disposable {
                             startColumn: tableRange.startColumn - removeCount,
                             endColumn: tableRange.endColumn - removeCount,
                         };
-                        if (hasTableDxfStyles(table.toJSON())) {
+                        if (range.endColumn < tableRange.startColumn || hasTableDxfStyles(table.toJSON())) {
                             this._tableManager.moveTable(unitId, table.getId(), subUnitId, newRange);
                         } else {
                             this._tableManager.updateTableRange(unitId, table.getId(), { newRange });

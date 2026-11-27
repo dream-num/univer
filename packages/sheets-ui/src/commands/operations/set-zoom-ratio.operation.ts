@@ -15,7 +15,7 @@
  */
 
 import type { BooleanNumber, IOperation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import { CommandType, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsZoomRenderController } from '../../controllers/render-controllers/zoom.render-controller';
 
@@ -37,6 +37,9 @@ export const SetZoomRatioOperation: IOperation<ISetZoomRatioOperationParams> = {
             return false;
         }
 
-        return renderUnit.with(SheetsZoomRenderController).updateZoom(params.subUnitId, params.zoomRatio, params.zoomToFit);
+        const renderers = renderManagerService.getAllRenderersOfType(UniverInstanceType.UNIVER_SHEET)
+            .filter((render) => render.unitId === params.unitId);
+        return renderers.every((render) => render.with(SheetsZoomRenderController)
+            .updateZoom(params.subUnitId, params.zoomRatio, params.zoomToFit));
     },
 };

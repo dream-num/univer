@@ -14,35 +14,69 @@
  * limitations under the License.
  */
 
+import type { VariantProps } from 'class-variance-authority';
 import { CalendarIcon } from '@univerjs/icons';
-import { useState } from 'react';
-import { borderClassName, focusClassName } from '../../helper/class-utilities';
+import { useContext, useState } from 'react';
+import { borderClassName, divideXClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { formatDateWithPattern } from '../../helper/date';
 import { Calendar } from '../calendar/Calendar';
+import { dateTriggerVariants } from '../date-picker/DatePicker';
 import { Dropdown } from '../dropdown/Dropdown';
+import { FormLayoutContext } from '../form-layout/FormLayout';
 
-interface IDateRangePickerProps {
+export interface IDateRangePickerProps extends VariantProps<typeof dateTriggerVariants> {
+    id?: string;
+    'aria-label'?: string;
+    'aria-labelledby'?: string;
+    'aria-describedby'?: string;
+    'aria-invalid'?: boolean;
+
     /**
-     * Additional CSS classes for the date picker.
+     * Additional CSS classes for the date range picker.
      */
     className?: string;
 
     /**
-     * The value of the date picker.
+     * The value of the date range picker.
      */
     value?: [Date, Date];
 
     /**
-     * Callback when the value of the date picker changes.
+     * Display format pattern.
+     * @default 'YYYY-MM-DD'
+     */
+    pattern?: string;
+
+    /**
+     * Whether the date range picker is disabled.
+     * @default false
+     */
+    disabled?: boolean;
+
+    /**
+     * Callback when the value of the date range picker changes.
      */
     onValueChange?: (date: [Date, Date]) => void;
 }
 
 export function DateRangePicker(props: IDateRangePickerProps) {
-    const { value = [new Date(), new Date()], onValueChange, className } = props;
+    const {
+        id,
+        'aria-label': ariaLabel,
+        'aria-labelledby': ariaLabelledby,
+        'aria-describedby': ariaDescribedby,
+        'aria-invalid': ariaInvalid,
+        value = [new Date(), new Date()],
+        pattern = 'YYYY-MM-DD',
+        size,
+        disabled = false,
+        onValueChange,
+        className,
+    } = props;
 
     const [open, setOpen] = useState(false);
+    const invalid = useContext(FormLayoutContext);
 
     function handleValueChange(date: [Date, Date]) {
         let [start, end] = date;
@@ -59,48 +93,95 @@ export function DateRangePicker(props: IDateRangePickerProps) {
     return (
         <Dropdown
             align="start"
+            disabled={disabled}
             overlay={(
-                <div className="univer-grid univer-grid-cols-2 univer-gap-2 univer-p-2">
-                    <Calendar
-                        value={value[0]}
-                        max={value[1]}
-                        onValueChange={(date) => {
-                            handleValueChange([date, value[1]]);
-                        }}
-                    />
-                    <Calendar
-                        value={value[1]}
-                        min={value[0]}
-                        onValueChange={(date) => {
-                            handleValueChange([value[0], date]);
-                        }}
-                    />
+                <div className={clsx('univer-grid univer-grid-cols-2', divideXClassName)}>
+                    <div className="univer-p-3">
+                        <Calendar
+                            value={value[0]}
+                            max={value[1]}
+                            onValueChange={(date) => {
+                                handleValueChange([date, value[1]]);
+                            }}
+                        />
+                    </div>
+                    <div className="univer-p-3">
+                        <Calendar
+                            value={value[1]}
+                            min={value[0]}
+                            onValueChange={(date) => {
+                                handleValueChange([value[0], date]);
+                            }}
+                        />
+                    </div>
                 </div>
             )}
-            open={open}
-            onOpenChange={setOpen}
+            open={!disabled && open}
+            onOpenChange={(nextOpen) => {
+                if (!disabled) {
+                    setOpen(nextOpen);
+                }
+            }}
         >
             <button
-                className={clsx(`
-                  univer-box-border univer-flex univer-h-8 univer-items-center univer-justify-between univer-gap-2
-                  univer-rounded-md univer-bg-gray-0 univer-px-2 univer-text-sm univer-text-gray-800
-                  univer-transition-all
-                  hover:univer-border-primary-600
-                  dark:!univer-bg-gray-700 dark:!univer-text-gray-0
-                `, borderClassName, focusClassName, className)}
+                id={id}
+                data-u-comp="date-range-picker"
+                aria-label={ariaLabel}
+                aria-labelledby={ariaLabelledby}
+                aria-describedby={ariaDescribedby}
+                aria-invalid={ariaInvalid ?? (invalid || undefined)}
+                aria-expanded={!disabled && open}
+                aria-haspopup="dialog"
+                disabled={disabled}
+                className={clsx(
+                    dateTriggerVariants({ size }),
+                    borderClassName,
+                    disabled
+                        ? `
+                          univer-cursor-not-allowed univer-bg-gray-50 univer-text-gray-400
+                          dark:!univer-bg-gray-800 dark:!univer-text-gray-500
+                        `
+                        : `
+                          univer-cursor-pointer
+                          hover:univer-border-gray-300
+                          dark:hover:!univer-border-gray-500
+                        `,
+                    !disabled && open && `
+                      !univer-border-primary-600 univer-ring-2 univer-ring-primary-50
+                      dark:!univer-border-primary-300 dark:!univer-ring-primary-900
+                    `,
+                    className
+                )}
                 type="button"
             >
-                <span className="univer-flex univer-gap-1">
-                    <span>{formatDateWithPattern(value[0], 'YYYY-MM-DD')}</span>
-                    <span>-</span>
-                    <span>{formatDateWithPattern(value[1], 'YYYY-MM-DD')}</span>
+                <span className="univer-inline-flex univer-min-w-0 univer-items-center univer-gap-1.5">
+                    <span className="univer-truncate">{formatDateWithPattern(value[0], pattern)}</span>
+                    <span
+                        aria-hidden="true"
+                        className="
+                          univer-text-gray-500
+                          dark:!univer-text-gray-300
+                        "
+                    >
+                        -
+                    </span>
+                    <span className="univer-truncate">{formatDateWithPattern(value[1], pattern)}</span>
                 </span>
 
                 <CalendarIcon
-                    className={`
-                      univer-text-gray-600
-                      dark:!univer-text-gray-400
-                    `}
+                    aria-hidden="true"
+                    className={clsx(
+                        'univer-size-4 univer-shrink-0',
+                        disabled
+                            ? `
+                              univer-text-gray-400
+                              dark:!univer-text-gray-500
+                            `
+                            : `
+                              univer-text-gray-500
+                              dark:!univer-text-gray-300
+                            `
+                    )}
                 />
             </button>
         </Dropdown>

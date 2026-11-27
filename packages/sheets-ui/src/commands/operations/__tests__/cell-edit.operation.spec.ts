@@ -14,9 +14,22 @@
  * limitations under the License.
  */
 
-import { ICommandService, IConfigService, IUniverInstanceService } from '@univerjs/core';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import { ICommandService, IConfigService, Injector, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { EditorService, IEditorService } from '@univerjs/docs-ui';
+import {
+    CanvasColorService,
+    DeviceInputEventType,
+    ICanvasColorService,
+    IRenderManagerService,
+    RenderManagerService,
+} from '@univerjs/engine-render';
+import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
-import { IEditorBridgeService } from '../../../services/editor-bridge.service';
+import { EditorBridgeService, IEditorBridgeService } from '../../../services/editor-bridge.service';
+import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
+import { SetActivateCellEditOperation } from '../activate-cell-edit.operation';
 import {
     SetCellEditVisibleArrowOperation,
     SetCellEditVisibleOperation,
@@ -62,6 +75,7 @@ describe('cell edit operations', () => {
     it('SetCellEditVisibleOperation falls back to workbook unitId', () => {
         const changeVisible = vi.fn();
         const accessor = createAccessor([
+            [Injector, new Injector()],
             [IConfigService, { getConfig: vi.fn(() => ({ disableEdit: false })) }],
             [IUniverInstanceService, { getCurrentUnitOfType: vi.fn(() => ({ getUnitId: () => 'workbook-u1' })) }],
             [IEditorBridgeService, { changeVisible }],
@@ -93,5 +107,56 @@ describe('cell edit operations', () => {
 
     it('SetCellEditVisibleArrowOperation is a no-op event operation', () => {
         expect(SetCellEditVisibleArrowOperation.handler({} as any, undefined as any)).toBe(true);
+    });
+
+    it('blocks activation and opening in the pending pane while allowing its peer to open the editor', () => {
+        const canvas = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+            return { canvas: this, setTransform: () => {}, clearRect: () => {} } as unknown as CanvasRenderingContext2D;
+        });
+        const univer = new Univer();
+        try {
+            const injector = univer.__getInjector();
+            injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([SheetSkeletonService]);
+            injector.add([SheetInterceptorService]);
+            injector.add([DocSelectionManagerService]);
+            injector.add([IEditorService, { useClass: EditorService }]);
+            injector.add([IEditorBridgeService, { useClass: EditorBridgeService }]);
+            const unitId = 'pending-editor';
+            const sheetId = 'sheet1';
+            const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+                id: unitId,
+                sheets: { [sheetId]: { id: sheetId } },
+                sheetOrder: [sheetId],
+            });
+            injector.get(IUniverInstanceService).focusUnit(unitId);
+            const renders = injector.get(IRenderManagerService);
+            renders.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService]);
+            const primary = renders.createRender(unitId);
+            const peerId = 'peer-editor';
+            renders.createRender(unitId, undefined, peerId);
+            primary.with(SheetSkeletonManagerService).setProjectionPending(sheetId, true);
+            const commands = injector.get(ICommandService);
+            commands.registerCommand(SetActivateCellEditOperation);
+            commands.registerCommand(SetCellEditVisibleOperation);
+            const editor = injector.get(IEditorBridgeService);
+            expect(commands.syncExecuteCommand(SetActivateCellEditOperation.id, {
+                unitId,
+                sheetId,
+                scene: primary.scene,
+                engine: primary.engine,
+                primary: workbook.getActiveSheet().getCellInfoInMergeData(0, 0),
+            })).toBe(false);
+            const open = { visible: true, unitId, eventType: DeviceInputEventType.Keyboard };
+            expect(commands.syncExecuteCommand(SetCellEditVisibleOperation.id, open)).toBe(false);
+            expect(editor.isVisible().visible).toBe(false);
+            renders.focusRender?.(peerId);
+            expect(commands.syncExecuteCommand(SetCellEditVisibleOperation.id, open)).toBe(true);
+            expect(editor.isVisible().visible).toBe(true);
+        } finally {
+            univer.dispose();
+            canvas.mockRestore();
+        }
     });
 });

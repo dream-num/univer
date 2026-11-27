@@ -27,7 +27,7 @@ const locale: typeof enUS = {
             'smart-toggle-filter': 'Przełącz filtr',
         },
         permission: {
-            filterErr: 'Nie masz uprawnień do używania filtra.',
+            filterErr: 'Zakres jest chroniony i nie masz uprawnień do filtrowania. Aby filtrować, skontaktuj się z twórcą.',
         },
         panel: {
             'clear-filter': 'Wyczyść filtr',

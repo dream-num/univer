@@ -16,13 +16,13 @@
 
 import type { IDrawingParam, IGroupBaseBound, IWorksheetBackgroundImage, Nullable } from '@univerjs/core';
 import type { IFBlobSource } from '@univerjs/core/facade';
-import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
+import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetDrawingPlacement, ISheetDrawingPlacementInput, ISheetImage } from '@univerjs/sheets-drawing';
-import { DrawingTypeEnum, generateRandomId, ImageSourceType, IUndoRedoService } from '@univerjs/core';
+import { DrawingTypeEnum, generateRandomId, ImageSourceType } from '@univerjs/core';
 import { isGroupableDrawingType } from '@univerjs/drawing';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { DrawingApplyType, getSheetDrawingPlacement, InsertSheetDrawingCommand, ISheetDrawingService, normalizeSheetDrawingPlacement, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand, SetSheetDrawingPlacementCommand, SetWorksheetBackgroundImageCommand, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import { getSheetDrawingPlacement, GroupSheetDrawingCommand, InsertSheetDrawingCommand, ISheetDrawingService, normalizeSheetDrawingPlacement, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SetSheetDrawingPlacementCommand, SetWorksheetBackgroundImageCommand, SheetDrawingAnchorType, UngroupSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
 
@@ -239,7 +239,7 @@ export interface IFWorksheetDrawingMixin {
     /**
      * Get the placement of any drawing on this sheet.
      *
-     * Image, Shape, Chart, and Group use the same placement contract.
+     * Image, Shape, Chart, and Group use the same Excel-aligned cell markers.
      * @param {string} drawingId Drawing id.
      * @returns {ISheetDrawingPlacement | null} The placement, or `null` when the drawing does not exist.
      * @example
@@ -306,8 +306,10 @@ export interface IFWorksheetDrawingMixin {
      * transform. Exact markers are useful when the caller must preserve a
      * user-selected cell and offset. `Position` maps to OOXML OneCell,
      * `Both` maps to TwoCell, and `None` maps to Absolute.
+     * For cell-anchored bounds, the result also carries the original bounds.
+     * Pass the full result to a placement setter so it can use the target drawing's rotation.
      * @param {ISheetDrawingPlacementInput} placement Exact markers or bounds with an explicit anchor type.
-     * @returns {ISheetDrawingPlacement} The normalized Placement.
+     * @returns {ISheetDrawingPlacement & { bounds?: IGroupBaseBound }} The normalized Placement and any retained bounds.
      * @example Infer Position and Both placements from bounds in Node/headless
      * ```ts
      * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
@@ -323,7 +325,7 @@ export interface IFWorksheetDrawingMixin {
      * console.log(bothPlacement.from, bothPlacement.to);
      * ```
      */
-    resolveDrawingPlacement(placement: ISheetDrawingPlacementInput): ISheetDrawingPlacement;
+    resolveDrawingPlacement(placement: ISheetDrawingPlacementInput): ISheetDrawingPlacement & { bounds?: IGroupBaseBound };
 
     /**
      * Get the Sheet host layout in model coordinates.
@@ -550,10 +552,6 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
         return this._injector.get(SheetSkeletonService);
     }
 
-    private get _undoRedoService(): IUndoRedoService {
-        return this._injector.get(IUndoRedoService);
-    }
-
     override getBackgroundImage(): Nullable<IWorksheetBackgroundImage> {
         const backgroundImage = this._worksheet.getConfig().backgroundImage;
         return backgroundImage ? { ...backgroundImage } : null;
@@ -687,7 +685,11 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
             subUnitId: this.getSheetId(),
             drawingId,
         });
-        return drawing ? getSheetDrawingPlacement(drawing) : null;
+        if (!drawing) return null;
+        const skeleton = drawing.anchorType === SheetDrawingAnchorType.None
+            ? undefined
+            : this._sheetSkeletonService.ensureSkeleton(drawing.unitId, drawing.subUnitId);
+        return getSheetDrawingPlacement(drawing, skeleton ?? undefined);
     }
 
     override setDrawingPlacement(drawingId: string, placement: ISheetDrawingPlacementInput): boolean {
@@ -698,14 +700,17 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
         });
     }
 
-    override resolveDrawingPlacement(placement: ISheetDrawingPlacementInput): ISheetDrawingPlacement {
+    override resolveDrawingPlacement(placement: ISheetDrawingPlacementInput): ISheetDrawingPlacement & { bounds?: IGroupBaseBound } {
         const skeleton = placement.kind === SheetDrawingAnchorType.None
             ? undefined
             : this._sheetSkeletonService.ensureSkeleton(this._fWorkbook.getId(), this.getSheetId());
         if (placement.kind !== SheetDrawingAnchorType.None && !skeleton) {
             throw new Error('SHEET_DRAWING_PLACEMENT_SKELETON_REQUIRED');
         }
-        return normalizeSheetDrawingPlacement(placement, skeleton);
+        const resolved = normalizeSheetDrawingPlacement(placement, skeleton);
+        return 'bounds' in placement && resolved.kind !== SheetDrawingAnchorType.None
+            ? { ...resolved, bounds: { ...placement.bounds } }
+            : resolved;
     }
 
     override getDrawingLayout(): ISheetDrawingLayout {
@@ -734,7 +739,7 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
                 drawingId,
                 drawingType: drawing.drawingType,
                 bounds,
-                placement: getSheetDrawingPlacement(drawing),
+                placement: getSheetDrawingPlacement(drawing, skeleton),
                 groupId: drawing.groupId,
             });
         }
@@ -796,10 +801,10 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
             groupId,
         })) as IDrawingParam[];
 
-        const result = this._applyGroupDrawingOperation([{
+        const result = this._commandService.syncExecuteCommand(GroupSheetDrawingCommand.id, [{
             parent: groupParam,
             children,
-        }], DrawingApplyType.GROUP);
+        }]);
 
         return result ? groupId : null;
     }
@@ -843,7 +848,8 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
             }
         }
 
-        return this._applyGroupDrawingOperation(groupParams, DrawingApplyType.UNGROUP);
+        if (groupParams.length === 0) return false;
+        return this._commandService.syncExecuteCommand(UngroupSheetDrawingCommand.id, groupParams);
     }
 
     override getDrawingGroupChildren(groupId: string, recursive = false): ISheetDrawing[] {
@@ -880,79 +886,6 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
 
     override isDrawingGrouped(drawingId: string): boolean {
         return this.getDrawingParentGroup(drawingId) !== null;
-    }
-
-    private _applyGroupDrawingOperation(groupParams: IDrawingGroupUpdateParam[], type: DrawingApplyType.GROUP | DrawingApplyType.UNGROUP): boolean {
-        if (groupParams.length === 0) return false;
-
-        const sheetDrawingService = this._sheetDrawingService;
-        const commandService = this._commandService;
-        const undoRedoService = this._undoRedoService;
-        const jsonOp = (type === DrawingApplyType.GROUP
-            ? sheetDrawingService.getGroupDrawingOp(groupParams)
-            : sheetDrawingService.getUngroupDrawingOp(groupParams)) as IDrawingJsonUndo1;
-
-        const { unitId, subUnitId, undo, redo, objects } = jsonOp;
-        const result = commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { op: redo, unitId, subUnitId, objects, type });
-
-        if (result) {
-            const inverseType = type === DrawingApplyType.GROUP ? DrawingApplyType.UNGROUP : DrawingApplyType.GROUP;
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: [
-                    { id: SetDrawingApplyMutation.id, params: { op: undo, unitId, subUnitId, objects: this._invertGroupOperationObjects(objects as IDrawingGroupUpdateParam[], type), type: inverseType } },
-                ],
-                redoMutations: [
-                    { id: SetDrawingApplyMutation.id, params: { op: redo, unitId, subUnitId, objects, type } },
-                ],
-            });
-
-            return true;
-        }
-
-        return false;
-    }
-
-    private _invertGroupOperationObjects(groupParams: IDrawingGroupUpdateParam[], type: DrawingApplyType.GROUP | DrawingApplyType.UNGROUP): IDrawingGroupUpdateParam[] {
-        return type === DrawingApplyType.GROUP
-            ? groupParams.map((groupParam) => {
-                const { parent, children } = groupParam;
-                const groupTransform = parent.transform || { width: 0, height: 0 };
-                return {
-                    parent: {
-                        ...parent,
-                        transform: {
-                            left: 0,
-                            top: 0,
-                        },
-                    },
-                    children: children.map((child) => ({
-                        ...child,
-                        transform: transformObjectOutOfGroup(
-                            child.transform || {},
-                            groupTransform,
-                            groupTransform.width || 0,
-                            groupTransform.height || 0,
-                            parent.groupBaseBound
-                        ),
-                        groupId: undefined,
-                    })),
-                };
-            })
-            : groupParams.map((groupParam) => {
-                const { parent, children } = groupParam;
-                const groupTransform = getGroupState(0, 0, children.map((child) => child.transform || {}));
-                return {
-                    parent: {
-                        ...parent,
-                        transform: groupTransform,
-                    },
-                    children: children.map((child) => ({
-                        ...child,
-                        groupId: parent.drawingId,
-                    })),
-                };
-            });
     }
 }
 

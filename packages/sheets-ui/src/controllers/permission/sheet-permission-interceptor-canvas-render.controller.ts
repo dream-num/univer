@@ -18,7 +18,6 @@ import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@
 import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { DisposableCollection, Inject, IPermissionService, IUniverInstanceService, Optional, RANGE_TYPE, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
-
 import { getSheetCommandTarget, RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { HeaderFreezeRenderController } from '../render-controllers/freeze.render-controller';
@@ -27,6 +26,23 @@ import { HeaderResizeRenderController } from '../render-controllers/header-resiz
 import { getTransformCoord } from '../utils/component-tools';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
+
+export function checkHeaderResizePermission(
+    permissionService: IPermissionService,
+    unitId: string,
+    subUnitId: string,
+    rangeParams: { row?: number; col?: number }
+): boolean {
+    if (rangeParams.row !== undefined) {
+        return permissionService.getPermissionPoint(new WorksheetSetRowStylePermission(unitId, subUnitId).id)?.value === true;
+    }
+
+    if (rangeParams.col !== undefined) {
+        return permissionService.getPermissionPoint(new WorksheetSetColumnStylePermission(unitId, subUnitId).id)?.value === true;
+    }
+
+    return true;
+}
 
 export class SheetPermissionInterceptorCanvasRenderController extends RxDisposable implements IRenderModule {
     disposableCollection = new DisposableCollection();
@@ -103,26 +119,13 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
 
         this.disposeWithMe(
             this._headerResizeRenderController.interceptor.intercept(this._headerResizeRenderController.interceptor.getInterceptPoints().HEADER_RESIZE_PERMISSION_CHECK, {
-                handler: (defaultValue: Nullable<boolean>, rangeParams: { row?: number; col?: number }) => {
+                handler: (_defaultValue: Nullable<boolean>, rangeParams: { row?: number; col?: number }) => {
                     const target = getSheetCommandTarget(this._univerInstanceService);
                     if (!target) {
                         return false;
                     }
-                    const { unitId, subUnitId } = target;
 
-                    if (rangeParams.row) {
-                        const setRowStylePermission = this._permissionService.getPermissionPoint(new WorksheetSetRowStylePermission(unitId, subUnitId).id)?.value ?? false;
-                        if (setRowStylePermission === false) {
-                            return false;
-                        }
-                    } else if (rangeParams.col) {
-                        const setColStylePermission = this._permissionService.getPermissionPoint(new WorksheetSetColumnStylePermission(unitId, subUnitId).id)?.value ?? false;
-                        if (setColStylePermission === false) {
-                            return false;
-                        }
-                    }
-
-                    return true;
+                    return checkHeaderResizePermission(this._permissionService, target.unitId, target.subUnitId, rangeParams);
                 },
             })
         );

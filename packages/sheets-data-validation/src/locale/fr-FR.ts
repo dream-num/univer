@@ -136,6 +136,11 @@ const locale: typeof enUS = {
             title: 'Case à cocher',
             error: 'Le contenu de cette cellule viole sa règle de validation',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'La plage est protégée, et vous n\'avez pas la permission de définir les styles. Pour définir les styles, veuillez contacter le créateur.',
+            },
+        },
     },
 };
 

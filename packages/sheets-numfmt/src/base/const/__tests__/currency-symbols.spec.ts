@@ -16,12 +16,15 @@
 
 import { LocaleType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { getCurrencyFormat, getCurrencySymbolByLocale, getCurrencySymbolIconByLocale } from '../currency-symbols';
+import { getCurrencyFormat, getCurrencySymbolIconByLocale } from '../currency-symbols';
 
 describe('currency symbols', () => {
+    it.each(['en-IN', 'mlIN', 'hi-Deva-IN', 'pa-Guru-IN-u-nu-latn'])('uses the Indian currency for %s', (region) => {
+        expect(getCurrencySymbolIconByLocale(region)).toMatchObject({ symbol: '₹', icon: 'RegionalCurrencyIcon' });
+        expect(getCurrencyFormat(region)).toContain('"₹"#,##0.00');
+    });
+
     it('currency symbol helpers', () => {
-        expect(getCurrencySymbolByLocale(LocaleType.ZH_CN)).toBe('¥');
-        expect(getCurrencySymbolByLocale(LocaleType.KO_KR)).toBe('₩');
         expect(getCurrencySymbolIconByLocale(LocaleType.FR_FR)).toEqual({
             icon: 'EuroIcon',
             symbol: '€',
@@ -41,7 +44,7 @@ describe('currency symbols', () => {
         ].map((locale) => getCurrencySymbolIconByLocale(locale).icon)).toEqual([
             'DongIcon',
             'RialIcon',
-            'RialIcon',
+            'RegionalCurrencyIcon',
             'RupiahIcon',
             'ZlotyIcon',
         ]);

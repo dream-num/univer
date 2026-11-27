@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomRange, IDocumentData } from '@univerjs/core';
+import type { DocumentDataModel, ICustomRange, IDocumentData, IHyperlink } from '@univerjs/core';
 import {
     CustomRangeType,
+    DocumentFlavor,
     ICommandService,
     IResourceManagerService,
     LocaleType,
@@ -110,6 +111,27 @@ function getRange(model: DocumentDataModel, rangeId: string, segment: 'body' | '
     return doc?.getBody()?.customRanges?.find((range) => range.rangeId === rangeId);
 }
 
+function createInternalDocData(
+    flavor: DocumentFlavor,
+    story: 'body' | 'header' | 'footer',
+    properties: IHyperlink
+): IDocumentData {
+    const data = createDocData();
+    data.documentStyle.documentFlavor = flavor;
+    const bodies = { body: data.body!, header: data.headers!['header-1'].body!, footer: data.footers!['footer-1'].body! };
+    for (const body of Object.values(bodies)) {
+        body.customRanges = [];
+    }
+    bodies[story].customRanges = [{
+        startIndex: 0,
+        endIndex: 0,
+        rangeId: 'internal-link',
+        rangeType: CustomRangeType.HYPERLINK,
+        properties: { ...properties },
+    }];
+    return data;
+}
+
 describe('DocHyperLinkResourceController', () => {
     let univer: Univer;
     let commandService: ICommandService;
@@ -183,5 +205,63 @@ describe('DocHyperLinkResourceController', () => {
         await expect(commandService.executeCommand(AddHyperLinkMuatation.id)).resolves.toBe(true);
         await expect(commandService.executeCommand(UpdateHyperLinkMuatation.id)).resolves.toBe(true);
         await expect(commandService.executeCommand(DeleteHyperLinkMuatation.id)).resolves.toBe(true);
+    });
+
+    describe('internal reference resource replay', () => {
+        it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((flavor) =>
+            (['body', 'header', 'footer'] as const).flatMap((story) =>
+                (['bookmark', 'heading'] as const).flatMap((target) =>
+                    [false, true].map((owned) => ({ flavor, story, target, owned }))
+                )
+            )
+        ))('preserves the entire public snapshot through empty URL resource round trips ($flavor/$story/$target/$owned)', ({ flavor, story, target, owned }) => {
+            const properties: IHyperlink = {
+                textStyleMode: 'text',
+                referenceFieldLink: owned,
+                ...(target === 'bookmark' ? { bookmarkId: '_RefTarget' } : { headingId: 'heading-target' }),
+            };
+            const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createInternalDocData(flavor, story, properties));
+            const before = JSON.stringify(doc.getSnapshot());
+            const resources = resourceManagerService.getResourcesByType(doc.getUnitId(), UniverInstanceType.UNIVER_DOC);
+            expect(JSON.parse(resources.find((resource) => resource.name === DOC_HYPER_LINK_PLUGIN)!.data)).toEqual({
+                links: [{ id: 'internal-link', payload: '' }],
+            });
+            resourceManagerService.loadResources(doc.getUnitId(), resources);
+            expect(getRange(doc, 'internal-link', story)?.properties).toEqual(properties);
+            expect(JSON.stringify(doc.getSnapshot())).toBe(before);
+        });
+
+        it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((flavor) =>
+            (['body', 'header', 'footer'] as const).map((story) => ({ flavor, story }))
+        ))('retains owned reference targets when legacy resources contain a stale external URL ($flavor/$story)', ({ flavor, story }) => {
+            const properties: IHyperlink = { bookmarkId: '_RefTarget', textStyleMode: 'text', referenceFieldLink: true };
+            const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createInternalDocData(flavor, story, properties));
+            const before = JSON.stringify(doc.getSnapshot());
+            resourceManagerService.loadResources(doc.getUnitId(), [{
+                name: DOC_HYPER_LINK_PLUGIN,
+                data: JSON.stringify({ links: [{ id: 'internal-link', payload: 'https://stale.example/' }] }),
+            }]);
+            expect(JSON.stringify(doc.getSnapshot())).toBe(before);
+        });
+
+        it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('retains an explicit public URL on an edited reference link (%s)', (flavor) => {
+            const properties: IHyperlink = { bookmarkId: '_RefTarget', url: 'https://edited.example/', referenceFieldLink: true };
+            const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createInternalDocData(flavor, 'body', properties));
+            resourceManagerService.loadResources(doc.getUnitId(), [{
+                name: DOC_HYPER_LINK_PLUGIN,
+                data: JSON.stringify({ links: [{ id: 'internal-link', payload: 'https://stale.example/' }] }),
+            }]);
+            expect(getRange(doc, 'internal-link')?.properties).toEqual(properties);
+        });
+
+        it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('continues loading real legacy external destinations for authored links (%s)', (flavor) => {
+            const properties: IHyperlink = { bookmarkId: '_RefTarget', textStyleMode: 'text', referenceFieldLink: false };
+            const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createInternalDocData(flavor, 'body', properties));
+            resourceManagerService.loadResources(doc.getUnitId(), [{
+                name: DOC_HYPER_LINK_PLUGIN,
+                data: JSON.stringify({ links: [{ id: 'internal-link', payload: 'https://legacy.example/' }] }),
+            }]);
+            expect(getRange(doc, 'internal-link')?.properties).toEqual({ ...properties, url: 'https://legacy.example/' });
+        });
     });
 });

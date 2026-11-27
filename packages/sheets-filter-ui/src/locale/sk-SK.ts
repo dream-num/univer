@@ -27,7 +27,7 @@ const locale: typeof enUS = {
             'smart-toggle-filter': 'Prepnúť filter',
         },
         permission: {
-            filterErr: 'Nemáte povolenie používať filter.',
+            filterErr: 'Rozsah je chránený a nemáte oprávnenie na filtrovanie. Ak chcete filtrovať, kontaktujte tvorcu.',
         },
         panel: {
             'clear-filter': 'Vymazať filter',

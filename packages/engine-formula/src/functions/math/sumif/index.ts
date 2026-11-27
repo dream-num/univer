@@ -18,9 +18,11 @@ import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/r
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import { valueObjectCompare } from '../../../engine/utils/object-compare';
-import { filterSameValueObjectResult, getPairedRangeAndCriteriaResult } from '../../../engine/utils/value-object';
+import { filterSameValueObjectResult, getPairedRangeAndCriteriaResult, mapReferenceGridCriteria } from '../../../engine/utils/value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Sumif extends BaseFunction {
@@ -29,6 +31,8 @@ export class Sumif extends BaseFunction {
     override maxParams = 3;
 
     override needsReferenceObject = true;
+
+    override lazyIfReferenceArrayArgumentIndexes = [0, 2];
 
     override calculate(range: FunctionVariantType, criteria: FunctionVariantType, sumRange?: FunctionVariantType): BaseValueObject {
         if (range.isError()) {
@@ -45,6 +49,16 @@ export class Sumif extends BaseFunction {
 
         if (criteria.isReferenceObject()) {
             _criteria = (criteria as BaseReferenceObject).toArrayValueObject();
+        }
+
+        if ((range instanceof MultiAreaReferenceObject && range.isArrayOfReferences()) ||
+            (sumRange instanceof MultiAreaReferenceObject && sumRange.isArrayOfReferences())) {
+            return mapReferenceGridCriteria(
+                range as BaseReferenceObject,
+                _criteria as BaseValueObject,
+                sumRange as BaseReferenceObject | undefined,
+                (area, condition, target) => condition.isError() ? NumberValueObject.create(0) : this._handleSingleObject(area, condition, target)
+            );
         }
 
         if (_criteria.isArray()) {
@@ -99,13 +113,18 @@ export class Sumif extends BaseFunction {
             // TODO: @DR-Univer The current situation is that the cell value in the extended range changes,
             // but it is not within the formula parameter range, so it will not trigger the formula to recalculate.
             if (rangeRowCount !== sumRangeRowCount || rangeColumnCount !== sumRangeColumnCount) {
-                const rangeData = (sumRange as BaseReferenceObject).getRangeData();
-                rangeData.endRow = rangeData.startRow + rangeRowCount - 1;
-                rangeData.endColumn = rangeData.startColumn + rangeColumnCount - 1;
-
-                (sumRange as BaseReferenceObject).setRangeData(rangeData);
-
-                _sumRange = (sumRange as BaseReferenceObject).toArrayValueObject();
+                const reference = sumRange as BaseReferenceObject;
+                const rangeData = reference.getRangeData();
+                reference.setRangeData({
+                    ...rangeData,
+                    endRow: rangeData.startRow + rangeRowCount - 1,
+                    endColumn: rangeData.startColumn + rangeColumnCount - 1,
+                });
+                try {
+                    _sumRange = reference.toArrayValueObject();
+                } finally {
+                    reference.setRangeData(rangeData);
+                }
             }
         }
 

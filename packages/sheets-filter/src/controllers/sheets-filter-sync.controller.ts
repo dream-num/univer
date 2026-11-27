@@ -14,13 +14,44 @@
  * limitations under the License.
  */
 
-import type { IInsertColMutationParams, IMoveColumnsMutationParams, IRemoveColMutationParams } from '@univerjs/sheets';
-import type { IUniverSheetsFilterConfig } from '../config/config';
-import { Disposable, DisposableCollection, ICommandService, IConfigService, Inject, sequenceExecute } from '@univerjs/core';
-import { InsertColMutation, MoveColsMutation, RemoveColMutation } from '@univerjs/sheets';
+import type { IMutationInfo } from '@univerjs/core';
+import type {
+    IInsertColMutationParams,
+    IInsertRowMutationParams,
+    IMoveColumnsMutationParams,
+    IMoveRowsMutationParams,
+    IRemoveColMutationParams,
+    IRemoveRowsMutationParams,
+} from '@univerjs/sheets';
+import {
+    Disposable,
+    DisposableCollection,
+    ICommandService,
+    IConfigService,
+    Inject,
+    IPermissionService,
+    IUniverInstanceService,
+    sequenceExecute,
+} from '@univerjs/core';
+import {
+    getSheetCommandTarget,
+    InsertColMutation,
+    InsertRowMutation,
+    MoveColsMutation,
+    MoveRowsMutation,
+    RemoveColMutation,
+    RemoveRowMutation,
+    WorkbookEditablePermission,
+} from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
-import { ReCalcSheetsFilterMutation, SetSheetsFilterCriteriaMutation } from '../commands/mutations/sheets-filter.mutation';
+import type { IUniverSheetsFilterConfig } from '../config/config';
+import {
+    ReCalcSheetsFilterMutation,
+    RemoveSheetsFilterMutation,
+    SetSheetsFilterCriteriaMutation,
+} from '../commands/mutations/sheets-filter.mutation';
 import { SHEETS_FILTER_PLUGIN_CONFIG_KEY } from '../config/config';
+import { SheetsFilterService } from '../services/sheet-filter.service';
 import { SheetsFilterController } from './sheets-filter.controller';
 
 const sheetsFilterOnlyLocalMutationIds = [
@@ -32,6 +63,15 @@ const effectedByOnlyLocalMutationIds = [
     InsertColMutation.id,
     RemoveColMutation.id,
     MoveColsMutation.id,
+];
+
+const structuralMutationIds = [
+    InsertColMutation.id,
+    InsertRowMutation.id,
+    RemoveColMutation.id,
+    RemoveRowMutation.id,
+    MoveColsMutation.id,
+    MoveRowsMutation.id,
 ];
 
 export class SheetsFilterSyncController extends Disposable {
@@ -47,10 +87,15 @@ export class SheetsFilterSyncController extends Disposable {
 
     constructor(
         @Inject(SheetsFilterController) private readonly _sheetsFilterController: SheetsFilterController,
+        @Inject(SheetsFilterService) private readonly _sheetsFilterService: SheetsFilterService,
         @ICommandService protected readonly _commandService: ICommandService,
-        @IConfigService private readonly _configService: IConfigService
+        @IConfigService private readonly _configService: IConfigService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         super();
+
+        this._initRemoteStructuralListener();
 
         const config = this._configService.getConfig<IUniverSheetsFilterConfig>(SHEETS_FILTER_PLUGIN_CONFIG_KEY);
         if (config?.enableSyncSwitch) {
@@ -74,16 +119,36 @@ export class SheetsFilterSyncController extends Disposable {
     private _initOnlyLocalListener() {
         this._d.add(
             this._commandService.beforeCommandExecuted((commandInfo, options) => {
-                if (sheetsFilterOnlyLocalMutationIds.includes(commandInfo.id)) {
-                    if (!options) options = {};
-                    options.onlyLocal = true;
+                if (!sheetsFilterOnlyLocalMutationIds.includes(commandInfo.id)) {
+                    return;
                 }
+                const target = getSheetCommandTarget(this._univerInstanceService, commandInfo.params as {
+                    unitId?: string;
+                    subUnitId?: string;
+                });
+                if (!target || !this._isWorkbookEditable(target.unitId)) {
+                    return;
+                }
+                if (!options) {
+                    options = {};
+                }
+                options.onlyLocal = true;
             })
         );
 
         this._d.add(
             this._commandService.onCommandExecuted((commandInfo, options) => {
                 if (effectedByOnlyLocalMutationIds.includes(commandInfo.id) && options?.fromCollab) {
+                    const { unitId: targetUnitId, subUnitId: targetSubUnitId } = commandInfo.params as {
+                        unitId?: string;
+                        subUnitId?: string;
+                    };
+                    if (!targetUnitId || !targetSubUnitId || !this._isWorkbookEditable(targetUnitId)) {
+                        return;
+                    }
+                    if (this._sheetsFilterService.isRemoteFilterMutationsSuppressed(targetUnitId, targetSubUnitId)) {
+                        return;
+                    }
                     if (commandInfo.id === InsertColMutation.id) {
                         const { range, unitId, subUnitId } = commandInfo.params as IInsertColMutationParams;
                         const { redos } = this._sheetsFilterController.handleInsertColCommand(range, unitId, subUnitId);
@@ -97,6 +162,73 @@ export class SheetsFilterSyncController extends Disposable {
                         const { redos } = this._sheetsFilterController.handleMoveColsCommand({ fromRange, toRange }, unitId, subUnitId);
                         sequenceExecute(redos, this._commandService, options);
                     }
+                }
+            })
+        );
+    }
+
+    private _isWorkbookEditable(unitId?: string): boolean {
+        if (!unitId) {
+            return true;
+        }
+        const permission = this._permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id);
+        return permission?.value !== false;
+    }
+
+    private _initRemoteStructuralListener() {
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((commandInfo, options) => {
+                if (!options?.fromCollab || !structuralMutationIds.includes(commandInfo.id)) {
+                    return;
+                }
+                const { unitId, subUnitId } = commandInfo.params as { unitId?: string; subUnitId?: string };
+                if (!unitId || !subUnitId || !this._sheetsFilterService.isRemoteFilterMutationsSuppressed(unitId, subUnitId)) {
+                    return;
+                }
+
+                let redos: IMutationInfo[] = [];
+                switch (commandInfo.id) {
+                    case InsertColMutation.id: {
+                        const params = commandInfo.params as IInsertColMutationParams;
+                        redos = this._sheetsFilterController.handleRemoteInsertCol(params.range, unitId, params.subUnitId);
+                        break;
+                    }
+                    case InsertRowMutation.id: {
+                        const params = commandInfo.params as IInsertRowMutationParams;
+                        redos = this._sheetsFilterController.handleRemoteInsertRow(params.range, unitId, params.subUnitId);
+                        break;
+                    }
+                    case RemoveColMutation.id: {
+                        const params = commandInfo.params as IRemoveColMutationParams;
+                        redos = this._sheetsFilterController.handleRemoteRemoveCol(params.range, unitId, params.subUnitId);
+                        break;
+                    }
+                    case RemoveRowMutation.id: {
+                        const params = commandInfo.params as IRemoveRowsMutationParams;
+                        redos = this._sheetsFilterController.handleRemoteRemoveRow(params.range, unitId, params.subUnitId);
+                        break;
+                    }
+                    case MoveColsMutation.id: {
+                        const params = commandInfo.params as IMoveColumnsMutationParams;
+                        redos = this._sheetsFilterController.handleRemoteMoveCols(params.sourceRange, params.targetRange, unitId, params.subUnitId);
+                        break;
+                    }
+                    case MoveRowsMutation.id: {
+                        const params = commandInfo.params as IMoveRowsMutationParams;
+                        redos = this._sheetsFilterController.handleRemoteMoveRows(params.sourceRange, params.targetRange, unitId, params.subUnitId);
+                        break;
+                    }
+                }
+
+                if (subUnitId) {
+                    this._sheetsFilterService.markRemoteFilterRecalc(unitId, subUnitId);
+                }
+                const removesFilter = redos.some((mutation) => mutation.id === RemoveSheetsFilterMutation.id);
+                sequenceExecute(redos, this._commandService, { ...options, onlyLocal: true });
+                if (removesFilter && subUnitId) {
+                    // The local filter model is gone; undo entries that still target it would
+                    // fail and block later history entries.
+                    this._sheetsFilterService.invalidateFilterHistory(unitId, subUnitId);
                 }
             })
         );

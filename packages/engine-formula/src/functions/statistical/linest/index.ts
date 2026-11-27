@@ -16,7 +16,7 @@
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
-import { checkKnownsArrayDimensions, getKnownsArrayCoefficients, getKnownsArrayValues, getSerialNumbersByRowsColumns, getSlopeAndIntercept } from '../../../basics/statistical';
+import { checkKnownsArrayDimensions, fitSinglePredictor, getKnownsArrayCoefficients, getKnownsArrayValues, getSerialNumbersByRowsColumns, getSlopeAndIntercept } from '../../../basics/statistical';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -29,6 +29,8 @@ export class Linest extends BaseFunction {
     override maxParams = 4;
 
     override returnsLegacyArrayAsScalar = true;
+
+    protected readonly useExcelResidualArithmetic: boolean = false;
 
     override calculate(knownYs: BaseValueObject, knownXs?: BaseValueObject, constb?: BaseValueObject, stats?: BaseValueObject): BaseValueObject {
         const { isError, errorObject } = checkKnownsArrayDimensions(knownYs, knownXs);
@@ -49,7 +51,7 @@ export class Linest extends BaseFunction {
             return knownXsValues;
         }
 
-        let _constb = constb ?? BooleanValueObject.create(true);
+        let _constb = constb == null || constb.isNull() ? BooleanValueObject.create(true) : constb;
 
         if (_constb.isArray()) {
             _constb = (_constb as ArrayValueObject).get(0, 0) as BaseValueObject;
@@ -97,13 +99,13 @@ export class Linest extends BaseFunction {
     }
 
     private _getResultByMultipleVariables(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
-        const _coefficients = getKnownsArrayCoefficients(knownYsValues, knownXsValues, knownXsValues, constb, false);
+        const _coefficients = getKnownsArrayCoefficients(knownYsValues, knownXsValues, knownXsValues, constb, false, this.useExcelResidualArithmetic);
 
         if (_coefficients instanceof ErrorValueObject) {
             return _coefficients;
         }
 
-        const { coefficients, X, XTXInverse } = _coefficients;
+        const { coefficients, XTXInverse, rank } = _coefficients;
 
         let result: Array<Array<number | string>> = [];
 
@@ -113,30 +115,15 @@ export class Linest extends BaseFunction {
             const meanY = !constb ? 0 : _knownYsValues.reduce((acc, value) => acc + value, 0) / n;
 
             const k = XTXInverse.length;
-            const df = n - k;
+            const df = n - rank;
 
             const cl = coefficients[0].length;
             const fillNa = new Array(cl - 2).fill(ErrorType.NA);
-            const b = coefficients[0][cl - 1];
-
-            const newY = [];
-
-            for (let i = 0; i < X.length; i++) {
-                let value = b;
-
-                for (let j = cl - 2; j >= 0; j--) {
-                    value += coefficients[0][cl - 2 - j] * X[i][j];
-                }
-
-                newY.push(value);
-            }
-
             let sstotal = 0;
-            let ssresid = 0;
+            const ssresid = _coefficients.squaredError;
 
             for (let i = 0; i < n; i++) {
                 sstotal += (_knownYsValues[i] - meanY) ** 2;
-                ssresid += (_knownYsValues[i] - newY[i]) ** 2;
             }
 
             const ssreg = sstotal - ssresid;
@@ -158,7 +145,7 @@ export class Linest extends BaseFunction {
             }
 
             const sey = df > 0 ? Math.sqrt(ssresid / df) : 0;
-            const F = df > 0 ? (ssreg / (cl - 1)) / (ssresid / df) : ErrorType.NUM;
+            const F = df > 0 ? (ssreg / (rank - Number(Boolean(constb)))) / (ssresid / df) : ErrorType.NUM;
 
             result = [
                 coefficients[0], // [mn, mn-1, ..., m1, b]
@@ -179,12 +166,16 @@ export class Linest extends BaseFunction {
     private _getResultBySimpleVariables(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
         const knownYsValuesFlat = knownYsValues.flat();
         const knownXsValuesFlat = knownXsValues.flat();
-        const { slope: m, intercept: b, isConstantPredictor, centered } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, false);
+        const fit = this.useExcelResidualArithmetic ? fitSinglePredictor(knownXsValuesFlat, knownYsValuesFlat, constb, true) : null;
+        const { slope: m, intercept: b, isConstantPredictor, centered } = fit
+            ? { ...fit, isConstantPredictor: false, centered: undefined }
+            : getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, false);
 
         if (Number.isNaN(m)) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
+        const useCenteredFit = centered !== undefined || isConstantPredictor;
         let result: Array<Array<number | string>> = [];
 
         if (stats) {
@@ -192,23 +183,39 @@ export class Linest extends BaseFunction {
 
             let meanY = 0;
             let meanX = 0;
-            let df = n - 1;
+            let df = Math.max(0, n - 1);
 
             if (constb) {
-                meanY = centered ? centered.yAnchor + centered.meanYOffset : b;
-                meanX = centered ? centered.xAnchor + centered.meanXOffset : knownXsValuesFlat[0];
-                df = isConstantPredictor ? n - 1 : n - 2;
+                if (useCenteredFit) {
+                    meanY = centered ? centered.yAnchor + centered.meanYOffset : b;
+                    meanX = centered ? centered.xAnchor + centered.meanXOffset : knownXsValuesFlat[0];
+                    df = Math.max(0, n - (isConstantPredictor ? 1 : 2));
+                } else {
+                    let sumY = 0;
+                    let sumX = 0;
+
+                    for (let i = 0; i < n; i++) {
+                        sumY += knownYsValuesFlat[i];
+                        sumX += knownXsValuesFlat[i];
+                    }
+
+                    meanY = sumY / n;
+                    meanX = sumX / n;
+                    df = Math.max(0, n - 2);
+                }
             }
 
             let sstotal = 0;
-            let ssresid = 0;
+            let ssresid = !useCenteredFit && df > 0 ? (fit ?? fitSinglePredictor(knownXsValuesFlat, knownYsValuesFlat, constb)).squaredError : 0;
             let ssx = 0;
 
             for (let i = 0; i < n; i++) {
                 const dy = centered ? (knownYsValuesFlat[i] - centered.yAnchor) - centered.meanYOffset : knownYsValuesFlat[i] - meanY;
                 const dx = centered ? (knownXsValuesFlat[i] - centered.xAnchor) - centered.meanXOffset : knownXsValuesFlat[i] - meanX;
                 sstotal += dy ** 2;
-                ssresid += (centered ? dy - m * dx : knownYsValuesFlat[i] - (m * knownXsValuesFlat[i] + b)) ** 2;
+                if (useCenteredFit && df > 0) {
+                    ssresid += (centered ? dy - m * dx : knownYsValuesFlat[i] - (m * knownXsValuesFlat[i] + b)) ** 2;
+                }
                 ssx += dx ** 2;
             }
 
@@ -220,13 +227,14 @@ export class Linest extends BaseFunction {
             let sey = 0;
 
             if (df > 0) {
-                if (isConstantPredictor) {
-                    seb = Math.sqrt(ssresid / df / n);
-                } else if (ssx > 0) {
+                if (ssx > 0) {
                     se = Math.sqrt(ssresid / df / ssx);
                     seb = Math.sqrt(ssresid / df * (1 / n + meanX ** 2 / ssx));
                 }
 
+                if (constb && ssx === 0) {
+                    seb = Math.sqrt(ssresid / df / n);
+                }
                 sey = Math.sqrt(ssresid / df);
             }
 
@@ -245,7 +253,9 @@ export class Linest extends BaseFunction {
                 [ssreg, ssresid], // [ssreg, ssresid]
             ];
         } else {
-            result = [[m, b]];
+            result = [
+                [m, b], // [m, b]
+            ];
         }
 
         return ArrayValueObject.createByArray(result);

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import { Injector } from '@univerjs/core';
+import { createIdentifier, Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import type { IFunctionNames } from '../../basics/function';
 import { FunctionType } from '../../basics/function';
 import { AstRootNode } from '../../engine/ast-node/ast-root-node';
 import { BaseAstNode } from '../../engine/ast-node/base-ast-node';
+import { CustomFunction } from '../../functions/custom-function';
 import { FormulaCacheService } from '../formula-cache.service';
 import { FunctionService } from '../function.service';
 
@@ -26,10 +28,103 @@ function createService() {
     const injector = new Injector();
     injector.add([FormulaCacheService]);
     injector.add([FunctionService]);
-    return { service: injector.get(FunctionService), cache: injector.get(FormulaCacheService) };
+    return { injector, service: injector.get(FunctionService), cache: injector.get(FormulaCacheService) };
+}
+
+const FACTOR = createIdentifier<number>('test.function-factor');
+
+class StatefulFunction extends CustomFunction {
+    #factor: number;
+
+    constructor(name: string, factor: number) {
+        super(name);
+        this.#factor = factor;
+    }
+
+    override calculateCustom(value: number) {
+        return value * this.#factor;
+    }
 }
 
 describe('FunctionService', () => {
+    it('recreates stateful functions using the target context without sharing executor state', () => {
+        const host = createService();
+        const target = createService();
+        host.injector.add([FACTOR, { useValue: 2 }]);
+        target.injector.add([FACTOR, { useValue: 5 }]);
+        try {
+            host.service.registerFunctionFactories({ name: 'SCALE', create: (accessor) =>
+                new StatefulFunction('SCALE', accessor.get(FACTOR)) });
+            const definitions = host.service.getFunctionRegistrations();
+            target.service.registerFunctionFactories(...definitions);
+            const first = host.service.getExecutor('SCALE')!;
+            const second = target.service.getExecutor('SCALE')!;
+            expect(first.calculateCustom(3)).toBe(6);
+            expect(second.calculateCustom(3)).toBe(15);
+            second.setRefInfo('private', 'sheet', 1, 1);
+            expect(first.unitId).toBeUndefined();
+            expect(second).not.toBe(first);
+        } finally {
+            host.injector.dispose();
+            target.injector.dispose();
+        }
+    });
+
+    it('publishes effective changes once per batch and protects newer registrations from old disposables', () => {
+        const { injector, service } = createService();
+        const received: Array<readonly IFunctionNames[]> = [];
+        try {
+            service.functionsChanged$.subscribe((names) => received.push(names));
+            const first = service.registerFunctionFactories(
+                { name: 'ONE', create: () => new StatefulFunction('ONE', 1) },
+                { name: 'TWO', create: () => new StatefulFunction('TWO', 2) }
+            );
+            const version = service.functionVersion;
+            const replacement = service.registerFunctionFactories({ name: 'ONE', create: () => new StatefulFunction('ONE', 3) });
+            first.dispose();
+            expect(service.getExecutor('ONE')?.calculateCustom(2)).toBe(6);
+            expect(service.hasExecutor('TWO')).toBe(false);
+            expect(service.functionVersion).toBe(version + 2);
+            service.unregisterExecutors('MISSING');
+            expect(received).toEqual([['ONE', 'TWO'], ['ONE'], ['TWO']]);
+            replacement.dispose();
+            replacement.dispose();
+            expect(service.getFunctionRegistrations()).toEqual([]);
+            expect(received).toEqual([['ONE', 'TWO'], ['ONE'], ['TWO'], ['ONE']]);
+        } finally {
+            injector.dispose();
+        }
+    });
+
+    it('does not partially register a batch when a factory fails or returns a different name', () => {
+        const { injector, service } = createService();
+        try {
+            expect(() => service.registerFunctionFactories(
+                { name: 'FIRST', create: () => new StatefulFunction('FIRST', 1) },
+                { name: 'SECOND', create: () => { throw new Error('factory failed'); } }
+            )).toThrow('factory failed');
+            expect(service.hasExecutor('FIRST')).toBe(false);
+            expect(service.functionVersion).toBe(0);
+            expect(() => service.registerFunctionFactories({ name: 'EXPECTED', create: () => new StatefulFunction('OTHER', 1) }))
+                .toThrow();
+            expect(service.getExecutors().size).toBe(0);
+        } finally {
+            injector.dispose();
+        }
+    });
+
+    it('does not silently recreate a legacy executor from an obsolete factory', () => {
+        const { injector, service } = createService();
+        try {
+            service.registerFunctionFactories({ name: 'SCALE', create: () => new StatefulFunction('SCALE', 1) });
+            service.registerExecutors(new StatefulFunction('SCALE', 7));
+            expect(service.getExecutor('SCALE')?.calculateCustom(2)).toBe(14);
+            expect(() => service.getFunctionRegistrations()).toThrow('SCALE');
+        } finally {
+            injector.dispose();
+        }
+    });
+
     it('makes registered formula executors available until they are unregistered', () => {
         const { service } = createService();
         const sumExecutor = { name: 'SUM' };

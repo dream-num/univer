@@ -18,6 +18,7 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { DataStreamTreeTokenType } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
+import { isNonCharacterCodePoint, isSurrogateCodePoint } from '../../../engine/utils/char-kit';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
@@ -55,6 +56,10 @@ export class Char extends BaseFunction {
         return this._handleSingleObject(number);
     }
 
+    protected _getMaximumCode(): number {
+        return 0x10FFFF;
+    }
+
     private _handleSingleObject(number: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(number);
 
@@ -66,11 +71,18 @@ export class Char extends BaseFunction {
 
         const numberValue = Math.floor(+numberObject.getValue());
 
-        if (numberValue <= 0) {
+        if (numberValue < 1 || numberValue > this._getMaximumCode()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        let result = String.fromCharCode(numberValue);
+        // CHAR follows UNICHAR: code points that do not name a character (the
+        // surrogate block and the Unicode noncharacters) return #N/A.
+        if (isSurrogateCodePoint(numberValue) || isNonCharacterCodePoint(numberValue)) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        // fromCharCode would keep only the low 16 bits of a code point above U+FFFF.
+        let result = String.fromCodePoint(numberValue);
 
         // special case for some characters causing doc stream issues
         if (filterCodeArray.some((value) => value === result)) {
@@ -78,5 +90,11 @@ export class Char extends BaseFunction {
         }
 
         return StringValueObject.create(result);
+    }
+}
+
+export class ExcelChar extends Char {
+    protected override _getMaximumCode(): number {
+        return 255;
     }
 }

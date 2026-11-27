@@ -39,7 +39,7 @@ const locale: typeof enUS = {
             add: 'Inserir Link',
         },
         permission: {
-            hyperLinkErr: 'Você não tem permissão para inserir um link.',
+            editErr: 'O intervalo está protegido e você não tem permissão de edição. Para editar, entre em contato com o criador.',
         },
         message: {
             noSheet: 'A planilha de destino foi excluída',

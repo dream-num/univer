@@ -27,7 +27,7 @@ const locale: typeof enUS = {
             'smart-toggle-filter': '필터 토글',
         },
         permission: {
-            filterErr: '필터를 사용할 권한이 없습니다.',
+            filterErr: '범위가 보호되어 있으며 필터링할 권한이 없습니다. 필터링하려면 생성자에게 문의하세요.',
         },
         panel: {
             'clear-filter': '필터 지우기',

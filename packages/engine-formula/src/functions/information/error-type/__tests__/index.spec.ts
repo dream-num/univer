@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it } from 'vitest';
 import { ErrorType as ErrorTypeBase } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
 import { ErrorType } from '../index';
 
 describe('Test error.type function', () => {
-    const testFunction = new ErrorType(FUNCTION_NAMES_INFORMATION.ERROR_TYPE);
+    const { univer } = createFunctionTestBed();
+    const testFunction = univer.__getInjector().createInstance(ErrorType, FUNCTION_NAMES_INFORMATION.ERROR_TYPE);
+
+    afterAll(() => univer.dispose());
 
     describe('ErrorType', () => {
         it('errorVal is error', () => {
@@ -33,7 +37,7 @@ describe('Test error.type function', () => {
 
             errorVal = ErrorValueObject.create(ErrorTypeBase.SPILL);
             result = testFunction.calculate(errorVal);
-            expect(result.getValue()).toBe(ErrorTypeBase.NA);
+            expect(result.getValue()).toBe(9);
         });
 
         it('errorVal is number', () => {
@@ -46,8 +50,8 @@ describe('Test error.type function', () => {
             expect(result2.getValue()).toBe(ErrorTypeBase.NA);
         });
 
-        it('errorVal is string', () => {
-            const errorVal = StringValueObject.create('test');
+        it.each(['test', '#SPILL!'])('errorVal is the string %s', (text) => {
+            const errorVal = StringValueObject.create(text);
             const result = testFunction.calculate(errorVal);
             expect(result.getValue()).toBe(ErrorTypeBase.NA);
         });
@@ -83,7 +87,7 @@ describe('Test error.type function', () => {
             });
             const result = testFunction.calculate(value);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [2, 5, 3, 6, 7, ErrorTypeBase.NA, 4, ErrorTypeBase.NA],
+                [2, 5, 3, 6, 7, ErrorTypeBase.NA, 4, 9],
                 [14, ErrorTypeBase.NA, 8, 1, ErrorTypeBase.NA, ErrorTypeBase.NA, ErrorTypeBase.NA, ErrorTypeBase.NA],
             ]);
         });

@@ -16,7 +16,6 @@
 
 import type { DocumentDataModel, Nullable, Workbook } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import type { LocaleKey } from '../locale/types';
 import {
     BuildTextUtils,
     ColorKit,
@@ -54,6 +53,7 @@ import {
 import { IEditorBridgeService, IMarkSelectionService } from '@univerjs/sheets-ui';
 import { KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../locale/types';
 import { CloseHyperLinkPopupOperation } from '../commands/operations/popup.operations';
 import { isLegalLink, serializeUrl } from '../common/util';
 import { ISheetsHyperLinkPopupService } from '../services/popup.service';
@@ -426,7 +426,7 @@ export const CellLinkEdit = () => {
         <div
             className={clsx(
                 `
-                  univer-box-border univer-w-[296px] univer-rounded-xl univer-bg-gray-0 univer-p-4 univer-shadow-md
+                  univer-box-border univer-w-[296px] univer-rounded-xl univer-bg-gray-0 univer-p-3 univer-shadow
                   dark:!univer-bg-gray-900
                 `,
                 borderClassName

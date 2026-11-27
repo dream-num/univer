@@ -71,7 +71,7 @@ export const DeleteSheetTableCommand: ICommand<IDeleteSheetTableParams> = {
                 ...(hasTableDxfStyles(tableConfig) ? { meta: Tools.deepClone(tableConfig.meta) } : {}),
                 options: hasTableDxfStyles(tableConfig)
                     ? { ...tableConfig.options, columns: Tools.deepClone(tableConfig.columns) }
-                    : tableConfig.options,
+                    : { ...tableConfig.options, columns: tableConfig.columns },
             },
         });
         tableConfig.filters.tableColumnFilterList?.forEach((tableFilter, column) => {

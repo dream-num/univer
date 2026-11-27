@@ -15,7 +15,6 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsTableUIConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -33,8 +32,10 @@ import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
 import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
 import { UniverMobileUIPlugin } from '@univerjs/ui';
+import type { IUniverSheetsTableUIConfig } from './config/config';
 import pkg from '../package.json';
 import { OpenTableFilterPanelMobileOperation } from './commands/operations/mobile/open-table-filter-dialog.operation';
+import { RequestOpenTableFilterPanelOperation } from './commands/operations/open-table-filter-dialog.opration';
 import { OpenTableSelectorOperation } from './commands/operations/open-table-selector.operation';
 import { defaultPluginConfig, SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { PLUGIN_NAME } from './const';
@@ -128,6 +129,7 @@ export class UniverSheetsTableMobileUIPlugin extends Plugin {
     private _initRegisterCommand(): void {
         [
             OpenTableFilterPanelMobileOperation,
+            RequestOpenTableFilterPanelOperation,
             OpenTableSelectorOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }

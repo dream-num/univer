@@ -17,6 +17,7 @@
 import type { IUnitRange, Nullable } from '@univerjs/core';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
+import { ErrorType } from '../../basics/error-type';
 import { createNewArray } from '../utils/array-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NullValueObject } from '../value-object/primitive-object';
@@ -40,7 +41,8 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
     constructor(
         token: string,
         areas: MultiAreaValue[][] = [],
-        private readonly _arrayMode = MultiAreaArrayMode.FIRST_CELL_GRID
+        private readonly _arrayMode = MultiAreaArrayMode.FIRST_CELL_GRID,
+        readonly isSheetSpan = false
     ) {
         // The parent class's rangeData becomes meaningless for multi-area.
         // We only reuse the generic infrastructure from BaseReferenceObject.
@@ -94,6 +96,21 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
 
     override isMultiArea(): boolean {
         return true;
+    }
+
+    isArrayOfReferences(): boolean {
+        return this._arrayMode === MultiAreaArrayMode.FIRST_CELL_GRID;
+    }
+
+    toReferenceErrorGrid(): ArrayValueObject {
+        const rows = this.getRowCount();
+        const columns = this.getColumnCount();
+        const referenceError = ErrorValueObject.create(ErrorType.VALUE);
+        const grid = this._areas.map((row) => Array.from({ length: columns }, (_, column) => {
+            const area = row[column];
+            return area instanceof ErrorValueObject ? area : referenceError;
+        }));
+        return createNewArray(grid, rows, columns);
     }
 
     override isRange(): boolean {

@@ -23,6 +23,8 @@ export type LocalStorageValueTypes = string;
 export interface ILocalStorageService {
     getItem<T>(key: string): Promise<T | null>;
     setItem<T>(key: string, value: T): Promise<T>;
+    /** Atomically update a value across storage clients. Returning undefined leaves it unchanged. */
+    updateItem?<T>(key: string, update: (value: T | null) => T | undefined): Promise<boolean>;
     removeItem(key: string): Promise<void>;
     clear(): Promise<void>;
     key(index: number): Promise<string | null>;

@@ -41,4 +41,25 @@ describe('Badge', () => {
         fireEvent.click(closeButton);
         expect(onClose).toHaveBeenCalled();
     });
+
+    it('stops propagation when clicking close button and supports semantic variants', () => {
+        const onParentClick = vi.fn();
+        const onClose = vi.fn();
+        render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <div onClick={onParentClick}>
+                    <Badge variant="danger" closable onClose={onClose}>Error</Badge>
+                </div>
+            </ConfigProvider>
+        );
+
+        const badge = screen.getByText('Error').closest('[data-u-comp="badge"]');
+        expect(badge?.className).toContain('univer-bg-red-50');
+
+        const closeButton = screen.getByLabelText(enUS.design.Accessibility.closeBadge);
+        fireEvent.click(closeButton);
+
+        expect(onClose).toHaveBeenCalledOnce();
+        expect(onParentClick).not.toHaveBeenCalled();
+    });
 });

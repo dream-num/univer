@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Ifna extends BaseFunction {
@@ -25,17 +28,17 @@ export class Ifna extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(value: BaseValueObject, valueIfNa: BaseValueObject) {
+    override needsReferenceObject = true;
+
+    override calculate(input: FunctionVariantType, fallback: FunctionVariantType) {
+        const value = this._toValueObject(input);
+        const valueIfNa = this._toValueObject(fallback);
         if (value.isError() && (value as ErrorValueObject).getErrorType() !== ErrorType.NA) {
             return value;
         }
 
-        if (valueIfNa.isError()) {
-            return valueIfNa;
-        }
-
         if (!value.isArray()) {
-            return value.isError() && (value as ErrorValueObject).getErrorType() === ErrorType.NA ? valueIfNa : value;
+            return value.isError() ? valueIfNa : value;
         }
 
         // get max row length
@@ -50,15 +53,22 @@ export class Ifna extends BaseFunction {
             valueIfNa.isArray() ? (valueIfNa as ArrayValueObject).getColumnCount() : 1
         );
 
-        const valueArray = expandArrayValueObject(maxRowLength, maxColumnLength, value);
-        const valueIfNaArray = expandArrayValueObject(maxRowLength, maxColumnLength, valueIfNa);
+        const valueArray = expandArrayValueObject(maxRowLength, maxColumnLength, value, ErrorValueObject.create(ErrorType.NA));
+        const valueIfNaArray = expandArrayValueObject(maxRowLength, maxColumnLength, valueIfNa, ErrorValueObject.create(ErrorType.NA));
 
         valueArray.iterator((cellValue, rowIndex, columnIndex) => {
-            if (cellValue?.isError() && (cellValue as ErrorValueObject).getErrorType() === ErrorType.NA) {
-                valueArray.set(rowIndex, columnIndex, valueIfNaArray.get(rowIndex, columnIndex));
-            }
+            const result = cellValue?.isError() && (cellValue as ErrorValueObject).getErrorType() === ErrorType.NA ? valueIfNaArray.get(rowIndex, columnIndex) : cellValue;
+            valueArray.set(rowIndex, columnIndex, result == null || result.isNull() ? NumberValueObject.create(0) : result);
         });
 
         return valueArray;
+    }
+
+    private _toValueObject(value: FunctionVariantType): BaseValueObject {
+        if (!value.isReferenceObject()) {
+            return value as BaseValueObject;
+        }
+        const array = (value as BaseReferenceObject).toArrayValueObject();
+        return array.getRowCount() === 1 && array.getColumnCount() === 1 ? array.getFirstCell() : array;
     }
 }

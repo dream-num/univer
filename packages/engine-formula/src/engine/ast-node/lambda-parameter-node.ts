@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-
+import type { FunctionVariantType } from '../reference-object/base-reference-object';
 import type { LambdaPrivacyVarType } from './base-ast-node';
 import { ErrorType } from '../../basics/error-type';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../../basics/token-type';
@@ -25,26 +25,25 @@ import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
 
-function getRootLexerNode(node: Nullable<BaseAstNode>): Nullable<BaseAstNode> {
-    if (!node) {
-        return;
-    }
-    if (node.getToken() !== DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER) {
-        return node;
-    }
-
-    const parameterNode = node as LambdaParameterNode;
-    const currentLambdaPrivacyVar = parameterNode.getCurrentLambdaPrivacyVar();
-    const lambdaParameter = parameterNode.getLambdaParameter();
-
-    if (!currentLambdaPrivacyVar) {
-        return;
-    }
-
-    return getRootLexerNode(currentLambdaPrivacyVar.get(lambdaParameter));
-}
-
 export class LambdaParameterNode extends BaseAstNode {
+    private static readonly _bindings = new WeakMap<LambdaPrivacyVarType, ReadonlyMap<string, FunctionVariantType>>();
+
+    static getBinding(scope: LambdaPrivacyVarType, name: string): Nullable<FunctionVariantType> {
+        return this._bindings.get(scope)?.get(name) ?? scope.get(name)?.getValue();
+    }
+
+    static bindValues(scope: LambdaPrivacyVarType, values: ReadonlyMap<string, FunctionVariantType>): () => void {
+        const previous = this._bindings.get(scope);
+        this._bindings.set(scope, values);
+        return () => {
+            if (previous) {
+                this._bindings.set(scope, previous);
+            } else {
+                this._bindings.delete(scope);
+            }
+        };
+    }
+
     constructor(
         token: string,
         private _lambdaParameter: string,
@@ -66,18 +65,7 @@ export class LambdaParameterNode extends BaseAstNode {
     }
 
     override execute() {
-        /**
-         * In the case of =lambda(x,y,lambda(a,b,a*b)(x,y))(1,2)
-         */
-        const node = getRootLexerNode(this._currentLambdaPrivacyVar.get(this._lambdaParameter));
-        if (!node) {
-            const value = this.getValue();
-            if (value == null || value.isError()) {
-                this.setValue(ErrorValueObject.create(ErrorType.NAME));
-            }
-        } else {
-            this.setValue(node.getValue());
-        }
+        this.setValue(LambdaParameterNode.getBinding(this._currentLambdaPrivacyVar, this._lambdaParameter) ?? ErrorValueObject.create(ErrorType.NAME));
     }
 }
 

@@ -151,6 +151,7 @@ const locale: typeof enUS = {
                 formulas: 'Fórmulas',
                 rules: 'Regras',
                 organization: 'Organização de dados',
+                analysis: 'Análise de dados',
                 display: 'Exibição',
                 visibility: 'Visibilidade',
             },

@@ -93,6 +93,24 @@ describe('getStyleInTextRange', () => {
 
         cloneSpy.mockRestore();
     });
+    it('reads the East Asian font family for a CJK selection', () => {
+        const body: IDocumentBody = {
+            dataStream: '原料药ABC\r\n',
+            textRuns: [
+                { st: 0, ed: 3, ts: { ff: 'Times New Roman', eastAsiaFontFamily: '宋体', fs: 18 } },
+                { st: 3, ed: 6, ts: { ff: 'Arial', fs: 18 } },
+            ],
+            paragraphs: [{ paragraphId: 'cjk', startIndex: 8 }],
+        };
+        const range = { startOffset: 0, endOffset: 3, collapsed: false } satisfies ITextRangeWithStyle;
+
+        const style = getStyleInTextRange(body, range, {});
+
+        // The font selector shows eastAsiaFontFamily for CJK text instead of the Latin `ff` slot.
+        expect(style.ff).toBe('Times New Roman');
+        expect(style.eastAsiaFontFamily).toBe('宋体');
+        expect(style.fs).toBe(18);
+    });
 });
 
 describe('Test inline format commands', () => {
@@ -647,5 +665,59 @@ describe('Test inline format commands', () => {
                 color: '#222222',
             });
         });
+    });
+});
+
+describe('Test inline format commands on East Asian text', () => {
+    let univer: Univer;
+    let get: Injector['get'];
+    let commandService: ICommandService;
+
+    beforeEach(() => {
+        const testBed = createCommandTestBed({
+            id: 'test-doc',
+            body: {
+                dataStream: '原料药的质量控制\r\n',
+                textRuns: [{ st: 0, ed: 8, ts: { fs: 12 } }],
+                paragraphs: [{ startIndex: 8, paragraphId: 'cjk-paragraph' }],
+                sectionBreaks: [],
+                customBlocks: [],
+            },
+            documentStyle: {
+                pageSize: { width: 594.3, height: 840.51 },
+                marginTop: 72,
+                marginBottom: 72,
+                marginRight: 90,
+                marginLeft: 90,
+            },
+        });
+        univer = testBed.univer;
+        get = testBed.get;
+
+        commandService = get(ICommandService);
+        commandService.registerCommand(SetInlineFormatCommand);
+        commandService.registerCommand(SetInlineFormatFontFamilyCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        const selectionManager = get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: 'test-doc', subUnitId: 'test-doc' });
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 0,
+            endOffset: 8,
+            collapsed: false,
+            isActive: true,
+        }]);
+    });
+
+    afterEach(() => univer.dispose());
+
+    it('applies a picked font to the East Asian slot as well', async () => {
+        await commandService.executeCommand(SetInlineFormatFontFamilyCommand.id, { value: '黑体' });
+
+        const docsModel = get(IUniverInstanceService).getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC);
+        const ts = docsModel?.getBody()?.textRuns?.[0].ts;
+
+        expect(ts?.ff).toBe('黑体');
+        expect(ts?.eastAsiaFontFamily).toBe('黑体');
     });
 });

@@ -33,10 +33,12 @@ import { CommandType } from '@univerjs/core';
 
 export interface ISetFormulaCalculationStartMutation extends IFormulaDirtyData {
     options: Nullable<IExecutionOptions>;
+    region?: string;
 }
 
 export interface ISetFormulaStringBatchCalculationMutation {
     formulas: IFormulaStringMap;
+    region?: string;
 }
 
 export interface ISetFormulaStringBatchCalculationResultMutation {

@@ -33,10 +33,11 @@ export { AddHyperLinkMutation } from './commands/mutations/add-hyper-link.mutati
 export type { IAddHyperLinkMutationParams } from './commands/mutations/add-hyper-link.mutation';
 export { RemoveHyperLinkMutation } from './commands/mutations/remove-hyper-link.mutation';
 export type { IRemoveHyperLinkMutationParams } from './commands/mutations/remove-hyper-link.mutation';
-export { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from './commands/mutations/update-hyper-link.mutation';
+export { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation, UpdateRichHyperLinkMutation } from './commands/mutations/update-hyper-link.mutation';
 export type {
     IUpdateHyperLinkMutationParams,
     IUpdateHyperLinkRefMutationParams,
+    IUpdateRichHyperLinkMutationParams,
 } from './commands/mutations/update-hyper-link.mutation';
 export type { IUniverSheetsHyperLinkConfig } from './config/config';
 export { HyperLinkModel } from './models/hyper-link.model';

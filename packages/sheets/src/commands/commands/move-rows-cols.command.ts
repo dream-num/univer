@@ -15,10 +15,6 @@
  */
 
 import type { IAccessor, ICommand, IRange, Worksheet } from '@univerjs/core';
-import type { ISelectionWithStyle } from '../../basics';
-import type { LocaleKey } from '../../locale/types';
-import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
-import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import {
     CommandType,
     ErrorService,
@@ -30,6 +26,10 @@ import {
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
+import type { ISelectionWithStyle } from '../../basics';
+import type { LocaleKey } from '../../locale/types';
+import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SelectionMoveType } from '../../services/selections/type';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
@@ -131,7 +131,8 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
 
         const commandService = accessor.get(ICommandService);
 
-        const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: MoveRowsCommand.id, params });
+        const interceptorParams = { ...params, resolvedMove: moveRowsParams };
+        const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: MoveRowsCommand.id, params: interceptorParams });
 
         const redos = [
             ...(interceptorCommands.preRedos ?? []),
@@ -189,7 +190,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         if (result.result) {
             const afterInterceptors = sheetInterceptorService.afterCommandExecute({
                 id: MoveRowsCommand.id,
-                params,
+                params: interceptorParams,
             });
             sequenceExecute(afterInterceptors.redos, commandService);
             redos.push(...afterInterceptors.redos);
@@ -285,7 +286,8 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
 
         const commandService = accessor.get(ICommandService);
 
-        const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: MoveColsCommand.id, params });
+        const interceptorParams = { ...params, resolvedMove: moveColsParams };
+        const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: MoveColsCommand.id, params: interceptorParams });
 
         const redos = [
             ...(interceptorCommands.preRedos ?? []),
@@ -338,7 +340,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         if (result.result) {
             const afterInterceptors = sheetInterceptorService.afterCommandExecute({
                 id: MoveColsCommand.id,
-                params,
+                params: interceptorParams,
             });
             sequenceExecute(afterInterceptors.redos, commandService);
             redos.push(...afterInterceptors.redos);

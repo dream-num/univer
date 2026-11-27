@@ -15,7 +15,6 @@
  */
 
 import type { ICommandInfo, IRange } from '@univerjs/core';
-
 import type { IDeleteRangeMoveLeftCommandParams } from '../../commands/commands/delete-range-move-left.command';
 import type { IDeleteRangeMoveUpCommandParams } from '../../commands/commands/delete-range-move-up.command';
 import type { IInsertRangeMoveDownCommandParams } from '../../commands/commands/insert-range-move-down.command';
@@ -25,6 +24,7 @@ import type { IMoveRangeCommandParams } from '../../commands/commands/move-range
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
 import type { IRemoveRowColCommandParams } from '../../commands/commands/remove-row-col.command';
 import type { IReorderRangeCommandParams } from '../../commands/commands/reorder-range.command';
+import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../../commands/mutations/move-rows-cols.mutation';
 import { DeleteRangeMoveLeftCommandId } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommandId } from '../../commands/commands/delete-range-move-up.command';
 import { InsertRangeMoveDownCommandId } from '../../commands/commands/insert-range-move-down.command';
@@ -35,8 +35,13 @@ import { MoveColsCommandId, MoveRowsCommandId } from '../../commands/commands/mo
 import { RemoveColCommandId, RemoveRowCommandId } from '../../commands/commands/remove-row-col.command';
 import { ReorderRangeCommandId } from '../../commands/commands/reorder-range.command';
 
-export type IMoveRowsCommand = ICommandInfo<IMoveRowsCommandParams> & { id: typeof MoveRowsCommandId };
-export type IMoveColsCommand = ICommandInfo<IMoveColsCommandParams> & { id: typeof MoveColsCommandId };
+// Interceptors receive the original command params and the resolved row or column mutation params.
+export type IMoveRowsCommand = ICommandInfo<IMoveRowsCommandParams & { resolvedMove?: IMoveRowsMutationParams }> & {
+    id: typeof MoveRowsCommandId;
+};
+export type IMoveColsCommand = ICommandInfo<IMoveColsCommandParams & { resolvedMove?: IMoveColumnsMutationParams }> & {
+    id: typeof MoveColsCommandId;
+};
 
 export type IMoveRangeCommand = ICommandInfo<IMoveRangeCommandParams> & { id: typeof MoveRangeCommandId };
 export type IInsertRowCommand = ICommandInfo<IInsertRowCommandParams> & { id: typeof InsertRowCommandId };

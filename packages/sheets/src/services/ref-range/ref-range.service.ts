@@ -34,7 +34,6 @@ import type { IInsertRangeMoveDownCommandParams } from '../../commands/commands/
 import type { IInsertRangeMoveRightCommandParams } from '../../commands/commands/insert-range-move-right.command';
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../commands/commands/insert-row-col.command';
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
-import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
 import type { IRemoveRowColCommandInterceptParams } from '../../commands/commands/remove-row-col.command';
 import type { IReorderRangeCommandParams } from '../../commands/commands/reorder-range.command';
 import type { IMoveRangeMutationParams } from '../../commands/mutations/move-range.mutation';
@@ -182,29 +181,45 @@ export class RefRangeService extends Disposable {
                 const getEffectsCbList = () => {
                     switch (command.id) {
                         case EffectRefRangId.MoveColsCommandId: {
-                            const params = command.params as IMoveColsCommandParams;
-                            const target = getSheetCommandTarget(this._univerInstanceService, params);
+                            const params = command.params!;
+                            const target = getSheetCommandTarget(this._univerInstanceService, params.resolvedMove ?? params);
                             if (!target) return [];
 
                             const { worksheet, unitId, subUnitId } = target;
-                            const startColumn = Math.min(params.fromRange.startColumn, params.toRange.startColumn);
+                            const fromRange = params.resolvedMove?.sourceRange ?? params.fromRange;
+                            const toRange = params.resolvedMove?.targetRange ?? params.toRange;
+                            const startColumn = Math.min(fromRange.startColumn, toRange.startColumn);
 
                             return this._checkRange(
-                                [{ ...params.fromRange, startColumn, endColumn: worksheet.getColumnCount() - 1 }],
+                                [{
+                                    ...fromRange,
+                                    startRow: 0,
+                                    endRow: worksheet.getRowCount() - 1,
+                                    startColumn,
+                                    endColumn: worksheet.getColumnCount() - 1,
+                                }],
                                 unitId,
                                 subUnitId
                             );
                         }
                         case EffectRefRangId.MoveRowsCommandId: {
-                            const params = command.params as IMoveRowsCommandParams;
-                            const target = getSheetCommandTarget(this._univerInstanceService, params);
+                            const params = command.params!;
+                            const target = getSheetCommandTarget(this._univerInstanceService, params.resolvedMove ?? params);
                             if (!target) return [];
 
                             const { worksheet, unitId, subUnitId } = target;
-                            const startRow = Math.min(params.fromRange.startRow, params.toRange.startRow);
+                            const fromRange = params.resolvedMove?.sourceRange ?? params.fromRange;
+                            const toRange = params.resolvedMove?.targetRange ?? params.toRange;
+                            const startRow = Math.min(fromRange.startRow, toRange.startRow);
 
                             return this._checkRange(
-                                [{ ...params.fromRange, startRow, endRow: worksheet.getRowCount() - 1 }],
+                                [{
+                                    ...fromRange,
+                                    startRow,
+                                    endRow: worksheet.getRowCount() - 1,
+                                    startColumn: 0,
+                                    endColumn: worksheet.getColumnCount() - 1,
+                                }],
                                 unitId,
                                 subUnitId
                             );

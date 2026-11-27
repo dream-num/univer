@@ -288,4 +288,21 @@ describe('layer', () => {
         layer.dispose();
         expect(layer.getObjects()).toEqual([]);
     });
+
+    it('sizes cache canvas immediately when enableCache() is called on an active engine', () => {
+        const scene = createScene();
+        const object = injector.createChild([[TestObject, { useFactory: function createTestInstance() {
+            return injector.createInstance(TestObject, 'cached-dyn', 1);
+        } }]]).get(TestObject);
+        const layer = injector.createChild([[Layer, { useFactory: function createTestInstance() {
+            return injector.createInstance(Layer, scene, [object], 1, false);
+        } }]]).get(Layer);
+        layer.enableCache();
+        const ctx = createCtx();
+
+        layer.render(ctx);
+        expect(ctx.drawImage).toHaveBeenCalledWith(expect.any(HTMLCanvasElement), 0, 0, 160, 90);
+
+        layer.dispose();
+    });
 });

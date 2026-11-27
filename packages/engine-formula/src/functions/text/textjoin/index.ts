@@ -16,6 +16,7 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject, formatNumberForFormulaText } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
@@ -83,12 +84,24 @@ export class Textjoin extends BaseFunction {
         let result = '';
 
         for (let i = 0; i < _textValues.length; i++) {
-            if (_textValues[i] !== null) {
-                result += _textValues[i];
+            const text = _textValues[i];
+
+            if (text !== null) {
+                if (result.length + text.length > 32767) {
+                    return this._createLengthError();
+                }
+
+                result += text;
             }
 
             if (i < _textValues.length - 1) {
-                result += delimiterValues[i % delimiterValues.length];
+                const delimiter = String(delimiterValues[i % delimiterValues.length]);
+
+                if (result.length + delimiter.length > 32767) {
+                    return this._createLengthError();
+                }
+
+                result += delimiter;
             }
         }
 
@@ -106,6 +119,10 @@ export class Textjoin extends BaseFunction {
 
     protected _createResult(value: string): BaseValueObject {
         return StringValueObject.create(value);
+    }
+
+    protected _createLengthError(): ErrorValueObject {
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     private _getDelimiterValues(delimiter: BaseValueObject): string[] | ErrorValueObject {

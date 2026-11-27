@@ -118,6 +118,10 @@ class ExcelTextjoin extends Textjoin {
     protected override _createResult(value: string): BaseValueObject {
         return limitedText(value);
     }
+
+    protected override _createLengthError(): ErrorValueObject {
+        return ErrorValueObject.create(ErrorType.CALC);
+    }
 }
 
 class ExcelRept extends Rept {
@@ -131,6 +135,10 @@ class ExcelRept extends Rept {
 }
 
 class ExcelConcat extends Concat {
+    protected override _createLengthError(): ErrorValueObject {
+        return ErrorValueObject.create(ErrorType.CALC);
+    }
+
     protected override _formatText(value: string | number | boolean | null): string {
         return typeof value === 'number' ? formatExcelTextNumber(value) : super._formatText(value);
     }

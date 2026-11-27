@@ -17,14 +17,117 @@
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { excelTextSerializationFunctions } from '../../excel-text-serialization';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Concat } from '../index';
 
 describe('Test concat function', () => {
     const testFunction = new Concat(FUNCTION_NAMES_TEXT.CONCAT);
 
+    describe('Excel CONCAT error propagation', () => {
+        const registration = excelTextSerializationFunctions.find(([, name]) => name === FUNCTION_NAMES_TEXT.CONCAT);
+        if (!registration) {
+            throw new Error('Missing Excel CONCAT registration');
+        }
+        const [ExcelConcat] = registration;
+        const registeredFunction = new ExcelConcat(FUNCTION_NAMES_TEXT.CONCAT);
+        if (!(registeredFunction instanceof Concat)) {
+            throw new Error('The registered Excel CONCAT must extend Concat');
+        }
+        const excelFunction = registeredFunction;
+
+        it.each([ErrorType.NA, ErrorType.DIV_BY_ZERO])('preserves a later scalar %s after exceeding the cell limit', (errorType) => {
+            const error = ErrorValueObject.create(errorType);
+            const prefix = StringValueObject.create('a'.repeat(32767));
+
+            expect(excelFunction.calculate(prefix, StringValueObject.create('b'), error)).toBe(error);
+            expect(excelFunction.calculate(ArrayValueObject.createByArray([['a'.repeat(32767), 'b']]), error)).toBe(error);
+        });
+
+        it.each([32766, 32767, 32768])('retains the registered Excel length result at %s characters', (length) => {
+            const text = 'x'.repeat(length);
+            for (const value of [StringValueObject.create(text), ArrayValueObject.createByArray([[text]])]) {
+                const result = excelFunction.calculate(value);
+                expect(result.getValue()).toBe(length > 32767 ? ErrorType.CALC : text);
+            }
+        });
+
+        it.each([
+            [ErrorType.NA, 0],
+            [ErrorType.NA, 1],
+            [ErrorType.NA, 2],
+            [ErrorType.VALUE, 0],
+            [ErrorType.VALUE, 1],
+            [ErrorType.VALUE, 2],
+            [ErrorType.DIV_BY_ZERO, 0],
+            [ErrorType.DIV_BY_ZERO, 1],
+            [ErrorType.DIV_BY_ZERO, 2],
+        ] as const)('propagates scalar %s at argument position %s', (errorType, position) => {
+            const error = ErrorValueObject.create(errorType);
+            const args = [StringValueObject.create('before'), StringValueObject.create('after')];
+            const result = excelFunction.calculate(...args.slice(0, position), error, ...args.slice(position));
+
+            expect(result).toBe(error);
+        });
+
+        it.each([false, true])('preserves argument-order error precedence with an array (arrayFirst=%s)', (arrayFirst) => {
+            const scalar = ErrorValueObject.create(ErrorType.NUM);
+            const array = ArrayValueObject.createByArray([['text', ErrorType.REF]]);
+            const result = arrayFirst ? excelFunction.calculate(array, scalar) : excelFunction.calculate(scalar, array);
+
+            expect(result.getValue()).toBe(arrayFirst ? ErrorType.REF : ErrorType.NUM);
+        });
+
+        it('keeps literal error-looking text as text', () => {
+            const result = excelFunction.calculate(StringValueObject.create('#N/A'), StringValueObject.create(' value'));
+            expect(result.getValue()).toBe('#N/A value');
+        });
+    });
+
     describe('Concat', () => {
+        it.each([32766, 32767, 32768])('enforces the cell limit at %s characters across scalar, range and formatted inputs', (length) => {
+            const text = 'x'.repeat(length);
+            const prefix = text.slice(0, 16000);
+            const suffix = text.slice(16000);
+            const inputs = [
+                [StringValueObject.create(text)],
+                [ArrayValueObject.createByArray([[text]])],
+                [StringValueObject.create(prefix), ArrayValueObject.createByArray([[suffix]])],
+                [BooleanValueObject.create(true), StringValueObject.create('x'.repeat(length - 4))],
+            ];
+
+            for (const args of inputs) {
+                const result = testFunction.calculate(...args);
+                if (length > 32767) {
+                    expect(result.getValue()).toBe(ErrorType.VALUE);
+                } else {
+                    expect(result.isString()).toBe(true);
+                    expect(`${result.getValue()}`).toHaveLength(length);
+                    expect(result.getValue()).toBe(args[0].isBoolean() ? `TRUE${'x'.repeat(length - 4)}` : text);
+                }
+            }
+        });
+
+        it.each([false, true])('preserves an array input error around an oversized string (errorFirst=%s)', (errorFirst) => {
+            const oversized = 'x'.repeat(32768);
+            const values = errorFirst ? [ErrorType.NA, oversized] : [oversized, ErrorType.NA];
+            const result = testFunction.calculate(ArrayValueObject.createByArray([values]));
+
+            expect(result.getValue()).toBe(ErrorType.NA);
+        });
+
+        it('retains native scalar-error handling after exceeding the cell limit', () => {
+            const result = testFunction.calculate(StringValueObject.create('x'.repeat(32768)), ErrorValueObject.create(ErrorType.NA));
+            expect(result.getValue()).toBe(ErrorType.VALUE);
+        });
+
+        it('retains native scalar-error handling', () => {
+            const result = testFunction.calculate(StringValueObject.create('before'), ErrorValueObject.create(ErrorType.NA), StringValueObject.create('after'));
+            expect(result.getValue()).toBe('beforeafter');
+        });
+
         it('Text is single cell', () => {
             const text1 = StringValueObject.create('Start ');
             const text2 = StringValueObject.create('End');

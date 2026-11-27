@@ -20,13 +20,96 @@ import { ArrayValueObject, transformToValueObject } from '../../../../engine/val
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../util';
+import { excelTextSerializationFunctions } from '../../excel-text-serialization';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Textjoin } from '../index';
 
 describe('Test textjoin function', () => {
     const testFunction = new Textjoin(FUNCTION_NAMES_TEXT.TEXTJOIN);
 
+    describe('Registered Excel TEXTJOIN length handling', () => {
+        const registration = excelTextSerializationFunctions.find(([, name]) => name === FUNCTION_NAMES_TEXT.TEXTJOIN);
+        if (!registration) {
+            throw new Error('Missing Excel TEXTJOIN registration');
+        }
+        const [ExcelTextjoin] = registration;
+        const registeredFunction = new ExcelTextjoin(FUNCTION_NAMES_TEXT.TEXTJOIN);
+        if (!(registeredFunction instanceof Textjoin)) {
+            throw new TypeError('Excel TEXTJOIN must extend Textjoin');
+        }
+        const excelFunction = registeredFunction;
+
+        it.each([32766, 32767, 32768])('retains the registered Excel length result at %s characters', (length) => {
+            const left = 'a'.repeat(16000);
+            const right = 'b'.repeat(length - 16001);
+            const values = ArrayValueObject.createByArray([[left, right]]);
+            const result = excelFunction.calculate(StringValueObject.create(','), BooleanValueObject.create(true), values);
+            expect(result.getValue()).toBe(length > 32767 ? ErrorType.CALC : `${left},${right}`);
+        });
+
+        it('retains delimiter limits, per-result filtering and input-error precedence', () => {
+            const delimiter = StringValueObject.create('-'.repeat(32766));
+            const ignoreEmpty = ArrayValueObject.createByArray([[true, false]]);
+            const text = ArrayValueObject.createByArray([['a', '', null]]);
+            expect(getObjectValue(excelFunction.calculate(delimiter, ignoreEmpty, text))).toStrictEqual([['a', ErrorType.CALC]]);
+
+            const error = ErrorValueObject.create(ErrorType.NA);
+            expect(excelFunction.calculate(delimiter, BooleanValueObject.create(false), StringValueObject.create('x'.repeat(32768)), error)).toBe(error);
+        });
+    });
+
     describe('Textjoin', () => {
+        it.each([32766, 32767, 32768])('counts text and delimiters toward the %s-character output', (length) => {
+            const left = 'a'.repeat(16000);
+            const right = 'b'.repeat(length - 16001);
+            const args = [StringValueObject.create(left), StringValueObject.create(right)];
+
+            for (const values of [args, [ArrayValueObject.createByArray([[left, right]])]]) {
+                const result = testFunction.calculate(StringValueObject.create(','), BooleanValueObject.create(true), ...values);
+                expect(result.getValue()).toBe(length > 32767 ? ErrorType.VALUE : `${left},${right}`);
+            }
+        });
+
+        it.each([32765, 32766])('checks a large delimiter before appending it (%s characters)', (delimiterLength) => {
+            const delimiter = StringValueObject.create('-'.repeat(delimiterLength));
+            const result = testFunction.calculate(delimiter, BooleanValueObject.create(false), StringValueObject.create('a'), StringValueObject.create('b'));
+            expect(result.getValue()).toBe(delimiterLength === 32765 ? `a${'-'.repeat(delimiterLength)}b` : ErrorType.VALUE);
+        });
+
+        it('applies the limit separately for each ignore-empty result', () => {
+            const delimiter = StringValueObject.create('-'.repeat(32766));
+            const ignoreEmpty = ArrayValueObject.createByArray([[true, false]]);
+            const text = ArrayValueObject.createByArray([['a', '', null]]);
+            const result = testFunction.calculate(delimiter, ignoreEmpty, text);
+            expect(getObjectValue(result)).toStrictEqual([['a', ErrorType.VALUE]]);
+        });
+
+        it('does not count unused delimiters for one or no remaining text values', () => {
+            const delimiter = StringValueObject.create('-'.repeat(32768));
+            const ignoreEmpty = BooleanValueObject.create(true);
+            expect(testFunction.calculate(delimiter, ignoreEmpty, StringValueObject.create('a')).getValue()).toBe('a');
+            expect(testFunction.calculate(delimiter, ignoreEmpty, NullValueObject.create()).getValue()).toBe('');
+        });
+
+        it('counts cycling delimiter lengths', () => {
+            const delimiter = ArrayValueObject.createByArray([['-', '--']]);
+            const prefix = 'x'.repeat(32762);
+            const ignoreEmpty = BooleanValueObject.create(false);
+            const result = testFunction.calculate(delimiter, ignoreEmpty, ArrayValueObject.createByArray([[prefix, 'a', 'b']]));
+            expect(result.getValue()).toBe(`${prefix}-a--b`);
+            const overflow = testFunction.calculate(delimiter, ignoreEmpty, ArrayValueObject.createByArray([[`${prefix}x`, 'a', 'b']]));
+            expect(overflow.getValue()).toBe(ErrorType.VALUE);
+        });
+
+        it('preserves input error precedence when text would exceed the limit', () => {
+            const text = ArrayValueObject.createByArray([['x'.repeat(32768), ErrorType.NA]]);
+            const delimiter = StringValueObject.create(',');
+            const ignoreEmpty = BooleanValueObject.create(true);
+            expect(testFunction.calculate(delimiter, ignoreEmpty, text).getValue()).toBe(ErrorType.NA);
+            expect(testFunction.calculate(ErrorValueObject.create(ErrorType.REF), ignoreEmpty, text).getValue()).toBe(ErrorType.REF);
+            expect(testFunction.calculate(delimiter, ErrorValueObject.create(ErrorType.DIV_BY_ZERO), text).getValue()).toBe(ErrorType.DIV_BY_ZERO);
+        });
+
         it('Value is normal', () => {
             const delimiter = StringValueObject.create(', ');
             const ignoreEmpty = BooleanValueObject.create(true);

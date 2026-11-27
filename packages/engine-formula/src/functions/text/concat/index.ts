@@ -16,7 +16,8 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { formatValueForFormulaText } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { ErrorValueObject, formatValueForFormulaText } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -27,6 +28,19 @@ export class Concat extends BaseFunction {
     override calculate(...textValues: BaseValueObject[]) {
         let concatenatedString = '';
         let isError: BaseValueObject | null = null;
+        let exceedsCellLimit = false;
+
+        const appendText = (text: string) => {
+            if (exceedsCellLimit) {
+                return;
+            }
+
+            if (concatenatedString.length + text.length > 32767) {
+                exceedsCellLimit = true;
+            } else {
+                concatenatedString += text;
+            }
+        };
 
         for (const textValue of textValues) {
             if (textValue.isArray()) {
@@ -40,7 +54,7 @@ export class Concat extends BaseFunction {
                         return false; // break
                     }
 
-                    concatenatedString += this._formatText(valueObject.getValue());
+                    appendText(this._formatText(valueObject.getValue()));
                 });
 
                 if (isError) {
@@ -51,11 +65,15 @@ export class Concat extends BaseFunction {
                     return textValue;
                 }
             } else if (!textValue.isNull()) {
-                concatenatedString += this._formatText(textValue.getValue());
+                appendText(this._formatText(textValue.getValue()));
             }
         }
 
-        return StringValueObject.create(concatenatedString);
+        return exceedsCellLimit ? this._createLengthError() : StringValueObject.create(concatenatedString);
+    }
+
+    protected _createLengthError(): ErrorValueObject {
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     protected _propagatesScalarErrors(): boolean {

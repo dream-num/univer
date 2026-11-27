@@ -120,17 +120,17 @@ export class Unique extends BaseFunction {
         const repeatRows = this._getRepeatRows(arrayValue as Array<Array<BaseValueObject>>, arrayRows, arrayColumns);
 
         if (repeatRows.length > 0) {
-            const spliceRows: number[] = [];
+            const spliceRows = new Set<number>();
 
             repeatRows.forEach((rows) => {
                 rows.forEach((r, index) => {
                     if (index !== 0 || exactlyOnceValue) {
-                        spliceRows.push(r);
+                        spliceRows.add(r);
                     }
                 });
             });
 
-            arrayValue = arrayValue.filter((row, rowIndex) => !spliceRows.includes(rowIndex));
+            arrayValue = arrayValue.filter((row, rowIndex) => !spliceRows.has(rowIndex));
         }
 
         if (arrayValue.length === 0) {

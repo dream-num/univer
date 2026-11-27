@@ -118,6 +118,11 @@ export class Numbervalue extends BaseFunction {
             return NumberValueObject.create(0);
         }
 
+        const signLength = /^[+-]/.test(textValue) ? 1 : 0;
+        if (decimalSeparatorValue && textValue[signLength] === decimalSeparatorValue && /\d/.test(textValue[signLength + 1] ?? '')) {
+            textValue = `${textValue.slice(0, signLength)}0${textValue.slice(signLength)}`;
+        }
+
         if (!textValue.match(/^\s*[+-]?\s*(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:[eE][+-]?\d+)?[ \t]*/)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }

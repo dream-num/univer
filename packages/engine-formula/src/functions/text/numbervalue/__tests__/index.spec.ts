@@ -27,6 +27,24 @@ describe('Test numbervalue function', () => {
     const testFunction = new Numbervalue(FUNCTION_NAMES_TEXT.NUMBERVALUE);
 
     describe('Numbervalue', () => {
+        it.each([
+            ['.5', '.', 0.5],
+            ['-.5', '.', -0.5],
+            ['+.5', '.', 0.5],
+            ['.5%', '.', 0.005],
+            ['-.5e2', '.', -50],
+            [',5', ',', 0.5],
+            ['-,5', ',', -0.5],
+            ['*5', '*', 0.5],
+        ])('Accepts a leading decimal separator in %s', (text, separator, expected) => {
+            const result = testFunction.calculate(StringValueObject.create(text), StringValueObject.create(separator));
+            expect(result.getValue()).toBe(expected);
+        });
+
+        it.each(['.', '-.', '.5x', '.5.2'])('Rejects malformed fractions in %s', (text) => {
+            expect(testFunction.calculate(StringValueObject.create(text)).getValue()).toBe(ErrorType.VALUE);
+        });
+
         it('Value is normal', () => {
             const text = StringValueObject.create('2.500,27');
             const decimalSeparator = StringValueObject.create(',');

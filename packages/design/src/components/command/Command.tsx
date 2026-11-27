@@ -140,7 +140,8 @@ export function CommandShortcut({ className, ...props }: ComponentProps<'span'>)
         <span
             data-slot="command-shortcut"
             className={clsx(`
-              univer-ms-auto univer-text-xs univer-tracking-widest univer-text-gray-500
+              univer-ml-auto univer-text-xs univer-tracking-widest univer-text-gray-500
+              rtl:univer-ml-0 rtl:univer-mr-auto
               dark:!univer-text-gray-300
             `, className)}
             {...props}

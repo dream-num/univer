@@ -57,7 +57,7 @@ describe('Command', () => {
         expect(list?.className).not.toContain('max-h-[300px]');
 
         const shortcut = screen.getByText('⌘R');
-        expect(shortcut.className).toContain('univer-ms-auto');
+        expect(shortcut.className).toContain('rtl:univer-mr-auto');
         expect(shortcut.className).toContain('univer-text-gray-500');
     });
 });

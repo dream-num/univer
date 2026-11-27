@@ -18,7 +18,7 @@ import type { BaseValueObject } from '../../../../engine/value-object/base-value
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
-import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Hlookup } from '../index';
 
@@ -200,6 +200,17 @@ describe('Excel lookup error precedence', () => {
                 NumberValueObject.create(index as number),
                 NumberValueObject.create(mode)
             );
+            expect(result.getValue()).toBe(expected);
+        }
+    });
+});
+
+describe('HLOOKUP numeric-looking text in binary search', () => {
+    it('uses the same text ordering for sorted keys and lookup values', () => {
+        const lookup = new Hlookup(FUNCTION_NAMES_LOOKUP.HLOOKUP);
+        const table = ArrayValueObject.create('{"10","2","9";100,200,900}');
+        for (const [key, expected] of [['10', 100], ['11', 100], ['2', 200], ['02', ErrorType.NA], ['9', 900]] as const) {
+            const result = lookup.calculate(StringValueObject.create(key), table, NumberValueObject.create(2)) as BaseValueObject;
             expect(result.getValue()).toBe(expected);
         }
     });

@@ -890,9 +890,10 @@ export class ArrayValueObject extends BaseValueObject {
     ) {
         const compareFunc = getCompare();
 
-        // Convert to number if possible, otherwise use string
+        // Numeric-looking text must use the same string ordering as the selected string array.
         const value = Number(valueObject.getValue());
-        const isValueNumber = !Number.isNaN(value);
+        const isValueNumber = !valueObject.isString() && !Number.isNaN(value);
+        const findLastMatch = preferLastMatch || (searchType === ArrayBinarySearchType.MAX && matchType === ArrayOrderSearchType.NORMAL);
 
         let start = 0;
         let end = searchArray.length - 1;
@@ -924,7 +925,7 @@ export class ArrayValueObject extends BaseValueObject {
 
             if (compareResult === 0) {
                 exactMatchIndex = middle;
-                if (!preferLastMatch) break;
+                if (!findLastMatch) break;
                 start = middle + 1;
                 continue;
             }

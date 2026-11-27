@@ -32,7 +32,11 @@ describe('Test concat function', () => {
             throw new Error('Missing Excel CONCAT registration');
         }
         const [ExcelConcat] = registration;
-        const excelFunction = new ExcelConcat(FUNCTION_NAMES_TEXT.CONCAT);
+        const registeredFunction = new ExcelConcat(FUNCTION_NAMES_TEXT.CONCAT);
+        if (!(registeredFunction instanceof Concat)) {
+            throw new Error('The registered Excel CONCAT must extend Concat');
+        }
+        const excelFunction = registeredFunction;
 
         it.each([
             [ErrorType.NA, 0],

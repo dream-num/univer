@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-import type { Injector, IWorkbookData } from '@univerjs/core';
+import type { ICellData, Injector, IWorkbookData } from '@univerjs/core';
+import { BooleanNumber, CellValueType, LocaleType, ObjectMatrix } from '@univerjs/core';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
-import { BooleanNumber, CellValueType, LocaleType } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
+import { RangeReferenceObject } from '../../../../engine/reference-object/range-reference-object';
 import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
+import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
-import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Aggregate } from '../index';
@@ -424,5 +426,23 @@ describe('Test aggregate', () => {
             const result = calculate('=AGGREGATE(19,,A1:B2,2)');
             expect(result).toBe(2.5);
         });
+    });
+});
+
+describe('Finite median midpoints', () => {
+    const aggregate = new Aggregate(FUNCTION_NAMES_MATH.AGGREGATE);
+
+    it('computes AGGREGATE median from real cell references', () => {
+        for (const sign of [1, -1]) {
+            const cellData = new ObjectMatrix<ICellData>();
+            for (let row = 0; row < 2; row++) cellData.setValue(row, 0, { v: sign * Number.MAX_VALUE, t: CellValueType.NUMBER });
+            const range = new RangeReferenceObject({ startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 }, 'sheet', 'unit');
+            range.setUnitData({ unit: { sheet: { rowCount: 2, columnCount: 1, rowData: {}, columnData: {}, cellData } } });
+            try {
+                expect(getObjectValue(aggregate.calculate(NumberValueObject.create(12), NumberValueObject.create(4), range))).toBe(sign * Number.MAX_VALUE);
+            } finally {
+                range.dispose();
+            }
+        }
     });
 });

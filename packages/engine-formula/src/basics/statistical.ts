@@ -15,12 +15,12 @@
  */
 
 import type { ICellData, IObjectArrayPrimitiveType, IRowData, Nullable, ObjectMatrix } from '@univerjs/core';
+import { BooleanNumber, isRealNum } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { MultiAreaReferenceObject } from '../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { FormulaDataModel } from '../models/formula-data.model';
-import { BooleanNumber, isRealNum } from '@univerjs/core';
 import { createNewArray } from '../engine/utils/array-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { NumberValueObject } from '../engine/value-object/primitive-object';
@@ -723,11 +723,61 @@ export function poissonCDF(x: number, mean: number): number {
         result += poissonPDF(i, mean);
     }
 
-    return result;
+    // Summing rounded masses can exceed the cumulative upper bound by an ulp.
+    return Math.min(result, 1);
 }
 
 export function poissonPDF(x: number, mean: number): number {
-    return Math.exp(-mean) * (mean ** x) / calculateFactorial(x);
+    if (x === 0) {
+        return Math.exp(-mean);
+    }
+
+    if (mean === 0 && x > 0) {
+        return 0;
+    }
+
+    const exponential = Math.exp(-mean);
+    const factorial = calculateFactorial(x);
+    const result = exponential * (mean ** x) / factorial;
+
+    // A subnormal exponential can lose precision before the mass becomes normal.
+    if (Number.isFinite(result) && result !== 0 && exponential >= 2 ** -1022) {
+        return result;
+    }
+
+    if (x < 16) {
+        return Math.exp(x * Math.log(mean) - mean - Math.log(factorial));
+    }
+
+    // Loader's saddle-point form avoids subtracting large log-gamma terms.
+    // https://www.r-project.org/doc/reports/CLoader-dbinom-2002.pdf, equation (7).
+    const inverse = 1 / x;
+    const inverseSquared = inverse * inverse;
+    const correction = inverse * (1 / 12 + inverseSquared * (-1 / 360 + inverseSquared * (1 / 1260
+        + inverseSquared * (-1 / 1680 + inverseSquared / 1188))));
+    const difference = mean - x;
+    const ratio = difference / x;
+    let deviance;
+
+    if (Math.abs(ratio) <= 0.125) {
+        // t - log1p(t) = t^2 * (1/2 - t/3 + t^2/4 - ...).
+        // Form x*t^2 as (mean-x)*t to avoid squaring a small ratio first.
+        let term = 0.5;
+        let series = term;
+
+        for (let denominator = 3; denominator <= 32; denominator++) {
+            term *= -ratio * (denominator - 1) / denominator;
+            const next = series + term;
+            if (next === series) break;
+            series = next;
+        }
+
+        deviance = difference * ratio * series;
+    } else {
+        deviance = x * Math.log(x / mean) + difference;
+    }
+
+    return Math.exp(-correction - deviance) / (Math.sqrt(2 * Math.PI) * Math.sqrt(x));
 }
 
 export function studentTCDF(x: number, degFreedom: number): number {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@univerjs/core';
+import type { Injector, IRange } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { ICommandService, UniverInstanceType } from '@univerjs/core';
 import {
@@ -24,6 +24,7 @@ import {
     RemoveSheetMutation,
     SetGridlinesColorCommand,
     SetGridlinesColorMutation,
+    SetRowDataMutation,
     SetTabColorCommand,
     SetTabColorMutation,
     SetWorksheetActiveOperation,
@@ -36,15 +37,16 @@ import {
     ToggleGridlinesCommand,
     ToggleGridlinesMutation,
 } from '@univerjs/sheets';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
 
 describe('Test FUniver sheets facade', () => {
     let get: Injector['get'];
     let univerAPI: FUniver;
+    let testBed: ReturnType<typeof createFacadeTestBed>;
 
     beforeEach(() => {
-        const testBed = createFacadeTestBed();
+        testBed = createFacadeTestBed();
         get = testBed.get;
         univerAPI = testBed.univerAPI;
 
@@ -69,6 +71,8 @@ describe('Test FUniver sheets facade', () => {
             ToggleGridlinesMutation,
         ].forEach((command) => commandService.registerCommand(command));
     });
+
+    afterEach(() => testBed.univer.dispose());
 
     it('reports workbook lifecycle through the sheet facade', () => {
         const created: string[] = [];
@@ -119,6 +123,31 @@ describe('Test FUniver sheets facade', () => {
         const assertWorkbook: LoadedWorkbook extends unknown ? true : false = true;
 
         expect(assertWorkbook).toBe(true);
+    });
+
+    it('emits the affected range after a large row data mutation', () => {
+        const commandService = get(ICommandService);
+        commandService.registerCommand(SetRowDataMutation);
+        const workbook = univerAPI.createWorkbook({
+            id: 'large-row-data',
+            sheetOrder: ['sheet'],
+            sheets: { sheet: { id: 'sheet', name: 'Sheet', rowCount: 200010, columnCount: 2 } },
+        });
+        const affected: IRange[] = [];
+        const listener = univerAPI.addEvent(univerAPI.Event.SheetValueChanged, (event) => {
+            affected.push(...event.effectedRanges.map((range) => range.getRange()));
+        });
+        try {
+            const rowData = Object.fromEntries(Array.from({ length: 200000 }, (_, index) => [index + 10, { h: 20 }]));
+            expect(commandService.syncExecuteCommand(SetRowDataMutation.id, {
+                unitId: workbook.getId(),
+                subUnitId: 'sheet',
+                rowData,
+            })).toBe(true);
+            expect(affected).toEqual([{ startRow: 10, endRow: 200009, startColumn: 0, endColumn: 1 }]);
+        } finally {
+            listener.dispose();
+        }
     });
 
     it('reports sheet lifecycle events with the resulting workbook state', () => {

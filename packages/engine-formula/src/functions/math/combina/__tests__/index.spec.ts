@@ -23,6 +23,21 @@ import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Combina } from '../index';
 
+function exactCombination(n: number, k: number): bigint {
+    let result = 1n;
+    const integerN = BigInt(n);
+    for (let i = 1; i <= Math.min(k, n - k); i++) {
+        result = result * (integerN - BigInt(i) + 1n) / BigInt(i);
+    }
+    return result;
+}
+
+function expectRelative(actual: unknown, expected: number) {
+    expect(typeof actual).toBe('number');
+    expect(Number.isFinite(actual)).toBe(true);
+    expect(Math.abs((actual as number) / expected - 1)).toBeLessThan(1e-14);
+}
+
 describe('Test combina function', () => {
     const testFunction = new Combina(FUNCTION_NAMES_MATH.COMBINA);
 
@@ -105,6 +120,12 @@ describe('Test combina function', () => {
                 [1, ErrorType.VALUE, 1, 1, ErrorType.NUM, ErrorType.NUM],
                 [ErrorType.NUM, 5050, 3, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
+        });
+
+        it('evaluates finite combinations with repetitions', () => {
+            const number = NumberValueObject.create;
+            const expected = Number(exactCombination(1024, 512));
+            expectRelative(getObjectValue(testFunction.calculate(number(513), number(512))), expected);
         });
     });
 });

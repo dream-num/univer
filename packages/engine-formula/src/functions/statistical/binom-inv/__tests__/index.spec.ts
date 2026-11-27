@@ -117,5 +117,12 @@ describe('Test binomInv function', () => {
                 [0, 53, 1, ErrorType.VALUE, ErrorType.NUM, 0],
             ]);
         });
+
+        it('restores binomial quantiles using finite coefficients', () => {
+            const number = NumberValueObject.create;
+            const trials = 1024;
+            const midpoint = trials / 2;
+            expect(getObjectValue(testFunction.calculate(number(trials), number(0.5), number(0.5)))).toBe(midpoint);
+        });
     });
 });

@@ -23,6 +23,21 @@ import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { BinomDist } from '../index';
 
+function exactCombination(n: number, k: number): bigint {
+    let result = 1n;
+    const integerN = BigInt(n);
+    for (let i = 1; i <= Math.min(k, n - k); i++) {
+        result = result * (integerN - BigInt(i) + 1n) / BigInt(i);
+    }
+    return result;
+}
+
+function expectRelative(actual: unknown, expected: number) {
+    expect(typeof actual).toBe('number');
+    expect(Number.isFinite(actual)).toBe(true);
+    expect(Math.abs((actual as number) / expected - 1)).toBeLessThan(1e-14);
+}
+
 describe('Test binomDist function', () => {
     const testFunction = new BinomDist(FUNCTION_NAMES_STATISTICAL.BINOM_DIST);
 
@@ -153,6 +168,16 @@ describe('Test binomDist function', () => {
                 [0.0107421875, ErrorType.VALUE, 0.0107421875, 0.0107421875, 0.0009765625, 0.0009765625],
                 [0.0009765625, ErrorType.NUM, 0.0546875, ErrorType.VALUE, ErrorType.NUM, 0.0009765625],
             ]);
+        });
+
+        it('restores binomial probabilities using finite coefficients', () => {
+            const number = NumberValueObject.create;
+            const trials = 1024;
+            const midpoint = trials / 2;
+            const pmf = Number(exactCombination(trials, midpoint)) * 2 ** -trials;
+            expectRelative(getObjectValue(testFunction.calculate(number(midpoint), number(trials), number(0.5), BooleanValueObject.create(false))), pmf);
+            // Symmetry of a fair even binomial: P(X <= n/2) = (1 + P(X = n/2)) / 2.
+            expectRelative(getObjectValue(testFunction.calculate(number(midpoint), number(trials), number(0.5), BooleanValueObject.create(true))), (1 + pmf) / 2);
         });
     });
 });

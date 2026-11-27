@@ -1076,6 +1076,8 @@ export class Documents extends DocComponent {
                     this._drawLiquid.translate(0, -rotateTranslateY);
                 }
 
+                // For unrotated text, cull lines at the same vertical position used for painting.
+                const lineOrigin = pageTop + section.top + (centerAngle === 0 && vertexAngle === 0 ? alignOffset.y : pagePaddingTop);
                 for (let i = visibleLineRange.start; i < visibleLineRange.end; i++) {
                     const line = lines[i];
                     const { divides, type, lineHeight = 0 } = line;
@@ -1085,8 +1087,7 @@ export class Documents extends DocComponent {
                         page.pageHeight === Number.POSITIVE_INFINITY &&
                         bounds != null
                     ) {
-                        const lineTop = pageTop + pagePaddingTop + section.top + line.top +
-                            (line.marginTop ?? 0) + (line.paddingTop ?? 0);
+                        const lineTop = lineOrigin + getLineTop(line);
                         const lineBottom = lineTop + lineHeight;
                         const { top, bottom } = bounds.viewBound;
                         if (

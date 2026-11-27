@@ -17,7 +17,7 @@
 import type { Injector, ITextStyle } from '@univerjs/core';
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
-import { DataStreamTreeTokenType, getTextRunSlice, ICommandService, Tools, UpdateDocsAttributeType } from '@univerjs/core';
+import { DataStreamTreeTokenType, ICommandService, Tools, UpdateDocsAttributeType } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { buildPlainTextInsertBody, replaceBodyRange, retainBodyRange } from './utils';
 
@@ -218,13 +218,12 @@ export class FDocumentTextRange extends FBaseInitialable {
     }
 
     /**
-     * Replaces the selected text using its character formatting. Use a separate range for
-     * each edit in a paragraph with multiple styles. Identical text succeeds without an edit.
+     * Replaces the selected text using the first selected character's formatting for the
+     * entire replacement. Identical text succeeds without editing any character styles.
      * At a caret, insertion takes the previous character's style within the paragraph,
      * or the following character's style at the start of a paragraph.
      * @param {string} text Replacement text. An empty string deletes even a mixed-style range.
-     * @returns {boolean} Whether the edit succeeded. A changed, nonempty replacement across
-     * mixed character styles returns `false` and leaves the range intact.
+     * @returns {boolean} Whether the edit succeeded.
      * @example
      * ```ts
      * const paragraph = univerAPI.getActiveDocument()?.getParagraphs()[0];
@@ -240,22 +239,13 @@ export class FDocumentTextRange extends FBaseInitialable {
         }
 
         if (insertBody.dataStream.length > 0) {
-            let start = this._startOffset;
-            let end = this._endOffset;
-            if (start === end) {
-                if (start > 0 && body.dataStream[start - 1] !== DataStreamTreeTokenType.PARAGRAPH) {
-                    start--;
-                } else {
-                    end = Math.min(end + 1, body.dataStream.length);
-                }
+            let styleOffset = this._startOffset;
+            if (styleOffset === this._endOffset && styleOffset > 0 && body.dataStream[styleOffset - 1] !== DataStreamTreeTokenType.PARAGRAPH) {
+                styleOffset--;
             }
-            const runs = getTextRunSlice(body, start, end, false) ?? [];
-            const [run] = runs;
+            const run = body.textRuns?.find(({ st, ed }) => st <= styleOffset && styleOffset < ed);
             if (run) {
-                if (runs.length > 1 || run.st !== 0 || run.ed !== end - start) {
-                    return false;
-                }
-                insertBody.textRuns = [{ ...run, ed: insertBody.dataStream.length }];
+                insertBody.textRuns = [{ ...Tools.deepClone(run), st: 0, ed: insertBody.dataStream.length }];
             }
         }
 

@@ -46,6 +46,31 @@ describe('Test lcm function', () => {
             expect(getObjectValue(result)).toBe(1611000000);
         });
 
+        it('Keeps large common factors exact for scalar and repeated arguments', () => {
+            const values = [1999999874, 24999998425].map((value) => NumberValueObject.create(value));
+            expect(getObjectValue(testFunction.calculate(...values))).toBe(49999996850);
+            expect(getObjectValue(testFunction.calculate(...values, NumberValueObject.create(2)))).toBe(49999996850);
+            expect(getObjectValue(testFunction.calculate(...values, values[0]))).toBe(49999996850);
+        });
+
+        it('Keeps large common factors exact while iterating an array', () => {
+            const values = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[1999999874, 24999998425, 2]]),
+                rowCount: 1,
+                columnCount: 3,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            expect(getObjectValue(testFunction.calculate(values))).toBe(49999996850);
+        });
+
+        it('Truncates fractional inputs before computing the least common multiple', () => {
+            const values = [4.9, 6.8].map((value) => NumberValueObject.create(value));
+            expect(getObjectValue(testFunction.calculate(...values))).toBe(12);
+        });
+
         it('Value is number negative', () => {
             const number1 = NumberValueObject.create(-8);
             const number2 = NumberValueObject.create(8);

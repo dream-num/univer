@@ -15,8 +15,8 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
+import { Disposable, DocumentFlavor, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, DocStateChangeManagerService } from '@univerjs/docs';
 import { findTableOfContentsAtOffset } from '@univerjs/docs-toc';
 import { IRibbonService } from '@univerjs/ui';
 import { DOC_TABLE_OF_CONTENTS_RIBBON_TAB } from '../menu/schema';
@@ -27,11 +27,13 @@ export class TableOfContentsRibbonController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @Inject(DocSelectionManagerService) private readonly _selectionManager: DocSelectionManagerService,
+        @Inject(DocStateChangeManagerService) changes: DocStateChangeManagerService,
         @IRibbonService private readonly _ribbonService: IRibbonService
     ) {
         super();
 
         this.disposeWithMe(this._selectionManager.textSelection$.subscribe(() => this._update()));
+        this.disposeWithMe(changes.docStateChange$.subscribe(() => this._update()));
         this.disposeWithMe(
             this._instanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
                 .subscribe(() => this._update())
@@ -44,6 +46,7 @@ export class TableOfContentsRibbonController extends Disposable {
         const selection = this._selectionManager.getActiveTextRange();
         const visible = Boolean(
             doc &&
+            doc.getDocumentStyle().documentFlavor === DocumentFlavor.TRADITIONAL &&
             selection &&
             !selection.segmentId &&
             findTableOfContentsAtOffset(doc.getBody(), selection.startOffset)

@@ -16,13 +16,13 @@
 
 import type { Injector } from '@univerjs/core';
 import type { ComponentType } from 'react';
-import type { IUniverUIConfig } from '../../config/config';
-import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { IConfigService, LifecycleService, LifecycleStages, LocaleService, ThemeService } from '@univerjs/core';
 import { borderBottomClassName, clsx, ConfigContext, ConfigProvider, render } from '@univerjs/design';
 import { useContext, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { map } from 'rxjs';
+import type { IUniverUIConfig } from '../../config/config';
+import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switcher.service';
@@ -208,8 +208,8 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
 
                             <section
                                 className={clsx(`
-                                  univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
-                                  univer-overflow-hidden univer-bg-gray-0
+                                  univer-relative univer-grid univer-flex-1 univer-grid-cols-[minmax(0,1fr)]
+                                  univer-grid-rows-[auto_1fr] univer-overflow-hidden univer-bg-gray-0
                                   dark:!univer-bg-gray-800
                                 `, borderBottomClassName)}
                             >

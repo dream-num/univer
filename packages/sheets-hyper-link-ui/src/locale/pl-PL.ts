@@ -39,7 +39,7 @@ const locale: typeof enUS = {
             add: 'Wstaw łącze',
         },
         permission: {
-            hyperLinkErr: 'Nie masz uprawnień do wstawiania łącza.',
+            editErr: 'Zakres jest chroniony i nie masz uprawnień do edycji. Aby edytować, skontaktuj się z twórcą.',
         },
         message: {
             noSheet: 'Arkusz docelowy został usunięty',

@@ -39,7 +39,7 @@ const locale: typeof enUS = {
             add: 'Sisipkan Tautan',
         },
         permission: {
-            hyperLinkErr: 'Anda tidak memiliki izin untuk menyisipkan tautan.',
+            editErr: 'Rentang dilindungi, dan Anda tidak memiliki izin edit. Untuk mengedit, silakan hubungi pembuatnya.',
         },
         message: {
             noSheet: 'Lembar target telah dihapus',

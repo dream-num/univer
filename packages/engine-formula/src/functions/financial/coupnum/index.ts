@@ -16,66 +16,22 @@
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { DateSystem } from '@univerjs/core';
-import { getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { calculateCoupnum, calculateCouppcd } from '../../../basics/financial';
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
-import { BaseFunction } from '../../base-function';
+import { CouponFunction } from '../coupon-function';
 
-export class Coupnum extends BaseFunction {
-    override minParams = 3;
-
-    override maxParams = 4;
-
-    override calculate(settlement: BaseValueObject, maturity: BaseValueObject, frequency: BaseValueObject, basis?: BaseValueObject): BaseValueObject {
-        const _basis = basis ?? NumberValueObject.create(0);
-
-        const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(settlement, maturity, frequency, _basis);
-
-        if (isError) {
-            return errorObject as ErrorValueObject;
-        }
-
-        const [settlementObject, maturityObject, frequencyObject, basisObject] = variants as BaseValueObject[];
-
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
-
-        if (typeof settlementSerialNumber !== 'number') {
-            return settlementSerialNumber;
-        }
-
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
-
-        if (typeof maturitySerialNumber !== 'number') {
-            return maturitySerialNumber;
-        }
-
-        const frequencyValue = Math.floor(+frequencyObject.getValue());
-        const basisValue = Math.floor(+basisObject.getValue());
-
-        if (Number.isNaN(frequencyValue) || Number.isNaN(basisValue)) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        if (
-            ![1, 2, 4].includes(frequencyValue) ||
-            basisValue < 0 ||
-            basisValue > 4 ||
-            Math.floor(settlementSerialNumber) >= Math.floor(maturitySerialNumber)
-        ) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        const coupDateSerialNumber = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequencyValue, this.getDateSystem());
+export class Coupnum extends CouponFunction {
+    protected override calculateCoupon(settlement: number, maturity: number, frequency: number): BaseValueObject {
+        const coupDateSerialNumber = calculateCouppcd(settlement, maturity, frequency, this.getDateSystem());
 
         // special handle for excel
         if (this.getDateSystem() === DateSystem.Date1900 && coupDateSerialNumber < 0) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequencyValue, this.getDateSystem());
+        const result = calculateCoupnum(settlement, maturity, frequency, this.getDateSystem());
 
         return NumberValueObject.create(result);
     }

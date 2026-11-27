@@ -15,7 +15,6 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { isRealNum } from '@univerjs/core';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -205,7 +204,7 @@ export class Unique extends BaseFunction {
             if (valueObject.isNull()) {
                 value = null;
             } else if (valueObject.isString()) {
-                value = isRealNum(value as number) ? +value : normalizeTextForComparison(value as string);
+                value = normalizeTextForComparison(value as string);
             }
 
             if (!valueMap.has(value)) {

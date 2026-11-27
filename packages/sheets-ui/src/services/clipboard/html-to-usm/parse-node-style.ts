@@ -15,7 +15,7 @@
  */
 
 import type { ITextStyle } from '@univerjs/core';
-import { BaselineOffset, BooleanNumber, ColorKit } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, ColorKit, setTextDecorationLines } from '@univerjs/core';
 
 export function extractNodeStyle(node: HTMLElement, predefinedStyles?: Record<string, string>): ITextStyle {
     const styles = predefinedStyles ?? node.style;
@@ -76,7 +76,10 @@ function parseStyleByProperty(styles: CSSStyleDeclaration | Record<string, strin
 }
 
 function handleStyle(cssRule: string, cssValue: string, docStyles: ITextStyle) {
-    switch (cssRule) {
+    // `text-decoration-line` is the longhand of the property parsed as `text-decoration`.
+    const rule = cssRule === 'text-decoration-line' ? 'text-decoration' : cssRule;
+
+    switch (rule) {
         case 'font-family':
             docStyles.ff = cssValue;
             break;
@@ -103,16 +106,9 @@ function handleStyle(cssRule: string, cssValue: string, docStyles: ITextStyle) {
             }
             break;
         }
-        case 'text-decoration': {
-            if (/underline/.test(cssValue)) {
-                docStyles.ul = { s: BooleanNumber.TRUE };
-            } else if (/overline/.test(cssValue)) {
-                docStyles.ol = { s: BooleanNumber.TRUE };
-            } else if (/line-through/.test(cssValue)) {
-                docStyles.st = { s: BooleanNumber.TRUE };
-            }
+        case 'text-decoration':
+            setTextDecorationLines(docStyles, cssValue);
             break;
-        }
         case 'color': {
             try {
                 const color = new ColorKit(cssValue);

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { NotImplementedFunction } from '../../not-implemented-function';
+import { EtsFunction } from '../forecast-ets/base';
 
-export class ForecastEtsSeasonality extends NotImplementedFunction {
+export class ForecastEtsSeasonality extends EtsFunction {
     override minParams = 2;
 
     override maxParams = 4;
 
-    // TODO: Implement ETS seasonality detection and timeline validation.
+    protected override readonly mode = 'seasonality';
 }

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import { BooleanNumber, DocumentFlavor, PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import { LineType } from '../../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy } from '../../../document-compatibility';
 import {
@@ -45,6 +45,18 @@ function createTopBottomDrawing(top: number, height: number, angle = 0) {
 }
 
 describe('line model', () => {
+    it('includes legacy paragraph spacing only in top-bottom drawing collisions', () => {
+        const drawing = createTopBottomDrawing(60, 80);
+        const page = { skeDrawings: new Map([['picture', drawing]]), skeTables: new Map() } as unknown as IDocumentSkeletonPage;
+        expect(calculateLineTopByDrawings(16, 32, page, null, null, 0, 100)).toBe(32);
+        expect(calculateLineTopByDrawings(16, 32, page, null, null, 0, 100, 0, 0, 16)).toBe(142);
+        const tablePage = {
+            skeDrawings: new Map(),
+            skeTables: new Map([['table', { left: 0, top: 60, width: 100, height: 80, tableSource: { textWrap: TableTextWrapType.NONE } }]]),
+        } as unknown as IDocumentSkeletonPage;
+        expect(calculateLineTopByDrawings(16, 32, tablePage, null, null, 0, 100, 0, 0, 16)).toBe(32);
+    });
+
     it.each([
         { flavor: DocumentFlavor.TRADITIONAL, left: -10, right: 0, expectedLeft: -10, expectedRight: 100 },
         { flavor: DocumentFlavor.TRADITIONAL, left: 0, right: -15, expectedLeft: 0, expectedRight: 115 },
@@ -65,6 +77,38 @@ describe('line model', () => {
         expect(line.divides.map((divide) => [divide.left, divide.left + divide.width]))
             .toEqual([[expectedLeft, 30], [50, expectedRight]]);
         expect(drawing).toMatchObject({ aLeft: 30, width: 20 });
+    });
+
+    it('keeps body text outside overlapping header drawings and indents', () => {
+        const page = { marginTop: 30, skeDrawings: new Map(), skeTables: new Map() } as unknown as IDocumentSkeletonPage;
+        const header = {
+            marginTop: 10,
+            skeDrawings: new Map([['logo', {
+                aTop: 7,
+                aLeft: -8,
+                width: 70,
+                height: 25,
+                drawingOrigin: {
+                    behindDoc: BooleanNumber.TRUE,
+                    layoutType: PositionedObjectLayoutType.WRAP_TIGHT,
+                    distL: 2,
+                    distR: 3,
+                },
+            }]]),
+        } as unknown as IDocumentSkeletonPage;
+        const line = createSkeletonLine(
+            0,
+            LineType.PARAGRAPH,
+            { lineHeight: 16, contentHeight: 16, lineTop: 0, paddingLeft: 15 },
+            100,
+            0,
+            true,
+            { documentCompatibilityPolicy: getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL) } as never,
+            page,
+            header,
+            null
+        );
+        expect(line.divides.map((divide) => [divide.left, divide.width])).toEqual([[65, 35]]);
     });
 
     it.each([PositionedObjectLayoutType.WRAP_SQUARE, PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM])('reserves asymmetric effect bounds while leaving drawing geometry unchanged (%s)', (layoutType) => {

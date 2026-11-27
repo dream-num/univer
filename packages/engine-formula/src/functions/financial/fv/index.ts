@@ -78,7 +78,10 @@ export class Fv extends BaseFunction {
             const pvValue = +_pvObject.getValue();
             const typeValue = +_typeObject.getValue();
 
-            const result = calculateFV(rateValue, nperValue, pmtValue, pvValue, typeValue ? 1 : 0);
+            const domainError = this._domainError(rateValue, nperValue);
+            if (domainError) return ErrorValueObject.create(domainError);
+
+            const result = this._calculateValue(rateValue, nperValue, pmtValue, pvValue, typeValue ? 1 : 0);
 
             if (Number.isNaN(result) || !Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);
@@ -96,5 +99,13 @@ export class Fv extends BaseFunction {
         }
 
         return resultArray;
+    }
+
+    protected _calculateValue(...args: Parameters<typeof calculateFV>): number {
+        return calculateFV(...args);
+    }
+
+    protected _domainError(_rate: number, _periods: number): ErrorType | undefined {
+        return undefined;
     }
 }

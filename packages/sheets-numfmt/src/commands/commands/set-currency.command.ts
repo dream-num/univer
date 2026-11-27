@@ -18,7 +18,7 @@ import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISetNumfmtCommandParams } from './set-numfmt.command';
 import { CommandType, ICommandService, Range, RegionService } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { getCurrencyFormat, getCurrencySymbolIconByLocale } from '../../base/const/currency-symbols';
+import { getCurrencyFormat } from '../../base/const/currency-symbols';
 import { SetNumfmtCommand } from './set-numfmt.command';
 
 /**
@@ -39,8 +39,7 @@ export const SetCurrencyCommand: ICommand = {
         }
 
         const values: ISetNumfmtCommandParams['values'] = [];
-        const currencySymbolIcon = getCurrencySymbolIconByLocale(regionService.getCurrentRegion());
-        const currencyFormat = getCurrencyFormat(currencySymbolIcon.locale);
+        const currencyFormat = getCurrencyFormat(regionService.getCurrentRegion());
 
         selections.forEach((selection) => {
             Range.foreach(selection.range, (row, col) => {

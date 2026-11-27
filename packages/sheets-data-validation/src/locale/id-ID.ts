@@ -136,6 +136,11 @@ const locale: typeof enUS = {
             title: 'Kotak centang',
             error: 'Konten sel ini melanggar aturan validasinya',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'Rentang ini dilindungi, dan Anda tidak memiliki izin untuk mengatur gaya. Untuk mengatur gaya, silakan hubungi pembuatnya.',
+            },
+        },
     },
 };
 

@@ -15,20 +15,23 @@
  */
 
 import type { CSSProperties, ReactNode } from 'react';
+import { Children, cloneElement, isValidElement, useId } from 'react';
 import type { IRadioProps } from '../radio/Radio';
-import { Children, cloneElement, isValidElement } from 'react';
 import { clsx } from '../../helper/clsx';
 
 export interface IRadioGroupProps {
     children: ReactNode[];
+    name?: string;
+    'aria-label'?: string;
+    'aria-labelledby'?: string;
 
     /**
-     * The class name of the checkbox group
+     * The class name of the radio group
      */
     className?: string;
 
     /**
-     * The style of the checkbox group
+     * The style of the radio group
      */
     style?: CSSProperties;
 
@@ -38,7 +41,7 @@ export interface IRadioGroupProps {
     value: string;
 
     /**
-     * Whether the radio is disabled
+     * Whether the radio group is disabled
      * @default false
      */
     disabled?: boolean;
@@ -59,27 +62,51 @@ export interface IRadioGroupProps {
  * RadioGroup Component
  */
 export function RadioGroup(props: IRadioGroupProps) {
-    const { children, className, style, value, disabled = false, direction = 'horizontal', onChange } = props;
+    const {
+        children,
+        name,
+        'aria-label': ariaLabel,
+        'aria-labelledby': ariaLabelledby,
+        className,
+        style,
+        value,
+        disabled = false,
+        direction = 'horizontal',
+        onChange,
+    } = props;
 
-    const handleChange = (value: string | number | boolean) => {
-        onChange(value);
+    const groupId = useId();
+    const groupName = name ?? groupId;
+
+    const handleChange = (nextValue: string | number | boolean) => {
+        onChange(nextValue);
     };
 
     return (
         <div
-            className={clsx('univer-flex univer-gap-2', {
-                'univer-flex-col': direction === 'vertical',
-            }, className)}
+            data-u-comp="radio-group"
+            role="radiogroup"
+            aria-orientation={direction}
+            aria-label={ariaLabel}
+            aria-labelledby={ariaLabelledby}
+            className={clsx(
+                'univer-flex',
+                direction === 'vertical'
+                    ? 'univer-flex-col univer-gap-2.5'
+                    : 'univer-flex-wrap univer-items-center univer-gap-x-4 univer-gap-y-2',
+                className
+            )}
             style={style}
         >
             {Children.map(children, (child, index) => {
                 if (isValidElement<IRadioProps>(child)) {
                     return cloneElement(child, {
-                        key: index,
+                        key: child.key ?? index,
                         children: child.props.children,
+                        name: child.props.name ?? groupName,
                         value: child.props.value,
                         checked: value === child.props.value,
-                        disabled: disabled ?? child.props.disabled,
+                        disabled: Boolean(disabled || child.props.disabled),
                         onChange: handleChange,
                     });
                 }

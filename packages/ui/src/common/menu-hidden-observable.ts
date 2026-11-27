@@ -25,9 +25,13 @@ export function getMenuHiddenObservable(
     needHideUnitId?: string | string[]
 ): Observable<boolean> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const getUnitType = (unitId: string) => SHEET_EDITOR_UNITS.includes(unitId)
-        ? UniverInstanceType.UNIVER_SHEET
-        : univerInstanceService.getUnitType(unitId);
+    const getUnitType = (unitId: string) => {
+        if (SHEET_EDITOR_UNITS.includes(unitId)) {
+            return UniverInstanceType.UNIVER_SHEET;
+        }
+        const hostId = univerInstanceService.getUnitCreateOptions(unitId)?.workbenchHostUnitId;
+        return univerInstanceService.getUnitType(hostId ?? unitId);
+    };
 
     return new Observable((subscriber) => {
         const subscription = univerInstanceService.focused$.subscribe((unitId) => {

@@ -17,10 +17,10 @@
 import type { IAccessor } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { IUniverInstanceService, SheetTypes, UniverInstanceType } from '@univerjs/core';
-import { CancelFrozenCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { UniverInstanceType } from '@univerjs/core';
+import { CancelFrozenCommand, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { combineLatest, map, Observable, of } from 'rxjs';
+import { combineLatest, map, Observable } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
 import {
     SetColumnFrozenCommand,
@@ -30,10 +30,13 @@ import {
     SetSelectionFrozenCommand,
 } from '../commands/commands/set-frozen.command';
 import { MENU_ITEM_FROZEN_COMPONENT } from '../views/menu-item-frozen/index';
-import { deriveStateFromActiveSheet$ } from './menu-util';
+import { getCurrentRangeDisable$ } from './menu-util';
 
 function getFrozenDisabled$(accessor: IAccessor) {
-    return deriveStateFromActiveSheet$(accessor.get(IUniverInstanceService), true, ({ worksheet }) => of(worksheet.getConfig().type === SheetTypes.CHART));
+    return getCurrentRangeDisable$(accessor, {
+        workbookTypes: [WorkbookEditablePermission],
+        worksheetTypes: [WorksheetEditPermission],
+    });
 }
 
 const getMenuHiddenByCurrentSelectionChangedObservable$ = (accessor: IAccessor, type: 'row' | 'col' | 'all'): Observable<boolean> => {
@@ -187,6 +190,7 @@ export function FrozenMenuItemFactory(accessor: IAccessor): IMenuButtonItem<Loca
         ]).pipe(
             map(([menuHidden, selectionHidden]) => menuHidden || selectionHidden)
         ),
+        disabled$: getFrozenDisabled$(accessor),
     };
 }
 
@@ -207,6 +211,7 @@ export function FrozenRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem<L
         ]).pipe(
             map(([menuHidden, selectionHidden]) => menuHidden || selectionHidden)
         ),
+        disabled$: getFrozenDisabled$(accessor),
     };
 }
 
@@ -227,6 +232,7 @@ export function FrozenColMenuItemFactory(accessor: IAccessor): IMenuButtonItem<L
         ]).pipe(
             map(([menuHidden, selectionHidden]) => menuHidden || selectionHidden)
         ),
+        disabled$: getFrozenDisabled$(accessor),
     };
 }
 

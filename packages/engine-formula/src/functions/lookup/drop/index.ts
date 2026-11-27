@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
@@ -27,7 +28,13 @@ export class Drop extends BaseFunction {
 
     override maxParams = 3;
 
-    override calculate(array: BaseValueObject, rows: BaseValueObject, columns?: BaseValueObject): BaseValueObject {
+    override needsReferenceObject = true;
+
+    override calculate(input: FunctionVariantType, rowCount: FunctionVariantType, columnCount?: FunctionVariantType): FunctionVariantType {
+        const reference = input.isReferenceObject() ? input as BaseReferenceObject : undefined;
+        const array = reference?.toArrayValueObject() ?? input as BaseValueObject;
+        const rows = rowCount.isReferenceObject() ? (rowCount as BaseReferenceObject).toArrayValueObject() : rowCount as BaseValueObject;
+        const columns = columnCount?.isReferenceObject() ? (columnCount as BaseReferenceObject).toArrayValueObject() : columnCount as BaseValueObject | undefined;
         const _columns = columns ?? NumberValueObject.create(0);
 
         const arrayRowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
@@ -89,7 +96,7 @@ export class Drop extends BaseFunction {
             return errorObject as ErrorValueObject;
         }
 
-        return this._getResultArray(array, rowsValue as number, columnsValue as number, arrayRowCount, arrayColumnCount);
+        return this._getResultArray(array, rowsValue as number, columnsValue as number, arrayRowCount, arrayColumnCount, reference);
     }
 
     private _checkRowsColumns(rowsObject: BaseValueObject, columnsObject: BaseValueObject, arrayRowCount: number, arrayColumnCount: number) {
@@ -131,9 +138,21 @@ export class Drop extends BaseFunction {
         };
     }
 
-    private _getResultArray(array: BaseValueObject, rows: number, columns: number, arrayRowCount: number, arrayColumnCount: number): BaseValueObject {
+    private _getResultArray(array: BaseValueObject, rows: number, columns: number, arrayRowCount: number, arrayColumnCount: number, reference?: BaseReferenceObject): FunctionVariantType {
         const rowParam = rows >= 0 ? [rows, arrayRowCount] : [0, arrayRowCount + rows];
         const columnParam = columns >= 0 ? [columns, arrayColumnCount] : [0, arrayColumnCount + columns];
+        if (reference && !reference.isMultiArea()) {
+            const range = reference.getRangePosition();
+            return this.createReferenceObject(reference, {
+                startRow: range.startRow + rowParam[0],
+                startColumn: range.startColumn + columnParam[0],
+                endRow: range.startRow + rowParam[1] - 1,
+                endColumn: range.startColumn + columnParam[1] - 1,
+            });
+        }
+        if (!array.isArray()) {
+            return expandArrayValueObject(1, 1, array);
+        }
 
         let resultArray: ArrayValueObject;
 
@@ -147,12 +166,6 @@ export class Drop extends BaseFunction {
             resultArray = (array as ArrayValueObject).slice(rowParam, columnParam) as ArrayValueObject;
         }
 
-        resultArray = resultArray.map((valueObject) => valueObject.isNull() ? NumberValueObject.create(0) : valueObject) as ArrayValueObject;
-
-        if (arrayRowCount - rows === 1 && arrayColumnCount - columns === 1) {
-            return resultArray.get(0, 0) as BaseValueObject;
-        }
-
-        return resultArray;
+        return resultArray.map((valueObject) => valueObject.isNull() ? NumberValueObject.create(0) : valueObject);
     };
 }

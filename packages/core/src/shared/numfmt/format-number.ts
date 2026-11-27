@@ -137,7 +137,7 @@ export function formatValue(
             ? decimalFromNumber(value)
             : null;
 
-    return part
-        ? runPart(value, part, options, locale, decimalValue)
-        : options.overflow;
+    if (!part) return options.overflow;
+
+    return runPart(value, part, options, locale, decimalValue);
 }

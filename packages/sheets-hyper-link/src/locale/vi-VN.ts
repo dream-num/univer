@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         message: {
             refError: 'Tham chiếu lỗi',
         },
+        permission: {
+            editErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền chỉnh sửa. Nếu cần chỉnh sửa, vui lòng liên hệ với người tạo.',
+        },
     },
 };
 

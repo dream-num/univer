@@ -16,13 +16,13 @@
 
 import type { Editor } from '@univerjs/docs-ui';
 import type { IFunctionParam } from '@univerjs/engine-formula';
-import type { LocaleKey } from '../../../locale/types';
 import { LocaleService, noop } from '@univerjs/core';
 import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CloseIcon, MoreRightIcon } from '@univerjs/icons';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { RectPopup, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../../locale/types';
 import { generateParam } from '../../../services/utils';
 import { useEditorPosition } from '../hooks/use-editor-position';
 import { useFormulaDescribe } from '../hooks/use-formula-describe';
@@ -70,7 +70,12 @@ function Help(props: {
                 value.map((item: IFunctionParam, i: number) => (
                     <span key={item.name}>
                         <span
-                            className={active === i ? 'univer-text-primary-500' : ''}
+                            className={active === i
+                                ? `
+                                  univer-text-primary-500
+                                  dark:!univer-text-primary-300
+                                `
+                                : ''}
                             onClick={() => onClick(i)}
                         >
                             {generateParam(item)}
@@ -131,8 +136,8 @@ export function HelpFunction(props: {
                     >
                         <div
                             className={clsx(`
-                              univer-box-border univer-flex univer-items-center univer-justify-between univer-px-4
-                              univer-py-3 univer-text-xs univer-font-medium univer-text-gray-900
+                              univer-box-border univer-flex univer-items-center univer-justify-between univer-p-3
+                              univer-text-xs univer-font-medium univer-text-gray-900
                               dark:!univer-text-gray-0
                             `, borderTopClassName)}
                             style={{
@@ -176,7 +181,7 @@ export function HelpFunction(props: {
                         </div>
                         <div
                             className={clsx(`
-                              univer-box-border univer-max-h-[350px] univer-overflow-y-auto univer-px-4 univer-pb-3
+                              univer-box-border univer-max-h-[350px] univer-overflow-y-auto univer-px-3 univer-pb-3
                               univer-pt-0
                             `, scrollbarClassName)}
                             style={{
@@ -200,7 +205,12 @@ export function HelpFunction(props: {
                                     functionInfo.functionParameter.map((item: IFunctionParam, i: number) => (
                                         <Params
                                             key={i}
-                                            className={paramIndex === i ? 'univer-text-primary-500' : ''}
+                                            className={paramIndex === i
+                                                ? `
+                                                  univer-text-primary-500
+                                                  dark:!univer-text-primary-300
+                                                `
+                                                : ''}
                                             title={item.name}
                                             value={`${item.require ? required : optional} ${item.detail}`}
                                         />

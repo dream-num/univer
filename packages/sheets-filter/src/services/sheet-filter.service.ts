@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import type { IAutoFilter } from '../models/types';
+import type { Subscription } from 'rxjs';
 import {
     CommandType,
     Disposable,
@@ -25,8 +25,9 @@ import {
     IUniverInstanceService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { BehaviorSubject, filter, merge, of, switchMap } from 'rxjs';
-import { FILTER_MUTATIONS } from '../common/const';
+import { BehaviorSubject, filter, merge, of, Subject, switchMap } from 'rxjs';
+import type { IAutoFilter } from '../models/types';
+import { FILTER_MUTATIONS, ReCalcSheetsFilterMutationId } from '../common/const';
 import { FilterModel } from '../models/filter-model';
 
 type WorksheetID = string;
@@ -41,6 +42,15 @@ export const SHEET_FILTER_SNAPSHOT_ID = 'SHEET_FILTER_PLUGIN';
  */
 export class SheetsFilterService extends Disposable {
     private readonly _filterModels = new Map<string, Map<string, FilterModel>>();
+    private readonly _remoteFilterMutationsSuppressed = new Set<string>();
+    private readonly _initialFilterCatchUpUnits = new Set<string>();
+    private readonly _sheetDisposalSubscriptions = new Map<string, Subscription>();
+    private readonly _pendingFilterRecalc = new Set<string>();
+    private readonly _filterHistoryInvalidated$ = new Subject<{ unitId: string; subUnitId: string }>();
+    readonly filterHistoryInvalidated$ = this._filterHistoryInvalidated$.asObservable();
+    private readonly _localFilterOperationSucceeded$ = new Subject<{ unitId: string; subUnitId: string }>();
+    readonly localFilterOperationSucceeded$ = this._localFilterOperationSucceeded$.asObservable();
+    private readonly _personalFilterModeUnits = new Map<string, Set<string>>();
 
     private readonly _loadedUnitId$ = new BehaviorSubject<Nullable<string>>(null);
     readonly loadedUnitId$ = this._loadedUnitId$.asObservable();
@@ -63,6 +73,7 @@ export class SheetsFilterService extends Disposable {
 
         this._initModel();
         this._initActiveFilterModel();
+        this._initSheetDisposal();
     }
 
     /**
@@ -93,6 +104,106 @@ export class SheetsFilterService extends Disposable {
 
     getFilterModel(unitId: string, subUnitId: string): Nullable<FilterModel> {
         return this._filterModels.get(unitId)?.get(subUnitId) ?? null;
+    }
+
+    /**
+     * A viewer keeps a local-only filter model while remote filter mutations are discarded. In
+     * that mode structural mutations still have to update the local filter range.
+     */
+    setRemoteFilterMutationsSuppressed(unitId: string, subUnitId: string, suppressed: boolean): void {
+        const key = this._getFilterKey(unitId, subUnitId);
+        if (suppressed) {
+            this._remoteFilterMutationsSuppressed.add(key);
+        } else {
+            this._remoteFilterMutationsSuppressed.delete(key);
+        }
+    }
+
+    isRemoteFilterMutationsSuppressed(unitId: string, subUnitId: string): boolean {
+        return this._remoteFilterMutationsSuppressed.has(this._getFilterKey(unitId, subUnitId));
+    }
+
+    clearRemoteFilterMutationsSuppressed(unitId: string): void {
+        const prefix = `${unitId}\0`;
+        this._remoteFilterMutationsSuppressed.forEach((key) => {
+            if (key.startsWith(prefix)) {
+                this._remoteFilterMutationsSuppressed.delete(key);
+            }
+        });
+    }
+
+    private _getFilterKey(unitId: string, subUnitId: string): string {
+        return `${unitId}\0${subUnitId}`;
+    }
+
+    /** The unit was restored from a cached revision and still needs the shared filter catch-up. */
+    beginInitialFilterCatchUp(unitId: string): void {
+        this._initialFilterCatchUpUnits.add(unitId);
+    }
+
+    isInitialFilterCatchUp(unitId: string): boolean {
+        return this._initialFilterCatchUpUnits.has(unitId);
+    }
+
+    completeInitialFilterCatchUp(unitId: string): void {
+        this._initialFilterCatchUpUnits.delete(unitId);
+    }
+
+    /** Notify collaboration that a local user has successfully taken over a worksheet filter. */
+    notifyLocalFilterOperationSucceeded(unitId: string, subUnitId: string): void {
+        this._localFilterOperationSucceeded$.next({ unitId, subUnitId });
+    }
+
+    enablePersonalFilterMode(unitId: string, subUnitId: string): void {
+        let sheets = this._personalFilterModeUnits.get(unitId);
+        if (!sheets) {
+            sheets = new Set();
+            this._personalFilterModeUnits.set(unitId, sheets);
+        }
+        sheets.add(subUnitId);
+    }
+
+    disablePersonalFilterMode(unitId: string, subUnitId?: string): void {
+        if (subUnitId) {
+            const sheets = this._personalFilterModeUnits.get(unitId);
+            sheets?.delete(subUnitId);
+            if (sheets?.size === 0) {
+                this._personalFilterModeUnits.delete(unitId);
+            }
+            return;
+        }
+        this._personalFilterModeUnits.delete(unitId);
+    }
+
+    isPersonalFilterMode(unitId: string, subUnitId: string): boolean {
+        return this._personalFilterModeUnits.get(unitId)?.has(subUnitId) ?? false;
+    }
+
+    /** Defer recalculation until every mutation of the remote changeset has been applied. */
+    markRemoteFilterRecalc(unitId: string, subUnitId: string): void {
+        this._pendingFilterRecalc.add(`${unitId}\0${subUnitId}`);
+    }
+
+    flushRemoteFilterRecalc(): void {
+        const pending = [...this._pendingFilterRecalc];
+        this._pendingFilterRecalc.clear();
+        pending.forEach((key) => {
+            const [unitId, subUnitId] = key.split('\0');
+            if (!this._filterModels.get(unitId)?.get(subUnitId)) {
+                return;
+            }
+            // Run through the command service so the formula worker receives the same filter
+            // recalculation; onlyLocal keeps the generated mutation out of collaboration.
+            this._commandService.syncExecuteCommand(
+                ReCalcSheetsFilterMutationId,
+                { unitId, subUnitId },
+                { onlyLocal: true }
+            );
+        });
+    }
+
+    invalidateFilterHistory(unitId: string, subUnitId: string): void {
+        this._filterHistoryInvalidated$.next({ unitId, subUnitId });
     }
 
     removeFilterModel(unitId: string, subUnitId: string): boolean {
@@ -184,6 +295,14 @@ export class SheetsFilterService extends Disposable {
             allFilterModels.clear();
         });
         this._filterModels.clear();
+        this._remoteFilterMutationsSuppressed.clear();
+        this._initialFilterCatchUpUnits.clear();
+        this._personalFilterModeUnits.clear();
+        this._localFilterOperationSucceeded$.complete();
+        this._pendingFilterRecalc.clear();
+        this._filterHistoryInvalidated$.complete();
+        this._sheetDisposalSubscriptions.forEach((subscription) => subscription.unsubscribe());
+        this._sheetDisposalSubscriptions.clear();
     }
 
     private _initModel(): void {
@@ -198,6 +317,14 @@ export class SheetsFilterService extends Disposable {
                 this._updateActiveFilterModel();
             },
             onUnLoad: (unitId: string) => {
+                this.clearRemoteFilterMutationsSuppressed(unitId);
+                this._initialFilterCatchUpUnits.delete(unitId);
+                this._personalFilterModeUnits.delete(unitId);
+                this._pendingFilterRecalc.forEach((key) => {
+                    if (key.startsWith(`${unitId}\0`)) {
+                        this._pendingFilterRecalc.delete(key);
+                    }
+                });
                 const allFilterModels = this._filterModels.get(unitId);
                 if (allFilterModels) {
                     allFilterModels.forEach((model) => model.dispose());
@@ -205,6 +332,40 @@ export class SheetsFilterService extends Disposable {
                 }
             },
         });
+    }
+
+    private _initSheetDisposal(): void {
+        this.disposeWithMe(
+            this._univerInstanceService.unitAdded$.subscribe(({ unit }) => {
+                if (unit.type === UniverInstanceType.UNIVER_SHEET) {
+                    this._subscribeSheetDisposal(unit as Workbook);
+                }
+            })
+        );
+        this._univerInstanceService
+            .getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .forEach((workbook) => this._subscribeSheetDisposal(workbook));
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
+                const subscription = this._sheetDisposalSubscriptions.get(unit.getUnitId());
+                subscription?.unsubscribe();
+                this._sheetDisposalSubscriptions.delete(unit.getUnitId());
+            })
+        );
+    }
+
+    private _subscribeSheetDisposal(workbook: Workbook): void {
+        const unitId = workbook.getUnitId();
+        if (this._sheetDisposalSubscriptions.has(unitId)) {
+            return;
+        }
+        this._sheetDisposalSubscriptions.set(unitId, workbook.sheetDisposed$.subscribe((sheet) => {
+            const subUnitId = sheet.getSheetId();
+            this.removeFilterModel(unitId, subUnitId);
+            this.disablePersonalFilterMode(unitId, subUnitId);
+            this.setRemoteFilterMutationsSuppressed(unitId, subUnitId, false);
+            this._updateActiveFilterModel();
+        }));
     }
 
     private _cacheFilterModel(unitId: string, subUnitId: string, filterModel: FilterModel): void {

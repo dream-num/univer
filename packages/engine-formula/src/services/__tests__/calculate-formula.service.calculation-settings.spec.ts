@@ -14,30 +14,37 @@
  * limitations under the License.
  */
 
-import type { Ctor } from '@univerjs/core';
+import type { Ctor, IWorkbookData } from '@univerjs/core';
 import type { IFormulaDatasetConfig } from '../../basics/common';
 import type { IFunctionNames } from '../../basics/function';
 import type { BaseFunction } from '../../functions/base-function';
 import type { IAllRuntimeData } from '../runtime.service';
-import { CellValueType, ObjectMatrix } from '@univerjs/core';
+import { CellValueType, LocaleType, ObjectMatrix } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
+import { LexerNode } from '../../engine/analysis/lexer-node';
+import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
+import { StringValueObject } from '../../engine/value-object/primitive-object';
 import { createFunctionTestBed } from '../../functions/__tests__/create-function-test-bed';
 import { ALL_IMPLEMENTED_FUNCTIONS } from '../../functions/index';
+import { ExcelRegexreplace } from '../../functions/text/excel-regex';
+import { FUNCTION_NAMES_TEXT } from '../../functions/text/function-names';
 
 import { ICalculateFormulaService } from '../calculate-formula.service';
+import { IDefinedNamesService } from '../defined-names.service';
 import { DependencyManagerService, IDependencyManagerService } from '../dependency-manager.service';
 import { FeatureCalculationManagerService, IFeatureCalculationManagerService } from '../feature-calculation-manager.service';
 import { IFunctionService } from '../function.service';
 import { IFormulaRuntimeService } from '../runtime.service';
 
-function createBed() {
-    const bed = createFunctionTestBed(undefined, [
+function createBed(workbookData?: IWorkbookData) {
+    const bed = createFunctionTestBed(workbookData, [
         [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
         [IDependencyManagerService, { useClass: DependencyManagerService }],
     ]);
+    const injector = bed.univer.__getInjector();
     bed.get(IFunctionService).registerExecutors(...ALL_IMPLEMENTED_FUNCTIONS.map(([Fn, name]) =>
-        new (Fn as Ctor<BaseFunction>)(name as IFunctionNames)));
+        injector.createInstance(Fn as Ctor<BaseFunction>, name as IFunctionNames)));
     return bed;
 }
 
@@ -186,6 +193,427 @@ describe('Persisted calculation settings', () => {
             });
             expect(second.unitData[bed.unitId]?.[bed.sheetId]?.getValue(1, 3)?.v).toBe(21);
             expect(second.circularReferences).toHaveLength(1);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('updates the interior of an OFFSET range and follows a chain of resolved addresses', async () => {
+        const bed = createBed();
+        const formulas = {
+            0: { 3: { f: '=SUM(A1:OFFSET(A3,0,0))' } },
+            1: { 3: { f: '=SUM(OFFSET(D2,-1,0),A2)' } },
+            2: { 3: { f: '=SUM(OFFSET(D3,-1,0),A3)' }, 4: { f: '=D3*2' } },
+        };
+        const { unitId, sheetId } = bed;
+        const cells = bed.sheetData[sheetId]!.cellData;
+        const read = (result: IAllRuntimeData) => {
+            const values = result.unitData[unitId]?.[sheetId];
+            return [values?.getValue(0, 3)?.v, values?.getValue(1, 3)?.v, values?.getValue(2, 3)?.v, values?.getValue(2, 4)?.v];
+        };
+        const calculateEdit = () => calculate(bed, formulas, false, 100, 0.001, {
+            forceCalculate: false,
+            clearDependencyTreeCache: {},
+            dirtyRanges: [{ unitId, sheetId, range: { startRow: 1, endRow: 1, startColumn: 0, endColumn: 0 } }],
+        });
+        try {
+            cells.setValue(0, 0, { v: 1 });
+            cells.setValue(1, 0, { v: 2 });
+            cells.setValue(2, 0, { v: 3 });
+            const first = await calculate(bed, formulas, false);
+            expect(first.circularReferences).toEqual([]);
+            expect(read(first)).toEqual([6, 8, 11, 22]);
+            cells.setValue(1, 0, { v: 8 });
+            expect(read(await calculateEdit())).toEqual([12, 20, 23, 46]);
+            cells.setValue(1, 0, { v: 2 });
+            expect(read(await calculateEdit())).toEqual([6, 8, 11, 22]);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it.each([
+        ['=SUM((A1):(A3))', 6],
+        ['=SUM(A1:((INDEX(A3:A4,1))))', 6],
+        ['=SUM(A1:(A2:A3))', 6],
+        ['=SUM(A1:(INDEX(A3:A4,1)))+10', 16],
+        ['=SUM(A1:(INDEX(A3:A4,1)),20)', 26],
+        ['=2+(SUM(A1:(INDEX(A3:A4,1))))%', 2.06],
+        ['=2+((3))%', 2.03],
+        ['=SUM(A1:(INDEX(A3:A4,1)))%', 0.06],
+    ])('keeps grouped range endpoints and surrounding expressions intact in %s', async (formula, expected) => {
+        const bed = createBed();
+        const cells = bed.sheetData[bed.sheetId]!.cellData;
+        try {
+            cells.reset();
+            for (let row = 0; row < 4; row++) {
+                cells.setValue(row, 0, { v: row + 1 });
+            }
+            const result = await calculate(bed, { 0: { 1: { f: formula } } }, false);
+            expect(result.unitData[bed.unitId]?.[bed.sheetId]?.getValue(0, 1)?.v).toBe(expected);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('preserves grouped endpoints when adding Excel function prefixes', () => {
+        const bed = createBed();
+        try {
+            const input = '=SUM(A1:(XLOOKUP(3,A3:A4,A3:A4)),20)';
+            const functions = bed.get(IFunctionService);
+            expect(bed.get(LexerTreeBuilder).getNewFormulaWithPrefix(input, (name) => functions.hasExecutor(name)))
+                .toBe('=SUM(A1:(_xlfn.XLOOKUP(3,A3:A4,A3:A4)),20)');
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('combines the areas of a range endpoint into one rectangle', async () => {
+        const cases = [
+            ['=SUM(A1:(A2,A3))', 63],
+            ['=SUM((A2,A3):A1)', 63],
+            ['=SUM(D4:(C6,A2))', 850],
+            ['=SUM((A1,A3):(C2,D4))', 440],
+            ['=SUM(B3:((E1,A2),C6))', 1140],
+            ['=SUM((B3:D4,A5):(A2,D4:F6))', 1305],
+            ['=SUM(A1:((A2,A4) A1:A4))', 104],
+            ['=SUM(A1:Corners)', 212],
+            ['=SUM(Corners:A1)', 212],
+            ['=SUM(A1:IF(TRUE,(A2,A4),(A2,A6)))', 104],
+            ['=AREAS((D4:B3,A6):(C7,B1))', 1],
+            ['=COLUMNS((2:3,5:6):B2)', 16384],
+            ['=ROWS(B2:(A:A,D:D))', 1048576],
+            ['=SUM(Sheet1!A1:(Sheet1!A2,Sheet1!B3))', 129],
+            ['=SUM(Other!A1:(Other!A2,Other!B3))', 141],
+            ['=SUM(Sheet1!A1:(Other!A2,Sheet1!B3))', ErrorType.VALUE],
+            ['=SUM(A1:(Other!A2,Other!B3))', ErrorType.VALUE],
+            ['=SUM(A1:IFS(TRUE,Other!A4))', ErrorType.VALUE],
+            ['=SUM(Other!A1:SWITCH(1,1,A4))', ErrorType.VALUE],
+            ['=SUM(Other!A1:IFS(TRUE,Other!A4))', 116],
+            ['=SUM(SWITCH(1,1,Other!A4):Other!A1)', 116],
+            ['=SUM(A1:(A2,INDIRECT("bad reference")))', ErrorType.REF],
+            ['=SUM(A1:INDIRECT({"A2","A4"}))', ErrorType.VALUE],
+            ['=SUM(A1:(A2,XLOOKUP(999,A2:A4,B2:B4)))', ErrorType.NA],
+            ['=SUM(A1:CHOOSE(0,(A2,A4),(A2,A6)))', ErrorType.VALUE],
+            ['=SUM(A1:CHOOSE({1,2},(A2,A4),(A2,A6)))', ErrorType.VALUE],
+            ['=SUM(A1:(Sheet1:Other!A2))', ErrorType.NAME],
+            ['=SUM(A1:(Sheet1:Other!A2,Sheet1!A3))', ErrorType.NAME],
+        ] as const;
+        const bed = createBed({
+            id: 'multi-area',
+            name: 'Multi-area references',
+            appVersion: '3.0.0-alpha',
+            locale: LocaleType.EN_US,
+            sheetOrder: ['main', 'other'],
+            sheets: {
+                main: { id: 'main', name: 'Sheet1' },
+                other: { id: 'other', name: 'Other' },
+            },
+            styles: {},
+        });
+        try {
+            bed.get(IDefinedNamesService).registerDefinedName(bed.unitId, {
+                id: 'corners',
+                name: 'Corners',
+                formulaOrRefString: '(Sheet1!$A$3,Sheet1!$B$4)',
+            });
+            // All cells are filled so an endpoint-only or duplicated-area sum cannot pass.
+            const { main, other } = bed.sheetData;
+            for (const sheet of [main, other]) {
+                for (let row = 0; row < 8; row++) {
+                    for (let column = 0; column < 8; column++) {
+                        sheet.cellData.setValue(row, column, { v: 10 * (row + 1) + column + 1 });
+                    }
+                }
+            }
+            other.cellData.setValue(0, 0, { v: 23 });
+            const formulas = Object.fromEntries(cases.map(([f], index) => [index + 9, { 11: { f } }]));
+            const result = await calculate(bed, formulas, false, 100, 0.001, {
+                unitSheetNameMap: { [bed.unitId]: { Sheet1: 'main', Other: 'other' } },
+            });
+            const actual = result.unitData[bed.unitId]?.[bed.sheetId];
+            cases.forEach(([formula, expected], index) => expect.soft(actual?.getValue(index + 9, 11)?.v, formula).toBe(expected));
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it.each([
+        'A1:INDEX(C4:C5,D1)',
+        'A1:(INDEX(C4:C5,D1))',
+        '(INDEX(C4:C5,D1)):A1',
+        'A1:(A2,INDEX(C4:C5,D1))',
+        '(A2,INDEX(C4:C5,D1)):A1',
+        'A1:CHOOSE(D1,(A2,C4),(A2,C5))',
+        'A1:IF(D1=1,(A2,C4),(A2,C5))',
+        'A1:_xlfn.IFS(D1=1,(A2,C4),TRUE,(A2,C5))',
+        'SWITCH(D1,1,(A2,C4),(A2,C5)):A1',
+    ])('updates the dependency range when an endpoint moves in %s', async (range) => {
+        const bed = createBed();
+        const formulas = { 0: { 4: { f: `=SUM(${range})` } } };
+        const { unitId, sheetId } = bed;
+        const cells = bed.sheetData[sheetId]!.cellData;
+        const read = (result: IAllRuntimeData) => result.unitData[unitId]?.[sheetId]?.getValue(0, 4)?.v;
+        const edit = (row: number, column: number, v: number) => {
+            cells.setValue(row, column, { v });
+            return calculate(bed, formulas, false, 100, 0.001, {
+                forceCalculate: false,
+                clearDependencyTreeCache: {},
+                dirtyRanges: [{ unitId, sheetId, range: { startRow: row, endRow: row, startColumn: column, endColumn: column } }],
+            });
+        };
+        try {
+            cells.reset();
+            cells.setValue(0, 0, { v: 1 });
+            cells.setValue(0, 3, { v: 1 });
+            cells.setValue(3, 2, { v: 4 });
+            cells.setValue(4, 1, { v: 10 });
+            cells.setValue(4, 2, { v: 5 });
+            expect(read(await calculate(bed, formulas, false))).toBe(5);
+            expect(read(await edit(0, 3, 2))).toBe(20);
+            expect(read(await edit(4, 1, 30))).toBe(40);
+            expect(read(await edit(0, 3, 1))).toBe(5);
+            expect(read(await edit(4, 1, 10))).toBeUndefined();
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('keeps selected references in range endpoints without changing ordinary selector results', async () => {
+        const cases = [
+            ['=SUM(IFS(TRUE,(A2,A4),TRUE,(A3,A6)):A1)', 10],
+            ['=SUM(A1:SWITCH(1,1,(A2,A4),(A3,A6)))', 10],
+            ['=SUM(A1:(A2,IFS(TRUE,(A3,A4),TRUE,(A5,A6))))', 10],
+            ['=SUM(A1:CHOOSE(1,SWITCH(1,1,(A2,A4),(A3,A6))))', 10],
+            ['=SUM(A1:IFS(TRUE,(A2,A4),FALSE,NA()))', 10],
+            ['=SUM(A1:IFS(TRUE,(A2,A4),NA(),(A2,A6)))', 10],
+            ['=SUM(A1:SWITCH(1,1,(A2,A4),NA(),(A2,A6)))', 10],
+            ['=SUM(A1:IFS({TRUE,FALSE},(A2,A4),TRUE,(A3,A6)))', ErrorType.VALUE],
+            ['=SUM(A1:IFS({TRUE},(A2,A4),TRUE,(A3,A6)))', ErrorType.VALUE],
+            ['=SUM(A1:SWITCH({1,2},1,(A2,A4),(A3,A6)))', ErrorType.VALUE],
+            ['=SUM(A1:SWITCH({1},1,(A2,A4),(A3,A6)))', ErrorType.VALUE],
+            ['=SUM(A1:SWITCH(1,"1",(A2,A4),(A3,A6)))', 21],
+            ['=SUM(A1:SWITCH(TRUE,1,(A2,A4),(A3,A6)))', 21],
+            ['=SUM(A1:IFS("TRUE",(A2,A4),TRUE,(A3,A6)))', 10],
+            ['=SUM(A1:IFS(FALSE,(A2,A4)))', ErrorType.NA],
+            ['=SUM(A1:SWITCH(2,1,(A2,A4)))', ErrorType.NA],
+            ['=SUM(A1:IFS(TRUE,A4))', 10],
+            ['=SUM(A1:SWITCH(1,1,A4))', 10],
+            ['=IFS(TRUE,5,TRUE,10)', 5],
+            ['=SWITCH(1,1,5,6)', 5],
+            ['=SUM(IFS({TRUE,FALSE},10,TRUE,20))', 30],
+            ['=SUM(SWITCH({1,2},1,10,20))', 30],
+        ] as const;
+        const bed = createBed();
+        try {
+            const data = bed.sheetData[bed.sheetId]!.cellData;
+            data.reset();
+            for (let row = 0; row < 6; row++) {
+                data.setValue(row, 0, { v: row + 1 });
+            }
+            const formulas = Object.fromEntries(cases.map(([f], index) => [index, { 9: { f } }]));
+            const result = await calculate(bed, formulas, false);
+            const actual = result.unitData[bed.unitId]?.[bed.sheetId];
+            cases.forEach(([formula, expected], index) => expect.soft(actual?.getValue(index, 9)?.v, formula).toBe(expected));
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('evaluates grouped intersections and preserves references only in reference-producing arguments', async () => {
+        const bed = createBed();
+        const cells = bed.sheetData[bed.sheetId]!.cellData;
+        const cases = [
+            ['=SUM(A1:A4 (A2:A3))', 5, 5],
+            ['=SUM((A1:A4) ( A2:A3 ))', 5, 5],
+            ['=SUM(CHOOSE(D1,A1:A4,A3:A4) (A2:A3))', 5, 3],
+            ['=SUM(CHOOSE(D1,A1:A4,A3:A4) A2:A3)', 5, 3],
+            ['=SUM(A1:A4 (A2:A3,A4))', 9, 9],
+            ['=SUM(A1:A4 (A2:INDEX(A1:A4,D1+2)))', 5, 9],
+            ['=SUM(A1:IFS(IFS(TRUE,B1),A4))', 10, 10],
+            ['=SUM(A1:INDEX(IFS(TRUE,A2:A4),D1+1))', 6, 10],
+            ['=SUM(A1:INDEX(SWITCH(1,1,A2:A4),2))', 6, 6],
+            ['=SUM(A1:INDEX(IFS(TRUE,(A2:A4,B2:B4)),2,1,1))', 6, 6],
+            ['=SUM (A1:A4)', 10, 10],
+            ['=SUM(MyRange (A2:A3))', 5, 5],
+            ['=SUM(MovingBlock (A2:A3))', 5, 5],
+            ['=SUM(AliasRange (A2:A3))', 5, 5],
+            ['=NamedFn(A2:A3)', 15, 15],
+            ['=NamedFn (A2:A3)', ErrorType.VALUE, ErrorType.VALUE],
+            ['=SUM(A1:OFFSET(IFS(TRUE,A2),1,0))', 6, 6],
+            ['=SUM(A1:OFFSET(SWITCH(1,1,A2),1,0))', 6, 6],
+            ['=SUM(IFS(TRUE,A1:A4) A2:A3)', 5, 5],
+            ['=SUM(A2:A3 IFS(TRUE,A1:A4))', 5, 5],
+            ['=SUM(SWITCH(1,1,A1:A4) A2:A3)', 5, 5],
+            ['=SUM(A2:A3 SWITCH(1,1,A1:A4))', 5, 5],
+            ['=SUM(IFS(D1=1,A1:A4,TRUE,A3:A4) A2:A3)', 5, 3],
+            ['=SUM(A2:A3 SWITCH(D1,1,A1:A4,A3:A4))', 5, 3],
+            ['=LET(myvar,A1:A4,SUM(myvar (A2:A3)))', 5, 5],
+            ['=LAMBDA(myvar,SUM(myvar (A2:A3)))(A1:A4)', 5, 5],
+            ['=LET(f,LAMBDA(x,x+1),f(5)+f(6))', 13, 13],
+        ] as const;
+        try {
+            bed.get(IDefinedNamesService).registerDefinedName(bed.unitId, {
+                id: 'grouped-range',
+                name: 'MyRange',
+                formulaOrRefString: '=Sheet1!$A$1:$A$4',
+            });
+            bed.get(IDefinedNamesService).registerDefinedName(bed.unitId, {
+                id: 'moving-block',
+                name: 'MovingBlock',
+                formulaOrRefString: '=OFFSET(Sheet1!$A$1,0,0,4,1)',
+            });
+            bed.get(IDefinedNamesService).registerDefinedName(bed.unitId, {
+                id: 'alias-range',
+                name: 'AliasRange',
+                formulaOrRefString: '=MyRange',
+            });
+            bed.get(IDefinedNamesService).registerDefinedName(bed.unitId, {
+                id: 'named-lambda',
+                name: 'NamedFn',
+                formulaOrRefString: '=LAMBDA(arg,SUM(arg)+10)',
+            });
+            cells.reset();
+            for (let row = 0; row < 4; row++) {
+                cells.setValue(row, 0, { v: row + 1 });
+            }
+            cells.setValue(0, 1, { v: 1 });
+            cells.setValue(0, 3, { v: 1 });
+            const formulas = Object.fromEntries(cases.map(([f], index) => [index, { 9: { f } }]));
+            const read = (result: IAllRuntimeData, index: number) => result.unitData[bed.unitId]?.[bed.sheetId]?.getValue(index, 9)?.v;
+            const full = await calculate(bed, formulas, false);
+            cases.forEach(([formula, expected], index) => expect.soft(read(full, index), formula).toBe(expected));
+            cells.setValue(0, 3, { v: 2 });
+            const updated = await calculate(bed, formulas, false, 100, 0.001, {
+                forceCalculate: false,
+                clearDependencyTreeCache: {},
+                dirtyRanges: [{ unitId: bed.unitId, sheetId: bed.sheetId, range: { startRow: 0, endRow: 0, startColumn: 3, endColumn: 3 } }],
+            });
+            cases.forEach(([formula, , expected], index) => expect.soft(read(updated, index) ?? read(full, index), formula).toBe(expected));
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('parses formulas and expands regex backreferences without newer browser built-ins', () => {
+        const bed = createBed();
+        const lexer = bed.get(LexerTreeBuilder);
+        const replace = bed.univer.__getInjector().createInstance(ExcelRegexreplace, FUNCTION_NAMES_TEXT.REGEXREPLACE);
+        const at = Object.getOwnPropertyDescriptor(Array.prototype, 'at')!;
+        const hasOwn = Object.getOwnPropertyDescriptor(Object, 'hasOwn')!;
+        let parsed: ReturnType<LexerTreeBuilder['treeBuilder']>[];
+        let replacements: unknown[];
+        try {
+            // eslint-disable-next-line no-extend-native -- Simulate older browsers for this synchronous test.
+            Object.defineProperty(Array.prototype, 'at', { value: undefined, configurable: true });
+            Object.defineProperty(Object, 'hasOwn', { value: undefined, configurable: true });
+            parsed = [lexer.treeBuilder('=(1+2)'), lexer.treeBuilder('=1+{2,3}')];
+            const evaluate = (pattern: string, replacement: string) => replace.calculate(
+                StringValueObject.create('a'),
+                StringValueObject.create(pattern),
+                StringValueObject.create(replacement)
+            ).getValue();
+            replacements = [evaluate('(a)', '\\1'), evaluate('(?<letter>a)', '$<letter>')];
+        } finally {
+            // eslint-disable-next-line no-extend-native -- Restore the original browser API.
+            Object.defineProperty(Array.prototype, 'at', at);
+            Object.defineProperty(Object, 'hasOwn', hasOwn);
+            bed.univer.dispose();
+        }
+        expect(parsed.every((node) => node instanceof LexerNode)).toBe(true);
+        expect(replacements).toEqual(['a', 'a']);
+    });
+
+    it('returns positive zero when ISO.CEILING rounds a negative number to zero', async () => {
+        const bed = createBed();
+        try {
+            const result = await calculate(bed, {
+                0: {
+                    9: { f: '=ISO.CEILING(-1.3,2)' },
+                    10: { f: '=ISO.CEILING(-1.3,-2)' },
+                    11: { f: '=ISO.CEILING(-2.3,-2)' },
+                },
+            }, false);
+            const actual = result.unitData[bed.unitId]?.[bed.sheetId];
+            expect(actual?.getValue(0, 9)?.v).toBe(0);
+            expect(actual?.getValue(0, 10)?.v).toBe(0);
+            expect(actual?.getValue(0, 11)?.v).toBe(-2);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('detects a weekly period in four weeks of hourly values', async () => {
+        const bed = createBed();
+        try {
+            const cases = [
+                ['=FORECAST.ETS.SEASONALITY(MOD(SEQUENCE(672)-1,168),SEQUENCE(672))', 168],
+                ['=FORECAST.ETS.SEASONALITY(MOD(SEQUENCE(336)-1,168),SEQUENCE(336))', 0],
+                ['=FORECAST.ETS.SEASONALITY(MOD(SEQUENCE(419)-1,168),SEQUENCE(419))', 0],
+                ['=FORECAST.ETS.SEASONALITY(MOD(SEQUENCE(420)-1,168),SEQUENCE(420))', 168],
+                ['=LET(h,SEQUENCE(672)-1,FORECAST.ETS.SEASONALITY(MOD(h,168),45000+h/24))', 168],
+                ['=LET(h,SEQUENCE(672)-1,FORECAST.ETS.SEASONALITY(MOD(h,24)+3*INT(MOD(h,168)/24),h+1))', 168],
+                ['=LET(h,SEQUENCE(168)-1,FORECAST.ETS.SEASONALITY(MOD(h,12)+3*INT(MOD(h,24)/12),h+1))', 12],
+                ['=LET(h,SEQUENCE(240)-1,FORECAST.ETS.SEASONALITY(MOD(h,12)+3*INT(MOD(h,24)/12),h+1))', 12],
+                ['=LET(h,SEQUENCE(192)-1,FORECAST.ETS.SEASONALITY(MOD(h,12)+3*INT(MOD(h,48)/12),h+1))', 48],
+                ['=LET(h,SEQUENCE(288)-1,FORECAST.ETS.SEASONALITY(MOD(h,24)+3*INT(MOD(h,72)/24),h+1))', 24],
+                ['=LET(h,SEQUENCE(60)-1,k,FILTER(h,(MOD(h,12)<>2)*(MOD(h,12)<>8)),FORECAST.ETS.SEASONALITY(MOD(k,12),EDATE(DATE(2020,1,1),k)))', 12],
+                ['=LET(h,SEQUENCE(24)-1,FORECAST.ETS.SEASONALITY(MOD(h,4),EDATE(DATE(2020,1,1),h*3)))', 4],
+                ['=LET(h,SEQUENCE(800)-1,k,FILTER(h,MOD(h,6)<>0),FORECAST.ETS.SEASONALITY(MOD(k,168),45000+k/24))', 168],
+                ['=FORECAST.ETS.SEASONALITY(SEQUENCE(672),SEQUENCE(672))', 0],
+            ] as const;
+            const result = await calculate(bed, { 0: Object.fromEntries(cases.map(([f], index) => [index + 9, { f }])) }, false);
+            const actual = result.unitData[bed.unitId]?.[bed.sheetId];
+            cases.forEach(([formula, expected], index) => expect.soft(actual?.getValue(0, index + 9)?.v, formula).toBe(expected));
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('keeps XLOOKUP references and updates composed ranges after their endpoints move', async () => {
+        const bed = createBed();
+        const formulas = {
+            0: {
+                6: { f: '=SUM(XLOOKUP(E1,A1:A4,B1:B4):XLOOKUP(F1,A1:A4,D1:D4))' },
+                7: { f: '=G1*2' },
+                8: { f: '=ISREF(XLOOKUP(1,A1:A4,B1:D4))' },
+                9: { f: '=ISREF(XLOOKUP(99,A1:A4,B1:B4,D1))' },
+                10: { f: '=ISREF(XLOOKUP(1,A1:A4,{1;2;3;4}))' },
+                11: { f: '=COUNT(XLOOKUP(1,A1:A4,J2:J5))' },
+                12: { f: '=XLOOKUP(1,A1:A4,N1:N4)' },
+            },
+        };
+        const { unitId, sheetId } = bed;
+        const cells = bed.sheetData[sheetId]!.cellData;
+        const read = (result: IAllRuntimeData, columns: number[]) => columns.map((column) =>
+            result.unitData[unitId]?.[sheetId]?.getValue(0, column)?.v
+        );
+        const edit = async (row: number, column: number, value: number, expected: number) => {
+            cells.setValue(row, column, { v: value });
+            const result = await calculate(bed, formulas, false, 100, 0.001, {
+                forceCalculate: false,
+                clearDependencyTreeCache: {},
+                dirtyRanges: [{ unitId, sheetId, range: { startRow: row, endRow: row, startColumn: column, endColumn: column } }],
+            });
+            expect(read(result, [6, 7])).toEqual([expected, expected * 2]);
+        };
+        try {
+            for (let row = 0; row < 4; row++) {
+                cells.setValue(row, 0, { v: row + 1 });
+                for (let column = 1; column < 4; column++) {
+                    cells.setValue(row, column, { v: row * 3 + column });
+                }
+            }
+            cells.setValue(0, 4, { v: 1 });
+            cells.setValue(0, 5, { v: 2 });
+            const initial = await calculate(bed, formulas, false);
+            expect(read(initial, [6, 7, 8, 9, 10, 11, 12])).toEqual([21, 42, 1, 1, 0, 0, 0]);
+            await edit(1, 2, 50, 66);
+            await edit(1, 2, 5, 21);
+            await edit(0, 5, 4, 78);
+            await edit(3, 2, 100, 167);
+            await edit(3, 2, 11, 78);
+            await edit(0, 5, 2, 21);
         } finally {
             bed.univer.dispose();
         }

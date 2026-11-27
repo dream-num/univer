@@ -26,6 +26,10 @@ export class DesktopLocalStorageService implements ILocalStorageService {
         return browserStorage.setItem(key, value);
     }
 
+    updateItem<T>(key: string, update: (value: T | null) => T | undefined): Promise<boolean> {
+        return browserStorage.updateItem(key, update);
+    }
+
     removeItem(key: string): Promise<void> {
         return browserStorage.removeItem(key);
     }

@@ -15,7 +15,6 @@
  */
 
 import type { Meta } from '@storybook/react';
-
 import { useState } from 'react';
 import { DateRangePicker } from './DateRangePicker';
 
@@ -32,10 +31,16 @@ export default meta;
 
 export const DateRangePickerBasic = {
     render() {
-        const [value, setValue] = useState<[Date, Date]>([new Date(), new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)]);
+        const [value, setValue] = useState<[Date, Date]>([
+            new Date(),
+            new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        ]);
 
         return (
-            <DateRangePicker value={value} onValueChange={setValue} />
+            <div className="univer-flex univer-flex-col univer-gap-3">
+                <DateRangePicker value={value} onValueChange={setValue} />
+                <DateRangePicker disabled value={value} />
+            </div>
         );
     },
 };

@@ -32,7 +32,7 @@ describe('Test xirr function', () => {
             const dates = ArrayValueObject.create('{39448,39508,39751,39859,39904}');
             const guess = NumberValueObject.create(0.1);
             const result = testFunction.calculate(values, dates, guess);
-            expect(getObjectValue(result, true)).toBe(0.373362533519);
+            expect(getObjectValue(result, true)).toBe(0.373362535238);
         });
 
         it('Value is normal, but no positive and negative number', () => {
@@ -111,7 +111,7 @@ describe('Test xirr function', () => {
             const values2 = ArrayValueObject.create('{-10000,2750,4250,3250,2750}');
             const guess2 = NullValueObject.create();
             const result2 = testFunction.calculate(values2, dates, guess2);
-            expect(getObjectValue(result2, true)).toBe(0.373362533519);
+            expect(getObjectValue(result2, true)).toBe(0.373362535238);
         });
 
         it('Value is array', () => {

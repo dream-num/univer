@@ -58,7 +58,13 @@ export const FontSize = (props: IFontSizeProps) => {
     }
 
     return (
-        <div className="univer-h-6 univer-w-7 univer-text-sm" onPointerDown={(event) => event.stopPropagation()}>
+        <div
+            className="
+              univer-h-6 univer-w-7 univer-rounded univer-text-sm
+              focus-within:univer-ring-2 focus-within:univer-ring-inset focus-within:univer-ring-primary-600
+            "
+            onPointerDown={(event) => event.stopPropagation()}
+        >
             <InputNumber
                 aria-label={ariaLabel}
                 className={`

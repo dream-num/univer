@@ -18,10 +18,11 @@ import type { ICellRenderContext, IPaddingData } from '@univerjs/core';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
-import type { IShowDataValidationDropdownParams } from '../../commands/operations/data-validation.operation';
 import { DataValidationRenderMode, DataValidationType, DEFAULT_STYLES, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { CURSOR_TYPE, DocSimpleSkeleton, getCurrentTypeOfRenderer, getFontStyleString, IRenderManagerService, Rect, Text } from '@univerjs/engine-render';
+import { drawCanvasIcon } from '@univerjs/icons-svg';
 import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
+import type { IShowDataValidationDropdownParams } from '../../commands/operations/data-validation.operation';
 import { ShowDataValidationDropdown } from '../../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR, DROP_DOWN_ICON_COLOR } from '../../const';
 
@@ -39,8 +40,6 @@ const PADDING_V = 1;
 const MARGIN_H = 6;
 const MARGIN_V = 3;
 const RADIUS_BG = 8;
-
-const downPath = new Path2D('M3.32201 4.84556C3.14417 5.05148 2.85583 5.05148 2.67799 4.84556L0.134292 1.90016C-0.152586 1.56798 0.0505937 1 0.456301 1L5.5437 1C5.94941 1 6.15259 1.56798 5.86571 1.90016L3.32201 4.84556Z');
 
 function calcPadding(cellWidth: number, cellHeight: number, fontWidth: number, fontHeight: number, vt: VerticalAlign, ht: HorizontalAlign, margin = true) {
     let paddingTop = 0;
@@ -86,8 +85,6 @@ export interface IDropdownInfo {
 }
 
 export class DropdownWidget implements IBaseDataValidationWidget {
-    private _dropdownInfoMap: Map<string, Map<string, IDropdownInfo>> = new Map();
-
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
@@ -99,20 +96,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
     }
 
     zIndex?: number | undefined;
-
-    private _ensureMap(subUnitId: string) {
-        let map = this._dropdownInfoMap.get(subUnitId);
-
-        if (!map) {
-            map = new Map();
-            this._dropdownInfoMap.set(subUnitId, map);
-        }
-        return map;
-    }
-
-    private _generateKey(row: number, col: number) {
-        return `${row}.${col}`;
-    }
 
     private _drawDownIcon(
         ctx: UniverRenderingContext2D,
@@ -139,14 +122,13 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         }
         ctx.save();
         ctx.translateWithPrecision(cellBounding.startX + left, cellBounding.startY + top);
-        ctx.fillStyle = DROP_DOWN_ICON_COLOR;
-        ctx.fill(downPath);
+        drawCanvasIcon(ctx, 'down-icon', -2, -2, 10, DROP_DOWN_ICON_COLOR);
         ctx.restore();
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton): void {
-        const { primaryWithCoord, row, col, style, data, subUnitId } = info;
+    drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, _skeleton: SpreadsheetSkeleton): void {
+        const { primaryWithCoord, row, col, style, data } = info;
         const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
         const _row = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo.startRow : row;
         const _col = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo.startColumn : col;
@@ -178,13 +160,10 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         };
         const cellWidth = cellBounding.endX - cellBounding.startX;
         const cellHeight = cellBounding.endY - cellBounding.startY;
-        const map = this._ensureMap(subUnitId);
-        const key = this._generateKey(row, col);
 
-        const colorMap = validator.getListWithColorMap(rule);
         const value = getCellValueOrigin(data);
         const valueStr = `${value ?? ''}`;
-        const activeColor = colorMap[valueStr];
+        const activeColor = validator.getOptionColor(rule, valueStr);
         let { tb, vt, ht, pd } = style || {};
         tb = tb ?? WrapStrategy.WRAP;
         vt = vt ?? VerticalAlign.BOTTOM;
@@ -235,13 +214,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             ctx.restore();
 
             ctx.restore();
-
-            map.set(key, {
-                left: cellBounding.endX - ICON_PLACE + skeleton.rowHeaderWidth,
-                top: cellBounding.startY + t + skeleton.columnHeaderHeight,
-                width: ICON_PLACE,
-                height: cellHeight - t - b,
-            });
         } else {
             // Capsule
             ctx.save();
@@ -297,16 +269,8 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
             ctx.restore();
             ctx.translateWithPrecision(realWidth + PADDING_H + 4, ((fontHeight) - ICON_SIZE) / 2);
-            ctx.fillStyle = DROP_DOWN_ICON_COLOR;
-            ctx.fill(downPath);
+            drawCanvasIcon(ctx, 'down-icon', -2, -2, 10, DROP_DOWN_ICON_COLOR);
             ctx.restore();
-
-            map.set(key, {
-                left: cellBounding.startX + MARGIN_H + skeleton.rowHeaderWidth,
-                top: cellBounding.startY + paddingTop + skeleton.columnHeaderHeight,
-                width: rectWidth,
-                height: rectHeight,
-            });
         }
     }
 
@@ -422,29 +386,16 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         return skeleton.getTotalWidth() + paddingAll;
     }
 
-    isHit(position: { x: number; y: number }, info: ICellRenderContext) {
-        const { subUnitId, row, col } = info;
-        const map = this._ensureMap(subUnitId);
-        const dropdownInfo = map.get(this._generateKey(row, col));
-        const rule = this._dataValidationModel.getRuleByLocation(info.unitId, info.subUnitId, row, col);
+    isHit(_position: { x: number; y: number }, info: ICellRenderContext) {
+        const rule = this._dataValidationModel.getRuleByLocation(info.unitId, info.subUnitId, info.row, info.col);
         if (!rule) {
             return false;
         }
 
-        if (!dropdownInfo) {
-            return false;
-        }
-        if (rule.renderMode === DataValidationRenderMode.TEXT) {
-            return false;
-        }
-        const { top, left, width, height } = dropdownInfo;
-        const { x, y } = position;
-
-        if (x >= left && (x <= (left + width)) && y >= top && (y <= (top + height))) {
-            return true;
-        }
-
-        return false;
+        // Every list render mode (chip, arrow, plain text) opens the same dropdown.
+        // Treat the whole cell as the trigger so plain-text cells, which draw no arrow,
+        // stay usable; the display style must not change how the dropdown is opened.
+        return rule.type === DataValidationType.LIST;
     };
 
     onPointerDown(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {

@@ -15,16 +15,15 @@
  */
 
 import type { BaseFunction } from '../../functions/base-function';
+import type { Anchorarray } from '../../functions/lookup/anchorarray';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
-import type { CellReferenceObject } from '../reference-object/cell-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
-import { DateSystem, Inject } from '@univerjs/core';
+import { DateSystem } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { suffixToken } from '../../basics/token';
+import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
-import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFunctionService } from '../../services/function.service';
-import { Lexer } from '../analysis/lexer';
 import { LexerNode } from '../analysis/lexer-node';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NumberValueObject } from '../value-object/primitive-object';
@@ -34,10 +33,8 @@ import { NODE_ORDER_MAP, NodeType } from './node-type';
 
 export class SuffixNode extends BaseAstNode {
     constructor(
-        private _currentConfigService: IFormulaCurrentConfigService,
-        private _lexer: Lexer,
         private _operatorString: string,
-        private _functionExecutor?: BaseFunction
+        private _functionExecutor: BaseFunction
     ) {
         super(_operatorString);
     }
@@ -46,7 +43,7 @@ export class SuffixNode extends BaseAstNode {
         return NodeType.SUFFIX;
     }
 
-    override execute(dateSystem: DateSystem = DateSystem.Date1900) {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900, readRegion?: () => string) {
         const children = this.getChildren();
         let value = children[0]?.getValue();
         let result: FunctionVariantType;
@@ -57,10 +54,10 @@ export class SuffixNode extends BaseAstNode {
 
         if (this._operatorString === suffixToken.PERCENTAGE) {
             if (value.isReferenceObject()) {
-                value = (value as BaseReferenceObject).withDateSystem(dateSystem).toArrayValueObject();
+                value = (value as BaseReferenceObject).withDateSystem(dateSystem, readRegion).toArrayValueObject();
             }
-            result = this._functionExecutor!.calculate(
-                (value as BaseValueObject).withDateSystem(dateSystem),
+            result = this._functionExecutor.calculate(
+                (value as BaseValueObject).withDateSystem(dateSystem, readRegion),
                 NumberValueObject.create(100)
             ) as FunctionVariantType;
 
@@ -74,51 +71,23 @@ export class SuffixNode extends BaseAstNode {
         } else {
             result = ErrorValueObject.create(ErrorType.VALUE);
         }
-        this.setValue(result.withDateSystem(dateSystem));
+        this.setValue(result.withDateSystem(dateSystem, readRegion));
     }
 
-    private _handlerPound(value: FunctionVariantType) {
-        // const sheetData = interpreterDatasetConfig.sheetData;
-        // if (!sheetData) {
-        //     return false;
-        // }
-
+    private _handlerPound(value: FunctionVariantType): FunctionVariantType {
         if (!value.isReferenceObject()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
-
-        if (!(value as BaseReferenceObject).isCell()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        // const currentConfigService = this._accessor.get(IFormulaCurrentConfigService);
-
-        // const lexer = this._accessor.get(Lexer);
-
-        const cellValue = value as CellReferenceObject;
-        const range = cellValue.getRangePosition();
-        const unitId = cellValue.getUnitId();
-        const sheetId = cellValue.getSheetId();
-        const formulaData = this._currentConfigService.getFormulaData();
-
-        const formulaString = formulaData?.[unitId]?.[sheetId]?.[range.startRow]?.[range.startColumn]?.f;
-
-        if (!formulaString) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        const lexerNode = this._lexer.treeBuilder(formulaString, true, unitId);
-
-        return ErrorValueObject.create(ErrorType.VALUE);
-        /** todo */
+        const reference = value as BaseReferenceObject;
+        const { startRow, startColumn } = reference.getRangePosition();
+        this._functionExecutor.setRefInfo(reference.getUnitId(), reference.getSheetId(), startRow, startColumn);
+        return (this._functionExecutor as Anchorarray).calculate(reference);
     }
 }
 
 export class SuffixNodeFactory extends BaseAstNodeFactory {
     constructor(
-        @IFunctionService private readonly _functionService: IFunctionService,
-        @Inject(Lexer) private readonly _lexer: Lexer,
-        @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService
+        @IFunctionService private readonly _functionService: IFunctionService
     ) {
         super();
     }
@@ -142,7 +111,7 @@ export class SuffixNodeFactory extends BaseAstNodeFactory {
         if (tokenTrim === suffixToken.PERCENTAGE) {
             functionName = FUNCTION_NAMES_META.DIVIDED;
         } else if (tokenTrim === suffixToken.POUND) {
-            return new SuffixNode(this._currentConfigService, this._lexer, tokenTrim);
+            functionName = FUNCTION_NAMES_LOOKUP.ANCHORARRAY;
         } else {
             return;
         }
@@ -152,6 +121,6 @@ export class SuffixNodeFactory extends BaseAstNodeFactory {
             console.error(`No function ${param}`);
             return ErrorNode.create(ErrorType.NAME);
         }
-        return new SuffixNode(this._currentConfigService, this._lexer, tokenTrim, functionExecutor);
+        return new SuffixNode(tokenTrim, functionExecutor);
     }
 }

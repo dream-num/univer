@@ -21,7 +21,7 @@ import type { ActiveCommentInfo } from '@univerjs/thread-comment-ui';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { RangeProtectionPermissionViewPoint, SetWorksheetActiveOperation, SheetPermissionCheckController, SheetsSelectionsService, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionViewPoint, SetWorksheetActiveOperation, SheetPermissionCheckController, SheetsSelectionsService, WorkbookViewPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { DeleteCommentMutation, deserializeThreadCommentAnchor, ThreadCommentAnchorKind } from '@univerjs/thread-comment';
@@ -191,7 +191,7 @@ export class SheetsThreadCommentPopupController extends Disposable {
 
                 const { row, column: col } = location;
                 const commentPermission = this._sheetPermissionCheckController.permissionCheckWithRanges({
-                    workbookTypes: [WorkbookCommentPermission],
+                    workbookTypes: [WorkbookViewPermission],
                     worksheetTypes: [WorksheetViewPermission],
                     rangeTypes: [RangeProtectionPermissionViewPoint],
                 }, [{ startRow: row, startColumn: col, endRow: row, endColumn: col }], unitId, subUnitId);

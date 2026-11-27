@@ -16,19 +16,24 @@
 
 import type { ChangeEvent, CSSProperties, ReactNode } from 'react';
 import { CheckMarkIcon } from '@univerjs/icons';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { clsx } from '../../helper/clsx';
 
 export interface ICheckboxProps {
+    id?: string;
+    name?: string;
+    'aria-label'?: string;
+    'aria-labelledby'?: string;
+    'aria-describedby'?: string;
     children?: ReactNode;
 
     /**
-     * The class name of the checkbox group
+     * The class name of the checkbox
      */
     className?: string;
 
     /**
-     * The style of the checkbox group
+     * The style of the checkbox
      */
     style?: CSSProperties;
 
@@ -57,7 +62,7 @@ export interface ICheckboxProps {
     disabled?: boolean;
 
     /**
-     * Set the handler to handle `click` event
+     * Set the handler to handle `change` event
      */
     onChange?: (value: string | number | boolean) => void;
 
@@ -68,9 +73,30 @@ export interface ICheckboxProps {
  * Checkbox Component
  */
 export function Checkbox(props: ICheckboxProps) {
-    const { children, className, style, checked = false, indeterminate = false, value, disabled = false, onChange, contentClassName } = props;
+    const {
+        id,
+        name,
+        'aria-label': ariaLabel,
+        'aria-labelledby': ariaLabelledby,
+        'aria-describedby': ariaDescribedby,
+        children,
+        className,
+        style,
+        checked = false,
+        indeterminate = false,
+        value,
+        disabled = false,
+        onChange,
+        contentClassName,
+    } = props;
 
     const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (inputRef.current) {
+            inputRef.current.indeterminate = indeterminate;
+        }
+    }, [indeterminate]);
 
     function handleChange(e: ChangeEvent<HTMLInputElement>) {
         e.stopPropagation();
@@ -80,23 +106,46 @@ export function Checkbox(props: ICheckboxProps) {
         if (typeof value !== 'undefined') {
             onChange?.(value);
         } else {
-            const checked = inputRef?.current?.checked ?? false;
-            onChange?.(checked);
+            const nextChecked = inputRef?.current?.checked ?? false;
+            onChange?.(nextChecked);
         }
     }
+
+    const hasChildren = children !== undefined && children !== null && children !== false;
+    const isActive = checked || indeterminate;
 
     return (
         <label
             data-u-comp="checkbox"
-            className={clsx('univer-box-border univer-inline-flex univer-items-center univer-gap-2 univer-text-sm', {
-                'univer-cursor-pointer univer-text-gray-900 dark:!univer-text-gray-0': !disabled,
-                'univer-text-gray-400': disabled,
-            }, className)}
+            className={clsx(
+                'univer-group univer-box-border univer-inline-flex univer-gap-2 univer-text-sm',
+                hasChildren ? 'univer-items-start' : 'univer-items-center',
+                disabled
+                    ? `
+                      univer-cursor-not-allowed univer-text-gray-400
+                      dark:!univer-text-gray-500
+                    `
+                    : `
+                      univer-cursor-pointer univer-text-gray-900
+                      dark:!univer-text-gray-0
+                    `,
+                className
+            )}
             style={style}
         >
-            <span className="univer-relative univer-block">
+            <span
+                className={clsx(
+                    'univer-relative univer-flex univer-shrink-0 univer-items-center',
+                    hasChildren && 'univer-min-h-[1lh]'
+                )}
+            >
                 <input
                     ref={inputRef}
+                    id={id}
+                    name={name}
+                    aria-label={ariaLabel}
+                    aria-labelledby={ariaLabelledby}
+                    aria-describedby={ariaDescribedby}
                     className="univer-peer univer-sr-only"
                     type="checkbox"
                     checked={checked}
@@ -105,39 +154,58 @@ export function Checkbox(props: ICheckboxProps) {
                     onChange={handleChange}
                 />
                 <span
-                    className={clsx(`
-                      univer-relative univer-box-border univer-flex univer-size-4 univer-items-center
-                      univer-justify-center univer-overflow-hidden univer-rounded univer-border univer-border-solid
-                      univer-transition-colors
-                      peer-focus:univer-outline peer-focus:univer-outline-2 peer-focus:univer-outline-offset-2
-                      peer-focus:univer-outline-primary-600
-                      dark:peer-focus:!univer-outline-primary-300
-                    `, {
-                        'univer-opacity-50': disabled,
-                        'univer-border-primary-600 univer-bg-primary-600': checked || indeterminate,
-                        'univer-border-gray-300 univer-bg-gray-50 dark:!univer-border-gray-500 dark:!univer-bg-gray-600': !checked && !indeterminate,
-                    })}
+                    className={clsx(
+                        `
+                          univer-relative univer-box-border univer-flex univer-size-4 univer-items-center
+                          univer-justify-center univer-overflow-hidden univer-rounded univer-border univer-border-solid
+                          univer-transition-all univer-duration-200
+                          peer-focus-visible:univer-outline peer-focus-visible:univer-outline-2
+                          peer-focus-visible:univer-outline-offset-2 peer-focus-visible:univer-outline-primary-600
+                          motion-reduce:univer-transition-none
+                          dark:peer-focus-visible:!univer-outline-primary-300
+                        `,
+                        disabled
+                            ? isActive
+                                ? 'univer-border-primary-600 univer-bg-primary-600 univer-opacity-50'
+                                : `
+                                  univer-border-gray-200 univer-bg-gray-100
+                                  dark:!univer-border-gray-600 dark:!univer-bg-gray-800
+                                `
+                            : isActive
+                                ? `
+                                  univer-border-primary-600 univer-bg-primary-600
+                                  group-hover:univer-border-primary-500 group-hover:univer-bg-primary-500
+                                  group-active:univer-scale-95 group-active:univer-border-primary-700
+                                  group-active:univer-bg-primary-700
+                                  motion-reduce:group-active:univer-scale-100
+                                `
+                                : `
+                                  univer-border-gray-300 univer-bg-gray-0
+                                  group-hover:univer-border-primary-600 group-hover:univer-bg-primary-50
+                                  group-active:univer-scale-95 group-active:univer-border-primary-700
+                                  motion-reduce:group-active:univer-scale-100
+                                  dark:!univer-border-gray-500 dark:!univer-bg-gray-700
+                                  dark:group-hover:!univer-border-primary-300 dark:group-hover:!univer-bg-gray-600
+                                `
+                    )}
                 >
                     {checked && (
                         <CheckMarkIcon
-                            className={`
-                              univer-absolute univer-left-1/2 univer-top-1/2 univer-block univer-size-3
-                              -univer-translate-x-1/2 -univer-translate-y-1/2 univer-text-gray-0
-                            `}
+                            aria-hidden="true"
+                            preserveStrokeWidth
+                            className="univer-size-3 univer-shrink-0 univer-text-gray-0"
                         />
                     )}
                     {indeterminate && !checked && (
                         <span
-                            className={`
-                              univer-absolute univer-left-1/2 univer-top-1/2 univer-block univer-h-0.5 univer-w-2.5
-                              -univer-translate-x-1/2 -univer-translate-y-1/2 univer-rounded univer-bg-gray-0
-                            `}
+                            aria-hidden="true"
+                            className="univer-block univer-h-0.5 univer-w-2.5 univer-rounded-full univer-bg-gray-0"
                         />
                     )}
                 </span>
             </span>
 
-            <span className={clsx('univer-select-none', contentClassName)}>{children}</span>
+            {hasChildren && <span className={clsx('univer-select-none', contentClassName)}>{children}</span>}
         </label>
     );
 }

@@ -19,8 +19,9 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { ErrorType } from '../../../basics/error-type';
 import { getTextValueOfNumberFormat } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { charLenByte } from '../../../engine/utils/char-kit';
+import { charLenByte, upperCaseKeepingPositions } from '../../../engine/utils/char-kit';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
+import { parseWildcardPattern, searchWildcard } from '../../../engine/utils/compare';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -76,8 +77,8 @@ export class Searchb extends BaseFunction {
     }
 
     private _handleSingleObject(findText: BaseValueObject, withinText: BaseValueObject, startNum: BaseValueObject): BaseValueObject {
-        const findTextValue = getTextValueOfNumberFormat(findText).toLocaleUpperCase();
-        const withinTextValue = getTextValueOfNumberFormat(withinText).toLocaleUpperCase();
+        const findTextValue = upperCaseKeepingPositions(getTextValueOfNumberFormat(findText));
+        const withinTextValue = upperCaseKeepingPositions(getTextValueOfNumberFormat(withinText));
 
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(startNum);
 
@@ -97,7 +98,8 @@ export class Searchb extends BaseFunction {
             return NumberValueObject.create(startNumValue);
         }
 
-        const index = withinTextValue.indexOf(findTextValue, startNumValue - 1);
+        // SEARCHB reads ? and * as wildcards and ~ as their escape, as SEARCH does.
+        const index = searchWildcard(withinTextValue, parseWildcardPattern(findTextValue), startNumValue - 1);
 
         if (index === -1) {
             return ErrorValueObject.create(ErrorType.VALUE);

@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         message: {
             refError: 'Rentang Tidak Valid',
         },
+        permission: {
+            editErr: 'Rentang dilindungi, dan Anda tidak memiliki izin edit. Untuk mengedit, silakan hubungi pembuatnya.',
+        },
     },
 };
 

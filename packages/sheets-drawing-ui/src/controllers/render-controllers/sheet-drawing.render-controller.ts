@@ -20,10 +20,10 @@ import { Disposable, DrawingTypeEnum, ILogService, Inject } from '@univerjs/core
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import {
-    drawingPositionToTransform,
     ISheetDrawingService,
     refreshSheetDrawingPlacement,
     SheetDrawingAnchorType,
+    transformToAxisAlignPosition,
 } from '@univerjs/sheets-drawing';
 
 export class SheetsDrawingRenderController extends Disposable implements IRenderModule {
@@ -57,23 +57,27 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
 
                 if (
                     skeletonParam &&
-                    drawingData.sheetTransform &&
+                    (drawingData.axisAlignSheetTransform || drawingData.sheetTransform) &&
                     !drawingData.groupId &&
                     drawingData.anchorType !== SheetDrawingAnchorType.None
                 ) {
                     try {
-                        if (drawingData.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
-                            const transform = drawingPositionToTransform(drawingData.sheetTransform, skeletonParam);
+                        const placement = refreshSheetDrawingPlacement(drawingData, skeletonParam.skeleton);
+                        if (drawingData.drawingType === DrawingTypeEnum.DRAWING_GROUP && !drawingData.axisAlignSheetTransform) {
+                            // Legacy groups used coordinates relative to the grid origin.
+                            const { skeleton } = skeletonParam;
+                            const transform = {
+                                ...placement.transform,
+                                left: (placement.transform?.left ?? 0) - skeleton.rowHeaderWidthAndMarginLeft,
+                                top: (placement.transform?.top ?? 0) - skeleton.columnHeaderHeightAndMarginTop,
+                            };
                             refreshedDrawings.push({
-                                ...drawingData,
-                                transform: transform && {
-                                    ...transform,
-                                    left: (transform.left ?? 0) - skeletonParam.skeleton.rowHeaderWidthAndMarginLeft,
-                                    top: (transform.top ?? 0) - skeletonParam.skeleton.columnHeaderHeightAndMarginTop,
-                                },
+                                ...placement,
+                                transform,
+                                axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton),
                             });
                         } else {
-                            refreshedDrawings.push(refreshSheetDrawingPlacement(drawingData, skeletonParam.skeleton));
+                            refreshedDrawings.push(placement);
                         }
                     } catch (error) {
                         this._logService.warn('[SheetsDrawingRenderController]', 'Skipping drawing placement initialization', {
@@ -81,7 +85,7 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
                             subUnitId,
                             drawingId,
                             transform: drawingData.transform,
-                            sheetTransform: drawingData.sheetTransform,
+                            axisAlignSheetTransform: drawingData.axisAlignSheetTransform,
                             error,
                         });
                     }

@@ -16,6 +16,7 @@
 
 import type {
     DocumentDataModel,
+    ICustomRange,
     IDocumentBody,
     ISectionBreak,
     JSONXActions,
@@ -246,6 +247,7 @@ export function getDocumentEditTargetObjectIdsFromActions(
             }
             offset += action.len;
         });
+        addCustomRangeUpdateTargets(documentDataModel, scopedSegment, textActions, result, addRange);
     });
 
     getDrawingIdsFromActions(actions).forEach((drawingId) => {
@@ -261,6 +263,78 @@ export function getDocumentEditTargetObjectIdsFromActions(
     });
 
     return [...result];
+}
+
+function addCustomRangeUpdateTargets(
+    document: DocumentDataModel,
+    segmentId: string,
+    actions: TextXAction[],
+    result: Set<string>,
+    addRange: (startOffset: number, endOffset: number) => void
+): void {
+    if (!actions.some((action) => action.t === TextXActionType.RETAIN && action.rangeUpdates?.length)) {
+        return;
+    }
+    const ranges = document.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges ?? [];
+    const byId = new Map(ranges.map((range) => [range.rangeId, range]));
+    const hasTextEdits = actions.some((action) => action.t !== TextXActionType.RETAIN);
+    for (const action of actions) {
+        if (action.t !== TextXActionType.RETAIN || !action.rangeUpdates?.length) {
+            continue;
+        }
+        for (const { rangeId, range, propertyPaths } of action.rangeUpdates) {
+            const previous = byId.get(rangeId);
+            if (previous) {
+                addRange(previous.startIndex, customRangeEnd(previous));
+            }
+            if (range && !propertyPaths) {
+                // Range positions describe the result. Resolve permissions against the source document.
+                let start = range.startIndex;
+                let end = customRangeEnd(range);
+                if (hasTextEdits) {
+                    start = getSourceTextOffset(actions, start, false);
+                    end = start;
+                    if (!isCollapsedCustomRange(range)) {
+                        end = getSourceTextOffset(actions, range.endIndex, true);
+                    }
+                }
+                addRange(start, end);
+            }
+            if (previous || (range && !propertyPaths)) {
+                result.add(getDocumentEntityPermissionObjectId(segmentId, 'custom-range', rangeId));
+            }
+        }
+    }
+}
+
+function customRangeEnd(range: ICustomRange): number {
+    return isCollapsedCustomRange(range) ? range.startIndex : range.endIndex + 1;
+}
+
+function isCollapsedCustomRange(range: ICustomRange): boolean {
+    return range.startIndex === range.endIndex && range.properties?.collapsed === true;
+}
+
+function getSourceTextOffset(actions: TextXAction[], index: number, afterCharacter: boolean): number {
+    let resultOffset = 0;
+    let sourceOffset = 0;
+    for (const { t, len } of actions) {
+        if (t === TextXActionType.DELETE) {
+            sourceOffset += len;
+            continue;
+        }
+        if (index < resultOffset + len) {
+            if (t === TextXActionType.INSERT) {
+                return sourceOffset;
+            }
+            return sourceOffset + index - resultOffset + Number(afterCharacter);
+        }
+        resultOffset += len;
+        if (t === TextXActionType.RETAIN) {
+            sourceOffset += len;
+        }
+    }
+    return sourceOffset + index - resultOffset + Number(afterCharacter);
 }
 
 function getDrawingIdsFromActions(actions: JSONXActions): string[] {

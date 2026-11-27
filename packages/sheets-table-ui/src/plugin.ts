@@ -15,14 +15,14 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsTableUIConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import type { IUniverSheetsTableUIConfig } from './config/config';
 import pkg from '../package.json';
-import { OpenTableFilterPanelOperation } from './commands/operations/open-table-filter-dialog.opration';
+import { OpenTableFilterPanelOperation, RequestOpenTableFilterPanelOperation } from './commands/operations/open-table-filter-dialog.opration';
 import { OpenTableSelectorOperation } from './commands/operations/open-table-selector.operation';
 import { defaultPluginConfig, SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { PLUGIN_NAME } from './const';
@@ -114,6 +114,7 @@ export class UniverSheetsTableUIPlugin extends Plugin {
     private _initRegisterCommand() {
         [
             OpenTableFilterPanelOperation,
+            RequestOpenTableFilterPanelOperation,
             OpenTableSelectorOperation,
         ].forEach((m) => this._commandService.registerCommand(m));
     }

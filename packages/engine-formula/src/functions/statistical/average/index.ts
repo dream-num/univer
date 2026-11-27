@@ -24,6 +24,8 @@ export class Average extends BaseFunction {
 
     override maxParams = 255;
 
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
+
     override calculate(...variants: BaseValueObject[]) {
         let accumulatorSum: BaseValueObject = NumberValueObject.create(0);
         let accumulatorCount: BaseValueObject = NumberValueObject.create(0);
@@ -47,7 +49,7 @@ export class Average extends BaseFunction {
                 }
 
                 accumulatorCount = accumulatorCount.plus(variant.count());
-            } else if (!variant.isNull()) {
+            } else {
                 accumulatorSum = accumulatorSum.plus(variant);
                 accumulatorCount = accumulatorCount.plus(NumberValueObject.create(1));
             }
@@ -56,7 +58,7 @@ export class Average extends BaseFunction {
         return accumulatorSum.divided(accumulatorCount);
     }
 
-    private _legacyImplicitDerivedArray(variant: BaseValueObject): BaseValueObject {
+    protected _legacyImplicitDerivedArray(variant: BaseValueObject): BaseValueObject {
         if (!variant.isArray()) {
             return variant;
         }

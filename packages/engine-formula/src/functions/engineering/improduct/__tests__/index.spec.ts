@@ -75,7 +75,7 @@ describe('Test improduct function', () => {
             });
             const inumber2 = StringValueObject.create('5+12i');
             const result = testFunction.calculate(inumber1, inumber2);
-            expect(result.getValue()).toBe(0);
+            expect(result.getValue()).toBe('0');
         });
 
         it('Value is error', () => {

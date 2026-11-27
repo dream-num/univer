@@ -15,25 +15,26 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { Injector } from '../../../common/di';
 import { LocaleType } from '../../../types/enum/locale-type';
 import { LocaleService } from '../../locale/locale.service';
 import { RegionService } from '../region.service';
 
 describe('RegionService', () => {
     it('follows locale until a region is explicitly set', () => {
-        const localeService = new LocaleService();
-        const regionService = new RegionService(localeService);
+        const injector = new Injector([[LocaleService], [RegionService]]);
+        const localeService = injector.get(LocaleService);
+        const regionService = injector.get(RegionService);
 
         expect(regionService.getCurrentRegion()).toBe(LocaleType.ZH_CN);
 
         localeService.setLocale(LocaleType.EN_US);
         expect(regionService.getCurrentRegion()).toBe(LocaleType.EN_US);
 
-        regionService.setRegion(LocaleType.FR_FR);
+        regionService.setRegion('en-IN');
         localeService.setLocale(LocaleType.JA_JP);
-        expect(regionService.getCurrentRegion()).toBe(LocaleType.FR_FR);
+        expect(regionService.getCurrentRegion()).toBe('en-IN');
 
-        regionService.dispose();
-        localeService.dispose();
+        injector.dispose();
     });
 });

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -23,10 +25,18 @@ export class Count extends BaseFunction {
 
     override maxParams = 255;
 
-    override calculate(...variants: BaseValueObject[]) {
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
+
+    override needsReferenceObject = true;
+
+    override calculate(...variants: FunctionVariantType[]) {
         let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         for (let i = 0; i < variants.length; i++) {
-            const variant = variants[i];
+            const input = variants[i];
+            if (input instanceof MultiAreaReferenceObject && input.isArrayOfReferences()) {
+                continue;
+            }
+            const variant = input.isReferenceObject() ? (input as BaseReferenceObject).toArrayValueObject() : input as BaseValueObject;
 
             if (variant.isError()) {
                 continue;
@@ -38,7 +48,7 @@ export class Count extends BaseFunction {
                 if (!variant.convertToNumberObjectValue().isError()) {
                     accumulatorAll = accumulatorAll.plus(NumberValueObject.create(1));
                 }
-            } else if (!variant.isNull()) {
+            } else {
                 accumulatorAll = accumulatorAll.plus(NumberValueObject.create(1));
             }
         }

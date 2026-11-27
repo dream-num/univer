@@ -32,6 +32,48 @@ describe('regexp utilities', () => {
         expect(regex.test('file-a-index.ts')).toBe(false);
     });
 
+    it('escapes the character after a tilde in a wildcard pattern', () => {
+        const question = regexp.createFromWildcard('fy06~?');
+        expect(question.test('fy06?')).toBe(true);
+        expect(question.test('fy06x')).toBe(false);
+
+        const star = regexp.createFromWildcard('5~*3*');
+        expect(star.test('5*3 = 15')).toBe(true);
+        expect(star.test('513')).toBe(false);
+
+        // `~~` is one tilde where the pattern has a wildcard for tildes to escape.
+        expect(regexp.createFromWildcard('*a~~b*').test('a~b')).toBe(true);
+
+        const letter = regexp.createFromWildcard('*a~b*');
+        expect(letter.test('ab')).toBe(true);
+        expect(letter.test('a~b')).toBe(false);
+
+        const dot = regexp.createFromWildcard('*a~.b*');
+        expect(dot.test('a.b')).toBe(true);
+        expect(dot.test('axb')).toBe(false);
+
+        const trailingTilde = regexp.createFromWildcard('fy06~?~');
+        expect(trailingTilde.test('fy06?')).toBe(true);
+        expect(trailingTilde.test('fy06?~')).toBe(false);
+    });
+
+    it('matches a pattern without * or ? as written, tildes included', () => {
+        const tildes = regexp.createFromWildcard('a~~b');
+        expect(tildes.test('a~~b')).toBe(true);
+        expect(tildes.test('A~~B')).toBe(true);
+        expect(tildes.test('a~b')).toBe(false);
+
+        expect(regexp.createFromWildcard('a~b').test('a~b')).toBe(true);
+        expect(regexp.createFromWildcard('a~').test('a~')).toBe(true);
+        expect(regexp.createFromWildcard('a.b').test('axb')).toBe(false);
+    });
+
+    it('matches line breaks with wildcards', () => {
+        expect(regexp.createFromWildcard('a*b').test('a\r\nb')).toBe(true);
+        expect(regexp.createFromWildcard('a?b').test('a\nb')).toBe(true);
+        expect(regexp.createFromWildcard('a?b').test('a\r\nb')).toBe(false);
+    });
+
     it('builds literal regexes from text containing regex syntax', () => {
         const regex = regexp.createLiteralRegExp('a.b+(test)?', 'g');
 

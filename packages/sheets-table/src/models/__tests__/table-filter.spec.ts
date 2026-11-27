@@ -15,8 +15,8 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import type { ITableRecordFilterItem } from '../../types/type';
 import {
+    BooleanNumber,
     CellValueType,
     FilterSelectionMode,
     LocaleType,
@@ -25,8 +25,54 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
-import { TableColumnFilterTypeEnum } from '../../types/enum';
+import type { ITableRecordFilterItem } from '../../types/type';
+import { TableColumnFilterTypeEnum, TableConditionTypeEnum, TableStringCompareTypeEnum } from '../../types/enum';
 import { TableFilters } from '../table-filter';
+
+it('keeps blank cells distinct from text during a table filter recalculation', () => {
+    const univer = new Univer({ locale: LocaleType.EN_US });
+    try {
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'table-text-filter',
+            sheetOrder: ['sheet-1'],
+            sheets: {
+                'sheet-1': {
+                    id: 'sheet-1',
+                    name: 'Sheet1',
+                    cellData: {
+                        2: { 0: { s: { bl: BooleanNumber.TRUE } } },
+                        3: { 0: { v: 'null' } },
+                        4: { 0: { v: 'null-key' } },
+                        5: { 0: { v: 'undefined' } },
+                        6: { 0: { f: '=""', v: '', t: CellValueType.STRING } },
+                    },
+                },
+            },
+        });
+        const sheet = workbook.getSheetBySheetId('sheet-1')!;
+        const range = { startRow: 1, endRow: 6, startColumn: 0, endColumn: 0 };
+        const filters = new TableFilters();
+        const visibleRows = (compareType: TableStringCompareTypeEnum, expectedValue: string) => {
+            filters.setColumnFilter(0, {
+                filterType: TableColumnFilterTypeEnum.condition,
+                filterInfo: { conditionType: TableConditionTypeEnum.String, compareType, expectedValue },
+            });
+            const hidden = filters.doFilter(sheet, range);
+            return [1, 2, 3, 4, 5, 6].filter((row) => !hidden.has(row));
+        };
+
+        expect(visibleRows(TableStringCompareTypeEnum.Equal, 'null')).toEqual([3]);
+        expect(visibleRows(TableStringCompareTypeEnum.Equal, 'n~ull*')).toEqual([3, 4]);
+        expect(visibleRows(TableStringCompareTypeEnum.Equal, 'u~ndefined*')).toEqual([5]);
+        expect(visibleRows(TableStringCompareTypeEnum.Equal, '*')).toEqual([3, 4, 5, 6]);
+        expect(visibleRows(TableStringCompareTypeEnum.NotEqual, '*')).toEqual([1, 2]);
+        expect(visibleRows(TableStringCompareTypeEnum.Equal, '')).toEqual([1, 2, 6]);
+        expect(visibleRows(TableStringCompareTypeEnum.NotEqual, '')).toEqual([3, 4, 5]);
+        expect(visibleRows(TableStringCompareTypeEnum.NotEqual, 'n~ull*')).toEqual([1, 2, 5, 6]);
+    } finally {
+        univer.dispose();
+    }
+});
 
 function createSparseWorkbookData(): IWorkbookData {
     return {

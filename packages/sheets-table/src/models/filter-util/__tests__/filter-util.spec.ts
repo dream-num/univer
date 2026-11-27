@@ -69,15 +69,7 @@ import {
     yesterday,
 } from '../date-filter-util';
 import { above, below, getBottomN, getNumberFilterExecuteFunc, getTopN } from '../number-filter-util';
-import {
-    getTextFilterExecuteFunc,
-    textContain,
-    textEndWith,
-    textEqual,
-    textNotContain,
-    textNotEqual,
-    textStartWith,
-} from '../text-filter-util';
+import { getTextFilterExecuteFunc } from '../text-filter-util';
 import { getLargestK, getSmallestK } from '../top-n';
 
 function createWorkbookData(): IWorkbookData {
@@ -515,38 +507,28 @@ describe('table filter utilities', () => {
     });
 
     it('matches text filters with wildcard-aware predicates', () => {
-        expect(textEqual('North-01', 'North-*')).toBe(true);
-        expect(textNotEqual('South-01', 'North-*')).toBe(true);
-        expect(textContain('FY24 Revenue', 'Revenue')).toBe(true);
-        expect(textNotContain('FY24 Cost', 'Revenue')).toBe(true);
-        expect(textStartWith('Table Sales', 'Table')).toBe(true);
-        expect(textEndWith('Table Sales', 'Sales')).toBe(true);
+        const createFilter = (compareType: TableStringCompareTypeEnum, expectedValue: string) => getTextFilterExecuteFunc({
+            conditionType: TableConditionTypeEnum.String,
+            compareType,
+            expectedValue,
+        });
+        expect(createFilter(TableStringCompareTypeEnum.Equal, 'North-*')('North-01')).toBe(true);
+        expect(createFilter(TableStringCompareTypeEnum.NotEqual, 'North-*')('South-01')).toBe(true);
+        expect(createFilter(TableStringCompareTypeEnum.Contains, 'Revenue')('FY24 Revenue')).toBe(true);
+        expect(createFilter(TableStringCompareTypeEnum.Contains, 'West')('West Region')).toBe(true);
+        expect(createFilter(TableStringCompareTypeEnum.NotContains, 'Revenue')('FY24 Cost')).toBe(true);
+        expect(createFilter(TableStringCompareTypeEnum.StartsWith, 'Table')('Table Sales')).toBe(true);
+        expect(createFilter(TableStringCompareTypeEnum.EndsWith, 'Sales')('Table Sales')).toBe(true);
 
-        expect(getTextFilterExecuteFunc({
-            conditionType: TableConditionTypeEnum.String,
-            compareType: TableStringCompareTypeEnum.Contains,
-            expectedValue: 'West',
-        })('West Region')).toBe(true);
-        expect(getTextFilterExecuteFunc({
-            conditionType: TableConditionTypeEnum.String,
-            compareType: TableStringCompareTypeEnum.Equal,
-            expectedValue: 'West*',
-        })('West Region')).toBe(true);
-        expect(getTextFilterExecuteFunc({
-            conditionType: TableConditionTypeEnum.String,
-            compareType: TableStringCompareTypeEnum.NotEqual,
-            expectedValue: 'East*',
-        })('West Region')).toBe(true);
-        expect(getTextFilterExecuteFunc({
-            conditionType: TableConditionTypeEnum.String,
-            compareType: TableStringCompareTypeEnum.NotContains,
-            expectedValue: 'East',
-        })('West Region')).toBe(true);
-        expect(getTextFilterExecuteFunc({
-            conditionType: TableConditionTypeEnum.String,
-            compareType: TableStringCompareTypeEnum.EndsWith,
-            expectedValue: 'Region',
-        })('West Region')).toBe(true);
+        const equalWithTildes = createFilter(TableStringCompareTypeEnum.Equal, 'a~~b');
+        expect(equalWithTildes('a~~b')).toBe(true);
+        expect(equalWithTildes('a~b')).toBe(false);
+        expect(createFilter(TableStringCompareTypeEnum.NotEqual, 'a~~b')('a~b')).toBe(true);
+        expect(createFilter(TableStringCompareTypeEnum.Contains, 'a~~b')('a~b')).toBe(true);
+
+        const endsWithTilde = createFilter(TableStringCompareTypeEnum.EndsWith, 'a~');
+        expect(endsWithTilde('pa')).toBe(true);
+        expect(endsWithTilde('pa~')).toBe(false);
 
         const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
         expect(getTextFilterExecuteFunc({

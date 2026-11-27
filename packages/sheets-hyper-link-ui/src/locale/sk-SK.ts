@@ -39,7 +39,7 @@ const locale: typeof enUS = {
             add: 'Vložiť odkaz',
         },
         permission: {
-            hyperLinkErr: 'Nemáte povolenie vložiť odkaz.',
+            editErr: 'Rozsah je chránený a nemáte oprávnenie na úpravy. Ak chcete upravovať, kontaktujte autora.',
         },
         message: {
             noSheet: 'Cieľový hárok bol odstránený',

@@ -15,13 +15,12 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { isRealNum } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { Complex } from '../../../basics/complex';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Improduct extends BaseFunction {
@@ -29,8 +28,12 @@ export class Improduct extends BaseFunction {
 
     override maxParams = 255;
 
+    protected parseComplex(value: BaseValueObject): Complex {
+        return new Complex(`${value.getValue()}`, this.getDateSystem());
+    }
+
     override calculate(...variants: BaseValueObject[]): BaseValueObject {
-        let result: number | string | ErrorValueObject = '';
+        let result: string | ErrorValueObject = '';
 
         for (let i = 0; i < variants.length; i++) {
             if (result instanceof ErrorValueObject) {
@@ -44,7 +47,7 @@ export class Improduct extends BaseFunction {
                 let errorObject: Nullable<ErrorValueObject>;
 
                 (variant as ArrayValueObject).iterator((valueObject) => {
-                    result = this._handleSingleObject(valueObject as BaseValueObject, result as number | string);
+                    result = this._handleSingleObject(valueObject as BaseValueObject, result as string);
 
                     if (result instanceof ErrorValueObject) {
                         isError = true;
@@ -65,14 +68,10 @@ export class Improduct extends BaseFunction {
             return result;
         }
 
-        if (typeof result === 'number' || isRealNum(result)) {
-            return NumberValueObject.create(+result);
-        }
-
         return StringValueObject.create(result);
     }
 
-    private _handleSingleObject(variant: BaseValueObject, result: number | string): number | string | ErrorValueObject {
+    private _handleSingleObject(variant: BaseValueObject, result: string): string | ErrorValueObject {
         let _result = result;
 
         if (variant.isError()) {
@@ -83,30 +82,27 @@ export class Improduct extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const value = `${variant.getValue()}`;
+        const complex = this.parseComplex(variant);
 
-        if (typeof result !== 'number' && !result) {
-            const complex = new Complex(value, this.getDateSystem());
+        if (complex.isError()) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
 
-            if (complex.isError()) {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
-
+        if (!result) {
             _result = complex.toString();
         } else {
             const complex1: Complex = new Complex(result, this.getDateSystem());
-            const complex2 = new Complex(value, this.getDateSystem());
 
-            if (complex1.isError() || complex2.isError()) {
+            if (complex1.isError()) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
             // Cannot perform operations on complex numbers with different suffixes.
-            if (complex1.isDifferentSuffixes(complex2)) {
+            if (complex1.isDifferentSuffixes(complex)) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            _result = complex1.Product(complex2);
+            _result = complex1.Product(complex);
         }
 
         return _result;

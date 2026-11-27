@@ -136,6 +136,11 @@ const locale: typeof enUS = {
             title: 'チェックボックス',
             error: 'このセルの内容は入力規則に違反しています',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'この範囲は保護されており、スタイルを変更する権限がありません。変更するには作成者に連絡してください。',
+            },
+        },
     },
 };
 

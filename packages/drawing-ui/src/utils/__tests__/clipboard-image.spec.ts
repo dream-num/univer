@@ -41,9 +41,8 @@ describe('writeImageSourceToClipboard', () => {
     });
 
     it('writes a PNG source through the browser clipboard API', async () => {
-        const blob = new Blob(['png'], { type: 'image/png' });
         const write = vi.fn(async (_items: ClipboardItem[]) => undefined);
-        globalThis.fetch = vi.fn(async () => new Response(blob, { status: 200 })) as typeof fetch;
+        globalThis.fetch = vi.fn(async () => new Response('png', { headers: { 'Content-Type': 'image/png' } })) as typeof fetch;
         globalThis.ClipboardItem = class ClipboardItemMock {
             readonly types = ['image/png'];
             readonly presentationStyle = 'unspecified' as const;
@@ -62,7 +61,7 @@ describe('writeImageSourceToClipboard', () => {
         await expect(writeImageSourceToClipboard('data:image/png;base64,cG5n')).resolves.toBe(true);
         const item = write.mock.calls[0][0][0] as unknown as { data: Record<string, Promise<Blob>> };
         const copiedBlob = await item.data['image/png'];
-        expect(copiedBlob).toMatchObject({ size: blob.size, type: blob.type });
+        expect(copiedBlob).toMatchObject({ size: 3, type: 'image/png' });
     });
 
     it('returns false when binary clipboard writing is unavailable', async () => {
@@ -96,7 +95,7 @@ describe('writeImageSourceToClipboard', () => {
     });
 
     it('deduplicates HTML images and ignores images from hidden content', async () => {
-        globalThis.fetch = vi.fn(async () => new Response(new Blob(['png'], { type: 'image/png' }), { status: 200 })) as typeof fetch;
+        globalThis.fetch = vi.fn(async () => new Response('png', { headers: { 'Content-Type': 'image/png' } })) as typeof fetch;
 
         const files = await extractClipboardHtmlImageFiles(`
             <img src="https://example.com/visible.png">
@@ -109,7 +108,7 @@ describe('writeImageSourceToClipboard', () => {
     });
 
     it('extracts lazy HTML images and inline SVG as image files', async () => {
-        globalThis.fetch = vi.fn(async () => new Response(new Blob(['png'], { type: 'image/png' }), { status: 200 })) as typeof fetch;
+        globalThis.fetch = vi.fn(async () => new Response('png', { headers: { 'Content-Type': 'image/png' } })) as typeof fetch;
 
         const files = await extractClipboardHtmlImageFiles(`
             <img data-src="https://example.com/lazy.png">

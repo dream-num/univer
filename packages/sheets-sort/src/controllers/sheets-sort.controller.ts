@@ -14,23 +14,36 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable } from '@univerjs/core';
-import type { ICellValueCompareFn } from '../commands/commands/sheets-sort.command';
-import { CellValueType, Disposable, ICommandService, Inject } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, RegionService } from '@univerjs/core';
+import type { IRowComparator, IRowCompareFn } from '../commands/commands/sheets-sort.command';
+import type { IRegionTextComparer, TextColumnComparer } from './text-comparer';
 import { SortRangeCommand } from '../commands/commands/sheets-sort.command';
+import { SortType } from '../services/interface';
 import { SheetsSortService } from '../services/sheets-sort.service';
-import { compareNull, compareNumber, compareString, isNullValue } from './utils';
+import { createRegionTextComparer } from './text-comparer';
+import { compareCells, compareRankedCells, getSortRank, readNumber, readText, SortRank } from './utils';
 
-export type ICommonComparableCellValue = number | string | null;
+type ColumnCompareFn = (type: SortType, a: IRowComparator, b: IRowComparator) => number;
 
 export class SheetsSortController extends Disposable {
+    private _textComparer: IRegionTextComparer;
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SheetsSortService) private readonly _sortService: SheetsSortService
+        @Inject(SheetsSortService) private readonly _sortService: SheetsSortService,
+        @Inject(RegionService) private readonly _regionService: RegionService
     ) {
         super();
+        this._textComparer = createRegionTextComparer(this._regionService.getCurrentRegion());
         this._initCommands();
+        this._initTextComparer();
         this._registerCompareFns();
+    }
+
+    private _initTextComparer(): void {
+        this.disposeWithMe(this._regionService.currentRegion$.subscribe((region) => {
+            this._textComparer = createRegionTextComparer(region);
+        }));
     }
 
     private _initCommands(): void {
@@ -40,53 +53,91 @@ export class SheetsSortController extends Disposable {
     }
 
     private _registerCompareFns(): void {
-        const commonFn: ICellValueCompareFn = (type, a, b) => {
-            const valueA: ICommonComparableCellValue = this._getCommonValue(a);
-            const valueB: ICommonComparableCellValue = this._getCommonValue(b);
-
-            const compareTypeFns = [
-                compareNull,
-                compareString,
-                compareNumber,
-            ];
-
-            for (let i = 0; i < compareTypeFns.length; i++) {
-                const res = compareTypeFns[i](valueA, valueB, type);
-                if (res !== null) {
-                    return res;
-                }
-            }
-
-            return null;
-        };
-        this._sortService.registerCompareFn(commonFn);
+        this._sortService.registerCompareFn(
+            (type, a, b) => compareCells(type, a, b, this._textComparer.compare),
+            (rows) => this._prepareCompareFn(rows)
+        );
     }
 
-    private _getCommonValue(a: Nullable<ICellData>): ICommonComparableCellValue {
-        if (isNullValue(a)) {
-            return null;
-        }
+    private _prepareCompareFn(rows: readonly IRowComparator[]): IRowCompareFn {
+        const comparer = this._textComparer;
+        const columns: Array<ColumnCompareFn | undefined> = [];
+        const secondaryTextComparisons: number[] = [];
+        const prepareAfter = Math.ceil(Math.sqrt(rows.length));
 
-        const richTextValue = a?.p?.body?.dataStream;
-        if (richTextValue) {
-            return richTextValue;
-        }
-
-        if (a?.t === CellValueType.NUMBER) {
-            return Number.parseFloat(`${a.v}`);
-        }
-        if (a?.t === CellValueType.STRING) {
-            if (typeof a.v === 'number') {
-                return a.v;
+        return (type, a, b, key) => {
+            let column = columns[key];
+            if (column) {
+                return column(type, a, b);
             }
-            return `${a.v}`;
+
+            if (key > 0) {
+                const aCell = a.value[key];
+                const bCell = b.value[key];
+                const rankA = getSortRank(aCell);
+                const rankB = getSortRank(bCell);
+                if (rankA !== SortRank.TEXT || rankB !== SortRank.TEXT) {
+                    return compareRankedCells(type, aCell, bCell, rankA, rankB, comparer.compare);
+                }
+                // A few tied primary keys do not justify preparing an entire secondary column.
+                const comparisons = (secondaryTextComparisons[key] ?? 0) + 1;
+                secondaryTextComparisons[key] = comparisons;
+                if (comparisons < prepareAfter) {
+                    return compareRankedCells(type, aCell, bCell, rankA, rankB, comparer.compare);
+                }
+            }
+            column = columns[key] = this._prepareColumn(rows, key, comparer);
+            return column(type, a, b);
+        };
+    }
+
+    private _prepareColumn(rows: readonly IRowComparator[], key: number, comparer: IRegionTextComparer): ColumnCompareFn {
+        const ranks: SortRank[] = [];
+        const rowTexts: Array<string | undefined> = [];
+        let allNumeric = true;
+        let textCount = 0;
+        for (const row of rows) {
+            const cell = row.value[key];
+            const rank = getSortRank(cell);
+            ranks[row.position] = rank;
+            if (rank !== SortRank.NUMBER) {
+                allNumeric = false;
+            }
+            if (rank === SortRank.TEXT) {
+                rowTexts[row.position] = readText(cell);
+                textCount++;
+            }
         }
-        if (a?.t === CellValueType.BOOLEAN) {
-            return `${a.v}`;
+
+        if (allNumeric) {
+            const numbers = new Float64Array(rows.length);
+            for (const row of rows) {
+                numbers[row.position] = readNumber(row.value[key]);
+            }
+            return (type, a, b) => {
+                const order = Math.sign(numbers[a.position] - numbers[b.position]);
+                return type === SortType.ASC ? order : -order;
+            };
         }
-        if (a?.t === CellValueType.FORCE_STRING) {
-            return Number.parseFloat(`${a.v}`);
+
+        if (textCount === rows.length) {
+            const compareText = comparer.prepareColumn(rowTexts);
+            return (type, a, b) => {
+                const order = compareText(a.position, b.position);
+                return type === SortType.ASC ? order : -order;
+            };
         }
-        return `${a?.v}`;
+
+        let compareText: TextColumnComparer | undefined;
+        return (type, a, b) => {
+            const rankA = ranks[a.position];
+            const rankB = ranks[b.position];
+            if (rankA === SortRank.TEXT && rankB === SortRank.TEXT) {
+                compareText ??= comparer.prepareColumn(rowTexts);
+                const order = compareText(a.position, b.position);
+                return type === SortType.ASC ? order : -order;
+            }
+            return compareRankedCells(type, a.value[key], b.value[key], rankA, rankB, comparer.compare);
+        };
     }
 }

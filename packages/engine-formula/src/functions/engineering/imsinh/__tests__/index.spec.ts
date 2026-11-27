@@ -41,7 +41,7 @@ describe('Test imsinh function', () => {
         it('Value is number string', () => {
             const inumber = StringValueObject.create('1.5');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(2.12927945509482);
+            expect(result.getValue()).toBe('2.12927945509482');
         });
 
         it('Value is normal string', () => {
@@ -69,7 +69,7 @@ describe('Test imsinh function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(0);
+            expect(result.getValue()).toBe('0');
         });
 
         it('Value is error', () => {

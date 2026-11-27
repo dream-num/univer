@@ -17,9 +17,58 @@
 import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { compareToken } from '../../../basics/token';
-import { NumberValueObject, StringValueObject } from '../primitive-object';
+import { NullValueObject, NumberValueObject, StringValueObject } from '../primitive-object';
+
+describe('NullValueObject', () => {
+    it('keeps omitted arguments distinct from blank values', () => {
+        const blank = NullValueObject.create();
+        const omitted = NullValueObject.create(true);
+        expect(blank.isNull()).toBe(true);
+        expect(omitted.isNull()).toBe(true);
+        expect(blank.isOmitted()).toBe(false);
+        expect(omitted.isOmitted()).toBe(true);
+        expect(NullValueObject.create()).toBe(blank);
+        expect(NullValueObject.create(true)).toBe(omitted);
+    });
+});
+
+describe('NumberValueObject', () => {
+    it('flushes denormal formula numbers and preserves the normal boundary', () => {
+        for (const value of [1e-308, -1e-308, Number.MIN_VALUE]) {
+            expect(NumberValueObject.create(value).getValue()).toBe(0);
+            const mutable = NumberValueObject.create(1);
+            mutable.setValue(value);
+            expect(mutable.getValue()).toBe(0);
+        }
+        expect(NumberValueObject.create(2.2250738585072014e-308).getValue()).toBe(2.2250738585072014e-308);
+    });
+});
 
 describe('StringValueObject', () => {
+    it.each([
+        ['1E-307', 1e-307],
+        ['1E-308', 0],
+        ['1E-309', 0],
+        ['0E308', 0],
+        ['1000E-310', 1e-307],
+        ['1E309%', 1e307],
+        ['(1E2)', -100],
+        ['$1E2', 100],
+        ['1 1/2', 1.5],
+        ['1.2345678901234567', 1.23456789012345],
+        ['2.2250738585072014E-308', 0],
+    ])('converts Excel numeric text %s without retaining subnormals', (text, expected) => {
+        const value = StringValueObject.create(text as string).convertToNumberObjectValue();
+        expect(value.isError()).toBe(false);
+        expect(value.getValue()).toBe(expected);
+    });
+
+    it.each(['0E-309', '1E308', '1E-400', '0E400', '1E-308%', '1%%', '$1E309%', '0x10', 'Infinity'])('rejects invalid Excel numeric text %s', (text) => {
+        const value = StringValueObject.create(text).convertToNumberObjectValue();
+        expect(value.isError()).toBe(true);
+        expect(value.getValue()).toBe('#VALUE!');
+    });
+
     it.each([
         ['ß', 'SS', true],
         ['ẞ', 'ss', true],

@@ -26,6 +26,7 @@ import type { DocumentDataModel } from '../../document-data-model';
 import { MemoryCursor } from '../../../../common/memory-cursor';
 import { UpdateDocsAttributeType } from '../../../../shared';
 import { generateRandomId } from '../../../../shared/random-id';
+import { resolveDocumentParagraphBullet } from '../../paragraph-style';
 import { PRESET_LIST_TYPE, PresetListType } from '../../preset-list-type';
 import { DataStreamTreeTokenType } from '../../types';
 import { TextXActionType } from '../action-types';
@@ -44,7 +45,8 @@ export const switchParagraphBullet = (params: ISwitchParagraphBulletParams) => {
     const { paragraphs: currentParagraphs, segmentId, document: docDataModel } = params;
     let listType = params.listType;
     const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.paragraphs ?? [];
-    const isAlreadyList = currentParagraphs.every((paragraph) => paragraph.bullet?.listType.indexOf(listType) === 0);
+    const snapshot = docDataModel.getSnapshot();
+    const isAlreadyList = currentParagraphs.every((paragraph) => resolveDocumentParagraphBullet(snapshot, paragraph)?.listType.indexOf(listType) === 0);
 
     const ID_LENGTH = 6;
 
@@ -54,16 +56,18 @@ export const switchParagraphBullet = (params: ISwitchParagraphBulletParams) => {
         const curIndex = paragraphs.indexOf(currentParagraphs[0]);
         const prevParagraph = paragraphs[curIndex - 1];
         const nextParagraph = paragraphs[curIndex + 1];
+        const previousBullet = prevParagraph && resolveDocumentParagraphBullet(snapshot, prevParagraph);
+        const nextBullet = nextParagraph && resolveDocumentParagraphBullet(snapshot, nextParagraph);
 
-        if (prevParagraph && prevParagraph.bullet && prevParagraph.bullet.listType.indexOf(listType) === 0) {
-            listId = prevParagraph.bullet.listId;
+        if (previousBullet && previousBullet.listType.indexOf(listType) === 0) {
+            listId = previousBullet.listId;
             if (listType !== PresetListType.CHECK_LIST) {
-                listType = prevParagraph.bullet.listType;
+                listType = previousBullet.listType;
             }
-        } else if (nextParagraph && nextParagraph.bullet && nextParagraph.bullet.listType.indexOf(listType) === 0) {
-            listId = nextParagraph.bullet.listId;
+        } else if (nextBullet && nextBullet.listType.indexOf(listType) === 0) {
+            listId = nextBullet.listId;
             if (listType !== PresetListType.CHECK_LIST) {
-                listType = nextParagraph.bullet.listType;
+                listType = nextBullet.listType;
             }
         }
     }
@@ -75,7 +79,18 @@ export const switchParagraphBullet = (params: ISwitchParagraphBulletParams) => {
     const textX = new TextX();
 
     for (const paragraph of currentParagraphs) {
-        const { startIndex, paragraphId, paragraphStyle = {}, bullet } = paragraph;
+        const { startIndex } = paragraph;
+        const bullet = resolveDocumentParagraphBullet(snapshot, paragraph);
+        const update: IParagraph = { ...paragraph, startIndex: 0, paragraphStyle: paragraph.paragraphStyle ?? {} };
+        if (isAlreadyList) {
+            if (resolveDocumentParagraphBullet(snapshot, { styleId: paragraph.styleId })) {
+                update.bullet = null;
+            } else {
+                delete update.bullet;
+            }
+        } else {
+            update.bullet = { nestingLevel: bullet?.nestingLevel ?? 0, listType, listId };
+        }
 
         textX.push({
             t: TextXActionType.RETAIN,
@@ -88,24 +103,7 @@ export const switchParagraphBullet = (params: ISwitchParagraphBulletParams) => {
             body: {
                 dataStream: '',
                 paragraphs: [
-                    isAlreadyList
-                        ? {
-                            paragraphId,
-                            paragraphStyle,
-                            startIndex: 0,
-                        }
-                        : {
-                            startIndex: 0,
-                            paragraphId,
-                            paragraphStyle: {
-                                ...paragraphStyle,
-                            },
-                            bullet: {
-                                nestingLevel: bullet?.nestingLevel ?? 0,
-                                listType,
-                                listId,
-                            },
-                        },
+                    update,
                 ],
             },
             coverType: UpdateDocsAttributeType.REPLACE,
@@ -131,8 +129,9 @@ export const toggleChecklistParagraph = (params: IToggleChecklistParagraphParams
     }
 
     const currentParagraph = paragraphs.find((p) => p.startIndex === paragraphIndex);
+    const bullet = currentParagraph && resolveDocumentParagraphBullet(docDataModel.getSnapshot(), currentParagraph);
 
-    if (!currentParagraph?.bullet || currentParagraph.bullet.listType.indexOf(PresetListType.CHECK_LIST) === -1) {
+    if (!currentParagraph || !bullet || bullet.listType.indexOf(PresetListType.CHECK_LIST) === -1) {
         return false;
     }
 
@@ -142,7 +141,7 @@ export const toggleChecklistParagraph = (params: IToggleChecklistParagraphParams
     const textX = new TextX();
 
     const { startIndex, paragraphStyle = {} } = currentParagraph;
-    const listType = currentParagraph.bullet.listType === PresetListType.CHECK_LIST ?
+    const listType = bullet.listType === PresetListType.CHECK_LIST ?
         PresetListType.CHECK_LIST_CHECKED
         : PresetListType.CHECK_LIST;
 
@@ -202,7 +201,8 @@ export const setParagraphBullet = (params: ISetParagraphBulletParams) => {
     const textX = new TextX();
 
     for (const paragraph of currentParagraphs) {
-        const { startIndex, paragraphId, paragraphStyle = {}, bullet } = paragraph;
+        const { startIndex, paragraphStyle = {} } = paragraph;
+        const bullet = resolveDocumentParagraphBullet(docDataModel.getSnapshot(), paragraph);
 
         textX.push({
             t: TextXActionType.RETAIN,
@@ -216,8 +216,8 @@ export const setParagraphBullet = (params: ISetParagraphBulletParams) => {
                 dataStream: '',
                 paragraphs: [
                     {
+                        ...paragraph,
                         startIndex: 0,
-                        paragraphId,
                         paragraphStyle,
                         bullet: {
                             nestingLevel: bullet?.nestingLevel ?? 0,
@@ -344,7 +344,8 @@ export const changeParagraphBulletNestLevel = (params: IChangeParagraphBulletNes
     };
 
     for (const paragraph of currentParagraphs) {
-        const { startIndex, paragraphId, paragraphStyle = {}, bullet } = paragraph;
+        const { startIndex, paragraphStyle = {} } = paragraph;
+        const bullet = resolveDocumentParagraphBullet(docDataModel.getSnapshot(), paragraph);
         const isInTable = hasParagraphInTable(paragraph, tables);
 
         textX.push({
@@ -366,13 +367,13 @@ export const changeParagraphBulletNestLevel = (params: IChangeParagraphBulletNes
                     dataStream: '',
                     paragraphs: [
                         {
+                            ...paragraph,
                             startIndex: 0,
-                            paragraphId,
                             paragraphStyle: {
                                 ...paragraphStyle,
                             },
                             bullet: {
-                                ...bullet,
+                                ...paragraph.bullet,
                                 nestingLevel: Math.max(Math.min(bullet.nestingLevel + type, maxLevel), 0),
                             },
                         },

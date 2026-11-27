@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { getScalarRangeEndpointSelector } from '../../../engine/utils/value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NullValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -27,6 +29,26 @@ export class Ifs extends BaseFunction {
 
     // TODO(formula-contract): Restrict the maximum to 254 so condition/value pairs cannot be truncated at an odd count.
     override maxParams = 255;
+
+    override preservesReferenceInRangeEndpointArgument(argumentIndex: number): boolean {
+        return argumentIndex % 2 === 1;
+    }
+
+    override calculateReferenceEndpoint(params: FunctionVariantType[]) {
+        if (params.length < 2 || params.length % 2 !== 0) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+        for (let index = 0; index < params.length; index += 2) {
+            const condition = this._matchesCondition(getScalarRangeEndpointSelector(params[index]));
+            if (typeof condition !== 'boolean') {
+                return condition;
+            }
+            if (condition) {
+                return params[index + 1];
+            }
+        }
+        return ErrorValueObject.create(ErrorType.NA);
+    }
 
     override calculate(...params: BaseValueObject[]) {
         if (params.length % 2 !== 0) {
@@ -58,30 +80,12 @@ export class Ifs extends BaseFunction {
                 const condition = expandedParams[i].get(rowIndex, columnIndex) || NullValueObject.create();
                 const result = expandedParams[i + 1].get(rowIndex, columnIndex) || NullValueObject.create();
 
-                if (condition.isNull()) {
-                    continue;
+                const matches = this._matchesCondition(condition);
+                if (typeof matches !== 'boolean') {
+                    return matches;
                 }
-
-                if (condition.isError()) {
-                    return condition;
-                }
-
-                const conditionValue = condition.getValue();
-
-                if (condition.isString()) {
-                    if (`${conditionValue}`.toLocaleUpperCase() === 'TRUE') {
-                        return result;
-                    }
-
-                    if (`${conditionValue}`.toLocaleUpperCase() === 'FALSE') {
-                        continue;
-                    }
-
-                    return ErrorValueObject.create(ErrorType.VALUE);
-                }
-
-                if (+conditionValue) {
-                    return result.isNull() ? ErrorValueObject.create(ErrorType.NA) : result;
+                if (matches) {
+                    return !condition.isString() && result.isNull() ? ErrorValueObject.create(ErrorType.NA) : result;
                 }
             }
 
@@ -93,5 +97,23 @@ export class Ifs extends BaseFunction {
         }
 
         return resultArray;
+    }
+
+    private _matchesCondition(condition: BaseValueObject): boolean | BaseValueObject {
+        if (condition.isError()) {
+            return condition;
+        }
+        if (condition.isNull()) {
+            return false;
+        }
+        const value = condition.getValue();
+        if (condition.isString()) {
+            const logical = String(value).toLocaleUpperCase();
+            if (logical === 'TRUE' || logical === 'FALSE') {
+                return logical === 'TRUE';
+            }
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+        return Boolean(+value);
     }
 }

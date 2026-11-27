@@ -1879,7 +1879,7 @@ describe('SheetCanvasFloatDomManagerService', () => {
                 width: 100,
                 height: 40,
             },
-            sheetTransform: {
+            axisAlignSheetTransform: {
                 from: {
                     column: 1,
                     columnOffset: 4,

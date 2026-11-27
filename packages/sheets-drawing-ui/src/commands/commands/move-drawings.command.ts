@@ -17,6 +17,7 @@
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISetDrawingCommandParams, ISheetDrawing } from '@univerjs/sheets-drawing';
 import { CommandType, Direction, ICommandService } from '@univerjs/core';
+import { getTransformBoundingBox, precisionTo } from '@univerjs/engine-render';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import {
     applySheetDrawingPlacement,
@@ -77,15 +78,15 @@ export const MoveDrawingsCommand: ICommand = {
             if (!skeleton) {
                 continue;
             }
-            const { left = 0, top = 0, width = 0, height = 0 } = drawing.transform!;
+            const { left, top, width, height } = getTransformBoundingBox(drawing.transform!);
             const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop, columnTotalWidth, rowTotalHeight } = skeleton;
             minX = Math.max(minX, rowHeaderWidthAndMarginLeft - left);
             minY = Math.max(minY, columnHeaderHeightAndMarginTop - top);
             maxX = Math.min(maxX, rowHeaderWidthAndMarginLeft + columnTotalWidth - left - width);
             maxY = Math.min(maxY, columnHeaderHeightAndMarginTop + rowTotalHeight - top - height);
         }
-        moveX = Math.max(minX, Math.min(moveX, maxX));
-        moveY = Math.max(minY, Math.min(moveY, maxY));
+        moveX = precisionTo(Math.max(minX, Math.min(moveX, maxX)), 6);
+        moveY = precisionTo(Math.max(minY, Math.min(moveY, maxY)), 6);
         if (moveX === 0 && moveY === 0) {
             return false;
         }

@@ -154,4 +154,20 @@ describe('Calendar', () => {
         fireEvent.change(timeInput, { target: { value: '11:22:33' } });
         expect(onChange).toHaveBeenCalledWith(expect.any(Date), 'time');
     });
+
+    it('renders safely with fallback locale, syncs external value changes, and supports arrow-key navigation across months', () => {
+        const { getByText, rerender } = render(<Calendar value={new Date(2023, 7, 31)} onValueChange={onChange} />);
+
+        const day31 = getByText('31').closest('button') as HTMLButtonElement;
+        expect(day31).toHaveAttribute('aria-pressed', 'true');
+        day31.focus();
+
+        fireEvent.keyDown(day31, { key: 'ArrowRight' });
+        expect(getByText('Sep')).toBeInTheDocument();
+        expect(getByText('1').closest('button')).toHaveFocus();
+
+        rerender(<Calendar value={new Date(2025, 0, 5)} onValueChange={onChange} />);
+        expect(getByText('2025')).toBeInTheDocument();
+        expect(getByText('Jan')).toBeInTheDocument();
+    });
 });

@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+import type { IAggregateIgnoreOptions } from '../../../basics/statistical';
+import type { BaseAstNode } from '../../../engine/ast-node/base-ast-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import type { FormulaDataModel } from '../../../models/formula-data.model';
 import { ErrorType } from '../../../basics/error-type';
 import { AggregateFunctionType, getAggregateResult, getArrayValuesByAggregateIgnoreOptions, getLargeResult, getPercentileExcResult, getPercentileIncResult, getQuartileExcResult, getQuartileIncResult, getSmallResult, parseAggregateDataRefs } from '../../../basics/statistical';
+import { NodeType } from '../../../engine/ast-node/node-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -51,8 +54,26 @@ export class Aggregate extends BaseFunction {
 
     override needsFormulaDataModel = true;
 
-    override calculate(functionNum: FunctionVariantType, options: FunctionVariantType, ...refs: FunctionVariantType[]) {
-        const { isError, multiAreaRefs, normalRefs } = parseAggregateDataRefs(refs);
+    override needsAstChildren = true;
+
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
+
+    override calculateAst(children: BaseAstNode[], get: (node: BaseAstNode) => FunctionVariantType | null): BaseValueObject {
+        const [functionNum, options, ...refs] = children.map((child, index) => {
+            if (index >= 2 && child.nodeType === NodeType.FUNCTION && (child.getToken() === 'VSTACK' || child.getToken() === 'HSTACK')) {
+                // Excel propagates scalar stack arguments before applying the aggregate's options.
+                for (const input of child.getChildren()) {
+                    const value = get(input);
+                    if (value?.isError() && !value.isReferenceObject()) return value;
+                }
+            }
+            return get(child) ?? ErrorValueObject.create(ErrorType.VALUE);
+        });
+        return this.calculate(functionNum, options, ...refs);
+    }
+
+    override calculate(functionNum: FunctionVariantType, options: FunctionVariantType, ...refs: FunctionVariantType[]): BaseValueObject {
+        const { isError, multiAreaRefs, normalRefs } = parseAggregateDataRefs(refs, true);
 
         let _functionNum: BaseValueObject;
 
@@ -93,7 +114,7 @@ export class Aggregate extends BaseFunction {
                 return optionsObject;
             }
 
-            // AGGREGATE function does not support the multi-area reference.
+            // Arrays of references and 3-D references cannot be scanned as a union.
             if (multiAreaRefs.length > 0) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
@@ -123,6 +144,11 @@ export class Aggregate extends BaseFunction {
 
         if (_functionNum.isError()) {
             return _functionNum;
+        }
+
+        const argumentError = refs.find((ref) => !ref.isReferenceObject() && ref.isError());
+        if (argumentError) {
+            return argumentError as BaseValueObject;
         }
 
         const functionNumValue = Math.floor(+_functionNum.getValue());
@@ -181,71 +207,19 @@ export class Aggregate extends BaseFunction {
         }, normalRefs);
     }
 
-    private _getAggregateOptions(options: number): {
-        ignoreRowHidden: boolean;
-        ignoreErrorValues: boolean;
-        ignoreNested: boolean;
-    } {
-        switch (options) {
-            case 1:
-                return {
-                    ignoreRowHidden: true,
-                    ignoreErrorValues: false,
-                    ignoreNested: true,
-                };
-            case 2:
-                return {
-                    ignoreRowHidden: false,
-                    ignoreErrorValues: true,
-                    ignoreNested: true,
-                };
-            case 3:
-                return {
-                    ignoreRowHidden: true,
-                    ignoreErrorValues: true,
-                    ignoreNested: true,
-                };
-            case 4:
-                return {
-                    ignoreRowHidden: false,
-                    ignoreErrorValues: false,
-                    ignoreNested: false,
-                };
-            case 5:
-                return {
-                    ignoreRowHidden: true,
-                    ignoreErrorValues: false,
-                    ignoreNested: false,
-                };
-            case 6:
-                return {
-                    ignoreRowHidden: false,
-                    ignoreErrorValues: true,
-                    ignoreNested: false,
-                };
-            case 7:
-                return {
-                    ignoreRowHidden: true,
-                    ignoreErrorValues: true,
-                    ignoreNested: false,
-                };
-            case 0:
-            default:
-                return {
-                    ignoreRowHidden: false,
-                    ignoreErrorValues: false,
-                    ignoreNested: true,
-                };
-        }
+    private _getAggregateOptions(options: number): IAggregateIgnoreOptions {
+        const ignoreRowHidden = (options & 1) !== 0;
+        return {
+            ignoreRowHidden,
+            ignoreFilteredRows: ignoreRowHidden,
+            ignoreErrorValues: (options & 2) !== 0,
+            ignoreNested: options < 4,
+        };
     }
 
     private _handleLargeSmallPercentileQuartile(
         functionNum: number,
-        aggregateOptions: {
-            ignoreRowHidden: boolean;
-            ignoreErrorValues: boolean;
-            ignoreNested: boolean;
-        },
+        aggregateOptions: IAggregateIgnoreOptions,
         array: FunctionVariantType,
         kOrQuart: FunctionVariantType
     ): BaseValueObject {
@@ -272,7 +246,7 @@ export class Aggregate extends BaseFunction {
             _kOrQuart = (_kOrQuart as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        const arrayValues = getArrayValuesByAggregateIgnoreOptions(array, aggregateOptions, this._formulaDataModel as FormulaDataModel);
+        const arrayValues = this._getArrayValues(array, aggregateOptions);
 
         if (!Array.isArray(arrayValues)) {
             return arrayValues as ErrorValueObject;
@@ -296,5 +270,21 @@ export class Aggregate extends BaseFunction {
             default:
                 return ErrorValueObject.create(ErrorType.VALUE);
         }
+    }
+
+    private _getArrayValues(array: FunctionVariantType, options: IAggregateIgnoreOptions): number[] | ErrorValueObject {
+        const formulaDataModel = this._formulaDataModel as FormulaDataModel;
+        if (!array.isReferenceObject() || !(array as BaseReferenceObject).isMultiArea()) {
+            return getArrayValuesByAggregateIgnoreOptions(array, options, formulaDataModel);
+        }
+        const { isError, multiAreaRefs, normalRefs } = parseAggregateDataRefs([array], true);
+        if (isError || multiAreaRefs.length > 0) return ErrorValueObject.create(ErrorType.VALUE);
+        const result: number[] = [];
+        for (const area of normalRefs) {
+            const values = getArrayValuesByAggregateIgnoreOptions(area, options, formulaDataModel);
+            if (!Array.isArray(values)) return values;
+            for (const value of values) result.push(value);
+        }
+        return result;
     }
 }

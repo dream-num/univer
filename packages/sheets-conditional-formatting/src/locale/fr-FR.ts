@@ -24,6 +24,11 @@ const locale: typeof enUS = {
             mark: 'Marque',
             rank: 'Rang',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'La plage est protégée, et vous n\'avez pas la permission de définir les styles. Pour définir les styles, veuillez contacter le créateur.',
+            },
+        },
     },
 };
 

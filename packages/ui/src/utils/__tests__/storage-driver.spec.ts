@@ -88,7 +88,68 @@ describe('browserStorage (LocalStorageDriver fallback)', () => {
             await fallbackStorage.setItem('fallback', 'local');
 
             expect(await fallbackStorage.getItem('fallback')).toBe('local');
+            await expect(fallbackStorage.updateItem('fallback', () => 'split')).rejects.toThrow('IndexedDB is unavailable');
+            expect(await fallbackStorage.getItem('fallback')).toBe('local');
             vi.stubGlobal('indexedDB', originalIndexedDB);
+        });
+
+        it('should not leave an unhandled rejection when IndexedDB is denied before first use', async () => {
+            // A sandboxed iframe without allow-same-origin has an opaque origin, and
+            // the browser refuses `indexedDB.open` with a SecurityError there.
+            const originalIndexedDB = globalThis.indexedDB;
+            const unhandled: unknown[] = [];
+            const onUnhandled = (reason: unknown) => unhandled.push(reason);
+            process.on('unhandledRejection', onUnhandled);
+
+            vi.stubGlobal('indexedDB', {
+                open: () => {
+                    throw new DOMException('Access to the IndexedDB API is denied in this context.', 'SecurityError');
+                },
+            });
+            vi.resetModules();
+
+            try {
+                const { browserStorage: deniedStorage } = await import('../storage-driver');
+                await new Promise((resolve) => setTimeout(resolve, 10));
+
+                expect(unhandled).toEqual([]);
+                await deniedStorage.setItem('denied', 'local');
+                expect(await deniedStorage.getItem('denied')).toBe('local');
+            } finally {
+                process.off('unhandledRejection', onUnhandled);
+                vi.stubGlobal('indexedDB', originalIndexedDB);
+            }
+        });
+
+        it('uses one cross-client lock for every fallback write and preserves a rejected update', async () => {
+            const navigator = globalThis.navigator;
+            const request = vi.fn(async (_key: string, write: () => unknown) => write());
+            vi.stubGlobal('navigator', { locks: { request } });
+            try {
+                await browserStorage.setItem('source', 'original');
+                expect(await browserStorage.updateItem<string>('source', (value) =>
+                    value === 'original' ? 'updated' : undefined)).toBe(true);
+                expect(await browserStorage.updateItem<string>('source', (value) =>
+                    value === 'original' ? 'stale' : undefined)).toBe(false);
+                expect(await browserStorage.getItem('source')).toBe('updated');
+                await browserStorage.removeItem('source');
+                await browserStorage.clear();
+                expect(request.mock.calls.map(([name]) => name)).toEqual(new Array(5).fill('UniverLocalStorage'));
+            } finally {
+                vi.stubGlobal('navigator', navigator);
+            }
+        });
+
+        it('rejects a fallback update without cross-client locking', async () => {
+            const navigator = globalThis.navigator;
+            vi.stubGlobal('navigator', {});
+            try {
+                await browserStorage.setItem('source', 'original');
+                await expect(browserStorage.updateItem('source', () => 'unsafe')).rejects.toThrow('Atomic storage updates');
+                expect(await browserStorage.getItem('source')).toBe('original');
+            } finally {
+                vi.stubGlobal('navigator', navigator);
+            }
         });
 
         it('should store and retrieve a string', async () => {

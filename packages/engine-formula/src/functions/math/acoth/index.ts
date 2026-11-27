@@ -67,11 +67,13 @@ function acoth(num: BaseValueObject) {
         return ErrorValueObject.create(ErrorType.NUM);
     }
 
-    const result = (1 / 2) * Math.log((currentValue + 1) / (currentValue - 1));
+    const magnitude = 0.5 * Math.log1p(2 / (Math.abs(currentValue) - 1));
+    const result = currentValue < 0 ? -magnitude : magnitude;
 
     if (Number.isNaN(result)) {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
-    return NumberValueObject.create(result);
+    // Excel worksheets flush subnormal results to positive zero.
+    return NumberValueObject.create(Math.abs(result) < 2 ** -1022 ? 0 : result);
 }

@@ -26,7 +26,7 @@ import {
     revealFocusedElementInMobileViewport,
 } from '@univerjs/design';
 import { connectInjector, useDependency } from '@wendellhu/redi/react-bindings';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { map } from 'rxjs';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
@@ -38,6 +38,7 @@ import { MobileContextMenu } from '../components/context-menu/MobileContextMenu'
 import { MobileDrawerCoordinatorProvider } from '../components/mobile-drawer/MobileDrawerCoordinator';
 import { MobileSidebar } from '../components/sidebar/MobileSidebar';
 import { WorkbenchSkeleton } from '../components/workbench-skeleton/WorkbenchSkeleton';
+import { useWorkbenchPortalContainer } from '../hooks/layout';
 import { MobileKeyboardInsetContext } from './mobile-keyboard-inset-context';
 import { MobileCanvasLayoutProvider } from './MobileCanvasLayout';
 
@@ -121,12 +122,6 @@ export function MobileWorkbench(props: IUniverAppProps) {
     const externalSkeletonVisible = useObservable(workbenchService.skeletonVisible$, undefined, true);
     const ready = lifecycleStage >= LifecycleStages.Ready;
 
-    useEffect(() => {
-        if (ready && contentRef.current) {
-            onRendered?.(contentRef.current);
-        }
-    }, [ready, onRendered]);
-
     const locale = useObservable(
         () => localeService.localeChanged$.pipe(map(() => localeService.getLocales())),
         localeService.getLocales(),
@@ -135,8 +130,13 @@ export function MobileWorkbench(props: IUniverAppProps) {
     );
     const direction = useObservable(localeService.direction$, localeService.getDirection());
 
-    // Create a portal container for injecting global component themes.
-    const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
+    const portalContainer = useWorkbenchPortalContainer(mountContainer, direction);
+
+    useEffect(() => {
+        if (portalContainer && ready && contentRef.current) {
+            onRendered?.(contentRef.current);
+        }
+    }, [portalContainer, ready, onRendered]);
 
     useLayoutEffect(() => {
         const sub = themeService.currentTheme$.subscribe((theme) => {
@@ -148,18 +148,6 @@ export function MobileWorkbench(props: IUniverAppProps) {
         };
     }, [themeService.currentTheme$, themeSwitcherService]);
 
-    useEffect(() => {
-        document.body.appendChild(portalContainer);
-
-        return () => {
-            document.body.removeChild(portalContainer);
-        };
-    }, [mountContainer, portalContainer]);
-
-    useEffect(() => {
-        portalContainer.setAttribute('dir', direction);
-    }, [direction, portalContainer]);
-
     useLayoutEffect(() => {
         document.documentElement.classList.toggle('univer-dark', darkMode);
     }, [darkMode]);
@@ -167,7 +155,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
     useEffect(() => {
         const visualViewport = window.visualViewport;
         const viewportElement = viewportRef.current;
-        if (!viewportElement) {
+        if (!portalContainer || !viewportElement) {
             return undefined;
         }
 
@@ -292,7 +280,11 @@ export function MobileWorkbench(props: IUniverAppProps) {
             visualViewport?.removeEventListener('scroll', updateKeyboardViewport);
             document.removeEventListener('focusin', updateKeyboardViewport);
         };
-    }, [mountContainer]);
+    }, [mountContainer, portalContainer]);
+
+    if (!portalContainer) {
+        return null;
+    }
 
     // Keep the inner layout focusable so focusin bubbles from editors and the layout service can refocus input.
     return (

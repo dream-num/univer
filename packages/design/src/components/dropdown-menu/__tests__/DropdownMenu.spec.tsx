@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { DropdownMenu } from '../DropdownMenu';
 import { DropdownMenuShortcut } from '../DropdownMenuPrimitive';
 import '@testing-library/jest-dom/vitest';
@@ -95,12 +96,16 @@ describe('DropdownMenu', () => {
             },
         ];
 
-        const { getByText } = render(
-            <DropdownMenu open items={items}>
-                <button type="button">Trigger</button>
-            </DropdownMenu>
+        const portalHost = document.createElement('div');
+        render(
+            <ConfigProvider mountContainer={portalHost}>
+                <DropdownMenu open items={items}>
+                    <button type="button">Trigger</button>
+                </DropdownMenu>
+            </ConfigProvider>
         );
 
+        const { getByText } = within(portalHost);
         fireEvent.click(getByText('Run'));
         fireEvent.click(getByText('Check'));
         fireEvent.click(getByText('B'));

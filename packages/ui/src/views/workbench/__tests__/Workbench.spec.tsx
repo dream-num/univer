@@ -37,12 +37,16 @@ import {
 } from '@univerjs/core';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { IUIPartsService, UIPartsService } from '../../../services/parts/parts.service';
+import { BuiltInUIPart, IUIPartsService, UIPartsService } from '../../../services/parts/parts.service';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { ThemeSwitcherService } from '../../../services/theme-switcher/theme-switcher.service';
 import { IWorkbenchService, WorkbenchService } from '../../../services/workbench/workbench.service';
 import { connectInjector } from '../../../utils/di';
 import { DesktopWorkbenchContent } from '../Workbench';
+
+function FloatingMenuItem() {
+    return <button type="button" autoFocus>Menu action</button>;
+}
 
 describe('DesktopWorkbenchContent lifecycle', () => {
     afterEach(cleanup);
@@ -89,6 +93,7 @@ describe('DesktopWorkbenchContent lifecycle', () => {
                 },
             }],
         ]);
+        injector.get(IUIPartsService).registerComponent(BuiltInUIPart.FLOATING, () => FloatingMenuItem);
         const ConnectedWorkbench = connectInjector(DesktopWorkbenchContent, injector) as ComponentType<{
             mountContainer: HTMLElement;
             contextMenu: boolean;
@@ -104,6 +109,7 @@ describe('DesktopWorkbenchContent lifecycle', () => {
             />
         );
 
+        expect(document.activeElement).toBe(result.getByRole('button', { name: 'Menu action' }));
         expect(result.container.querySelector('[aria-busy="true"]')).not.toBeNull();
         expect(result.container.querySelector('[data-u-comp="workbench-layout"]')).not.toBeNull();
         expect(onRendered).not.toHaveBeenCalled();

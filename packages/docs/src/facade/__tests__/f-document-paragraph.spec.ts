@@ -44,22 +44,22 @@ describe('FDocumentParagraph', () => {
         univer = null;
     });
 
-    it('preserves mixed inline styles across a paragraph rename and restores them with undo', () => {
-        const data = createDocumentData('doc', {
+    it('replaces a formatted match, preserving its neighbors and undo history', () => {
+        const emphasis = { bl: BooleanNumber.TRUE, cl: { rgb: '#C00000' } };
+        createDocumentFacade(createDocumentData('doc', {
             dataStream: 'Rate 9% today\r\n',
             paragraphs: [{ startIndex: 13, paragraphId: 'rate' }],
-            textRuns: [{ st: 5, ed: 7, ts: { bl: 1, cl: { rgb: '#C00000' } } }, { st: 8, ed: 13, ts: { it: 1 } }],
-        });
-        createDocumentFacade(data);
+            textRuns: [{ st: 5, ed: 7, ts: emphasis }, { st: 8, ed: 13, ts: { it: BooleanNumber.TRUE } }],
+        }));
         const p = document.getParagraphs()[0];
         const before = p.getTextRange().getExplicitTextStyleRuns();
-        expect(p.setText(p.getText(), { preserveStyles: true })).toBe(true);
-        expect(p.getTextRange().getExplicitTextStyleRuns()).toEqual(before);
-        expect(p.setText('Rate 32% today', { preserveStyles: true })).toBe(true);
+        expect(p.findText('9%')!.replaceText('32%')).toBe(true);
+        expect(p.getText()).toBe('Rate 32% today');
         expect(p.getTextRange().getExplicitTextStyleRuns()).toEqual([
-            { startOffset: 5, endOffset: 8, textStyle: before[0].textStyle },
-            { startOffset: 9, endOffset: 14, textStyle: before[1].textStyle },
+            { startOffset: 5, endOffset: 8, textStyle: emphasis },
+            { startOffset: 9, endOffset: 14, textStyle: { it: BooleanNumber.TRUE } },
         ]);
+        expect(p.getTextRange().replaceText(p.getText())).toBe(true);
         expect(document.undo()).toBe(true);
         expect(p.getText()).toBe('Rate 9% today');
         expect(p.getTextRange().getExplicitTextStyleRuns()).toEqual(before);
@@ -69,24 +69,53 @@ describe('FDocumentParagraph', () => {
         expect(p.getTextRange().getExplicitTextStyleRuns()).toEqual([]);
     });
 
-    it('maps mixed replacement styles by Unicode characters, including unstyled gaps', () => {
-        const data = createDocumentData('doc', {
-            dataStream: 'xA😀B!\r\n',
-            paragraphs: [{ startIndex: 6, paragraphId: 'mixed' }],
-            textRuns: [{ st: 1, ed: 2, ts: { bl: 1 } }, { st: 4, ed: 5, ts: { it: 1 } }],
-        });
-        createDocumentFacade(data);
-        const options = { preserveStyles: true };
-        expect(document.getTextRange(1, 5).setText('😎yZZ', options)).toBe(true);
-        expect(document.getParagraphs()[0].getText()).toBe('x😎yZZ!');
-        expect(document.getTextRange(0, 7).getExplicitTextStyleRuns()).toEqual([
-            { startOffset: 1, endOffset: 3, textStyle: { bl: 1 } },
-            { startOffset: 4, endOffset: 6, textStyle: { it: 1 } },
+    it('leaves mixed formatting intact until the caller selects each edit', () => {
+        createDocumentFacade(createDocumentData('doc', {
+            dataStream: '张三负责上海\r\n',
+            paragraphs: [{ startIndex: 6, paragraphId: 'assignment' }],
+            textRuns: [{ st: 2, ed: 4, ts: { bl: BooleanNumber.TRUE } }],
+        }));
+        const p = document.getParagraphs()[0];
+        expect(p.getTextRange().replaceText('张三和李四负责北京')).toBe(false);
+        expect(p.getText()).toBe('张三负责上海');
+        expect(p.findText('张三')!.replaceText('张三和李四')).toBe(true);
+        expect(p.findText('上海')!.replaceText('北京')).toBe(true);
+        expect(p.getText()).toBe('张三和李四负责北京');
+        expect(p.getTextRange().getExplicitTextStyleRuns()).toEqual([
+            { startOffset: 5, endOffset: 7, textStyle: { bl: BooleanNumber.TRUE } },
         ]);
-        expect(document.getTextRange(1, 3).setText('a😎', options)).toBe(true);
-        expect(document.getTextRange(1, 4).getCommonExplicitTextStyle()).toEqual({ bl: 1 });
-        expect(document.getTextRange(1, 4).setText('', options)).toBe(true);
-        expect(document.getParagraphs()[0].getText()).toBe('xyZZ!');
+        expect(p.findText('李四负责')!.replaceText('')).toBe(true);
+        expect(p.getText()).toBe('张三和北京');
+    });
+
+    it('inherits the adjacent character style at a caret within the same paragraph', () => {
+        createDocumentFacade(createDocumentData('doc', {
+            dataStream: 'A😀B\rC\r\n',
+            paragraphs: [{ startIndex: 4, paragraphId: 'one' }, { startIndex: 6, paragraphId: 'two' }],
+            textRuns: [{ st: 1, ed: 3, ts: { bl: BooleanNumber.TRUE } }, { st: 5, ed: 6, ts: { it: BooleanNumber.TRUE } }],
+        }));
+        expect(document.getTextRange(5, 5).replaceText('新')).toBe(true);
+        expect(document.getTextRange(5, 7).getCommonExplicitTextStyle()).toEqual({ it: BooleanNumber.TRUE });
+        expect(document.getTextRange(3, 3).replaceText('!')).toBe(true);
+        expect(document.getTextRange(1, 4).getCommonExplicitTextStyle()).toEqual({ bl: BooleanNumber.TRUE });
+        expect(document.getTextRange(0, 0).replaceText('x')).toBe(true);
+        expect(document.getParagraphs().map((p) => p.getText())).toEqual(['xA😀!B', '新C']);
+    });
+
+    it('keeps named character styles distinct even when direct formatting matches', () => {
+        createDocumentFacade(createDocumentData('doc', {
+            dataStream: 'ABCD\r\n',
+            paragraphs: [{ startIndex: 4, paragraphId: 'styles' }],
+            textRuns: [{ st: 0, ed: 2, sId: 'first' }, { st: 2, ed: 4, sId: 'second' }],
+        }));
+        const p = document.getParagraphs()[0];
+        expect(p.findText('BC')!.replaceText('xy')).toBe(false);
+        expect(p.findText('AB')!.replaceText('😀!')).toBe(true);
+        expect(p.getText()).toBe('😀!CD');
+        expect(document.getBody().textRuns).toMatchObject([
+            { st: 0, ed: 3, sId: 'first' },
+            { st: 3, ed: 5, sId: 'second' },
+        ]);
     });
 
     it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('edits inherited character indents through save, undo and redo (%s)', (documentFlavor) => {

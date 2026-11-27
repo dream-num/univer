@@ -19,11 +19,10 @@ import { getParagraphContentStartOffset, ICommandService, IPermissionService, Pr
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { getDocumentParagraphParentPermissionObjectIds, getDocumentParagraphPermissionObjectId, UpdateDocumentParagraphStyleCommand } from '@univerjs/docs';
 import type { FDocument } from './f-document';
-import type { IFDocumentSetTextOptions } from './f-document-text-range';
 import type { IFDocumentTextRange } from './utils';
 import { FDocumentObjectPermission } from './f-document-permission';
 import { FDocumentTextRange } from './f-document-text-range';
-import { retainBodyRange } from './utils';
+import { buildPlainTextInsertBody, replaceBodyRange, retainBodyRange } from './utils';
 
 /**
  * Resolved paragraph metadata in the the document body.
@@ -300,19 +299,30 @@ export class FDocumentParagraph extends FBaseInitialable {
     }
 
     /**
-     * Replace this paragraph's text, excluding its trailing paragraph break.
-     * Pass `preserveStyles` to retain character formatting as in `FDocumentTextRange.setText`.
-     * @param {string} text Replacement text. An empty string clears the paragraph.
-     * @param {IFDocumentSetTextOptions} [options] Character-formatting behavior.
-     * @returns {boolean} Whether the replacement succeeded.
+     * Replace this paragraph's plain text.
+     * To edit formatted text in place, use `findText(...)` and call `replaceText` on the match.
+     * @param {string} text The replacement text. Do not include the paragraph break.
+     * @returns {boolean} `true` if the paragraph text was replaced.
      * @example
      * ```ts
-     * const paragraph = univerAPI.getActiveDocument()?.getParagraphs()[0];
-     * if (paragraph) paragraph.setText(paragraph.getText().replace('30%', '32%'), { preserveStyles: true });
+     * const fDocument = univerAPI.getActiveDocument();
+     * const paragraph = fDocument.getParagraphs()[0];
+     * paragraph?.setText('New text');
+     * console.log(paragraph?.getText());
      * ```
      */
-    setText(text: string, options?: IFDocumentSetTextOptions): boolean {
-        return this.getTextRange().setText(text, options);
+    setText(text: string): boolean {
+        const { startOffset, endOffset } = this.getInfo();
+        return replaceBodyRange(
+            {
+                startOffset,
+                endOffset,
+                segmentId: this._segmentId,
+            },
+            buildPlainTextInsertBody(text),
+            this._document.getDocumentDataModel(),
+            this._commandService
+        );
     }
 
     /**

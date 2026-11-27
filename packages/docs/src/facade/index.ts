@@ -28,7 +28,7 @@ export { FDocumentObjectPermission, FDocumentPermission } from './f-document-per
 export { DocsSectionUnsupportedDocumentFlavorError, FDocumentSection } from './f-document-section';
 export type { FDocumentSectionPageSetup, IFDocumentSectionColumnOptions, IFDocumentSectionDescription } from './f-document-section';
 export { FDocumentTextRange } from './f-document-text-range';
-export type { IFDocumentSetTextOptions, IFDocumentTextRangeDescription, IFDocumentTextStyleRun } from './f-document-text-range';
+export type { IFDocumentTextRangeDescription, IFDocumentTextStyleRun } from './f-document-text-range';
 export * from './f-enum';
 export type { IFDocumentTextRange } from './utils';
 export { stripBlockTokens } from './utils';

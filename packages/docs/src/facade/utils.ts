@@ -48,7 +48,7 @@ function cloneParagraphStyle(paragraphStyle: IParagraphStyle): IParagraphStyle {
     return paragraphStyle == null ? paragraphStyle : JSON.parse(JSON.stringify(paragraphStyle));
 }
 
-export function normalizePlainTextDataStream(dataStream: string): string {
+function normalizePlainTextDataStream(dataStream: string): string {
     return dataStream.replace(/\r\n/g, '\r').replace(/\n/g, '\r');
 }
 

@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-import type { Injector, ITextRun, ITextStyle } from '@univerjs/core';
+import type { Injector, ITextStyle } from '@univerjs/core';
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
-import { getTextChangeRange, ICommandService, Tools, UpdateDocsAttributeType } from '@univerjs/core';
+import { DataStreamTreeTokenType, getTextRunSlice, ICommandService, Tools, UpdateDocsAttributeType } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
-import { buildPlainTextInsertBody, normalizePlainTextDataStream, replaceBodyRange, retainBodyRange } from './utils';
-
-/** Options for replacing text in a Doc paragraph or range. */
-export interface IFDocumentSetTextOptions {
-    /** Keep explicit character formatting. The default writes plain text. */
-    preserveStyles?: boolean;
-}
+import { buildPlainTextInsertBody, replaceBodyRange, retainBodyRange } from './utils';
 
 /** A clipped text-style run in document offsets. */
 export interface IFDocumentTextStyleRun {
@@ -203,54 +197,69 @@ export class FDocumentTextRange extends FBaseInitialable {
     }
 
     /**
-     * Replaces the range with plain text. With `preserveStyles`, equal leading and trailing text
-     * stays in place. Replacement characters inherit the corresponding changed characters' runs.
-     * Extra characters inherit the last replaced character's style. A pure insertion uses the
-     * preceding character in the range, or its first character when inserting at its start.
-     * An empty range supplies no explicit style.
-     * @param {string} text Replacement text. An empty string deletes the range.
-     * @param {IFDocumentSetTextOptions} [options] Character-formatting behavior.
+     * Replaces the range with plain text while preserving document mutation semantics.
+     * Use `replaceText` to retain the character formatting of a matched range.
+     * @param {string} text Replacement plain text. An empty string deletes the range.
      * @returns {boolean} Whether the replacement succeeded.
      * @example
      * ```ts
-     * const paragraph = univerAPI.getActiveDocument()?.getParagraphs()[0];
-     * paragraph?.findText('30%')?.setText('32%', { preserveStyles: true });
+     * const fDocument = univerAPI.getActiveDocument();
+     * const range = fDocument?.findParagraphByText('Draft')?.getTextRange();
+     * range?.setText('Final');
      * ```
      */
-    setText(text: string, options: IFDocumentSetTextOptions = {}): boolean {
-        const range = this.getRange();
-        const model = this._document.getDocumentDataModel();
-        if (!options.preserveStyles) {
-            return replaceBodyRange(range, buildPlainTextInsertBody(text), model, this._commandService);
-        }
+    setText(text: string): boolean {
+        return replaceBodyRange(
+            this.getRange(),
+            buildPlainTextInsertBody(text),
+            this._document.getDocumentDataModel(),
+            this._commandService
+        );
+    }
 
+    /**
+     * Replaces the selected text using its character formatting. Use a separate range for
+     * each edit in a paragraph with multiple styles. Identical text succeeds without an edit.
+     * At a caret, insertion takes the previous character's style within the paragraph,
+     * or the following character's style at the start of a paragraph.
+     * @param {string} text Replacement text. An empty string deletes even a mixed-style range.
+     * @returns {boolean} Whether the edit succeeded. A changed, nonempty replacement across
+     * mixed character styles returns `false` and leaves the range intact.
+     * @example
+     * ```ts
+     * const paragraph = univerAPI.getActiveDocument()?.getParagraphs()[0];
+     * paragraph?.findText('30%')?.replaceText('32%');
+     * ```
+     */
+    replaceText(text: string): boolean {
         this._validateRange();
-        const original = this.getText();
-        const normalized = normalizePlainTextDataStream(text);
-        if (original === normalized) {
+        const body = this._document.getBody(this._segmentId);
+        const insertBody = buildPlainTextInsertBody(text);
+        if (this.getText() === insertBody.dataStream) {
             return true;
         }
 
-        // Diff code points so an edit can never retain half of a surrogate pair.
-        const before = Array.from(original);
-        const after = Array.from(normalized);
-        const { start, deleteLength, insertLength } = getTextChangeRange(before, after);
-        const startOffset = range.startOffset + before.slice(0, start).join('').length;
-        const removed = before.slice(start, start + deleteLength);
-        const inserted = after.slice(start, start + insertLength);
-        const body = buildPlainTextInsertBody(inserted.join(''));
-        if (before.length && inserted.length) {
-            const anchor = deleteLength > 0 || start === 0 ? startOffset : startOffset - 1;
-            const { textRuns = [] } = this._document.getBody(range.segmentId);
-            body.textRuns = mapReplacementRuns(textRuns, anchor, removed, inserted);
+        if (insertBody.dataStream.length > 0) {
+            let start = this._startOffset;
+            let end = this._endOffset;
+            if (start === end) {
+                if (start > 0 && body.dataStream[start - 1] !== DataStreamTreeTokenType.PARAGRAPH) {
+                    start--;
+                } else {
+                    end = Math.min(end + 1, body.dataStream.length);
+                }
+            }
+            const runs = getTextRunSlice(body, start, end, false) ?? [];
+            const [run] = runs;
+            if (run) {
+                if (runs.length > 1 || run.st !== 0 || run.ed !== end - start) {
+                    return false;
+                }
+                insertBody.textRuns = [{ ...run, ed: insertBody.dataStream.length }];
+            }
         }
 
-        return replaceBodyRange(
-            { ...range, startOffset, endOffset: startOffset + removed.join('').length },
-            body,
-            model,
-            this._commandService
-        );
+        return replaceBodyRange(this.getRange(), insertBody, this._document.getDocumentDataModel(), this._commandService);
     }
 
     private _validateRange(): void {
@@ -285,35 +294,6 @@ export class FDocumentTextRange extends FBaseInitialable {
 
         return segments;
     }
-}
-
-function mapReplacementRuns(runs: ITextRun[], sourceOffset: number, removed: string[], inserted: string[]): ITextRun[] {
-    const result: ITextRun[] = [];
-    let runIndex = 0;
-    let previous: ITextRun | undefined;
-    let offset = 0;
-    for (let i = 0; i < inserted.length; i++) {
-        while (runIndex < runs.length && runs[runIndex].ed <= sourceOffset) {
-            runIndex++;
-        }
-        const run = runs[runIndex];
-        const end = offset + inserted[i].length;
-        if (run && run.st <= sourceOffset) {
-            if (run === previous) {
-                result[result.length - 1].ed = end;
-            } else {
-                result.push({ ...Tools.deepClone(run), st: offset, ed: end });
-            }
-            previous = run;
-        } else {
-            previous = undefined;
-        }
-        offset = end;
-        if (i + 1 < removed.length) {
-            sourceOffset += removed[i].length;
-        }
-    }
-    return result;
 }
 
 function isDeepEqual(left: unknown, right: unknown): boolean {

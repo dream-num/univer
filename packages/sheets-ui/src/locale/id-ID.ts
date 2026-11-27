@@ -231,6 +231,7 @@ const locale: typeof enUS = {
             textToNumber: 'Teks ke Angka',
         },
         info: {
+            formulaSeparator: 'Gunakan pemisah rumus untuk wilayah Anda, seperti pada {0}.',
             problem: 'Terjadi masalah',
             error: 'Kesalahan',
             forceStringInfo: 'Angka disimpan sebagai teks',

@@ -15,7 +15,7 @@
  */
 
 import type { Editor } from '@univerjs/docs-ui';
-import type { IFunctionParam } from '@univerjs/engine-formula';
+import type { IFormulaSyntax, IFunctionParam } from '@univerjs/engine-formula';
 import { LocaleService, noop } from '@univerjs/core';
 import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CloseIcon, MoreRightIcon } from '@univerjs/icons';
@@ -53,12 +53,13 @@ function Params({ className, title, value }: {
 }
 
 function Help(props: {
+    separator: string;
     prefix?: string;
     value?: IFunctionParam[];
     active: number;
     onClick: (paramIndex: number) => void;
 }) {
-    const { prefix, value, active, onClick } = props;
+    const { separator, prefix, value, active, onClick } = props;
 
     return (
         <div>
@@ -78,9 +79,9 @@ function Help(props: {
                                 : ''}
                             onClick={() => onClick(i)}
                         >
-                            {generateParam(item)}
+                            {generateParam(item, separator)}
                         </span>
-                        {i === value.length - 1 ? '' : ','}
+                        {i === value.length - 1 ? '' : separator}
                     </span>
                 ))}
             )
@@ -89,14 +90,15 @@ function Help(props: {
 }
 
 export function HelpFunction(props: {
+    syntax: IFormulaSyntax;
     onParamsSwitch?: (index: number) => void;
     onClose?: () => void;
     editor: Editor;
     isFocus: boolean;
     formulaText: string;
 }) {
-    const { onParamsSwitch = noop, onClose: propColose = noop, isFocus, editor, formulaText } = props;
-    const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);
+    const { syntax, onParamsSwitch = noop, onClose: propColose = noop, isFocus, editor, formulaText } = props;
+    const { functionInfo, paramIndex, reset } = useFormulaDescribe(syntax, isFocus, formulaText, editor);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const hidden = !useObservable(editorBridgeService.helpFunctionVisible$);
     const [contentVisible, setContentVisible] = useState(false);
@@ -145,6 +147,7 @@ export function HelpFunction(props: {
                             }}
                         >
                             <Help
+                                separator={syntax.argumentSeparator}
                                 prefix={functionInfo.functionName}
                                 value={functionInfo.functionParameter}
                                 active={paramIndex}
@@ -192,9 +195,9 @@ export function HelpFunction(props: {
                             <div className="univer-mt-3">
                                 <Params
                                     title={localeService.t<LocaleKey>('sheets-formula-ui.prompt.helpExample')}
-                                    value={`${functionInfo.functionName}(${functionInfo.functionParameter
+                                    value={syntax.toLocal(`${functionInfo.functionName}(${functionInfo.functionParameter
                                         .map((item) => item.example)
-                                        .join(',')})`}
+                                        .join(',')})`)}
                                 />
                                 <Params
                                     title={localeService.t<LocaleKey>('sheets-formula-ui.prompt.helpAbstract')}

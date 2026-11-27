@@ -229,6 +229,7 @@ const locale = {
             textToNumber: 'Text to Number',
         },
         info: {
+            formulaSeparator: 'Use the formula separators for your region, as in {0}.',
             problem: 'There was a problem',
             error: 'Error',
             forceStringInfo: 'Number stored as text',

@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { IFunctionInfo } from '@univerjs/engine-formula';
 import { LocaleService, LocaleType, Univer } from '@univerjs/core';
-import { FunctionService, FunctionType, IFunctionService } from '@univerjs/engine-formula';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { IFunctionInfo } from '../../../basics/function';
+import { FunctionType } from '../../../basics/function';
 import formulaEnUS from '../../../locale/en-US';
+import esES from '../../../locale/es-ES';
 import { FormulaCacheService } from '../../formula-cache.service';
+import { FunctionService, IFunctionService } from '../../function.service';
 import { DescriptionService, IDescriptionService } from '../description.service';
 
 function createFunctionInfo(overrides: Partial<IFunctionInfo> = {}): IFunctionInfo {
@@ -120,6 +122,14 @@ describe('DescriptionService', () => {
             abstract: 'Adds its arguments',
             description: 'You can add individual values, cell references or ranges or a mix of all three.',
         });
+    });
+
+    it('shows a translated built-in name in both the common-functions menu and editor help', () => {
+        const descriptions = univer.__getInjector().get(IDescriptionService);
+        localeService.load({ [LocaleType.ES_ES]: esES });
+        localeService.setLocale(LocaleType.ES_ES);
+        expect(descriptions.getFunctionInfo('SUM')?.functionName).toBe('SUMA');
+        expect(descriptions.getFunctionInfo('SUMA')?.functionName).toBe('SUMA');
     });
 
     it('re-registers descriptions with localized alias names after locale changes', () => {

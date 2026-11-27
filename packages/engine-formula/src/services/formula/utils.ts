@@ -16,6 +16,9 @@
 
 import type { LocaleService } from '@univerjs/core';
 import type { IFunctionInfo, IFunctionParam } from '../../basics/function';
+import { FUNCTION_LIST } from './function-list/function-list';
+
+export const aliasedBuiltins = new Map(FUNCTION_LIST.filter((item) => item.aliasFunctionName).map((item) => [item.functionName, item]));
 
 export function getFunctionName(item: IFunctionInfo, localeService: LocaleService) {
     let functionName = '';

@@ -17,7 +17,6 @@
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import type { IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import type { KeyboardEvent } from 'react';
-import type { LocaleKey } from '../../../locale/types';
 import { IConfigService, LocaleService, regexp } from '@univerjs/core';
 import { borderClassName, clsx, divideYClassName, Input, scrollbarClassName, Select } from '@univerjs/design';
 import { IDescriptionService } from '@univerjs/engine-formula';
@@ -25,7 +24,9 @@ import { CheckMarkIcon } from '@univerjs/icons';
 import { PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
 import { ISidebarService, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
+import type { LocaleKey } from '../../../locale/types';
 import { getFunctionTypeValues } from '../../../services/utils';
+import { useCurrentFormulaSyntax } from '../../formula-editor/hooks/use-formula-editor-syntax';
 import { FunctionHelp } from '../function-help/FunctionHelp';
 
 export interface ISelectFunctionProps {
@@ -46,6 +47,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
     const [nameSelected, setNameSelected] = useState(0);
     const descriptionService = useDependency(IDescriptionService);
     const localeService = useDependency(LocaleService);
+    const syntax = useCurrentFormulaSyntax();
     const sidebarService = useDependency(ISidebarService);
     const selectList = useMemo(() => {
         const query = searchText.trim().toUpperCase();
@@ -248,6 +250,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                                 `, borderClassName)}
                             >
                                 <FunctionHelp
+                                    separator={syntax.argumentSeparator}
                                     prefix={functionInfo.functionName}
                                     value={functionInfo.functionParameter}
                                 />
@@ -271,9 +274,9 @@ export function SelectFunction(props: ISelectFunctionProps) {
                                   dark:!univer-bg-gray-800 dark:!univer-text-gray-0
                                 `, borderClassName)}
                             >
-                                {`${functionInfo.functionName}(${functionInfo.functionParameter
+                                {syntax.toLocal(`${functionInfo.functionName}(${functionInfo.functionParameter
                                     .map((item) => item.example)
-                                    .join(',')})`}
+                                    .join(',')})`)}
                             </div>
                         </div>
                     </div>

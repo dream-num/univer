@@ -38,6 +38,7 @@ import type {
 import type { Observable } from 'rxjs';
 import {
     BooleanNumber,
+    CanceledError,
     CellModeEnum,
     CellValueType,
     cloneCellDataWithSpanAndDisplay,
@@ -826,7 +827,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         for (let row = 0; row < rowCount; row++) {
             for (let column = 0; column < columnCount; column++) {
-                const formula = formulaOnlyHook?.onCopyCellContent?.(startRow + row, startColumn + column) ||
+                const formula = formulaOnlyHook?.getCopyCellFormula?.(startRow + row, startColumn + column) ||
                     copyContent.matrixFragment.getValue(row, column)?.f;
 
                 if (typeof formula === 'string' && isFormulaString(formula)) {
@@ -944,18 +945,24 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         const redoMutationsInfo: IMutationInfo[] = [];
         const undoMutationsInfo: IMutationInfo[] = [];
-        enabledHooks.forEach((h) => {
-            const contentReturn = generateMutations(h, {
-                unitId,
-                subUnitId,
-                range,
-            });
+        try {
+            enabledHooks.forEach((h) => {
+                const contentReturn = generateMutations(h, {
+                    unitId,
+                    subUnitId,
+                    range,
+                });
 
-            if (contentReturn) {
-                redoMutationsInfo.push(...contentReturn.redos);
-                undoMutationsInfo.push(...contentReturn.undos);
-            }
-        });
+                if (contentReturn) {
+                    redoMutationsInfo.push(...contentReturn.redos);
+                    undoMutationsInfo.push(...contentReturn.undos);
+                }
+            });
+        } catch (error) {
+            if (!(error instanceof CanceledError)) throw error;
+            enabledHooks.forEach((h) => h.onAfterPaste?.(false));
+            return false;
+        }
         const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
         if (result) {
             // add to undo redo services
@@ -1471,7 +1478,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             result = executePaste();
         } catch (error) {
             if (!objectOnly) {
-                throw error;
+                if (!(error instanceof CanceledError)) throw error;
+                enabledHooks.forEach((h) => h.onAfterPaste?.(false));
+                return false;
             }
             pasteThrew = true;
             pasteError = error;

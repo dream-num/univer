@@ -128,6 +128,7 @@ export { AutoHeightController } from './controllers/auto-height.controller';
 export { AutoWidthController } from './controllers/auto-width.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 export { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
+export { createPasteFormulaParser } from './controllers/clipboard/utils';
 export { DragRenderController } from './controllers/drag-render.controller';
 export { EditingRenderController } from './controllers/editor/editing.render-controller';
 export { FormulaEditorController } from './controllers/editor/formula-editor.controller';
@@ -198,6 +199,7 @@ export {
 export type { IDropdownParam } from './services/cell-dropdown-manager.service';
 export { CellPopupManagerService } from './services/cell-popup-manager.service';
 export {
+    escapeSpecialCode,
     FORMULA_CLIPBOARD_MIME_TYPE,
     getMatrixPlainText,
     ISheetClipboardService,

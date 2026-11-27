@@ -16,9 +16,11 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
+import type { IFormulaSeparators } from './formula-separators';
 import { Inject } from '../../common/di';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { LocaleService } from '../locale/locale.service';
+import { getFormulaSeparators } from './formula-separators';
 
 export class RegionService extends Disposable {
     private readonly _currentRegion$: BehaviorSubject<string>;
@@ -45,6 +47,11 @@ export class RegionService extends Disposable {
     setRegion(region: string): void {
         this._hasExplicitRegion = true;
         this._currentRegion$.next(region);
+    }
+
+    /** Excel formula punctuation for the current region, independent of the interface language packs. */
+    getFormulaSeparators(): IFormulaSeparators {
+        return getFormulaSeparators(this.getCurrentRegion());
     }
 
     getExplicitRegion(): string | undefined {

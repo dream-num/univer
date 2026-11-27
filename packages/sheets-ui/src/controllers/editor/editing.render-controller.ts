@@ -28,9 +28,11 @@ import type {
     Nullable,
     Styles,
     Workbook,
+    Worksheet,
 } from '@univerjs/core';
 import type { IInsertTextCommandParams, IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IInnerPasteCommandParams } from '@univerjs/docs-ui';
+import type { IFormulaSyntax } from '@univerjs/engine-formula';
 import type {
     ISetRangeValuesCommandParams,
     ISetWorksheetActivateCommandParams,
@@ -38,6 +40,7 @@ import type {
 } from '@univerjs/sheets';
 import {
     BooleanNumber,
+    CanceledError,
     CellValueType,
     createParagraphId,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -66,6 +69,7 @@ import {
     UniverInstanceType,
     WrapStrategy,
 } from '@univerjs/core';
+import { MessageType } from '@univerjs/design';
 import {
     DocSelectionManagerService,
     DocSkeletonManagerService,
@@ -111,10 +115,11 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { DISABLE_AUTO_FOCUS_KEY, KeyCode, MetaKeys } from '@univerjs/ui';
+import { DISABLE_AUTO_FOCUS_KEY, IMessageService, KeyCode, MetaKeys } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import type { IDocObjectParam } from '../../basics/editor/get-editor-object';
 import type { IUniverSheetsUIConfig } from '../../config/config';
+import type { LocaleKey } from '../../locale/types';
 import type { ICellEditorState, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
@@ -202,6 +207,7 @@ export class EditingRenderController extends Disposable {
         @IFunctionService private readonly _functionService: IFunctionService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,
+        @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) protected readonly _localService: LocaleService,
         @IEditorService private readonly _editorService: IEditorService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -250,6 +256,25 @@ export class EditingRenderController extends Disposable {
     }
 
     private _initEditorVisibilityListener(): void {
+        this.disposeWithMe(this._commandService.beforeCommandExecuted((command) => {
+            if (command.id !== SetCellEditVisibleOperation.id || !this._editorBridgeService.isVisible().visible) return;
+            const params = command.params as IEditorBridgeServiceVisibleParam;
+            if (!params || params.visible || params.keycode === KeyCode.ESC || !this._editorBridgeService.getEditorDirty()) return;
+
+            const snapshot = this._getDocumentDataModel()?.getSnapshot();
+            if (!snapshot?.body || !/^[=＝]/.test(snapshot.body.dataStream)) return;
+            const edit = this._editorBridgeService.getEditLocation();
+            if (!edit) return;
+            const workbook = this._univerInstanceService.getUnit<Workbook>(edit.unitId, UniverInstanceType.UNIVER_SHEET);
+            const worksheet = workbook?.getSheetBySheetId(edit.sheetId);
+            if (!workbook || !worksheet || (worksheet.getConfig().type ?? SheetTypes.GRID) !== SheetTypes.GRID) return;
+
+            // Cancel the close before either editor is reset so the user can correct the original draft.
+            const syntax = this._editorBridgeService.getFormulaSyntax();
+            if (this._readCellDraft(snapshot, syntax, workbook, worksheet, edit.row, edit.column) === undefined) {
+                throw new CanceledError();
+            }
+        }));
         this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe(async (unit) => {
             if (this._editingUnit && !this._editorBridgeService.isForceKeepVisible() && (!unit || unit.getUnitId() !== this._editingUnit)) {
                 this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
@@ -277,7 +302,7 @@ export class EditingRenderController extends Disposable {
                         this._handleEditorVisible(params);
                     } else if (this._editingUnit) {
                         await this._handleEditorInvisible(params);
-                        this._editingUnit = '';
+                        if (!this._editorBridgeService.isVisible().visible) this._editingUnit = '';
                     }
                 })
         );
@@ -746,6 +771,7 @@ export class EditingRenderController extends Disposable {
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         const snapshot = Tools.deepClone(documentDataModel?.getSnapshot());
         const { keycode, isShift } = param;
+        const syntax = this._editorBridgeService.getFormulaSyntax();
         const shouldSubmitEmptyCellImageEdit = this._submitEmptyCellImageEdit;
         this._submitEmptyCellImageEdit = false;
         this._cursorChange = CursorChange.InitialState;
@@ -795,7 +821,7 @@ export class EditingRenderController extends Disposable {
             : false;
 
         if (snapshot && shouldSubmitCellEdit({ isEmpty, isCellImage: cellImage, shouldSubmitEmptyCellImageEdit })) {
-            const res = await this._submitEdit(snapshot, keycode === (MetaKeys.CTRL_COMMAND | KeyCode.ENTER) || keycode === (MetaKeys.MAC_CTRL | KeyCode.ENTER));
+            const res = await this._submitEdit(snapshot, syntax, keycode === (MetaKeys.CTRL_COMMAND | KeyCode.ENTER) || keycode === (MetaKeys.MAC_CTRL | KeyCode.ENTER));
             if (res === false) return; // if the submit was rejected, don't move selection
         }
 
@@ -816,10 +842,30 @@ export class EditingRenderController extends Disposable {
             renderConfig.isRenderStyle = BooleanNumber.FALSE;
         }
 
-        return this._submitEdit(snapshot);
+        return this._submitEdit(snapshot, this._editorBridgeService.getFormulaSyntax());
     }
 
-    private async _submitEdit(snapshot: IDocumentData, wholeSelection = false) {
+    private _readCellDraft(snapshot: IDocumentData, syntax: IFormulaSyntax, workbook: Workbook, worksheet: Worksheet, row: number, column: number) {
+        const cell = getCellDataByInput(
+            { ...(worksheet.getCellRaw(row, column) || {}) },
+            snapshot,
+            this._lexerTreeBuilder,
+            this._localService,
+            this._functionService,
+            workbook.getStyles(),
+            syntax,
+            worksheet.getComposedCellStyleWithoutSelf(row, column).n?.pattern
+        );
+        if (cell === undefined) {
+            this._messageService.show({
+                type: MessageType.Error,
+                content: this._localService.t<LocaleKey>('sheets-ui.info.formulaSeparator', syntax.toLocal('=SUM(1.5,2.5)')),
+            });
+        }
+        return cell;
+    }
+
+    private async _submitEdit(snapshot: IDocumentData, syntax: IFormulaSyntax, wholeSelection = false) {
         const editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
             return true;
@@ -834,27 +880,13 @@ export class EditingRenderController extends Disposable {
         if (!workbook) {
             return true;
         }
-        let worksheet = workbook.getActiveSheet();
-
-        // If the target cell does not exist, there is no need to execute setRangeValue
-        const setRangeValueTargetSheet = workbook.getSheetBySheetId(sheetId);
-        if (!setRangeValueTargetSheet) {
+        const worksheet = workbook.getSheetBySheetId(sheetId);
+        if (!worksheet) {
             return true;
         }
 
-        worksheet = workbook.getActiveSheet();
-
-        // If cross-sheet operation, switch current sheet first, then const cellData
-        // This should moved to after cell editor
-        const cellData: Nullable<ICellData> = getCellDataByInput(
-            { ...(worksheet.getCellRaw(row, column) || {}) },
-            snapshot,
-            this._lexerTreeBuilder,
-            this._localService,
-            this._functionService,
-            workbook.getStyles()
-        );
-
+        const cellData = this._readCellDraft(snapshot, syntax, workbook, worksheet, row, column);
+        if (cellData === undefined) return false;
         if (!cellData) {
             return true;
         }
@@ -1075,13 +1107,16 @@ export class EditingRenderController extends Disposable {
     }
 }
 
+/** Returns null for an unchanged draft and undefined for invalid regional formula separators. */
 export function getCellDataByInput(
     cellData: ICellData,
     snapshot: Nullable<IDocumentData>,
     lexerTreeBuilder: LexerTreeBuilder,
     localeService: LocaleService,
     functionService: IFunctionService,
-    styles: Styles
+    styles: Styles,
+    syntax: IFormulaSyntax,
+    inheritedPattern?: string
 ) {
     if (snapshot?.body == null) {
         return null;
@@ -1095,9 +1130,15 @@ export function getCellDataByInput(
     let newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
 
     const currentLocale = localeService.getCurrentLocale();
-    newDataStream = normalizeString(newDataStream, lexerTreeBuilder, currentLocale, functionService);
+    const isText = isTextFormat(styles.get(cellData.s)?.n?.pattern ?? inheritedPattern);
+    const cellImage = isCellImage(snapshot);
+    if (!(isText && /^[=＝]/.test(newDataStream)) && !cellImage) {
+        const normalized = normalizeString(newDataStream, lexerTreeBuilder, currentLocale, functionService, syntax);
+        if (normalized === null) return undefined;
+        newDataStream = normalized;
+    }
 
-    if (isCellImage(snapshot)) {
+    if (cellImage) {
         cellData.v = '';
         cellData.f = null;
         cellData.si = null;
@@ -1105,7 +1146,7 @@ export function getCellDataByInput(
         cellData.t = CellValueType.STRING;
     } else if (
         // Text format ('@' or '@@@') has the highest priority
-        newDataStream !== '' && cellData.s && isTextFormat(styles?.get(cellData.s)?.n?.pattern)
+        newDataStream !== '' && isText
     ) {
         // If the style is text format ('@'or  '@@@'), the data should be set as a string.
         cellData.v = newDataStream;

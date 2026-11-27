@@ -23,23 +23,27 @@ import type {
     IRemoveWorksheetMergeMutationParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
-import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 import {
+    CanceledError,
     CellValueType,
     cloneCellDataMatrix,
     createParagraphId,
     createSectionId,
     CustomRangeType,
+    ErrorService,
     generateRandomId,
     getNumfmtLocaleTag,
     getNumfmtParseValueFilter,
     isTextFormat,
     IUniverInstanceService,
+    LocaleService,
     ObjectMatrix,
     Rectangle,
+    RegionService,
     Tools,
     willLoseNumericPrecision,
 } from '@univerjs/core';
+import { getFormulaSyntax } from '@univerjs/engine-formula';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
@@ -51,9 +55,22 @@ import {
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
 } from '@univerjs/sheets';
+import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 import { COPY_TYPE } from '../../services/clipboard/type';
 import { isRichText } from '../editor/editing.render-controller';
 import { virtualizeDiscreteRanges } from '../utils/range-tools';
+
+/** Capture the input syntax once for all formula cells in an external paste. */
+export function createPasteFormulaParser(accessor: IAccessor) {
+    const locale = accessor.get(LocaleService);
+    const syntax = getFormulaSyntax(accessor.get(RegionService), locale);
+    return (text: string): string => {
+        const standard = syntax.toStandard(text);
+        if (standard !== null) return standard;
+        accessor.get(ErrorService).emit(locale.t('sheets-ui.info.formulaSeparator', syntax.toLocal('=SUM(1.5,2.5)')));
+        throw new CanceledError();
+    };
+}
 
 interface IExternalPasteNumberFormatResult {
     n?: IStyleData['n'];

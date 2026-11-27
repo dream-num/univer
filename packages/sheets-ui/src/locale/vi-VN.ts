@@ -231,6 +231,7 @@ const locale: typeof enUS = {
             textToNumber: 'Chuyển văn bản thành số',
         },
         info: {
+            formulaSeparator: 'Hãy dùng dấu phân cách công thức cho khu vực của bạn, như trong {0}.',
             problem: 'Đã xảy ra một vấn đề',
             error: 'Lỗi',
             forceStringInfo: 'Số được lưu trữ dưới dạng văn bản',

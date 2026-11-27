@@ -1,0 +1,130 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { getRegionTag } from '../../types/enum/locale-type';
+
+export interface IFormulaSeparators {
+    readonly decimal: string;
+    readonly argument: string;
+    readonly arrayColumn: string;
+}
+
+// Each profile is shared by all matching regions. Excel uses a semicolon between array rows in all six.
+function profile(decimal: string, argument: string): IFormulaSeparators {
+    return Object.freeze({ decimal, argument, arrayColumn: decimal === ',' ? '\\' : ',' });
+}
+
+const dotComma = profile('.', ',');
+const commaSemicolon = profile(',', ';');
+const dotSemicolon = profile('.', ';');
+const arabicDecimal = profile('٫', ';');
+const arabicSemicolon = profile('٫', '؛');
+const arabicComma = profile('.', '،');
+
+interface IRegionalRule {
+    separators: IFormulaSeparators;
+    territories?: string[];
+    scripts?: string[];
+}
+
+const rulesByLanguage = new Map<string, IRegionalRule[]>();
+
+function register(separators: IFormulaSeparators, languages: string, territories?: string, scripts?: string): void {
+    const rule = { separators, territories: territories?.split(' '), scripts: scripts?.split(' ') };
+    for (const language of languages.split(' ')) {
+        const rules = rulesByLanguage.get(language);
+        if (rules) rules.push(rule);
+        else rulesByLanguage.set(language, [rule]);
+    }
+}
+
+// Excel for Mac 16.115, measured with FormulaLocal. More specific rules precede language defaults.
+// Script changes the grammar for some languages even within the same territory.
+register(dotComma, 'ff', 'NG', 'adlm');
+register(dotComma, 'kk', 'CN', 'arab');
+register(dotComma, 'ks', 'IN', 'aran deva');
+register(dotComma, 'ku', 'IQ SY', 'latn');
+register(dotComma, 'ms', 'BN CC MY', 'arab');
+register(arabicDecimal, 'pa', 'PK', 'arab');
+register(dotSemicolon, 'sd', 'PK', 'arab');
+register(dotComma, 'ur', 'IN PK', 'arab');
+register(dotComma, 'uz', 'AF', 'arab');
+
+register(dotComma, 'af', 'NA');
+register(dotComma, 'ar', '001 EH ER IL KM PS SD SO SS TD');
+register(commaSemicolon, 'ar', 'DJ DZ LY MA MR TN');
+register(dotSemicolon, 'ar', 'AE');
+register(dotComma, 'ckb', 'IQ IR');
+register(dotSemicolon, 'de fr it', 'CH');
+register(dotSemicolon, 'de', 'LI');
+register(dotSemicolon, 'dz', 'BT');
+register(commaSemicolon, 'ee', 'TG');
+register(dotComma, 'el tr', 'CY');
+register(commaSemicolon, 'en', 'AL AR AT BE BG BR CL CO CV CZ DE DK EE ES FI FR GE GR HU ID IT LT LV NL NO PL PT RO RU SE SI SK TR UA ZA');
+register(dotComma, 'es', '003 AG BB BM BS BZ CA DM GD GY HT KN KY LC MX PH TC TT US VC VG VI');
+register(dotSemicolon, 'es', '419 CU DO GT HN NI PA PE PR SV');
+register(commaSemicolon, 'ff', 'BF GN GW MR SN');
+register(dotComma, 'ff', 'CM GH GM LR NE SL');
+register(dotComma, 'fr', 'BI KM MG MU NE RW SC SY TD VU');
+register(dotSemicolon, 'ga', 'IE');
+register(dotComma, 'gsw', 'CH LI');
+register(dotComma, 'ha', 'GH NE NG');
+register(dotSemicolon, 'ko', 'KP');
+register(commaSemicolon, 'kpe', 'GN');
+register(commaSemicolon, 'ms', 'BN ID');
+register(dotComma, 'ms', 'SG');
+register(dotSemicolon, 'ne', 'IN');
+register(dotComma, 'nl', 'SX');
+register(dotComma, 'om so', 'KE');
+register(dotComma, 'ps', 'PK');
+register(dotComma, 'pt', 'CH MO');
+register(dotSemicolon, 'qu', 'EC PE');
+register(dotComma, 'so', 'ET');
+register(commaSemicolon, 'so', 'DJ');
+register(dotComma, 'ss', 'SZ');
+register(dotComma, 'st', 'LS');
+register(dotComma, 'sw', 'TZ UG');
+register(commaSemicolon, 'sw', 'CD');
+register(dotSemicolon, 'ta', 'LK');
+register(commaSemicolon, 'tzm', 'MA');
+register(commaSemicolon, 'yi', 'UA');
+register(commaSemicolon, 'yo', 'BJ');
+
+register(commaSemicolon, 'acf af ast az be ber bg blo br bs bua ca ce cs cv da de dsb dyo el es et eu fi fo fr fur fy gcf gl hr hsb hu');
+register(commaSemicolon, 'hy id ie inh is it jv ka kab kea kgp kk kl ksh ku ky lb lij lmo ln lo lt lu lv mgh mk myv nb nds nl nn no nqo');
+register(commaSemicolon, 'nr oc os pap pl pms prg pt qu rej rm ro ru rw sah sc scn se seh sg shi sjd sje sju sk sl smn sq sr ss su sv');
+register(commaSemicolon, 'szl tg tk tr ts tt tyv uk uz ve vec vi vmw wa wo yrl zgh');
+register(dotSemicolon, 'am ba co cy ff fil gd gsw ha haw ig ii ml mn ms mt my nso om si so st sw te ti tn tzm und ur xh yi yo zu');
+register(arabicDecimal, 'ar ckb ks ps');
+register(arabicSemicolon, 'fa');
+register(arabicComma, 'dv');
+
+// Read language, script and territory without using the host's locale data. Variants and extensions
+// do not change Excel's default formula punctuation.
+const regionTag = /^([a-z]{2,8})(?:-([a-z]{4}))?(?:-([a-z]{2}|[0-9]{3}))?(?:-(?:[a-z0-9]{5,8}|[0-9][a-z0-9]{3}))*(?:-[0-9a-wy-z](?:-[a-z0-9]{2,8})+)*(?:-x(?:-[a-z0-9]{1,8})+)?$/i;
+
+export function getFormulaSeparators(region: string): IFormulaSeparators {
+    const parts = regionTag.exec(getRegionTag(region));
+    if (!parts) return dotComma;
+
+    const language = parts[1].toLowerCase();
+    const script = parts[2]?.toLowerCase();
+    const territory = parts[3]?.toUpperCase();
+    return rulesByLanguage.get(language)?.find((rule) =>
+        (!rule.territories || (territory && rule.territories.includes(territory))) &&
+        (!rule.scripts || (script && rule.scripts.includes(script)))
+    )?.separators ?? dotComma;
+}

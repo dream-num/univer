@@ -24,7 +24,7 @@ export function getFunctionTypeValues(
 ): Array<{ label: string; value: string }> {
     // Exclude the DefinedName key
     return Object.keys(FunctionType)
-        .filter((key) => isNaN(Number(key)) && key !== 'DefinedName' && key !== 'Table' && (customFormula || key !== 'User'))
+        .filter((key) => Number.isNaN(Number(key)) && key !== 'DefinedName' && key !== 'Table' && (customFormula || key !== 'User'))
         .map((key) => ({
             label: localeService.t(`sheets-formula-ui.functionType.${key.toLocaleLowerCase()}`),
             value: `${FunctionType[key as keyof typeof FunctionType]}`,
@@ -46,14 +46,14 @@ export function getFunctionName(item: IFunctionInfo, localeService: LocaleServic
     return functionName;
 }
 
-export function generateParam(param: IFunctionParam) {
+export function generateParam(param: IFunctionParam, separator = ',') {
     if (!param.require && !param.repeat) {
         return `[${param.name}]`;
     } else if (param.require && !param.repeat) {
         return param.name;
     } else if (!param.require && param.repeat) {
-        return `[${param.name},...]`;
+        return `[${param.name}${separator}...]`;
     } else if (param.require && param.repeat) {
-        return `${param.name},...`;
+        return `${param.name}${separator}...`;
     }
 }

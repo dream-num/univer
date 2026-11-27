@@ -15,6 +15,7 @@
  */
 
 import type { IDisposable, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
+import type { IFormulaSyntax } from '@univerjs/engine-formula';
 import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
 import type { KeyCode } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
@@ -29,12 +30,15 @@ import {
     IContextService,
     Inject,
     IUniverInstanceService,
+    LocaleService,
+    RegionService,
     SheetTypes,
     ThemeService,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
 import { getCanvasOffsetByEngine, IEditorService } from '@univerjs/docs-ui';
+import { getFormulaSyntax } from '@univerjs/engine-formula';
 import {
     convertTextRotation,
     convertTransformToOffsetX,
@@ -50,7 +54,7 @@ import {
     SheetSkeletonService,
 } from '@univerjs/sheets';
 import { DISABLE_AUTO_FOCUS_KEY } from '@univerjs/ui';
-import { BehaviorSubject, map, switchMap } from 'rxjs';
+import { BehaviorSubject, map, merge, switchMap } from 'rxjs';
 import { getViewportByCell } from '../common/utils';
 
 export interface IEditorBridgeServiceVisibleParam {
@@ -120,6 +124,8 @@ export interface IEditorBridgeService {
      */
     changeEditorDirty(dirtyStatus: boolean): void;
     getEditorDirty(): boolean;
+    /** Uses the syntax captured when the current edit began, or the current region while idle. */
+    getFormulaSyntax(): IFormulaSyntax;
     isVisible(): IEditorBridgeServiceVisibleParam;
     enableForceKeepVisible(): void;
     disableForceKeepVisible(): void;
@@ -131,6 +137,8 @@ export interface IEditorBridgeService {
 export class EditorBridgeService extends Disposable implements IEditorBridgeService, IDisposable {
     private _editorUnitId: string = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
     private _editorIsDirty: boolean = false;
+    private _currentFormulaSyntax?: IFormulaSyntax;
+    private _draftFormulaSyntax?: IFormulaSyntax;
 
     private _visibleParams: IEditorBridgeServiceVisibleParam = {
         visible: false,
@@ -171,9 +179,18 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IEditorService private readonly _editorService: IEditorService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(RegionService) private readonly _regionService: RegionService
     ) {
         super();
+
+        this.disposeWithMe(merge(this._regionService.currentRegion$, this._localeService.localeChanged$).subscribe(() => {
+            this._currentFormulaSyntax = undefined;
+            if (this._currentEditCell && !this._visibleParams.visible) {
+                this.refreshEditCellState();
+            }
+        }));
 
         this.disposeWithMe(toDisposable(() => {
             this._currentEditCellState$.complete();
@@ -414,7 +431,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             : worksheet.getCell(startRow, startColumn);
         const cell = this._sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(BEFORE_CELL_EDIT)(displayCell, location);
 
-        documentLayoutObject = cell && worksheet.getCellDocumentModelWithFormula(cell, location.row, location.col);
+        const syntax = this._visibleParams.visible ? this.getFormulaSyntax() : this._getCurrentFormulaSyntax();
+        const editorCell = cell?.f ? { ...cell, f: syntax.toLocal(cell.f) } : cell;
+        documentLayoutObject = editorCell && worksheet.getCellDocumentModelWithFormula(editorCell, location.row, location.col);
 
         // Rewrite the cellValueType to STRING to avoid render the value on the right side when number type.
         const renderConfig = documentLayoutObject?.documentModel?.documentStyle.renderConfig;
@@ -497,6 +516,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         if (params.visible && this._getSheetType(this._getWorkbookForEditUnit(params.unitId)) === SheetTypes.CHART) {
             return;
         }
+        if (params.visible && !this._visibleParams.visible) {
+            this._draftFormulaSyntax = this._getCurrentFormulaSyntax();
+        }
         this._visibleParams = params;
 
         // Reset the dirty status when the editor is visible.
@@ -505,7 +527,20 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         }
 
         this._visibleParams$.next(this._visibleParams);
+        if (!params.visible && this._draftFormulaSyntax) {
+            const syntaxChanged = this._draftFormulaSyntax !== this._currentFormulaSyntax;
+            this._draftFormulaSyntax = undefined;
+            if (syntaxChanged && this._currentEditCell) this.refreshEditCellState();
+        }
         this._afterVisibleParams$.next(this._visibleParams);
+    }
+
+    getFormulaSyntax(): IFormulaSyntax {
+        return this._draftFormulaSyntax ?? this._getCurrentFormulaSyntax();
+    }
+
+    private _getCurrentFormulaSyntax(): IFormulaSyntax {
+        return this._currentFormulaSyntax ??= getFormulaSyntax(this._regionService, this._localeService);
     }
 
     isVisible() {

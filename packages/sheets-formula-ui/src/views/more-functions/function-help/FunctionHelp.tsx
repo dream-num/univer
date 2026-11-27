@@ -18,6 +18,7 @@ import type { IFunctionParam } from '@univerjs/engine-formula';
 import { generateParam } from '../../../services/utils';
 
 interface IFunctionHelpProps {
+    separator: string;
     prefix?: string;
     value?: IFunctionParam[];
 }
@@ -37,7 +38,7 @@ interface IFunctionHelpProps {
  * @returns
  */
 export function FunctionHelp(props: IFunctionHelpProps) {
-    const { prefix, value } = props;
+    const { prefix, value, separator } = props;
 
     return (
         <div>
@@ -48,8 +49,8 @@ export function FunctionHelp(props: IFunctionHelpProps) {
             {value &&
                 value.map((item: IFunctionParam, i: number) => (
                     <span key={i}>
-                        <span>{generateParam(item)}</span>
-                        {i === value.length - 1 ? '' : ','}
+                        <span>{generateParam(item, separator)}</span>
+                        {i === value.length - 1 ? '' : separator}
                     </span>
                 ))}
             )

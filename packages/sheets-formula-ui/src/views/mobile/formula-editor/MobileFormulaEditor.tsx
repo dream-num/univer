@@ -47,7 +47,7 @@ import {
 } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR, MOBILE_FORMULA_FUNCTION_PANEL_OPEN } from '@univerjs/sheets-ui';
-import { useDependency, useEvent, useObservable, useUpdateEffect } from '@univerjs/ui';
+import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { map } from 'rxjs';
 import type { IUniverSheetsFormulaUIConfig } from '../../../config/config';
@@ -62,6 +62,8 @@ import {
     resolveFormulaEmbedRuntimeDomScope,
 } from '../../formula-editor/formula-embed-integration.service';
 import { hasActiveFormulaEmbedInteraction, shouldRefocusFormulaEditorOnMouseUp, useFocus } from '../../formula-editor/hooks/use-focus';
+import { useFormulaEditorSyntax } from '../../formula-editor/hooks/use-formula-editor-syntax';
+import { useFormulaEditorValue } from '../../formula-editor/hooks/use-formula-editor-value';
 import { getSelectionAfterLaggingFormulaInput, useFormulaSelecting } from '../../formula-editor/hooks/use-formula-selection';
 import { useFormulaToken } from '../../formula-editor/hooks/use-formula-token';
 import { useDocHight, useSheetHighlight } from '../../formula-editor/hooks/use-highlight';
@@ -71,7 +73,6 @@ import { useResetSelection } from '../../formula-editor/hooks/use-reset-selectio
 import { useSheetSelectionChange } from '../../formula-editor/hooks/use-sheet-selection-change';
 import { useStateRef } from '../../formula-editor/hooks/use-state-ref';
 import { useSwitchSheet } from '../../formula-editor/hooks/use-switch-sheet';
-import { useVerify } from '../../formula-editor/hooks/use-verify';
 import { getFormulaText } from '../../formula-editor/utils/get-formula-text';
 import { syncCounterpartFormulaEditorSelection } from '../../formula-editor/utils/sync-counterpart-formula-editor-selection';
 import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../../range-selector/utils/find-index-from-sequence-nodes';
@@ -241,7 +242,8 @@ export const MobileFormulaEditor = forwardRef((props: IMobileFormulaEditorProps,
     const isError = errorText !== undefined;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const document = univerInstanceService.getUnit<DocumentDataModel>(editorId);
-    const getFormulaToken = useFormulaToken();
+    const syntax = useFormulaEditorSyntax(editorId, editor, isFocus);
+    const getFormulaToken = useFormulaToken(syntax);
     const formulaText = useObservable(
         document
             ? () => document.change$.pipe(map(() => BuildTextUtils.transform.getPlainText(document.getBody()?.dataStream ?? '')))
@@ -251,10 +253,12 @@ export const MobileFormulaEditor = forwardRef((props: IMobileFormulaEditorProps,
         [document]
     );
     const formulaTextRef = useStateRef(formulaText);
+    useFormulaEditorValue(syntax, formulaText, isFocus, onChange, onVerify);
     const formulaWithoutEqualSymbol = useMemo(() => getFormulaText(formulaText), [formulaText]);
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol, getFormulaToken]);
     const [mobileFunctionPanelOpen, setMobileFunctionPanelOpen] = useState(false);
     const { isSelecting, isSelectingRef } = useFormulaSelecting({
+        syntax,
         unitId,
         subUnitId,
         editor,
@@ -279,10 +283,6 @@ export const MobileFormulaEditor = forwardRef((props: IMobileFormulaEditorProps,
     // whether to hide formula search and help popup
     const configService = useDependency(IConfigService);
     const functionScreenTips = configService.getConfig<IUniverSheetsFormulaUIConfig>(PLUGIN_CONFIG_KEY_BASE)?.functionScreenTips ?? true;
-
-    useUpdateEffect(() => {
-        onChange(formulaText);
-    }, [formulaText, onChange]);
 
     useEffect(() => {
         onMobileFormulaActiveChange?.(formulaText.replace(/\r?\n$/, '').startsWith('='));
@@ -383,7 +383,6 @@ export const MobileFormulaEditor = forwardRef((props: IMobileFormulaEditorProps,
         }
     }, [formulaText]);
 
-    useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
 
     const resetSelection = useResetSelection(isFocus, unitId, subUnitId);
@@ -405,13 +404,14 @@ export const MobileFormulaEditor = forwardRef((props: IMobileFormulaEditorProps,
     useLayoutEffect(() => {
         let dispose: IDisposable;
         if (formulaEditorContainerRef.current) {
+            const localValue = syntax.toLocal(initValue);
             dispose = editorService.register({
                 autofocus,
                 editorUnitId: editorId,
                 initialSnapshot: {
                     id: editorId,
                     body: {
-                        dataStream: `${initValue}\r\n`,
+                        dataStream: `${localValue}\r\n`,
                         textRuns: [],
                         customBlocks: [],
                         customDecorations: [],
@@ -440,7 +440,7 @@ export const MobileFormulaEditor = forwardRef((props: IMobileFormulaEditorProps,
             const registeredEditor = editorService.getEditor(editorId)! as Editor;
             editorRef.current = registeredEditor;
             setEditor(registeredEditor);
-            highlight(initValue, false, true);
+            highlight(localValue, false, true);
         }
 
         return () => {
@@ -563,6 +563,7 @@ export const MobileFormulaEditor = forwardRef((props: IMobileFormulaEditorProps,
         }
     });
     useSheetSelectionChange(
+        syntax,
         isFocus && Boolean(isSelecting),
         isFocus,
         isSelectingRef,
@@ -720,6 +721,7 @@ export const MobileFormulaEditor = forwardRef((props: IMobileFormulaEditorProps,
                 />
             )}
             <MobileFunctionPanel
+                separator={syntax.argumentSeparator}
                 open={mobileFunctionPanelOpen}
                 onClose={closeMobileFunctionPanel}
                 onInsert={handleMobileFunctionInsert}

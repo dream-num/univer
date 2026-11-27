@@ -49,6 +49,7 @@ import {
     Inject,
     Injector,
     isFormulaString,
+    isTextFormat,
     IUniverInstanceService,
     LocaleService,
     ObjectMatrix,
@@ -112,6 +113,7 @@ import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manag
 import { whenSheetEditorFocused } from '../shortcuts/utils';
 import { RemovePasteMenuCommands } from './const';
 import {
+    createPasteFormulaParser,
     generateBody,
     getClearAndSetMergeMutations,
     getDefaultOnPasteCellMutations,
@@ -593,11 +595,14 @@ export class SheetClipboardController extends RxDisposable {
                 },
             };
         } else {
-            if (isFormulaString(text)) {
+            const isFormula = isFormulaString(text) && payload.pasteType !== PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE &&
+                !isTextFormat(workbook?.getSheetBySheetId(subUnitId)?.getComposedCellStyle(range.rows[0], range.cols[0]).n?.pattern);
+            if (isFormula) {
+                const parseFormula = createPasteFormulaParser(this._injector);
                 cellValue = {
                     [range.rows[0]]: {
                         [range.cols[0]]: {
-                            f: text,
+                            f: parseFormula(text),
                             ft: null,
                             fd: null,
                             v: null,

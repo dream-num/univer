@@ -15,9 +15,9 @@
  */
 
 /* eslint-disable antfu/consistent-list-newline */
-import type { IFunctionService, ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
+import type { IFormulaSyntax, IFunctionService, ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { getNumfmtParseValueFilter, LocaleType, numfmt } from '@univerjs/core';
-import { matchToken, sequenceNodeType } from '@univerjs/engine-formula';
+import { getFormulaProtectedTokenEnd, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 
 const fullWidthToHalfWidthMap: { [key: string]: string } = {
     '０': '0', '１': '1', '２': '2', '３': '3', '４': '4',
@@ -65,11 +65,9 @@ export function isCJKLocale(locale: LocaleType) {
  * 3. Characters between single and double quotes in formulas
  * 4. Other text that cannot be recognized as formulas, Boolean values, or numbers
  *
- * @param str
- * @param lexerTreeBuilder
- * @returns
+ * @returns The normalized input, or null for an invalid regional formula separator.
  */
-export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder, currentLocale: LocaleType, functionService: IFunctionService) {
+export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder, currentLocale: LocaleType, functionService: IFunctionService, syntax: IFormulaSyntax) {
     let normalStr = str;
 
     if (isCJKLocale(currentLocale)) {
@@ -78,13 +76,14 @@ export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder,
             return `'${str.slice(1)}`;
         }
 
-        // Handle quoted parts separately (e.g., sheet names)
-        normalStr = handleQuotedParts(normalStr);
+        normalStr = normalizeFullWidthCharacters(str);
     }
 
     // Check if it is a formula
     if (normalStr.startsWith('=')) {
-        return normalizeFormulaString(str, normalStr, lexerTreeBuilder, functionService);
+        const formula = syntax.toStandard(normalStr);
+        if (formula === null) return null;
+        return normalizeFormulaString(formula === normalStr ? str : formula, formula, lexerTreeBuilder, functionService);
     }
 
     // Check if it is a boolean value
@@ -99,27 +98,24 @@ export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder,
     return parsedValue == null ? str : normalStr;
 }
 
-// Helper function to handle sheet names with quotes
-function handleQuotedParts(str: string): string {
-    const sheetNamePattern = /['"].*?['"]/g; // Pattern to match quoted parts (sheet names)
-    const quotedParts: string[] = [];
-    const parts = str.split(sheetNamePattern);
-
-    // Save quoted parts and remove them from the string temporarily
-    str.replace(sheetNamePattern, (match) => {
-        quotedParts.push(match);
-        return ''; // Remove quoted parts for now
-    });
-
-    // Convert all full-width characters to half-width characters in non-quoted parts
-    let normalStr = parts.join('').split('').map(toHalfWidth).join('');
-
-    // Reinserting the quoted parts into the final string
-    quotedParts.forEach((part, idx) => {
-        normalStr = normalStr.slice(0, idx * 2) + part + normalStr.slice((idx + 1) * 2);
-    });
-
-    return normalStr;
+function normalizeFullWidthCharacters(str: string): string {
+    let result = '';
+    for (let i = 0; i < str.length;) {
+        const end = getFormulaProtectedTokenEnd(str, i);
+        if (end > i) {
+            result += str.slice(i, end);
+            i = end;
+        } else if (str[i] === '＂' || str[i] === '＇') {
+            const quote = toHalfWidth(str[i]);
+            const close = str.indexOf(str[i], i + 1);
+            if (close < 0) return result + quote + str.slice(i + 1);
+            result += quote + str.slice(i + 1, close) + quote;
+            i = close + 1;
+        } else {
+            result += toHalfWidth(str[i++]);
+        }
+    }
+    return result;
 }
 
 function normalizeFormulaString(str: string, normalStr: string, lexerTreeBuilder: LexerTreeBuilder, functionService: IFunctionService) {
@@ -158,14 +154,14 @@ function normalizeFormulaString(str: string, normalStr: string, lexerTreeBuilder
             } else if ((token.startsWith('"') && token.endsWith('"')) || (token.startsWith("'") && token.endsWith("'"))) {
                 const startIndex = node.startIndex + totalOffset + 2;
                 const endIndex = node.endIndex + totalOffset + 1;
-                _normalStr = replaceString(str.slice(startIndex, endIndex), _normalStr, startIndex, endIndex);
+                _normalStr = replaceString(str.slice(startIndex - totalOffset, endIndex - totalOffset), _normalStr, startIndex, endIndex);
             } else if (node.nodeType !== sequenceNodeType.ARRAY) {
                 const parsedValue = getNumfmtParseValueFilter(token);
 
                 if (parsedValue == null) {
                     const startIndex = node.startIndex + totalOffset + 1;
                     const endIndex = node.endIndex + totalOffset + 2;
-                    _normalStr = replaceString(str.slice(startIndex, endIndex), _normalStr, startIndex, endIndex);
+                    _normalStr = replaceString(str.slice(startIndex - totalOffset, endIndex - totalOffset), _normalStr, startIndex, endIndex);
                 }
                 // Entering =.07/0.1 in a cell will automatically convert to =0.07/0.1
                 // Entering =1.0+2.00 in a cell will automatically convert to =1+2

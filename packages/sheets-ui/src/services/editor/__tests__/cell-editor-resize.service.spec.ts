@@ -33,6 +33,7 @@ import {
     LocaleService,
     LocaleType,
     LocalUndoRedoService,
+    RegionService,
     ThemeService,
     Univer,
     UniverInstanceService,
@@ -745,6 +746,8 @@ describe('SheetCellEditorResizeService', () => {
         injector.add([SheetSkeletonService]);
         injector.add([IEditorService, { useClass: EditorService }]);
         injector.add([ICellEditorManagerService, { useClass: CellEditorManagerService }]);
+        injector.add([LocaleService]);
+        injector.add([RegionService]);
         injector.add([IEditorBridgeService, { useClass: EditorBridgeService }]);
         injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
         injector.add([IConfigService, { useClass: ConfigService }]);

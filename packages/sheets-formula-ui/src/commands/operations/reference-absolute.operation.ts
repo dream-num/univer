@@ -19,6 +19,8 @@ import { BuildTextUtils, CommandType, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IEditorService } from '@univerjs/docs-ui';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { syncCounterpartFormulaEditorSelection } from '../../views/formula-editor/utils/sync-counterpart-formula-editor-selection';
 import { toggleReferenceAbsoluteAtCursor } from '../utils/reference-absolute';
 
 export const ReferenceAbsoluteOperation: ICommand = {
@@ -45,17 +47,23 @@ export const ReferenceAbsoluteOperation: ICommand = {
         }
 
         const formulaText = BuildTextUtils.transform.getPlainText(focusEditor.getDocumentData().body?.dataStream ?? '');
-        const nextReferenceState = toggleReferenceAbsoluteAtCursor(lexerTreeBuilder, formulaText, activeTextRange.endOffset);
+        const syntax = accessor.get(IEditorBridgeService).getFormulaSyntax();
+        const nextReferenceState = toggleReferenceAbsoluteAtCursor(lexerTreeBuilder, formulaText, activeTextRange.endOffset, syntax.toEditorTokens(formulaText));
 
         if (!nextReferenceState) {
             return false;
         }
 
-        focusEditor.replaceText(nextReferenceState.formulaText, [{
+        const selections = [{
             startOffset: nextReferenceState.cursorOffset,
             endOffset: nextReferenceState.cursorOffset,
             collapsed: true,
-        }]);
+        }];
+        // Snapshot replacements are independent for the cell and formula bar.
+        const counterpartId = editorId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY ? DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY : DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
+        editorService.getEditor(counterpartId)?.replaceText(nextReferenceState.formulaText, false);
+        focusEditor.replaceText(nextReferenceState.formulaText, selections);
+        syncCounterpartFormulaEditorSelection(editorService, editorId, selections);
 
         return true;
     },

@@ -381,6 +381,7 @@ function MobileFormulaBarEditor() {
                     expanded={expanded}
                     formulaActive={mobileFormulaActive}
                     operatorsVisible={mobileFormulaOperatorsVisible}
+                    argumentSeparator={editorBridgeService.getFormulaSyntax().argumentSeparator}
                     editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
                     onOperator={(value) => setMobileOperatorRequest(({ id }) => ({ id: id + 1, value }))}
                 />

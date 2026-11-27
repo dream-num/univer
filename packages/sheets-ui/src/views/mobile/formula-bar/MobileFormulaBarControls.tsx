@@ -19,26 +19,11 @@ import { MobileRichTextToolbar } from '@univerjs/docs-ui';
 import { CheckMarkIcon, CloseIcon, DownIcon, FxIcon } from '@univerjs/icons';
 import { MOBILE_FORMULA_OPERATOR_BAR_HEIGHT } from '../../../consts/mobile-context';
 
-const FORMULA_OPERATORS = [
-    { label: '+', value: '+' },
-    { label: '−', value: '-' },
-    { label: '×', value: '*' },
-    { label: '÷', value: '/' },
-    { label: '=', value: '=' },
-    { label: '>', value: '>' },
-    { label: '<', value: '<' },
-    { label: ',', value: ',' },
-    { label: ':', value: ':' },
-    { label: '(', value: '(' },
-    { label: ')', value: ')' },
-    { label: '&', value: '&' },
-    { label: '!', value: '!' },
-] as const;
-
 interface IMobileFormulaBarOverlayProps {
     expanded: boolean;
     formulaActive: boolean;
     operatorsVisible: boolean;
+    argumentSeparator: string;
     editorId: string;
     onOperator: (value: string) => void;
 }
@@ -56,6 +41,21 @@ interface IMobileFormulaBarActionProps {
 }
 
 export function MobileFormulaBarOverlays(props: IMobileFormulaBarOverlayProps) {
+    const operators = [
+        { label: '+', value: '+' },
+        { label: '−', value: '-' },
+        { label: '×', value: '*' },
+        { label: '÷', value: '/' },
+        { label: '=', value: '=' },
+        { label: '>', value: '>' },
+        { label: '<', value: '<' },
+        { label: props.argumentSeparator, value: props.argumentSeparator },
+        { label: ':', value: ':' },
+        { label: '(', value: '(' },
+        { label: ')', value: ')' },
+        { label: '&', value: '&' },
+        { label: '!', value: '!' },
+    ] as const;
     return (
         <>
             {props.operatorsVisible && (
@@ -68,7 +68,7 @@ export function MobileFormulaBarOverlays(props: IMobileFormulaBarOverlayProps) {
                     "
                     style={{ height: MOBILE_FORMULA_OPERATOR_BAR_HEIGHT, scrollbarWidth: 'none', touchAction: 'pan-x' }}
                 >
-                    {FORMULA_OPERATORS.map((operator) => (
+                    {operators.map((operator) => (
                         <button
                             key={operator.label}
                             type="button"

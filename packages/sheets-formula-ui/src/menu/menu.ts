@@ -78,14 +78,14 @@ export function InsertCommonFunctionMenuItemFactory(accessor: IAccessor): IMenuI
 
     try {
         const descriptionService = accessor.get(IDescriptionService);
-        const filtered = commonFunctions.filter((name) => Boolean(descriptionService.getFunctionInfo(name)));
+        const filtered = commonFunctions.map((name) => descriptionService.getFunctionInfo(name)).filter((info) => info != null);
         if (filtered.length > 0) {
-            selections = filtered.map((name) => ({
+            selections = filtered.map(({ functionName }) => ({
                 label: {
-                    name,
+                    name: functionName,
                     selectable: false,
                 },
-                value: name,
+                value: functionName,
             }));
         }
     } catch {

@@ -231,6 +231,7 @@ const locale: typeof enUS = {
             textToNumber: 'テキストを数値に変換',
         },
         info: {
+            formulaSeparator: '地域に合った数式の区切り記号を使用してください。例：{0}',
             problem: '問題が発生しました',
             error: 'エラー',
             forceStringInfo: '数値がテキストとして保存されました',

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { Dependency, DocumentDataModel, IDocumentData } from '@univerjs/core';
-import { CanceledError, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, SheetTypes, UniverInstanceType } from '@univerjs/core';
+import type { Dependency, DocumentDataModel, IDocumentData, IWorksheetData } from '@univerjs/core';
+import { CanceledError, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, LocaleService, LocaleType, RegionService, SheetTypes, UniverInstanceType } from '@univerjs/core';
 import { DocStateChangeManagerService, DocStateEmitService, RichTextEditingMutation } from '@univerjs/docs';
 import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import formulaEsES from '@univerjs/engine-formula/locale/es-ES';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import {
     SetRangeValuesCommand,
@@ -26,11 +27,13 @@ import {
     SetWorksheetActivateCommand,
     SetWorksheetActiveOperation,
 } from '@univerjs/sheets';
-import { DesktopLayoutService, ILayoutService, KeyCode } from '@univerjs/ui';
+import { DesktopLayoutService, ILayoutService, IMessageService, KeyCode, MockMessageService } from '@univerjs/ui';
 import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { SetActivateCellEditOperation } from '../../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { ScrollToRangeOperation } from '../../../commands/operations/scroll-to-range.operation';
+import enUS from '../../../locale/en-US';
+import esES from '../../../locale/es-ES';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import {
     CellEditorManagerService,
@@ -39,6 +42,7 @@ import {
 import { SheetCellEditorResizeService } from '../../../services/editor/cell-editor-resize.service';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import { EditingRenderController } from '../../editor/editing.render-controller';
+import { MobileFormulaBarSubmitCommand } from '../../mobile/ui-mobile.controller';
 import { EditorBridgeRenderController } from '../editor-bridge.render-controller';
 import { SheetsScrollRenderController } from '../scroll.render-controller';
 import { createChartRenderTestBed } from './chart-render-test-bed';
@@ -46,6 +50,29 @@ import { createChartRenderTestBed } from './chart-render-test-bed';
 class TestFormulaEnginePlugin extends UniverFormulaEnginePlugin {
     // This render fixture needs formula providers without starting formula controllers.
     override onReady(): void {}
+}
+
+function createEditTestBed(gridConfig: Partial<IWorksheetData> = {}) {
+    const bed = createChartRenderTestBed([
+        [SheetScrollManagerService],
+        [SheetsScrollRenderController],
+        [EditorBridgeRenderController],
+    ], false, gridConfig);
+    const { injector, commands, univer } = bed;
+    univer.registerPlugin(TestFormulaEnginePlugin, { notExecuteFormula: true });
+    const providers: Dependency[] = [
+        [ILayoutService, { useClass: DesktopLayoutService }],
+        [ICellEditorManagerService, { useClass: CellEditorManagerService }],
+        [DocStateEmitService],
+        [DocStateChangeManagerService],
+        [SheetCellEditorResizeService],
+        [IMessageService, { useClass: MockMessageService }],
+        [EditingRenderController],
+    ];
+    providers.forEach((provider) => injector.add(provider));
+    [SetActivateCellEditOperation, SetCellEditVisibleOperation, ScrollToRangeOperation, SetRangeValuesCommand, SetRangeValuesMutation, SetWorksheetActivateCommand, ReplaceSnapshotCommand, RichTextEditingMutation].forEach((command) => commands.registerCommand(command));
+    injector.get(EditingRenderController);
+    return bed;
 }
 
 describe('Chart activation with a real pending Grid edit', () => {
@@ -64,23 +91,7 @@ describe('Chart activation with a real pending Grid edit', () => {
         { rangePicking: true, refuseRestore: false, removeCapturedSheet: true, escape: true },
         { rangePicking: true, refuseRestore: false, removeCapturedSheet: true, close: true },
     ])('commits valid Grid edits and discards invalid edits without restoring their sheet with %j', async ({ rangePicking, refuseRestore, capturedType, removeCapturedSheet, escape, close }) => {
-        const { injector, render, workbook, activate, commands, univer } = createChartRenderTestBed([
-            [SheetScrollManagerService],
-            [SheetsScrollRenderController],
-            [EditorBridgeRenderController],
-        ]);
-        univer.registerPlugin(TestFormulaEnginePlugin, { notExecuteFormula: true });
-        const providers: Dependency[] = [
-            [ILayoutService, { useClass: DesktopLayoutService }],
-            [ICellEditorManagerService, { useClass: CellEditorManagerService }],
-            [DocStateEmitService],
-            [DocStateChangeManagerService],
-            [SheetCellEditorResizeService],
-            [EditingRenderController],
-        ];
-        providers.forEach((provider) => injector.add(provider));
-        [SetActivateCellEditOperation, SetCellEditVisibleOperation, ScrollToRangeOperation, SetRangeValuesCommand, SetRangeValuesMutation, SetWorksheetActivateCommand, ReplaceSnapshotCommand, RichTextEditingMutation].forEach((command) => commands.registerCommand(command));
-        injector.get(EditingRenderController);
+        const { injector, render, workbook, activate, commands, univer } = createEditTestBed();
         const bridge = injector.get(IEditorBridgeService);
         commands.syncExecuteCommand(SetActivateCellEditOperation.id, {
             unitId: workbook.getUnitId(),
@@ -159,6 +170,98 @@ describe('Chart activation with a real pending Grid edit', () => {
 });
 
 describe('Editor bridge render lifecycle', () => {
+    it.each([
+        [LocaleType.EN_US, 'SUM'],
+        [LocaleType.ES_ES, 'SUMA'],
+    ] as const)('redisplays an existing formula by region and retains invalid input until it is corrected in %s', async (language, name) => {
+        const { injector, render, workbook, activate, commands, univer } = createEditTestBed({ cellData: { 0: { 0: { f: '=SUM(1,5)' } } } });
+        const region = injector.get(RegionService);
+        const locale = injector.get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: enUS, [LocaleType.ES_ES]: { ...esES, ...formulaEsES } });
+        region.setRegion('en-US');
+        locale.setLocale(language);
+        const showMessage = vi.spyOn(injector.get(IMessageService), 'show');
+        const bridge = injector.get(IEditorBridgeService);
+        const unitId = workbook.getUnitId();
+        const sheet = workbook.getActiveSheet();
+        commands.syncExecuteCommand(SetActivateCellEditOperation.id, {
+            unitId,
+            sheetId: sheet.getSheetId(),
+            scene: render.scene,
+            engine: render.engine,
+            primary: sheet.getCellInfoInMergeData(0, 0),
+        });
+        const displayed = () => bridge.getEditLocation()?.documentLayoutObject.documentModel?.getBody()?.dataStream;
+        expect(displayed()).toBe(`=${name}(1,5)\r\n`);
+        region.setRegion('es-ES');
+        expect(displayed()).toBe(`=${name}(1;5)\r\n`);
+        expect(sheet.getCellRaw(0, 0)?.f).toBe('=SUM(1,5)');
+
+        const changeVisibility = (visible: boolean) => commands.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+            unitId,
+            visible,
+            eventType: DeviceInputEventType.Keyboard,
+        });
+        changeVisibility(true);
+        const draft = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+            id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            body: { dataStream: `=${name}(A1,B1;2)\r\n` },
+            documentStyle: {},
+        });
+        bridge.changeEditorDirty(true);
+        region.setRegion('en-US');
+        expect(changeVisibility(false)).toBe(false);
+        expect(bridge.isVisible().visible).toBe(true);
+        expect(draft.getBody()?.dataStream).toBe(`=${name}(A1,B1;2)\r\n`);
+        expect(sheet.getCellRaw(0, 0)?.f).toBe('=SUM(1,5)');
+        expect(showMessage).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining(`=${name}(1,5;2,5)`) }));
+
+        bridge.enableForceKeepVisible();
+        expect(activate('chart')).toBe(false);
+        expect(workbook.getActiveSheet()).toBe(sheet);
+        expect(bridge.isForceKeepVisible()).toBe(true);
+        bridge.disableForceKeepVisible();
+
+        draft.getBody()!.dataStream = `=${name}(1,5;2,5)\r\n`;
+        expect(changeVisibility(false)).toBe(true);
+        await vi.advanceTimersByTimeAsync(10);
+        expect(bridge.isVisible().visible).toBe(false);
+        expect(sheet.getCellRaw(0, 0)?.f).toBe('=SUM(1.5,2.5)');
+        expect(displayed()).toBe(`=${name}(1.5,2.5)\r\n`);
+    });
+
+    it('keeps a rejected mobile formula bar draft in place until the user corrects it', async () => {
+        const { injector, render, workbook, commands, univer } = createEditTestBed();
+        injector.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
+        injector.get(RegionService).setRegion('es-ES');
+        const sheet = workbook.getActiveSheet();
+        const unitId = workbook.getUnitId();
+        commands.registerCommand(MobileFormulaBarSubmitCommand);
+        commands.syncExecuteCommand(SetActivateCellEditOperation.id, {
+            unitId,
+            sheetId: sheet.getSheetId(),
+            scene: render.scene,
+            engine: render.engine,
+            primary: sheet.getCellInfoInMergeData(1, 1),
+        });
+        commands.syncExecuteCommand(SetCellEditVisibleOperation.id, { unitId, visible: true, eventType: DeviceInputEventType.Keyboard });
+        const draft = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+            id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            body: { dataStream: '=SUM(A1,B1;2)\r\n' },
+            documentStyle: {},
+        });
+        const bridge = injector.get(IEditorBridgeService);
+        bridge.changeEditorDirty(true);
+        expect(await commands.executeCommand(MobileFormulaBarSubmitCommand.id)).toBe(false);
+        expect(draft.getBody()?.dataStream).toBe('=SUM(A1,B1;2)\r\n');
+        expect(bridge.isVisible().visible).toBe(true);
+        expect(bridge.getEditLocation()).toMatchObject({ row: 1, column: 1 });
+        expect(sheet.getCellRaw(1, 1)).toBeUndefined();
+        draft.getBody()!.dataStream = '=SUM(1,5;2,5)\r\n';
+        expect(await injector.get(EditingRenderController).submitCellData(draft)).toBe(true);
+        expect(sheet.getCellRaw(1, 1)?.f).toBe('=SUM(1.5,2.5)');
+    });
+
     it('releases active-sheet and command listeners when its real controller is disposed', () => {
         const { injector, render, workbook, activate, commands } = createChartRenderTestBed([[EditorBridgeRenderController]]);
         commands.registerCommand(SetActivateCellEditOperation);

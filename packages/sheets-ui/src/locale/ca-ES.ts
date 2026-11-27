@@ -231,6 +231,7 @@ const locale: typeof enUS = {
             textToNumber: 'Text a número',
         },
         info: {
+            formulaSeparator: 'Utilitzeu els separadors de fórmula de la vostra regió, com a {0}.',
             problem: 'Hi ha hagut un problema',
             error: 'Error',
             forceStringInfo: 'Número emmagatzemat com a text',

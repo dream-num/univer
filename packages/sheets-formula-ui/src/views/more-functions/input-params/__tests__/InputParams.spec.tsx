@@ -64,16 +64,16 @@ describe('InputParams', () => {
         container.remove();
     });
 
-    it('shows the selected function signature and description before a parameter is active', () => {
+    it.each([',', ';'])('shows the selected function signature with the %s argument separator', (separator) => {
         const changes: string[][] = [];
 
         act(() => {
-            root.render(<InputParams functionInfo={countIfInfo} onChange={(params) => changes.push(params)} />);
+            root.render(<InputParams separator={separator} functionInfo={countIfInfo} onChange={(params) => changes.push(params)} />);
         });
 
         expect(container.textContent).toContain('range');
         expect(container.textContent).toContain('criterion');
-        expect(container.textContent).toContain('COUNTIF(range,[criterion])');
+        expect(container.textContent).toContain(`COUNTIF(range${separator}[criterion])`);
         expect(container.textContent).toContain('Counts cells that meet a condition.');
         expect(changes).toEqual([]);
     });

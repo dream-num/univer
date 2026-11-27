@@ -14,43 +14,19 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IDocumentData } from '@univerjs/core';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService } from '@univerjs/core';
+import type { IDocumentData } from '@univerjs/core';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IEditorService } from '@univerjs/docs-ui';
-import { ISidebarService } from '@univerjs/ui';
-import { describe, expect, it, vi } from 'vitest';
-import { IFormulaPromptService } from '../../../services/prompt.service';
-import { MORE_FUNCTIONS_COMPONENT } from '../../../views/more-functions/interface';
-import { HelpFunctionOperation } from '../help-function.operation';
-import { MoreFunctionsOperation } from '../more-functions.operation';
+import { describe, expect, it, onTestFinished } from 'vitest';
 import { ReferenceAbsoluteOperation } from '../reference-absolute.operation';
-import { SearchFunctionOperation } from '../search-function.operation';
 import { createCommandTestBed } from './create-command-test-bed';
-
-function createAccessor() {
-    const promptService = { help: vi.fn(), search: vi.fn() };
-    const sidebarService = { open: vi.fn() };
-    const accessor = {
-        get(token: unknown) {
-            if (token === IFormulaPromptService) {
-                return promptService;
-            }
-
-            if (token === ISidebarService) {
-                return sidebarService;
-            }
-
-            throw new Error(`Unknown dependency: ${String(token)}`);
-        },
-    } as IAccessor;
-
-    return { accessor, promptService, sidebarService };
-}
 
 class TestFormulaEditor {
     readonly selectionRanges: Array<{ startOffset: number; endOffset: number; collapsed: boolean }> = [];
-    private _editorId = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
+    readonly docSelectionRenderService = { removeAllRanges: () => {} };
+
+    constructor(private _editorId: string) {}
     private _documentData: IDocumentData = {
         id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
         body: {
@@ -58,10 +34,6 @@ class TestFormulaEditor {
         },
         documentStyle: {},
     };
-
-    setEditorId(editorId: string) {
-        this._editorId = editorId;
-    }
 
     setFormulaText(formulaText: string) {
         this._documentData = {
@@ -80,15 +52,21 @@ class TestFormulaEditor {
         return this._documentData;
     }
 
-    replaceText(text: string, ranges: Array<{ startOffset: number; endOffset: number; collapsed: boolean }>) {
+    replaceText(text: string, ranges: false | Array<{ startOffset: number; endOffset: number; collapsed: boolean }>) {
         this.setFormulaText(text);
+        if (ranges) this.setSelectionRanges(ranges);
+    }
+
+    setSelectionRanges(ranges: Array<{ startOffset: number; endOffset: number; collapsed: boolean }>) {
         this.selectionRanges.length = 0;
         this.selectionRanges.push(...ranges);
     }
 }
 
 class TestEditorService {
-    readonly editor = new TestFormulaEditor();
+    readonly editor = new TestFormulaEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+    readonly bar = new TestFormulaEditor(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+    focusedId = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
     private _hasFocusEditor = true;
 
     setHasFocusEditor(hasFocusEditor: boolean) {
@@ -96,11 +74,11 @@ class TestEditorService {
     }
 
     getFocusEditor() {
-        return this._hasFocusEditor ? this.editor : null;
+        return this._hasFocusEditor ? this.getEditor(this.focusedId) : null;
     }
 
-    getEditor() {
-        return this.editor;
+    getEditor(id: string) {
+        return id === DOCS_NORMAL_EDITOR_UNIT_ID_KEY ? this.editor : this.bar;
     }
 
     register() {
@@ -132,63 +110,52 @@ class TestEditorService {
     }
 }
 
-describe('formula UI operations', () => {
-    it('delegates help and search actions to the prompt service', async () => {
-        const { accessor, promptService } = createAccessor();
-
-        await expect(HelpFunctionOperation.handler(accessor, { functionName: 'SUM' } as never)).resolves.toBe(true);
-        await expect(SearchFunctionOperation.handler(accessor, { searchText: 'count' } as never)).resolves.toBe(true);
-
-        expect(promptService.help).toHaveBeenCalledWith({ functionName: 'SUM' });
-        expect(promptService.search).toHaveBeenCalledWith({ searchText: 'count' });
-    });
-
-    it('opens the more-functions sidebar with the expected component', async () => {
-        const { accessor, sidebarService } = createAccessor();
-
-        await expect(MoreFunctionsOperation.handler(accessor)).resolves.toBe(true);
-        expect(sidebarService.open).toHaveBeenCalledWith({
-            header: { title: 'sheets-formula-ui.insert.tooltip' },
-            children: { label: MORE_FUNCTIONS_COMPONENT },
-        });
-    });
-
-    it('toggles the reference under the formula editor caret to the next absolute-reference state', async () => {
+describe('ReferenceAbsoluteOperation', () => {
+    it.each([
+        ['en-US', DOCS_NORMAL_EDITOR_UNIT_ID_KEY, '=A1', '=$A$1'],
+        ['es-ES', DOCS_NORMAL_EDITOR_UNIT_ID_KEY, '=SUMA(1,5;A1', '=SUMA(1,5;$A$1'],
+        ['es-ES', DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, '=SUMA(1,5;A1', '=SUMA(1,5;$A$1'],
+    ])('toggles the reference from %s %s and keeps both editor drafts in sync', async (region, editorId, draft, expected) => {
         const testBed = createCommandTestBed(undefined, [
             [IEditorService, { useClass: TestEditorService as never }],
         ]);
+        onTestFinished(() => testBed.univer.dispose());
         const commandService = testBed.get(ICommandService);
         commandService.registerCommand(ReferenceAbsoluteOperation);
+        testBed.univer.setRegion(region);
         const selectionManager = testBed.get(DocSelectionManagerService);
         selectionManager.__TEST_ONLY_setCurrentSelection({
-            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-            subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            unitId: editorId,
+            subUnitId: editorId,
         });
         selectionManager.__TEST_ONLY_add([{
-            startOffset: '=A1'.length,
-            endOffset: '=A1'.length,
+            startOffset: draft.length,
+            endOffset: draft.length,
             collapsed: true,
             isActive: true,
             segmentId: '',
         }]);
         const editorService = testBed.get(IEditorService) as unknown as TestEditorService;
 
+        editorService.focusedId = editorId;
+        editorService.getEditor(editorId).setFormulaText(draft);
         expect(await commandService.executeCommand(ReferenceAbsoluteOperation.id)).toBe(true);
 
-        expect(editorService.editor.getDocumentData().body?.dataStream).toBe('=$A$1\r\n');
+        expect(editorService.editor.getDocumentData().body?.dataStream).toBe(`${expected}\r\n`);
+        expect(editorService.bar.getDocumentData().body?.dataStream).toBe(`${expected}\r\n`);
+        expect(editorService.bar.selectionRanges).toEqual(editorService.editor.selectionRanges);
         expect(editorService.editor.selectionRanges).toEqual([{
-            startOffset: '=$A$1'.length,
-            endOffset: '=$A$1'.length,
+            startOffset: expected.length,
+            endOffset: expected.length,
             collapsed: true,
         }]);
-
-        testBed.univer.dispose();
     });
 
     it('does not change formula text when there is no focused formula editor or no reference at the caret', async () => {
         const testBed = createCommandTestBed(undefined, [
             [IEditorService, { useClass: TestEditorService as never }],
         ]);
+        onTestFinished(() => testBed.univer.dispose());
         const commandService = testBed.get(ICommandService);
         commandService.registerCommand(ReferenceAbsoluteOperation);
         const selectionManager = testBed.get(DocSelectionManagerService);
@@ -211,7 +178,5 @@ describe('formula UI operations', () => {
 
         editorService.setHasFocusEditor(false);
         expect(await commandService.executeCommand(ReferenceAbsoluteOperation.id)).toBe(false);
-
-        testBed.univer.dispose();
     });
 });

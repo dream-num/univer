@@ -15,14 +15,14 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { IFunctionInfo, IFunctionNames } from '../../basics/function';
 import { createIdentifier, Disposable, Inject, LocaleService, toDisposable } from '@univerjs/core';
+import type { IFunctionInfo, IFunctionNames } from '../../basics/function';
 import { FunctionType } from '../../basics/function';
 import { isReferenceStrings } from '../../engine/utils/reference';
 import { ALL_IMPLEMENTED_FUNCTIONS_SET } from '../../functions';
 import { IFunctionService } from '../function.service';
 import { FUNCTION_LIST } from './function-list/function-list';
-import { getFunctionName } from './utils';
+import { aliasedBuiltins, getFunctionName } from './utils';
 
 export interface ISearchItem {
     name: string;
@@ -189,7 +189,8 @@ export class DescriptionService extends Disposable implements IDescriptionServic
     }
 
     getFunctionInfo(searchText: string) {
-        const item = this._descriptions.get(searchText.toUpperCase());
+        const name = searchText.toUpperCase();
+        const item = this._descriptions.get(name) ?? aliasedBuiltins.get(name);
         if (!item) {
             return;
         }

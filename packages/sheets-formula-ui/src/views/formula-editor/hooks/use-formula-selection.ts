@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IAccessor, IUnitRangeName, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
-import type { ISequenceNode } from '@univerjs/engine-formula';
+import type { IFormulaSyntax, ISequenceNode } from '@univerjs/engine-formula';
 import { Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
@@ -133,8 +133,8 @@ export function shouldAddFormulaReference(dataStream: string, index: number): bo
 }
 
 // eslint-disable-next-line max-lines-per-function
-export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; isFocus: boolean; disableOnClick?: boolean; resetSignal?: number; unitId: string; subUnitId: string }) {
-    const { editor, editorId, isFocus, disableOnClick, resetSignal, unitId, subUnitId } = opts;
+export function useFormulaSelecting(opts: { syntax: IFormulaSyntax; editor?: Editor; editorId: string; isFocus: boolean; disableOnClick?: boolean; resetSignal?: number; unitId: string; subUnitId: string }) {
+    const { syntax, editor, editorId, isFocus, disableOnClick, resetSignal, unitId, subUnitId } = opts;
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const sheetRenderer = renderManagerService.getRenderUnitById(unitId);
@@ -178,7 +178,8 @@ export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; i
         const dataStream = config?.dataStream?.slice(0, -2);
         const normalizedActiveRange = getSelectionAfterLaggingFormulaInput(dataStream, activeRange, lastInputContentRef.current) ?? activeRange;
         const index = resolveFormulaSelectionCursorIndex(normalizedActiveRange, dataStream);
-        const nodes = (lexerTreeBuilder.sequenceNodesBuilder(dataStream) ?? []).map((node) => {
+        const tokenText = syntax.toEditorTokens(dataStream);
+        const nodes = (lexerTreeBuilder.sequenceNodesBuilder(tokenText) ?? []).map((node) => {
             if (typeof node === 'object') {
                 if (node.nodeType === sequenceNodeType.REFERENCE) {
                     return {
@@ -196,7 +197,7 @@ export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; i
             return node;
         });
         const focusingNode = nodes.find((node) => typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE && index === node.endIndex + 2) as unknown as (ISequenceNode & { range: IUnitRangeName });
-        const adding = shouldAddFormulaReference(dataStream, index);
+        const adding = shouldAddFormulaReference(tokenText, index);
         const editing = Boolean(focusingNode);
         const selectingIntent = resolveFormulaSelectingIntent(Boolean(adding), editing);
 

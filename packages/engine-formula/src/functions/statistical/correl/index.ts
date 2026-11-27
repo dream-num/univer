@@ -122,12 +122,19 @@ export class Correl extends BaseFunction {
             array2DiffSum += array2Diff ** 2;
         }
 
-        const denominator = Math.sqrt(array1DiffSum * array2DiffSum);
+        const product = array1DiffSum * array2DiffSum;
+        // Keep ordinary finite normalization; split roots only to avoid range loss.
+        const denominator = Number.isFinite(product) && product > 0
+            ? Math.sqrt(product)
+            : Math.sqrt(array1DiffSum) * Math.sqrt(array2DiffSum);
 
         if (denominator === 0) {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
-        return NumberValueObject.create(numerator / denominator);
+        const correlation = numerator / denominator;
+        const result = Number.isFinite(correlation) ? Math.max(-1, Math.min(1, correlation)) : correlation;
+
+        return NumberValueObject.create(result);
     }
 }

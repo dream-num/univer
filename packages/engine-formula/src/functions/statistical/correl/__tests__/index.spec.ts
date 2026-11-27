@@ -19,6 +19,8 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { Acos } from '../../../math/acos';
+import { FUNCTION_NAMES_MATH } from '../../../math/function-names';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { Correl } from '../index';
@@ -333,6 +335,60 @@ describe('Test correl function', () => {
             });
             const result = testFunction.calculate(array1, array2);
             expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
+        });
+    });
+
+    describe('normalization', () => {
+        describe.each([
+            [1e150, 1e150],
+            [1e-150, 1e-150],
+            [1e100, 1e100],
+            [1e-100, 1e-100],
+            [1e150, 1e-150],
+            [1, 1],
+        ])('with scales %s and %s', (scaleX, scaleY) => {
+            it.each([
+                { values: [-3, -1, 1, 3], correlation: 1 },
+                { values: [3, 1, -1, -3], correlation: -1 },
+                // The centered dot product is 16 and both squared norms are 20.
+                { values: [-3, 1, -1, 3], correlation: 0.8 },
+            ])('preserves correlation $correlation', ({ values, correlation }) => {
+                const x = ArrayValueObject.createByArray([[-3, -1, 1, 3].map((value) => value * scaleX)]);
+                const y = ArrayValueObject.createByArray([values.map((value) => value * scaleY)]);
+                const result = testFunction.calculate(x, y).getValue();
+
+                expect(typeof result).toBe('number');
+                expect(result).toBeCloseTo(correlation, 13);
+                expect(result).toBeGreaterThanOrEqual(-1);
+                expect(result).toBeLessThanOrEqual(1);
+            });
+        });
+
+        it.each([1e150, 1e-150, 1])('retains the zero-variance error at scale %s', (scale) => {
+            const x = ArrayValueObject.createByArray([[scale, scale, scale, scale]]);
+            const y = ArrayValueObject.createByArray([[-3, -1, 1, 3].map((value) => value * scale)]);
+            expect(testFunction.calculate(x, y).getValue()).toBe(ErrorType.DIV_BY_ZERO);
+        });
+
+        it('preserves the ordinary finite calculation', () => {
+            const x = ArrayValueObject.createByArray([[-3, -1, 1, 3]]);
+            const y = ArrayValueObject.createByArray([[-3, 1, -1, 3]]);
+            expect(testFunction.calculate(x, y).getValue()).toBe(0.8);
+        });
+
+        it.each([
+            { values: [1, -1, 1, -1, 1, -1], sign: 1 },
+            { values: [1, -1, 1, -1, 1, -1], sign: -1 },
+            { values: [0, 0, 0, 2], sign: 1 },
+            { values: [0, 0, 0, 2], sign: -1 },
+            { values: [0, 0, 0, 2e-100], sign: 1 },
+            { values: [0, 0, 0, 2e-100], sign: -1 },
+        ])('keeps exact perfect correlations usable by ACOS: $values, sign $sign', ({ values, sign }) => {
+            const x = ArrayValueObject.createByArray(values.map((value) => [value]));
+            const y = ArrayValueObject.createByArray(values.map((value) => [sign * value]));
+            const result = testFunction.calculate(x, y);
+            const downstream = new Acos(FUNCTION_NAMES_MATH.ACOS);
+            expect([result.getValue(), downstream.calculate(result).getValue()]).toEqual([sign, sign === 1 ? 0 : Math.PI]);
         });
     });
 });

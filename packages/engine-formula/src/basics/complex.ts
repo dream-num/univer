@@ -291,15 +291,12 @@ export class Complex {
     }
 
     Argument(): number {
-        const abs = Decimal.sqrt(Decimal.pow(this._realNum, 2).add(Decimal.pow(this._iNum, 2)));
-
-        let result = Decimal.acos(new Decimal(this._realNum).div(abs)).toSignificantDigits(16).toNumber();
-
-        if (this._iNum < 0) {
-            result = -result;
+        if (this._realNum === 0 && this._iNum === 0) {
+            return Number.NaN;
         }
 
-        return result;
+        const imaginary = this._iNum === 0 ? 0 : this._iNum;
+        return Decimal.atan2(imaginary, this._realNum).toSignificantDigits(16).toNumber();
     }
 
     Conjugate(): string {

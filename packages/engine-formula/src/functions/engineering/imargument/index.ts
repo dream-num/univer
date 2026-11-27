@@ -50,6 +50,7 @@ export class Imargument extends BaseFunction {
 
         const result = complex.Argument();
 
-        return NumberValueObject.create(result);
+        // Excel worksheets flush subnormal numeric results to positive zero.
+        return NumberValueObject.create(Math.abs(result) < 2 ** -1022 ? 0 : result);
     }
 }

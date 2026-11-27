@@ -56,7 +56,7 @@ describe('useWorkbenchPortalContainer', () => {
 
         const { result, unmount } = renderHook(() => useWorkbenchPortalContainer(editor, 'ltr'));
         const menu = ownerDocument.createElement('button');
-        result.current.appendChild(menu);
+        result.current!.appendChild(menu);
         expect(ownerDocument.body.contains(menu)).toBe(true);
         expect(otherEditor.contains(menu)).toBe(false);
 

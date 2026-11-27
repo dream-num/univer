@@ -116,12 +116,6 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
         }
     }, [darkMode]);
 
-    useEffect(() => {
-        if (ready && contentRef.current) {
-            onRendered?.(contentRef.current);
-        }
-    }, [ready, onRendered]);
-
     const locale = useObservable(
         () => localeService.localeChanged$.pipe(map(() => localeService.getLocales())),
         localeService.getLocales(),
@@ -131,6 +125,16 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     const direction = useObservable(localeService.direction$, localeService.getDirection());
 
     const portalContainer = useWorkbenchPortalContainer(mountContainer, direction);
+
+    useEffect(() => {
+        if (portalContainer && ready && contentRef.current) {
+            onRendered?.(contentRef.current);
+        }
+    }, [portalContainer, ready, onRendered]);
+
+    if (!portalContainer) {
+        return null;
+    }
 
     return (
         <ConfigProvider locale={locale?.design} direction={direction} mountContainer={portalContainer}>

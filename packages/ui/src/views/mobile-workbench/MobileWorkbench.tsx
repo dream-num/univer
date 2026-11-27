@@ -122,12 +122,6 @@ export function MobileWorkbench(props: IUniverAppProps) {
     const externalSkeletonVisible = useObservable(workbenchService.skeletonVisible$, undefined, true);
     const ready = lifecycleStage >= LifecycleStages.Ready;
 
-    useEffect(() => {
-        if (ready && contentRef.current) {
-            onRendered?.(contentRef.current);
-        }
-    }, [ready, onRendered]);
-
     const locale = useObservable(
         () => localeService.localeChanged$.pipe(map(() => localeService.getLocales())),
         localeService.getLocales(),
@@ -137,6 +131,12 @@ export function MobileWorkbench(props: IUniverAppProps) {
     const direction = useObservable(localeService.direction$, localeService.getDirection());
 
     const portalContainer = useWorkbenchPortalContainer(mountContainer, direction);
+
+    useEffect(() => {
+        if (portalContainer && ready && contentRef.current) {
+            onRendered?.(contentRef.current);
+        }
+    }, [portalContainer, ready, onRendered]);
 
     useLayoutEffect(() => {
         const sub = themeService.currentTheme$.subscribe((theme) => {
@@ -155,7 +155,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
     useEffect(() => {
         const visualViewport = window.visualViewport;
         const viewportElement = viewportRef.current;
-        if (!viewportElement) {
+        if (!portalContainer || !viewportElement) {
             return undefined;
         }
 
@@ -280,7 +280,11 @@ export function MobileWorkbench(props: IUniverAppProps) {
             visualViewport?.removeEventListener('scroll', updateKeyboardViewport);
             document.removeEventListener('focusin', updateKeyboardViewport);
         };
-    }, [mountContainer]);
+    }, [mountContainer, portalContainer]);
+
+    if (!portalContainer) {
+        return null;
+    }
 
     // Keep the inner layout focusable so focusin bubbles from editors and the layout service can refocus input.
     return (

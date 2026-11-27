@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import { IConfigService } from '@univerjs/core';
 import { isBrowser } from '@univerjs/design';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useDependency, useObservable } from '../../utils/di';
 import { useEvent } from './event';
 
@@ -84,8 +84,9 @@ export function useConfigValue<T>(configKey: string) {
 export function useWorkbenchPortalContainer(mountContainer: HTMLElement, direction: 'ltr' | 'rtl') {
     const ownerDocument = mountContainer.ownerDocument;
     const portalContainer = useMemo(() => ownerDocument.createElement('div'), [ownerDocument]);
+    const [attachedContainer, setAttachedContainer] = useState<HTMLElement | null>(null);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const syncPortalParent = () => {
             const { body, fullscreenElement } = ownerDocument;
             const parent = fullscreenElement?.contains(mountContainer) && !fullscreenElement.contains(body)
@@ -97,6 +98,8 @@ export function useWorkbenchPortalContainer(mountContainer: HTMLElement, directi
         };
 
         syncPortalParent();
+        // Initially open menus need a connected target for focus and layout on mount.
+        setAttachedContainer(portalContainer);
         ownerDocument.addEventListener('fullscreenchange', syncPortalParent);
         return () => {
             ownerDocument.removeEventListener('fullscreenchange', syncPortalParent);
@@ -104,9 +107,9 @@ export function useWorkbenchPortalContainer(mountContainer: HTMLElement, directi
         };
     }, [mountContainer, ownerDocument, portalContainer]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         portalContainer.setAttribute('dir', direction);
     }, [direction, portalContainer]);
 
-    return portalContainer;
+    return attachedContainer === portalContainer ? attachedContainer : null;
 }

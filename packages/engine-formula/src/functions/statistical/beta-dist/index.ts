@@ -21,13 +21,15 @@ import { betaCDF, betaPDF } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class BetaDist extends BaseFunction {
     override minParams = 4;
 
     override maxParams = 6;
+
+    protected readonly useExcelArguments: boolean = false;
 
     override calculate(
         x: BaseValueObject,
@@ -37,16 +39,8 @@ export class BetaDist extends BaseFunction {
         A?: BaseValueObject,
         B?: BaseValueObject
     ): BaseValueObject {
-        let _A = A ?? NumberValueObject.create(0);
-        let _B = B ?? NumberValueObject.create(1);
-
-        if (_A.isNull()) {
-            _A = NumberValueObject.create(0);
-        }
-
-        if (_B.isNull()) {
-            _B = NumberValueObject.create(1);
-        }
+        const _A = resolveBetaBound(A, 0, this.useExcelArguments);
+        const _B = resolveBetaBound(B, 1, this.useExcelArguments);
 
         const maxRowLength = Math.max(
             x.isArray() ? (x as ArrayValueObject).getRowCount() : 1,
@@ -98,31 +92,16 @@ export class BetaDist extends BaseFunction {
         AObject: BaseValueObject,
         BObject: BaseValueObject
     ): BaseValueObject {
-        if (xObject.isError()) {
-            return xObject;
+        const cumulative = this.useExcelArguments && cumulativeObject.isString()
+            ? parseCumulative(cumulativeObject)
+            : cumulativeObject;
+        const argumentsInOrder = [xObject, alphaObject, betaObject, cumulative, AObject, BObject];
+        if (!this.useExcelArguments) {
+            const error = argumentsInOrder.find((value) => value.isError());
+            if (error) return error;
         }
 
-        if (alphaObject.isError()) {
-            return alphaObject;
-        }
-
-        if (betaObject.isError()) {
-            return betaObject;
-        }
-
-        if (cumulativeObject.isError()) {
-            return cumulativeObject;
-        }
-
-        if (AObject.isError()) {
-            return AObject;
-        }
-
-        if (BObject.isError()) {
-            return BObject;
-        }
-
-        const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(xObject, alphaObject, betaObject, cumulativeObject, AObject, BObject);
+        const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(...argumentsInOrder);
 
         if (isError) {
             return errorObject as ErrorValueObject;
@@ -141,6 +120,10 @@ export class BetaDist extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
+        if (this.useExcelArguments && !cumulativeValue && (xValue === AValue || xValue === BValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
         let result;
 
         if (cumulativeValue) {
@@ -151,4 +134,19 @@ export class BetaDist extends BaseFunction {
 
         return NumberValueObject.create(result);
     }
+}
+
+export function resolveBetaBound(value: BaseValueObject | undefined, fallback: number, useExcelArguments: boolean): BaseValueObject {
+    if (!value || (value.isNull() && (!useExcelArguments || (value instanceof NullValueObject && value.isOmitted())))) {
+        return NumberValueObject.create(fallback);
+    }
+    return value;
+}
+
+function parseCumulative(value: BaseValueObject): BaseValueObject {
+    const text = String(value.getValue()).toUpperCase();
+    if (text === 'TRUE' || text === 'FALSE') {
+        return BooleanValueObject.create(text === 'TRUE');
+    }
+    return ErrorValueObject.create(ErrorType.VALUE);
 }

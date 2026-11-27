@@ -175,7 +175,6 @@ export function Ribbon(props: IRibbonProps) {
                                     <ToolbarItem
                                         key={child.key}
                                         {...child.item}
-                                        preserveStrokeWidth
                                         ref={(ref) => {
                                             if (ref?.el) {
                                                 toolbarItemsRef.current[child.key] = {
@@ -296,6 +295,7 @@ export function Ribbon(props: IRibbonProps) {
                     {...embedRibbonOverrideAttributes}
                     groups={activeGroup.allGroups}
                     title={activatedTabTitle}
+                    alignStart={effectiveActivatedTab === RibbonPosition.DATA}
                 />
             )}
 
@@ -344,7 +344,6 @@ export function Ribbon(props: IRibbonProps) {
                                                 <ToolbarItem
                                                     key={child.key}
                                                     {...child.item}
-                                                    preserveStrokeWidth
                                                 />
                                             )
                                         ))}

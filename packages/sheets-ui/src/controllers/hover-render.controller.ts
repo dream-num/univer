@@ -62,23 +62,23 @@ export class HoverRenderController extends Disposable implements IRenderModule {
 
             disposeSet.add(fromEventSubject(mainComponent.onPointerMove$).subscribe((evt) => {
                 this._active = true;
-                this._hoverManagerService.triggerMouseMove(unitId, evt);
+                this._hoverManagerService.triggerMouseMove(unitId, evt, this._context.renderId);
             }));
 
             disposeSet.add(mainComponent.onPointerDown$.subscribeEvent((evt) => {
-                this._hoverManagerService.triggerPointerDown(unitId, evt);
+                this._hoverManagerService.triggerPointerDown(unitId, evt, this._context.renderId);
             }));
 
             disposeSet.add(mainComponent.onPointerUp$.subscribeEvent((evt) => {
-                this._hoverManagerService.triggerPointerUp(unitId, evt);
+                this._hoverManagerService.triggerPointerUp(unitId, evt, this._context.renderId);
             }));
 
             disposeSet.add(mainComponent.onClick$.subscribeEvent((evt) => {
-                this._hoverManagerService.triggerClick(unitId, evt.offsetX, evt.offsetY);
+                this._hoverManagerService.triggerClick(unitId, evt.offsetX, evt.offsetY, this._context.renderId);
             }));
 
             disposeSet.add(mainComponent.onDblclick$.subscribeEvent((evt) => {
-                this._hoverManagerService.triggerDbClick(unitId, evt);
+                this._hoverManagerService.triggerDbClick(unitId, evt, this._context.renderId);
             }));
 
             disposeSet.add(mainComponent.onPointerLeave$.subscribeEvent(() => {
@@ -90,39 +90,39 @@ export class HoverRenderController extends Disposable implements IRenderModule {
             const colHeader = components.get(SHEET_VIEW_KEY.COLUMN);
             if (rowHeader) {
                 disposeSet.add(rowHeader.onPointerMove$.subscribeEvent((evt) => {
-                    this._hoverManagerService.triggerRowHeaderMouseMove(unitId, evt.offsetX, evt.offsetY);
+                    this._hoverManagerService.triggerRowHeaderMouseMove(unitId, evt.offsetX, evt.offsetY, this._context.renderId);
                 }));
 
                 disposeSet.add(rowHeader.onPointerDown$.subscribeEvent((evt) => {
-                    this._hoverManagerService.triggerRowHeaderPoniterDown(unitId, evt.offsetX, evt.offsetY);
+                    this._hoverManagerService.triggerRowHeaderPoniterDown(unitId, evt.offsetX, evt.offsetY, this._context.renderId);
                 }));
 
                 disposeSet.add(rowHeader.onPointerUp$.subscribeEvent((evt) => {
-                    this._hoverManagerService.triggerRowHeaderPoniterUp(unitId, evt.offsetX, evt.offsetY);
-                    this._hoverManagerService.triggerRowHeaderClick(unitId, evt.offsetX, evt.offsetY);
+                    this._hoverManagerService.triggerRowHeaderPoniterUp(unitId, evt.offsetX, evt.offsetY, this._context.renderId);
+                    this._hoverManagerService.triggerRowHeaderClick(unitId, evt.offsetX, evt.offsetY, this._context.renderId);
                 }));
 
                 disposeSet.add(rowHeader.onDblclick$.subscribeEvent((evt) => {
-                    this._hoverManagerService.triggerRowHeaderDbClick(unitId, evt.offsetX, evt.offsetY);
+                    this._hoverManagerService.triggerRowHeaderDbClick(unitId, evt.offsetX, evt.offsetY, this._context.renderId);
                 }));
             }
 
             if (colHeader) {
                 disposeSet.add(colHeader.onPointerMove$.subscribeEvent((evt) => {
-                    this._hoverManagerService.triggerColHeaderMouseMove(unitId, evt.offsetX, evt.offsetY);
+                    this._hoverManagerService.triggerColHeaderMouseMove(unitId, evt.offsetX, evt.offsetY, this._context.renderId);
                 }));
 
                 disposeSet.add(colHeader.onPointerDown$.subscribeEvent((evt) => {
-                    this._hoverManagerService.triggerColHeaderPoniterDown(unitId, evt.offsetX, evt.offsetY);
+                    this._hoverManagerService.triggerColHeaderPoniterDown(unitId, evt.offsetX, evt.offsetY, this._context.renderId);
                 }));
 
                 disposeSet.add(colHeader.onPointerUp$.subscribeEvent((evt) => {
-                    this._hoverManagerService.triggerColHeaderPoniterUp(unitId, evt.offsetX, evt.offsetY);
-                    this._hoverManagerService.triggerColHeaderClick(unitId, evt.offsetX, evt.offsetY);
+                    this._hoverManagerService.triggerColHeaderPoniterUp(unitId, evt.offsetX, evt.offsetY, this._context.renderId);
+                    this._hoverManagerService.triggerColHeaderClick(unitId, evt.offsetX, evt.offsetY, this._context.renderId);
                 }));
 
                 disposeSet.add(colHeader.onDblclick$.subscribeEvent((evt) => {
-                    this._hoverManagerService.triggerColHeaderDbClick(unitId, evt.offsetX, evt.offsetY);
+                    this._hoverManagerService.triggerColHeaderDbClick(unitId, evt.offsetX, evt.offsetY, this._context.renderId);
                 }));
             }
         };

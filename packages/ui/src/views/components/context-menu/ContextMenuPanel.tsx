@@ -31,7 +31,7 @@ import type {
 } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
-import { MenuItemType } from '../../../services/menu/menu';
+import { isSingleEmbeddedMenuPanel, MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
@@ -1578,6 +1578,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                             <div
                                 className={clsx(
                                     getContextMenuSubmenuPanelClassName(sizeVariant),
+                                    isSingleEmbeddedMenuPanel(selections) && '!univer-p-0',
                                     scrollbarClassName
                                 )}
                                 style={{

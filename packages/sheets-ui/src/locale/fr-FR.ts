@@ -381,6 +381,7 @@ const locale: typeof enUS = {
                 searchEmptyDescription: 'Essayez un autre nom ou effacez la recherche.',
                 commonErr: 'La plage est protégée, et vous n\'avez pas la permission pour cette opération. Pour modifier, veuillez contacter le créateur.',
                 editErr: 'La plage est protégée, et vous n\'avez pas la permission de modifier. Pour modifier, veuillez contacter le créateur.',
+                operatorSheetErr: 'Vous n\'avez pas la permission de travailler sur la feuille de calcul. Pour travailler sur la feuille de calcul, veuillez contacter le créateur.',
                 pasteErr: 'La plage est protégée, et vous n\'avez pas la permission de coller. Pour coller, veuillez contacter le créateur.',
                 setStyleErr: 'La plage est protégée, et vous n\'avez pas la permission de définir les styles. Pour définir les styles, veuillez contacter le créateur.',
                 copyErr: 'La plage est protégée, et vous n\'avez pas la permission de copier. Pour copier, veuillez contacter le créateur.',

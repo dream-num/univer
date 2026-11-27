@@ -69,11 +69,12 @@ export function createThreeDimensionalReference(
     return new MultiAreaReferenceObject(
         `${firstSheetName}:${source.getToken()}`,
         areas,
-        MultiAreaArrayMode.STACK_AREAS
+        MultiAreaArrayMode.STACK_AREAS,
+        true
     );
 }
 
-function copyReferenceContext(source: BaseReferenceObject, target: BaseReferenceObject): void {
+export function copyReferenceContext(source: BaseReferenceObject, target: BaseReferenceObject): void {
     target.setDefaultUnitId(source.getDefaultUnitId());
     target.setDefaultSheetId(source.getDefaultSheetId());
     target.setCalculationCache(source.getCalculationCache());

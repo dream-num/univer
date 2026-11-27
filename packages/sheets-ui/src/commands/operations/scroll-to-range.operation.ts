@@ -15,9 +15,9 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import type { IScrollToCellCommandParams } from '../commands/set-scroll.command';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { getFocusedRenderForUnit, IRenderManagerService } from '@univerjs/engine-render';
+import type { IScrollToCellCommandParams } from '../commands/set-scroll.command';
 import { SheetsScrollRenderController } from '../../controllers/render-controllers/scroll.render-controller';
 
 export const ScrollToRangeOperation: ICommand<IScrollToCellCommandParams> = {
@@ -34,7 +34,7 @@ export const ScrollToRangeOperation: ICommand<IScrollToCellCommandParams> = {
             return false;
         }
 
-        const renderUnit = renderManagerService.getRenderUnitById(unitId);
+        const renderUnit = getFocusedRenderForUnit(renderManagerService, unitId);
         if (!renderUnit) {
             return false;
         }

@@ -15,12 +15,14 @@
  */
 
 import type { CSSProperties, ReactNode } from 'react';
-import type { ICheckboxProps } from '../checkbox/Checkbox';
 import { Children, cloneElement, isValidElement } from 'react';
+import type { ICheckboxProps } from '../checkbox/Checkbox';
 import { clsx } from '../../helper/clsx';
 
 export interface ICheckboxGroupProps {
     children: ReactNode[];
+    'aria-label'?: string;
+    'aria-labelledby'?: string;
 
     /**
      * The class name of the checkbox group
@@ -38,13 +40,13 @@ export interface ICheckboxGroupProps {
     value: Array<string | number | boolean>;
 
     /**
-     * Whether the checkbox is disabled
+     * Whether the checkbox group is disabled
      * @default false
      */
     disabled?: boolean;
 
     /**
-     * Direction of the radio group
+     * Direction of the checkbox group
      * @default 'horizontal'
      */
     direction?: 'horizontal' | 'vertical';
@@ -59,7 +61,17 @@ export interface ICheckboxGroupProps {
  * CheckboxGroup Component
  */
 export function CheckboxGroup(props: ICheckboxGroupProps) {
-    const { children, className, style, value, disabled, direction = 'horizontal', onChange } = props;
+    const {
+        children,
+        'aria-label': ariaLabel,
+        'aria-labelledby': ariaLabelledby,
+        className,
+        style,
+        value,
+        disabled = false,
+        direction = 'horizontal',
+        onChange,
+    } = props;
 
     const handleChange = (item: string | number | boolean) => {
         if (value.includes(item)) {
@@ -71,18 +83,26 @@ export function CheckboxGroup(props: ICheckboxGroupProps) {
 
     return (
         <div
-            className={clsx('univer-flex univer-gap-2', {
-                'univer-flex-col': direction === 'vertical',
-            }, className)}
+            data-u-comp="checkbox-group"
+            role="group"
+            aria-label={ariaLabel}
+            aria-labelledby={ariaLabelledby}
+            className={clsx(
+                'univer-flex',
+                direction === 'vertical'
+                    ? 'univer-flex-col univer-gap-2.5'
+                    : 'univer-flex-wrap univer-items-center univer-gap-x-4 univer-gap-y-2',
+                className
+            )}
             style={style}
         >
             {Children.map(children, (child, index) => {
                 if (isValidElement<ICheckboxProps>(child)) {
                     return cloneElement(child, {
-                        key: index,
+                        key: child.key ?? index,
                         children: child.props.children,
-                        checked: child.props.value ? value.includes(child.props.value) : false,
-                        disabled: disabled ?? child.props.disabled,
+                        checked: child.props.value !== undefined ? value.includes(child.props.value) : false,
+                        disabled: Boolean(disabled || child.props.disabled),
                         onChange: handleChange,
                     });
                 }

@@ -24,15 +24,10 @@ import type {
     Nullable,
     ObjectMatrix,
 } from '@univerjs/core';
-import {
-    CellValueType,
-    getDisplayValueFromCell,
-    HorizontalAlign,
-    Tools,
-    WrapStrategy,
-} from '@univerjs/core';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics/vector2';
+import { CellValueType, getDisplayValueFromCell, HorizontalAlign, Tools, WrapStrategy } from '@univerjs/core';
+import type { IBoundRectNoAngle } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
+import type { IDocumentRenderBounds } from '../../docs/doc-component';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
@@ -44,7 +39,12 @@ import { clampRange, inViewRanges } from '../../../basics/tools';
 import { Text } from '../../../shape/text';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, FONT_EXTENSION_Z_INDEX, shouldRenderRowText } from '../constants';
-import { DEFAULT_PADDING_DATA, FULL_WIDTH_HORIZONTAL_ALIGNMENTS, getDocsSkeletonPageSize } from '../sheet.render-skeleton';
+import { SHEET_VIEWPORT_KEY } from '../interfaces';
+import {
+    DEFAULT_PADDING_DATA,
+    FULL_WIDTH_HORIZONTAL_ALIGNMENTS,
+    getDocsSkeletonPageSize,
+} from '../sheet.render-skeleton';
 import { calculateCellImageRect } from '../util';
 import { RenderPrimitiveCache } from './render-primitive-cache';
 import { SheetExtension } from './sheet-extension';
@@ -120,6 +120,9 @@ interface IRenderFontContext {
      */
     endX: number;
     cellInfo: ICellWithCoord;
+    /** Sheet content bounds, retaining a two-physical-pixel antialiasing halo. */
+    viewBound?: IBoundRectNoAngle;
+    glyphClipBound?: IBoundRectNoAngle;
 }
 
 export class Font extends SheetExtension {
@@ -128,7 +131,7 @@ export class Font extends SheetExtension {
     override uKey = UNIQUE_KEY;
     override Z_INDEX = FONT_EXTENSION_Z_INDEX;
     private _imageFallback = new Image();
-    private readonly _primitiveCache = new RenderPrimitiveCache();
+    private readonly _primitiveCache = new RenderPrimitiveCache(4096);
 
     override clearCache(): void {
         this._primitiveCache.clear();
@@ -216,6 +219,10 @@ export class Font extends SheetExtension {
         }
 
         const scale = this._getScale(parentScale);
+        // At unit sheet scale, native text avoids a bitmap lookup and blit per document glyph.
+        // The frozen row band still needs stable glyph coverage where a horizontal repair clips text.
+        const cacheDocumentGlyphs = this.constructor !== Font || parentScale.scaleX !== 1 || parentScale.scaleY !== 1
+            || moreBoundsInfo.viewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP;
         const { fontRenderRanges, viewRanges = [], checkOutOfViewBound } = moreBoundsInfo;
         const lastRowIndex = spreadsheetSkeleton.getRowCount() - 1;
         const lastColIndex = spreadsheetSkeleton.getColumnCount() - 1;
@@ -261,7 +268,27 @@ export class Font extends SheetExtension {
         } as IRenderFontContext;
         ctx.save();
         const deviceClip = ctx.__mode === 'printing' ? undefined : moreBoundsInfo.textClipBound;
-        const transform = deviceClip ? ctx.getTransform() : undefined;
+        const viewportBound = ctx.__mode !== 'printing' && this.constructor === Font ? moreBoundsInfo.viewBound : undefined;
+        const transform = deviceClip || viewportBound ? ctx.getTransform() : undefined;
+        if (viewportBound && transform && transform.a > 0 && transform.d > 0 && !transform.b && !transform.c
+            && [viewportBound.left, viewportBound.right, viewportBound.top, viewportBound.bottom, transform.a, transform.d].every(Number.isFinite)) {
+            renderFontContext.viewBound = {
+                left: viewportBound.left - spreadsheetSkeleton.rowHeaderWidthAndMarginLeft - 2 / transform.a,
+                right: viewportBound.right - spreadsheetSkeleton.rowHeaderWidthAndMarginLeft + 2 / transform.a,
+                top: viewportBound.top - spreadsheetSkeleton.columnHeaderHeightAndMarginTop - 2 / transform.d,
+                bottom: viewportBound.bottom - spreadsheetSkeleton.columnHeaderHeightAndMarginTop + 2 / transform.d,
+            };
+        }
+
+        if (renderFontContext.viewBound && transform) {
+            const bound = renderFontContext.viewBound;
+            renderFontContext.glyphClipBound = {
+                left: Math.max(bound.left * transform.a + transform.e, deviceClip?.left ?? -Infinity),
+                right: Math.min(bound.right * transform.a + transform.e, deviceClip?.right ?? Infinity),
+                top: Math.max(bound.top * transform.d + transform.f, deviceClip?.top ?? -Infinity),
+                bottom: Math.min(bound.bottom * transform.d + transform.f, deviceClip?.bottom ?? Infinity),
+            };
+        }
 
         const mergeData = spreadsheetSkeleton.worksheet.getMergeData();
         const hasMerge = mergeData.length > 0;
@@ -341,8 +368,8 @@ export class Font extends SheetExtension {
                     }
 
                     renderFontContext.cellInfo = cellInfo;
-                    if (fontCache.documentSkeleton || moreBoundsInfo.textClipBound) {
-                        this._primitiveCache.draw(ctx, () => this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache), fontCache.documentSkeleton ? undefined : moreBoundsInfo.textClipBound);
+                    if (fontCache.documentSkeleton ? cacheDocumentGlyphs : moreBoundsInfo.textClipBound) {
+                        this._primitiveCache.draw(ctx, () => this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache), fontCache.documentSkeleton ? undefined : moreBoundsInfo.textClipBound, moreBoundsInfo.textClipBound);
                     } else {
                         this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache);
                     }
@@ -358,7 +385,11 @@ export class Font extends SheetExtension {
 
             const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(range.startRow, range.startColumn, false);
             renderFontContext.cellInfo = cellInfo;
-            this._primitiveCache.draw(ctx, () => this._renderFontEachCell(renderFontContext, range.startRow, range.startColumn, fontMatrix, fontCache));
+            if (fontCache.documentSkeleton && !cacheDocumentGlyphs) {
+                this._renderFontEachCell(renderFontContext, range.startRow, range.startColumn, fontMatrix, fontCache);
+                return;
+            }
+            this._primitiveCache.draw(ctx, () => this._renderFontEachCell(renderFontContext, range.startRow, range.startColumn, fontMatrix, fontCache), undefined, moreBoundsInfo.textClipBound);
         });
 
         ctx.restore();
@@ -413,7 +444,7 @@ export class Font extends SheetExtension {
         //#endregion
 
         if (notInMergeRange) {
-            const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row) && spreadsheetSkeleton.worksheet.getRowHeight(row) > 0;
+            const visibleRow = spreadsheetSkeleton.getRowVisible(row) && spreadsheetSkeleton.worksheet.getRowManager().getRowHeight(row) > 0;
             if (!visibleRow) {
                 return true;
             }
@@ -426,7 +457,7 @@ export class Font extends SheetExtension {
             let isAllRowHidden = true;
 
             for (let r = mergeInfo.startRow; r <= mergeInfo.endRow; r++) {
-                const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(r) && spreadsheetSkeleton.worksheet.getRowHeight(r) > 0;
+                const visibleRow = spreadsheetSkeleton.getRowVisible(r) && spreadsheetSkeleton.worksheet.getRowManager().getRowHeight(r) > 0;
                 if (visibleRow) {
                     isAllRowHidden = false;
                     break;
@@ -455,10 +486,20 @@ export class Font extends SheetExtension {
         // For cells with render extensions, isSkip may be updated by render interceptors.
         // Plain cells avoid the extra worksheet lookup on every scroll repaint.
         if (fontCache.cellData?.fontRenderExtension) {
-            const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
+            const cellData = spreadsheetSkeleton.getCell(row, col) as ICellDataForSheetInterceptor || {};
             if (cellData?.fontRenderExtension?.isSkip) {
                 return true;
             }
+        }
+
+        const viewBound = renderFontCtx.viewBound;
+        // Wrapped, unrotated rich text is clipped to its cell, including the full merged rectangle.
+        if (viewBound && fontCache.documentSkeleton && fontCache.wrapStrategy === WrapStrategy.WRAP
+            && !overflowRange && !fontCache.vertexAngle && !fontCache.centerAngle && !fontCache.cellData?.fontRenderExtension
+            && (renderFontCtx.endX < viewBound.left || renderFontCtx.startX > viewBound.right
+                || renderFontCtx.endY < viewBound.top || renderFontCtx.startY > viewBound.bottom)) {
+            // Preserve drawing resource loading when the document contains embedded content.
+            if (!fontCache.documentSkeleton.getViewModel().getDataModel().getDrawingsOrder()?.length) return true;
         }
 
         if (this._renderPlainTextWithoutClip(ctx, renderFontCtx, fontCache)) {
@@ -640,7 +681,7 @@ export class Font extends SheetExtension {
                 horizontalAlignOverFlow = HorizontalAlign.RIGHT;
             }
         }
-        // const cellDataInterceptor = renderFontContext.spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
+        // const cellDataInterceptor = renderFontContext.spreadsheetSkeleton.getCell(row, col) as ICellDataForSheetInterceptor || {};
         const rightOffset = fontCache?.cellData?.fontRenderExtension?.rightOffset ?? 0;
         const leftOffset = fontCache?.cellData?.fontRenderExtension?.leftOffset ?? 0;
         let isOverflow = true;
@@ -844,14 +885,33 @@ export class Font extends SheetExtension {
         };
         documentSkeleton.makeDirty(false);
         documents.resize(cellWidth, cellHeight);
+        let glyphClipBound = !vertexAngle && !fontCache.centerAngle && wrapStrategy === WrapStrategy.WRAP
+            && !fontCache.cellData?.fontRenderExtension && !fontCache.shrinkScale
+            ? renderFontCtx.glyphClipBound
+            : undefined;
+        if (glyphClipBound) {
+            const matrix = ctx.getTransform();
+            if (matrix.d > 0 && !matrix.b && !matrix.c) {
+                // Cell clipping also hides text below a fixed row height, even inside the viewport.
+                const cellTop = matrix.f - FIX_ONE_PIXEL_BLUR_OFFSET * matrix.d;
+                glyphClipBound = {
+                    ...glyphClipBound,
+                    top: Math.max(glyphClipBound.top, cellTop),
+                    bottom: Math.min(glyphClipBound.bottom, cellTop + cellHeight * matrix.d),
+                };
+            } else {
+                glyphClipBound = undefined;
+            }
+        }
         documents.changeSkeleton(documentSkeleton).render(ctx, {
+            glyphClipBound,
             viewBound: {
                 left: 0,
                 top: 0,
                 right: viewBoundRightBottom.right,
                 bottom: viewBoundRightBottom.bottom,
             } as IBoundRectNoAngle,
-        } as Partial<IViewportInfo>);
+        } as Partial<IDocumentRenderBounds>);
     }
 
     private _clipRectangleForOverflow(

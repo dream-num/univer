@@ -136,6 +136,11 @@ const locale: typeof enUS = {
             title: 'Kontrollkästchen',
             error: 'Der Inhalt dieser Zelle verstößt gegen die Überprüfungsregel',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'Der Bereich ist geschützt und Sie haben keine Berechtigung, Stile festzulegen. Um Stile festzulegen, wenden Sie sich bitte an den Ersteller.',
+            },
+        },
     },
 };
 

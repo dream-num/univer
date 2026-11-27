@@ -38,6 +38,7 @@ export function MobileSelect(props: IMobileSelectProps) {
         className,
         size = 'small',
         value,
+        placeholder,
         disabled = false,
         options = EMPTY_OPTIONS,
         borderless = false,
@@ -51,7 +52,7 @@ export function MobileSelect(props: IMobileSelectProps) {
     const items: IMobileDropdownMenuProps['items'] = useMemo(() => {
         const selectOptions: Array<IOptionSeparator | { label?: ReactNode; value: string; disabled?: boolean }> = [];
 
-        for (const option of options) {
+        options.forEach((option, index) => {
             if (option.options) {
                 for (const nestedOption of option.options) {
                     selectOptions.push({
@@ -60,7 +61,9 @@ export function MobileSelect(props: IMobileSelectProps) {
                         disabled: nestedOption.disabled,
                     });
                 }
-                selectOptions.push({ type: 'separator' });
+                if (index < options.length - 1) {
+                    selectOptions.push({ type: 'separator' });
+                }
             } else {
                 selectOptions.push({
                     label: option.label,
@@ -68,7 +71,7 @@ export function MobileSelect(props: IMobileSelectProps) {
                     disabled: option.disabled,
                 });
             }
-        }
+        });
 
         return [{
             type: 'radio',
@@ -93,6 +96,8 @@ export function MobileSelect(props: IMobileSelectProps) {
         return value;
     }, [options, value]);
 
+    const isPlaceholder = !displayValue && Boolean(placeholder);
+
     return (
         <MobileDropdownMenu
             open={open}
@@ -110,26 +115,45 @@ export function MobileSelect(props: IMobileSelectProps) {
                 aria-expanded={open}
                 data-u-comp="mobile-select"
                 aria-invalid={triggerProps['aria-invalid'] ?? (invalid || undefined)}
-                className={clsx(selectClassName, 'univer-text-left', {
+                className={clsx(selectClassName, 'univer-text-start univer-font-normal', {
                     '!univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-border-primary-300 dark:!univer-ring-primary-900': open && !borderless,
-                    'univer-border-transparent univer-bg-transparent': borderless,
-                    'univer-cursor-not-allowed univer-opacity-50': disabled,
+                    'univer-border-transparent univer-bg-transparent dark:!univer-border-transparent dark:!univer-bg-transparent': borderless,
+                    'univer-cursor-not-allowed !univer-bg-gray-50 !univer-text-gray-400 dark:!univer-bg-gray-800 dark:!univer-text-gray-500': disabled,
                     'univer-cursor-pointer': !disabled,
                 }, className)}
             >
                 <span
-                    className="
-                      univer-flex-1 univer-truncate univer-text-gray-500
-                      dark:!univer-text-gray-0
-                    "
+                    className={clsx(
+                        'univer-flex-1 univer-truncate',
+                        isPlaceholder
+                            ? `
+                              univer-text-gray-500
+                              dark:!univer-text-gray-300
+                            `
+                            : `
+                              univer-text-gray-900
+                              dark:!univer-text-gray-0
+                            `,
+                        disabled && `
+                          !univer-text-gray-400
+                          dark:!univer-text-gray-500
+                        `
+                    )}
                 >
-                    {displayValue}
+                    {isPlaceholder ? placeholder : displayValue}
                 </span>
                 <MoreDownIcon
-                    className="
-                      univer-flex-shrink-0
-                      dark:!univer-text-gray-0
-                    "
+                    aria-hidden="true"
+                    preserveStrokeWidth
+                    className={clsx(
+                        `
+                          univer-size-4 univer-shrink-0 univer-text-gray-500 univer-transition-transform
+                          univer-duration-200
+                          motion-reduce:univer-transition-none
+                          dark:!univer-text-gray-300
+                        `,
+                        open && 'univer-rotate-180'
+                    )}
                 />
             </Button>
         </MobileDropdownMenu>

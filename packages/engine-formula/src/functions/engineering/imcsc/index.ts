@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { Complex } from '../../../basics/complex';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Imcsc extends BaseFunction {
@@ -50,10 +49,6 @@ export class Imcsc extends BaseFunction {
         }
 
         const result = complex.Csc();
-
-        if (typeof result === 'number' || isRealNum(result)) {
-            return NumberValueObject.create(+result);
-        }
 
         return StringValueObject.create(result);
     }

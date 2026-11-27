@@ -97,11 +97,6 @@ const locale: typeof enUS = {
         showTime: {
             label: 'Zeitauswahl anzeigen',
         },
-        permission: {
-            dialog: {
-                setStyleErr: 'Der Bereich ist geschützt und Sie haben keine Berechtigung, Stile festzulegen. Um Stile festzulegen, wenden Sie sich bitte an den Ersteller.',
-            },
-        },
     },
 };
 

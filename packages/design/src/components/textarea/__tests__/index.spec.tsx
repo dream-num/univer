@@ -32,7 +32,7 @@ describe('Textarea', () => {
 
         // @ts-ignore
         window.ResizeObserver = class ResizeObserver {
-            constructor(callback: any) {
+            constructor(callback: typeof triggerResize) {
                 triggerResize = callback;
             }
 
@@ -170,5 +170,20 @@ describe('Textarea', () => {
         const { container } = render(<Textarea className="custom-class" />);
         const textarea = container.querySelector('textarea[data-u-comp="textarea"]');
         expect(textarea).toHaveClass('custom-class');
+    });
+
+    it('invokes both onChange and onValueChange and supports size variants', () => {
+        const onChange = vi.fn();
+        const onValueChange = vi.fn();
+        const { rerender } = render(<Textarea size="mini" onChange={onChange} onValueChange={onValueChange} />);
+        const textarea = screen.getByRole('textbox');
+
+        expect(textarea).toHaveClass('univer-text-xs');
+        fireEvent.change(textarea, { target: { value: 'hello' } });
+        expect(onChange).toHaveBeenCalledOnce();
+        expect(onValueChange).toHaveBeenCalledWith('hello');
+
+        rerender(<Textarea size="large" onChange={onChange} onValueChange={onValueChange} />);
+        expect(textarea).toHaveClass('univer-text-base');
     });
 });

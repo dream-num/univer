@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { IDocumentSkeletonPage } from '../basics/i-document-skeleton-cached';
-import { cpuUsage, memoryUsage, stdout } from 'node:process';
 import {
     BooleanNumber,
     ColumnLayoutType,
@@ -29,10 +27,12 @@ import {
     JSONX,
     LocaleService,
     LocaleType,
+    NamedStyleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
     PresetListType,
+    SectionType,
     TableAlignmentType,
     TableRowHeightRule,
     TableSizeType,
@@ -42,7 +42,11 @@ import {
     Univer,
     VerticalAlignmentType,
 } from '@univerjs/core';
+import { memoryUsage, stdout } from 'node:process';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IDocumentSkeletonPage, IDocumentSkeletonTable } from '../basics/i-document-skeleton-cached';
+import type { IDocumentLayoutProgress } from '../components/docs/layout/document-layout-types';
+import { createParagraphLayoutTestBed } from '../components/docs/layout/block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import { DocumentSkeleton } from '../components/docs/layout/doc-skeleton';
 import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
 import { DocumentViewModel } from '../components/docs/view-model/document-view-model';
@@ -50,7 +54,7 @@ import { DocumentLayoutSession } from '../worker-layout';
 
 type LayoutPublication = ReturnType<DocumentLayoutSession['step']>['publication'];
 
-function mockWorkerCanvas(): void {
+function mockWorkerCanvas(beforeMeasureText?: (content: string) => void): void {
     vi.stubGlobal('document', undefined);
     vi.stubGlobal('OffscreenCanvas', class {
         getContext() {
@@ -58,6 +62,7 @@ function mockWorkerCanvas(): void {
                 font: '',
                 textBaseline: 'alphabetic',
                 measureText(this: { font: string }, content: string) {
+                    beforeMeasureText?.(content);
                     const size = this.font.match(/([\d.]+)(px|pt)/);
                     const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
                     return {
@@ -96,6 +101,22 @@ function normalizeSkeleton(value: unknown): unknown {
 function percentile(samples: number[], ratio: number): number {
     const sorted = [...samples].sort((a, b) => a - b);
     return sorted[Math.min(sorted.length - 1, Math.ceil(sorted.length * ratio) - 1)] ?? 0;
+}
+
+function measurePatchTransfer(
+    skeleton: DocumentSkeleton,
+    publication: NonNullable<LayoutPublication>,
+    progress: IDocumentLayoutProgress
+): number {
+    // Process-wide CPU includes background work. Use elapsed time when the thread CPU clock is unavailable.
+    const elapsedStart = performance.now();
+    const cpuStart = process.threadCpuUsage?.();
+    skeleton.applyLayoutPublication(structuredClone(publication), progress);
+    if (cpuStart == null) {
+        return performance.now() - elapsedStart;
+    }
+    const { user, system } = process.threadCpuUsage(cpuStart);
+    return (user + system) / 1_000;
 }
 
 function expectBoundedPatchTransfer(samples: number[]): void {
@@ -711,11 +732,7 @@ describe('worker document layout session', () => {
         let result = session.step(generation, 0);
         publications.push(result.publication);
         if (result.publication != null) {
-            const transferStart = cpuUsage();
-            const transferredPublication = structuredClone(result.publication);
-            targetSkeleton.applyLayoutPublication(transferredPublication, result.progress);
-            const transferCpu = cpuUsage(transferStart);
-            transferDurations.push((transferCpu.user + transferCpu.system) / 1_000);
+            transferDurations.push(measurePatchTransfer(targetSkeleton, result.publication, result.progress));
             if (result.progress.didPublishAnchor && !result.progress.complete) {
                 const partialSkeleton = targetSkeleton.getSkeletonData();
                 if (partialSkeleton == null) {
@@ -729,11 +746,7 @@ describe('worker document layout session', () => {
             result = session.step(generation, 0);
             publications.push(result.publication);
             if (result.publication != null) {
-                const transferStart = cpuUsage();
-                const transferredPublication = structuredClone(result.publication);
-                targetSkeleton.applyLayoutPublication(transferredPublication, result.progress);
-                const transferCpu = cpuUsage(transferStart);
-                transferDurations.push((transferCpu.user + transferCpu.system) / 1_000);
+                transferDurations.push(measurePatchTransfer(targetSkeleton, result.publication, result.progress));
                 if (result.progress.didPublishAnchor && !result.progress.complete) {
                     const partialSkeleton = targetSkeleton.getSkeletonData();
                     if (partialSkeleton == null) {
@@ -1474,7 +1487,7 @@ describe('worker document layout session', () => {
         const content = [
             `First ${T.CUSTOM_BLOCK} page${T.PARAGRAPH}${T.PAGE_BREAK}`,
             `Second ${T.CUSTOM_BLOCK} page${T.PARAGRAPH}${T.PAGE_BREAK}`,
-            ...Array.from({ length: 20 }, (_, index) => `Trailing paragraph ${index}${T.PARAGRAPH}`),
+            ...Array.from({ length: 60 }, (_, index) => `Trailing paragraph ${index}${T.PARAGRAPH}`),
         ].join('');
         const sourceModel = createDocumentModelWithStyle(content, {});
         const snapshot = sourceModel.getSnapshot();
@@ -1539,6 +1552,1169 @@ describe('worker document layout session', () => {
         session.dispose();
         dataModel.dispose();
         sourceModel.dispose();
+    });
+
+    it('publishes a Modern table when its layout is ready without resending the unchanged prefix during table layout', () => {
+        mockWorkerCanvas();
+        const T = DataStreamTreeTokenType;
+        const tableId = 'continuous-table';
+        const cellContents = ['First row', 'Second row', 'Third row'];
+        const prefix = ['First', 'Second', 'Third'].join(`${T.PARAGRAPH}${T.PAGE_BREAK}`) + T.PARAGRAPH;
+        const tableStream = T.TABLE_START + cellContents.map((content) =>
+            `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${content}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`
+        ).join('') + T.TABLE_END;
+        const tableEnd = prefix.length + tableStream.length;
+        const dataStream = `${prefix}${tableStream}${T.PARAGRAPH}After the table${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const model = new DocumentDataModel({
+            id: 'worker-continuous-table',
+            body: {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(new RegExp(T.PARAGRAPH, 'g'))].map((match, index) => ({
+                    startIndex: match.index,
+                    paragraphId: `paragraph-${index}`,
+                })),
+                sectionBreaks: [...dataStream.matchAll(new RegExp(T.SECTION_BREAK, 'g'))].map((match, index) => ({
+                    startIndex: match.index,
+                    sectionId: `section-${index}`,
+                })),
+                tables: [{ startIndex: prefix.length, endIndex: tableEnd, tableId }],
+            },
+            documentStyle: { documentFlavor: DocumentFlavor.MODERN, pageSize: { width: 280, height: 220 } },
+            tableSource: {
+                [tableId]: {
+                    tableId,
+                    align: TableAlignmentType.START,
+                    indent: { v: 0 },
+                    textWrap: TableTextWrapType.NONE,
+                    position: {
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 0 },
+                    },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: 160 } },
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 160 } } }],
+                    tableRows: cellContents.map(() => ({
+                        trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } },
+                        tableCells: [{ vAlign: VerticalAlignmentType.TOP }],
+                    })),
+                },
+            },
+        });
+        const targetModel = new DocumentDataModel(structuredClone(model.getSnapshot()));
+        const locale = new LocaleService();
+        const target = DocumentSkeleton.create(new DocumentViewModel(targetModel), locale);
+        const session = new DocumentLayoutSession(model, locale);
+        let now = 0;
+        const clock = vi.spyOn(performance, 'now').mockImplementation(() => now);
+        try {
+            target.beginExternalLayout({ reason: 'initial' });
+            const generation = session.start({ reason: 'initial' });
+            let previousBlockCount = 0;
+            let sawTableInProgress = false;
+            let firstVisibleTable: IDocumentSkeletonTable | undefined;
+            let complete = false;
+            for (let step = 0; step < 100 && !complete; step++) {
+                const { progress, publication } = session.step(generation, 0, 1);
+                if (
+                    !progress.complete &&
+                    firstVisibleTable == null &&
+                    progress.laidOutThrough >= prefix.lastIndexOf(T.PARAGRAPH) &&
+                    progress.processedBlockCount === previousBlockCount
+                ) {
+                    sawTableInProgress = true;
+                    expect(publication?.kind).toBeUndefined();
+                }
+                if (publication != null) {
+                    target.applyLayoutPublication(structuredClone(publication), progress);
+                }
+                if (!progress.complete) {
+                    // Drain any stable output before the next slice enters or advances the table.
+                    now += 250;
+                    const backlog = session.publishBacklog(generation);
+                    if (backlog.publication != null) {
+                        target.applyLayoutPublication(structuredClone(backlog.publication), backlog.progress);
+                    }
+                }
+                if (!progress.complete && firstVisibleTable == null && progress.laidOutThrough >= tableEnd) {
+                    firstVisibleTable = target.getSkeletonData()?.pages[0].skeTables.get(tableId);
+                    expect(firstVisibleTable).toBeDefined();
+                }
+                previousBlockCount = progress.processedBlockCount;
+                complete = progress.complete;
+            }
+
+            expect(sawTableInProgress).toBe(true);
+            expect(firstVisibleTable).toBeDefined();
+            expect(complete).toBe(true);
+            const published = target.getSkeletonData();
+            // Appending body text after the table must preserve the already
+            // hydrated cells if the complete packet resends the same geometry.
+            expect(published?.pages[0].skeTables.get(tableId)).toBe(firstVisibleTable);
+            target.calculate();
+            expect(normalizeSkeleton(published)).toEqual(normalizeSkeleton(target.getSkeletonData()));
+        } finally {
+            clock.mockRestore();
+            session.dispose();
+            target.dispose();
+            targetModel.dispose();
+            model.dispose();
+            locale.dispose();
+        }
+    });
+
+    it('flushes stable Modern Worker blocks at the first count or time limit and flushes the remainder at completion', () => {
+        mockWorkerCanvas();
+        const content = Array.from({ length: 40 }, (_, index) => `Paragraph ${index}\r`).join('');
+        const model = createDocumentModelWithStyle(content, {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const locale = new LocaleService();
+        const session = new DocumentLayoutSession(model, locale);
+        const clock = vi.spyOn(performance, 'now').mockReturnValue(0);
+        try {
+            const generation = session.start({ reason: 'initial' });
+            const first = session.step(generation, 0);
+            expect(first.publication?.kind).toBe('block');
+
+            expect(session.step(generation, Number.POSITIVE_INFINITY, 7).publication).toBeNull();
+            clock.mockReturnValue(249);
+            const pending = session.step(generation, Number.POSITIVE_INFINITY, 3);
+            expect(pending.publication).toBeNull();
+
+            // The three newer blocks join the earlier batch without resetting its deadline.
+            clock.mockReturnValue(250);
+            const timed = session.publishBacklog(generation);
+            expect(timed.publication?.kind).toBe('block');
+            expect(timed.progress.processedBlockCount).toBe(pending.progress.processedBlockCount);
+            expect(session.publishBacklog(generation).publication).toBeNull();
+
+            expect(session.step(generation, Number.POSITIVE_INFINITY, 23).publication).toBeNull();
+            const counted = session.step(generation, 0);
+            expect(counted.publication?.kind).toBe('block');
+            expect(counted.progress.complete).toBe(false);
+            expect(counted.progress.processedBlockCount - timed.progress.processedBlockCount).toBe(24);
+
+            const final = session.step(generation, Number.POSITIVE_INFINITY);
+            expect(final.publication?.kind).toBe('block');
+            expect(final.progress.complete).toBe(true);
+            expect(final.progress.processedBlockCount).toBe(final.progress.totalBlockCount);
+        } finally {
+            clock.mockRestore();
+            session.dispose();
+            model.dispose();
+            locale.dispose();
+        }
+    });
+
+    it.each([false, true])('applies an acknowledged Worker tail edit after skipping a completed result (protected: %s)', (protectedLayout) => {
+        mockWorkerCanvas();
+        const T = DataStreamTreeTokenType;
+        const table = (text: string) => T.TABLE_START + T.TABLE_ROW_START + T.TABLE_CELL_START + text +
+            T.PARAGRAPH + T.SECTION_BREAK + T.TABLE_CELL_END + T.TABLE_ROW_END + T.TABLE_END;
+        const prefix = 'One\rTwo\rThree\r';
+        const first = table('First table');
+        const gap = '\rBefore the last table\r';
+        const second = table('Second table');
+        const secondStart = prefix.length + first.length + gap.length;
+        const dataStream = `${prefix}${first}${gap}${second}\rTail\rAfter the anchor\r${T.SECTION_BREAK}`;
+        const tableSource = Object.fromEntries(['first', 'last'].map((tableId) => [tableId, {
+            tableId,
+            align: TableAlignmentType.START,
+            indent: { v: 0 },
+            textWrap: TableTextWrapType.NONE,
+            position: {
+                positionH: { relativeFrom: ObjectRelativeFromH.PAGE },
+                positionV: { relativeFrom: ObjectRelativeFromV.PAGE },
+            },
+            dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+            size: { type: TableSizeType.SPECIFIED, width: { v: 160 } },
+            tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 160 } } }],
+            tableRows: [{
+                trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } },
+                tableCells: [{}],
+            }],
+        }]));
+        const workerModel = new DocumentDataModel({
+            id: 'applied-worker-table-baseline',
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream.matchAll(/\r/g), (match, index) => ({
+                    startIndex: match.index,
+                    paragraphId: `p-${index}`,
+                })),
+                sectionBreaks: Array.from(dataStream.matchAll(/\n/g), (match, index) => ({
+                    startIndex: match.index,
+                    sectionId: `s-${index}`,
+                })),
+                tables: [
+                    { tableId: 'first', startIndex: prefix.length, endIndex: prefix.length + first.length },
+                    { tableId: 'last', startIndex: secondStart, endIndex: secondStart + second.length },
+                ],
+            },
+            documentStyle: { documentFlavor: DocumentFlavor.MODERN },
+            tableSource,
+        });
+        const mainModel = new DocumentDataModel(structuredClone(workerModel.getSnapshot()));
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setDirection('ltr');
+        const worker = new DocumentLayoutSession(workerModel, locale);
+        const main = DocumentSkeleton.create(new DocumentViewModel(mainModel), locale);
+        const restartedMain = DocumentSkeleton.create(new DocumentViewModel(mainModel), locale);
+        try {
+            main.beginExternalLayout({ reason: 'initial' });
+            const initial = worker.start({ reason: 'initial', continuousLayoutVersion: 'initial-complete' });
+            let initialPublication = worker.step(initial, 0, 1);
+            for (let step = 0; step < 100 && initialPublication.publication == null && !initialPublication.progress.complete; step++) {
+                initialPublication = worker.step(initial, 0, 1);
+            }
+            expect(initialPublication.progress.complete).toBe(false);
+            expect(initialPublication.publication).not.toBeNull();
+            main.applyLayoutPublication(structuredClone(initialPublication.publication!), initialPublication.progress);
+            expect(main.getAppliedContinuousLayoutVersion()).toBeUndefined();
+
+            const complete = worker.step(initial, Number.POSITIVE_INFINITY);
+            expect(complete.progress.complete).toBe(true);
+            expect(complete.publication).not.toBeNull();
+            main.applyLayoutPublication(structuredClone(complete.publication!), complete.progress);
+            const initialPage = main.getSkeletonData()!.pages[0];
+            const retainedTable = initialPage.skeTables.get('first');
+            expect(retainedTable).toBeDefined();
+            const initialLastTableEnd = initialPage.skeTables.get('last')!.ed;
+
+            const anchor = dataStream.indexOf('Second table') + 2;
+            const edit = new TextX();
+            edit.push({ t: TextXActionType.RETAIN, len: anchor });
+            edit.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: 'X' } });
+            const actions = JSONX.getInstance().editOp(edit.serialize(), ['body']);
+            workerModel.apply(actions);
+            mainModel.apply(actions);
+            worker.resetDataModel(workerModel);
+            main.getViewModel().reset(mainModel);
+            const invalidation = { oldStart: anchor, oldEnd: anchor, newEnd: anchor + 1 };
+
+            // Main can finish its own tail layout before the Worker. A complete
+            // Worker reply that it skips must not evict the last applied version.
+            const skipped = worker.start({
+                reason: 'edit',
+                anchor,
+                priorityAnchor: anchor,
+                invalidation,
+                ...(protectedLayout
+                    ? { acknowledgedLayoutVersion: main.getAppliedContinuousLayoutVersion() }
+                    : { appliedLayoutVersion: main.getAppliedContinuousLayoutVersion() }),
+                continuousLayoutVersion: 'unapplied-worker-reply',
+            });
+            const skippedResult = worker.step(skipped, Number.POSITIVE_INFINITY);
+            expect(skippedResult.progress.complete).toBe(true);
+            expect(skippedResult.publication?.kind).toBe('block');
+            if (protectedLayout && skippedResult.publication?.kind === 'block') {
+                expect(skippedResult.publication.block.baseLayoutVersion).toBeUndefined();
+            }
+            main.beginExternalLayout({
+                reason: 'edit',
+                protectedRange: protectedLayout ? { mode: 'continuous', startOffset: 0, endOffset: anchor } : undefined,
+            });
+            const generation = worker.start({
+                reason: 'edit',
+                anchor,
+                priorityAnchor: anchor,
+                invalidation,
+                appliedLayoutVersion: main.getAppliedContinuousLayoutVersion(),
+                continuousLayoutVersion: 'edit-complete',
+            });
+            let firstPublication: LayoutPublication | undefined;
+            let completed = false;
+            for (let step = 0; step < 150; step++) {
+                const result = worker.step(generation, 0, 1);
+                if (result.publication != null) {
+                    if (firstPublication == null) {
+                        firstPublication = result.publication;
+                        restartedMain.beginExternalLayout({ reason: 'edit' });
+                        const before = restartedMain.getSkeletonData();
+                        expect(restartedMain.applyLayoutPublication(
+                            structuredClone(result.publication),
+                            result.progress
+                        ).requiresFullPublication).toBe(true);
+                        expect(restartedMain.getSkeletonData()).toBe(before);
+                    }
+                    const application = main.applyLayoutPublication(structuredClone(result.publication), result.progress);
+                    expect(application.requiresFullPublication).toBeFalsy();
+                    if (protectedLayout && !result.progress.complete) {
+                        expect(main.getSkeletonData()!.pages[0]).toBe(initialPage);
+                        expect(main.getAppliedContinuousLayoutVersion()).toBe('initial-complete');
+                        expect(initialPage.skeTables.get('last')?.ed).toBe(initialLastTableEnd);
+                    }
+                }
+                if (result.progress.complete) {
+                    completed = true;
+                    break;
+                }
+            }
+            expect(completed).toBe(true);
+            if (firstPublication?.kind !== 'block') {
+                throw new Error('Expected a continuous edit patch.');
+            }
+            expect(firstPublication.block.baseLayoutVersion).toBe('initial-complete');
+            expect(firstPublication.block.flow.lineIndex).toBeGreaterThan(0);
+            expect(firstPublication.block.skeTables.map(([id]) => id)).toEqual(['last']);
+            expect(main.getAppliedContinuousLayoutVersion()).toBe('edit-complete');
+            expect(main.getSkeletonData()!.pages[0].skeTables.get('first')).toBe(retainedTable);
+            const page = worker.getPage(0);
+            expect(page).not.toBeNull();
+            const expectedGeometry = normalizeSkeleton(DocumentLayoutSession.hydratePage(page!, workerModel.getSnapshot()));
+            expect(normalizeSkeleton(main.getSkeletonData()!.pages[0])).toEqual(expectedGeometry);
+
+            const retry = worker.start({ reason: 'edit', anchor, priorityAnchor: anchor, invalidation });
+            const fallback = worker.step(retry, Number.POSITIVE_INFINITY);
+            expect(fallback.progress.complete).toBe(true);
+            if (fallback.publication?.kind !== 'block') {
+                throw new Error('Expected complete recovery geometry.');
+            }
+            expect(fallback.publication.block.baseLayoutVersion).toBeUndefined();
+            restartedMain.applyLayoutPublication(structuredClone(fallback.publication), fallback.progress);
+            expect(normalizeSkeleton(restartedMain.getSkeletonData()!.pages[0])).toEqual(expectedGeometry);
+        } finally {
+            restartedMain.dispose();
+            main.dispose();
+            worker.dispose();
+            mainModel.dispose();
+            workerModel.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('publishes a pending Modern batch after a slow later block in the same slice', () => {
+        let now = 0;
+        let slowMeasurement = false;
+        mockWorkerCanvas((content) => {
+            if (!slowMeasurement && content.includes('☃')) {
+                now += 300;
+                slowMeasurement = true;
+            }
+        });
+        const model = createDocumentModelWithStyle('Before\rFirst pending\r☃\rAfter\rLast\r', {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setDirection('ltr');
+        const session = new DocumentLayoutSession(model, locale);
+        const clock = vi.spyOn(performance, 'now').mockImplementation(() => now);
+        try {
+            const generation = session.start({ reason: 'initial' });
+            expect(session.step(generation, 0, 1).publication?.kind).toBe('block');
+
+            const result = session.step(generation, Number.POSITIVE_INFINITY, 2);
+
+            expect(slowMeasurement).toBe(true);
+            expect(result.progress.complete).toBe(false);
+            expect(result.publication?.kind).toBe('block');
+        } finally {
+            clock.mockRestore();
+            session.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('publishes a tail edit anchor promptly when an unchanged collapsed heading hides earlier paragraphs', () => {
+        mockWorkerCanvas();
+        const paragraphs = Array.from({ length: 100 }, (_, index) => `Paragraph ${index}`);
+        const content = `${['Collapsed', 'Hidden', 'Visible', ...paragraphs].join('\r')}\r`;
+        const model = createDocumentModelWithStyle(content, {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const body = model.getBody()!;
+        body.paragraphs = Array.from(content.matchAll(/\r/g), (match, index) => ({
+            startIndex: match.index,
+            paragraphId: `paragraph-${index}`,
+            ...(index === 0 || index === 2 ? { paragraphStyle: { namedStyleType: NamedStyleType.HEADING_1 } } : {}),
+            ...(index === 0 ? { headingCollapsed: true } : {}),
+        }));
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setDirection('ltr');
+        const session = new DocumentLayoutSession(model, locale);
+        try {
+            const initial = session.start();
+            expect(session.step(initial, Number.POSITIVE_INFINITY).progress.complete).toBe(true);
+            const anchor = content.lastIndexOf('Paragraph 99') + 'Paragraph '.length;
+            const edit = new TextX();
+            edit.push({ t: TextXActionType.RETAIN, len: anchor });
+            edit.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: '!' } });
+            model.apply(JSONX.getInstance().editOp(edit.serialize(), ['body']));
+            session.resetDataModel(model);
+            const generation = session.start({
+                reason: 'edit',
+                anchor,
+                priorityAnchor: anchor,
+                invalidation: { oldStart: anchor, oldEnd: anchor, newEnd: anchor + 1 },
+            });
+
+            const results = Array.from({ length: 3 }, () => session.step(generation, 0, 1));
+
+            expect(results.some(({ progress }) => progress.didPublishAnchor)).toBe(true);
+        } finally {
+            session.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('sends a small Worker suffix for an acknowledged edit near the end of a protected long document', () => {
+        mockWorkerCanvas();
+        const paragraphs = Array.from({ length: 600 }, (_, index) => `Paragraph ${index} can be edited.`);
+        const content = `${paragraphs.join('\r')}\r`;
+        const anchor = content.indexOf(paragraphs[590]) + 'Paragraph '.length;
+        const model = createDocumentModelWithStyle(content, {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        model.updateDocumentDataPageSize(420, Number.POSITIVE_INFINITY);
+        const mainModel = new DocumentDataModel(structuredClone(model.getSnapshot()));
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setDirection('ltr');
+        const worker = new DocumentLayoutSession(model, locale);
+        const main = DocumentSkeleton.create(new DocumentViewModel(mainModel), locale);
+        try {
+            const initial = worker.step(worker.start({ continuousLayoutVersion: 'v1' }), Number.POSITIVE_INFINITY);
+            main.beginExternalLayout({ reason: 'initial' });
+            main.applyLayoutPublication(structuredClone(initial.publication!), initial.progress);
+
+            const edit = new TextX();
+            edit.push({ t: TextXActionType.RETAIN, len: anchor });
+            edit.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: 'X' } });
+            const actions = JSONX.getInstance().editOp(edit.serialize(), ['body']);
+            model.apply(actions);
+            mainModel.apply(actions);
+            worker.resetDataModel(model);
+            main.getViewModel().reset(mainModel);
+            const invalidation = { oldStart: anchor, oldEnd: anchor, newEnd: anchor + 1 };
+            const base = main.getAppliedContinuousLayoutVersion();
+            const begin = () => {
+                main.beginExternalLayout({ reason: 'edit', protectedRange: { mode: 'continuous', startOffset: anchor, endOffset: anchor + 1 } });
+                return worker.start({ reason: 'edit', anchor, priorityAnchor: anchor, invalidation, appliedLayoutVersion: base, continuousLayoutVersion: 'v2' });
+            };
+            let generation = begin();
+            let cancelledDraft = false;
+            let receivedFirst = false;
+            for (let step = 0; step < 1300; step++) {
+                const result = worker.step(generation, 0, 1);
+                if (result.publication?.kind === 'block') {
+                    if (!receivedFirst) {
+                        receivedFirst = true;
+                        expect(result.publication.block.flow.lineIndex).toBeGreaterThanOrEqual(589);
+                        expect(result.publication.block.flow.lines.length).toBeLessThanOrEqual(2);
+                    }
+                    expect(main.applyLayoutPublication(structuredClone(result.publication), result.progress).requiresFullPublication).toBeFalsy();
+                    if (!cancelledDraft && !result.progress.complete) {
+                        cancelledDraft = true;
+                        worker.cancel(generation);
+                        main.cancelExternalLayout();
+                        expect(main.getAppliedContinuousLayoutVersion()).toBe('v1');
+                        generation = begin();
+                    }
+                }
+                if (result.progress.complete) {
+                    break;
+                }
+            }
+            expect(receivedFirst).toBe(true);
+            expect(cancelledDraft).toBe(true);
+            expect(main.getAppliedContinuousLayoutVersion()).toBe('v2');
+            const expected = DocumentLayoutSession.hydratePage(worker.getPage(0)!, model.getSnapshot());
+            expect(normalizeSkeleton(main.getSkeletonData()!.pages[0])).toEqual(normalizeSkeleton(expected));
+        } finally {
+            main.dispose();
+            worker.dispose();
+            mainModel.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('rebuilds every published batch when a late float rewinds already published lines', () => {
+        mockWorkerCanvas();
+        const clock = vi.spyOn(performance, 'now').mockReturnValue(0);
+        const marker = DataStreamTreeTokenType.CUSTOM_BLOCK;
+        const body = Array.from({ length: 108 }, (_, index) => {
+            return `Paragraph ${index} with enough text to wrap near the floating object.${index === 38 ? marker : ''}\r`;
+        }).join('');
+        const model = createDocumentModelWithStyle(body, {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        model.updateDocumentDataPageSize(460, Number.POSITIVE_INFINITY);
+        const snapshot = model.getSnapshot();
+        const drawingId = 'late-float';
+        snapshot.body!.customBlocks = [{ startIndex: body.indexOf(marker), blockId: drawingId }];
+        snapshot.drawings = {
+            [drawingId]: {
+                drawingId,
+                drawingType: DrawingTypeEnum.DRAWING_BLOCK,
+                unitId: snapshot.id,
+                subUnitId: snapshot.id,
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: {
+                    angle: 0,
+                    positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 80 },
+                    positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 100 },
+                    size: { width: 155, height: 84 },
+                },
+            },
+        };
+        const locale = new LocaleService();
+        const worker = new DocumentLayoutSession(model, locale);
+        const main = DocumentSkeleton.create(new DocumentViewModel(model), locale);
+        const independent = DocumentSkeleton.create(new DocumentViewModel(model), locale);
+        try {
+            main.beginExternalLayout({ reason: 'initial' });
+            const generation = worker.start({ reason: 'initial', continuousLayoutVersion: 'opening' });
+            let previousBlockCount = 0;
+            let rewoundAfterPublication = false;
+            let publications = 0;
+            for (let step = 0; step < 750; step++) {
+                const { publication, progress } = worker.step(generation, 0, 1);
+                rewoundAfterPublication ||= publications > 0 && progress.processedBlockCount < previousBlockCount;
+                previousBlockCount = progress.processedBlockCount;
+                if (publication?.kind === 'block') {
+                    publications++;
+                    main.applyLayoutPublication(structuredClone(publication), progress);
+                    const expected = DocumentLayoutSession.hydratePage(worker.getPage(0)!, snapshot);
+                    expect(normalizeSkeleton(main.getSkeletonData()!.pages[0])).toEqual(normalizeSkeleton(expected));
+                }
+                if (progress.complete) {
+                    break;
+                }
+            }
+            expect(rewoundAfterPublication).toBe(true);
+            expect(main.getAppliedContinuousLayoutVersion()).toBe('opening');
+            independent.calculate();
+            expect(normalizeSkeleton(main.getSkeletonData()!.pages[0].sections))
+                .toEqual(normalizeSkeleton(independent.getSkeletonData()!.pages[0].sections));
+        } finally {
+            independent.dispose();
+            main.dispose();
+            worker.dispose();
+            model.dispose();
+            locale.dispose();
+            clock.mockRestore();
+        }
+    });
+
+    it('publishes and removes Modern footnotes and endnotes through the continuous completion packet', () => {
+        mockWorkerCanvas();
+        const seed = createParagraphLayoutTestBed('First￼ second￼', {
+            documentStyle: { documentFlavor: DocumentFlavor.MODERN },
+            body: { customRanges: [
+                { rangeId: 'foot-reference', rangeType: CustomRangeType.FOOTNOTE, startIndex: 5, endIndex: 5, properties: { noteId: 'foot' } },
+                { rangeId: 'end-reference', rangeType: CustomRangeType.ENDNOTE, startIndex: 13, endIndex: 13, properties: { noteId: 'end' } },
+            ] },
+            notes: {
+                foot: { type: 'footnote', noteId: 'foot', body: { dataStream: 'Footnote content\r\n', paragraphs: [{ paragraphId: 'foot-p', startIndex: 16 }], sectionBreaks: [{ sectionId: 'foot-s', startIndex: 17 }] } },
+                end: { type: 'endnote', noteId: 'end', body: { dataStream: 'Endnote content\r\n', paragraphs: [{ paragraphId: 'end-p', startIndex: 15 }], sectionBreaks: [{ sectionId: 'end-s', startIndex: 16 }] } },
+            },
+        });
+        const { dataModel: model } = seed;
+        const { localeService } = seed.ctx.docsConfig;
+        const worker = new DocumentLayoutSession(model, localeService);
+        const main = DocumentSkeleton.create(seed.viewModel, localeService);
+        try {
+            const initial = worker.step(worker.start({ reason: 'initial', continuousLayoutVersion: 'with-notes' }), Infinity);
+            expect(initial.progress.complete).toBe(true);
+            expect(initial.publication?.kind).toBe('block');
+            main.beginExternalLayout({ reason: 'initial' });
+            main.applyLayoutPublication(structuredClone(initial.publication!), initial.progress);
+            const page = main.getSkeletonData()!.pages[0];
+            expect(page.notes?.map((note) => note.noteId)).toEqual(['foot', 'end']);
+            for (const note of page.notes!) {
+                expect(note.parent).toBe(page);
+                expect(note.page.parent).toBe(note);
+            }
+
+            const edit = new TextX();
+            edit.push({ t: TextXActionType.RETAIN, len: 5 });
+            edit.push({ t: TextXActionType.DELETE, len: 1 });
+            edit.push({ t: TextXActionType.RETAIN, len: 7 });
+            edit.push({ t: TextXActionType.DELETE, len: 1 });
+            model.apply(JSONX.getInstance().editOp(edit.serialize(), ['body']));
+            main.getViewModel().reset(model);
+            worker.resetDataModel(model);
+            main.beginExternalLayout({ reason: 'edit', protectedRange: { mode: 'continuous', startOffset: 5, endOffset: 13 } });
+            const finished = worker.step(worker.start({
+                reason: 'edit',
+                anchor: 5,
+                invalidation: { oldStart: 5, oldEnd: 14, newEnd: 12 },
+                appliedLayoutVersion: 'with-notes',
+                continuousLayoutVersion: 'without-notes',
+            }), Infinity);
+            expect(finished.progress.complete).toBe(true);
+            expect(finished.publication?.kind).toBe('block');
+            main.applyLayoutPublication(structuredClone(finished.publication!), finished.progress);
+            expect(main.getAppliedContinuousLayoutVersion()).toBe('without-notes');
+            expect(main.getSkeletonData()!.pages[0].notes).toBeUndefined();
+            expect(main.getSkeletonData()!.pages[0].noteDecorations).toBeUndefined();
+        } finally {
+            main.dispose();
+            worker.dispose();
+            model.dispose();
+        }
+    });
+
+    it.each([false, true])('publishes text after a page break following two incompatible packets (full recovery: %s)', (fullRecovery) => {
+        mockWorkerCanvas();
+        const clock = vi.spyOn(performance, 'now').mockReturnValue(0);
+        const prefix = Array.from({ length: 6 }, (_, index) => `Before ${index} text.${DataStreamTreeTokenType.PARAGRAPH}`).join('');
+        const suffix = Array.from({ length: 140 }, (_, index) => {
+            return `Following ${index} uniquely named paragraph.${DataStreamTreeTokenType.PARAGRAPH}`;
+        }).join('');
+        const model = createDocumentModelWithStyle(prefix + DataStreamTreeTokenType.PAGE_BREAK + suffix, {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        model.updateDocumentDataPageSize(460, Infinity);
+        const mainModel = new DocumentDataModel(structuredClone(model.getSnapshot()));
+        const locale = new LocaleService();
+        const worker = new DocumentLayoutSession(model, locale);
+        const main = DocumentSkeleton.create(new DocumentViewModel(mainModel), locale);
+        const visiblePage = () => main.getSkeletonData()!.pages[0];
+        const contains = (offset: number) => visiblePage().sections.some((section) =>
+            section.columns.some((column) => column.lines.some((line) => line.st <= offset && offset <= line.ed))
+        );
+        try {
+            main.beginExternalLayout({ reason: 'initial' });
+            const initial = worker.step(worker.start({ reason: 'initial', continuousLayoutVersion: 'initial' }), Infinity);
+            main.applyLayoutPublication(structuredClone(initial.publication!), initial.progress);
+            const anchor = prefix.lastIndexOf('text.');
+            const edit = new TextX();
+            edit.push({ t: TextXActionType.RETAIN, len: anchor });
+            edit.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: 'X' } });
+            const actions = JSONX.getInstance().editOp(edit.serialize(), ['body']);
+            model.apply(actions);
+            mainModel.apply(actions);
+            worker.resetDataModel(model);
+            main.getViewModel().reset(mainModel);
+            const invalidation = { oldStart: anchor, oldEnd: anchor, newEnd: anchor + 1 };
+            const options = { reason: 'edit' as const, anchor, invalidation };
+            const local = main.startIncrementalLayout({
+                ...options,
+                priorityAnchor: anchor + 1,
+                preserveInteractionWindow: true,
+                reuseUnaffectedTail: false,
+            });
+            for (let step = 0; step < 100; step++) {
+                if (main.stepIncrementalLayout(local, 0, 1).didPublishAnchor) {
+                    break;
+                }
+            }
+            expect(contains(prefix.length + 5)).toBe(false);
+            const beginProtectedLayout = () => main.beginExternalLayout({
+                reason: 'edit',
+                protectedRange: { mode: 'continuous', startOffset: anchor, endOffset: prefix.length },
+            });
+            beginProtectedLayout();
+            const visiblePrefix = normalizeSkeleton(visiblePage().sections);
+            let generation = worker.start({ ...options, appliedLayoutVersion: 'initial', continuousLayoutVersion: 'edited' });
+            let rejected = false;
+            let deferred = 0;
+            let publishedEarlyText = false;
+            for (let step = 0; step < 500; step++) {
+                const result = worker.step(generation, 0, 1);
+                if (result.publication?.kind !== 'block') {
+                    continue;
+                }
+                const packet = structuredClone(result.publication);
+                if (fullRecovery && !rejected) {
+                    expect(packet.block.baseLayoutVersion).toBe('initial');
+                    packet.block.baseLayoutVersion = 'stale';
+                    expect(main.applyLayoutPublication(packet, result.progress).requiresFullPublication).toBe(true);
+                    expect(normalizeSkeleton(visiblePage().sections)).toEqual(visiblePrefix);
+                    worker.cancel(generation);
+                    main.cancelExternalLayout();
+                    beginProtectedLayout();
+                    generation = worker.start({ ...options, acknowledgedLayoutVersion: 'initial', continuousLayoutVersion: 'edited' });
+                    rejected = true;
+                    continue;
+                }
+                if (!result.progress.complete && deferred < 2 &&
+                    (packet.block.flow.sectionIndex !== 0 || packet.block.flow.trailingSections.length > 0)) {
+                    // Resource keys and their resources must enter the same visible layout.
+                    packet.block.page.headerLayoutKey = 'future-header';
+                    main.applyLayoutPublication(packet, result.progress);
+                    expect(visiblePage().headerLayoutKey).not.toBe('future-header');
+                    expect(contains(prefix.length + 5)).toBe(false);
+                    deferred++;
+                    continue;
+                }
+                main.applyLayoutPublication(packet, result.progress);
+                if (result.progress.complete) {
+                    break;
+                }
+                if (deferred === 2 && contains(prefix.length + 5)) {
+                    publishedEarlyText = true;
+                    expect(contains(prefix.length + suffix.indexOf('Following 15 ') + 5)).toBe(true);
+                }
+            }
+            expect(deferred).toBe(2);
+            expect(publishedEarlyText).toBe(true);
+            expect(main.getAppliedContinuousLayoutVersion()).toBe('edited');
+            const expected = DocumentLayoutSession.hydratePage(worker.getPage(0)!, mainModel.getSnapshot());
+            expect(normalizeSkeleton(visiblePage())).toEqual(normalizeSkeleton(expected));
+        } finally {
+            main.dispose();
+            worker.dispose();
+            mainModel.dispose();
+            model.dispose();
+            locale.dispose();
+            clock.mockRestore();
+        }
+    });
+
+    it.each([
+        { embedded: 'prefix drawing', drawing: 'inline', publishesTail: true },
+        { embedded: 'prefix polygon ending before the Worker tail', drawing: 'polygon', polygonBottom: 22, publishesTail: true },
+        { embedded: 'rotated prefix polygon ending before the Worker tail', drawing: 'polygon', polygonBottom: 22, polygonAngle: 15, publishesTail: true },
+        { embedded: 'prefix polygon in a continuous section', drawing: 'polygon', polygonBottom: 22, polygonSection: SectionType.CONTINUOUS, publishesTail: true },
+        { embedded: 'prefix polygon in a next-page section', drawing: 'polygon', polygonBottom: 22, polygonSection: SectionType.NEXT_PAGE, publishesTail: true },
+        { embedded: 'polygon reaching the Worker tail from a later section', drawing: 'polygon', polygonBottom: 4_000, polygonSection: SectionType.NEXT_PAGE, publishesTail: false },
+        { embedded: 'prefix polygon extending into the Worker tail', drawing: 'polygon', polygonBottom: 8_000, publishesTail: false },
+        { embedded: 'rotated drawing overlapping the tail', drawing: 'rotated', publishesTail: false },
+        { embedded: 'margin-relative drawing after the edit and a page break', drawing: 'suffix', publishesTail: true },
+        { embedded: 'square-wrapped drawing below the splice after a page break', drawing: 'suffix', wrap: 'below', publishesTail: true },
+        { embedded: 'top-and-bottom wrapped drawing below the splice', drawing: 'suffix', wrap: 'below', wrapLayout: PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM, publishesTail: true },
+        { embedded: 'tight-wrapped drawing below the splice', drawing: 'suffix', wrap: 'below', wrapLayout: PositionedObjectLayoutType.WRAP_TIGHT, publishesTail: true },
+        { embedded: 'through-wrapped drawing below the splice', drawing: 'suffix', wrap: 'below', wrapLayout: PositionedObjectLayoutType.WRAP_THROUGH, publishesTail: true },
+        { embedded: 'square-wrapped drawing crossing subsequent splices', drawing: 'suffix', wrap: 'later', publishesTail: true },
+        { embedded: 'square-wrapped drawing resuming after a deferred drawing change', drawing: 'suffix', wrap: 'later', deferOnce: 'drawing', publishesTail: true },
+        { embedded: 'square-wrapped drawing resuming after a deferred column change', drawing: 'suffix', wrap: 'later', deferOnce: 'column', publishesTail: true },
+        { embedded: 'top-and-bottom wrapped drawing crossing subsequent splices', drawing: 'suffix', wrap: 'later', wrapLayout: PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM, publishesTail: true },
+        { embedded: 'square-wrapped drawing whose text distance reaches the retained lines', drawing: 'suffix', wrap: 'crossing', publishesTail: false },
+        { embedded: 'progressively published drawing interrupted by a remote edit', drawing: 'suffix', publishesTail: true, interrupt: true },
+        { embedded: 'margin-relative prefix drawing after a page break', drawing: 'prefix', publishesTail: true },
+        { embedded: 'clipped prefix column group', columns: 'clipped', publishesTail: true },
+        { embedded: 'unclipped prefix column group with ordinary text', columns: 'unclipped', publishesTail: true },
+        { embedded: 'unclipped prefix column group followed by a new group in the Worker tail', columns: 'two', publishesTail: true },
+        { embedded: 'unclipped prefix column group with a shadow reaching the tail', columns: 'shadow', publishesTail: false },
+    ])('handles protected foreground progress with a $embedded', ({ drawing, columns, publishesTail, interrupt, wrap, wrapLayout, deferOnce, polygonBottom, polygonAngle, polygonSection }) => {
+        mockWorkerCanvas();
+        const clock = vi.spyOn(performance, 'now').mockReturnValue(0);
+        const T = DataStreamTreeTokenType;
+        const afterPageBreak = drawing === 'prefix' || drawing === 'suffix' || drawing === 'polygon';
+        const columnStream = (left: string, right: string) =>
+            [T.COLUMN_GROUP_START, T.COLUMN_START, left, T.PARAGRAPH, T.COLUMN_END, T.COLUMN_START, right, T.PARAGRAPH, T.COLUMN_END, T.COLUMN_GROUP_END].join('');
+        const laterColumns = columns === 'two' ? columnStream('Later left', 'Later right') : '';
+        const prefix = columns != null
+            ? columnStream('Left', 'Right')
+            : afterPageBreak
+                ? Array.from({ length: 68 }, (_, index) => `Before break ${index}${index === 0 && drawing === 'polygon' && polygonSection == null ? T.CUSTOM_BLOCK : ''} on the first page.\r`).join('') + (polygonSection == null ? T.PAGE_BREAK : T.SECTION_BREAK)
+                : `Introduction ${T.CUSTOM_BLOCK} before the edit.\r`;
+        const lead = drawing === 'prefix' || polygonSection != null ? `Lead ${T.CUSTOM_BLOCK}.\r` : 'Lead.\r';
+        const content = prefix + lead + Array.from({ length: 90 }, (_, index) => {
+            const marker = drawing === 'suffix' && index === 24 ? T.CUSTOM_BLOCK : '';
+            const nextGroup = index === 24 ? laterColumns : '';
+            return `Paragraph ${index} renders the text following the embedded block.${marker}\r${nextGroup}`;
+        }).join('');
+        const seedModel = createDocumentModelWithStyle(content, {});
+        const snapshot = seedModel.getSnapshot();
+        const drawingId = 'picture';
+        if (polygonSection != null) {
+            snapshot.body!.dataStream = content + T.SECTION_BREAK;
+            snapshot.body!.paragraphs = Array.from(content.matchAll(/\r/g), (match, index) => ({
+                startIndex: match.index,
+                paragraphId: `paragraph-${index}`,
+            }));
+            snapshot.body!.sectionBreaks = [
+                { startIndex: prefix.length - 1, sectionId: 'before-polygon' },
+                { startIndex: content.length, sectionId: 'with-polygon', sectionType: polygonSection },
+            ];
+        }
+        const groupId = 'early-columns';
+        const laterGroupId = 'later-columns';
+        if (columns != null) {
+            snapshot.body!.columnGroups = [{
+                startIndex: 0,
+                endIndex: prefix.length,
+                columnGroupId: groupId,
+                ...(columns === 'clipped' ? {} : { clipContent: BooleanNumber.FALSE }),
+                gap: { v: 12 },
+                layout: ColumnLayoutType.FIXED,
+                responsive: ColumnResponsiveType.SHRINK,
+                columns: [
+                    { columnId: 'left', widthRatio: 1, minWidth: { v: 40 } },
+                    { columnId: 'right', widthRatio: 1, minWidth: { v: 40 } },
+                ],
+            }];
+            if (laterColumns) {
+                const startIndex = content.indexOf(laterColumns);
+                snapshot.body!.columnGroups.push({
+                    ...snapshot.body!.columnGroups[0],
+                    startIndex,
+                    endIndex: startIndex + laterColumns.length,
+                    columnGroupId: laterGroupId,
+                });
+            }
+            if (columns === 'shadow') {
+                const start = content.indexOf('Left');
+                snapshot.body!.textRuns = [{
+                    st: start,
+                    ed: start + 'Left'.length,
+                    ts: { outerShadow: { color: '#000000', blurRadius: 4, distance: 3_000, direction: 90 } },
+                }];
+            }
+        } else {
+            snapshot.body!.customBlocks = [{ startIndex: content.indexOf(T.CUSTOM_BLOCK), blockId: drawingId }];
+            let layoutType = PositionedObjectLayoutType.WRAP_NONE;
+            if (wrap) {
+                layoutType = wrapLayout ?? PositionedObjectLayoutType.WRAP_SQUARE;
+            } else if (drawing === 'polygon') {
+                layoutType = PositionedObjectLayoutType.WRAP_POLYGON;
+            } else if (drawing === 'inline') {
+                layoutType = PositionedObjectLayoutType.INLINE;
+            }
+            snapshot.drawings = {
+                [drawingId]: {
+                    drawingId,
+                    drawingType: DrawingTypeEnum.DRAWING_BLOCK,
+                    unitId: snapshot.id,
+                    subUnitId: snapshot.id,
+                    layoutType,
+                    ...(wrap === 'crossing' ? { distT: 1_200 } : {}),
+                    ...(polygonBottom == null
+                        ? {}
+                        : {
+                            start: [0, 8],
+                            lineTo: [[24, 8], [24, polygonBottom], [0, polygonBottom], [0, 8]],
+                        }),
+                    docTransform: {
+                        angle: drawing === 'rotated' ? 90 : (polygonAngle ?? 0),
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
+                        positionV: {
+                            relativeFrom: afterPageBreak && !wrap ? ObjectRelativeFromV.MARGIN : ObjectRelativeFromV.PARAGRAPH,
+                            posOffset: wrap ? (wrap === 'later' ? 1_700 : 300) : 0,
+                        },
+                        size: { width: drawing === 'rotated' ? 5_000 : 24, height: 14 },
+                    },
+                },
+            };
+        }
+        const workerModel = new DocumentDataModel(snapshot);
+        workerModel.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        workerModel.updateDocumentDataPageSize(450, Number.POSITIVE_INFINITY);
+        const mainModel = new DocumentDataModel(structuredClone(workerModel.getSnapshot()));
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setDirection('ltr');
+        const worker = new DocumentLayoutSession(workerModel, locale);
+        const main = DocumentSkeleton.create(new DocumentViewModel(mainModel), locale);
+        const visiblePage = () => main.getSkeletonData()!.pages[0];
+        const visibleLines = () => visiblePage().sections.flatMap((section) => section.columns.flatMap((column) => column.lines));
+        const visibleElement = () => columns != null
+            ? visiblePage().skeColumnGroups.get(groupId)
+            : visiblePage().skeDrawings.get(drawingId);
+        const tailOffset = content.indexOf('Paragraph 35') + 1;
+        const laterTailOffset = content.indexOf('Paragraph 72') + 1;
+        const isOffsetVisible = (offset: number) => visibleLines().some((line) => line.st <= offset && offset <= line.ed);
+        const insertText = (offset: number, text: string) => {
+            const edit = new TextX();
+            edit.push({ t: TextXActionType.RETAIN, len: offset });
+            edit.push({ t: TextXActionType.INSERT, len: text.length, body: { dataStream: text } });
+            const actions = JSONX.getInstance().editOp(edit.serialize(), ['body']);
+            workerModel.apply(actions);
+            mainModel.apply(actions);
+            worker.resetDataModel(workerModel);
+            main.getViewModel().reset(mainModel);
+            return { oldStart: offset, oldEnd: offset, newEnd: offset + text.length };
+        };
+        try {
+            const initial = worker.step(worker.start({ reason: 'initial', continuousLayoutVersion: 'v1' }), Number.POSITIVE_INFINITY);
+            main.beginExternalLayout({ reason: 'initial' });
+            main.applyLayoutPublication(structuredClone(initial.publication!), initial.progress);
+            const baseline = main.getAppliedContinuousLayoutVersion();
+            expect(baseline).toBe('v1');
+
+            const anchor = content.indexOf('Paragraph 15') + 'Paragraph '.length;
+            const invalidation = insertText(anchor, 'X');
+            const drawingOffset = content.indexOf(T.CUSTOM_BLOCK) + 1; // The edit inserts one character before the suffix anchor.
+            const foregroundGeneration = main.startIncrementalLayout({
+                reason: 'edit',
+                anchor,
+                priorityAnchor: anchor + 1,
+                invalidation,
+                preserveInteractionWindow: true,
+                reuseUnaffectedTail: false,
+            });
+            let foregroundProgress = main.stepIncrementalLayout(foregroundGeneration, 0, 1);
+            for (let step = 0; step < 180 && !foregroundProgress.didPublishAnchor; step++) {
+                foregroundProgress = main.stepIncrementalLayout(foregroundGeneration, 0, 1);
+            }
+            expect(foregroundProgress.didPublishAnchor).toBe(true);
+            expect(foregroundProgress.complete).toBe(false);
+            expect(isOffsetVisible(tailOffset)).toBe(false);
+            const foregroundElement = normalizeSkeleton(visibleElement());
+            if (drawing === 'suffix') {
+                expect(foregroundElement).toBeUndefined();
+            } else {
+                expect(foregroundElement).toBeDefined();
+            }
+            const protectedEnd = foregroundProgress.stableLaidOutThrough;
+            const protectedLines = visibleLines().filter((line) => line.ed <= protectedEnd);
+            const protectedGeometry = normalizeSkeleton(protectedLines);
+            main.beginExternalLayout({ reason: 'edit', protectedRange: { mode: 'continuous', startOffset: anchor, endOffset: protectedEnd } });
+            const generation = worker.start({
+                reason: 'edit',
+                anchor,
+                priorityAnchor: anchor,
+                invalidation,
+                appliedLayoutVersion: baseline,
+                continuousLayoutVersion: 'v2',
+            });
+            let intermediateCount = 0;
+            let publishedTail = false;
+            let publishedLaterTail = false;
+            let publishedDrawingWithAnchor = false;
+            let checkedWrapBoundary = false;
+            let deferredPublication = false;
+            let publishedLaterGroup = false;
+            let stoppedBeforeCompletion = false;
+            for (let step = 0; step < 350; step++) {
+                const result = worker.step(generation, 0, 1);
+                if (result.publication?.kind === 'block') {
+                    if (intermediateCount === 0) {
+                        expect(result.publication.block.baseLayoutVersion).toBe('v1');
+                    }
+                    const transferred = structuredClone(result.publication);
+                    if (deferOnce && publishedDrawingWithAnchor && !deferredPublication && !result.progress.complete) {
+                        // The next publication restores compatible geometry,
+                        // but its wire delta starts after this hidden batch.
+                        if (deferOnce === 'drawing') {
+                            transferred.block.skeDrawings.find(([id]) => id === drawingId)![1].aTop += 20;
+                        } else {
+                            transferred.block.flow.column.width += 20;
+                        }
+                        const visibleEnd = visiblePage().ed;
+                        expect(main.applyLayoutPublication(transferred, result.progress).requiresFullPublication).toBeFalsy();
+                        expect(visiblePage().ed).toBe(visibleEnd);
+                        deferredPublication = true;
+                        continue;
+                    }
+                    expect(main.applyLayoutPublication(transferred, result.progress).requiresFullPublication).toBeFalsy();
+                    if (!result.progress.complete) {
+                        intermediateCount++;
+                        publishedTail ||= isOffsetVisible(tailOffset);
+                        publishedLaterTail ||= isOffsetVisible(laterTailOffset);
+                        expect(normalizeSkeleton(visibleLines().slice(0, protectedLines.length))).toEqual(protectedGeometry);
+                        if (drawing === 'suffix') {
+                            const workerDrawing = result.publication.block.skeDrawings.find(([id]) => id === drawingId)?.[1];
+                            if (wrap && workerDrawing != null && !checkedWrapBoundary) {
+                                const { flow } = result.publication.block;
+                                const first = flow.lines.find((line) => line.st > protectedEnd)!;
+                                const spliceTop = flow.section.top + first.top;
+                                expect(workerDrawing.aTop).toBeGreaterThan(spliceTop);
+                                expect(workerDrawing.aTop - (snapshot.drawings?.[drawingId].distT ?? 0) > spliceTop).toBe(wrap !== 'crossing');
+                                checkedWrapBoundary = true;
+                            }
+                            const drawingGeometry = visiblePage().skeDrawings.get(drawingId);
+                            expect(drawingGeometry != null).toBe(isOffsetVisible(drawingOffset));
+                            if (drawingGeometry != null) {
+                                expect(workerDrawing).toBeDefined();
+                                expect(drawingGeometry.aTop).toBe(workerDrawing?.aTop);
+                                publishedDrawingWithAnchor = true;
+                            }
+                        } else {
+                            expect(normalizeSkeleton(visibleElement())).toEqual(foregroundElement);
+                            const laterGroup = visiblePage().skeColumnGroups.get(laterGroupId);
+                            if (laterGroup != null) {
+                                expect(isOffsetVisible(laterGroup.st)).toBe(true);
+                                expect(laterGroup.parent).toBe(visiblePage());
+                                publishedLaterGroup = true;
+                            }
+                        }
+                        if (interrupt && publishedDrawingWithAnchor && publishedTail) {
+                            stoppedBeforeCompletion = true;
+                            break;
+                        }
+                    }
+                }
+                if (result.progress.complete) {
+                    break;
+                }
+            }
+            expect(intermediateCount).toBeGreaterThan(1);
+            expect(publishedTail).toBe(publishesTail);
+            if (wrap === 'later') {
+                expect(publishedLaterTail).toBe(true);
+            }
+            if (deferOnce) {
+                expect(deferredPublication).toBe(true);
+            }
+            if (drawing === 'suffix') {
+                expect(publishedDrawingWithAnchor).toBe(publishesTail);
+            }
+            if (wrap) {
+                expect(checkedWrapBoundary).toBe(true);
+            }
+            if (laterColumns) {
+                expect(publishedLaterGroup).toBe(true);
+            }
+            if (interrupt) {
+                expect(stoppedBeforeCompletion).toBe(true);
+                const discarded = worker.step(generation, Number.POSITIVE_INFINITY, 24);
+                expect(discarded.publication?.kind).toBe('block');
+                expect(discarded.progress.complete).toBe(false);
+                worker.cancel(generation);
+                main.cancelExternalLayout();
+                expect(main.getAppliedContinuousLayoutVersion()).toBe(baseline);
+
+                // The remote edit changes a line in the now-visible Worker tail
+                // while another serialized publication is still in flight.
+                const remoteAnchor = tailOffset + 'Paragraph '.length;
+                const remoteInvalidation = insertText(remoteAnchor, 'remote ');
+                const localWindow = main.startIncrementalLayout({
+                    reason: 'edit',
+                    anchor,
+                    priorityAnchor: anchor,
+                    invalidation: remoteInvalidation,
+                    preserveInteractionWindow: true,
+                    reuseUnaffectedTail: false,
+                });
+                let localProgress = main.stepIncrementalLayout(localWindow, 0, 1);
+                for (let step = 0; step < 350 && !localProgress.didPublishAnchor; step++) {
+                    localProgress = main.stepIncrementalLayout(localWindow, 0, 1);
+                }
+                expect(localProgress.didPublishAnchor).toBe(true);
+                main.beginExternalLayout({
+                    reason: 'edit',
+                    protectedRange: { mode: 'continuous', startOffset: anchor, endOffset: localProgress.stableLaidOutThrough },
+                });
+                const resumed = worker.start({
+                    reason: 'edit',
+                    anchor: remoteAnchor,
+                    priorityAnchor: anchor,
+                    invalidation: remoteInvalidation,
+                    appliedLayoutVersion: baseline,
+                    continuousLayoutVersion: 'v3',
+                });
+                let result = worker.step(resumed, 0, 1);
+                for (let step = 0; step < 180; step++) {
+                    if (result.publication != null) {
+                        expect(main.applyLayoutPublication(structuredClone(result.publication), result.progress).requiresFullPublication).toBeFalsy();
+                    }
+                    if (result.progress.complete) {
+                        break;
+                    }
+                    result = worker.step(resumed, 0, 1);
+                }
+                expect(result.progress.complete).toBe(true);
+            }
+            expect(isOffsetVisible(tailOffset)).toBe(true);
+            expect(visibleElement()).toBeDefined();
+            expect(main.getAppliedContinuousLayoutVersion()).toBe(interrupt ? 'v3' : 'v2');
+            const expected = DocumentLayoutSession.hydratePage(worker.getPage(0)!, workerModel.getSnapshot());
+            const visibleGeometry = normalizeSkeleton(visiblePage());
+            expect(visibleGeometry).toEqual(normalizeSkeleton(expected));
+            if (interrupt) {
+                main.makeDirty(true);
+                main.calculate();
+                expect(visibleGeometry).toEqual(normalizeSkeleton(visiblePage()));
+            }
+        } finally {
+            clock.mockRestore();
+            main.dispose();
+            worker.dispose();
+            mainModel.dispose();
+            workerModel.dispose();
+            seedModel.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([
+        { interruption: 'waiting batch', pendingWork: 14, editedParagraph: 12, serialized: false },
+        { interruption: 'serialized but unapplied patch', pendingWork: 24, editedParagraph: 15, serialized: true },
+    ])('keeps all Modern paragraphs when a remote edit interrupts a $interruption', ({
+        pendingWork,
+        editedParagraph,
+        serialized,
+    }) => {
+        mockWorkerCanvas();
+        const content = Array.from({ length: 72 }, (_, index) => `Paragraph ${index} has a unique label.\r`).join('');
+        const model = createDocumentModelWithStyle(content, {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        model.updateDocumentDataPageSize(420, Number.POSITIVE_INFINITY);
+        const mainModel = new DocumentDataModel(structuredClone(model.getSnapshot()));
+        const locale = new LocaleService();
+        const worker = new DocumentLayoutSession(model, locale);
+        const main = DocumentSkeleton.create(new DocumentViewModel(mainModel), locale);
+        const clock = vi.spyOn(performance, 'now').mockReturnValue(0);
+        try {
+            const initial = worker.start({ reason: 'initial' });
+            const first = worker.step(initial, 0);
+            if (first.publication == null) {
+                throw new Error('Expected initial Worker geometry.');
+            }
+            main.beginExternalLayout({ reason: 'initial' });
+            main.applyLayoutPublication(structuredClone(first.publication), first.progress);
+            const interrupted = worker.step(initial, Number.POSITIVE_INFINITY, pendingWork);
+            expect(interrupted.publication?.kind).toBe(serialized ? 'block' : undefined);
+
+            const anchor = content.indexOf(`Paragraph ${editedParagraph} has`) + 'Paragraph '.length;
+            expect(interrupted.progress.laidOutThrough).toBeGreaterThan(anchor);
+            worker.cancel(initial);
+            main.cancelExternalLayout();
+
+            const inserted = 'remote ';
+            const edit = new TextX();
+            edit.push({ t: TextXActionType.RETAIN, len: anchor });
+            edit.push({ t: TextXActionType.INSERT, len: inserted.length, body: { dataStream: inserted } });
+            const actions = JSONX.getInstance().editOp(edit.serialize(), ['body']);
+            model.apply(actions);
+            mainModel.apply(actions);
+            worker.resetDataModel(model);
+            main.getViewModel().reset(mainModel);
+
+            const invalidation = { oldStart: anchor, oldEnd: anchor, newEnd: anchor + inserted.length };
+            // Main protects the local caret at the start while the Worker lays out the remote edit.
+            const foreground = main.startIncrementalLayout({
+                reason: 'edit',
+                anchor: 0,
+                priorityAnchor: 0,
+                invalidation,
+                preserveInteractionWindow: true,
+                reuseUnaffectedTail: false,
+            });
+            const foregroundProgress = main.stepIncrementalLayout(foreground, Number.POSITIVE_INFINITY, 5);
+            expect(foregroundProgress.didPublishAnchor).toBe(true);
+            expect(foregroundProgress.stableLaidOutThrough).toBeGreaterThanOrEqual(0);
+            expect(foregroundProgress.laidOutThrough).toBeLessThan(anchor);
+            main.beginExternalLayout({
+                reason: 'edit',
+                protectedRange: { mode: 'continuous', startOffset: 0, endOffset: foregroundProgress.stableLaidOutThrough },
+            });
+
+            const resumed = worker.start({ reason: 'edit', anchor, priorityAnchor: anchor, invalidation });
+            let result = worker.step(resumed, 0);
+            for (let step = 0; step < 100; step++) {
+                if (result.publication != null) {
+                    main.applyLayoutPublication(structuredClone(result.publication), result.progress);
+                }
+                if (result.progress.complete) {
+                    break;
+                }
+                result = worker.step(resumed, 0);
+            }
+            expect(result.progress.complete).toBe(true);
+            const received = main.getSkeletonData();
+            const page = worker.getPage(0);
+            if (page == null) {
+                throw new Error('Expected the final Worker page.');
+            }
+            const workerPage = DocumentLayoutSession.hydratePage(page, model.getSnapshot());
+            main.makeDirty(true);
+            main.calculate();
+            const expected = main.getSkeletonData();
+            expect(normalizeSkeleton(workerPage)).toEqual(normalizeSkeleton(expected?.pages[0]));
+            expect(normalizeSkeleton(received)).toEqual(normalizeSkeleton(expected));
+        } finally {
+            clock.mockRestore();
+            worker.dispose();
+            main.dispose();
+            model.dispose();
+            mainModel.dispose();
+            locale.dispose();
+        }
     });
 
     it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('preserves rich elements with bounded deferred snapshots across Worker transport (%s)', (flavor) => {
@@ -1860,6 +3036,7 @@ describe('worker document layout session', () => {
                 : undefined,
         });
 
+        const protectedPages = normalizeSkeleton(targetSkeleton.getSkeletonData()?.pages);
         const generation = session.start({ reason: 'initial' });
         const publicationPayloads: string[] = [];
         let result = session.step(generation, 0);
@@ -1868,19 +3045,9 @@ describe('worker document layout session', () => {
                 publicationPayloads.push(JSON.stringify(result.publication));
                 targetSkeleton.applyLayoutPublication(structuredClone(result.publication), result.progress);
                 if (result.publication.kind === 'block' && !result.progress.complete) {
-                    const deferred = (targetSkeleton as unknown as {
-                        _externalProtectedContinuousLayout: {
-                            pendingPublications: Array<Extract<NonNullable<LayoutPublication>, { kind: 'block' }>>;
-                        };
-                    })._externalProtectedContinuousLayout.pendingPublications;
-                    // Repeated snapshots must not retain one copy of all previous
-                    // tables, drawings and nested columns per published text delta.
-                    const retainedObjects = deferred.reduce((count, { block }) => count +
-                        block.skeTables.length + block.skeDrawings.length + block.skeColumnGroups.length, 0);
-                    const latest = result.publication.block;
-                    expect(retainedObjects).toBeLessThanOrEqual(
-                        latest.skeTables.length + latest.skeDrawings.length + latest.skeColumnGroups.length
-                    );
+                    expect(targetSkeleton.getAppliedContinuousLayoutVersion()).toBeUndefined();
+                    expect(normalizeSkeleton(targetSkeleton.getSkeletonData()?.pages))
+                        .toEqual(protectedPages);
                 }
             }
             if (result.progress.complete) {
@@ -2003,7 +3170,7 @@ describe('worker document layout session', () => {
         });
 
         const content = Array.from(
-            { length: 24 },
+            { length: 72 },
             (_, index) => `Modern paragraph ${index} is laid out independently.\r`
         ).join('');
         const dataModel = createDocumentModelWithStyle(content, {});
@@ -2030,11 +3197,7 @@ describe('worker document layout session', () => {
                 if (result.publication.kind === 'block') {
                     blockLineCounts.push(result.publication.block.flow.lines.length);
                 }
-                const transferStart = cpuUsage();
-                const transferredPublication = structuredClone(result.publication);
-                targetSkeleton.applyLayoutPublication(transferredPublication, result.progress);
-                const transferCpu = cpuUsage(transferStart);
-                transferDurations.push((transferCpu.user + transferCpu.system) / 1_000);
+                transferDurations.push(measurePatchTransfer(targetSkeleton, result.publication, result.progress));
             }
             if (result.progress.complete) {
                 break;
@@ -2046,7 +3209,7 @@ describe('worker document layout session', () => {
             (section) => section.columns
         ).flatMap((column) => column.lines).length ?? 0;
         expect(result.progress).toMatchObject({ mode: 'continuous', complete: true, pageCount: 1 });
-        expect(publications.length).toBeGreaterThan(10);
+        expect(publications.length).toBeGreaterThan(2);
         expect(Math.max(...blockLineCounts.slice(1))).toBeLessThan(finalLineCount);
         expect(() => structuredClone(publications)).not.toThrow();
         expectBoundedPatchTransfer(transferDurations);
@@ -2210,11 +3373,7 @@ describe('worker document layout session', () => {
                 if (editResult.publication.kind === 'block' && firstEditBlockLineIndex == null) {
                     firstEditBlockLineIndex = editResult.publication.block.flow.lineIndex;
                 }
-                const transferStart = cpuUsage();
-                const transferredPublication = structuredClone(editResult.publication);
-                targetSkeleton.applyLayoutPublication(transferredPublication, editResult.progress);
-                const transferCpu = cpuUsage(transferStart);
-                editTransferDurations.push((transferCpu.user + transferCpu.system) / 1_000);
+                editTransferDurations.push(measurePatchTransfer(targetSkeleton, editResult.publication, editResult.progress));
                 if (!editResult.progress.complete) {
                     expect(targetSkeleton.getSkeletonData()?.pages[0]).toBe(protectedContinuousPage);
                 }
@@ -2225,9 +3384,8 @@ describe('worker document layout session', () => {
             editResult = session.step(editGeneration, 0);
         }
 
-        expect(firstEditBlockLineIndex).not.toBeNull();
-        expect(firstEditBlockLineIndex).toBeGreaterThan(0);
-        expect(targetSkeleton.getSkeletonData()?.pages[0]).toBe(protectedContinuousPage);
+        // An edit generation starts with a complete prefix, independent of the previous transport cursor.
+        expect(firstEditBlockLineIndex).toBe(0);
         expectBoundedPatchTransfer(editTransferDurations);
         expect(normalizeSkeleton(targetSkeleton.getSkeletonData())).toEqual(
             normalizeSkeleton(synchronousSkeleton.getSkeletonData())
@@ -2307,7 +3465,6 @@ describe('worker document layout session', () => {
 
         expect(remoteResult.progress.complete).toBe(true);
         expect(didReplaceProtectedContinuousLayout).toBe(true);
-        expect(targetSkeleton.getSkeletonData()?.pages[0]).toBe(remotelyProtectedPage);
         expect(normalizeSkeleton(targetSkeleton.getSkeletonData())).toEqual(
             normalizeSkeleton(synchronousSkeleton.getSkeletonData())
         );

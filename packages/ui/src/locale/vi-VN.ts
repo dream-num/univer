@@ -151,6 +151,7 @@ const locale: typeof enUS = {
                 formulas: 'Công thức',
                 rules: 'Quy tắc',
                 organization: 'Tổ chức dữ liệu',
+                analysis: 'Phân tích dữ liệu',
                 display: 'Hiển thị',
                 visibility: 'Chế độ hiển thị',
             },

@@ -165,6 +165,21 @@ describe('DocStateChangeManagerService', () => {
         sub.unsubscribe();
     });
 
+    it.each([false, true])('skips manually owned history and publishes only local edits (sync: %s)', (isSync) => {
+        const { service, emitter, undoRedoService } = createService();
+        const changes: unknown[] = [];
+        const subscription = service.docStateChange$.subscribe((value) => changes.push(value));
+        emitter.emitStateChangeInfo(createChange({ skipHistory: true, isSync }));
+        expect(undoRedoService.getUndoRedoStatus('doc-1')).toEqual({ undos: 0, redos: 0 });
+        expect(changes).toHaveLength(isSync ? 1 : 2);
+        if (!isSync) {
+            expect(changes[1]).toMatchObject({ unitId: 'doc-1', commandId: 'doc.rich-text-editing' });
+        }
+        subscription.unsubscribe();
+        service.dispose();
+        emitter.dispose();
+    });
+
     it('debounces history and collaboration flushing for composed edits', () => {
         vi.useFakeTimers();
         const { service, emitter } = createService();

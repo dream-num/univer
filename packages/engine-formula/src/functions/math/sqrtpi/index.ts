@@ -22,11 +22,13 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Sqrtpi extends BaseFunction {
+    override rejectsMultiCellReference = true;
+
     override minParams = 1;
 
     override maxParams = 1;
 
-    override calculate(number: BaseValueObject) {
+    override calculate(number: BaseValueObject): BaseValueObject {
         let _number = number;
 
         if (_number.isArray()) {
@@ -34,7 +36,7 @@ export class Sqrtpi extends BaseFunction {
             const columnCount = (_number as ArrayValueObject).getColumnCount();
 
             if (rowCount > 1 || columnCount > 1) {
-                return ErrorValueObject.create(ErrorType.VALUE);
+                return (_number as ArrayValueObject).mapValue((value) => this.calculate(value));
             }
 
             _number = (_number as ArrayValueObject).get(0, 0) as BaseValueObject;

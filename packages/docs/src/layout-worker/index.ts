@@ -18,7 +18,7 @@ import type { IMessageProtocol } from '@univerjs/rpc';
 import { DependentOn, Disposable, IConfigService, Inject, Injector, merge, Plugin, Tools } from '@univerjs/core';
 import { FontCache } from '@univerjs/engine-render';
 import { ChannelService, toModule } from '@univerjs/rpc';
-import { Observable, shareReplay } from 'rxjs';
+import { Observable, share } from 'rxjs';
 import type {
     IDocLayoutCancelRequest,
     IDocLayoutCreateSessionRequest,
@@ -71,7 +71,7 @@ function createDocsLayoutWorkerMessageProtocol(
             const handler = (event: MessageEvent) => subscriber.next(event.data);
             worker.addEventListener('message', handler);
             return () => worker.removeEventListener('message', handler);
-        }).pipe(shareReplay({ bufferSize: 1, refCount: true })),
+        }).pipe(share()),
     };
 }
 

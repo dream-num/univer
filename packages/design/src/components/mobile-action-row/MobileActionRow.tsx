@@ -48,7 +48,7 @@ export function MobileActionRow(props: IMobileActionRowProps) {
             size="middle"
             type={type}
             className={clsx(resetButtonClassName, focusClassName, `
-              univer-flex univer-w-full univer-items-center univer-gap-3 univer-rounded-xl univer-text-left
+              univer-flex univer-w-full univer-items-center univer-gap-3 univer-rounded-xl univer-px-2 univer-text-start
               univer-font-medium univer-text-gray-900
               aria-pressed:!univer-bg-primary-50 aria-pressed:!univer-text-primary-600
               disabled:univer-opacity-40

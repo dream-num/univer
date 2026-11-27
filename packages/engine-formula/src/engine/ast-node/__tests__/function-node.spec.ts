@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { DateSystem, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import type { ICellData, IWorkbookData, Workbook } from '@univerjs/core';
 import type { LambdaValueObjectObject } from '../../value-object/lambda-value-object';
+import { BooleanNumber, DateSystem, FormulaType, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
+import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { createFunctionTestBed } from '../../../functions/__tests__/create-function-test-bed';
 import { AsyncCustomFunction, CustomFunction } from '../../../functions/custom-function';
@@ -30,6 +30,7 @@ import { Abs } from '../../../functions/math/abs';
 import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
 import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
 import { Plus } from '../../../functions/meta/plus';
+import { Linest } from '../../../functions/statistical/linest';
 import { FUNCTION_NAMES_TEXT } from '../../../functions/text/function-names';
 import { Substitute } from '../../../functions/text/substitute';
 import { getObjectValue } from '../../../functions/util';
@@ -73,6 +74,43 @@ function createDateSystemWorkbookData(id: string, dateSystem: DateSystem): IWork
 }
 
 describe('FunctionNode workbook context', () => {
+    it.each([
+        { label: 'legacy multi-cell ref', metadata: { ref: 'A1:B1' }, columns: 2, expected: [[2, 1]] },
+        { label: 'undeclared cached range', metadata: {}, columns: 2, expected: 2 },
+        { label: 'empty ref', metadata: { ref: '' }, columns: 2, expected: 2 },
+        { label: 'single-cell ref', metadata: { ref: 'A1' }, columns: 1, expected: 2 },
+        { label: 'explicit dynamic array', metadata: { ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE }, columns: 2, expected: [[2, 1]] },
+        { label: 'explicit fixed array', metadata: { ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE, ref: 'A1:B1' }, columns: 2, expected: [[2, 1]] },
+    ])('preserves top-level LINEST semantics for $label', ({ metadata, columns, expected }) => {
+        const formula = '=LINEST({3;5;7;9;11;13},{1;2;3;4;5;6})';
+        const anchor: ICellData & { ref?: string } = { f: formula, ...metadata };
+        const data = createWorkbookData();
+        data.sheets.sheet1.columnCount = 2;
+        data.sheets.sheet1.cellData = { 0: { 0: anchor } };
+        const bed = createFunctionTestBed(data);
+        try {
+            bed.get(IFormulaCurrentConfigService).load({
+                formulaData: {},
+                arrayFormulaCellData: {},
+                arrayFormulaRange: { [bed.unitId]: { [bed.sheetId]: { 0: { 0: { startRow: 0, endRow: 0, startColumn: 0, endColumn: columns - 1 } } } } },
+                forceCalculate: false,
+                dirtyRanges: [],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: {},
+                dirtyUnitOtherFormulaMap: {},
+                allUnitData: { [bed.unitId]: bed.sheetData },
+            });
+            bed.get(IFunctionService).registerExecutors(bed.univer.__getInjector().createInstance(Linest, 'LINEST'));
+            bed.get(IFormulaRuntimeService).setCurrent(0, 0, 1, 1, bed.sheetId, bed.unitId);
+            const lexerNode = bed.get(Lexer).treeBuilder(formula) as LexerNode;
+            const node = bed.get(AstTreeBuilder).parse(lexerNode) as BaseAstNode;
+            expect(getObjectValue(bed.get(Interpreter).execute(generateExecuteAstNodeData(node)))).toEqual(expected);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
     it('refreshes worksheet metadata when reusing an AST after repeated moves', () => {
         const data = createWorkbookData();
         data.sheetOrder = ['sheet1', 'sheet2'];

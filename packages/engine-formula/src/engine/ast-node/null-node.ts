@@ -28,6 +28,6 @@ export class NullNode extends BaseAstNode {
     }
 
     override execute() {
-        this.setValue(NullValueObject.create());
+        this.setValue(NullValueObject.create(true));
     }
 }

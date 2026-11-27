@@ -17,6 +17,7 @@
 import type { DocumentDataModel, ICommand, IDocumentBody, IParagraph, IParagraphStyle, JSONXActions } from '@univerjs/core';
 import {
     CommandType,
+    getDocumentParagraphStyleForUpdate,
     getParagraphContentStartOffset,
     getRichTextEditPath,
     ICommandService,
@@ -76,7 +77,8 @@ function getCurrentParagraph(
 function createParagraphStyleTextX(
     body: IDocumentBody,
     paragraph: IParagraph,
-    params: IUpdateDocumentParagraphStyleCommandParams
+    params: IUpdateDocumentParagraphStyleCommandParams,
+    documentDataModel: DocumentDataModel
 ): { textX: TextX; initializesTextRuns: boolean } {
     const textX = new TextX();
     const initializesTextRuns = Boolean(
@@ -113,10 +115,7 @@ function createParagraphStyleTextX(
         paragraphs: [{
             ...Tools.deepClone(paragraph),
             startIndex: 0,
-            paragraphStyle: {
-                ...Tools.deepClone(paragraph.paragraphStyle ?? {}),
-                ...Tools.deepClone(params.style),
-            },
+            paragraphStyle: getDocumentParagraphStyleForUpdate(documentDataModel.getSnapshot(), paragraph, params.style),
         }],
     };
     Object.defineProperty(paragraphBody, RESTORE_INSERTED_PARAGRAPH_IDS, {
@@ -158,7 +157,7 @@ export const UpdateDocumentParagraphStyleCommand: ICommand<IUpdateDocumentParagr
             return false;
         }
 
-        const { textX, initializesTextRuns } = createParagraphStyleTextX(body, paragraph, params);
+        const { textX, initializesTextRuns } = createParagraphStyleTextX(body, paragraph, params, documentDataModel);
         const jsonX = JSONX.getInstance();
         const path = getRichTextEditPath(documentDataModel, segmentId);
         let actions = jsonX.editOp(textX.serialize(), path);

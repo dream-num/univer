@@ -155,6 +155,10 @@ describe('Test clipboard', () => {
             expect(worksheet.getMergeData().length).toBe(3);
             expect(getValues(2, 2, 2, 2)?.[0]?.[0]?.v).toEqual('Univer');
             expect(getStyles(2, 2, 2, 2)?.[0]?.[0]).toStrictEqual({
+                bd: {
+                    b: { cl: { rgb: 'rgb(204,204,204)' }, s: 1 },
+                    r: { cl: { rgb: 'rgb(204,204,204)' }, s: 1 },
+                },
                 bl: 1,
                 ff: 'Arial',
                 fs: 10,
@@ -222,11 +226,11 @@ describe('Test clipboard', () => {
             expect(res).toBeTruthy();
             expect(worksheet.getMergeData().length).toBe(3);
             expect(worksheet.getMergedCell(9, 2)).toStrictEqual({ startRow: 9, endRow: 12, startColumn: 2, endColumn: 2 });
-            expect(getStyles(8, 2, 8, 2)?.[0]?.[0]?.bd?.b).toStrictEqual({ cl: { rgb: '#000000' }, s: 1 });
-            expect(getStyles(9, 2, 9, 2)?.[0]?.[0]?.bd?.r).toStrictEqual({ cl: { rgb: '#000000' }, s: 1 });
-            expect(getStyles(9, 1, 9, 1)?.[0]?.[0]?.bd?.r).toStrictEqual({ cl: { rgb: '#000000' }, s: 1 });
-            expect(getStyles(12, 2, 12, 2)?.[0]?.[0]?.bd?.r).toStrictEqual({ cl: { rgb: '#000000' }, s: 1 });
-            expect(getStyles(12, 2, 12, 2)?.[0]?.[0]?.bd?.b).toStrictEqual({ cl: { rgb: '#000000' }, s: 1 });
+            expect(getStyles(8, 2, 8, 2)?.[0]?.[0]?.bd?.b).toStrictEqual({ cl: { rgb: 'rgb(0,0,0)' }, s: 1 });
+            expect(getStyles(9, 2, 9, 2)?.[0]?.[0]?.bd?.r).toStrictEqual({ cl: { rgb: 'rgb(0,0,0)' }, s: 1 });
+            expect(getStyles(9, 1, 9, 1)?.[0]?.[0]?.bd?.r).toStrictEqual({ cl: { rgb: 'rgb(0,0,0)' }, s: 1 });
+            expect(getStyles(12, 2, 12, 2)?.[0]?.[0]?.bd?.r).toStrictEqual({ cl: { rgb: 'rgb(0,0,0)' }, s: 1 });
+            expect(getStyles(12, 2, 12, 2)?.[0]?.[0]?.bd?.b).toStrictEqual({ cl: { rgb: 'rgb(0,0,0)' }, s: 1 });
         });
     });
 });

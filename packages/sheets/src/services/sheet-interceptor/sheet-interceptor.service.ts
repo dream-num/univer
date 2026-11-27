@@ -24,6 +24,7 @@ import type {
     IComposeInterceptors,
     IDisposable,
     IInterceptor,
+    IMutationInfo,
     IRange,
     IUndoRedoCommandInfosByInterceptor,
     Nullable,
@@ -31,7 +32,6 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import type { ISheetLocation, ISheetRowLocation } from './utils/interceptor';
 import {
     composeInterceptors,
     createInterceptorKey,
@@ -45,7 +45,9 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { INTERCEPTOR_POINT } from './interceptor-const';
+import type { ICellContentLocation } from './interceptor-const';
+import type { ISheetLocation, ISheetRowLocation } from './utils/interceptor';
+import { InterceptCellContentPriority, INTERCEPTOR_POINT } from './interceptor-const';
 
 export interface IBeforeCommandInterceptor {
     priority?: number;
@@ -54,7 +56,14 @@ export interface IBeforeCommandInterceptor {
 
 export interface ICommandInterceptor {
     priority?: number;
-    getMutations(command: ICommandInfo): IUndoRedoCommandInfosByInterceptor;
+    getMutations(command: ICommandInfo): ICommandMutationGroup | ICommandMutationGroup[];
+}
+
+export interface ICommandMutationGroup extends IUndoRedoCommandInfosByInterceptor {
+    /** Inverses for each step in [...preRedos, ...redos]. Required for multi-step delete/filter removal hooks. */
+    rollbackMutations?: IMutationInfo[][];
+    /** Restore layout-dependent after-hook state once the command has restored the sheet structure. */
+    undoAfterBase?: boolean;
 }
 
 export interface IRangesInfo {
@@ -86,7 +95,7 @@ interface ISheetLocationForEditor extends ISheetLocation {
     origin: Nullable<ICellData>;
 }
 
-type ICellContentComposedInterceptor = ReturnType<IComposeInterceptors<ICellDataForSheetInterceptor, ISheetLocation & { rawData: Nullable<ICellData> }>>;
+type ICellContentComposedInterceptor = ReturnType<IComposeInterceptors<ICellDataForSheetInterceptor, ICellContentLocation>>;
 type IRowFilteredComposedInterceptor = ReturnType<IComposeInterceptors<boolean, ISheetRowLocation>>;
 
 export const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('BEFORE_CELL_EDIT');
@@ -139,6 +148,17 @@ export class SheetInterceptorService extends Disposable {
             effect: InterceptorEffectEnum.Style | InterceptorEffectEnum.Value,
             handler: (_value) => _value,
         });
+        this.disposeWithMe(this.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            // Apply the display result after the public spill value and before number formatting.
+            priority: InterceptCellContentPriority.DISPLAY_VALUE,
+            effect: InterceptorEffectEnum.Value,
+            handler: (cell, { displayValue }, next) => {
+                if (displayValue === undefined) {
+                    return next(cell);
+                }
+                return next({ ...cell, v: displayValue?.v, t: displayValue?.t });
+            },
+        }));
 
         this.disposeWithMe(this.writeCellInterceptor.intercept(AFTER_CELL_EDIT, {
             priority: -1,
@@ -195,7 +215,7 @@ export class SheetInterceptorService extends Disposable {
      * @returns
      */
     onCommandExecute(info: ICommandInfo): IUndoRedoCommandInfosByInterceptor {
-        const infos = this._commandInterceptors.map((i) => i.getMutations(info));
+        const infos = this.getCommandMutationGroups(info);
 
         return {
             preUndos: infos.map((i) => i.preUndos ?? []).flat(),
@@ -203,6 +223,11 @@ export class SheetInterceptorService extends Disposable {
             preRedos: infos.map((i) => i.preRedos ?? []).flat(),
             redos: infos.map((i) => i.redos).flat(),
         };
+    }
+
+    /** Keeps each hook's inverse mutations paired with its work for transaction rollback. */
+    getCommandMutationGroups(info: ICommandInfo): ICommandMutationGroup[] {
+        return this._commandInterceptors.flatMap((interceptor) => interceptor.getMutations(info));
     }
 
     interceptAfterCommand(interceptor: ICommandInterceptor): IDisposable {
@@ -217,12 +242,16 @@ export class SheetInterceptorService extends Disposable {
     }
 
     afterCommandExecute(info: ICommandInfo): IUndoRedoCommandInfosByInterceptor {
-        const infos = this._afterCommandInterceptors.map((i) => i.getMutations(info));
+        const infos = this.getAfterCommandMutationGroups(info);
 
         return {
             undos: infos.map((i) => i.undos).flat(),
             redos: infos.map((i) => i.redos).flat(),
         };
+    }
+
+    getAfterCommandMutationGroups(info: ICommandInfo): ICommandMutationGroup[] {
+        return this._afterCommandInterceptors.flatMap((interceptor) => interceptor.getMutations(info));
     }
 
     interceptAutoHeight(interceptor: IAutoHeightInterceptors): IDisposable {
@@ -455,7 +484,8 @@ export class SheetInterceptorService extends Disposable {
                         col: number,
                         effect: InterceptorEffectEnum,
                         key?: string,
-                        filter?: (interceptor: IInterceptor<any, any>) => boolean
+                        filter?: (interceptor: IInterceptor<any, any>) => boolean,
+                        displayValue?: Pick<ICellData, 'v' | 't'> | null
                     ): Nullable<ICellData> {
                         const rawData = worksheet.getCellRaw(row, col);
                         const context = {
@@ -466,6 +496,7 @@ export class SheetInterceptorService extends Disposable {
                             worksheet,
                             workbook,
                             rawData,
+                            displayValue,
                         };
 
                         if (key === undefined && filter === undefined) {

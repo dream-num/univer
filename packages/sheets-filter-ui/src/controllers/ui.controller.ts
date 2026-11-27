@@ -34,6 +34,7 @@ import {
     CloseFilterPanelOperation,
     FILTER_PANEL_OPENED_KEY,
     OpenFilterPanelOperation,
+    RequestOpenFilterPanelOperation,
 } from '../commands/operations/sheets-filter.operation';
 import { menuSchema } from '../menu/schema';
 import { ISheetsFilterPanelService } from '../services/sheets-filter-panel.service';
@@ -99,6 +100,7 @@ export class SheetsFilterUIDesktopController extends RxDisposable {
             SmartToggleSheetsFilterCommand,
             ChangeFilterByOperation,
             OpenFilterPanelOperation,
+            RequestOpenFilterPanelOperation,
             CloseFilterPanelOperation,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
@@ -144,8 +146,9 @@ export class SheetsFilterUIDesktopController extends RxDisposable {
             componentKey: FILTER_PANEL_POPUP_KEY,
             direction: 'horizontal',
             onClickOutside: () => this._commandService.syncExecuteCommand(CloseFilterPanelOperation.id),
+            onAnchorDisposed: () => this._commandService.syncExecuteCommand(CloseFilterPanelOperation.id),
             offset: [5, 0],
-        });
+        }, currentFilterModel.unitId, currentFilterModel.subUnitId, undefined, this._sheetsFilterPanelService.renderId);
     }
 
     private _closeFilterPopup(): void {

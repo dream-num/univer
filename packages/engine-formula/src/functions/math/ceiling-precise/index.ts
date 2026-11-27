@@ -84,7 +84,7 @@ export class CeilingPrecise extends BaseFunction {
 
             const result = (significanceValue < 0 ? -ceil(numberValue / Math.abs(significanceValue), 0) : ceil(numberValue / significanceValue, 0)) * significanceValue;
 
-            return NumberValueObject.create(result);
+            return NumberValueObject.create(result === 0 ? 0 : result);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {

@@ -25,8 +25,9 @@ import {
     setPatternDecimal,
 } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import { useContext, useLayoutEffect, useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { UserHabitCurrencyContext } from '../../controllers/user-habit.controller';
+import { usePanelPattern } from '../hooks/use-panel-pattern';
 
 export const isCurrencyPanel = (pattern: string) => {
     const type = getCurrencyType(pattern);
@@ -34,47 +35,39 @@ export const isCurrencyPanel = (pattern: string) => {
 };
 
 export function CurrencyPanel(props: IBusinessComponentProps) {
-    const { onActionChange, onChange: onValueChange } = props;
     const localeService = useDependency(LocaleService);
     const userHabitCurrency = useContext(UserHabitCurrencyContext);
-    const [suffix, setSuffix] = useState(() => getCurrencyType(props.defaultPattern) || userHabitCurrency[0]);
+    const [selectedCurrency, setSelectedCurrency] = useState(() => getCurrencyType(props.defaultPattern));
+    const suffix = selectedCurrency ?? userHabitCurrency[0];
     const [decimal, setDecimal] = useState(() => getDecimalFromPattern(props.defaultPattern || '', 2));
-    const [pattern, setPattern] = useState(() => {
-        const negativeOptions = getCurrencyFormatOptions(suffix);
-        const pattern =
-            negativeOptions.find((item) => isPatternEqualWithoutDecimal(item.value, props.defaultPattern))?.value ||
-            negativeOptions[0].value;
-        return pattern;
-    });
-
     const negativeOptions = useMemo(() => getCurrencyFormatOptions(suffix), [suffix]);
+    const [selectedStyle, setSelectedStyle] = useState<number>();
+    const pattern = selectedStyle === undefined
+        ? negativeOptions.find((item) => isPatternEqualWithoutDecimal(item.value, props.defaultPattern))?.value ?? negativeOptions[0].value
+        : negativeOptions[selectedStyle].value;
     const options = useMemo(() => userHabitCurrency.map((key) => ({ label: key, value: key })), [userHabitCurrency]);
 
-    useLayoutEffect(() => {
-        onActionChange(() => setPatternDecimal(pattern, decimal));
-    }, [decimal, onActionChange, pattern]);
+    usePanelPattern(setPatternDecimal(pattern, decimal), props);
 
     const onSelect = (value: string) => {
         if (value === undefined) {
             return;
         }
-        setSuffix(value);
-        const pattern = getCurrencyFormatOptions(value)[0].value;
-        setPattern(pattern);
-        onValueChange(setPatternDecimal(pattern, decimal));
+        setSelectedCurrency(value);
+        setSelectedStyle(0);
     };
 
-    const onChange = (value: any) => {
-        if (value === undefined) {
+    const onChange = (value: string | string[] | undefined) => {
+        if (typeof value !== 'string') {
             return;
         }
-        setPattern(value);
-        onValueChange(setPatternDecimal(value, decimal));
+        const index = negativeOptions.findIndex((option) => option.value === value);
+        if (index < 0) return;
+        setSelectedStyle(index);
     };
 
     const onDecimalChange = (v: number | null) => {
         setDecimal(v || 0);
-        onValueChange(setPatternDecimal(pattern, v || 0));
     };
 
     return (

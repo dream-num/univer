@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DateSystem, excelDateSerial, getNumfmtParseValueFilter, isRealNum, numfmt, Tools } from '@univerjs/core';
+import { DateSystem, excelDateSerial, getNumfmtNumberGrouping, getNumfmtParseValueFilter, isRealNum, numfmt, Tools } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
@@ -24,10 +24,67 @@ import { compareWithWildcard, isWildcard, normalizeTextForComparison } from '../
 import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt } from '../utils/math-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
+const EXCEL_TRIGONOMETRIC_LIMIT = 2 ** 27;
+const EXCEL_MIN_NORMAL_NUMBER = 2.2250738585072014e-308;
+
 export type PrimitiveValueType = string | boolean | number | null;
 
 export type FormulaFunctionValueType = PrimitiveValueType | PrimitiveValueType[][] | BaseValueObject;
 export type FormulaFunctionResultValueType = PrimitiveValueType | PrimitiveValueType[][];
+
+function isValidGroupedMantissa(mantissa: string, readRegion?: () => string): boolean {
+    const parts = mantissa.split('.');
+    if (parts.length > 2 || (parts.length === 2 && !/^\d*$/.test(parts[1]))) return false;
+    const groups = parts[0].split(',');
+    if (!/[1-9]/.test(groups[0]) || groups[groups.length - 1].length < 3) return false;
+    let shortest = 3;
+    for (let index = 1; index < groups.length - 1; index++) {
+        shortest = Math.min(shortest, groups[index].length);
+    }
+    // Wider groups are accepted. Only two-digit interior groups distinguish regions.
+    return shortest >= 3 || (shortest === 2 && getNumfmtNumberGrouping(readRegion?.())[1] === 2);
+}
+
+export function parseFormulaNumericText(rawValue: string, readRegion?: () => string): { v: number; z?: string } | ErrorValueObject | null {
+    const match = rawValue.match(/([0-9.,]+)(?:[eE]([+-]?[0-9]+))?/);
+    if (!match) return null;
+    const mantissa = match[1];
+    const point = mantissa.indexOf('.');
+    const integerEnd = point < 0 ? mantissa.length : point;
+    let selectedDigit = -1;
+    for (let index = 0; index < integerEnd; index++) {
+        if (/[0-9]/.test(mantissa[index])) selectedDigit = index;
+    }
+    if (selectedDigit < 0) selectedDigit = mantissa.search(/[0-9]/);
+    if (selectedDigit < 0) return null;
+    // Validate the original decorations without overflowing or underflowing the mantissa.
+    const probe = mantissa.replace(/[0-9]/g, (_digit, index: number) => index === selectedDigit ? '1' : '0');
+    const start = match.index!;
+    const validation = rawValue.slice(0, start) + probe + rawValue.slice(start + match[0].length);
+    if (/[0-9][eE][+-]?[0-9]/.test(validation)) return null;
+    const parsed = numfmt.parseNumber(validation) ?? (mantissa.includes(',') ? numfmt.parseNumber(rawValue.slice(0, start) + probe.replace(/,/g, '') + rawValue.slice(start + match[0].length)) : null);
+    if (!parsed) return null;
+    const percentCount = (rawValue.match(/%/g) ?? []).length;
+    const validMantissa = mantissa.includes(',')
+        ? isValidGroupedMantissa(mantissa, readRegion)
+        : /^(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)$/.test(mantissa);
+    if (!validMantissa || percentCount > 1) return ErrorValueObject.create(ErrorType.VALUE);
+    const [integer, fraction = ''] = mantissa.replace(/,/g, '').split('.');
+    const significantInteger = integer.replace(/^0+/, '');
+    const leadingFractionZeros = fraction.match(/^0*/)![0].length;
+    const exponent = Number(match[2] ?? 0) - 2 * percentCount;
+    const normalizedExponent = (significantInteger.length || -leadingFractionZeros) + exponent;
+    // Excel FParseNumberCore checks this exponent before constructing the binary value.
+    if (Math.abs(normalizedExponent) > 308) return ErrorValueObject.create(ErrorType.VALUE);
+    const sign = Number(parsed.v) < 0 ? '-' : '';
+    const digits = `${integer}${fraction}`.replace(/^0+/, '');
+    const retained = digits.slice(0, 15) || '0';
+    const dropped = Math.max(0, digits.length - 15);
+    const number = Number(`${sign}${retained}e${exponent - fraction.length + dropped}`);
+    if (!Number.isFinite(number)) return ErrorValueObject.create(ErrorType.VALUE);
+    const pattern = match[2] == null ? parsed.z : numfmt.parseNumber(rawValue)?.z ?? parsed.z;
+    return { v: number, z: pattern };
+}
 
 function parseCompactEnglishMonthYear(rawValue: string, dateSystem: DateSystem): number | null {
     const match = rawValue.trim().match(/^([A-Za-z]{3,9})(\d{4})$/);
@@ -71,9 +128,22 @@ function parseCompactEnglishMonthYear(rawValue: string, dateSystem: DateSystem):
 export class NullValueObject extends BaseValueObject {
     private static _instance: NullValueObject;
 
-    static create() {
+    private static _omittedInstance: NullValueObject;
+
+    private _omitted = false;
+
+    static create(omitted = false) {
+        if (omitted) {
+            this._omittedInstance ??= new NullValueObject();
+            this._omittedInstance._omitted = true;
+            return this._omittedInstance;
+        }
         this._instance = this._instance || new NullValueObject();
         return this._instance;
+    }
+
+    isOmitted(): boolean {
+        return this._omitted;
     }
 
     override isNull(): boolean {
@@ -489,7 +559,8 @@ export class NumberValueObject extends BaseValueObject {
     constructor(rawValue: number, dateSystem: DateSystem = DateSystem.Date1900) {
         super(dateSystem);
 
-        this._value = Number(rawValue);
+        const value = Number(rawValue);
+        this._value = value !== 0 && Math.abs(value) < EXCEL_MIN_NORMAL_NUMBER ? 0 : value;
     }
 
     override getValue() {
@@ -497,7 +568,7 @@ export class NumberValueObject extends BaseValueObject {
     }
 
     override setValue(value: number) {
-        this._value = value;
+        this._value = value !== 0 && Math.abs(value) < EXCEL_MIN_NORMAL_NUMBER ? 0 : value;
     }
 
     override isNumber() {
@@ -971,7 +1042,7 @@ export class NumberValueObject extends BaseValueObject {
     override cos(): BaseValueObject {
         const currentValue = this.getValue();
 
-        if (!Number.isFinite(currentValue)) {
+        if (!(Math.abs(currentValue) < EXCEL_TRIGONOMETRIC_LIMIT)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
@@ -1035,7 +1106,7 @@ export class NumberValueObject extends BaseValueObject {
     override sin(): BaseValueObject {
         const currentValue = this.getValue();
 
-        if (!Number.isFinite(currentValue)) {
+        if (!(Math.abs(currentValue) < EXCEL_TRIGONOMETRIC_LIMIT)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
@@ -1099,7 +1170,7 @@ export class NumberValueObject extends BaseValueObject {
     override tan(): BaseValueObject {
         const currentValue = this.getValue();
 
-        if (!Number.isFinite(currentValue)) {
+        if (!(Math.abs(currentValue) < EXCEL_TRIGONOMETRIC_LIMIT)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
@@ -1427,6 +1498,13 @@ const STRING_CACHE_LRU_COUNT = 100000;
 
 export const StringValueObjectCache = new FormulaAstLRU<StringValueObject>(STRING_CACHE_LRU_COUNT);
 export class StringValueObject extends BaseValueObject {
+    private _readRegion?: () => string;
+
+    override withDateSystem(dateSystem: DateSystem, readRegion?: () => string): this {
+        this._readRegion = this._value.includes(',') ? readRegion : undefined;
+        return super.withDateSystem(dateSystem);
+    }
+
     private _value: string;
     private _isHyperlink: boolean = false;
     private _hyperlinkUrl: string = '';
@@ -1434,7 +1512,9 @@ export class StringValueObject extends BaseValueObject {
     private _imageInfo: IStringValueObjectOptions['imageInfo'];
 
     static create(value: string, options?: IStringValueObjectOptions) {
-        const cached = StringValueObjectCache.get(value);
+        // Grouped numeric text carries its evaluator's region reader. Keep it local to that evaluator.
+        const cacheable = !value.includes(',');
+        const cached = cacheable && StringValueObjectCache.get(value);
         if (cached && options && this.checkCacheByOptions(cached, options)) {
             return cached;
         }
@@ -1447,7 +1527,7 @@ export class StringValueObject extends BaseValueObject {
             instance._isImage = options.isImage;
             instance._imageInfo = options.imageInfo;
         }
-        StringValueObjectCache.set(value, instance);
+        if (cacheable) StringValueObjectCache.set(value, instance);
         return instance;
     }
 
@@ -1534,7 +1614,7 @@ export class StringValueObject extends BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.compare(this, reverseCompareOperator(operator), isCaseSensitive);
         }
-        return this.compareBy(valueObject.getValue(), operator, isCaseSensitive);
+        return this.compareBy(valueObject.isNull() ? '' : valueObject.getValue(), operator, isCaseSensitive);
     }
 
     override compareBy(value: string | number | boolean, operator: compareToken, isCaseSensitive: boolean = false): BaseValueObject {
@@ -1615,9 +1695,17 @@ export class StringValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const parseData = getNumfmtParseValueFilter(rawValue, { dateSystem: this.getDateSystem() });
+        const numeric = parseFormulaNumericText(rawValue, this._readRegion);
+        if (numeric instanceof ErrorValueObject) return numeric;
+        const parseData = numeric ?? getNumfmtParseValueFilter(rawValue, { dateSystem: this.getDateSystem() });
 
-        if (parseData && parseData.z) {
+        // A parse result is authoritative even when the input carries no number
+        // format, e.g. "(5)" or "( 12.34 )": the value is a number, the pattern
+        // is optional information.
+        if (parseData) {
+            if (typeof parseData.v === 'number' && !Number.isFinite(parseData.v)) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
             return createNumberValueObjectByRawValue(parseData.v, parseData.z).withDateSystem(this.getDateSystem());
         }
 
@@ -1626,7 +1714,17 @@ export class StringValueObject extends BaseValueObject {
             return createNumberValueObjectByRawValue(compactMonthYear).withDateSystem(this.getDateSystem());
         }
 
-        return createNumberValueObjectByRawValue(rawValue).withDateSystem(this.getDateSystem());
+        const fraction = rawValue.trim().match(/^([+-]?)([0-9]+)\s+([0-9]+)\/([0-9]+)$/);
+        if (fraction) {
+            const whole = Number(fraction[2]);
+            const numerator = Number(fraction[3]);
+            const denominator = Number(fraction[4]);
+            const value = (fraction[1] === '-' ? -1 : 1) * (whole + numerator / denominator);
+            if ([whole, numerator, denominator, value].every(Number.isFinite) && denominator !== 0) {
+                return NumberValueObject.create(value).withDateSystem(this.getDateSystem());
+            }
+        }
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     override convertToBooleanObjectValue() {

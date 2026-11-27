@@ -43,7 +43,7 @@ describe('Test drop function', () => {
             const rows = NumberValueObject.create(1);
             const columns = NumberValueObject.create(1);
             const result = testFunction.calculate(array, rows, columns);
-            expect(getObjectValue(result)).toStrictEqual(2);
+            expect(getObjectValue(result)).toStrictEqual([[2]]);
 
             const rows2 = NumberValueObject.create(0);
             const columns2 = NumberValueObject.create(0);
@@ -130,7 +130,7 @@ describe('Test drop function', () => {
             const rows = BooleanValueObject.create(true);
             const columns = NumberValueObject.create(1);
             const result = testFunction.calculate(array, rows, columns);
-            expect(getObjectValue(result)).toStrictEqual(2);
+            expect(getObjectValue(result)).toStrictEqual([[2]]);
         });
 
         it('Rows value test3', async () => {
@@ -249,7 +249,7 @@ describe('Test drop function', () => {
             const rows = NumberValueObject.create(1);
             const columns = BooleanValueObject.create(true);
             const result = testFunction.calculate(array, rows, columns);
-            expect(getObjectValue(result)).toStrictEqual(2);
+            expect(getObjectValue(result)).toStrictEqual([[2]]);
         });
 
         it('Columns value test3', async () => {

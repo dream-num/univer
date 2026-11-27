@@ -35,13 +35,13 @@ describe('Test imcot function', () => {
         it('Value is large numbers', () => {
             const inumber = NumberValueObject.create(25698432);
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(-9.06359967954937);
+            expect(result.getValue()).toBe('-9.06359967954937');
         });
 
         it('Value is number string', () => {
             const inumber = StringValueObject.create('1.5');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(0.0709148443026525);
+            expect(result.getValue()).toBe('0.0709148443026525');
         });
 
         it('Value is normal string', () => {

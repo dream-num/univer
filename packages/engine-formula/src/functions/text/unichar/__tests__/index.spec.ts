@@ -20,6 +20,7 @@ import { ArrayValueObject, transformToValueObject } from '../../../../engine/val
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
+import { Unicode } from '../../unicode';
 import { Unichar } from '../index';
 
 describe('Test unichar function', () => {
@@ -46,6 +47,36 @@ describe('Test unichar function', () => {
             const number2 = NumberValueObject.create(1114112);
             const result2 = testFunction.calculate(number2);
             expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Number is a code point above U+FFFF', () => {
+            // Excel 2016+ and Google Sheets (executed 2026-08-29) return the supplementary-plane character.
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(128512)))).toStrictEqual('\u{1F600}');
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(65601)))).toStrictEqual('\u{10041}');
+        });
+
+        it('Number is a surrogate code point', () => {
+            // Excel documents #N/A for partial surrogates.
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(55296)))).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(57343)))).toStrictEqual(ErrorType.NA);
+        });
+
+        it('Number is a non-character code point', () => {
+            // Excel 2024 (build 20026), verified 2026-06-23: #N/A for Unicode noncharacters.
+            const nonCharacters = [0xFDD0, 0xFDEF, 0xFFFE, 0xFFFF, 0x10FFFE, 0x10FFFF];
+
+            nonCharacters.forEach((codePoint) => {
+                expect(getObjectValue(testFunction.calculate(NumberValueObject.create(codePoint)))).toStrictEqual(ErrorType.NA);
+            });
+
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(0x10FFFD)))).toStrictEqual('\u{10FFFD}');
+        });
+
+        it('Round trips a code point above U+FFFF through UNICODE', () => {
+            const unicode = new Unicode(FUNCTION_NAMES_TEXT.UNICODE);
+            const character = testFunction.calculate(NumberValueObject.create(128512));
+
+            expect(getObjectValue(unicode.calculate(character))).toStrictEqual(128512);
         });
 
         it('Value is array', () => {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
@@ -26,115 +26,68 @@ export class Frequency extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(dataArray: BaseValueObject, binsArray: BaseValueObject): BaseValueObject {
-        const { isError, errorObject, values: dataArrayValues } = this._getValues(dataArray);
+    override needsReferenceObject = true;
 
-        if (isError) {
-            return errorObject as ErrorValueObject;
-        }
-
-        if (dataArray.isNull() || binsArray.isNull()) {
+    override calculate(data: FunctionVariantType, bins: FunctionVariantType): BaseValueObject {
+        const dataValue = this._resolve(data);
+        const binsValue = this._resolve(bins);
+        if ((!data.isReferenceObject() && dataValue.isNull()) || (!bins.isReferenceObject() && binsValue.isNull())) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
-
-        let { values: binsArrayValues } = this._getValues(binsArray, true);
-
-        if (binsArrayValues.length === 0) {
-            binsArrayValues = [0];
+        const observations = this._numbers(dataValue, false);
+        if (observations instanceof ErrorValueObject) {
+            return observations;
         }
 
-        const newBinsArrayValues = this._getNewBinsArrayValues(binsArrayValues);
+        if (binsValue.isError()) {
+            return binsValue;
+        }
 
-        const result: number[] = new Array(newBinsArrayValues.length).fill(0);
+        const thresholds = this._numbers(binsValue, true) as number[];
+        if (thresholds.length === 0) {
+            thresholds.push(0);
+        }
+        const ordered = thresholds.map((threshold, index) => ({ threshold, index })).sort((left, right) => left.threshold - right.threshold);
 
-        for (let i = 0; i < dataArrayValues.length; i++) {
-            const value = dataArrayValues[i];
-            let low = 0;
-            let high = newBinsArrayValues.length - 1;
+        const counts: number[] = new Array(thresholds.length + 1).fill(0);
+        for (const observation of observations) {
+            if (Number.isNaN(observation) || observation === -Infinity) {
+                continue;
+            }
 
-            // Find the first upper bound that contains the value. Equal bins
-            // remain stable, so only the first duplicate receives a count.
-            while (low < high) {
-                const middle = Math.floor((low + high) / 2);
-                if (value <= newBinsArrayValues[middle].end) {
-                    high = middle;
+            let start = 0;
+            let end = thresholds.length;
+            while (start < end) {
+                const middle = start + Math.floor((end - start) / 2);
+                if (observation > ordered[middle].threshold) {
+                    start = middle + 1;
                 } else {
-                    low = middle + 1;
+                    end = middle;
                 }
             }
-
-            const bin = newBinsArrayValues[low];
-            if (value > bin.start && value <= bin.end) {
-                result[bin.index]++;
-            }
+            counts[ordered[start]?.index ?? thresholds.length]++;
         }
 
-        return ArrayValueObject.createByArray(result.map((item) => [item]));
+        return ArrayValueObject.createByArray(counts.map((count) => [count]));
     }
 
-    private _getValues(array: BaseValueObject, isIgnoreError: boolean = false) {
+    private _resolve(input: FunctionVariantType): BaseValueObject {
+        return input.isReferenceObject() ? (input as BaseReferenceObject).toArrayValueObject() : input as BaseValueObject;
+    }
+
+    private _numbers(input: BaseValueObject, ignoreErrors: boolean): number[] | ErrorValueObject {
+        const rows = input.isArray() ? (input as ArrayValueObject).getArrayValue() : [[input]];
         const values: number[] = [];
-
-        const arrayRowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
-        const arrayColumnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
-
-        for (let r = 0; r < arrayRowCount; r++) {
-            for (let c = 0; c < arrayColumnCount; c++) {
-                const valueObject = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
-
-                if (valueObject.isError()) {
-                    if (!isIgnoreError) {
-                        return {
-                            isError: true,
-                            errorObject: valueObject as ErrorValueObject,
-                            values,
-                        };
-                    }
-
-                    continue;
+        for (const row of rows) {
+            for (const cell of row) {
+                if (!ignoreErrors && cell?.isError()) {
+                    return cell as ErrorValueObject;
                 }
-
-                if (valueObject.isNull() || valueObject.isBoolean()) {
-                    continue;
+                if (cell?.isNumber()) {
+                    values.push(Number(cell.getValue()));
                 }
-
-                const value = valueObject.getValue();
-
-                if (!isRealNum(value)) {
-                    continue;
-                }
-
-                values.push(+value);
             }
         }
-
-        return {
-            isError: false,
-            errorObject: null,
-            values,
-        };
-    }
-
-    private _getNewBinsArrayValues(binsArrayValues: number[]) {
-        const _binsArrayValues = binsArrayValues.map((value, index) => {
-            return {
-                value,
-                index,
-            };
-        }).sort((a, b) => a.value - b.value);
-
-        const newBinsArrayValues = _binsArrayValues.map((bin, i) => ({
-            start: i === 0 ? -Infinity : _binsArrayValues[i - 1].value,
-            end: bin.value,
-            index: bin.index,
-        }));
-
-        newBinsArrayValues.push({
-            start: _binsArrayValues[_binsArrayValues.length - 1].value,
-            end: Infinity,
-            index: _binsArrayValues.length,
-        });
-
-        return newBinsArrayValues;
+        return values;
     }
 }

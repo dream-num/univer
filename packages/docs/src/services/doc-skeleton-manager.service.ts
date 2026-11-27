@@ -29,10 +29,9 @@ import {
     SHEET_TEXT_LINE_GAP,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocumentSkeleton, DocumentViewModel, getDocumentLayoutPresentation, SheetCellDocumentViewModel } from '@univerjs/engine-render';
+import { DocumentSkeleton, DocumentViewModel, getDocumentLayoutPresentation, hasDocumentHeaderFooterReferenceLayout, hasDocumentReferenceLayout, SheetCellDocumentViewModel } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocLayoutExecutorService } from './doc-layout-executor.service';
-
 /**
  * This service is for document build and manage doc skeletons. It also manages
  * DocumentViewModels.
@@ -96,6 +95,8 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
         return this._docLayoutExecutorService.getExecutor() != null &&
             !isInternalEditorID(this._context.unitId) &&
             !getDocumentLayoutPresentation(this._context.unit) &&
+            !hasDocumentHeaderFooterReferenceLayout(this._context.unit) &&
+            !hasDocumentReferenceLayout(this._context.unit) &&
             (documentFlavor === DocumentFlavor.TRADITIONAL || documentFlavor === DocumentFlavor.MODERN);
     }
 

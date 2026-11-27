@@ -17,7 +17,7 @@
 import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { getPairedRangeAndCriteriaResult, parsePairedRangeAndCriteria } from '../../../engine/utils/value-object';
+import { getPairedRangeAndCriteriaResult, parsePairedRangeAndCriteria, TARGET_AND_CRITERIA_RANGE_ARGUMENT_INDEXES } from '../../../engine/utils/value-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -28,6 +28,8 @@ export class Sumifs extends BaseFunction {
     override maxParams = 255;
 
     override needsReferenceObject = true;
+
+    override lazyIfReferenceArrayArgumentIndexes = TARGET_AND_CRITERIA_RANGE_ARGUMENT_INDEXES;
 
     override calculate(sumRange: FunctionVariantType, ...variants: FunctionVariantType[]) {
         const {

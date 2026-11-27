@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         message: {
             refError: 'Neplatný rozsah',
         },
+        permission: {
+            editErr: 'Rozsah je chránený a nemáte oprávnenie na úpravy. Ak chcete upravovať, kontaktujte autora.',
+        },
     },
 };
 

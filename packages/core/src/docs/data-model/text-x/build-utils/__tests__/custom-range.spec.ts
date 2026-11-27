@@ -14,11 +14,41 @@
  * limitations under the License.
  */
 
+import { describe, expect, it } from 'vitest';
 import type { ITextRange } from '../../../../../sheets/typedef';
 import type { ICustomRange } from '../../../../../types/interfaces';
-import { describe, expect, it } from 'vitest';
 import { CustomRangeType } from '../../../../../types/interfaces';
-import { excludePointsFromRange, getCustomRangesInterestsWithSelection } from '../custom-range';
+import { createBookmarkRangeId } from '../../../../bookmark-id';
+import { copyCustomRange, excludePointsFromRange, getCustomRangesInterestsWithSelection, getSelectionForAddCustomRange } from '../custom-range';
+
+describe('bookmark custom ranges', () => {
+    it('retains managed ordering when copying a bookmark', () => {
+        const original: ICustomRange = {
+            rangeId: createBookmarkRangeId('source'),
+            rangeType: CustomRangeType.BOOKMARK,
+            startIndex: 0,
+            endIndex: 3,
+            properties: { bookmarkId: 'Target' },
+        };
+        const copied = copyCustomRange(original);
+        expect(copied.rangeId).not.toBe(original.rangeId);
+        expect(copied.rangeId.startsWith(createBookmarkRangeId(''))).toBe(true);
+        expect(copied.properties).toEqual(original.properties);
+    });
+
+    it('expands a link selection across intersecting ranges in ID order', () => {
+        const body = {
+            dataStream: 'First word after another word',
+            customRanges: [
+                { rangeId: createBookmarkRangeId('a'), rangeType: CustomRangeType.BOOKMARK, startIndex: 10, endIndex: 13 },
+                { rangeId: createBookmarkRangeId('b'), rangeType: CustomRangeType.BOOKMARK, startIndex: 1, endIndex: 2 },
+                { rangeId: createBookmarkRangeId('z'), rangeType: CustomRangeType.BOOKMARK, startIndex: 0, endIndex: 3 },
+            ],
+        };
+        expect(getSelectionForAddCustomRange({ startOffset: 1, endOffset: 3, collapsed: false }, body))
+            .toEqual({ startOffset: 0, endOffset: 4, collapsed: false });
+    });
+});
 
 describe('excludePointsFromRange function', () => {
     it('should handle empty points array', () => {

@@ -25,6 +25,7 @@ import {
     LogLevel,
     RANGE_TYPE,
     touchDependencies,
+    UndoCommand,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -59,7 +60,7 @@ const subUnitId = 'sheet1';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
     id: unitId,
-    sheetOrder: [subUnitId],
+    sheetOrder: [subUnitId, 'sheet2'],
     name: '',
     appVersion: '0.15.4',
     locale: LocaleType.EN_US,
@@ -68,6 +69,13 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
         [subUnitId]: {
             id: subUnitId,
             name: 'Sheet1',
+            rowCount: 10,
+            columnCount: 10,
+            cellData: {},
+        },
+        sheet2: {
+            id: 'sheet2',
+            name: 'Sheet2',
             rowCount: 10,
             columnCount: 10,
             cellData: {},
@@ -201,6 +209,51 @@ describe('sheets-note facade mixins', () => {
         range.deleteNote();
         expect(range.getNote()).toBeUndefined();
         expect(sheet.getNotes()).toHaveLength(0);
+    });
+
+    it('routes facade note writes through the note commands', async () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const sheet = workbook.getActiveSheet();
+        const commandService = injector.get(ICommandService);
+        const events: string[] = [];
+        const disposable = univerAPI.addEvent(univerAPI.Event.SheetNoteAdd, (event) => events.push(`add:${event.row}:${event.col}`));
+
+        sheet.getRange(0, 0).createOrUpdateNote({ width: 160, height: 72, note: 'hint' });
+
+        expect(events).toEqual(['add:0:0']);
+        expect(sheet.getRange(0, 0).getNote()?.note).toBe('hint');
+
+        // Being a command write, a facade-created note is undoable.
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+        expect(sheet.getRange(0, 0).getNote()).toBeUndefined();
+
+        disposable.dispose();
+    });
+
+    it('reports facade note events for the edited sheet and cell', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const secondSheet = workbook.getSheetByName('Sheet2')!;
+        const events: string[] = [];
+        const disposables = [
+            univerAPI.addEvent(univerAPI.Event.BeforeSheetNoteAdd, (event) => events.push(`before-add:${event.worksheet.getSheetId()}:${event.row}:${event.col}`)),
+            univerAPI.addEvent(univerAPI.Event.SheetNoteUpdate, (event) => events.push(`update:${event.worksheet.getSheetId()}:${event.row}:${event.col}`)),
+            univerAPI.addEvent(univerAPI.Event.BeforeSheetNoteDelete, (event) => events.push(`before-delete:${event.worksheet.getSheetId()}:${event.row}:${event.col}`)),
+            univerAPI.addEvent(univerAPI.Event.SheetNoteDelete, (event) => events.push(`delete:${event.worksheet.getSheetId()}:${event.row}:${event.col}`)),
+        ];
+
+        // The active sheet stays `sheet1`; the facade writes to `sheet2`.
+        secondSheet.getRange(1, 1).createOrUpdateNote({ width: 160, height: 72, note: 'first' });
+        secondSheet.getRange(1, 1).createOrUpdateNote({ width: 160, height: 72, note: 'second' });
+        secondSheet.getRange(1, 1).deleteNote();
+
+        expect(events).toEqual([
+            'before-add:sheet2:1:1',
+            'update:sheet2:1:1',
+            'before-delete:sheet2:1:1',
+            'delete:sheet2:1:1',
+        ]);
+
+        disposables.forEach((disposable) => disposable.dispose());
     });
 
     it('emits business events while notes are added, updated, shown, hidden and deleted', () => {

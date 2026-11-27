@@ -46,6 +46,8 @@ function createSkeleton(options: { cells: Map<string, any>; primary?: (row: numb
 
     return {
         worksheet,
+        getRowVisible: worksheet.getRowVisible,
+        getCell: worksheet.getCell,
         rowColumnSegment: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
         getCellWithCoordByIndex: vi.fn((row: number, col: number) => (
             options.primary?.(row, col) ?? createCellWithCoord(row, col)

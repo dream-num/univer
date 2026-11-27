@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -23,7 +24,17 @@ import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { Counta } from '../index';
 
 describe('Test counta function', () => {
-    const testFunction = new Counta(FUNCTION_NAMES_STATISTICAL.COUNTA);
+    let injector: Injector;
+    let testFunction: Counta;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [Counta, { useFactory: () => injector.createInstance(Counta, FUNCTION_NAMES_STATISTICAL.COUNTA) }],
+        ]);
+        testFunction = injector.get(Counta);
+    });
+
+    afterEach(() => injector.dispose());
 
     describe('Counta', () => {
         it('Var1 is error', () => {
@@ -64,7 +75,10 @@ describe('Test counta function', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = NullValueObject.create();
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(1);
+            expect(result.getValue()).toBe(2);
+        });
+        it('counts explicitly omitted scalar arguments', () => {
+            expect(testFunction.calculate(NullValueObject.create(true), NullValueObject.create(true)).getValue()).toBe(2);
         });
         it('Var1 is number, var2 is error', () => {
             const var1 = NumberValueObject.create(1);
@@ -88,7 +102,7 @@ describe('Test counta function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(4);
+            expect(result.getValue()).toBe(5);
         });
 
         it('Var1 is number, var2 is array not includes error', () => {
@@ -106,7 +120,7 @@ describe('Test counta function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(11);
+            expect(result.getValue()).toBe(13);
         });
     });
 });

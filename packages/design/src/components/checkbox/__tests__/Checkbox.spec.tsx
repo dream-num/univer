@@ -16,7 +16,7 @@
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { useState } from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Checkbox } from '../Checkbox';
 
 afterEach(cleanup);
@@ -45,5 +45,19 @@ describe('Checkbox', () => {
         expect($input?.checked).toBe(true);
 
         root.unmount();
+    });
+
+    it('syncs native indeterminate property, omits empty label span, and blocks disabled changes', () => {
+        const onChange = vi.fn();
+        const root = render(<Checkbox aria-label="Select row" indeterminate onChange={onChange} />);
+        const input = root.getByRole('checkbox', { name: 'Select row' }) as HTMLInputElement;
+        expect(input.indeterminate).toBe(true);
+        // No trailing label text span when children are omitted
+        expect(root.container.querySelector('[data-u-comp="checkbox"]')?.children).toHaveLength(1);
+
+        root.rerender(<Checkbox aria-label="Select row" disabled onChange={onChange} />);
+        expect(input.indeterminate).toBe(false);
+        fireEvent.click(input);
+        expect(onChange).not.toHaveBeenCalled();
     });
 });

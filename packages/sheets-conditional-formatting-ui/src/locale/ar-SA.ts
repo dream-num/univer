@@ -169,11 +169,6 @@ const locale: typeof enUS = {
             formulaError: 'صيغة خاطئة',
             rangeError: 'تحديد غير صالح',
         },
-        permission: {
-            dialog: {
-                setStyleErr: 'النطاق محمي، وليس لديك الإذن بتعيين الأنماط. لتعيين الأنماط، يُرجى التواصل مع المنشئ.',
-            },
-        },
     },
 };
 

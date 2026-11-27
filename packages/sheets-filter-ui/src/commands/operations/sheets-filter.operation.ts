@@ -29,6 +29,12 @@ export interface IOpenFilterPanelOperationParams {
     subUnitId: string;
 
     col: number;
+    renderId?: string;
+}
+
+export interface IRequestOpenFilterPanelOperationParams extends IOpenFilterPanelOperationParams {
+    /** Set by a beforeCommandExecuted listener when an alternative panel handles this request. */
+    handled?: boolean;
 }
 
 /**
@@ -51,15 +57,31 @@ export const OpenFilterPanelOperation: IOperation<IOpenFilterPanelOperationParam
 
         const { unitId, subUnitId, col } = params;
         const filterModel = sheetsFilterService.getFilterModel(unitId, subUnitId);
-        if (!filterModel) return false;
+        if (!filterModel) {
+            return false;
+        }
 
-        sheetsFilterPanelService.setupCol(filterModel, col);
+        sheetsFilterPanelService.setupCol(filterModel, col, { renderId: params.renderId });
         if (!contextService.getContextValue(FILTER_PANEL_OPENED_KEY)) {
             contextService.setContextValue(FILTER_PANEL_OPENED_KEY, true);
         }
 
         // Set the filter condition to the filter ui service on the specific column.
         return true;
+    },
+};
+
+export const RequestOpenFilterPanelOperation: IOperation<IRequestOpenFilterPanelOperationParams> = {
+    id: 'sheet.operation.request-open-filter-panel',
+    type: CommandType.OPERATION,
+    handler: (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+        if (params.handled) {
+            return true;
+        }
+        return accessor.get(ICommandService).syncExecuteCommand(OpenFilterPanelOperation.id, params);
     },
 };
 

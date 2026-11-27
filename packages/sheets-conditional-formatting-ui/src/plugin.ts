@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsConditionalFormattingUIConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -32,6 +31,7 @@ import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import type { IUniverSheetsConditionalFormattingUIConfig } from './config/config';
 import pkg from '../package.json';
 import { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
 import { AddColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
@@ -53,7 +53,6 @@ import { ConditionalFormattingEditorController } from './controllers/cf.editor.c
 import { ConditionalFormattingI18nController } from './controllers/cf.i18n.controller';
 import { ConditionalFormattingPainterController } from './controllers/cf.painter.controller';
 import { ConditionalFormattingPanelController } from './controllers/cf.panel.controller';
-import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
 import { SheetsCfRenderController } from './controllers/cf.render.controller';
 import { ConditionalFormattingViewportController } from './controllers/cf.viewport.controller';
 import { ComponentsController } from './controllers/components.controller';
@@ -101,7 +100,6 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
             [SheetsCfRenderController],
             [ConditionalFormattingCopyPasteController],
             [ConditionalFormattingAutoFillController],
-            [ConditionalFormattingPermissionController],
             [ConditionalFormattingPanelController],
             [ConditionalFormattingMenuController],
             [ConditionalFormattingI18nController],
@@ -133,7 +131,6 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
             [ConditionalFormattingEditorController],
             [ConditionalFormattingI18nController],
             [ConditionalFormattingPainterController],
-            [ConditionalFormattingPermissionController],
             [ConditionalFormattingViewportController],
         ]);
     }

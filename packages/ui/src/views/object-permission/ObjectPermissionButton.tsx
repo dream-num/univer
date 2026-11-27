@@ -246,7 +246,8 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
                                 setPolicy({ ...policy, edit: value as IObjectPermissionPolicy['edit'] });
                                 setDirty(true);
                             }}
-                            className="univer-flex univer-flex-col univer-gap-2"
+                            direction="vertical"
+                            className="univer-gap-2"
                         >
                             {editOptions.map((value) => (
                                 <Radio key={value} value={value}>

@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         message: {
             refError: '錯誤的引用',
         },
+        permission: {
+            editErr: '該範圍已被保護，目前無編輯權限。如需編輯，請聯絡創建者。 ',
+        },
     },
 };
 

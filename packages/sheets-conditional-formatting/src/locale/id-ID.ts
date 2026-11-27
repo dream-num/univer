@@ -24,6 +24,11 @@ const locale: typeof enUS = {
             mark: 'Tanda',
             rank: 'Peringkat',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'Rentang ini dilindungi, dan Anda tidak memiliki izin untuk mengatur gaya. Untuk mengatur gaya, silakan hubungi pembuatnya.',
+            },
+        },
     },
 };
 

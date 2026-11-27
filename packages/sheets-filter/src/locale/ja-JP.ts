@@ -24,6 +24,9 @@ const locale: typeof enUS = {
         msg: {
             'filter-header-forbidden': 'フィルタヘッダー行は移動できません。',
         },
+        permission: {
+            filterErr: '範囲は保護されており、フィルターを設定する権限がありません。フィルターを設定するには、作成者に連絡してください。',
+        },
     },
 };
 

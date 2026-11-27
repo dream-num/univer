@@ -15,6 +15,7 @@
  */
 
 import type { IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
+import type { IDiscreteRange } from '@univerjs/sheets';
 import type { ICopyPastePayload, IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import { Disposable, Inject, Injector, IUniverInstanceService, Rectangle } from '@univerjs/core';
 import { getSheetCommandTarget, rangeToDiscreteRange } from '@univerjs/sheets';
@@ -50,7 +51,7 @@ export class DataValidationCopyPasteController extends Disposable {
     private _initCopyPaste() {
         this._sheetClipboardService.addClipboardHook({
             id: DATA_VALIDATION_PLUGIN_NAME,
-            onBeforeCopy: (unitId, subUnitId, range) => this._collect(unitId, subUnitId, range),
+            onBeforeCopy: (unitId, subUnitId, range, _copyType, discreteRange) => this._collect(unitId, subUnitId, range, discreteRange),
             onPasteCells: (pasteFrom, pasteTo, data, payload) => {
                 if (!pasteFrom || !this._copyInfo || specialPastes.includes(payload.pasteType)) {
                     return { redos: [], undos: [] };
@@ -60,7 +61,7 @@ export class DataValidationCopyPasteController extends Disposable {
         });
     }
 
-    private _collect(unitId: string, subUnitId: string, range: IRange) {
+    private _collect(unitId: string, subUnitId: string, range: IRange, sourceRange?: IDiscreteRange) {
         const rules = new Map<string, IRange[]>();
         this._copyInfo = {
             unitId,
@@ -68,7 +69,7 @@ export class DataValidationCopyPasteController extends Disposable {
             rules,
         };
 
-        const discreteRange = this._injector.invoke((accessor) => {
+        const discreteRange = sourceRange ?? this._injector.invoke((accessor) => {
             return rangeToDiscreteRange(range, accessor, unitId, subUnitId);
         });
         if (!discreteRange) {

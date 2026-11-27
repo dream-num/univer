@@ -1,0 +1,47 @@
+{
+    "actualNativeBinarySha256": "71f6feffb38a3356c84205f4b759b5914e2c4621b3baa2b38540f3d1ef77d882",
+    "actualOnlyAuthoredWordControls": true,
+    "actualAllControlWordSessionsProperlyClosed": true,
+    "cases": [
+        {
+            "sourceField": "field-12",
+            "url": "https://riunet.upv.es/bitstream/handle/10251/62203/BRUGAROLAS%20-%20El%20cuerpo%20plural.%20Danza%20integrada%20en%20la%20inclusi%C3%B3n.%20Una%20renovaci%C3%B3n%20de%20la%20mirada.pdf?sequence=1&isAllowed=y",
+            "wordBreakAfter": "https://riunet.upv.es/bitstream/handle/10251/62203/BRUGAROLAS%20-",
+            "actualControlInputSha256": "e2093f6eeb261c8931e2f11832195f58c02a44a16a05b65091a5ea6cdb68d0de",
+            "actualWordPdfSha256": "00ec5f55ff0fa8aadf3119248694a809a9ed9aeb25b9070314c2dfc49f66ef28",
+            "actualWordSessionSha256": "143558c1f47c020233b4865f57c318a5c994a6e47f1839989e3ad221b13abcb4"
+        },
+        {
+            "sourceField": "field-32",
+            "url": "http://repositorio.pedagogica.edu.co/xmlui/bitstream/handle/123456789/1069/TE-18433.pdf?sequence=1",
+            "wordBreakAfter": "http://repositorio.pedagogica.edu.co/xmlui/bitstream/handle/123456789/1069/TE-",
+            "actualControlInputSha256": "39efb28d48521f87ddabdecb6d6b5db12fb524e0713d4dbaaf9680474d1f0aa4",
+            "actualWordPdfSha256": "a9fc6ed4f3998d1aedaae99644c28eebbe2c5239dd3e8c1b47517d1f1a6b7757",
+            "actualWordSessionSha256": "143558c1f47c020233b4865f57c318a5c994a6e47f1839989e3ad221b13abcb4"
+        },
+        {
+            "sourceField": "field-45",
+            "url": "https://eed.fundaciontelefonica.com/eed2015-sesion-1/",
+            "wordBreakAfter": "https://eed.fundaciontelefonica.com/eed2015-",
+            "actualControlInputSha256": "0f57476eeab0d1a1c48769196d5dab95a5e3fcb6801b3b907ed42b022024e74b",
+            "actualWordPdfSha256": "06231380e62bae57a7ec05f258b592b348ed3d0df15d029a74c60eba3e483c35",
+            "actualWordSessionSha256": "143558c1f47c020233b4865f57c318a5c994a6e47f1839989e3ad221b13abcb4"
+        },
+        {
+            "sourceField": "field-50",
+            "url": "http://www.efdeportes.com/efd138/la-danza-y-su-valor-educativo.htm",
+            "wordBreakAfter": "http://www.efdeportes.com/efd138/la-danza-y-su-valor-",
+            "actualControlInputSha256": "2bb5fe4116d690fa95cc5adb12dbaf604ab3d7e14c4fbdd5b9020fd1e9704b16",
+            "actualWordPdfSha256": "006a432fbdac2a38e6a8d20074ff022fdd9c9719bf37cd89bdb52f553b9d2800",
+            "actualWordSessionSha256": "143558c1f47c020233b4865f57c318a5c994a6e47f1839989e3ad221b13abcb4"
+        },
+        {
+            "sourceField": "field-46",
+            "url": "http://www.expresiva.org/wp-content/uploads/2015/01/12-La-EC-danza-en-Patricia-Stokoe.pdf",
+            "wordBreakAfter": "http://www.expresiva.org/wp-content/uploads/2015/01/12-",
+            "actualControlInputSha256": "97be82c9f14bda6707398b0f686d77f8e96c2c765640d17454201f148abeb347",
+            "actualWordPdfSha256": "2290c4bc859661d1a740fbb4d6aa9e33d7368ad266df196e7bffff8b1d71a126",
+            "actualWordSessionSha256": "6800cc2e873f3025a410498fe0e8545103bb49a851c20754a0864760d52be4f9"
+        }
+    ]
+}

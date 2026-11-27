@@ -33,7 +33,7 @@ import {
 } from '@univerjs/core';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { CellPopupManagerService, ISheetClipboardService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { AddCommentMutation, DeleteCommentMutation, IThreadCommentDataSourceService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
+import { AddCommentMutation, DeleteCommentMutation, IThreadCommentAuthzService, IThreadCommentDataSourceService, ThreadCommentAuthzService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
 import { vi } from 'vitest';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
@@ -99,6 +99,7 @@ export function createThreadCommentUiTestBed(workbookData?: IWorkbookData, depen
 
         override onStarting(): void {
             ([
+                [IThreadCommentAuthzService, { useClass: ThreadCommentAuthzService }],
                 [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
                 [ThreadCommentModel],
                 [SheetsThreadCommentModel],

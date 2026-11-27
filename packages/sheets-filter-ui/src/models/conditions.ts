@@ -16,9 +16,9 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { ICustomFilters, IFilterColumn } from '@univerjs/sheets-filter';
-import type { LocaleKey } from '../locale/types';
 import { BooleanNumber } from '@univerjs/core';
 import { CustomFilterOperator } from '@univerjs/sheets-filter';
+import type { LocaleKey } from '../locale/types';
 import { ExtendCustomFilterOperator, OperatorOrder } from './extended-operators';
 
 // This file implements a simple form schema system for condition filters (and only for it!)
@@ -141,7 +141,7 @@ export namespace FilterConditionItems {
             }
 
             const firstCustomFilter = filterColumn.customFilters.customFilters[0];
-            const canMap = firstCustomFilter.val === ' ' && firstCustomFilter.operator === CustomFilterOperator.NOT_EQUALS;
+            const canMap = !firstCustomFilter.compareAsText && firstCustomFilter.val === ' ' && firstCustomFilter.operator === CustomFilterOperator.NOT_EQUALS;
             if (!canMap) {
                 return false;
             }
@@ -180,7 +180,7 @@ export namespace FilterConditionItems {
 
             const firstCustomFilter = filterColumn.customFilters.customFilters[0];
             const valAsString = firstCustomFilter.val.toString();
-            if (!firstCustomFilter.operator && valAsString.startsWith('*') && valAsString.endsWith('*')) {
+            if (!firstCustomFilter.operator && valAsString.length > 2 && valAsString.startsWith('*') && hasTrailingWildcard(valAsString)) {
                 return { operator1: ExtendCustomFilterOperator.CONTAINS, val1: valAsString.slice(1, -1) };
             }
 
@@ -212,8 +212,9 @@ export namespace FilterConditionItems {
             const valAsString = firstCustomFilter.val.toString();
             if (
                 firstCustomFilter.operator === CustomFilterOperator.NOT_EQUALS
+                && valAsString.length > 1
                 && valAsString.startsWith('*')
-                && valAsString.endsWith('*')
+                && hasTrailingWildcard(valAsString)
             ) {
                 return { operator1: ExtendCustomFilterOperator.DOES_NOT_CONTAIN, val1: valAsString.slice(1, -1) };
             }
@@ -244,7 +245,7 @@ export namespace FilterConditionItems {
 
             const firstCustomFilter = filterColumn.customFilters.customFilters[0];
             const valAsString = firstCustomFilter.val.toString();
-            if (!firstCustomFilter.operator && valAsString.endsWith('*') && !valAsString.startsWith('*')) {
+            if (!firstCustomFilter.operator && hasTrailingWildcard(valAsString) && !valAsString.startsWith('*')) {
                 return { operator1: ExtendCustomFilterOperator.STARTS_WITH, val1: valAsString.slice(0, -1) };
             }
 
@@ -274,7 +275,7 @@ export namespace FilterConditionItems {
 
             const firstCustomFilter = filterColumn.customFilters.customFilters[0];
             const valAsString = firstCustomFilter.val.toString();
-            if (!firstCustomFilter.operator && valAsString.startsWith('*') && !valAsString.endsWith('*')) {
+            if (!firstCustomFilter.operator && valAsString.startsWith('*') && !hasTrailingWildcard(valAsString)) {
                 return { operator1: ExtendCustomFilterOperator.ENDS_WITH, val1: valAsString.slice(1) };
             }
 
@@ -806,6 +807,18 @@ export namespace FilterConditionItems {
         // Return NONE by default.
         return [NONE, {}];
     }
+}
+
+function hasTrailingWildcard(pattern: string): boolean {
+    if (!pattern.endsWith('*')) {
+        return false;
+    }
+
+    let index = pattern.length - 2;
+    while (pattern[index] === '~') {
+        index--;
+    }
+    return (pattern.length - 2 - index) % 2 === 0;
 }
 
 function getOnlyOperatorAndVal(mapParams: IFilterConditionFormParams): [FilterOperator, string | undefined] {

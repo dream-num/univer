@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -23,7 +24,17 @@ import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { FloorMath } from '../index';
 
 describe('Test floor.math function', () => {
-    const testFunction = new FloorMath(FUNCTION_NAMES_MATH.FLOOR_MATH);
+    let injector: Injector;
+    let testFunction: FloorMath;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [FloorMath, { useFactory: () => injector.createInstance(FloorMath, FUNCTION_NAMES_MATH.FLOOR_MATH) }],
+        ]);
+        testFunction = injector.get(FloorMath);
+    });
+
+    afterEach(() => injector.dispose());
 
     describe('FloorMath', () => {
         it('Value is normal number', () => {
@@ -64,7 +75,15 @@ describe('Test floor.math function', () => {
 
         it('Value is blank cell', () => {
             const number = NumberValueObject.create(2.15);
-            const significance = NullValueObject.create();
+            const significance = ArrayValueObject.create({
+                calculateValueList: [[NullValueObject.create()]],
+                rowCount: 1,
+                columnCount: 1,
+                unitId: 'unit',
+                sheetId: 'sheet',
+                row: 0,
+                column: 0,
+            });
             const result = testFunction.calculate(number, significance);
             expect(result.getValue()).toBe(0);
         });

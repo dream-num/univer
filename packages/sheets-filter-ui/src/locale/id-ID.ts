@@ -27,7 +27,7 @@ const locale: typeof enUS = {
             'smart-toggle-filter': 'Aktifkan/Nonaktifkan Filter',
         },
         permission: {
-            filterErr: 'Anda tidak memiliki izin untuk menggunakan filter.',
+            filterErr: 'Rentang dilindungi, dan Anda tidak memiliki izin untuk memfilter. Untuk memfilter, hubungi pembuat.',
         },
         panel: {
             'clear-filter': 'Hapus Filter',

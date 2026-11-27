@@ -75,8 +75,12 @@ export class Nper extends BaseFunction {
             let typeValue = +_typeObject.getValue();
             typeValue = typeValue ? 1 : 0;
 
-            if (rateValue === 0 && pmtValue === 0) {
+            if (this._isZeroDivisor(rateValue, pmtValue)) {
                 return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+            }
+
+            if (!this._supportsRate(rateValue)) {
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             let result;
@@ -102,5 +106,13 @@ export class Nper extends BaseFunction {
         }
 
         return resultArray;
+    }
+
+    protected _isZeroDivisor(rate: number, payment: number): boolean {
+        return rate === 0 && payment === 0;
+    }
+
+    protected _supportsRate(_rate: number): boolean {
+        return true;
     }
 }

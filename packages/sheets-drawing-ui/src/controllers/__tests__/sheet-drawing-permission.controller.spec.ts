@@ -17,13 +17,11 @@
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
 import { DrawingTypeEnum, IPermissionService, LocaleType, SheetTypes } from '@univerjs/core';
 import { WorksheetEditPermission } from '@univerjs/sheets';
-import { InsertSheetDrawingCommand, ISheetDrawingService } from '@univerjs/sheets-drawing';
+import { GroupSheetDrawingCommand, InsertSheetDrawingCommand, ISheetDrawingService, UngroupSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { expect, it, onTestFinished } from 'vitest';
 import { createAbsoluteChart } from '../../__tests__/chart-drawing-test-bed';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import { FlipSheetDrawingCommand } from '../../commands/commands/flip-drawings.command';
-import { GroupSheetDrawingCommand } from '../../commands/commands/group-sheet-drawing.command';
-import { UngroupSheetDrawingCommand } from '../../commands/commands/ungroup-sheet-drawing.command';
 import { SheetDrawingPermissionController } from '../sheet-drawing-permission.controller';
 
 function createPermissionRuntime(type?: SheetTypes) {
@@ -44,8 +42,6 @@ function createPermissionRuntime(type?: SheetTypes) {
 
 it('cancels Chart Sheet group and flip commands through the existing worksheet permission check', () => {
     const runtime = createPermissionRuntime(SheetTypes.CHART);
-    runtime.commandService.registerCommand(GroupSheetDrawingCommand);
-    runtime.commandService.registerCommand(UngroupSheetDrawingCommand);
     runtime.commandService.registerCommand(FlipSheetDrawingCommand);
 
     const executed: string[] = [];

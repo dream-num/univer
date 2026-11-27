@@ -15,10 +15,10 @@
  */
 
 import type { ITextStyle } from '@univerjs/core';
-import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
-import type { IFontCreateConfig } from '../../../../../basics/interfaces';
 import { BooleanNumber, DataStreamTreeTokenType, DocumentFlavor, GridType } from '@univerjs/core';
 import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
+import type { IFontCreateConfig } from '../../../../../basics/interfaces';
 import { GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import { getFontStyleString } from '../../../../../basics/tools';
 import { getDocumentCompatibilityPolicy } from '../../../document-compatibility';
@@ -40,6 +40,71 @@ import {
 } from '../glyph';
 
 describe('Glyph utils test cases', () => {
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('keeps font leading separate from ink and bare inline object bounds in %s', (flavor) => {
+        const policy = getDocumentCompatibilityPolicy(flavor);
+        const picture = {
+            streamType: DataStreamTreeTokenType.CUSTOM_BLOCK,
+            width: 96,
+            bBox: { ba: 64, bd: 0 },
+        } as IDocumentSkeletonGlyph;
+        const text = {
+            streamType: DataStreamTreeTokenType.LETTER,
+            content: 'A',
+            width: 8,
+            bBox: { ba: 12, bd: 3, aba: 10, abd: 2, normalLineHeight: 20, lineLeading: 4 },
+        } as IDocumentSkeletonGlyph;
+        const mark = { ...text, content: '\r', width: 0, streamType: DataStreamTreeTokenType.PARAGRAPH };
+        const original = JSON.stringify([picture, text, mark]);
+        expect(getGlyphGroupFontBoundingBox(policy, [text])).toEqual({
+            boundingBoxAscent: 12,
+            boundingBoxDescent: 3,
+            normalLineHeight: 20,
+        });
+        expect(getGlyphGroupFontBoundingBox(policy, [picture], [mark])).toEqual({
+            boundingBoxAscent: 64,
+            boundingBoxDescent: flavor === DocumentFlavor.TRADITIONAL ? 0 : 3,
+            normalLineHeight: 20,
+        });
+        expect(getGlyphGroupFontBoundingBox(policy, [picture], [text, mark])).toEqual({
+            boundingBoxAscent: 64,
+            boundingBoxDescent: flavor === DocumentFlavor.TRADITIONAL ? 5 : 3,
+            normalLineHeight: 20,
+        });
+        expect(JSON.stringify([picture, text, mark])).toBe(original);
+    });
+
+    it.each([
+        { content: '中', hint: undefined, eastAsian: true },
+        { content: '§', hint: 'eastAsia', eastAsian: true },
+        { content: '§', hint: 'default', eastAsian: false },
+        { content: 'A', hint: 'eastAsia', eastAsian: false },
+    ] as const)('uses a supplied theme fallback only in the East Asian glyph path: %j', ({ content, hint, eastAsian }) => {
+        for (const authored of ['Authored East Asian', undefined]) {
+            const textStyle: ITextStyle = { ff: 'Latin Face', fs: 12, eastAsiaFontFamily: authored, fontHint: hint };
+            const before = JSON.stringify(textStyle);
+            const fontStyle = getFontStyleString(textStyle);
+            const glyph = createSkeletonLetterGlyph(content, {
+                textStyle,
+                fontStyle,
+                eastAsiaFontScheme: { language: 'zh-CN', major: {}, minor: { scriptFonts: { Hans: 'Word Theme Face' } } },
+                charSpace: 0,
+                snapToGrid: BooleanNumber.FALSE,
+            });
+            if (eastAsian) {
+                const families = glyph.fontStyle!.fontFamily;
+                expect(families).toContain('Word Theme Face');
+                expect(families.indexOf('Word Theme Face')).toBeLessThan(families.indexOf('Latin Face'));
+                if (authored) {
+                    expect(families.indexOf(authored)).toBeLessThan(families.indexOf('Word Theme Face'));
+                }
+            } else {
+                expect(glyph.fontStyle!.fontFamily).toBe(fontStyle.fontFamily);
+            }
+            expect(glyph.ts).toEqual(textStyle);
+            expect(JSON.stringify(textStyle)).toBe(before);
+        }
+    });
+
     it.each(['A', '😀', 'مرحبا', '\t', '\r'])('preserves hidden %j offsets without painting or measuring it', (raw) => {
         const textStyle: ITextStyle = { ff: 'Arial', fs: 80, hidden: true };
         const glyph = createSkeletonLetterGlyph(raw, {
@@ -523,6 +588,40 @@ describe('Glyph utils test cases', () => {
     });
 
     describe('test bullet glyph style', () => {
+        it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('preserves the text font leading on a DengXian marker in %s mode', (flavor) => {
+            const textStyle = { ff: 'DengXian', fs: 13 };
+            const policy = getDocumentCompatibilityPolicy(flavor);
+            const em = 13 / 0.75;
+            const measure = vi.spyOn(FontCache, 'getTextSize').mockReturnValue({
+                width: 10,
+                ba: em * 1659 / 2048,
+                bd: em * 475 / 2048,
+                aba: 10,
+                abd: 2,
+                normalLineHeight: em * 2134 / 2048,
+                sp: 0,
+                sbr: 0,
+                sbo: 0,
+                spr: 0,
+                spo: 0,
+            });
+            onTestFinished(() => measure.mockRestore());
+            const text = createSkeletonLetterGlyph('1.', {
+                textStyle,
+                fontStyle: getFontStyleString(textStyle),
+                documentCompatibilityPolicy: policy,
+                charSpace: 0,
+                snapToGrid: BooleanNumber.FALSE,
+            });
+            const marker = createSkeletonBulletGlyph(
+                { ts: { fs: 11 }, bBox: { ba: 10, bd: 2 } } as IDocumentSkeletonGlyph,
+                { listId: 'list', symbol: '1.', ts: textStyle, startIndexItem: 1 },
+                10,
+                policy
+            );
+            expect(marker.bBox).toEqual(text.bBox);
+        });
+
         it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('measures list markers with the same font policy as body text in %s mode', (flavor) => {
             const textStyle = { ff: 'Symbol', fs: 12 };
             const fontStyle = getFontStyleString(textStyle);
@@ -815,14 +914,15 @@ describe('Glyph utils test cases', () => {
     });
 
     it.each([
-        { enabled: BooleanNumber.TRUE, fontHint: 'eastAsia', flavor: DocumentFlavor.TRADITIONAL, content: ' ', sa: 100, expected: 12 },
-        { enabled: BooleanNumber.TRUE, fontHint: 'eastAsia', flavor: DocumentFlavor.TRADITIONAL, content: ' ', sa: 50, expected: 6 },
-        { enabled: BooleanNumber.FALSE, fontHint: 'eastAsia', flavor: DocumentFlavor.TRADITIONAL, content: ' ', sa: 100, expected: 6.66796875 },
-        { enabled: undefined, fontHint: 'eastAsia', flavor: DocumentFlavor.TRADITIONAL, content: ' ', sa: 100, expected: 6.66796875 },
-        { enabled: BooleanNumber.TRUE, fontHint: 'default', flavor: DocumentFlavor.TRADITIONAL, content: ' ', sa: 100, expected: 6.66796875 },
-        { enabled: BooleanNumber.TRUE, fontHint: 'eastAsia', flavor: DocumentFlavor.MODERN, content: ' ', sa: 100, expected: 6.66796875 },
-        { enabled: BooleanNumber.TRUE, fontHint: 'eastAsia', flavor: DocumentFlavor.TRADITIONAL, content: '　', sa: 100, expected: 24 },
-    ] as const)('gates legacy East Asian half-em space advances: %j', ({ enabled, fontHint, flavor, content, sa, expected }) => {
+        { enabled: BooleanNumber.TRUE, fontHint: 'eastAsia', balanceSpaceWidth: true, flavor: DocumentFlavor.TRADITIONAL, content: ' ', sa: 100, expected: 12 },
+        { enabled: BooleanNumber.TRUE, fontHint: 'eastAsia', balanceSpaceWidth: true, flavor: DocumentFlavor.TRADITIONAL, content: ' ', sa: 50, expected: 6 },
+        { enabled: BooleanNumber.TRUE, fontHint: 'eastAsia', balanceSpaceWidth: false, flavor: DocumentFlavor.TRADITIONAL, content: ' ', sa: 100, expected: 6.66796875 },
+        { enabled: BooleanNumber.FALSE, fontHint: 'eastAsia', balanceSpaceWidth: true, flavor: DocumentFlavor.TRADITIONAL, content: ' ', sa: 100, expected: 6.66796875 },
+        { enabled: undefined, fontHint: 'eastAsia', balanceSpaceWidth: true, flavor: DocumentFlavor.TRADITIONAL, content: ' ', sa: 100, expected: 6.66796875 },
+        { enabled: BooleanNumber.TRUE, fontHint: 'default', balanceSpaceWidth: true, flavor: DocumentFlavor.TRADITIONAL, content: ' ', sa: 100, expected: 12 },
+        { enabled: BooleanNumber.TRUE, fontHint: 'eastAsia', balanceSpaceWidth: true, flavor: DocumentFlavor.MODERN, content: ' ', sa: 100, expected: 6.66796875 },
+        { enabled: BooleanNumber.TRUE, fontHint: 'eastAsia', balanceSpaceWidth: true, flavor: DocumentFlavor.TRADITIONAL, content: '　', sa: 100, expected: 24 },
+    ] as const)('gates legacy contextual half-em space advances: %j', ({ enabled, fontHint, balanceSpaceWidth, flavor, content, sa, expected }) => {
         const textStyle: ITextStyle = { ff: 'Arial', fs: 18, fontHint, sa };
         const fontStyle = getFontStyleString(textStyle);
         const measuredWidth = content === '　' ? 24 : 6.66796875;
@@ -848,6 +948,7 @@ describe('Glyph utils test cases', () => {
                 charSpace: 0,
                 snapToGrid: BooleanNumber.FALSE,
                 balanceSingleByteDoubleByteWidth: enabled,
+                balanceSpaceWidth,
                 documentCompatibilityPolicy: getDocumentCompatibilityPolicy(flavor),
             });
             expect(glyph.width).toBeCloseTo(expected);

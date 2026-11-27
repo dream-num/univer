@@ -26,16 +26,18 @@ import {
 import { MessageType } from '@univerjs/design';
 import { getDocumentPermissionValue } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
-import { HyperlinkPreview, IMessageService, useDependency, useObservable } from '@univerjs/ui';
+import { HyperlinkPreview, IClipboardInterfaceService, IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
 import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
+import { getDocHyperLinkTarget, getDocHyperLinkTargetLabel } from '../utils/hyper-link-target';
 
 export const DocLinkPopup = () => {
     const hyperLinkService = useDependency(DocHyperLinkPopupService);
     const commandService = useDependency(ICommandService);
     const messageService = useDependency(IMessageService);
+    const clipboardService = useDependency(IClipboardInterfaceService);
     const localeService = useDependency(LocaleService);
     const currentPopup = useObservable(hyperLinkService.showingLink$, hyperLinkService.showing);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -55,12 +57,13 @@ export const DocLinkPopup = () => {
         return null;
     }
 
-    const target = link.properties?.url ?? `#${link.properties?.bookmarkId ?? link.properties?.headingId ?? ''}`;
+    const target = getDocHyperLinkTarget(link.properties);
+    const targetLabel = getDocHyperLinkTargetLabel(link.properties, body);
     const canEdit = hyperLinkService.canEditLink(unitId, currentPopup);
     const canCopy = getDocumentPermissionValue(permissionService, unitId, unitId, UnitAction.Copy);
     return (
         <HyperlinkPreview
-            title={target}
+            title={targetLabel}
             copyDisabled={!canCopy}
             labels={{ copy: localeService.t<LocaleKey>('docs-hyper-link-ui.info.copy'), edit: localeService.t<LocaleKey>('docs-hyper-link-ui.info.edit'), remove: localeService.t<LocaleKey>('docs-hyper-link-ui.info.cancel') }}
             onPointerEnter={() => hyperLinkService.setInfoPopupHovered(true)}
@@ -71,7 +74,7 @@ export const DocLinkPopup = () => {
             onDismiss={() => hyperLinkService.hideInfoPopup()}
             onOpen={() => commandService.executeCommand(ClickDocHyperLinkOperation.id, { unitId, linkId, segmentId })}
             onCopy={async () => {
-                await navigator.clipboard.writeText(target);
+                await clipboardService.writeText(target);
                 messageService.show({ content: localeService.t<LocaleKey>('docs-hyper-link-ui.info.coped'), type: MessageType.Info });
             }}
             onEdit={canEdit ? () => commandService.executeCommand(ShowDocHyperLinkEditPopupOperation.id, { link: currentPopup }) : undefined}

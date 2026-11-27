@@ -39,6 +39,7 @@ import { getImageSize } from '@univerjs/drawing';
 import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute, SheetSkeletonService } from '@univerjs/sheets';
 import {
     applySheetDrawingPlacement,
+    getLegacySheetDrawingPosition,
     getSheetDrawingPlacement,
     ISheetDrawingService,
     RemoveSheetDrawingCommand,
@@ -60,7 +61,7 @@ export interface IFOverGridImage extends Omit<ISheetImage, 'sheetTransform' | 't
  * @returns {IFOverGridImage} The FOverGridImage {@link IFOverGridImage}
  */
 function convertSheetImageToFOverGridImage(sheetImage: ISheetImage, skeleton: SpreadsheetSkeleton): IFOverGridImage {
-    const { from, to, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = sheetImage.sheetTransform;
+    const { from, to, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = getLegacySheetDrawingPosition(sheetImage, skeleton);
 
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
 
@@ -71,7 +72,9 @@ function convertSheetImageToFOverGridImage(sheetImage: ISheetImage, skeleton: Sp
         skeleton
     );
 
-    const { width, height } = absolutePosition;
+    const fixed = sheetImage.anchorType !== SheetDrawingAnchorType.Both;
+    const width = (fixed ? sheetImage.transform?.width : undefined) ?? absolutePosition.width;
+    const height = (fixed ? sheetImage.transform?.height : undefined) ?? absolutePosition.height;
 
     return {
         ...sheetImage,
@@ -112,26 +115,11 @@ function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, shee
         skeleton
     );
 
-    const { sheetTransform, transform } = absolutePosition;
+    const transform = { ...absolutePosition.transform, flipY, flipX, angle, skewX, skewY };
 
     return {
         ...fOverGridImage,
-        sheetTransform: {
-            ...sheetTransform,
-            flipY,
-            flipX,
-            angle,
-            skewX,
-            skewY,
-        },
-        transform: {
-            ...transform,
-            flipY,
-            flipX,
-            angle,
-            skewX,
-            skewY,
-        },
+        transform,
         axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton),
     };
 }
@@ -210,38 +198,6 @@ export class FOverGridImageBuilder {
             throw new Error(`Skeleton for unitId ${unitId} and subUnitId ${subUnitId} not found`);
         }
 
-        if (image.sheetTransform == null) {
-            image.sheetTransform = {
-                from: {
-                    column: 0,
-                    columnOffset: 0,
-                    row: 0,
-                    rowOffset: 0,
-                },
-                to: {
-                    column: 0,
-                    columnOffset: 0,
-                    row: 0,
-                    rowOffset: 0,
-                },
-            };
-        }
-        if (image.axisAlignSheetTransform == null) {
-            image.axisAlignSheetTransform = {
-                from: {
-                    column: 0,
-                    columnOffset: 0,
-                    row: 0,
-                    rowOffset: 0,
-                },
-                to: {
-                    column: 0,
-                    columnOffset: 0,
-                    row: 0,
-                    rowOffset: 0,
-                },
-            };
-        }
         this._image = convertSheetImageToFOverGridImage(image, skeleton);
         return this;
     }
@@ -542,7 +498,7 @@ export class FOverGridImageBuilder {
      *
      * This placement takes precedence over the individual row, column, size,
      * and anchor type builder fields. Use bounds inference for an existing
-     * transform; use exact markers when a caller explicitly chose cells.
+     * unrotated transform; use exact Excel-aligned markers to select cells.
      * @param {ISheetDrawingPlacementInput} placement Exact placement or bounds with an explicit anchor type.
      * @returns {FOverGridImageBuilder} This builder.
      * @example
@@ -827,7 +783,6 @@ export class FOverGridImageBuilder {
                     skewX: this._image.skewX,
                     skewY: this._image.skewY,
                 },
-                sheetTransform,
                 axisAlignSheetTransform: sheetTransform,
             };
             return applySheetDrawingPlacement(image, this._placement);
@@ -904,7 +859,7 @@ export class FOverGridImage extends FBase {
     }
 
     /**
-     * Get this image's explicit placement.
+     * Get this image's placement with Excel-aligned cell markers.
      * @returns {ISheetDrawingPlacement} OneCell, TwoCell, or Absolute placement.
      * @example
      * ```ts
@@ -918,7 +873,9 @@ export class FOverGridImage extends FBase {
             subUnitId: this._image.subUnitId,
             drawingId: this._image.drawingId,
         });
-        return getSheetDrawingPlacement(current ?? this._image);
+        const { unitId, subUnitId } = this._image;
+        const skeleton = this._sheetSkeletonService.getSkeleton(unitId, subUnitId);
+        return getSheetDrawingPlacement(current ?? this._image, skeleton ?? undefined);
     }
 
     /**
@@ -956,8 +913,8 @@ export class FOverGridImage extends FBase {
     /**
      * Set this image's explicit placement through the drawing command.
      * `Position`, `Both`, and `None` correspond to OneCell, TwoCell, and
-     * Absolute. Bounds inference is preferable when preserving the current
-     * visual bounds; exact markers are for user-selected cells and offsets.
+     * Absolute. Use the unrotated rectangle to infer placement, or specify
+     * exact Excel-aligned cell markers and offsets.
      * @param {ISheetDrawingPlacementInput} placement Exact placement or bounds with an explicit anchor type.
      * @returns {boolean} `true` when the command succeeds.
      * @example OneCell
@@ -1044,7 +1001,8 @@ export class FOverGridImage extends FBase {
      */
     toBuilder(): FOverGridImageBuilder {
         const builder = this._injector.createInstance(FOverGridImageBuilder, this._image.unitId, this._image.subUnitId);
-        builder.setImage(this._image);
+        const current = this._sheetDrawingService.getDrawingByParam(this._image) as ISheetImage | undefined;
+        builder.setImage(current ?? this._image);
         return builder;
     }
 
@@ -1222,18 +1180,11 @@ export class FOverGridImage extends FBase {
      * ```
      */
     setRotate(angle: number): boolean {
-        this._image.sheetTransform.angle = angle;
-        this._image.transform && (this._image.transform.angle = angle);
-        if (this._image.transform) {
-            const skeleton = this._sheetSkeletonService.getSkeleton(this._image.unitId, this._image.subUnitId);
-            if (!skeleton) {
-                throw new Error(`Skeleton for unitId ${this._image.unitId} and subUnitId ${this._image.subUnitId} not found`);
-            }
-
-            this._image.axisAlignSheetTransform && (this._image.axisAlignSheetTransform = transformToAxisAlignPosition(this._image.transform, skeleton));
-        }
-
-        return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
+        const { unitId, subUnitId, drawingId } = this._image;
+        return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, {
+            unitId,
+            drawings: [{ unitId, subUnitId, drawingId, transform: { angle } }],
+        });
     }
 
     /**

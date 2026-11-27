@@ -33,7 +33,7 @@ import {
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { IThreadCommentDataSourceService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
+import { IThreadCommentAuthzService, IThreadCommentDataSourceService, ThreadCommentAuthzService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation, ThreadCommentDraftService, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import threadCommentEnUS from '@univerjs/thread-comment-ui/locale/en-US';
 import { ComponentManager, ISidebarService, RediContext } from '@univerjs/ui';
@@ -177,6 +177,7 @@ function createPanelTestBed(decorationIds: string[]) {
     injector.add([ComponentManager]);
     injector.add([DocSelectionManagerService]);
     injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
+    injector.add([IThreadCommentAuthzService, { useClass: ThreadCommentAuthzService }]);
     injector.add([IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }]);
     injector.add([ThreadCommentModel]);
     injector.add([ISidebarService, { useClass: TestSidebarService as never }]);

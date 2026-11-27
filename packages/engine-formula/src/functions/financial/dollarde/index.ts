@@ -36,7 +36,7 @@ export class Dollarde extends BaseFunction {
         const [fractionalDollarObject, fractionObject] = variants as BaseValueObject[];
 
         const fractionalDollarValue = +fractionalDollarObject.getValue();
-        let fractionValue = Math.floor(+fractionObject.getValue());
+        const fractionValue = Math.floor(+fractionObject.getValue());
 
         if (Number.isNaN(fractionalDollarValue) || Number.isNaN(fractionValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -50,19 +50,28 @@ export class Dollarde extends BaseFunction {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
-        fractionValue = Number.parseInt(`${fractionValue}`, 10);
+        return NumberValueObject.create(this._convert(fractionalDollarValue, fractionValue));
+    }
+
+    protected _convert(fractionalDollarValue: number, fractionValue: number): number {
+        const integerFraction = Number.parseInt(`${fractionValue}`, 10);
 
         // Compute integer part
         let result = Number.parseInt(`${fractionalDollarValue}`, 10);
 
         // Add decimal part
-        result += ((fractionalDollarValue % 1) * 10 ** Math.ceil(Math.log(fractionValue) / Math.LN10)) / fractionValue;
+        result += ((fractionalDollarValue % 1) * 10 ** Math.ceil(Math.log(integerFraction) / Math.LN10)) / integerFraction;
 
         // Round result
-        const power = 10 ** (Math.ceil(Math.log(fractionValue) / Math.LN2) + 1);
+        const power = 10 ** (Math.ceil(Math.log(integerFraction) / Math.LN2) + 1);
 
-        result = Math.round(result * power) / power;
+        return Math.round(result * power) / power;
+    }
+}
 
-        return NumberValueObject.create(result);
+export class ExcelDollarde extends Dollarde {
+    protected override _convert(value: number, fraction: number): number {
+        const integer = Math.trunc(value);
+        return integer + ((value - integer) * 10 ** Math.ceil(Math.log10(fraction))) / fraction;
     }
 }

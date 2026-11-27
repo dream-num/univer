@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -24,7 +25,17 @@ import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { Average } from '../index';
 
 describe('Test average function', () => {
-    const testFunction = new Average(FUNCTION_NAMES_STATISTICAL.AVERAGE);
+    let injector: Injector;
+    let testFunction: Average;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [Average, { useFactory: () => injector.createInstance(Average, FUNCTION_NAMES_STATISTICAL.AVERAGE) }],
+        ]);
+        testFunction = injector.get(Average);
+    });
+
+    afterEach(() => injector.dispose());
 
     describe('Average', () => {
         it('Var1 is number, var2 is number', () => {
@@ -60,7 +71,7 @@ describe('Test average function', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = NullValueObject.create();
             const result = testFunction.calculate(var1, var2);
-            expect(getObjectValue(result)).toBe(1);
+            expect(getObjectValue(result)).toBe(0.5);
         });
         it('Var1 is number, var2 is error', () => {
             const var1 = NumberValueObject.create(1);

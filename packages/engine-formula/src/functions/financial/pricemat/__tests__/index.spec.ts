@@ -184,7 +184,9 @@ describe('Test pricemat function', () => {
             const yld = NumberValueObject.create(0.0625);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, issue, rate, yld, basis);
-            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+            const [row] = getObjectValue(result) as (number | string)[][];
+            expect(row[0]).toBeCloseTo(99.46653933766413, 10);
+            expect(row.slice(1)).toEqual([ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME]);
         });
         it('checks the serial-zero boundary in both date systems', () => {
             const args = [

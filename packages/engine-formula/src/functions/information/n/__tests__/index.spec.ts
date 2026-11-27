@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
 import { N } from '../index';
 
@@ -76,7 +77,7 @@ describe('Test n function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(valueArray);
-            expect(result.getValue()).toBe(1);
+            expect(getObjectValue(result)).toEqual([[1, 0, 1.23, 1, 0, 0], [0, 100, 2.34, 0, -3, ErrorType.NAME]]);
         });
     });
 });

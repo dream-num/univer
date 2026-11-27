@@ -19,6 +19,12 @@ import { describe, expect, it } from 'vitest';
 import { getCurrencyType } from '../currency';
 
 describe('getCurrencyType', () => {
+    it('keeps explicit currency symbols separate from locale markers', () => {
+        expect(getCurrencyType('[$₹-4009]#,##0')).toBe('₹');
+        expect(getCurrencyType('[$-en-IN]dd/mm/yyyy')).toBeUndefined();
+        expect(getCurrencyType('[$$-409]#,##0')).toBe('$');
+    });
+
     it('getCurrencyType', () => {
         expect(getCurrencyType(`_(${currencySymbols[7]} 123123`)).toBe(currencySymbols[7]);
         expect(getCurrencyType('_(# 123123')).toBeUndefined();

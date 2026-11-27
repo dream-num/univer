@@ -24,7 +24,6 @@ import {
     ISheetDrawingService,
     SetSheetDrawingCommand,
     transformToAxisAlignPosition,
-    transformToDrawingPosition,
 } from '@univerjs/sheets-drawing';
 import { FileNamePart, IBatchSaveImagesService, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { transformComponentKey } from '@univerjs/sheets-ui/facade';
@@ -499,16 +498,13 @@ export class FWorksheetDrawingUIMixin extends FWorksheet implements IFWorksheetD
             componentKey: config.componentKey || drawingParm.componentKey,
             allowTransform: config.allowTransform !== undefined ? config.allowTransform : drawingParm.allowTransform,
             data: config.data || drawingParm.data,
-            sheetTransform: config.position
-                ? transformToDrawingPosition(config.position, skeleton) ?? drawingParm.sheetTransform
-                : drawingParm.sheetTransform,
             transform: {
                 ...drawingParm.transform,
                 ...config.position, // Merge with existing transform
             },
             axisAlignSheetTransform: config.position
-                ? transformToAxisAlignPosition(config.position, skeleton) ?? drawingParm.sheetTransform
-                : drawingParm.sheetTransform,
+                ? transformToAxisAlignPosition(config.position, skeleton) ?? drawingParm.axisAlignSheetTransform
+                : drawingParm.axisAlignSheetTransform,
         };
 
         const res = this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId, subUnitId, drawings: [newParam] });
@@ -545,16 +541,13 @@ export class FWorksheetDrawingUIMixin extends FWorksheet implements IFWorksheetD
                 componentKey: update.config.componentKey || drawingParm.componentKey,
                 allowTransform: update.config.allowTransform !== undefined ? update.config.allowTransform : drawingParm.allowTransform,
                 data: update.config.data || drawingParm.data,
-                sheetTransform: update.config.position
-                    ? transformToDrawingPosition(update.config.position, skeleton) ?? drawingParm.sheetTransform
-                    : drawingParm.sheetTransform,
                 transform: {
                     ...drawingParm.transform,
                     ...update.config.position, // Merge with existing transform
                 },
                 axisAlignSheetTransform: update.config.position
-                    ? transformToAxisAlignPosition(update.config.position, skeleton) ?? drawingParm.sheetTransform
-                    : drawingParm.sheetTransform,
+                    ? transformToAxisAlignPosition(update.config.position, skeleton) ?? drawingParm.axisAlignSheetTransform
+                    : drawingParm.axisAlignSheetTransform,
             };
 
             drawings.push(newParam);

@@ -97,11 +97,6 @@ const locale: typeof enUS = {
         showTime: {
             label: 'Tampilkan TimePicker',
         },
-        permission: {
-            dialog: {
-                setStyleErr: 'Rentang ini dilindungi, dan Anda tidak memiliki izin untuk mengatur gaya. Untuk mengatur gaya, silakan hubungi pembuatnya.',
-            },
-        },
     },
 };
 

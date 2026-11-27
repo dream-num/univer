@@ -76,6 +76,21 @@ function linebreakLink(link: string): string[] {
     return pieces;
 }
 
+function linebreakWordLink(link: string): string[] {
+    const pieces: string[] = [];
+    let offset = 0;
+    const schemeEnd = link.indexOf('://');
+
+    for (let i = schemeEnd < 0 ? 0 : schemeEnd + 3; i < link.length - 1; i++) {
+        if (link[i] === '-' && !(/[0-9]/.test(link[i - 1]) && /[0-9]/.test(link[i + 1]))) {
+            pieces.push(link.slice(offset, i + 1));
+            offset = i + 1;
+        }
+    }
+    pieces.push(link.slice(offset));
+    return pieces;
+}
+
 const LINK_CHAR_REG_EXP = /[a-z\d!#$%&*+,-./:;=?@_~\\]/i;
 const LINK_CHAR_NO_TRAILING_REG_EXP = /[!,.;:?']$/g;
 
@@ -107,6 +122,8 @@ export class LineBreakerLinkEnhancer implements IBreakPoints {
 
     private _link = '';
 
+    private _linkStart = 0;
+
     private _index = -1;
 
     private _linkSlice: string[] = [];
@@ -115,7 +132,8 @@ export class LineBreakerLinkEnhancer implements IBreakPoints {
 
     constructor(
         private _lineBreaker: IBreakPoints,
-        private readonly _allowLinkBreaks = true
+        private readonly _allowLinkBreaks = true,
+        private readonly _allowWordHyphenBreaks = false
     ) {
         this.content = _lineBreaker.content;
     }
@@ -131,15 +149,23 @@ export class LineBreakerLinkEnhancer implements IBreakPoints {
             }
             // Check if next break is in word.
             const word = this.content.slice(this._curBreak.position, this._nextBreak.position);
+            const link = word.match(/[a-z][a-z\d+.-]*:\/\/$|www\./i);
 
-            if (word.length && (word.endsWith('://') || word.startsWith('www.'))) {
+            if (link) {
                 this._isInLink = true;
-                this._link = extractLink(this.content, this._curBreak.position);
+                // An opening delimiter can share the first Unicode break slice with the URL.
+                this._linkStart = this._curBreak.position + (link.index ?? 0);
+                this._link = extractLink(this.content, this._linkStart);
                 // get link slice.
-                this._linkSlice = this._allowLinkBreaks ? linebreakLink(this._link) : [];
+                if (this._allowLinkBreaks) {
+                    this._linkSlice = linebreakLink(this._link);
+                } else {
+                    // Word keeps numeric date components together but permits ordinary URL hyphens.
+                    this._linkSlice = this._allowWordHyphenBreaks ? linebreakWordLink(this._link) : [];
+                }
                 this._index = 0;
 
-                while (this._nextBreak && this._nextBreak.position < this._curBreak.position + this._link.length) {
+                while (this._nextBreak && this._nextBreak.position < this._linkStart + this._link.length) {
                     this._nextBreak = this._lineBreaker.nextBreakPoint();
                 }
 
@@ -150,7 +176,7 @@ export class LineBreakerLinkEnhancer implements IBreakPoints {
         } else {
             // No need to add `-` to last hyphen slice, so use length - 1.
             if (this._index < this._linkSlice.length - 1) {
-                const position = getSlicePosition(this._curBreak!.position, this._linkSlice, this._index);
+                const position = getSlicePosition(this._linkStart, this._linkSlice, this._index);
 
                 this._index++;
 
@@ -158,6 +184,7 @@ export class LineBreakerLinkEnhancer implements IBreakPoints {
             } else {
                 this._isInLink = false;
                 this._link = '';
+                this._linkStart = 0;
                 this._linkSlice = [];
                 this._index = -1;
 

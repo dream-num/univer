@@ -14,10 +14,26 @@
  * limitations under the License.
  */
 
-import { HorizontalAlign, Injector, IUniverInstanceService, VerticalAlign } from '@univerjs/core';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import type { IPointerEvent, IRender } from '@univerjs/engine-render';
+import {
+    DocumentDataModel,
+    DrawingTypeEnum,
+    EventSubject,
+    HorizontalAlign,
+    Injector,
+    IUniverInstanceService,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    Univer,
+    UniverInstanceType,
+    VerticalAlign,
+} from '@univerjs/core';
+import { IRenderManagerService, RenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { HoverRenderController } from '../../controllers/hover-render.controller';
 import { HoverManagerService } from '../hover-manager.service';
 import { SheetScrollManagerService } from '../scroll-manager.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -58,6 +74,84 @@ function createHoverManagerService(univerInstanceService: Partial<IUniverInstanc
 }
 
 describe('HoverManagerService', () => {
+    let documentInjector: Injector | undefined;
+
+    afterEach(() => {
+        documentInjector?.dispose();
+        documentInjector = undefined;
+    });
+
+    it('reports the visible cell in the pane receiving the click', () => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([SheetInterceptorService]);
+        injector.add([SheetSkeletonService]);
+        injector.add([HoverManagerService]);
+        injector.get(SheetSkeletonService);
+        const workbook = univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+            id: 'pane-book',
+            sheetOrder: ['sheet'],
+            sheets: { sheet: { id: 'sheet', rowCount: 20, columnCount: 4 } },
+        });
+        const manager = injector.get(IRenderManagerService);
+        const hover = injector.get(HoverManagerService);
+        const clicks: number[] = [];
+        hover.currentClickedCell$.subscribe((cell) => clicks.push(cell.location.row));
+        const createPane = (renderId: string, filtered: boolean) => {
+            const onClick$ = new EventSubject<IPointerEvent>();
+            const scene = {
+                onTransformChange$: new EventSubject(),
+                getActiveViewportByCoord: () => ({ viewportScrollX: 0, viewportScrollY: 0 }),
+                getAncestorScale: () => ({ scaleX: 1, scaleY: 1 }),
+            };
+            const mainComponent = {
+                onClick$,
+                onPointerEnter$: new EventSubject(),
+                onPointerMove$: new EventSubject(),
+                onPointerDown$: new EventSubject(),
+                onPointerUp$: new EventSubject(),
+                onDblclick$: new EventSubject(),
+                onPointerLeave$: new EventSubject(),
+            };
+            const context = { unitId: 'pane-book', renderId, unit: workbook, scene, mainComponent, components: new Map() };
+            const child = injector.createChild();
+            child.add([SheetSkeletonManagerService, { useFactory: function createSkeletonManager() {
+                return child.createInstance(SheetSkeletonManagerService, context as never);
+            } }]);
+            child.add([SheetScrollManagerService, { useFactory: function createScrollManager() {
+                return child.createInstance(SheetScrollManagerService, context as never);
+            } }]);
+            child.add([HoverRenderController, { useFactory: function createHoverController() {
+                return child.createInstance(HoverRenderController, context as never);
+            } }]);
+            const skeletons = child.get(SheetSkeletonManagerService);
+            skeletons.setCurrent({ sheetId: 'sheet' });
+            if (filtered) {
+                skeletons.setProjection('sheet', { isRowFiltered: (row) => row < 10, getCell: () => undefined });
+            }
+            const skeleton = skeletons.getCurrentSkeleton()!;
+            skeleton.calculate();
+            const scroll = child.get(SheetScrollManagerService);
+            scroll.setSearchParam({ unitId: 'pane-book', sheetId: 'sheet' });
+            scroll.setValidScrollState({ unitId: 'pane-book', sheetId: 'sheet', sheetViewStartRow: 0, sheetViewStartColumn: 0, offsetX: 0, offsetY: 0 });
+            manager.addRender(renderId, { ...context, type: UniverInstanceType.UNIVER_SHEET, with: child.get.bind(child), engine: { dispose() {} }, scene: { ...scene, dispose() {} }, activate() {}, deactivate() {} } as unknown as IRender);
+            child.get(HoverRenderController);
+            return { child, onClick$, event: { offsetX: skeleton.rowHeaderWidth + 5, offsetY: skeleton.columnHeaderHeight + 5 } as IPointerEvent };
+        };
+        const left = createPane('pane-book', false);
+        const right = createPane('right', true);
+        try {
+            right.onClick$.emitEvent(right.event);
+            left.onClick$.emitEvent(left.event);
+            expect(clicks).toEqual([10, 0]);
+        } finally {
+            right.child.dispose();
+            left.child.dispose();
+            univer.dispose();
+        }
+    });
+
     it('emits row/col header hover and click positions based on active viewport', () => {
         const workbook = {
             getUnitId: () => 'u-1',
@@ -152,6 +246,25 @@ describe('HoverManagerService', () => {
     });
 
     it('emits cell hover/click/pointer events and supports header dbclick/pointer branches', () => {
+        documentInjector = new Injector();
+        const docModel = documentInjector.createInstance(DocumentDataModel, {
+            body: { dataStream: '\r\n', customRanges: [], paragraphs: [] },
+            drawings: {
+                'image-1': {
+                    unitId: 'u-1',
+                    subUnitId: 'sheet1',
+                    drawingId: 'image-1',
+                    drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                    layoutType: PositionedObjectLayoutType.INLINE,
+                    docTransform: {
+                        size: { width: 86, height: 86 },
+                        positionH: { relativeFrom: ObjectRelativeFromH.COLUMN },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH },
+                        angle: 0,
+                    },
+                },
+            },
+        });
         const workbook = {
             getUnitId: () => 'u-1',
             getActiveSheet: () => ({
@@ -217,16 +330,7 @@ describe('HoverManagerService', () => {
                         }],
                     }),
                     getViewModel: () => ({
-                        getDataModel: () => ({
-                            getBody: () => ({ customRanges: [], paragraphs: [] }),
-                            getDrawings: () => ({
-                                'image-1': {
-                                    docTransform: {
-                                        size: { width: 86, height: 86 },
-                                    },
-                                },
-                            }),
-                        }),
+                        getDataModel: () => docModel,
                     }),
                 },
             }),

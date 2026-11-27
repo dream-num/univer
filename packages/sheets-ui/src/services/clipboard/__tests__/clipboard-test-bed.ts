@@ -41,7 +41,6 @@ import {
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import {
-    BrowserClipboardService,
     DesktopMessageService,
     IClipboardInterfaceService,
     IMessageService,
@@ -57,6 +56,7 @@ import { ISheetSelectionRenderService } from '../../selection/base-selection-ren
 import { SheetSelectionRenderService } from '../../selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService, SheetClipboardService } from '../clipboard.service';
+import { MockClipboardItem } from './mock-clipboard';
 
 const cellData = {
     0: {
@@ -545,6 +545,14 @@ export class testPlatformService {
 
 // eslint-disable-next-line max-lines-per-function
 export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[], clipboardBoundary?: IClipboardInterfaceService) {
+    let clipboardData: Record<string, string> = {};
+    const clipboard: IClipboardInterfaceService = clipboardBoundary ?? {
+        supportClipboard: true,
+        async writeText(text) { clipboardData = { 'text/plain': text }; },
+        async write(text, html, customData) { clipboardData = { 'text/plain': text, 'text/html': html, ...customData }; },
+        async readText() { return clipboardData['text/plain'] ?? ''; },
+        async read() { return Object.keys(clipboardData).length ? [new MockClipboardItem(clipboardData)] : []; },
+    };
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
@@ -565,9 +573,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
             injector.add([RangeProtectionRuleModel]);
             injector.add([IAutoFillService, { useClass: AutoFillService }]);
             injector.add([SheetPermissionCheckController]);
-            injector.add(clipboardBoundary
-                ? [IClipboardInterfaceService, { useValue: clipboardBoundary }]
-                : [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }]);
+            injector.add([IClipboardInterfaceService, { useValue: clipboard }]);
             injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
             injector.add([IMessageService, { useClass: DesktopMessageService, lazy: true }]);
             injector.add([

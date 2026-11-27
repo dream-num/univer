@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { isRealNum } from '@univerjs/core';
+import { DateSystem, EXCEL_1904_OFFSET, isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
-import { getResultByGuessIterF } from '../../../basics/financial';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -47,7 +47,12 @@ export class Xirr extends BaseFunction {
 
     override maxParams = 3;
 
-    override calculate(values: BaseValueObject, dates: BaseValueObject, guess?: BaseValueObject): BaseValueObject {
+    override needsReferenceObject = true;
+
+    override calculate(valueArg: FunctionVariantType, dateArg: FunctionVariantType, guessArg?: FunctionVariantType): BaseValueObject {
+        const values = resolveArgument(valueArg);
+        const dates = resolveArgument(dateArg);
+        const guess = guessArg === undefined ? undefined : resolveArgument(guessArg);
         if (values.isNull() || dates.isNull()) {
             return ErrorValueObject.create(ErrorType.NA);
         }
@@ -61,7 +66,7 @@ export class Xirr extends BaseFunction {
         let _guess = guess ?? NumberValueObject.create(0.1);
 
         if (_guess.isNull()) {
-            _guess = NumberValueObject.create(0.1);
+            _guess = NumberValueObject.create(guessArg?.isReferenceObject() ? 0 : 0.1);
         }
 
         const { isError: _isError_guess, errorObject: _errorObject_guess, variants } = checkVariantsErrorIsArrayOrBoolean(_guess);
@@ -80,17 +85,17 @@ export class Xirr extends BaseFunction {
 
         const { positive, negative } = this._checkValues(_values as number[]);
 
-        if (!positive || !negative || _values?.length !== _dates?.length || guessValue < 0) {
+        if (!positive || !negative || _values?.length !== _dates?.length || guessValue <= -1) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = getResultByGuessIterF(guessValue, (rate: number) => this._iterF(_values as number[], _dates as number[], rate));
-
-        if (typeof result !== 'number') {
-            return result as ErrorValueObject;
+        const amounts = _values as number[];
+        const serials = _dates as number[];
+        if (serials.some((date) => date < serials[0] || date > 2_958_465)) {
+            return ErrorValueObject.create(ErrorType.NUM);
         }
-
-        return NumberValueObject.create(result);
+        const result = solveXirr(amounts, serials, guessValue);
+        return result === undefined ? ErrorValueObject.create(ErrorType.NUM) : NumberValueObject.create(result);
     }
 
     private _checkErrors(values: BaseValueObject, dates: BaseValueObject): ICheckErrorValues & ICheckErrorDates {
@@ -235,7 +240,8 @@ export class Xirr extends BaseFunction {
                     return false;
                 }
 
-                _dates.push(Math.floor(datesValue));
+                const dateOffset = datesObject?.isString() && this.getDateSystem() === DateSystem.Date1904 ? EXCEL_1904_OFFSET : 0;
+                _dates.push(Math.floor(datesValue) - dateOffset);
             });
 
             if (isError) {
@@ -299,10 +305,46 @@ export class Xirr extends BaseFunction {
             negative,
         };
     }
+}
 
-    private _iterF(values: number[], dates: number[], rate: number): number {
-        return values.reduce((total, value, index) => {
-            return total + value / ((1 + rate) ** ((dates[index] - dates[0]) / 365));
-        }, 0);
+function resolveArgument(arg: FunctionVariantType): BaseValueObject {
+    if (!arg.isReferenceObject()) return arg as BaseValueObject;
+    const array = (arg as BaseReferenceObject).toArrayValueObject();
+    return array.getRowCount() === 1 && array.getColumnCount() === 1 ? array.getFirstCell() : array;
+}
+
+function solveXirr(amounts: number[], dates: number[], guess: number): number | undefined {
+    if (!Number.isFinite(guess)) return;
+    let rate = guess === 0 ? 1e-5 : guess;
+    const initial = amounts[0];
+    const nominal = amounts.slice(1).reduce((total, amount) => total + amount, 0);
+    if (Math.abs(initial) > Math.abs(nominal) && rate > 0) rate = -rate;
+
+    const years = dates.map((date) => (date - dates[0]) / 365);
+    const negative = rate < 0;
+    let lower = negative ? -1 : 0;
+    let upper = 0;
+    let bracketed = negative;
+    for (let i = 0; i <= 100; i++) {
+        let discounted = 0;
+        for (let j = 1; j < amounts.length; j++) {
+            discounted += amounts[j] / ((1 + rate) ** years[j]);
+        }
+        const residual = initial + discounted;
+        if (bracketed && upper - lower < (1 + Math.abs(upper + lower)) * 1e-8
+            && (!negative || Math.abs(residual) < (Math.abs(initial) + Math.abs(discounted)) * 1e-8)) {
+            return rate;
+        }
+        if ((initial < 0 && residual > 0) || (initial > 0 && residual < 0)) {
+            if (!bracketed) {
+                rate *= 2;
+                continue;
+            }
+            lower = rate;
+        } else {
+            upper = rate;
+            bracketed = true;
+        }
+        rate = lower + (upper - lower) / 2;
     }
 }

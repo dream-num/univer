@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { createBookmarkRangeId } from './bookmark-id';
 export * from './data-model';
 export {
     cloneBodyWithFreshParagraphIds,

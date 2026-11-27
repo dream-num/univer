@@ -17,17 +17,32 @@
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { round } from '../../../engine/utils/math-kit';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Mround extends BaseFunction {
+    override rejectsMultiCellReference = true;
+
     override minParams = 2;
 
     override maxParams = 2;
 
-    override calculate(number: BaseValueObject, multiple: BaseValueObject) {
+    override calculate(number: BaseValueObject, multiple: BaseValueObject): BaseValueObject {
+        const rowCount = Math.max(number.isArray() ? (number as ArrayValueObject).getRowCount() : 1, multiple.isArray() ? (multiple as ArrayValueObject).getRowCount() : 1);
+        const columnCount = Math.max(number.isArray() ? (number as ArrayValueObject).getColumnCount() : 1, multiple.isArray() ? (multiple as ArrayValueObject).getColumnCount() : 1);
+        if (rowCount > 1 || columnCount > 1) {
+            const left = expandArrayValueObject(rowCount, columnCount, number, ErrorValueObject.create(ErrorType.NA));
+            const right = expandArrayValueObject(rowCount, columnCount, multiple, ErrorValueObject.create(ErrorType.NA));
+            return left.mapValue((value, row, column) => this._handleSingleObject(value, right.get(row, column) as BaseValueObject));
+        }
+
+        return this._handleSingleObject(number, multiple);
+    }
+
+    private _handleSingleObject(number: BaseValueObject, multiple: BaseValueObject): BaseValueObject {
         let _number = number;
 
         if (_number.isArray()) {

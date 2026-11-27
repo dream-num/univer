@@ -15,6 +15,7 @@
  */
 
 import type { Meta } from '@storybook/react';
+import { useState } from 'react';
 import { Radio } from './Radio';
 
 const meta: Meta<typeof Radio> = {
@@ -30,12 +31,26 @@ export default meta;
 
 export const RadioBasic = {
     render() {
+        const [selected, setSelected] = useState('portrait');
+
         return (
-            <>
-                <Radio>radio 1</Radio>
-                <Radio checked={false}>radio 1</Radio>
-                <Radio checked>radio 1</Radio>
-            </>
+            <div className="univer-flex univer-flex-col univer-gap-2.5">
+                <Radio name="orientation" value="portrait" checked={selected === 'portrait'} onChange={(v) => setSelected(String(v))}>
+                    Portrait
+                </Radio>
+                <Radio name="orientation" value="landscape" checked={selected === 'landscape'} onChange={(v) => setSelected(String(v))}>
+                    Landscape
+                </Radio>
+                <Radio
+                    name="orientation"
+                    value="auto"
+                    checked={selected === 'auto'}
+                    onChange={(v) => setSelected(String(v))}
+                    className="univer-max-w-56"
+                >
+                    Match page orientation automatically when printing multi-page sheets
+                </Radio>
+            </div>
         );
     },
 };
@@ -43,12 +58,10 @@ export const RadioBasic = {
 export const RadioDisabled = {
     render() {
         return (
-            <>
-                <Radio disabled>radio 1</Radio>
-                <Radio disabled checked>
-                    radio 2
-                </Radio>
-            </>
+            <div className="univer-flex univer-flex-col univer-gap-2.5">
+                <Radio disabled>Disabled unselected</Radio>
+                <Radio disabled checked>Disabled selected</Radio>
+            </div>
         );
     },
 };

@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-import { NotImplementedFunction } from '../../not-implemented-function';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { CeilingPrecise } from '../ceiling-precise';
 
-export class IsoCeiling extends NotImplementedFunction {
-    override minParams = 1;
+export class IsoCeiling extends CeilingPrecise {
+    override needsReferenceObject = true;
 
-    override maxParams = 2;
-
-    // TODO: Implement ISO 8601 ceiling semantics and Excel-compatible error handling.
+    override calculate(number: FunctionVariantType, significance?: FunctionVariantType) {
+        const value = number.isReferenceObject() ? (number as BaseReferenceObject).toArrayValueObject() : number as BaseValueObject;
+        if (significance?.isReferenceObject()) {
+            return super.calculate(value, (significance as BaseReferenceObject).toArrayValueObject());
+        }
+        const optionalSignificance = significance as BaseValueObject | undefined;
+        return super.calculate(value, optionalSignificance?.isNull() ? undefined : optionalSignificance);
+    }
 }

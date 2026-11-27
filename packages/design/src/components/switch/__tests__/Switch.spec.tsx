@@ -46,4 +46,37 @@ describe('Switch', () => {
         );
         expect(screen.getByRole('checkbox', { name: 'Show grid' })).not.toBeChecked();
     });
+
+    it('supports controlled checked state, visible children, and disabled mode', () => {
+        const onChange = vi.fn();
+        const { rerender } = render(
+            <Switch checked={false} onChange={onChange}>
+                Auto save
+            </Switch>
+        );
+        const checkbox = screen.getByRole('checkbox', { name: 'Auto save' });
+        expect(checkbox).not.toBeChecked();
+
+        fireEvent.click(checkbox);
+        expect(onChange).toHaveBeenCalledExactlyOnceWith(true);
+        // Remains controlled until parent updates checked
+        expect(checkbox).not.toBeChecked();
+
+        rerender(
+            <Switch checked onChange={onChange}>
+                Auto save
+            </Switch>
+        );
+        expect(checkbox).toBeChecked();
+
+        onChange.mockClear();
+        rerender(
+            <Switch checked disabled onChange={onChange}>
+                Auto save
+            </Switch>
+        );
+        expect(checkbox).toBeDisabled();
+        fireEvent.click(checkbox);
+        expect(onChange).not.toHaveBeenCalled();
+    });
 });

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICommand, ITextRangeParam } from '@univerjs/core';
-import { CommandType, CustomRangeType, generateRandomId, ICommandService } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, ITextRangeParam } from '@univerjs/core';
+import { CommandType, CustomRangeType, generateRandomId, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
 import { DocHyperLinkCommandId } from '@univerjs/docs-hyper-link';
+import { getDocHyperLinkTargetProperties } from '../../utils/hyper-link-target';
 
 export interface IAddDocHyperLinkCommandParams {
     payload: string;
@@ -35,6 +36,7 @@ export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
 
         const { payload, unitId, selections } = params;
         const commandService = accessor.get(ICommandService);
+        const doc = accessor.get(IUniverInstanceService).getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         const id = generateRandomId();
         const doMutation = addCustomRangeBySelectionFactory(
             accessor,
@@ -42,7 +44,7 @@ export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
                 rangeId: id,
                 rangeType: CustomRangeType.HYPERLINK,
                 properties: {
-                    url: payload,
+                    ...getDocHyperLinkTargetProperties(payload, doc?.getBody()),
                 },
                 unitId,
                 selections,

@@ -36,9 +36,9 @@ describe('Test workday.intl function', () => {
             }
         });
 
-        it('rejects an overlong all-rest mask for zero workdays', () => {
+        it('returns the start date for zero workdays even with an invalid weekend mask', () => {
             const result = testFunction.calculate(NumberValueObject.create(45000), NumberValueObject.create(0), StringValueObject.create('11111111'));
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(result.getValue()).toBe(45000);
         });
 
         it('preserves valid masks and numeric weekend codes', () => {
@@ -134,7 +134,7 @@ describe('Test workday.intl function', () => {
             const days3 = NumberValueObject.create(151);
             const weekend3 = NullValueObject.create();
             const result3 = testFunction.calculate(startDate3, days3, weekend3);
-            expect(result3.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(result3.getValue()).toStrictEqual(39933);
 
             const startDate4 = StringValueObject.create('2008-10-1');
             const days4 = NumberValueObject.create(151);
@@ -184,7 +184,7 @@ describe('Test workday.intl function', () => {
             const days3 = NumberValueObject.create(151);
             const weekend3 = ErrorValueObject.create(ErrorType.NAME);
             const result3 = testFunction.calculate(startDate3, days3, weekend3);
-            expect(result3.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(result3.getValue()).toStrictEqual(ErrorType.NUM);
 
             const startDate4 = StringValueObject.create('2008-10-1');
             const days4 = NumberValueObject.create(151);

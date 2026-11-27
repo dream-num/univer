@@ -14,35 +14,32 @@
  * limitations under the License.
  */
 
-import type { BBox } from 'rbush';
-import KDBush from 'kdbush';
-import RBush from 'rbush';
 import type { IUnitRange } from '../sheets/typedef';
+import type { IBoundingBox, RBushNode } from './rbush';
+import KDBush from 'kdbush';
+import { RBush } from './rbush';
 
 type StringOrNumber = string | number;
+type CellIds = StringOrNumber | Set<StringOrNumber>;
+type CellCacheRow = Map<number, CellIds>;
 
 export interface IRTreeItem extends IUnitRange {
     id: StringOrNumber;
 }
 
-interface IRBushItem extends BBox {
+interface IRBushItem extends IBoundingBox {
     id: StringOrNumber;
-}
-
-interface IRBushNode extends BBox {
-    children: (IRBushNode | IRBushItem)[];
-    leaf: boolean;
 }
 
 interface IRdTreeItem {
     x: number;
     y: number;
-    ids: Set<StringOrNumber>;
+    cells: CellCacheRow;
 }
 
 export interface IRTreeData {
     [unitId: string]: {
-        [subUnitId: string]: IRTreeItem[];
+        [subUnitId: string]: RBushNode<IRBushItem>;
     };
 }
 
@@ -50,7 +47,7 @@ export class RTree {
     private _tree: Map<string, Map<string, RBush<IRBushItem>>> = new Map();
 
     // unitId -> subUnitId -> row -> column -> ids
-    private _oneCellCache = new Map<string, Map<string, Map<number, Map<number, Set<StringOrNumber>>>>>();
+    private _oneCellCache = new Map<string, Map<string, Map<number, CellCacheRow>>>();
 
     private _kdTree: Map<string, Map<string, { tree: KDBush; items: IRdTreeItem[] } | undefined>> = new Map();
 
@@ -73,37 +70,51 @@ export class RTree {
         return this._tree.get(unitId)!.get(subUnitId)!;
     }
 
-    private _getOneCellCache(unitId: string, subUnitId: string, row: number, column: number): Set<StringOrNumber> {
-        if (!this._oneCellCache.has(unitId)) {
-            this._oneCellCache.set(unitId, new Map());
+    private _getOneCellRow(unitId: string, subUnitId: string, row: number): CellCacheRow {
+        let unit = this._oneCellCache.get(unitId);
+        if (!unit) {
+            unit = new Map();
+            this._oneCellCache.set(unitId, unit);
         }
-        if (!this._oneCellCache.get(unitId)!.has(subUnitId)) {
-            this._oneCellCache.get(unitId)!.set(subUnitId, new Map());
+        let sheet = unit.get(subUnitId);
+        if (!sheet) {
+            sheet = new Map();
+            unit.set(subUnitId, sheet);
         }
-        if (!this._oneCellCache.get(unitId)!.get(subUnitId)!.has(row)) {
-            this._oneCellCache.get(unitId)!.get(subUnitId)!.set(row, new Map());
+        let cells = sheet.get(row);
+        if (!cells) {
+            cells = new Map();
+            sheet.set(row, cells);
         }
-        if (!this._oneCellCache.get(unitId)!.get(subUnitId)!.get(row)!.has(column)) {
-            this._oneCellCache.get(unitId)!.get(subUnitId)!.get(row)!.set(column, new Set());
-        }
+        return cells;
+    }
 
-        return this._oneCellCache.get(unitId)!.get(subUnitId)!.get(row)!.get(column)!;
+    private _compactCellIds(cells: CellCacheRow, column: number, ids: Set<StringOrNumber>) {
+        if (ids.size === 0) {
+            cells.delete(column);
+        } else if (ids.size === 1) {
+            const remaining = ids.values().next();
+            if (!remaining.done) {
+                cells.set(column, remaining.value);
+            }
+        }
+    }
+
+    private _removeCellId(cells: CellCacheRow, column: number, id: StringOrNumber) {
+        const cached = cells.get(column);
+        if (cached instanceof Set) {
+            cached.delete(id);
+            this._compactCellIds(cells, column, cached);
+        } else if (cached === id || (Number.isNaN(cached) && Number.isNaN(id))) {
+            cells.delete(column);
+        }
     }
 
     private _removeOneCellCache(unitId: string, subUnitId: string, row: number, column: number, id: StringOrNumber) {
-        const unitCache = this._oneCellCache.get(unitId);
-        if (!unitCache) return;
-
-        const subUnitCache = unitCache.get(subUnitId);
-        if (!subUnitCache) return;
-
-        const rowCache = subUnitCache.get(row);
-        if (!rowCache) return;
-
-        const cellCache = rowCache.get(column);
-        if (!cellCache) return;
-
-        cellCache.delete(id);
+        const cells = this._oneCellCache.get(unitId)?.get(subUnitId)?.get(row);
+        if (cells) {
+            this._removeCellId(cells, column, id);
+        }
     }
 
     private _removeCellCacheByRange(search: IRTreeItem) {
@@ -122,31 +133,30 @@ export class RTree {
             if (!rowCache) continue;
 
             for (let column = startColumn; column <= endColumn; column++) {
-                const cellCache = rowCache.get(column);
-                if (!cellCache) continue;
-
-                cellCache.delete(id);
+                this._removeCellId(rowCache, column, id);
             }
         }
     }
 
     private _insertOneCellCache(unitId: string, subUnitId: string, row: number, column: number, id: StringOrNumber) {
-        this._getOneCellCache(unitId, subUnitId, row, column).add(id);
+        const cells = this._getOneCellRow(unitId, subUnitId, row);
+        const cached = cells.get(column);
+        if (cached instanceof Set) {
+            cached.add(id);
+        } else if (cached === undefined) {
+            cells.set(column, id);
+        } else if (cached !== id && !(Number.isNaN(cached) && Number.isNaN(id))) {
+            cells.set(column, new Set([cached, id]));
+        }
     }
 
-    private _getRdTreeItems(map: Map<number, Map<number, Set<StringOrNumber>>>) {
+    private _getRdTreeItems(map: Map<number, CellCacheRow>) {
         const items: IRdTreeItem[] = [];
-
-        for (const [y, innerMap] of map) {
-            for (const [x, ids] of innerMap) {
-                items.push({
-                    x,
-                    y,
-                    ids,
-                });
+        for (const [y, cells] of map) {
+            for (const x of cells.keys()) {
+                items.push({ x, y, cells });
             }
         }
-
         return items;
     }
 
@@ -166,7 +176,14 @@ export class RTree {
 
         for (const index of indexes) {
             const item = items[index];
-            result.push(...Array.from(item.ids));
+            const cached = item.cells.get(item.x);
+            if (cached instanceof Set) {
+                for (const id of cached) {
+                    result.push(id);
+                }
+            } else if (cached !== undefined) {
+                result.push(cached);
+            }
         }
 
         return result;
@@ -376,7 +393,7 @@ export class RTree {
             }
         }
         // With the point cache enabled, remove() treats point searches as point-cache-only removals.
-        const matches = (id: StringOrNumber, bounds: BBox, rangedOnly = false) => searches.get(id)?.some(({ range }) =>
+        const matches = (id: StringOrNumber, bounds: IBoundingBox, rangedOnly = false) => searches.get(id)?.some(({ range }) =>
             (!rangedOnly || !this._enableOneCellCache || range.startRow !== range.endRow || range.startColumn !== range.endColumn) &&
             range.startColumn <= bounds.maxX && range.endColumn >= bounds.minX &&
             range.startRow <= bounds.maxY && range.endRow >= bounds.minY
@@ -401,10 +418,15 @@ export class RTree {
             for (const [row, columns] of cells) {
                 for (const [column, ids] of columns) {
                     const bounds = { minX: column, maxX: column, minY: row, maxY: row };
-                    for (const id of ids) {
-                        if (matches(id, bounds)) {
-                            ids.delete(id);
+                    if (ids instanceof Set) {
+                        for (const id of ids) {
+                            if (matches(id, bounds)) {
+                                ids.delete(id);
+                            }
                         }
+                        this._compactCellIds(columns, column, ids);
+                    } else if (matches(ids, bounds)) {
+                        columns.delete(column);
                     }
                 }
             }
@@ -415,18 +437,19 @@ export class RTree {
         // Probe a bounded number of candidates without allocating a full-tree snapshot.
         let remaining = 128;
         if (searches.size > remaining) return false;
-        const visit = (node: IRBushNode, range: IUnitRange['range']): boolean => {
+        const visit = (node: RBushNode<IRBushItem>, range: IUnitRange['range']): boolean => {
             if (--remaining < 0) return false;
             if (!node.leaf && range.startColumn <= node.minX && range.endColumn >= node.maxX &&
                 range.startRow <= node.minY && range.endRow >= node.maxY) {
                 return false;
             }
-            for (const child of node.children) {
+            for (let i = 0; i < node.children.length; i++) {
+                const child = node.children[i];
                 if (range.startColumn <= child.maxX && range.endColumn >= child.minX &&
                     range.startRow <= child.maxY && range.endRow >= child.minY) {
                     if (node.leaf) {
                         if (--remaining < 0) return false;
-                    } else if (!visit(child as IRBushNode, range)) {
+                    } else if (!visit(node.children[i], range)) {
                         return false;
                     }
                 }
@@ -434,7 +457,7 @@ export class RTree {
             return true;
         };
         const tree = this._tree.get(unitId)?.get(sheetId);
-        const root = tree?.toJSON() as IRBushNode | undefined;
+        const root = tree?.toJSON();
         const cells = this._oneCellCache.get(unitId)?.get(sheetId);
         for (const [id, ranges] of searches) {
             if (Number.isNaN(id)) return false;
@@ -473,7 +496,7 @@ export class RTree {
         return result;
     }
 
-    fromJSON(data: IRTreeData) {
+    fromJSON(data: Record<string, Record<string, unknown>>) {
         this._tree.clear();
         for (const unitId in data) {
             this._tree.set(unitId, new Map());
@@ -485,5 +508,3 @@ export class RTree {
         }
     }
 }
-
-export { type BBox, RBush };

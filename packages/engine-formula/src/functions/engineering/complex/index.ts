@@ -19,7 +19,7 @@ import { Complex as COMPLEX } from '../../../basics/complex';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Complex extends BaseFunction {
@@ -51,10 +51,6 @@ export class Complex extends BaseFunction {
         }
 
         const result = COMPLEX.getComplex(realNumValue, iNumValue, suffixValue);
-
-        if (typeof result === 'number') {
-            return NumberValueObject.create(result);
-        }
 
         return StringValueObject.create(result);
     }

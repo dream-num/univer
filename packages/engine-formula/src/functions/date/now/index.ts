@@ -24,8 +24,14 @@ export class Now extends BaseFunction {
 
     override maxParams = 0;
 
+    private _getTimestamp?: () => number;
+
+    override bindCalculationTimestamp(getTimestamp: () => number): void {
+        this._getTimestamp = getTimestamp;
+    }
+
     override calculate() {
-        const now = new Date();
+        const now = new Date(this._getTimestamp?.() ?? Date.now());
         // Here we use local time to calculate UTC date time serial number
         const utcNow = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds()));
         const currentSerial = excelDateTimeSerial(utcNow, this.getDateSystem());

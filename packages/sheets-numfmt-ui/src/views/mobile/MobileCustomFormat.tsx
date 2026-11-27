@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, RegionService } from '@univerjs/core';
 import { Button, Input, MobileActionRowGroup, MobileSelect } from '@univerjs/design';
 import { getDateFormatOptions } from '@univerjs/sheets-numfmt';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -30,14 +30,16 @@ export function MobileCustomFormat(props: IMobileCustomFormatProps) {
     const { patterns, onConfirm } = props;
     const localeService = useDependency(LocaleService);
     const locale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
+    const regionService = useDependency(RegionService);
+    const region = useObservable(regionService.explicitRegion$, regionService.getExplicitRegion());
     const [pattern, setPattern] = useState('');
     const title = localeService.t<LocaleKey>('sheets-numfmt-ui.customFormat');
     // Menu configuration outlives locale changes; resolve date presets when the editor renders.
     const options = useMemo(() => [...new Set([
         ...patterns,
-        ...getDateFormatOptions(locale).map((item) => item.value),
+        ...getDateFormatOptions(locale, undefined, region).map((item) => item.value),
         ...(pattern ? [pattern] : []),
-    ])].map((value) => ({ label: value, value })), [locale, pattern, patterns]);
+    ])].map((value) => ({ label: value, value })), [locale, region, pattern, patterns]);
 
     return (
         <div

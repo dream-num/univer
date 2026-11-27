@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         message: {
             refError: 'Intervallo non valido',
         },
+        permission: {
+            editErr: 'L\'intervallo è protetto e non si dispone dell\'autorizzazione di modifica. Per modificare, contattare il creatore.',
+        },
     },
 };
 

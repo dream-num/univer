@@ -41,6 +41,7 @@ import { focusThreadCommentEditor } from './thread-comment-editor/util';
 
 export interface IThreadCommentEditorProps {
     id?: string;
+    isNewThread?: boolean;
     comment?: Pick<IThreadComment, 'attachments' | 'text' | 'mentions'>;
     onSave?: (comment: Pick<IThreadComment, 'attachments' | 'text'>) => boolean | void | Promise<boolean | void>;
     onCancel?: () => void;
@@ -66,6 +67,8 @@ function getSnapshot(body: IDocumentBody): IDocumentData {
 
 export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThreadCommentEditorProps>((props, ref) => {
     const { comment, onSave, id, onCancel, autoFocus, unitId, type, editorId, ActionRowComponent = ActionRow } = props;
+    const createLabel = props.isNewThread ? 'thread-comment-ui.panel.addComment' : 'thread-comment-ui.editor.reply';
+    const placeholder = props.isNewThread ? 'thread-comment-ui.panel.addComment' : 'thread-comment-ui.editor.placeholder';
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const [editing, setEditing] = useState(false);
@@ -201,7 +204,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                     preserveHostFocus
                     autoFocus={autoFocus}
                     keyboardEventConfig={keyboardEventConfig}
-                    placeholder={localeService.t<LocaleKey>('thread-comment-ui.editor.placeholder')}
+                    placeholder={localeService.t<LocaleKey>(placeholder)}
                     initialValue={comment?.text && getSnapshot(comment.text)}
                     onChange={(data) => setCanSubmit(BuildTextUtils.transform.getPlainText(data.body?.dataStream ?? ''))}
                     onFocusChange={(isFocus) => isFocus && setEditing(isFocus)}
@@ -240,7 +243,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                             disabled={!canSubmit || submitting}
                             onClick={handleSave}
                         >
-                            {localeService.t<LocaleKey>(id ? 'thread-comment-ui.editor.save' : 'thread-comment-ui.editor.reply')}
+                            {localeService.t<LocaleKey>(id ? 'thread-comment-ui.editor.save' : createLabel)}
                         </Button>
                     </ActionRowComponent>
                 )

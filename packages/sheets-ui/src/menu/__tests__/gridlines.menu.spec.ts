@@ -35,6 +35,7 @@ function createMenuAccessor(unitType: UniverInstanceType): Injector {
                 getFocusedUnit: () => ({ getUnitId: () => 'unit-1' }),
                 getCurrentUnitOfType: () => null,
                 getCurrentTypeOfUnit$: () => of(null),
+                getUnitCreateOptions: () => null,
                 getUnitType: () => unitType,
             },
         }],

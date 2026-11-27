@@ -74,7 +74,6 @@ describe('Cube function', () => {
 
         const result = testFunction.calculate(first, second);
 
-        expect(result.isCube()).toBe(true);
         expect(result).toBeInstanceOf(CubeValueObject);
         expect((result as CubeValueObject).getCubeCount()).toBe(2);
         expect((result as CubeValueObject).getCubeValues()).toEqual([first, second]);

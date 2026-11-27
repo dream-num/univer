@@ -15,11 +15,10 @@
  */
 
 import type { ICommand, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IScrollState } from '../../services/scroll-manager.service';
-
 import { CommandType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { getFocusedRenderForUnit, IRenderManagerService } from '@univerjs/engine-render';
 import { getSheetCommandTarget } from '@univerjs/sheets';
+import type { IScrollState } from '../../services/scroll-manager.service';
 import { SheetsScrollRenderController } from '../../controllers/render-controllers/scroll.render-controller';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SetScrollOperation } from '../operations/scroll.operation';
@@ -73,7 +72,9 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
         if (!target) return false;
 
         const { unitId, subUnitId } = target;
-        const scrollManagerService = renderManagerSrv.getRenderUnitById(unitId)!.with(SheetScrollManagerService);
+        const renderUnit = getFocusedRenderForUnit(renderManagerSrv, unitId);
+        if (!renderUnit) return false;
+        const scrollManagerService = renderUnit.with(SheetScrollManagerService);
         const currentScroll = scrollManagerService.getCurrentScrollState();
         const { offsetX = 0, offsetY = 0 } = params || {};
         const {
@@ -122,7 +123,7 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
         if (!target) return false;
 
         const { workbook, worksheet, unitId } = target;
-        const renderUnit = renderManagerSrv.getRenderUnitById(unitId);
+        const renderUnit = getFocusedRenderForUnit(renderManagerSrv, unitId);
         if (!renderUnit) return false;
 
         const scrollManagerService = renderUnit.with(SheetScrollManagerService);
@@ -195,9 +196,11 @@ export const ScrollToCellCommand: ICommand<IScrollToCellCommandParams> = {
     handler: (accessor, params) => {
         const instanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
-        const scrollController = renderManagerService
-            .getRenderUnitById(instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)!.getUnitId())!
-            .with(SheetsScrollRenderController);
+        const unitId = params?.unitId ?? instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+        if (!params || !unitId) return false;
+        const renderUnit = getFocusedRenderForUnit(renderManagerService, unitId);
+        if (!renderUnit) return false;
+        const scrollController = renderUnit.with(SheetsScrollRenderController);
         return scrollController.scrollToRange(params!.range, params!.forceTop, params!.forceLeft);
     },
 };

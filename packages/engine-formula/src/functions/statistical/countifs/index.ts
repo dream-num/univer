@@ -31,6 +31,8 @@ export class Countifs extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: Math.ceil(this.maxParams / 2) }, (_, index) => index * 2);
+
     override calculate(...variants: FunctionVariantType[]): BaseValueObject {
         const {
             isError,

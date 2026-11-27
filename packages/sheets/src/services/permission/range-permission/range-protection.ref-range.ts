@@ -240,7 +240,7 @@ export class RangeProtectionRefRangeService extends Disposable {
                 undoMutations.push({ id: SetRangeProtectionMutation.id, params: { unitId, subUnitId, rule, ruleId: rule.id } });
             });
 
-            return { redos: redoMutations, undos: undoMutations };
+            return { redos: redoMutations, undos: undoMutations, rollbackMutations: undoMutations.map((undo) => [undo]) };
         }
         return { undos: [], redos: [] };
     }

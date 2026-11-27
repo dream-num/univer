@@ -109,7 +109,8 @@ export class Forecast extends BaseFunction {
             knownXs,
             knownYsRowCount * knownYsColumnCount,
             knownYsColumnCount,
-            knownXsColumnCount
+            knownXsColumnCount,
+            true
         );
 
         if (isError) {

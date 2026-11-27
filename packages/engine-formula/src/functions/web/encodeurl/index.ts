@@ -16,9 +16,12 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
 import { getTextValueOfNumberFormat } from '../../../basics/format';
+import { ErrorValueObject, formatValueForFormulaText } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { formatExcelTextNumber } from '../../text/format-excel-text-number';
 
 export class Encodeurl extends BaseFunction {
     override minParams = 1;
@@ -39,15 +42,32 @@ export class Encodeurl extends BaseFunction {
         return this._handleSingleObject(text);
     }
 
-    private _handleSingleObject(text: BaseValueObject): BaseValueObject {
+    protected _handleSingleObject(text: BaseValueObject): BaseValueObject {
         if (text.isError()) {
             return text;
         }
 
         const textValue = getTextValueOfNumberFormat(text);
 
-        const result = encodeURIComponent(textValue).replace(/[!~'()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toLocaleUpperCase()}`);
-
-        return StringValueObject.create(result);
+        return StringValueObject.create(encodeUrlComponent(textValue));
     }
+}
+
+export class ExcelEncodeurl extends Encodeurl {
+    protected override _handleSingleObject(value: BaseValueObject): BaseValueObject {
+        if (value.isError()) return value;
+        if (value.isNull()) return StringValueObject.create('');
+        const text = value.isNumber()
+            ? formatExcelTextNumber(Number(value.getValue()))
+            : formatValueForFormulaText(value.getValue());
+        if (text.length > 32766 || /[\uD800-\uDFFF]/u.test(text)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+        const encoded = encodeUrlComponent(text);
+        return encoded.length > 32766 ? ErrorValueObject.create(ErrorType.VALUE) : StringValueObject.create(encoded);
+    }
+}
+
+function encodeUrlComponent(value: string): string {
+    return encodeURIComponent(value).replace(/[!~'()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
 }

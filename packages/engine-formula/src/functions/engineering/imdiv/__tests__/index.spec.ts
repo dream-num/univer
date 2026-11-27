@@ -82,7 +82,7 @@ describe('Test imdiv function', () => {
             });
             const inumber2 = StringValueObject.create('10+24i');
             const result = testFunction.calculate(inumber1, inumber2);
-            expect(result.getValue()).toBe(0);
+            expect(result.getValue()).toBe('0');
 
             const inumber3 = StringValueObject.create('-238+240i');
             const inumber4 = ArrayValueObject.create({

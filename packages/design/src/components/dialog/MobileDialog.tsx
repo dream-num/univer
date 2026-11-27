@@ -87,7 +87,6 @@ export function MobileDialog(props: IMobileDialogProps) {
                 className={clsx(`
                   !univer-left-0 !univer-right-0 !univer-top-auto !univer-flex !univer-max-w-none !univer-translate-x-0
                   !univer-translate-y-0 !univer-flex-col !univer-gap-4 !univer-overflow-hidden !univer-rounded-t-2xl
-                  !univer-p-4
                   [&_[data-slot='dialog-footer']]:!univer-flex-row [&_[data-slot='dialog-footer']]:!univer-gap-3
                   [&_[data-slot='dialog-footer']_button]:!univer-flex-1
                   [&_button[data-slot='close']]:!univer-right-3 [&_button[data-slot='close']]:!univer-top-3

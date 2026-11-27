@@ -107,6 +107,14 @@ export function getDocumentPermissionValue(
     return permissionService.getPermissionPoint(createDocumentPermissionPoint(unitId, objectId, action).id)?.value ?? true;
 }
 
+/**
+ * Whether comments can be written in the document. Reads are not restricted by
+ * this point; a user who can open the document can also read its comments.
+ */
+export function getDocumentCommentPermission(permissionService: IPermissionService, unitId: string): boolean {
+    return getDocumentPermissionValue(permissionService, unitId, unitId, UnitAction.Comment);
+}
+
 export function setDocumentPermissionValue(
     permissionService: IPermissionService,
     unitId: string,

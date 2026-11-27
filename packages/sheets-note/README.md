@@ -10,7 +10,7 @@
 
 | Package | UMD global | CSS | Locales | Facade entry | Worker entry |
 | --- | --- | :---: | :---: | :---: | :---: |
-| `@univerjs/sheets-note` | `UniverSheetsNote` | No | No | Yes | No |
+| `@univerjs/sheets-note` | `UniverSheetsNote` | No | Yes | Yes | No |
 
 ## Installation
 

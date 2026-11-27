@@ -100,6 +100,13 @@ class TestListValidator {
             Hold: '#ffcc00',
         };
     }
+
+    getOptionColor(_rule: unknown, value: unknown): string | undefined {
+        const valueStr = `${value ?? ''}`;
+        const colorMap = this.getListWithColorMap();
+        const matched = Object.keys(colorMap).find((label) => label.toLowerCase() === valueStr.toLowerCase());
+        return matched ? colorMap[matched] : undefined;
+    }
 }
 
 class TestListMultipleValidator extends TestListValidator {
@@ -158,6 +165,7 @@ class RecordingRenderContext {
     restore(): void {}
     translateWithPrecision(): void {}
     translate(): void {}
+    scale(): void {}
     beginPath(): void {}
     rect(): void {}
     clip(): void {}
@@ -234,11 +242,6 @@ function createSkeleton() {
     };
 }
 
-function getRenderedDropdownInfo(widget: unknown) {
-    const map = (widget as { _dropdownInfoMap: Map<string, Map<string, { left: number; top: number; width: number; height: number }>> })._dropdownInfoMap;
-    return map.get('sheet-1')!.get('3.4')!;
-}
-
 describe('data validation canvas widgets', () => {
     it('opens the single-select dropdown for the clicked cell and ignores secondary clicks', async () => {
         const injector = createInjector();
@@ -287,45 +290,53 @@ describe('data validation canvas widgets', () => {
         ]);
     });
 
-    it('uses the rendered capsule bounds for single-select dropdown hit testing', async () => {
+    it.each([
+        ['chip', DataValidationRenderMode.CUSTOM],
+        ['arrow', DataValidationRenderMode.ARROW],
+        ['plain text', DataValidationRenderMode.TEXT],
+        ['unset', undefined],
+    ])('opens the dropdown from anywhere in the cell in %s mode', async (_label, renderMode) => {
         const injector = createInjector();
         const model = getDataValidationModel(injector);
         model.rule = {
             ...model.rule,
             type: DataValidationType.LIST,
-            renderMode: DataValidationRenderMode.CUSTOM,
+            renderMode,
         };
         const { DropdownWidget } = await import('../dropdown-widget');
         const widget = injector.createInstance(DropdownWidget);
-        const ctx = new RecordingRenderContext();
         const cellContext = createCellContext('Done');
+        const commandService = getCommandService(injector);
 
-        widget.drawWith(ctx as never, cellContext, createSkeleton() as never);
-        const dropdownInfo = getRenderedDropdownInfo(widget);
+        expect(widget.isHit({ x: 40, y: 45 }, cellContext)).toBe(true);
+        expect(widget.isHit({ x: 60, y: 52 }, cellContext)).toBe(true);
 
-        expect(widget.isHit({ x: dropdownInfo.left + 1, y: dropdownInfo.top + 1 }, cellContext)).toBe(true);
-        expect(widget.isHit({ x: dropdownInfo.left - 1, y: dropdownInfo.top + 1 }, cellContext)).toBe(false);
-        expect(widget.isHit({ x: dropdownInfo.left + 1, y: dropdownInfo.top - 1 }, cellContext)).toBe(false);
+        widget.onPointerDown(cellContext, { button: 0 } as never);
+
+        expect(commandService.commands).toEqual([
+            {
+                id: ShowDataValidationDropdown.id,
+                params: {
+                    unitId: 'unit-1',
+                    subUnitId: 'sheet-1',
+                    row: 3,
+                    column: 4,
+                },
+            },
+        ]);
     });
 
-    it('limits arrow-mode single-select hit testing to the dropdown arrow region', async () => {
+    it('does not claim pointer hits for validations that are not list dropdowns', async () => {
         const injector = createInjector();
         const model = getDataValidationModel(injector);
         model.rule = {
             ...model.rule,
-            type: DataValidationType.LIST,
-            renderMode: DataValidationRenderMode.ARROW,
+            type: DataValidationType.WHOLE,
         };
         const { DropdownWidget } = await import('../dropdown-widget');
         const widget = injector.createInstance(DropdownWidget);
-        const ctx = new RecordingRenderContext();
-        const cellContext = createCellContext('Done');
 
-        widget.drawWith(ctx as never, cellContext, createSkeleton() as never);
-        const dropdownInfo = getRenderedDropdownInfo(widget);
-
-        expect(widget.isHit({ x: dropdownInfo.left + 1, y: dropdownInfo.top + 1 }, cellContext)).toBe(true);
-        expect(widget.isHit({ x: dropdownInfo.left - 10, y: dropdownInfo.top + 1 }, cellContext)).toBe(false);
+        expect(widget.isHit({ x: 40, y: 45 }, createCellContext('Done'))).toBe(false);
     });
 
     it('applies list option colors while drawing multi-select dropdown capsules', async () => {

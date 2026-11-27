@@ -16,7 +16,7 @@
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
-import { checkKnownsArrayDimensions, getKnownsArrayCoefficients, getKnownsArrayValues, getSerialNumbersByRowsColumns, getSlopeAndIntercept } from '../../../basics/statistical';
+import { checkKnownsArrayDimensions, fitSinglePredictor, getKnownsArrayCoefficients, getKnownsArrayValues, getSerialNumbersByRowsColumns, getSlopeAndIntercept } from '../../../basics/statistical';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -28,6 +28,9 @@ export class Logest extends BaseFunction {
 
     override maxParams = 4;
 
+    protected readonly requirePositiveKnownYs: boolean = false;
+    protected readonly useExcelResidualArithmetic: boolean = false;
+
     override calculate(knownYs: BaseValueObject, knownXs?: BaseValueObject, constb?: BaseValueObject, stats?: BaseValueObject): BaseValueObject {
         const { isError, errorObject } = checkKnownsArrayDimensions(knownYs, knownXs);
 
@@ -35,19 +38,24 @@ export class Logest extends BaseFunction {
             return errorObject as ErrorValueObject;
         }
 
-        const knownYsValues = getKnownsArrayValues(knownYs);
+        const explicitXs = this.requirePositiveKnownYs && knownXs && !knownXs.isNull() ? getKnownsArrayValues(knownXs) : undefined;
+        if (explicitXs instanceof ErrorValueObject) {
+            return explicitXs;
+        }
+
+        const knownYsValues = getKnownsArrayValues(knownYs, this.requirePositiveKnownYs);
 
         if (knownYsValues instanceof ErrorValueObject) {
             return knownYsValues;
         }
 
-        const knownXsValues = this._getKnownXsValues(knownYsValues, knownXs);
+        const knownXsValues = explicitXs ?? this._getKnownXsValues(knownYsValues, knownXs);
 
         if (knownXsValues instanceof ErrorValueObject) {
             return knownXsValues;
         }
 
-        let _constb = constb ?? BooleanValueObject.create(true);
+        let _constb = constb == null || constb.isNull() ? BooleanValueObject.create(true) : constb;
 
         if (_constb.isArray()) {
             _constb = (_constb as ArrayValueObject).get(0, 0) as BaseValueObject;
@@ -94,15 +102,14 @@ export class Logest extends BaseFunction {
         return this._getResultBySimpleVariables(knownYsValues, knownXsValues, constb, stats);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _getResultByMultipleVariables(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
-        const _coefficients = getKnownsArrayCoefficients(knownYsValues, knownXsValues, knownXsValues, constb, true);
+        const _coefficients = getKnownsArrayCoefficients(knownYsValues, knownXsValues, knownXsValues, constb, true, this.useExcelResidualArithmetic);
 
         if (_coefficients instanceof ErrorValueObject) {
             return _coefficients;
         }
 
-        const { coefficients, Y, X, XTXInverse } = _coefficients;
+        const { coefficients, Y, XTXInverse, rank } = _coefficients;
 
         let result: Array<Array<number | string>> = [];
 
@@ -112,39 +119,15 @@ export class Logest extends BaseFunction {
             const meanY = !constb ? 0 : _knownYsValues.reduce((acc, value) => acc + value, 0) / n;
 
             const k = XTXInverse.length;
-            const df = n - k;
+            const df = n - rank;
 
             const cl = coefficients[0].length;
             const fillNa = new Array(cl - 2).fill(ErrorType.NA);
-            const b = coefficients[0][cl - 1];
-
-            const newY = [];
-
-            for (let i = 0; i < X.length; i++) {
-                let value = b;
-
-                for (let j = cl - 2; j >= 0; j--) {
-                    value *= coefficients[0][cl - 2 - j] ** X[i][j];
-                }
-
-                newY.push(Math.log(value));
-            }
-
             let sstotal = 0;
-            let ssresid = 0;
+            const ssresid = _coefficients.squaredError;
 
             for (let i = 0; i < n; i++) {
                 sstotal += (_knownYsValues[i] - meanY) ** 2;
-
-                if (!constb && !Number.isFinite(newY[i])) {
-                    continue;
-                }
-
-                ssresid += (_knownYsValues[i] - newY[i]) ** 2;
-            }
-
-            if (!Number.isFinite(ssresid)) {
-                ssresid = 0;
             }
 
             const ssreg = sstotal - ssresid;
@@ -166,7 +149,7 @@ export class Logest extends BaseFunction {
             }
 
             const sey = df > 0 ? Math.sqrt(ssresid / df) : 0;
-            const F = df > 0 ? (ssreg / (cl - 1)) / (ssresid / df) : ErrorType.NUM;
+            const F = df > 0 ? (ssreg / (rank - Number(Boolean(constb)))) / (ssresid / df) : ErrorType.NUM;
 
             result = [
                 coefficients[0], // [mn, mn-1, ..., m1, b]
@@ -187,7 +170,11 @@ export class Logest extends BaseFunction {
     private _getResultBySimpleVariables(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
         const knownYsValuesFlat = knownYsValues.flat();
         const knownXsValuesFlat = knownXsValues.flat();
-        const { slope: m, intercept: b, Y } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, true);
+        const knownLogs = this.useExcelResidualArithmetic ? knownYsValuesFlat.map((value) => Math.log(value)) : null;
+        const fit = knownLogs && fitSinglePredictor(knownXsValuesFlat, knownLogs, constb, true);
+        const { slope: m, intercept: b, Y } = fit && knownLogs
+            ? { slope: Math.exp(fit.slope), intercept: Math.exp(fit.intercept), Y: knownLogs }
+            : getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, true);
 
         if (Number.isNaN(m)) {
             return ErrorValueObject.create(ErrorType.NA);
@@ -200,7 +187,7 @@ export class Logest extends BaseFunction {
 
             let meanY = 0;
             let meanX = 0;
-            let df = n - 1;
+            let df = Math.max(0, n - 1);
 
             if (constb) {
                 let sumY = 0;
@@ -213,26 +200,25 @@ export class Logest extends BaseFunction {
 
                 meanY = sumY / n;
                 meanX = sumX / n;
-                df = n - 2;
+                df = Math.max(0, n - 2);
             }
 
             let sstotal = 0;
-            let ssresid = 0;
+            const ssresid = df > 0 ? (fit ?? fitSinglePredictor(knownXsValuesFlat, Y, constb)).squaredError : 0;
             let ssx = 0;
 
             for (let i = 0; i < n; i++) {
                 sstotal += (Y[i] - meanY) ** 2;
-                ssresid += (Y[i] - Math.log(b * (m ** knownXsValuesFlat[i]))) ** 2;
                 ssx += (knownXsValuesFlat[i] - meanX) ** 2;
             }
 
             const ssreg = sstotal - ssresid;
-            const r2 = sstotal === 0 ? 0 : ssreg / sstotal;
+            const r2 = sstotal === 0 ? Number(this.useExcelResidualArithmetic) : ssreg / sstotal;
 
             let se = 0;
             let seb: number | ErrorType = 0;
             let sey = 0;
-            let F = 0;
+            let F: number | ErrorType = this.useExcelResidualArithmetic ? ErrorType.NUM : 0;
 
             if (df > 0) {
                 if (ssx > 0) {
@@ -240,6 +226,9 @@ export class Logest extends BaseFunction {
                     seb = Math.sqrt(ssresid / df * (1 / n + meanX ** 2 / ssx));
                 }
 
+                if (constb && ssx === 0) {
+                    seb = Math.sqrt(ssresid / df / n);
+                }
                 sey = Math.sqrt(ssresid / df);
                 F = (ssreg / 1) / (ssresid / df);
             }

@@ -35,13 +35,13 @@ describe('Test imtan function', () => {
         it('Value is large numbers', () => {
             const inumber = NumberValueObject.create(25698432);
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(-0.110331439533494);
+            expect(result.getValue()).toBe('-0.110331439533494');
         });
 
         it('Value is number string', () => {
             const inumber = StringValueObject.create('1.5');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(14.1014199471717);
+            expect(result.getValue()).toBe('14.1014199471717');
         });
 
         it('Value is normal string', () => {
@@ -69,7 +69,7 @@ describe('Test imtan function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(0);
+            expect(result.getValue()).toBe('0');
         });
 
         it('Value is error', () => {

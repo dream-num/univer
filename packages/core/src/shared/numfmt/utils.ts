@@ -16,9 +16,10 @@
 
 import type { ParseData } from './api';
 import type { ParseOptions } from './parse-value';
-import { regexp } from '../../common/regexp';
 import { LocaleType } from '../../types/enum/locale-type';
 import { parseDate, parseNumber, parseTime, tokenize, tokenTypes } from './api';
+import { reCurrencySymbols } from './constants';
+import { currencySymbolFromLiteral } from './currency-symbols';
 
 export const DEFAULT_TEXT_FORMAT = '@@@'; // Compatible with old data
 export const DEFAULT_TEXT_FORMAT_EXCEL = '@'; // The default text format in Excel, recommended
@@ -168,43 +169,27 @@ export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string)
 
 const ignoreCommonPatterns = new Set(['m d']);
 const ignoreAMPMPatterns = new Set(['h:mm AM/PM', 'hh:mm AM/PM']);
-export const currencySymbols = [
-    'Rp',
-    'zł',
-    'NT$',
-    'R$',
-    'HK$',
-    '$',
-    '£',
-    '¥',
-    '¤',
-    '֏',
-    '؋',
-    '৳',
-    '฿',
-    '៛',
-    '₡',
-    '₦',
-    '₩',
-    '₪',
-    '₫',
-    '€',
-    '₭',
-    '₮',
-    '₱',
-    '₲',
-    '₴',
-    '₸',
-    '₹',
-    '₺',
-    '₼',
-    '₽',
-    '₾',
-    '₿',
-    '﷼',
-];
+/** Gets the first displayed currency symbol, including an explicit Excel currency token. */
+export function getNumfmtCurrencySymbol(pattern: string): string | undefined {
+    let afterDigits = false;
+    for (const token of tokenize(pattern)) {
+        if (token.type === tokenTypes.BREAK) {
+            afterDigits = false;
+        } else if (token.type === tokenTypes.ZERO || token.type === tokenTypes.HASH || token.type === tokenTypes.QMARK) {
+            afterDigits = true;
+        } else if (token.type === tokenTypes.LOCALE) {
+            const symbol = token.value.split('-')[0];
+            if (symbol) return symbol;
+        } else if (token.type === tokenTypes.STRING || token.type === tokenTypes.ESCAPED || token.type === tokenTypes.CHAR) {
+            const symbol = currencySymbolFromLiteral(token.value, afterDigits);
+            if (symbol) return symbol;
+        }
+    }
+}
 
-const CURRENCY_SYMBOL_PREFIX_REG = new RegExp(`^${regexp.charset(...Array.from(new Set(currencySymbols.join(''))))}+`);
+export { currencySymbols } from './currency-symbols';
+
+const CURRENCY_SYMBOL_PREFIX_REG = new RegExp(`^${reCurrencySymbols.source}+`);
 
 /**
  * Get the numfmt parse value, and filter out the parse error.
@@ -240,7 +225,15 @@ export const getNumfmtParseValueFilter = (value: string, options: ParseOptions =
         if (z.includes('#,##0')) {
             if (/[.,]$/.test(value)) return null;
 
-            const normalized = value.replace(CURRENCY_SYMBOL_PREFIX_REG, '').trim();
+            // Accounting negatives wrap the number, e.g. "(1,000)" or "($1,000)",
+            // so unwrap one surrounding pair before validating the grouping.
+            const unwrapParens = (input: string) => {
+                const trimmed = input.trim();
+                return trimmed.startsWith('(') && trimmed.endsWith(')') ? trimmed.slice(1, -1).trim() : trimmed;
+            };
+            const normalized = unwrapParens(
+                unwrapParens(value).replace(CURRENCY_SYMBOL_PREFIX_REG, '').trim()
+            );
 
             if (normalized.includes(',')) {
                 const validGrouping = /^-?\d{1,3}(,\d{3})*(\.\d+)?$/.test(normalized);

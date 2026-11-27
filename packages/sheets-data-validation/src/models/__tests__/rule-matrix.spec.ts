@@ -55,6 +55,12 @@ describe('RuleMatrix', () => {
         expect(matrix.getValue(5, 5)).toBeUndefined();
     });
 
+    it('reopens overlapping rules with the same rule selected for a shared cell', () => {
+        const ranges = [{ startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 }];
+        const matrix = createMatrix(new Map(Array.from({ length: 12 }, (_, i) => [`rule-${i}`, ranges])));
+        expect(matrix.getValue(1, 1)).toBe('rule-1');
+    });
+
     it('keeps a whole column range type when an already covered range is added', () => {
         const wholeColumn = { startRow: 0, endRow: 19, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN };
         const rule = createRule('rule-1', [wholeColumn]);

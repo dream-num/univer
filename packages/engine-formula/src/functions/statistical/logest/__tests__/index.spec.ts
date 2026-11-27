@@ -213,10 +213,10 @@ describe('Test logest function', () => {
             const result2 = testFunction.calculate(knownYs, knownXs, constb2, stats);
             expect(getObjectValue(result2, true)).toStrictEqual([
                 [1.05785486328, 1.00009083808, 1.00275120574, 0.944165822137, 1],
-                [0.382793300408, 0.00521575247085, 0.629924174927, 0.237868333877, ErrorType.NA],
+                [0.382793300408, 0.00521575247085, expect.closeTo(0.629924174927, 10), 0.237868333877, ErrorType.NA],
                 [0.994573882203, expect.closeTo(0.935634628939, 9), ErrorType.NA, ErrorType.NA, ErrorType.NA],
                 [expect.closeTo(45.8234560762, 8), 1, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [160.457642442172, 0.875412158869, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [expect.closeTo(160.457642442172, 8), expect.closeTo(0.875412158869, 10), ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
         });
 

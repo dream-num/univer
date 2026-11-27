@@ -19,9 +19,11 @@ import {
     BooleanNumber,
     createDocumentModelWithStyle,
     DataStreamTreeTokenType,
+    DocStyleType,
     DocumentDataModel,
     DocumentFlavor,
     LocaleService,
+    LocaleType,
     TableRowHeightRule,
     Univer,
 } from '@univerjs/core';
@@ -30,7 +32,12 @@ import { DocumentViewModel } from '../../view-model/document-view-model';
 import { createParagraphLayoutTestBed } from '../block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import { cachePrecomputedTableSkeleton, createTableSkeleton } from '../block/table';
 import { DocumentSkeleton } from '../doc-skeleton';
-import { hydrateDocumentSkeletonPage, serializeDocumentSkeletonPage } from '../document-layout-page-patch';
+import {
+    applyDocumentSkeletonContinuousBlock,
+    hydrateDocumentSkeletonPage,
+    serializeDocumentSkeletonContinuousBlock,
+    serializeDocumentSkeletonPage,
+} from '../document-layout-page-patch';
 
 function normalizeSkeleton(value: unknown): unknown {
     if (value instanceof Map) {
@@ -53,7 +60,99 @@ function normalizeSkeleton(value: unknown): unknown {
 }
 
 describe('document layout page patch', () => {
-    it.each(['header', 'footer'] as const)('keeps precomputed body tables out of a %s at the same stream offset', (kind) => {
+    it('serializes and applies a continuous replacement with 150,000 flow lines', () => {
+        const model = createDocumentModelWithStyle('Old', {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const viewModel = new DocumentViewModel(model);
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setDirection('ltr');
+        const skeleton = DocumentSkeleton.create(viewModel, locale);
+        try {
+            skeleton.calculate();
+            const source = skeleton.getSkeletonData()!;
+            const page = source.pages[0];
+            const column = page.sections[0].columns[0];
+            const initial = serializeDocumentSkeletonContinuousBlock(page, null);
+            const target = { ...source, pages: [] };
+            applyDocumentSkeletonContinuousBlock(target, initial.block, model.getSnapshot());
+            const line = column.lines[0];
+            const lineCount = 150_000;
+            column.lines = Array.from({ length: lineCount }, (_, offset) => ({
+                ...line,
+                st: offset,
+                ed: offset,
+                divides: [],
+            }));
+
+            const replacement = serializeDocumentSkeletonContinuousBlock(page, initial.snapshot);
+            const applied = applyDocumentSkeletonContinuousBlock(target, replacement.block, model.getSnapshot());
+            const appliedColumn = applied.sections[0].columns[0];
+
+            expect(appliedColumn.lines).toHaveLength(lineCount);
+            expect(appliedColumn.lines[0].st).toBe(0);
+            expect(appliedColumn.lines[75_000].ed).toBe(75_000);
+            expect(appliedColumn.lines[lineCount - 1].ed).toBe(lineCount - 1);
+            expect(appliedColumn.lines[lineCount - 1].parent).toBe(appliedColumn);
+        } finally {
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('retains geometry from earlier continuous sections and columns when the final column changes', () => {
+        const model = createDocumentModelWithStyle('One\rTwo\rThree\r', {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setDirection('ltr');
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), locale);
+        try {
+            skeleton.calculate();
+            const data = skeleton.getSkeletonData()!;
+            const page = data.pages[0];
+            const section = page.sections[0];
+            const column = section.columns[0];
+            const [one, two, three] = column.lines;
+            page.sections = [
+                { ...section, columns: [{ ...column, lines: [one] }] },
+                { ...section, columns: [{ ...column, lines: [two] }, { ...column, lines: [three] }] },
+            ];
+            for (const bodySection of page.sections) {
+                bodySection.parent = page;
+                for (const bodyColumn of bodySection.columns) {
+                    bodyColumn.parent = bodySection;
+                    for (const line of bodyColumn.lines) {
+                        line.parent = bodyColumn;
+                    }
+                }
+            }
+            const initial = serializeDocumentSkeletonContinuousBlock(page, null, false, { trackBaseline: true, complete: true });
+            const target = { ...data, pages: [] };
+            const applied = applyDocumentSkeletonContinuousBlock(target, initial.block, model.getSnapshot());
+            const retainedSection = applied.sections[0];
+            const retainedColumn = applied.sections[1].columns[0];
+            const { height, baselineSections, tables } = initial.snapshot;
+            page.sections[1].columns[1].lines[0] = { ...three, top: three.top + 10 };
+
+            const { block } = serializeDocumentSkeletonContinuousBlock(page, null, false, {
+                base: { version: 'previous', height, sections: baselineSections!, tables: tables! },
+            });
+
+            expect(block.flow).toMatchObject({ sectionIndex: 1, columnIndex: 1 });
+            applyDocumentSkeletonContinuousBlock(target, block, model.getSnapshot());
+            expect(applied.sections[0]).toBe(retainedSection);
+            expect(applied.sections[1].columns[0]).toBe(retainedColumn);
+            expect(applied.sections[1].columns[1].lines[0].top).toBe(three.top + 10);
+        } finally {
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each((['header', 'footer'] as const).flatMap((kind) => [undefined, 0, 3].map((cellSpacing) => ({ kind, cellSpacing }))))('keeps precomputed body tables out of a $kind at the same stream offset (cell spacing: $cellSpacing)', ({ kind, cellSpacing }) => {
         const T = DataStreamTreeTokenType;
         const story = (text: string, rowCount: number, rowHeight: number): Required<Pick<IDocumentData, 'body' | 'tableSource'>> => {
             const row = `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`;
@@ -61,6 +160,7 @@ describe('document layout page patch', () => {
             const dataStream = `${tableText}${T.PARAGRAPH}${T.SECTION_BREAK}`;
             const table: ITable = {
                 tableId: 'table-1',
+                ...(cellSpacing == null ? {} : { styleId: 'Spacing' }),
                 align: 0,
                 indent: { v: 0 },
                 textWrap: 0,
@@ -86,6 +186,12 @@ describe('document layout page patch', () => {
         };
         const snapshot: IDocumentData = {
             id: 'segment-local-tables',
+            ...(cellSpacing == null
+                ? {}
+                : { styles: {
+                    Base: { name: 'Base', type: DocStyleType.table, tableProperties: { cellSpacing: { v: 6 } }, rowProperties: { cellSpacing: { v: cellSpacing } } },
+                    Spacing: { name: 'Spacing', type: DocStyleType.table, basedOn: 'Base' },
+                } }),
             ...story('Body', 4, 100),
             documentStyle: {
                 documentFlavor: DocumentFlavor.TRADITIONAL,
@@ -125,7 +231,7 @@ describe('document layout page patch', () => {
             expect(resourceNode.startIndex).toBe(bodyNode.startIndex);
             const resourceTable = createTableSkeleton(ctx, curPage, resourceViewModel, resourceNode, sectionBreakConfig)!;
             expect(resourceTable.rows).toHaveLength(1);
-            expect(resourceTable.height).toBe(18);
+            expect(resourceTable.height).toBe(18 + (cellSpacing ?? 0) * 4);
             expect(createTableSkeleton(ctx, curPage, viewModel, bodyNode, sectionBreakConfig)).toBe(bodyTable);
         } finally {
             viewModel.dispose();
@@ -145,9 +251,24 @@ describe('document layout page patch', () => {
             const page = [...resources.get('regular')!.values()][0];
             const table = [...page.skeTables.values()][0];
             expect(table.rows).toHaveLength(1);
-            expect(table.height).toBe(18);
-            const hydrated = hydrateDocumentSkeletonPage(structuredClone(serializeDocumentSkeletonPage(page, true)), undefined, snapshot);
-            expect([...hydrated.skeTables.values()][0].rows[0].rowSource).toBe(table.tableSource.tableRows[0]);
+            expect(table.height).toBe(18 + (cellSpacing ?? 0) * 4);
+            const publication = structuredClone(serializeDocumentSkeletonPage(page, true));
+            const resource = kind === 'header' ? snapshot.headers!.regular : snapshot.footers!.regular;
+            // A worker can resolve a DOCX grid whose authored widths were omitted.
+            resource.tableSource!['table-1'].tableColumns = [{}] as ITable['tableColumns'];
+            const hydrated = hydrateDocumentSkeletonPage(publication, undefined, snapshot);
+            expect([...hydrated.skeTables.values()][0].tableSource.tableColumns).toEqual(table.tableSource.tableColumns);
+            expect(resource.tableSource!['table-1'].tableColumns).toEqual([{}]);
+            const hydratedTable = [...hydrated.skeTables.values()][0];
+            if (cellSpacing == null) {
+                expect(hydratedTable.rows[0].rowSource).toBe(table.tableSource.tableRows[0]);
+            } else {
+                expect(hydratedTable.rows[0].rowSource).toEqual(table.tableSource.tableRows[0]);
+                expect(hydratedTable.tableSource.cellSpacing).toEqual({ v: 6 });
+                expect(hydratedTable.rows[0].rowSource.cellSpacing).toEqual({ v: cellSpacing });
+                expect(resource.tableSource!['table-1'].cellSpacing).toBeUndefined();
+                expect(resource.tableSource!['table-1'].tableRows[0].cellSpacing).toBeUndefined();
+            }
         } finally {
             skeleton.dispose();
             univer.dispose();

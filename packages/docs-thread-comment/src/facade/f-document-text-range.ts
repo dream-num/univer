@@ -31,7 +31,7 @@ export interface IFDocumentTextRangeThreadCommentMixin {
      * Creates a comment on this text range.
      * @param content Plain text or a Univer document body for rich comment content.
      * @param [options] Optional stable IDs, author, attachments, and creation time.
-     * @returns {Promise<boolean>} `true` when the create command succeeds; otherwise, `false`.
+     * @returns {Promise<boolean>} `true` when the create command succeeds; otherwise, `false`. Rejects when a host permission interceptor denies the write.
      * @throws {TypeError} If the content is empty.
      * @example
      * ```ts

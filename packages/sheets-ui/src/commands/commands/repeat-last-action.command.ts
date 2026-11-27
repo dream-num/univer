@@ -56,17 +56,13 @@ const permissionCheckMap = {
     },
     [RepeatLastActionPermission.RowStyle]: {
         permissionTypes: {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
+            worksheetTypes: [WorksheetSetRowStylePermission],
         },
         errorMessageKey: 'sheets-ui.permission.dialog.setRowColStyleErr',
     },
     [RepeatLastActionPermission.ColumnStyle]: {
         permissionTypes: {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
+            worksheetTypes: [WorksheetSetColumnStylePermission],
         },
         errorMessageKey: 'sheets-ui.permission.dialog.setRowColStyleErr',
     },

@@ -86,7 +86,7 @@ export class Tocol extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.CALC);
             }
 
-            if (maxRowLength > 1 || maxColumnLength > 1 || result.length === 1) {
+            if (maxRowLength > 1 || maxColumnLength > 1 || (result.length === 1 && !this._preservesSingletonArray())) {
                 return result[0];
             }
 
@@ -108,6 +108,14 @@ export class Tocol extends BaseFunction {
         return resultArray;
     }
 
+    protected _flattenValue(value: BaseValueObject): BaseValueObject {
+        return value.isNull() ? NumberValueObject.create(0) : value;
+    }
+
+    protected _preservesSingletonArray(): boolean {
+        return false;
+    }
+
     private _getArrayValueByColumn(array: BaseValueObject, ignore: number): BaseValueObject[] {
         const _array = array as ArrayValueObject;
         const arrayRowCount = _array.getRowCount();
@@ -120,7 +128,7 @@ export class Tocol extends BaseFunction {
                 const valueObject = _array.get(r, c) as BaseValueObject;
 
                 if (!this._isIgnore(valueObject, ignore)) {
-                    result.push(valueObject.isNull() ? NumberValueObject.create(0) : valueObject);
+                    result.push(this._flattenValue(valueObject));
                 }
             }
         }
@@ -140,7 +148,7 @@ export class Tocol extends BaseFunction {
                 const valueObject = _array.get(r, c) as BaseValueObject;
 
                 if (!this._isIgnore(valueObject, ignore)) {
-                    result.push(valueObject.isNull() ? NumberValueObject.create(0) : valueObject);
+                    result.push(this._flattenValue(valueObject));
                 }
             }
         }

@@ -19,6 +19,7 @@ import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { formatExcelFixedDecimal } from '../excel-fixed-decimal';
 
 export class Bahttext extends BaseFunction {
     override minParams = 1;
@@ -39,7 +40,7 @@ export class Bahttext extends BaseFunction {
         return this._handleSingleObject(number);
     }
 
-    private _handleSingleObject(number: BaseValueObject): BaseValueObject {
+    protected _handleSingleObject(number: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(number);
 
         if (isError) {
@@ -72,7 +73,7 @@ export class Bahttext extends BaseFunction {
         return StringValueObject.create(result);
     }
 
-    private _convertNumberToThaiText(number: number): string {
+    protected _convertNumberToThaiText(number: number | string): string {
         const units = ['ล้าน', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', '']; // 10^6, 10^1, 10^2, 10^3, 10^4, 10^5, 10^0
         const digits = ['ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า']; // 0~9
         const special = ['ลบ', 'บาท', 'ถ้วน', 'สตางค์', 'ยี่', 'เอ็ด', ',', ' ', '฿']; // minus, baht, integer, satang, two, one, comma, space, baht symbol
@@ -118,5 +119,23 @@ export class Bahttext extends BaseFunction {
         }
 
         return result;
+    }
+}
+
+export class ExcelBahttext extends Bahttext {
+    protected override _handleSingleObject(value: BaseValueObject): BaseValueObject {
+        const numberValue = value.isString() ? value.convertToNumberObjectValue() : value;
+        if (numberValue.isError()) return numberValue;
+        const number = Number(numberValue.getValue());
+        const [whole, decimals] = formatExcelFixedDecimal(Math.abs(number), 2, false).split('.');
+        const satang = decimals.replace(/^0+/, '');
+        const prefix = number < 0 ? 'ลบ' : '';
+        if (whole === '0') {
+            const amount = satang ? `${this._convertNumberToThaiText(satang)}สตางค์` : 'ศูนย์บาทถ้วน';
+            return StringValueObject.create(prefix + amount);
+        }
+        const baht = this._convertNumberToThaiText(whole);
+        const fraction = satang ? `${this._convertNumberToThaiText(satang)}สตางค์` : 'ถ้วน';
+        return StringValueObject.create(`${prefix}${baht}บาท${fraction}`);
     }
 }

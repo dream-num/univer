@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BorderStyleTypes } from '@univerjs/core';
+import { BorderStyleTypes, createIdentifier, Injector } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BORDER_TYPE, ORIENTATION_TYPE } from '../const';
 import {
@@ -93,6 +93,20 @@ describe('draw extra', () => {
         expect(ctx.clearRectForTexture).toHaveBeenCalledTimes(4);
     });
 
+    it('extends every border line by the line width buffer at both ends', () => {
+        const ctx = createCtxMock();
+        const position = { startX: 10, startY: 20, endX: 30, endY: 40 };
+
+        drawLineByBorderType(ctx, BORDER_TYPE.TOP, 1, position);
+        drawLineByBorderType(ctx, BORDER_TYPE.BOTTOM, 1, position);
+        drawLineByBorderType(ctx, BORDER_TYPE.LEFT, 1, position);
+        drawLineByBorderType(ctx, BORDER_TYPE.RIGHT, 1, position);
+
+        // The bottom line has to reach as far as the top line, otherwise the bottom right corner of a thick border is left open.
+        expect(ctx.moveToByPrecision.mock.calls).toEqual([[9, 20], [9, 40], [10, 19], [30, 19]]);
+        expect(ctx.lineToByPrecision.mock.calls).toEqual([[31, 20], [31, 40], [10, 41], [30, 41]]);
+    });
+
     it('draws diagonal lines and sets line styles', () => {
         const ctx = createCtxMock();
         const position = { startX: 0, startY: 0, endX: 20, endY: 20 };
@@ -160,5 +174,39 @@ describe('solid line transitions', () => {
         expect(ctx.setLineDash).toHaveBeenLastCalledWith([3]);
         setLineType(ctx, style);
         expect(ctx.setLineDash).toHaveBeenLastCalledWith([]);
+    });
+});
+
+const ICalculateRectRotate = createIdentifier<typeof calculateRectRotate>('render.test.calculate-rect-rotate');
+
+describe('rectangle rotation value ownership', () => {
+    let injector: Injector;
+
+    beforeEach(() => {
+        injector = new Injector([[ICalculateRectRotate, { useValue: calculateRectRotate }]]);
+    });
+
+    afterEach(() => injector.dispose());
+
+    it.each(['start', 'center', 'separate'])('preserves inputs and independent results when the offset aliases %s', (alias) => {
+        const rotate = injector.get(ICalculateRectRotate);
+        const start = Vector2.create(10, 0);
+        const center = Vector2.create(5, 5);
+        let offset = Vector2.create(2, 3);
+        if (alias === 'start') offset = start;
+        if (alias === 'center') offset = center;
+        const inputs = [start, center, offset].map((point) => [point.x, point.y]);
+        const result = rotate(start, center, Math.PI / 6, Math.PI / 4, offset);
+        const coordinates = [result.x, result.y];
+
+        expect(result).not.toBe(start);
+        expect(result).not.toBe(center);
+        expect(result).not.toBe(offset);
+        expect([start, center, offset].map((point) => [point.x, point.y])).toEqual(inputs);
+        result.x += 100;
+        result.y -= 100;
+        const next = rotate(start, center, Math.PI / 6, Math.PI / 4, offset);
+        expect([next.x, next.y]).toEqual(coordinates);
+        expect([start, center, offset].map((point) => [point.x, point.y])).toEqual(inputs);
     });
 });

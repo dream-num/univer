@@ -182,4 +182,27 @@ describe('Dialog', () => {
         unmount();
         mountContainer.remove();
     });
+
+    it('uses design-token overlay, high-contrast body text, focusable close button and RTL-safe footer gap', () => {
+        const { getByRole } = render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body} direction="ltr">
+                <Dialog open title="Accessible Dialog" showOk showCancel>Body</Dialog>
+            </ConfigProvider>
+        );
+
+        const overlay = document.querySelector('[data-slot="dialog-overlay"]');
+        expect(overlay?.className).toContain('univer-bg-gray-1000');
+        expect(overlay?.className).not.toContain('rgba(');
+
+        const dialog = getByRole('dialog');
+        expect(dialog.className).toContain('univer-text-gray-900');
+
+        const closeButton = getByRole('button', { name: 'Close' });
+        expect(closeButton.className).toContain('focus-visible:univer-outline');
+        expect(closeButton.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+
+        const footer = dialog.querySelector('[data-slot="dialog-footer"]');
+        expect(footer?.className).toContain('univer-gap-2');
+        expect(footer?.className).not.toContain('space-x-2');
+    });
 });

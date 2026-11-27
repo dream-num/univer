@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { LocaleType } from '@univerjs/core';
-import { currencySymbols, excelDateTimeSerial, getNumfmtLocaleTag, numfmt } from '@univerjs/core';
-import { getDateFormatPatterns } from '../base/const/date-format';
+import { currencySymbols, excelDateTimeSerial, getNumfmtLocaleTag, getRegionLocale, numfmt } from '@univerjs/core';
+import { getDateFormatLocale, getDateFormatPatterns } from '../base/const/date-format';
 import { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from '../base/const/formatdetail';
 
 export const getCurrencyOptions = () => currencySymbols.map((item) => ({ label: item, value: item }));
@@ -30,19 +29,23 @@ export const getCurrencyFormatOptions = (suffix: string) =>
 
 const DATE_FORMAT_PREVIEW_VALUE = excelDateTimeSerial(new Date(Date.UTC(1930, 7, 5, 13, 30, 30)));
 
-export const getDateFormatOptions = (locale?: LocaleType, currentPattern?: string) => {
+export const getDateFormatOptions = (locale?: string, currentPattern?: string, region?: string) => {
     if (locale === undefined) {
         return DATEFMTLISG.map((item) => ({ label: item.label, value: item.suffix }));
     }
 
-    const numfmtLocale = getNumfmtLocaleTag(locale);
-    const patterns = getDateFormatPatterns(locale);
+    const effectiveRegion = region ?? locale;
+    const regionTag = region && getRegionLocale(region)?.baseName;
+    const patterns = getDateFormatPatterns(effectiveRegion, region !== undefined || !getDateFormatLocale(effectiveRegion)).map((pattern) =>
+        regionTag && /mmm|ddd|am\/pm/i.test(pattern) ? `[$-${regionTag}]${pattern}` : pattern);
     if (currentPattern && !patterns.includes(currentPattern)) {
         patterns.unshift(currentPattern);
     }
 
+    const workbookLocale = getDateFormatLocale(locale);
+    const previewLocale = workbookLocale ? getNumfmtLocaleTag(workbookLocale) : getRegionLocale(locale)?.language;
     return patterns.map((pattern) => ({
-        label: numfmt.format(pattern, DATE_FORMAT_PREVIEW_VALUE, { locale: numfmtLocale }),
+        label: numfmt.format(pattern, DATE_FORMAT_PREVIEW_VALUE, { locale: previewLocale ?? 'en' }),
         value: pattern,
     }));
 };

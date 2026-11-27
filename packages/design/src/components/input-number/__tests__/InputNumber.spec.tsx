@@ -380,4 +380,84 @@ describe('InputNumber', () => {
         fireEvent.click(decrementButton);
         expect(onLocalChange).toHaveBeenCalledWith(1);
     });
+
+    it('avoids floating-point drift when stepping decimal values', () => {
+        const onLocalChange = vi.fn();
+        const { container } = render(<InputNumber defaultValue={0.1} step={0.2} onChange={onLocalChange} />);
+        const input = container.querySelector('input') as HTMLInputElement;
+        const [incBtn, decBtn] = Array.from(container.querySelectorAll('[role="button"]')) as HTMLElement[];
+
+        fireEvent.click(incBtn);
+        expect(onLocalChange).toHaveBeenLastCalledWith(0.3);
+        expect(input.value).toBe('0.3');
+
+        fireEvent.click(decBtn);
+        expect(onLocalChange).toHaveBeenLastCalledWith(0.1);
+        expect(input.value).toBe('0.1');
+    });
+
+    it('supports 10x stepping with Shift + Arrow keys and Shift + Click', () => {
+        const onLocalChange = vi.fn();
+        const { container } = render(<InputNumber defaultValue={10} step={0.5} min={0} max={20} onChange={onLocalChange} />);
+        const input = container.querySelector('input') as HTMLInputElement;
+        const [incBtn, decBtn] = Array.from(container.querySelectorAll('[role="button"]')) as HTMLElement[];
+
+        fireEvent.keyDown(input, { key: 'ArrowUp', shiftKey: true });
+        expect(onLocalChange).toHaveBeenLastCalledWith(15);
+        expect(input.value).toBe('15');
+
+        fireEvent.keyDown(input, { key: 'ArrowDown', shiftKey: true });
+        expect(onLocalChange).toHaveBeenLastCalledWith(10);
+
+        fireEvent.click(incBtn, { shiftKey: true });
+        expect(onLocalChange).toHaveBeenLastCalledWith(15);
+
+        fireEvent.click(decBtn, { shiftKey: true });
+        expect(onLocalChange).toHaveBeenLastCalledWith(10);
+    });
+
+    it('supports press-and-hold continuous stepping and stops at bounds without double-stepping on release', () => {
+        vi.useFakeTimers();
+        try {
+            const onLocalChange = vi.fn();
+            const { container } = render(<InputNumber defaultValue={1} max={4} onChange={onLocalChange} />);
+            const [incBtn] = Array.from(container.querySelectorAll('[role="button"]')) as HTMLElement[];
+
+            fireEvent.mouseDown(incBtn, { button: 0 });
+            vi.advanceTimersByTime(350);
+            expect(onLocalChange).toHaveBeenCalledTimes(1);
+            expect(onLocalChange).toHaveBeenLastCalledWith(2);
+
+            vi.advanceTimersByTime(150);
+            expect(onLocalChange).toHaveBeenCalledTimes(3);
+            expect(onLocalChange).toHaveBeenLastCalledWith(4);
+
+            // Further intervals should not emit past max
+            vi.advanceTimersByTime(300);
+            expect(onLocalChange).toHaveBeenCalledTimes(3);
+
+            fireEvent.mouseUp(incBtn);
+            fireEvent.click(incBtn);
+            expect(onLocalChange).toHaveBeenCalledTimes(3);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('renders crisp icon controls across sizes and reserves non-overlapping padding for clear + controls', () => {
+        const { container, rerender } = render(<InputNumber size="small" allowClear allowEmpty defaultValue={12} />);
+        const input = container.querySelector('input') as HTMLInputElement;
+        const clearButton = container.querySelector('button') as HTMLButtonElement;
+        const controlButtons = Array.from(container.querySelectorAll('[role="button"]')) as HTMLElement[];
+
+        expect(input.className).toContain('univer-tabular-nums');
+        expect(input.className).toContain('univer-pr-14');
+        expect(clearButton.className).toContain('univer-right-8');
+        expect(controlButtons).toHaveLength(2);
+        expect(controlButtons[0].querySelector('svg')).not.toBeNull();
+        expect(controlButtons[1].querySelector('svg')).not.toBeNull();
+
+        rerender(<InputNumber size="large" defaultValue={12} />);
+        expect(input.className).toContain('univer-pr-11');
+    });
 });

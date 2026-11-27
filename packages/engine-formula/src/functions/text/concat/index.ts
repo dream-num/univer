@@ -40,18 +40,29 @@ export class Concat extends BaseFunction {
                         return false; // break
                     }
 
-                    concatenatedString += formatValueForFormulaText(valueObject.getValue());
+                    concatenatedString += this._formatText(valueObject.getValue());
                 });
 
                 if (isError) {
                     return isError;
                 }
-            } else if (!textValue.isError() && !textValue.isNull()) {
-                // Direct concatenation if it's a single value
-                concatenatedString += formatValueForFormulaText(textValue.getValue());
+            } else if (textValue.isError()) {
+                if (this._propagatesScalarErrors()) {
+                    return textValue;
+                }
+            } else if (!textValue.isNull()) {
+                concatenatedString += this._formatText(textValue.getValue());
             }
         }
 
         return StringValueObject.create(concatenatedString);
+    }
+
+    protected _propagatesScalarErrors(): boolean {
+        return false;
+    }
+
+    protected _formatText(value: string | number | boolean | null): string {
+        return formatValueForFormulaText(value);
     }
 }

@@ -15,12 +15,12 @@
  */
 
 import type { ReactElement } from 'react';
-import type { IValueOption } from '../../../../services/menu/menu';
-import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { ICommandService, Injector, LocaleService } from '@univerjs/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IValueOption } from '../../../../services/menu/menu';
+import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
 import { IDialogService } from '../../../../services/dialog/dialog.service';
@@ -28,6 +28,7 @@ import { ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
 import { MenuManagerPosition } from '../../../../services/menu/types';
+import { IRibbonOverrideService, RibbonOverrideService } from '../../../../services/ribbon/ribbon-override.service';
 import { IRibbonService } from '../../../../services/ribbon/ribbon.service';
 import { RediProvider } from '../../../../utils/di';
 import { FEATURE_SEARCH_DIALOG_ID, FeatureSearch } from '../FeatureSearch';
@@ -234,11 +235,13 @@ function renderWithDependencies(element: ReactElement) {
     injector.add([ICommandService, { useValue: commandService as never }]);
     injector.add([IDialogService, { useValue: dialogService as never }]);
     injector.add([ILayoutService, { useValue: layoutService as never }]);
+    injector.add([IRibbonOverrideService, { useClass: RibbonOverrideService }]);
     injector.add([ComponentManager]);
     injector.add([IconManager]);
 
     return {
         ...render(<RediProvider value={{ injector }}>{element}</RediProvider>),
+        injector,
         commandService,
         dialogService,
         layoutService,
@@ -266,6 +269,20 @@ describe('FeatureSearch', () => {
         expect(await screen.findByText('Target action')).toBeTruthy();
 
         act(() => visibleRibbon$.next(ribbon));
+        await waitFor(() => expect(screen.queryByText('Target action')).toBeNull());
+    });
+
+    it('searches the active workbench ribbon and restores the host commands when it closes', async () => {
+        const { injector } = renderWithDependencies(<FeatureSearch />);
+        const overrides = injector.get(IRibbonOverrideService);
+        const hostRibbon = injector.get(IRibbonService);
+        act(() => submenuDisabled$.next(false));
+        await screen.findByText('Print layout');
+        act(() => overrides.activate({ id: 'editor', ribbonService: { ...hostRibbon, ribbon$: of([contextualRibbon]) } }));
+        expect(await screen.findByText('Target action')).toBeTruthy();
+        expect(screen.queryByText('Print layout')).toBeNull();
+        act(() => overrides.clear('editor'));
+        expect(await screen.findByText('Print layout')).toBeTruthy();
         await waitFor(() => expect(screen.queryByText('Target action')).toBeNull());
     });
 

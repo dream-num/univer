@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
+import type { IAccessor, ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import {
     CommandType,
     Direction,
     ICommandService,
     IConfigService,
+    Injector,
     IUniverInstanceService,
     RANGE_TYPE,
     Rectangle,
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { getFocusedRenderForUnit, IRenderManagerService } from '@univerjs/engine-render';
 import {
     expandToContinuousRange,
     getCellAtRowCol,
@@ -36,6 +37,7 @@ import {
     SelectionMoveType,
     SetSelectionsOperation,
     SheetInterceptorService,
+    SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
@@ -80,6 +82,15 @@ export interface IMoveSelectionEnterAndTabCommandParams {
     fromCurrentSelection?: boolean;
 }
 
+function getDisplayContext(accessor: IAccessor, unitId: string, subUnitId: string) {
+    const injector = accessor.get(Injector);
+    const skeletons = injector.has(SheetSkeletonService) ? injector.get(SheetSkeletonService) : undefined;
+    return {
+        display: skeletons?.getDisplaySkeleton(unitId, subUnitId),
+        pending: skeletons?.isDisplayProjectionPending(unitId, subUnitId) ?? false,
+    };
+}
+
 /**
  * Move selection (Mainly by keyboard arrow keys, For Tab and Enter key, check @MoveSelectionEnterAndTabCommand)
  */
@@ -96,7 +107,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
             return false;
         }
 
-        const { workbook, worksheet } = target;
+        const { workbook, worksheet, unitId, subUnitId } = target;
         const selection = getSelectionsService(accessor, params.fromCurrentSelection).getCurrentLastSelection();
         if (!selection) {
             return false;
@@ -129,18 +140,21 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
         const startRange = getStartRange(range, primary, direction);
         const config = accessor.get(IConfigService).getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
         const allowWrap = config?.allowArrowKeyWrapOnSheetBoundary ?? true;
+        const { display, pending } = getDisplayContext(accessor, unitId, subUnitId);
+        if (pending) {
+            return false;
+        }
 
         // the start range is from the primary selection range
         const next =
             jumpOver === JumpOver.moveGap
-                ? findNextGapRange(startRange, direction, worksheet)
-                : findNextRange(startRange, direction, worksheet, undefined, true, 1, allowWrap);
+                ? findNextGapRange(startRange, direction, worksheet, display)
+                : findNextRange(startRange, direction, worksheet, undefined, true, 1, allowWrap, display);
         const destRange = getCellAtRowCol(next.startRow, next.startColumn, worksheet);
 
         if (Rectangle.equals(destRange, startRange)) {
             return false;
         }
-        const unitId = workbook.getUnitId();
         // If there are changes to the selection, clear the start position saved by the tab.
         // This function works in conjunction with the enter and tab shortcuts.
         accessor.get(ShortcutExperienceService).remove({
@@ -212,6 +226,10 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
 
         const unitId = workbook.getUnitId();
         const sheetId = worksheet.getSheetId();
+        const { display, pending } = getDisplayContext(accessor, unitId, sheetId);
+        if (pending) {
+            return false;
+        }
         if (!selection) {
             return false;
         }
@@ -260,7 +278,11 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
                         endRow,
                         startColumn,
                         endColumn,
-                    }
+                    },
+                    true,
+                    1,
+                    true,
+                    display
                 );
 
             const useLeftTopAsDest = isLastCell && isReverse;
@@ -307,7 +329,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
                 });
             }
 
-            const next = findNextRange(startRange, direction, worksheet, undefined, true, 1, false);
+            const next = findNextRange(startRange, direction, worksheet, undefined, true, 1, false, display);
             const destRange = getCellAtRowCol(next.startRow, next.startColumn, worksheet);
 
             if (Rectangle.equals(destRange, startRange)) {
@@ -350,7 +372,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
             fromCurrentSelection: params.fromCurrentSelection,
         });
         const renderManagerService = accessor.get(IRenderManagerService);
-        const selectionService = renderManagerService.getRenderUnitById(unitId)?.with(ISheetSelectionRenderService);
+        const selectionService = getFocusedRenderForUnit(renderManagerService, unitId)?.with(ISheetSelectionRenderService);
         selectionService?.refreshSelectionMoveEnd();
         return rs;
     },
@@ -381,6 +403,10 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
         }
 
         const { worksheet, unitId, subUnitId } = target;
+        const { display, pending } = getDisplayContext(accessor, unitId, subUnitId);
+        if (pending) {
+            return false;
+        }
 
         const selectionsService = getSelectionsService(accessor, params.fromCurrentSelection);
         const selection = selectionsService.getCurrentLastSelection();
@@ -434,13 +460,14 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
                     startRange,
                     { ...Rectangle.clone(primary), rangeType: RANGE_TYPE.NORMAL },
                     direction,
-                    worksheet
+                    worksheet,
+                    display
                 )
-                : shrinkToNextCell(startRange, direction, worksheet);
+                : shrinkToNextCell(startRange, direction, worksheet, display);
         } else {
             destRange = jumpOver === JumpOver.moveGap
-                ? expandToNextGapRange(startRange, direction, worksheet)
-                : expandToNextCell(startRange, direction, worksheet);
+                ? expandToNextGapRange(startRange, direction, worksheet, display)
+                : expandToNextCell(startRange, direction, worksheet, display);
         }
         destRange.rangeType = startRange.rangeType;
 

@@ -181,26 +181,40 @@ export class Sortby extends BaseFunction {
                     : values.every((value) => value?.isString() && !/[^a-z0-9]/i.test(String(value.getValue()))));
 
                 if (!(byArray1RowCount === 1 && byArray1ColumnCount === 1)) {
-                    if (byArray1RowCount === 1) {
-                        arrayValue = arrayValue.concat(byArrays);
-                        arrayValue = this._transposeArray(arrayValue);
-                        const compare = this._sort(arrayRowCount, sortOrders as Array<1 | -1>);
-                        arrayValue = simple ? arrayValue.sort(compare) : getSortIndices(arrayValue.length, (left, right) => compare(arrayValue[left], arrayValue[right])).map((index) => arrayValue[index]);
-                        arrayValue = this._transposeArray(arrayValue).slice(0, arrayRowCount);
-                    } else if (byArray1ColumnCount === 1) {
+                    if (byArray1ColumnCount === 1 && arrayColumnCount === 1) {
+                        // A single data column has no wide payload to avoid transposing.
                         arrayValue = this._transposeArray(arrayValue);
                         arrayValue = arrayValue.concat(byArrays);
                         arrayValue = this._transposeArray(arrayValue);
                         const compare = this._sort(arrayColumnCount, sortOrders as Array<1 | -1>);
                         arrayValue = simple ? arrayValue.sort(compare) : getSortIndices(arrayValue.length, (left, right) => compare(arrayValue[left], arrayValue[right])).map((index) => arrayValue[index]);
                         arrayValue = arrayValue.map((row) => row.slice(0, arrayColumnCount));
+                    } else {
+                        const indices = this._sortIndices(byArrays, sortOrders as Array<1 | -1>, simple);
+                        if (byArray1RowCount === 1) {
+                            arrayValue = arrayValue.map((row) => {
+                                const result: Nullable<BaseValueObject>[] = [];
+                                for (let i = 0; i < indices.length; i++) {
+                                    result[i] = row[indices[i]];
+                                }
+                                return result;
+                            });
+                        } else if (byArray1ColumnCount === 1) {
+                            arrayValue = indices.map((index) => {
+                                const row = arrayValue[index].slice(0, arrayColumnCount);
+                                if (row.length < arrayColumnCount) {
+                                    row.length = arrayColumnCount;
+                                }
+                                return row;
+                            });
+                        }
                     }
                 }
 
                 const result = ArrayValueObject.create({
                     calculateValueList: arrayValue,
                     rowCount: arrayValue.length,
-                    columnCount: arrayValue[0].length || 0,
+                    columnCount: arrayColumnCount,
                     unitId: this.unitId as string,
                     sheetId: this.subUnitId as string,
                     row: this.row,
@@ -322,5 +336,26 @@ export class Sortby extends BaseFunction {
 
             return result;
         };
+    }
+
+    private _sortIndices(byArrays: Nullable<BaseValueObject>[][], sortOrders: Array<1 | -1>, simple: boolean) {
+        const compare = createSortCompare();
+        const primary = byArrays[0];
+        const primaryOrder = sortOrders[0];
+        const compareIndices = (a: number, b: number) => {
+            let result = compareSortValues(primary[a], primary[b], primaryOrder, compare);
+            if (result === 0) {
+                for (let i = 1; i < sortOrders.length; i++) {
+                    result = compareSortValues(byArrays[i][a], byArrays[i][b], sortOrders[i], compare);
+                    if (result !== 0) {
+                        return result;
+                    }
+                }
+            }
+            return result;
+        };
+        return simple
+            ? Array.from({ length: primary.length }, (_, index) => index).sort(compareIndices)
+            : getSortIndices(primary.length, compareIndices);
     }
 }

@@ -575,6 +575,47 @@ describe('spreadsheet integration', () => {
         expect(linkGlyph?.ts?.ul?.s).toBe(BooleanNumber.TRUE);
     });
 
+    it.each([
+        [VerticalAlign.TOP, 'T'],
+        [VerticalAlign.MIDDLE, 'M'],
+        [VerticalAlign.BOTTOM, 'B'],
+    ] as const)('paints the visible lines of overflowing merged rich text at vertical alignment %s', (alignment, marker) => {
+        const data = workbookDataFactory();
+        const sheet = data.sheets['sheet-1'];
+        const lines = Array.from({ length: 100 }, () => 'x');
+        lines[0] = 'T';
+        lines[50] = 'M';
+        lines[99] = 'B';
+        sheet.cellData = { 2: { 2: {
+            p: {
+                id: 'overflowing-rich-text',
+                body: {
+                    dataStream: `${lines.join('\r')}\r\n`,
+                    paragraphs: lines.map((_, index) => ({ startIndex: index * 2 + 1, paragraphId: `line-${index}` })),
+                    textRuns: [{ st: 0, ed: lines.length * 2, ts: { fs: 12 } }],
+                },
+                documentStyle: {},
+            },
+            s: { vt: alignment, tb: WrapStrategy.WRAP },
+        } } };
+        const extra = createFixture(data);
+        try {
+            const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = extra;
+            const info = createViewportInfo(scene, cacheCanvas);
+            skeleton.setStylesCache(info);
+            const context = mainCanvas.getContext();
+            const fill = vi.spyOn(context._context, 'fillText');
+            spreadsheet.draw(context, info);
+
+            const { startY, endY } = skeleton.getCellWithCoordByIndex(2, 2).mergeInfo;
+            const cellHeight = endY - startY;
+            const visibleText = fill.mock.calls.filter(([, , y]) => y > 0 && y < cellHeight).map(([text]) => text);
+            expect(visibleText).toContain(marker);
+        } finally {
+            disposeFixture(extra);
+        }
+    });
+
     it('applies shrink to fit while building the font cache', () => {
         const { skeleton, workbook } = fixture;
         const worksheet = workbook.getActiveSheet()!;

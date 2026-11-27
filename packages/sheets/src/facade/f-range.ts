@@ -1651,6 +1651,8 @@ export class FRange extends FBaseInitialable {
     /**
      * Set the vertical (top to bottom) alignment for the given range (top/middle/bottom).
      *
+     * In a fixed-height merged cell, overflowing unrotated rich text is clipped to the portion that fits after alignment.
+     *
      * To apply the same setting to multiple cells, create the full target range with {@link FWorksheet.getRange}
      * and call this method once instead of calling it on each cell separately.
      *

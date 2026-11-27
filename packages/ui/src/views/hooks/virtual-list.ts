@@ -103,8 +103,11 @@ function useContainerSize(containerTarget: RefObject<HTMLElement | null>) {
     useEffect(() => {
         if (containerTarget.current) {
             const getSize = () => {
-                const width = containerTarget.current!.clientWidth;
-                const height = containerTarget.current!.clientHeight;
+                const container = containerTarget.current;
+                if (!container) {
+                    return;
+                }
+                const { clientWidth: width, clientHeight: height } = container;
                 if (width !== size?.width || height !== size?.height) {
                     setSize({ width, height });
                 }

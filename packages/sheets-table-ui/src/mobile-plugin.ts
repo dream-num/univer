@@ -29,6 +29,7 @@ import {
 } from '@univerjs/core';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
 import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
 import { UniverMobileUIPlugin } from '@univerjs/ui';
@@ -52,6 +53,7 @@ import { SheetsTableUiService } from './services/sheets-table-ui.service';
 @DependentOn(
     UniverRenderEnginePlugin,
     UniverSheetsPlugin,
+    UniverSheetsSortPlugin,
     UniverSheetsTablePlugin,
     UniverSheetsMobileUIPlugin,
     UniverMobileUIPlugin

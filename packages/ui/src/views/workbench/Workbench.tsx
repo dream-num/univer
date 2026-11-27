@@ -18,7 +18,7 @@ import type { Injector } from '@univerjs/core';
 import type { ComponentType } from 'react';
 import { IConfigService, LifecycleService, LifecycleStages, LocaleService, ThemeService } from '@univerjs/core';
 import { borderBottomClassName, clsx, ConfigContext, ConfigProvider, render } from '@univerjs/design';
-import { useContext, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useContext, useEffect, useLayoutEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { map } from 'rxjs';
 import type { IUniverUIConfig } from '../../config/config';
@@ -32,7 +32,7 @@ import { ComponentContainer, useComponentsOfPart } from '../components/Component
 import { DesktopContextMenu } from '../components/context-menu/ContextMenu';
 import { Sidebar } from '../components/sidebar/Sidebar';
 import { WorkbenchSkeleton } from '../components/workbench-skeleton/WorkbenchSkeleton';
-import { useConfigValue } from '../hooks/index';
+import { useConfigValue, useWorkbenchPortalContainer } from '../hooks/layout';
 
 export interface IUniverWorkbenchProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -130,20 +130,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     );
     const direction = useObservable(localeService.direction$, localeService.getDirection());
 
-    // Create a portal container for injecting global component themes.
-    const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
-
-    useEffect(() => {
-        document.body.appendChild(portalContainer);
-
-        return () => {
-            document.body.removeChild(portalContainer);
-        };
-    }, [mountContainer, portalContainer]);
-
-    useEffect(() => {
-        portalContainer.dir = direction;
-    }, [direction, portalContainer]);
+    const portalContainer = useWorkbenchPortalContainer(mountContainer, direction);
 
     return (
         <ConfigProvider locale={locale?.design} direction={direction} mountContainer={portalContainer}>

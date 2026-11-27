@@ -80,3 +80,33 @@ export function useConfigValue<T>(configKey: string) {
         configService.getConfig<T>(configKey)
     );
 }
+
+export function useWorkbenchPortalContainer(mountContainer: HTMLElement, direction: 'ltr' | 'rtl') {
+    const ownerDocument = mountContainer.ownerDocument;
+    const portalContainer = useMemo(() => ownerDocument.createElement('div'), [ownerDocument]);
+
+    useEffect(() => {
+        const syncPortalParent = () => {
+            const { body, fullscreenElement } = ownerDocument;
+            const parent = fullscreenElement?.contains(mountContainer) && !fullscreenElement.contains(body)
+                ? fullscreenElement
+                : body;
+            if (portalContainer.parentNode !== parent) {
+                parent.appendChild(portalContainer);
+            }
+        };
+
+        syncPortalParent();
+        ownerDocument.addEventListener('fullscreenchange', syncPortalParent);
+        return () => {
+            ownerDocument.removeEventListener('fullscreenchange', syncPortalParent);
+            portalContainer.remove();
+        };
+    }, [mountContainer, ownerDocument, portalContainer]);
+
+    useEffect(() => {
+        portalContainer.setAttribute('dir', direction);
+    }, [direction, portalContainer]);
+
+    return portalContainer;
+}

@@ -16,9 +16,9 @@
 
 import type { Dispatch, KeyboardEvent, MouseEvent, RefObject, SetStateAction } from 'react';
 import { isRealNum, LocaleService } from '@univerjs/core';
-import { borderBottomClassName, borderClassName, clsx, cva, scrollbarClassName } from '@univerjs/design';
+import { borderBottomClassName, borderClassName, clsx, ConfigContext, cva, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { combineLatest, isObservable, map, merge, of, scan, startWith } from 'rxjs';
 import type {
@@ -713,8 +713,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         () => (menuType ? menuManagerService.getMenuByPositionKey(menuType) : []),
         [menuManagerService, menuType, menuSchemaVersion, menuSessionVersion]
     );
-    const submenuPortalContainer = layoutService.rootContainerElement?.ownerDocument?.body
-        ?? (typeof document !== 'undefined' ? document.body : null);
+    const { mountContainer: submenuPortalContainer } = useContext(ConfigContext);
 
     useEffect(() => {
         if (!menuElement) {

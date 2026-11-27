@@ -18,9 +18,10 @@
  * @vitest-environment jsdom
  */
 
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, waitFor, within } from '@testing-library/react';
 import { createRef } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Dropdown } from '../Dropdown';
 
 afterEach(() => {
@@ -44,6 +45,7 @@ describe('Dropdown positioning', () => {
         });
 
         const anchorRef = createRef<HTMLDivElement>();
+        const portalHost = document.createElement('div');
         render(
             <div ref={anchorRef} data-testid="name-box">
                 <input aria-label="Name box" />
@@ -56,11 +58,12 @@ describe('Dropdown positioning', () => {
                 >
                     <button type="button">Open named ranges</button>
                 </Dropdown>
-            </div>
+            </div>,
+            { wrapper: ({ children }) => <ConfigProvider mountContainer={portalHost}>{children}</ConfigProvider> }
         );
 
         await waitFor(() => {
-            const positioner = screen.getByText('Named ranges').closest('[data-radix-popper-content-wrapper]');
+            const positioner = within(portalHost).getByText('Named ranges').closest('[data-radix-popper-content-wrapper]');
             expect(positioner?.getAttribute('style')).toContain(`translate(${expectedLeft}px, 88px)`);
         });
     });

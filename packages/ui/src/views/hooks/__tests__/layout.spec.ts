@@ -16,8 +16,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
-import { useScrollYOverContainer } from '../layout';
+import { useScrollYOverContainer, useWorkbenchPortalContainer } from '../layout';
 
 describe('useScrollYOverContainer', () => {
     afterEach(() => {
@@ -43,5 +42,34 @@ describe('useScrollYOverContainer', () => {
         unmount();
 
         expect(disconnect).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe('useWorkbenchPortalContainer', () => {
+    it('keeps menu content accessible only in its own fullscreen workbench and restores it on exit', () => {
+        const ownerDocument = document.implementation.createHTMLDocument();
+        const editor = ownerDocument.createElement('div');
+        const otherEditor = ownerDocument.createElement('div');
+        ownerDocument.body.append(editor, otherEditor);
+        let fullscreenElement: HTMLElement | null = otherEditor;
+        Object.defineProperty(ownerDocument, 'fullscreenElement', { get: () => fullscreenElement });
+
+        const { result, unmount } = renderHook(() => useWorkbenchPortalContainer(editor, 'ltr'));
+        const menu = ownerDocument.createElement('button');
+        result.current.appendChild(menu);
+        expect(ownerDocument.body.contains(menu)).toBe(true);
+        expect(otherEditor.contains(menu)).toBe(false);
+
+        fullscreenElement = editor;
+        ownerDocument.dispatchEvent(new Event('fullscreenchange'));
+        expect(editor.contains(menu)).toBe(true);
+
+        fullscreenElement = null;
+        ownerDocument.dispatchEvent(new Event('fullscreenchange'));
+        expect(editor.contains(menu)).toBe(false);
+        expect(ownerDocument.body.contains(menu)).toBe(true);
+
+        unmount();
+        expect(menu.isConnected).toBe(false);
     });
 });

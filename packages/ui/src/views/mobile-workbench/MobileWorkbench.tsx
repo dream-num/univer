@@ -26,7 +26,7 @@ import {
     revealFocusedElementInMobileViewport,
 } from '@univerjs/design';
 import { connectInjector, useDependency } from '@wendellhu/redi/react-bindings';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { map } from 'rxjs';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
@@ -38,6 +38,7 @@ import { MobileContextMenu } from '../components/context-menu/MobileContextMenu'
 import { MobileDrawerCoordinatorProvider } from '../components/mobile-drawer/MobileDrawerCoordinator';
 import { MobileSidebar } from '../components/sidebar/MobileSidebar';
 import { WorkbenchSkeleton } from '../components/workbench-skeleton/WorkbenchSkeleton';
+import { useWorkbenchPortalContainer } from '../hooks/layout';
 import { MobileKeyboardInsetContext } from './mobile-keyboard-inset-context';
 import { MobileCanvasLayoutProvider } from './MobileCanvasLayout';
 
@@ -135,8 +136,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
     );
     const direction = useObservable(localeService.direction$, localeService.getDirection());
 
-    // Create a portal container for injecting global component themes.
-    const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
+    const portalContainer = useWorkbenchPortalContainer(mountContainer, direction);
 
     useLayoutEffect(() => {
         const sub = themeService.currentTheme$.subscribe((theme) => {
@@ -147,18 +147,6 @@ export function MobileWorkbench(props: IUniverAppProps) {
             sub.unsubscribe();
         };
     }, [themeService.currentTheme$, themeSwitcherService]);
-
-    useEffect(() => {
-        document.body.appendChild(portalContainer);
-
-        return () => {
-            document.body.removeChild(portalContainer);
-        };
-    }, [mountContainer, portalContainer]);
-
-    useEffect(() => {
-        portalContainer.setAttribute('dir', direction);
-    }, [direction, portalContainer]);
 
     useLayoutEffect(() => {
         document.documentElement.classList.toggle('univer-dark', darkMode);

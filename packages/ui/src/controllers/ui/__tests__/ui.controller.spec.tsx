@@ -276,4 +276,46 @@ describe('MobileUIController', () => {
         byElement.dispose();
         byDefault.dispose();
     });
+
+    it('passes renderDelay configuration to SingleUnitUIController in DesktopUIController', () => {
+        vi.useFakeTimers();
+        const deps = createCommonDeps();
+        const menuManagerService = { mergeMenu: vi.fn() };
+        const uiPartsService = { registerComponent: vi.fn(() => ({ dispose: vi.fn() })) };
+
+        const controller = new DesktopUIController(
+            { renderDelay: 50 } as any,
+            deps.injector as any,
+            deps.lifecycleService as any,
+            deps.renderManagerService as any,
+            deps.layoutService as any,
+            deps.instanceService as any,
+            menuManagerService as any,
+            uiPartsService as any
+        );
+
+        expect((controller as any)._renderDelay).toBe(50);
+        controller.dispose();
+    });
+
+    it('passes renderDelay configuration to SingleUnitUIController in MobileUIController', () => {
+        vi.useFakeTimers();
+        const deps = createCommonDeps();
+        const menuManagerService = { mergeMenu: vi.fn() };
+        const uiPartsService = { registerComponent: vi.fn(() => ({ dispose: vi.fn() })) };
+
+        const controller = new MobileUIController(
+            { renderDelay: 0 } as any,
+            deps.injector as any,
+            deps.lifecycleService as any,
+            deps.renderManagerService as any,
+            deps.layoutService as any,
+            deps.instanceService as any,
+            menuManagerService as any,
+            uiPartsService as any
+        );
+
+        expect((controller as any)._renderDelay).toBe(0);
+        controller.dispose();
+    });
 });

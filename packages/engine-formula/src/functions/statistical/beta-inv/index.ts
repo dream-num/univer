@@ -23,11 +23,14 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { resolveBetaBound } from '../beta-dist';
 
 export class BetaInv extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 5;
+
+    protected readonly useExcelArguments: boolean = false;
 
     override calculate(
         probability: BaseValueObject,
@@ -36,16 +39,8 @@ export class BetaInv extends BaseFunction {
         A?: BaseValueObject,
         B?: BaseValueObject
     ): BaseValueObject {
-        let _A = A ?? NumberValueObject.create(0);
-        let _B = B ?? NumberValueObject.create(1);
-
-        if (_A.isNull()) {
-            _A = NumberValueObject.create(0);
-        }
-
-        if (_B.isNull()) {
-            _B = NumberValueObject.create(1);
-        }
+        const _A = resolveBetaBound(A, 0, this.useExcelArguments);
+        const _B = resolveBetaBound(B, 1, this.useExcelArguments);
 
         const maxRowLength = Math.max(
             probability.isArray() ? (probability as ArrayValueObject).getRowCount() : 1,
@@ -92,27 +87,13 @@ export class BetaInv extends BaseFunction {
         AObject: BaseValueObject,
         BObject: BaseValueObject
     ): BaseValueObject {
-        if (probabilityObject.isError()) {
-            return probabilityObject;
+        const argumentsInOrder = [probabilityObject, alphaObject, betaObject, AObject, BObject];
+        if (!this.useExcelArguments) {
+            const error = argumentsInOrder.find((value) => value.isError());
+            if (error) return error;
         }
 
-        if (alphaObject.isError()) {
-            return alphaObject;
-        }
-
-        if (betaObject.isError()) {
-            return betaObject;
-        }
-
-        if (AObject.isError()) {
-            return AObject;
-        }
-
-        if (BObject.isError()) {
-            return BObject;
-        }
-
-        const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(probabilityObject, alphaObject, betaObject, AObject, BObject);
+        const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(...argumentsInOrder);
 
         if (isError) {
             return errorObject as ErrorValueObject;

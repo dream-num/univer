@@ -20,6 +20,7 @@ import { useContext, useMemo, useState } from 'react';
 import type { IDropdownMenuProps } from '../dropdown-menu/DropdownMenu';
 import { clsx } from '../../helper/clsx';
 import { Badge } from '../badge/Badge';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
 import { FormLayoutContext } from '../form-layout/FormLayout';
 import { selectClassName } from './Select';
@@ -31,8 +32,14 @@ interface IOption {
 }
 
 export interface IMultipleSelectProps {
+    id?: string;
+    'aria-label'?: string;
+    'aria-labelledby'?: string;
+    'aria-describedby'?: string;
+    'aria-invalid'?: boolean;
     className?: string;
     size?: 'small' | 'large';
+    placeholder?: string;
 
     /**
      * The value of select
@@ -65,8 +72,14 @@ export interface IMultipleSelectProps {
 
 export function MultipleSelect(props: IMultipleSelectProps) {
     const {
+        id,
+        'aria-label': ariaLabel,
+        'aria-labelledby': ariaLabelledby,
+        'aria-describedby': ariaDescribedby,
+        'aria-invalid': ariaInvalid,
         className,
         size = 'small',
+        placeholder,
         value = [],
         disabled = false,
         options = [],
@@ -74,11 +87,14 @@ export function MultipleSelect(props: IMultipleSelectProps) {
         onChange,
     } = props;
 
+    const { direction } = useContext(ConfigContext);
     const [open, setOpen] = useState(false);
     const invalid = useContext(FormLayoutContext);
 
-    function handleOpenChange(open: boolean) {
-        setOpen(open);
+    function handleOpenChange(nextOpen: boolean) {
+        if (!disabled) {
+            setOpen(nextOpen);
+        }
     }
 
     const items: IDropdownMenuProps['items'] = useMemo(() => {
@@ -119,36 +135,73 @@ export function MultipleSelect(props: IMultipleSelectProps) {
 
     return (
         <DropdownMenu
-            className="univer-w-[--radix-popper-anchor-width] univer-min-w-36"
+            className="univer-max-h-80 univer-w-[--radix-popper-anchor-width] univer-min-w-36 univer-overflow-auto"
             align="start"
-            open={open}
+            open={!disabled && open}
             items={items}
             disabled={disabled}
             onOpenChange={handleOpenChange}
         >
             <div
+                id={id}
+                dir={direction}
+                role="combobox"
+                tabIndex={disabled ? -1 : 0}
+                aria-label={ariaLabel}
+                aria-labelledby={ariaLabelledby}
+                aria-describedby={ariaDescribedby}
+                aria-expanded={!disabled && open}
+                aria-haspopup="menu"
+                aria-disabled={disabled || undefined}
                 data-u-comp="multiple-select"
-                aria-invalid={invalid || undefined}
-                className={clsx(selectClassName, size === 'large'
-                    ? 'univer-h-auto univer-min-h-12 univer-text-base'
-                    : 'univer-text-sm', {
-                    '!univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-border-primary-300 dark:!univer-ring-primary-900': open && !borderless,
-                    'univer-border-transparent univer-bg-transparent hover:univer-border-transparent': borderless,
-                    'univer-cursor-not-allowed univer-opacity-50': disabled,
-                    'hover:univer-border-primary-600': !disabled && !borderless,
-                    'univer-cursor-pointer': !disabled && !open,
-                }, className)}
+                aria-invalid={ariaInvalid ?? (invalid || undefined)}
+                className={clsx(
+                    selectClassName,
+                    size === 'large'
+                        ? 'univer-h-auto univer-min-h-12 univer-py-1.5 univer-text-base'
+                        : 'univer-h-auto univer-min-h-8 univer-py-1 univer-text-sm',
+                    {
+                        '!univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-border-primary-300 dark:!univer-ring-primary-900': !disabled && open && !borderless,
+                        'univer-border-transparent univer-bg-transparent hover:univer-border-transparent dark:!univer-border-transparent dark:!univer-bg-transparent': borderless,
+                        'univer-cursor-not-allowed !univer-bg-gray-50 !univer-text-gray-400 univer-opacity-60 dark:!univer-bg-gray-800 dark:!univer-text-gray-500': disabled,
+                        'hover:univer-border-gray-300 dark:hover:!univer-border-gray-500': !disabled && !borderless,
+                        'univer-cursor-pointer': !disabled,
+                    },
+                    className
+                )}
             >
                 <div
-                    className="univer-box-border univer-flex univer-w-[calc(100%-16px)] univer-gap-2 univer-pr-2"
+                    className="
+                      univer-flex univer-min-w-0 univer-flex-1 univer-flex-wrap univer-items-center univer-gap-1
+                    "
                 >
-                    {displayValue}
+                    {displayValue.length > 0
+                        ? displayValue
+                        : placeholder
+                            ? (
+                                <span
+                                    className="
+                                      univer-truncate univer-text-gray-500
+                                      dark:!univer-text-gray-300
+                                    "
+                                >
+                                    {placeholder}
+                                </span>
+                            )
+                            : null}
                 </div>
                 <MoreDownIcon
-                    className={`
-                      univer-flex-shrink-0
-                      dark:!univer-text-gray-0
-                    `}
+                    aria-hidden="true"
+                    preserveStrokeWidth
+                    className={clsx(
+                        `
+                          univer-size-4 univer-shrink-0 univer-text-gray-500 univer-transition-transform
+                          univer-duration-200
+                          motion-reduce:univer-transition-none
+                          dark:!univer-text-gray-300
+                        `,
+                        !disabled && open && 'univer-rotate-180'
+                    )}
                 />
             </div>
         </DropdownMenu>

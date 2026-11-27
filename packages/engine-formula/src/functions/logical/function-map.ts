@@ -31,6 +31,7 @@ import { Map } from './map';
 import { Not } from './not';
 import { Or } from './or';
 import { Percentof } from './percentof';
+import { Pivotby } from './pivotby';
 import { Reduce } from './reduce';
 import { Scan } from './scan';
 import { Switch } from './switch';
@@ -54,6 +55,7 @@ export const functionLogical = [
     [Not, FUNCTION_NAMES_LOGICAL.NOT],
     [Or, FUNCTION_NAMES_LOGICAL.OR],
     [Percentof, FUNCTION_NAMES_LOGICAL.PERCENTOF],
+    [Pivotby, FUNCTION_NAMES_LOGICAL.PIVOTBY],
     [Reduce, FUNCTION_NAMES_LOGICAL.REDUCE],
     [Scan, FUNCTION_NAMES_LOGICAL.SCAN],
     [Switch, FUNCTION_NAMES_LOGICAL.SWITCH],

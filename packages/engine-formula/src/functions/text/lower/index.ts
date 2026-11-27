@@ -38,7 +38,7 @@ export class Lower extends BaseFunction {
         return this._handleSingleObject(text);
     }
 
-    private _handleSingleObject(text: BaseValueObject): BaseValueObject {
+    protected _handleSingleObject(text: BaseValueObject): BaseValueObject {
         if (text.isError()) {
             return text;
         }

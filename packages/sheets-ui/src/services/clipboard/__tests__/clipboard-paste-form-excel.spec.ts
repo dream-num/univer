@@ -204,7 +204,6 @@ describe('Test clipboard', () => {
                 },
                 ff: '等线',
                 fs: 12,
-                ht: 0,
                 it: 1,
                 tb: 1,
                 vt: 2,
@@ -321,7 +320,6 @@ describe('Test clipboard', () => {
                 it: 0,
                 bl: 0,
                 cl: { rgb: 'rgb(0,0,0)' },
-                ht: 0,
                 vt: 2,
                 tb: 1,
             });
@@ -332,7 +330,6 @@ describe('Test clipboard', () => {
                 it: 0,
                 bl: 0,
                 cl: { rgb: 'rgb(0,0,0)' },
-                ht: 0,
                 vt: 2,
                 tb: 1,
             });

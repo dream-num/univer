@@ -15,15 +15,16 @@
  */
 
 import type { IDocumentNote } from '@univerjs/core';
-import type { IDocumentSkeletonPage } from '../../../../basics/i-document-skeleton-cached';
 import {
     BaselineOffset,
     BooleanNumber,
     CustomRangeType,
     DataStreamTreeTokenType,
+    DocStyleType,
     DocumentFlavor,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IDocumentSkeletonPage } from '../../../../basics/i-document-skeleton-cached';
 import { DocumentSkeletonPageType, PageLayoutType } from '../../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../../basics/vector2';
 import { createParagraphLayoutTestBed } from '../block/paragraph/__tests__/create-paragraph-layout-test-bed';
@@ -33,14 +34,14 @@ import { layoutNoteBody } from '../footnote-layout';
 import { resolveNoteReferences } from '../note-numbering';
 import { FontCache } from '../shaping-engine/font-cache';
 
-function createNoteTestBed(pageHeight = 600, noteOverrides: Partial<IDocumentNote> = {}) {
+function createNoteTestBed(pageHeight = 600, noteOverrides: Partial<IDocumentNote> = {}, documentFlavor = DocumentFlavor.TRADITIONAL) {
     const dataStream = `${Array.from({ length: 30 }, (_, i) => `Explanation ${i + 1} with enough text to wrap onto another line.\r`).join('')}\n`;
     const paragraphs = [...dataStream.matchAll(/\r/g)].map((match, i) => ({
         paragraphId: `note-paragraph-${i}`,
         startIndex: match.index!,
     }));
     return createParagraphLayoutTestBed('Reference\uFFFC', {
-        documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 400, height: pageHeight } },
+        documentStyle: { documentFlavor, pageSize: { width: 400, height: pageHeight } },
         body: {
             customRanges: [{
                 rangeId: 'reference',
@@ -83,6 +84,101 @@ describe('footnote body layout', () => {
     });
 
     afterEach(() => vi.restoreAllMocks());
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('renders explicit body references at their editable offsets in %s documents', (flavor) => {
+        const dataStream = 'Heading\r \u0008\u0008Body\r\n';
+        const bed = createNoteTestBed(600, {
+            body: {
+                dataStream,
+                paragraphs: [{ startIndex: 7, paragraphId: 'heading' }, { startIndex: 15, paragraphId: 'body' }],
+                sectionBreaks: [{ startIndex: 16, sectionId: 'note-section' }],
+                customBlocks: [9, 10].map((startIndex) => ({ startIndex, blockId: `marker-${startIndex}`, noteType: 'footnote' })),
+                textRuns: [
+                    { st: 9, ed: 10, ts: { fs: 8, va: BaselineOffset.SUPERSCRIPT } },
+                    { st: 10, ed: 11, ts: { fs: 11, it: BooleanNumber.TRUE } },
+                ],
+            },
+        }, flavor);
+        try {
+            const pages = layoutNoteBody(bed.ctx, resolveNoteReferences(bed.dataModel.getSnapshot()).get(9)!, bed.sectionBreakConfig, {
+                width: 320,
+                firstPageHeight: 200,
+                continuationPageHeight: 200,
+            });
+            const glyphs = pages.flatMap(getPageGlyphs);
+            expect(glyphs.map((glyph) => glyph.raw).join('')).toBe(dataStream);
+            const markers = glyphs.filter((glyph) => glyph.content === 'VIII');
+            expect(markers).toHaveLength(2);
+            expect(markers[0]).toMatchObject({ raw: '\u0008', count: 1, ts: { fs: 8, va: BaselineOffset.SUPERSCRIPT } });
+            expect(markers[1]).toMatchObject({ raw: '\u0008', count: 1, ts: { fs: 11, it: BooleanNumber.TRUE } });
+            expect(markers[1].ts?.va).not.toBe(BaselineOffset.SUPERSCRIPT);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it('reserves inherited paragraph after-spacing at the end of a note', () => {
+        const bed = createParagraphLayoutTestBed('Reference\uFFFC', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, defaultParagraphStyle: { spaceBelow: { v: 13 } } },
+            styles: {
+                Base: { name: 'Base', type: DocStyleType.paragraph, paragraphStyle: { spaceBelow: { v: 17 } } },
+                Note: { name: 'Note', type: DocStyleType.paragraph, basedOn: 'Base' },
+            },
+            body: { customRanges: [{ rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, startIndex: 9, endIndex: 9, wholeEntity: true, properties: { noteId: 'note' } }] },
+            notes: { note: { noteId: 'note', type: 'footnote', body: { dataStream: 'Note\r\n', paragraphs: [{ startIndex: 4, paragraphId: 'note-p', styleId: 'Note' }], sectionBreaks: [{ startIndex: 5, sectionId: 'note-s' }] } } },
+        });
+        try {
+            const pages = layoutNoteBody(bed.ctx, resolveNoteReferences(bed.dataModel.getSnapshot()).get(9)!, bed.sectionBreakConfig, { width: 320, firstPageHeight: 200, continuationPageHeight: 200 });
+            expect(pages).toHaveLength(1);
+            const line = pages[0].sections[0].columns[0].lines[0];
+            expect(line.spaceBelowApply).toBe(17);
+            expect(pages[0].height).toBeCloseTo(line.top + line.lineHeight + 17);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each([0, 40 / 3])('keeps %s pixels of paragraph after-spacing before the following footnote', (spaceBelow) => {
+        const bed = createParagraphLayoutTestBed('\uFFFC\uFFFC', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, defaultParagraphStyle: { spaceBelow: { v: 0 } } },
+            styles: { Note: { name: 'Note', type: DocStyleType.paragraph, paragraphStyle: { spaceBelow: { v: spaceBelow } } } },
+            body: { customRanges: [0, 1].map((index) => ({
+                rangeType: CustomRangeType.FOOTNOTE,
+                rangeId: `ref-${index}`,
+                startIndex: index,
+                endIndex: index,
+                wholeEntity: true,
+                properties: { noteId: `note-${index}` },
+            })) },
+            notes: Object.fromEntries([0, 1].map((index) => [`note-${index}`, {
+                type: 'footnote',
+                noteId: `note-${index}`,
+                body: {
+                    dataStream: 'Note\r\n',
+                    paragraphs: [{ startIndex: 4, paragraphId: `note-p-${index}`, ...(index === 0 ? { styleId: 'Note' } : {}) }],
+                    sectionBreaks: [{ startIndex: 5, sectionId: `note-s-${index}` }],
+                },
+            }])),
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        const before = JSON.stringify(bed.dataModel.getSnapshot());
+        try {
+            skeleton.calculate();
+            const notes = skeleton.getSkeletonData()!.pages[0].notes!;
+            expect(notes).toHaveLength(2);
+            const first = notes[0].page.sections[0].columns[0].lines;
+            const second = notes[1].page.sections[0].columns[0].lines[0];
+            const previous = first[first.length - 1];
+            expect(second.top - previous.top - previous.lineHeight).toBeCloseTo(spaceBelow);
+            expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+        } finally {
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
 
     it.each([undefined, false, true])('keeps the anchor but respects note-body marker presence: %s', (showBodyReference) => {
         const bed = createNoteTestBed(600, {
@@ -287,14 +383,56 @@ describe('footnote body layout', () => {
         }
     });
 
+    it.each(['footnote', 'endnote'] as const)('lays out editable tables in the %s separator', (kind) => {
+        const T = DataStreamTreeTokenType;
+        const tableStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Separator\r\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const stream = `${tableStream}\r\n`;
+        const bed = createParagraphLayoutTestBed('Reference\uFFFC', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 400, height: 600 } },
+            body: { customRanges: [{ rangeId: 'ref', rangeType: kind === 'footnote' ? CustomRangeType.FOOTNOTE : CustomRangeType.ENDNOTE, startIndex: 9, endIndex: 9, wholeEntity: true, properties: { noteId: 'note' } }] },
+            notes: { note: { noteId: 'note', type: kind, body: { dataStream: 'Note\r\n', paragraphs: [{ paragraphId: 'note-p', startIndex: 4 }], sectionBreaks: [{ sectionId: 'note-s', startIndex: 5 }] } } },
+            noteSettings: { [kind]: { separator: {
+                dataStream: stream,
+                paragraphs: [...stream.matchAll(/\r/g)].map((match, index) => ({ paragraphId: `separator-${index}`, startIndex: match.index! })),
+                sectionBreaks: [{ sectionId: 'separator-s', startIndex: stream.length - 1 }],
+                tables: [{ tableId: 'separator-table', startIndex: 0, endIndex: tableStream.length }],
+                tableSource: { 'separator-table': {
+                    tableId: 'separator-table',
+                    align: 0,
+                    indent: { v: 0 },
+                    textWrap: 0,
+                    position: { positionH: { relativeFrom: 0 }, positionV: { relativeFrom: 0 } },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: 0, width: { v: 300 } },
+                    tableRows: [{ tableCells: [{}], trHeight: { val: { v: 0 }, hRule: 0 } }],
+                    tableColumns: [{ size: { type: 0, width: { v: 300 } } }],
+                } },
+            } } },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        try {
+            skeleton.calculate();
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const separator = page.noteDecorations!.find((decoration) => decoration.kind === 'separator')!;
+            const table = separator.page.skeTables.get('separator-table')!;
+            expect(table).toBeDefined();
+            expect(getPageGlyphs(table.rows[0].cells[0]).map((glyph) => glyph.raw).join('')).toBe('Separator\r\n');
+            expect(page.notes![0].top).toBeGreaterThanOrEqual(separator.top + separator.page.height);
+        } finally {
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
     it('keeps the reference font separate from editable footnote text', () => {
         const bed = createNoteTestBed(600, {
-            referenceTextStyle: { fs: 8, va: BaselineOffset.SUPERSCRIPT },
+            referenceTextStyle: { ff: 'Calibri', fs: 8, va: BaselineOffset.SUPERSCRIPT },
             body: {
                 dataStream: 'Explanation\r\n',
                 paragraphs: [{ startIndex: 11, paragraphId: 'note-text' }],
                 sectionBreaks: [{ startIndex: 12, sectionId: 'note-section' }],
-                textRuns: [{ st: 0, ed: 11, ts: { fs: 9.5 } }],
+                textRuns: [{ st: 0, ed: 11, ts: { ff: 'Times New Roman', fs: 9.5, it: BooleanNumber.TRUE, cl: { rgb: '#FF0000' } } }],
             },
         });
         const pages = layoutNoteBody(bed.ctx, resolveNoteReferences(bed.dataModel.getSnapshot()).get(9)!, bed.sectionBreakConfig, {
@@ -308,7 +446,12 @@ describe('footnote body layout', () => {
             expect(marker).toMatchObject({ count: 0, ts: { fs: 8, va: BaselineOffset.SUPERSCRIPT } });
             expect(marker.fontStyle?.originFontSize).toBe(8);
             expect(marker.fontStyle?.fontSize).toBeLessThan(8);
+            expect(marker.fontStyle?.fontFamily).toBe('Calibri');
+            expect(marker.ts?.it).not.toBe(BooleanNumber.TRUE);
+            expect(marker.ts?.cl?.rgb).not.toBe('#FF0000');
             expect(text.ts?.fs).toBe(9.5);
+            expect(text.ts?.it).toBe(BooleanNumber.TRUE);
+            expect(text.ts?.cl?.rgb).toBe('#FF0000');
             expect(text.ts?.va).not.toBe(BaselineOffset.SUPERSCRIPT);
             expect(text.fontStyle?.fontSize).toBe(9.5);
         } finally {
@@ -568,6 +711,54 @@ describe('footnote body layout', () => {
         }
     });
 
+    it.each([14, 15])('uses the Word compatibility separator on continued footnotes in mode %s', (mode) => {
+        const bed = createNoteTestBed(200);
+        const snapshot = bed.dataModel.getSnapshot();
+        snapshot.documentStyle!.compatibilitySettings = { compatibilityMode: String(mode) };
+        const makeBody = (text: string) => {
+            const dataStream = `${text}\r\n`;
+            return {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({
+                    paragraphId: `separator-${index}`,
+                    startIndex: match.index!,
+                })),
+                sectionBreaks: [{ sectionId: 'separator', startIndex: dataStream.length - 1 }],
+            };
+        };
+        const ordinary = makeBody('Ordinary separator\rSecond line');
+        const continuation = makeBody('Legacy continuation');
+        snapshot.noteSettings!.footnote!.separator = ordinary;
+        snapshot.noteSettings!.footnote!.continuationSeparator = continuation;
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        try {
+            skeleton.calculate();
+            const pages = skeleton.getSkeletonData()!.pages;
+            expect(pages.length).toBeGreaterThan(1);
+            for (const [index, page] of pages.entries()) {
+                const useContinuation = index > 0 && mode === 14;
+                const expectedKind = useContinuation ? 'continuationSeparator' : 'separator';
+                const expectedBody = useContinuation ? continuation : ordinary;
+                const decoration = page.noteDecorations![0];
+                expect(decoration.kind).toBe(expectedKind);
+                expect(getPageGlyphs(decoration.page).map((glyph) => glyph.raw).join('')).toBe(expectedBody.dataStream);
+                expect(page.notes![0].top).toBeCloseTo(decoration.top + decoration.page.height);
+                for (const note of page.notes!) {
+                    expect(note.top + note.page.height).toBeLessThanOrEqual(page.pageHeight - page.marginBottom + 0.01);
+                }
+                const restored = hydrateDocumentSkeletonPage(serializeDocumentSkeletonPage(page, true), undefined, snapshot);
+                expect(restored.noteDecorations![0].kind).toBe(expectedKind);
+                expect(getPageGlyphs(restored.noteDecorations![0].page).map((glyph) => glyph.raw).join('')).toBe(expectedBody.dataStream);
+            }
+            const actual = pages.flatMap((page) => page.notes ?? []).flatMap((note) => getPageGlyphs(note.page)).filter((glyph) => glyph.count > 0).map((glyph) => glyph.raw).join('');
+            expect(actual).toBe(snapshot.notes!.note.body.dataStream);
+        } finally {
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
     it('reserves custom separator and continuation notice paragraphs and publishes them to the Worker consumer', () => {
         const bed = createNoteTestBed(200);
         const makeBody = (text: string) => ({
@@ -698,5 +889,42 @@ describe('footnote body layout', () => {
         expect(restored.notes![0].top).toBe(400);
         bed.viewModel.dispose();
         bed.dataModel.dispose();
+    });
+
+    it.each([false, true])('retains a long footnote while subsequent body paragraphs paginate (incremental: %s)', (incremental) => {
+        const noteStream = `${Array.from({ length: 20 }, (_, index) => `Explanation ${index} that must continue onto a following page.\r`).join('')}\n`;
+        const dataStream = `Reference\uFFFC\r${'Following body paragraph with enough text to occupy the page.\r'.repeat(12)}\n`;
+        const bed = createParagraphLayoutTestBed('', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 200, height: 180 }, marginTop: 10, marginBottom: 10, marginLeft: 10, marginRight: 10 },
+            body: {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index!, paragraphId: `p-${index}` })),
+                sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: 'main' }],
+                customRanges: [{ rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, startIndex: 9, endIndex: 9, wholeEntity: true, properties: { noteId: 'note' } }],
+            },
+            notes: { note: { type: 'footnote', noteId: 'note', body: { dataStream: noteStream, paragraphs: [...noteStream.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index!, paragraphId: `note-${index}` })), sectionBreaks: [{ startIndex: noteStream.length - 1, sectionId: 'note-section' }] } } },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        try {
+            if (incremental) {
+                const generation = skeleton.startIncrementalLayout();
+                let progress = skeleton.stepIncrementalLayout(generation, 0);
+                for (let step = 0; step < 1000 && !progress.complete; step++) {
+                    progress = skeleton.stepIncrementalLayout(generation, 0);
+                }
+                expect(progress.complete).toBe(true);
+            } else {
+                skeleton.calculate();
+            }
+            const pages = skeleton.getSkeletonData()!.pages;
+            const fragments = pages.flatMap((page) => (page.notes ?? []).filter((note) => note.noteId === 'note'));
+            const actual = fragments.flatMap((fragment) => getPageGlyphs(fragment.page)).filter((glyph) => glyph.count > 0).map((glyph) => glyph.raw).join('');
+            expect(actual).toBe(noteStream);
+            expect(fragments.length).toBeGreaterThan(1);
+        } finally {
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
     });
 });

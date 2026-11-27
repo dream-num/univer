@@ -15,7 +15,6 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import type {
     ISetFormulaCalculationStartMutation,
@@ -28,7 +27,7 @@ import type {
     IFormulaDependencyTreeJson,
     IFormulaDependentsAndInRangeResults,
 } from '../engine/dependency/dependency-tree';
-import type { IFormulaDirtyData } from '../services/current-data.service';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
     SetCellFormulaDependencyCalculationMutation,
@@ -98,8 +97,9 @@ export class CalculateController extends Disposable {
         );
     }
 
-    private async _calculate(formulaDirtyData: Partial<IFormulaDirtyData>) {
+    private async _calculate(formulaDirtyData: Partial<ISetFormulaCalculationStartMutation>) {
         const {
+            dirtyCalculationRegion,
             dirtyIterationUnits,
             dirtyReferenceUnits,
             forceCalculation: forceCalculate = false,
@@ -112,6 +112,7 @@ export class CalculateController extends Disposable {
             clearDependencyTreeCache = {},
             calculationSettings,
             rowData,
+            region,
             externalReferences,
             isCalculateTreeModel = false,
         } = formulaDirtyData;
@@ -129,6 +130,7 @@ export class CalculateController extends Disposable {
         const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
 
         const config = {
+            dirtyCalculationRegion,
             dirtyIterationUnits,
             dirtyReferenceUnits,
             arrayFormulaCellData,
@@ -144,6 +146,7 @@ export class CalculateController extends Disposable {
             calculationSettings,
             isCalculateTreeModel,
             rowData,
+            ...(region === undefined ? {} : { region }),
             externalReferences,
         };
         if (snapshot && typeof snapshotExecutor === 'function') {
@@ -230,10 +233,8 @@ export class CalculateController extends Disposable {
     }
 
     private async _calculateFormulaString(param: ISetFormulaStringBatchCalculationMutation) {
-        const { formulas } = param;
-        const result = await this._calculateFormulaService.executeFormulas(
-            formulas
-        );
+        const { formulas, region } = param;
+        const result = await this._calculateFormulaService.executeFormulas(formulas, undefined, region);
         if (this._disposed) {
             return;
         }

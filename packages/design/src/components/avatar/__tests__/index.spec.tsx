@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { cleanup, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Avatar } from '../Avatar';
 
 afterEach(cleanup);
@@ -33,10 +33,31 @@ describe('Avatar', () => {
         expect(container.querySelector('img')).not.toBeNull();
     });
 
-    it('renders the image with fit', () => {
+    it('renders the image with fit applied directly on the img element', () => {
         const { container } = render(<Avatar src="test.png" fit="contain" />);
+        const img = container.querySelector('img');
+        const wrapper = container.querySelector('[data-u-comp="avatar"]') as HTMLElement;
 
+        expect(img?.style.objectFit).toBe('contain');
+        expect(wrapper.style.objectFit).toBe('');
         expect(container.innerHTML).contains('object-fit: contain');
+    });
+
+    it('falls back to children when image fails to load and recovers when src changes', () => {
+        const onError = vi.fn();
+        const { container, getByText, rerender } = render(
+            <Avatar src="broken.png" onError={onError}>JD</Avatar>
+        );
+
+        const img = container.querySelector('img')!;
+        fireEvent.error(img);
+
+        expect(onError).toHaveBeenCalledOnce();
+        expect(container.querySelector('img')).toBeNull();
+        expect(getByText('JD')).not.toBeNull();
+
+        rerender(<Avatar src="recovered.png" onError={onError}>JD</Avatar>);
+        expect(container.querySelector('img')?.getAttribute('src')).toBe('recovered.png');
     });
 
     it('renders the size with number', () => {

@@ -35,13 +35,13 @@ describe('Test imcsc function', () => {
         it('Value is large numbers', () => {
             const inumber = NumberValueObject.create(25698432);
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(9.11859852998954);
+            expect(result.getValue()).toBe('9.11859852998954');
         });
 
         it('Value is number string', () => {
             const inumber = StringValueObject.create('1.5');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(1.00251130424672);
+            expect(result.getValue()).toBe('1.00251130424672');
         });
 
         it('Value is normal string', () => {

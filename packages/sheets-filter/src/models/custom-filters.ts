@@ -109,14 +109,7 @@ export const notEquals: ICustomFilterFn<TwoParameters<number | string>> = {
     fn: (value, compare): boolean => {
         // As text match.
         if (typeof compare === 'string') {
-            if (compare === ' ') {
-                if (value !== undefined && value !== null) return true;
-                return false;
-            };
-
-            const ensuredString = ensureString(value);
-            if (ensuredString && isWildCardString(compare)) return !regexp.createFromWildcard(compare as string).test(ensuredString);
-            return ensuredString !== compare;
+            return isTextNotEqual(value, compare);
         }
 
         // As numeric match.
@@ -124,6 +117,23 @@ export const notEquals: ICustomFilterFn<TwoParameters<number | string>> = {
         return value !== compare;
     },
 };
+
+export function createTextNotEqualsFilter(compare: string): (value: Nullable<CellValue>) => boolean {
+    const pattern = compare === ' ' ? undefined : regexp.createFromWildcard(compare);
+    return (value) => isTextNotEqual(value, compare, pattern);
+}
+
+function isTextNotEqual(value: Nullable<CellValue>, compare: string, pattern?: RegExp): boolean {
+    if (compare === ' ') {
+        return value != null && value !== '';
+    }
+
+    const text = ensureString(value);
+    if (text === null) {
+        return value != null || compare !== '';
+    }
+    return !(pattern ?? regexp.createFromWildcard(compare)).test(text);
+}
 
 // Register the custom filter functions to the registry, making it easier to get them.
 export const CustomFilterFnRegistry = new Map<CustomFilterOperator, ICustomFilterFn<TwoParameters<number>>>([]);
@@ -181,12 +191,4 @@ function ensureString(value: Nullable<CellValue>): string | null {
     }
 
     return typeof value === 'string' ? value : value.toString();
-}
-
-function isWildCardString(str: string | number): boolean {
-    if (typeof str === 'number') {
-        return false;
-    }
-
-    return str.indexOf('*') !== -1 || str.indexOf('?') !== -1;
 }

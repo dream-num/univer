@@ -15,7 +15,8 @@
  */
 
 import type { LocaleKey } from '../locale/types';
-import { ICON_MAP } from '../assets/icon-map';
+import { iconUrls } from '../assets/icon-map';
+import { conditionalFormattingIconPresets } from './conditional-formatting-icon-presets';
 
 export enum IIconSetType {
     threeArrows = '3Arrows',
@@ -42,37 +43,44 @@ export enum IIconSetType {
     empty = 'EMPTY_ICON_TYPE',
 }
 
-export const iconGroup: { title: LocaleKey; group: { name: IIconSetType; list: string[] }[] }[] = [
+type IconPresetKey = keyof typeof conditionalFormattingIconPresets;
+
+export interface IConditionalFormattingIcon {
+    name: (typeof conditionalFormattingIconPresets)[IconPresetKey]['name'];
+    colors?: Record<string, string>;
+}
+
+const groups: { title: LocaleKey; group: { name: IIconSetType; list: IconPresetKey[] }[] }[] = [
     {
         title: 'sheets-conditional-formatting.iconSet.direction',
         group: [
             {
                 name: IIconSetType.threeArrows,
-                list: [ICON_MAP.arrow['up-green'], ICON_MAP.arrow['right-gold'], ICON_MAP.arrow['down-red']],
+                list: ['upGreen', 'rightGold', 'downRed'],
             },
             {
                 name: IIconSetType.threeArrowsGray,
-                list: [ICON_MAP.arrow['up-gray'], ICON_MAP.arrow['right-gray'], ICON_MAP.arrow['down-gray']],
+                list: ['upGray', 'rightGray', 'downGray'],
             },
             {
                 name: IIconSetType.fourArrows,
-                list: [ICON_MAP.arrow['up-green'], ICON_MAP.arrow['rightAndUp-gold'], ICON_MAP.arrow['rightAndDown-gold'], ICON_MAP.arrow['down-red']],
+                list: ['upGreen', 'rightAndUpGold', 'rightAndDownGold', 'downRed'],
             },
             {
                 name: IIconSetType.fourArrowsGray,
-                list: [ICON_MAP.arrow['up-gray'], ICON_MAP.arrow['rightAndUp-gray'], ICON_MAP.arrow['rightAndDown-gray'], ICON_MAP.arrow['down-gray']],
+                list: ['upGray', 'rightAndUpGray', 'rightAndDownGray', 'downGray'],
             },
             {
                 name: IIconSetType.fiveArrows,
-                list: [ICON_MAP.arrow['up-green'], ICON_MAP.arrow['rightAndUp-gold'], ICON_MAP.arrow['right-gold'], ICON_MAP.arrow['rightAndDown-gold'], ICON_MAP.arrow['down-red']],
+                list: ['upGreen', 'rightAndUpGold', 'rightGold', 'rightAndDownGold', 'downRed'],
             },
             {
                 name: IIconSetType.fiveArrowsGray,
-                list: [ICON_MAP.arrow['up-gray'], ICON_MAP.arrow['rightAndUp-gray'], ICON_MAP.arrow['right-gray'], ICON_MAP.arrow['rightAndDown-gray'], ICON_MAP.arrow['down-gray']],
+                list: ['upGray', 'rightAndUpGray', 'rightGray', 'rightAndDownGray', 'downGray'],
             },
             {
                 name: IIconSetType.threeTriangles,
-                list: [ICON_MAP.shape.up, ICON_MAP.shape.cross, ICON_MAP.shape.down],
+                list: ['up', 'cross', 'down'],
             },
         ],
     },
@@ -81,23 +89,23 @@ export const iconGroup: { title: LocaleKey; group: { name: IIconSetType; list: s
         group: [
             {
                 name: IIconSetType.threeTrafficLights1,
-                list: [ICON_MAP.shape['roundness-greed'], ICON_MAP.shape['roundness-gold'], ICON_MAP.shape['roundness-red']],
+                list: ['roundnessGreen', 'roundnessGold', 'roundnessRed'],
             },
             {
                 name: IIconSetType.threeSigns,
-                list: [ICON_MAP.shape['roundness-greed'], ICON_MAP.shape['triangle-gold'], ICON_MAP.shape['rhomboid-red']],
+                list: ['roundnessGreen', 'triangleGold', 'rhomboidRed'],
             },
             {
                 name: IIconSetType.threeTrafficLights2,
-                list: [ICON_MAP.shape['indicate-greed'], ICON_MAP.shape['indicate-gold'], ICON_MAP.shape['indicate-red']],
+                list: ['indicateGreen', 'indicateGold', 'indicateRed'],
             },
             {
                 name: IIconSetType.fourRedToBlack,
-                list: [ICON_MAP.shape['roundness-red'], ICON_MAP.shape['roundness-pink'], ICON_MAP.shape['roundness-gray'], ICON_MAP.shape['roundness-black']],
+                list: ['roundnessRed', 'roundnessPink', 'roundnessGray', 'roundnessBlack'],
             },
             {
                 name: IIconSetType.fourTrafficLights,
-                list: [ICON_MAP.shape['roundness-greed'], ICON_MAP.shape['roundness-gold'], ICON_MAP.shape['roundness-red'], ICON_MAP.shape['roundness-black']],
+                list: ['roundnessGreen', 'roundnessGold', 'roundnessRed', 'roundnessBlack'],
             },
         ],
     },
@@ -106,15 +114,15 @@ export const iconGroup: { title: LocaleKey; group: { name: IIconSetType; list: s
         group: [
             {
                 name: IIconSetType.threeSymbols,
-                list: [ICON_MAP.feedback.correct, ICON_MAP.feedback.warn, ICON_MAP.feedback.mistake],
+                list: ['correct', 'warn', 'mistake'],
             },
             {
                 name: IIconSetType.threeSymbols2,
-                list: [ICON_MAP.feedback2.correct2, ICON_MAP.feedback2.warn2, ICON_MAP.feedback2.mistake2],
+                list: ['correct2', 'warn2', 'mistake2'],
             },
             {
                 name: IIconSetType.threeFlags,
-                list: [ICON_MAP.flag['flag-green'], ICON_MAP.flag['flag-gold'], ICON_MAP.flag['flag-red']],
+                list: ['flagGreen', 'flagGold', 'flagRed'],
             },
 
         ],
@@ -124,41 +132,49 @@ export const iconGroup: { title: LocaleKey; group: { name: IIconSetType; list: s
         group: [
             {
                 name: IIconSetType.fourRating,
-                list: [ICON_MAP.signal.signal25, ICON_MAP.signal.signal50, ICON_MAP.signal.signal75, ICON_MAP.signal.signal100],
+                list: ['signal25', 'signal50', 'signal75', 'signal100'],
             },
             {
                 name: IIconSetType.fiveRating,
-                list: [ICON_MAP.signal.signal0, ICON_MAP.signal.signal25, ICON_MAP.signal.signal50, ICON_MAP.signal.signal75, ICON_MAP.signal.signal100],
+                list: ['signal0', 'signal25', 'signal50', 'signal75', 'signal100'],
             },
             {
                 name: IIconSetType.fiveQuarters,
-                list: [ICON_MAP.progress.progress100, ICON_MAP.progress.progress75, ICON_MAP.progress.progress50, ICON_MAP.progress.progress25, ICON_MAP.progress.progress0],
+                list: ['progress100', 'progress75', 'progress50', 'progress25', 'progress0'],
             },
             {
                 name: IIconSetType.fiveFelling,
-                list: [ICON_MAP.feeling.guffaw, ICON_MAP.feeling.smile, ICON_MAP.feeling.noninductive, ICON_MAP.feeling.dissatisfied, ICON_MAP.feeling.impatient],
+                list: ['guffaw', 'smile', 'noninductive', 'dissatisfied', 'impatient'],
             },
             {
                 name: IIconSetType.fiveBoxes,
-                list: [ICON_MAP.cell['cell-100'], ICON_MAP.cell['cell-75'], ICON_MAP.cell['cell-50'], ICON_MAP.cell['cell-25'], ICON_MAP.cell['cell-0']],
+                list: ['cell100', 'cell75', 'cell50', 'cell25', 'cell0'],
             },
             {
                 name: IIconSetType.threeStars,
-                list: [ICON_MAP.star.starFull, ICON_MAP.star.starIncomplete, ICON_MAP.star.starEmpty],
+                list: ['starFull', 'starIncomplete', 'starEmpty'],
             },
         ],
     },
 ];
 
-export const iconMap = iconGroup.reduce((result, cur) => {
-    const { group } = cur;
-    for (const v of group) {
-        result[v.name] = v.list;
-    }
-    return result;
-}, {} as Record<IIconSetType, string[]>);
-
-for (const key in iconMap) {
-    const v = iconMap[key as IIconSetType];
-    Object.freeze(v);
+function resolveIconGroups<T>(presets: Record<IconPresetKey, T>) {
+    return groups.map(({ title, group }) => ({
+        title,
+        group: group.map(({ name, list }) => {
+            const icons = list.map((key) => presets[key]);
+            Object.freeze(icons);
+            return { name, list: icons };
+        }),
+    }));
 }
+
+export const conditionalFormattingIconGroups = resolveIconGroups<IConditionalFormattingIcon>(conditionalFormattingIconPresets);
+export const conditionalFormattingIcons: Partial<Record<IIconSetType, IConditionalFormattingIcon[]>> = Object.fromEntries(
+    conditionalFormattingIconGroups.flatMap(({ group }) => group.map(({ name, list }) => [name, list]))
+);
+
+export const iconGroup = resolveIconGroups(iconUrls);
+export const iconMap = Object.fromEntries(
+    iconGroup.flatMap(({ group }) => group.map(({ name, list }) => [name, list]))
+) as Record<IIconSetType, string[]>;

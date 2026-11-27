@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// @vitest-environment happy-dom
-
 import type { IOleConfig, IOleDrawing, IOleOnlineUnit, IOleResource } from '@univerjs/drawing';
 import {
     DrawingTypeEnum,
@@ -549,7 +547,7 @@ describe('explicit collaborative OLE conversion', () => {
         delete h.resource.files[sha256].attachment;
         h.resource.files[sha256].data = Buffer.from(bytes).toString('base64');
         await h.service.convertToOnline(h.drawing);
-        expect(h.convert).toHaveBeenCalledWith(expect.objectContaining({ bytes, unitId: 'host' }));
+        expect(h.convert).toHaveBeenCalledWith(expect.objectContaining({ bytes: Uint8Array.from(bytes), unitId: 'host' }));
         expect(h.convert.mock.calls[0][0]).not.toHaveProperty('fileId');
         expect(h.drawing.oleOnlineUnit).toEqual(online);
         expect(h.notifications.show).toHaveBeenLastCalledWith(expect.objectContaining({ type: 'success' }));

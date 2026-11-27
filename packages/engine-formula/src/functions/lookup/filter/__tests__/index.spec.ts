@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Filter } from '../index';
@@ -90,9 +90,12 @@ describe('Test filter function', () => {
             ]);
         });
 
-        it('supports scalar array and string-number include values', async () => {
-            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(42), StringValueObject.create('1')))).toBe(42);
-            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(42), StringValueObject.create('0'), StringValueObject.create('empty')))).toBe('empty');
+        it('handles scalar masks and distinguishes omitted and empty-string fallbacks', () => {
+            const value = NumberValueObject.create(42);
+            expect(getObjectValue(testFunction.calculate(value, StringValueObject.create('true')))).toEqual([[42]]);
+            expect(getObjectValue(testFunction.calculate(value, StringValueObject.create('1')))).toBe(ErrorType.VALUE);
+            expect(getObjectValue(testFunction.calculate(value, NumberValueObject.create(0), NullValueObject.create()))).toBe(ErrorType.CALC);
+            expect(getObjectValue(testFunction.calculate(value, NumberValueObject.create(0), StringValueObject.create('')))).toBe('');
         });
 
         it('returns include conversion errors before building a filtered result', async () => {

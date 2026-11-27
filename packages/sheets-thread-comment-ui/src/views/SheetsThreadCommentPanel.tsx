@@ -19,7 +19,7 @@ import type { IThreadComment } from '@univerjs/thread-comment';
 import { ICommandService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
-import { deserializeThreadCommentAnchor, serializeThreadCommentAnchor, ThreadCommentAnchorKind } from '@univerjs/thread-comment';
+import { deserializeThreadCommentAnchor, IThreadCommentAuthzService, serializeThreadCommentAnchor, ThreadCommentAnchorKind } from '@univerjs/thread-comment';
 import { ThreadCommentDraftService, ThreadCommentPanel, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -57,6 +57,7 @@ export const SheetsThreadCommentPanel = ({
         : null;
     const subUnitId$ = useMemo(() => workbook.activeSheet$.pipe(map((i) => i?.getSheetId())), [workbook.activeSheet$]);
     const subUnitId = useObservable(subUnitId$, workbook.getActiveSheet()?.getSheetId());
+    const authzService = useDependency(IThreadCommentAuthzService);
     const hoverShapeId = useRef<string | null>(null);
     const panelService = useDependency(ThreadCommentPanelService);
     const activeCommentId = useObservable(panelService.activeCommentId$);
@@ -133,6 +134,8 @@ export const SheetsThreadCommentPanel = ({
         commandService.executeCommand(ShowAddSheetCommentModalOperation.id);
     };
 
+    const filterComment = useCallback((comment: IThreadComment) => authzService.canRead(comment), [authzService]);
+
     const handleHover = (comment: IThreadComment) => {
         if (hoverShapeId.current) {
             markSelectionService.removeShape(hoverShapeId.current);
@@ -177,6 +180,8 @@ export const SheetsThreadCommentPanel = ({
             subUnitId$={subUnitId$}
             type={UniverInstanceType.UNIVER_SHEET}
             onAdd={handleAdd}
+            disableAdd={!authzService.canWrite('add', { unitId, subUnitId: subUnitId ?? '', ref: '' })}
+            filterComment={filterComment}
             getSubUnitName={getSubUnitName}
             onResolve={handleResolve}
             sortComments={sortComments}

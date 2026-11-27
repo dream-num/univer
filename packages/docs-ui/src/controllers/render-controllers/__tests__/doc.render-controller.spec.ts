@@ -16,18 +16,21 @@
 
 // @vitest-environment jsdom
 
-import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { IDocumentData } from '@univerjs/core';
 import type { IDocLayoutExecutor } from '@univerjs/docs';
 import type { Documents, IPointerEvent, RenderUnit } from '@univerjs/engine-render';
 import {
     BooleanNumber,
     CustomRangeType,
     DataStreamTreeTokenType,
+    DocumentDataModel,
     DocumentFlavor,
     DrawingTypeEnum,
     HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
+    LocaleService,
+    LocaleType,
     NamedStyleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
@@ -38,6 +41,7 @@ import {
 } from '@univerjs/core';
 import {
     DocLayoutExecutorService,
+    DocLayoutSessionStatus,
     DocSelectionManagerService,
     DocSkeletonManagerService,
     DocStateEmitService,
@@ -53,6 +57,7 @@ import {
     IRenderManagerService,
     RenderManagerService,
 } from '@univerjs/engine-render';
+import { DocumentLayoutSession } from '@univerjs/engine-render/worker';
 import { CanvasPopupService, ContextMenuService, ICanvasPopupService, IContextMenuService, ILayoutService } from '@univerjs/ui';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -91,6 +96,10 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
     }
     const univer = new Univer();
     const injector = univer.__getInjector();
+    const locale = injector.get(LocaleService);
+    locale.load({ [LocaleType.EN_US]: {} });
+    locale.setLocale(LocaleType.EN_US);
+    locale.setDirection('ltr');
     const root = document.createElement('div');
     document.body.appendChild(root);
     injector.add([ILayoutService, { useValue: {
@@ -302,6 +311,7 @@ describe('DocRenderController bounded input publication', () => {
         Reflect.set(FontCache, '_context', null);
         FontCache.invalidateMetrics(() => true);
     });
+
     afterEach(() => {
         vi.restoreAllMocks();
         vi.unstubAllGlobals();
@@ -461,6 +471,93 @@ describe('DocRenderController bounded input publication', () => {
             expect(pages.every((page) => page.sections.length > 0)).toBe(true);
         } finally {
             editor.dispose();
+        }
+    });
+
+    it('retries a rejected Worker baseline with a full publication of the same edit', async () => {
+        let worker: { model: DocumentDataModel; session: DocumentLayoutSession } | undefined;
+        const locale = new LocaleService();
+        locale.setDirection('ltr');
+        const startLayout = vi.fn<IDocLayoutExecutor['startLayout']>(async (request) => {
+            if (!worker) {
+                throw new Error('Expected the Worker session to be registered.');
+            }
+            const { modelRevision, metricsRevision, mountEpoch, mountId, unitId, viewportEpoch } = request;
+            const { model, session } = worker;
+            for (const mutation of request.mutations) {
+                model.apply(mutation.actions);
+            }
+            if (request.mutations.length > 0) {
+                session.resetDataModel(model);
+            }
+            const generation = session.start({
+                reason: request.reason,
+                anchor: request.anchor,
+                priorityAnchor: request.priorityAnchor,
+                invalidation: request.invalidation,
+                modernPageWidth: request.modernPageWidth,
+                modernHorizontalMargin: request.modernHorizontalMargin,
+                acknowledgedLayoutVersion: request.acknowledgedLayoutVersion,
+                appliedLayoutVersion: request.appliedLayoutVersion,
+                continuousLayoutVersion: `worker-version-${metricsRevision}`,
+            });
+            const result = session.step(generation, Number.POSITIVE_INFINITY);
+            const { publication } = result;
+            if (request.reason === 'edit' && request.appliedLayoutVersion != null && publication?.kind === 'block') {
+                publication.block.baseLayoutVersion = 'rejected-test-baseline';
+            }
+            return {
+                status: DocLayoutSessionStatus.ACCEPTED,
+                step: { modelRevision, metricsRevision, mountEpoch, mountId, unitId, viewportEpoch, ...structuredClone(result) },
+            };
+        });
+        const editor = createEditor(500, false, true, DocumentFlavor.MODERN, false, false, undefined, {
+            initialize: async () => {},
+            createSession: async ({ snapshot }) => {
+                const model = new DocumentDataModel(structuredClone(snapshot));
+                worker = { model, session: new DocumentLayoutSession(model, locale) };
+            },
+            startLayout,
+            cancelLayout: async ({ generation }) => {
+                if (generation != null) {
+                    worker?.session.cancel(generation);
+                }
+            },
+            disposeLayoutMount: async () => {},
+        });
+        try {
+            await vi.advanceTimersByTimeAsync(1_000);
+            editor.render.engine._beginFrame(0);
+            await vi.advanceTimersByTimeAsync(1);
+            const acknowledged = editor.skeleton.getAppliedContinuousLayoutVersion();
+            expect(acknowledged).toBeDefined();
+            editor.selection.replaceDocRanges([{ startOffset: 5, endOffset: 5 }], true, { shouldFocus: false });
+            await editor.commands.executeCommand(InsertTextCommand.id, {
+                unitId: editor.unitId,
+                range: { startOffset: 5, endOffset: 5, collapsed: true },
+                body: { dataStream: 'X' },
+            });
+            // The test renderer is inactive. Advance real Engine frame events
+            // so the controller can accept or reject each staged publication.
+            for (let frame = 0; frame < 25; frame++) {
+                await vi.advanceTimersByTimeAsync(40);
+                editor.render.engine._beginFrame(frame * 40);
+            }
+
+            const edits = startLayout.mock.calls.map(([request]) => request).filter(({ reason }) => reason === 'edit');
+            expect(edits).toHaveLength(2);
+            expect(edits[0].appliedLayoutVersion).toBe(acknowledged);
+            expect(edits[1].appliedLayoutVersion).toBeUndefined();
+            expect(edits[1].invalidation).toEqual({ oldStart: 5, oldEnd: 5, newEnd: 6 });
+            expect(edits[1].mutations).toEqual([]);
+            expect(worker?.model.getBody()?.dataStream).toBe(editor.model.getBody()?.dataStream);
+            expect(editor.skeleton.findNodeByCharIndex(5)?.raw).toBe('X');
+            expect(editor.skeleton.getAppliedContinuousLayoutVersion()).toBe(`worker-version-${edits[1].metricsRevision}`);
+        } finally {
+            editor.dispose();
+            worker?.session.dispose();
+            worker?.model.dispose();
+            locale.dispose();
         }
     });
 
@@ -812,6 +909,68 @@ describe('DocRenderController bounded input publication', () => {
             expect(editor.model.getBody()?.dataStream.startsWith('HelloAB world')).toBe(true);
             expect(editor.selectionManager.getActiveTextRange()?.endOffset).toBe(7);
             expect(viewport.viewportScrollY).toBeLessThan(manualScroll);
+        } finally {
+            editor.dispose();
+        }
+    });
+
+    it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('prepares a complete immutable print layout while initial flavor %i layout is still progressive', async (documentFlavor) => {
+        const editor = createEditor(500, false, true, documentFlavor);
+        try {
+            await vi.advanceTimersByTimeAsync(1_000);
+            const terminalOffset = editor.model.getBody()!.dataStream.length - 1;
+            const before = JSON.stringify(editor.model.getSnapshot());
+            expect(editor.skeleton.hasCompleteLayout()).toBe(false);
+            expect(editor.skeleton.findBodyPageIndexByCharIndex(terminalOffset)).toBe(-1);
+
+            const controller = editor.render.with(DocRenderController);
+            expect(await controller.prepareForPrint()).toBe(true);
+
+            expect(editor.skeleton.hasCompleteLayout()).toBe(true);
+            expect(editor.skeleton.getLayoutProgress()).toBeNull();
+            expect(editor.skeleton.findBodyPageIndexByCharIndex(terminalOffset)).toBeGreaterThanOrEqual(0);
+            expect(editor.skeleton.getSkeletonData()!.pages.every((page) => !page.isLayoutPlaceholder && !page.isMaterializationPlaceholder)).toBe(true);
+            await vi.advanceTimersByTimeAsync(1_000);
+            expect(editor.skeleton.findBodyPageIndexByCharIndex(terminalOffset)).toBeGreaterThanOrEqual(0);
+            expect(editor.skeleton.getLayoutProgress()).toBeNull();
+            expect(JSON.stringify(editor.model.getSnapshot())).toBe(before);
+        } finally {
+            editor.dispose();
+        }
+    });
+
+    it('waits for configured fonts before preparing a complete print layout', async () => {
+        let fontsReady!: () => void;
+        const initialization = new Promise<void>((resolve) => {
+            fontsReady = resolve;
+        });
+        const editor = createEditor(500, false, true, DocumentFlavor.MODERN, false, false, initialization);
+        try {
+            const controller = editor.render.with(DocRenderController);
+            const before = JSON.stringify(editor.model.getSnapshot());
+            const preparation = controller.prepareForPrint();
+            await Promise.resolve();
+            expect(editor.skeleton.hasCompleteLayout()).toBe(false);
+            fontsReady();
+            expect(await preparation).toBe(true);
+            expect(editor.skeleton.findBodyPageIndexByCharIndex(editor.model.getBody()!.dataStream.length - 1)).toBeGreaterThanOrEqual(0);
+            expect(JSON.stringify(editor.model.getSnapshot())).toBe(before);
+        } finally {
+            editor.dispose();
+        }
+    });
+
+    it('does not resume print preparation after its render is disposed while fonts are pending', async () => {
+        let fontsReady!: () => void;
+        const initialization = new Promise<void>((resolve) => {
+            fontsReady = resolve;
+        });
+        const editor = createEditor(500, false, true, DocumentFlavor.MODERN, false, false, initialization);
+        try {
+            const preparation = editor.render.with(DocRenderController).prepareForPrint();
+            editor.render.dispose();
+            fontsReady();
+            expect(await preparation).toBe(false);
         } finally {
             editor.dispose();
         }

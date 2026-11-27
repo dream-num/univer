@@ -29,6 +29,8 @@ export class Vlookup extends BaseFunction {
 
     override maxParams = 4;
 
+    override lazyIfReferenceArrayArgumentIndexes = [1];
+
     override calculate(
         lookupValue: BaseValueObject,
         tableArray: BaseValueObject,

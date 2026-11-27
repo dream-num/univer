@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import { CheckMarkIcon } from '@univerjs/icons';
 import { useCallback } from 'react';
+import { borderClassName, focusClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
-import { hexToHsv, hsvToHex } from './color-conversion';
+import { hexToHsv, hsvToHex, isLightColor } from './color-conversion';
 import { colorPresets } from './presets';
 
 interface IColorPresetsProps {
@@ -30,49 +32,73 @@ export function ColorPresets({ hsv, onChange }: IColorPresetsProps) {
         onChange(h, s, v);
     }, [onChange]);
 
-    const currentColor = hsv ? hsvToHex(...hsv) : '';
+    const currentColor = hsv ? hsvToHex(...hsv).toUpperCase() : '';
 
     return (
         <div
             data-u-comp="color-picker-presets"
-            className="univer-grid univer-content-center"
+            className="univer-grid univer-content-center univer-gap-y-0.5"
         >
             {colorPresets.map((row) => (
                 <div
                     key={row[0]}
-                    className="univer-grid univer-grid-flow-col univer-items-center univer-justify-between"
+                    className="univer-flex univer-min-w-0 univer-items-center univer-justify-between"
                 >
-                    {row.map((color) => (
-                        <button
-                            key={color}
-                            type="button"
-                            aria-label={color}
-                            aria-pressed={color.toUpperCase() === currentColor.toUpperCase()}
-                            title={color}
-                            className={clsx(`
-                              univer-box-border univer-flex univer-size-8 univer-cursor-pointer univer-items-center
-                              univer-justify-center univer-rounded-md univer-border-0 univer-bg-transparent univer-p-1
-                              univer-transition-colors
-                              hover:univer-bg-gray-100
-                              focus-visible:univer-outline focus-visible:univer-outline-2
-                              focus-visible:univer-outline-primary-600
-                              dark:hover:!univer-bg-gray-700
-                            `, {
-                                'univer-bg-primary-50 dark:!univer-bg-gray-700': color.toUpperCase() === currentColor.toUpperCase(),
-                            })}
-                            onClick={() => handleSelectPreset(color)}
-                        >
-                            <span
-                                className={clsx(`
-                                  univer-box-border univer-size-6 univer-rounded univer-border univer-border-solid
-                                  univer-border-black/10
-                                `, {
-                                    'univer-ring-2 univer-ring-primary-600 univer-ring-offset-2 univer-ring-offset-gray-0 dark:!univer-ring-primary-400 dark:!univer-ring-offset-gray-700': color.toUpperCase() === currentColor.toUpperCase(),
-                                })}
-                                style={{ backgroundColor: color }}
-                            />
-                        </button>
-                    ))}
+                    {row.map((color) => {
+                        const selected = color.toUpperCase() === currentColor;
+                        const lightSwatch = isLightColor(color);
+
+                        return (
+                            <button
+                                key={color}
+                                type="button"
+                                aria-label={color}
+                                aria-pressed={selected}
+                                title={color}
+                                className={clsx(
+                                    `
+                                      univer-group univer-box-border univer-flex univer-size-8 univer-min-w-0
+                                      univer-cursor-pointer univer-items-center univer-justify-center univer-rounded-md
+                                      univer-border-0 univer-bg-transparent univer-p-0 univer-transition-colors
+                                      hover:univer-bg-gray-100
+                                      dark:hover:!univer-bg-gray-600
+                                    `,
+                                    focusClassName
+                                )}
+                                onClick={() => handleSelectPreset(color)}
+                            >
+                                <span
+                                    className={clsx(
+                                        `
+                                          univer-relative univer-box-border univer-flex univer-size-6
+                                          univer-items-center univer-justify-center univer-rounded
+                                          univer-transition-transform univer-duration-200
+                                          group-hover:univer-scale-110
+                                          motion-reduce:univer-transform-none motion-reduce:univer-transition-none
+                                        `,
+                                        borderClassName,
+                                        selected && `
+                                          univer-ring-2 univer-ring-primary-600 univer-ring-offset-1
+                                          univer-ring-offset-gray-0
+                                          dark:!univer-ring-primary-300 dark:!univer-ring-offset-gray-700
+                                        `
+                                    )}
+                                    style={{ backgroundColor: color }}
+                                >
+                                    {selected && (
+                                        <CheckMarkIcon
+                                            aria-hidden="true"
+                                            preserveStrokeWidth
+                                            className={clsx(
+                                                'univer-size-3.5 univer-shrink-0',
+                                                lightSwatch ? 'univer-text-gray-900' : 'univer-text-gray-0'
+                                            )}
+                                        />
+                                    )}
+                                </span>
+                            </button>
+                        );
+                    })}
                 </div>
             ))}
         </div>

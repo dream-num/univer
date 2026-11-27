@@ -123,6 +123,7 @@ export function MobileThreadCommentPanel(props: IThreadCommentPanelProps) {
         onAfterDeleteComment,
         showComments,
         formatRef,
+        filterComment,
         onTempCommentClose,
         autoFocusActiveComment = false,
     } = props;
@@ -153,7 +154,8 @@ export function MobileThreadCommentPanel(props: IThreadCommentPanelProps) {
             ? unitComments
             : unitComments.filter((comment) => comment.subUnitId === subUnitId);
         const sortedComments = sortComments ?? ((commentList) => commentList);
-        const result: IThreadCommentWithUsers[] = allComments.map((comment) => ({
+        const visibleComments = filterComment ? allComments.filter((comment) => filterComment(comment.root)) : allComments;
+        const result: IThreadCommentWithUsers[] = visibleComments.map((comment) => ({
             ...comment.root,
             children: comment.children ?? [],
             users: comment.relativeUsers,
@@ -165,7 +167,7 @@ export function MobileThreadCommentPanel(props: IThreadCommentPanelProps) {
 
         const commentMap = new Map(result.map((comment) => [comment.id, comment]));
         return [...showComments, ''].map((id) => commentMap.get(id)).filter(Boolean) as IThreadCommentWithUsers[];
-    }, [showComments, sortComments, subUnitId, type, unit, unitComments]);
+    }, [showComments, sortComments, subUnitId, type, unit, unitComments, filterComment]);
     const commentsSorted = useMemo(() => [
         ...comments.filter((comment) => !comment.resolved),
         ...comments.filter((comment) => comment.resolved),

@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { DateSystem, excelSerialToDate } from '@univerjs/core';
-import {
-    getDateSerialNumberByObject,
-    getTwoDateDaysByBasis,
-    lastDayOfMonth,
-} from '../../../basics/date';
+import { getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
-import { calculateCoupdays, calculateCouppcd, getDateSerialNumberByMonths } from '../../../basics/financial';
+import { calculateAccruedInterest } from '../../../basics/financial';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -33,157 +31,56 @@ export class Accrint extends BaseFunction {
 
     override maxParams = 8;
 
-    override calculate(
-        issue: BaseValueObject,
-        firstInterest: BaseValueObject,
-        settlement: BaseValueObject,
-        rate: BaseValueObject,
-        par: BaseValueObject,
-        frequency: BaseValueObject,
-        basis?: BaseValueObject,
-        calcMethod?: BaseValueObject
-    ): BaseValueObject {
-        const _basis = basis ?? NumberValueObject.create(0);
-        const _calcMethod = calcMethod ?? BooleanValueObject.create(true);
+    override needsReferenceObject = true;
 
-        const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(issue, firstInterest, settlement, rate, par, frequency, _basis);
-
-        if (isError) {
-            return errorObject as ErrorValueObject;
-        }
-
-        const [issueObject, firstInterestObject, settlementObject, rateObject, parObject, frequencyObject, basisObject] = variants as BaseValueObject[];
-
-        const issueSerialNumber = getDateSerialNumberByObject(issueObject, this.getDateSystem());
-
-        if (typeof issueSerialNumber !== 'number') {
-            return issueSerialNumber;
-        }
-
-        const firstInterestSerialNumber = getDateSerialNumberByObject(firstInterestObject, this.getDateSystem());
-
-        if (typeof firstInterestSerialNumber !== 'number') {
-            return firstInterestSerialNumber;
-        }
-
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
-
-        if (typeof settlementSerialNumber !== 'number') {
-            return settlementSerialNumber;
-        }
-
-        const rateValue = +rateObject.getValue();
-        const parValue = +parObject.getValue();
-        const frequencyValue = Math.floor(+frequencyObject.getValue());
-        const basisValue = Math.floor(+basisObject.getValue());
-        const calcMethodValue = +_calcMethod.getValue();
-
-        if (Number.isNaN(rateValue) || Number.isNaN(parValue) || Number.isNaN(frequencyValue) || Number.isNaN(basisValue) || Number.isNaN(calcMethodValue)) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        if (
-            rateValue <= 0 ||
-            parValue <= 0 ||
-            ![1, 2, 4].includes(frequencyValue) ||
-            basisValue < 0 ||
-            basisValue > 4 ||
-            Math.floor(issueSerialNumber) >= Math.floor(settlementSerialNumber)
-        ) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        // Excel treats serial 0 as an invalid issue date in the 1900 date system.
-        if (this.getDateSystem() === DateSystem.Date1900 && issueSerialNumber === 0) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        return this._getResult(issueSerialNumber, firstInterestSerialNumber, settlementSerialNumber, rateValue, parValue, frequencyValue, basisValue, calcMethodValue);
+    override calculate(...input: FunctionVariantType[]): BaseValueObject {
+        const args = input.map((arg, i) => {
+            if (!arg.isReferenceObject()) return arg as BaseValueObject;
+            const array = (arg as BaseReferenceObject).toArrayValueObject();
+            if (array.getRowCount() !== 1 || array.getColumnCount() !== 1) return array;
+            const cell = array.getFirstCell();
+            return (i === 4 || i === 7) && cell.isNull() ? NumberValueObject.create(0) : cell;
+        });
+        const arrays = args.filter((arg): arg is ArrayValueObject => arg.isArray());
+        const rows = Math.max(1, ...arrays.map((item) => item.getRowCount()));
+        const cols = Math.max(1, ...arrays.map((item) => item.getColumnCount()));
+        if (rows === 1 && cols === 1) return this._calculateSingle(args);
+        const missing = ErrorValueObject.create(ErrorType.NA);
+        const expanded = args.map((arg) => expandArrayValueObject(rows, cols, arg, missing));
+        return expanded[0].map((_, row, col) => this._calculateSingle(expanded.map((arg) => arg.get(row, col) ?? missing)));
     }
 
-    private _getResult(
-        issueSerialNumber: number,
-        firstInterestSerialNumber: number,
-        settlementSerialNumber: number,
-        rateValue: number,
-        parValue: number,
-        frequencyValue: number,
-        basisValue: number,
-        calcMethodValue: number
-    ): NumberValueObject {
-        const issueCouppcd = calculateCouppcd(issueSerialNumber, firstInterestSerialNumber, frequencyValue, this.getDateSystem());
-        // Excel's 1900 date system treats an issue coupon boundary at serial 0 as invalid.
-        if (this.getDateSystem() === DateSystem.Date1900 && issueCouppcd <= 0) {
-            return NumberValueObject.create(0);
-        }
-        const couppcd = calculateCouppcd(settlementSerialNumber, firstInterestSerialNumber, frequencyValue, this.getDateSystem());
+    private _calculateSingle(args: BaseValueObject[]): BaseValueObject {
+        const [issue, first, settlement, rate, par, frequency, basis, method] = args;
+        const parArg = par.isNull() ? NumberValueObject.create(1000) : par;
+        const basisArg = basis ?? NumberValueObject.create(0);
+        const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(issue, first, settlement, rate, parArg, frequency, basisArg);
+        if (isError) return errorObject as ErrorValueObject;
 
-        const numMonths = 12 / frequencyValue;
-        const firstInterestDate = excelSerialToDate(firstInterestSerialNumber, this.getDateSystem());
-        const firstInterestDateYear = firstInterestDate.getUTCFullYear();
-        const firstInterestDateMonth = firstInterestDate.getUTCMonth();
-        const firstInterestDateDay = firstInterestDate.getUTCDate();
-        const lastDayOfMonthF = lastDayOfMonth(firstInterestDateYear, firstInterestDateMonth, firstInterestDateDay);
+        const dateSystem = this.getDateSystem();
+        const [issueArg, firstArg, settlementArg, rateArg, faceArg, freqArg, dayCountArg] = variants as BaseValueObject[];
+        const issueDate = getDateSerialNumberByObject(issueArg, dateSystem);
+        const firstDate = getDateSerialNumberByObject(firstArg, dateSystem);
+        const settlementDate = getDateSerialNumberByObject(settlementArg, dateSystem);
+        if (typeof issueDate !== 'number') return issueDate;
+        if (typeof firstDate !== 'number') return firstDate;
+        if (typeof settlementDate !== 'number') return settlementDate;
 
-        let coupDateSerialNumber = getDateSerialNumberByMonths(firstInterestSerialNumber, -numMonths, lastDayOfMonthF, this.getDateSystem());
-        // In the 1904 system serial 0 can be the start of the first coupon period.
-        // Keep the first-interest date as the period boundary instead of advancing to the next coupon.
-        const startsAtFirstCoupon = issueSerialNumber === 0 && issueCouppcd === 0;
-        if (settlementSerialNumber > firstInterestSerialNumber && calcMethodValue) {
-            coupDateSerialNumber = firstInterestSerialNumber;
-            if (!startsAtFirstCoupon) {
-                while (coupDateSerialNumber < settlementSerialNumber) {
-                    coupDateSerialNumber = getDateSerialNumberByMonths(coupDateSerialNumber, numMonths, lastDayOfMonthF, this.getDateSystem());
-                }
-            }
+        const methodArg = method?.isArray() ? (method as ArrayValueObject).getFirstCell() : method;
+        if (methodArg?.isError()) return methodArg;
+        if (methodArg?.isString()) return ErrorValueObject.create(ErrorType.VALUE);
+        const fromIssue = methodArg == null || methodArg.isNull() ? BooleanValueObject.create(true) : methodArg;
+        const actualRate = Number(rateArg.getValue());
+        const face = Number(faceArg.getValue());
+        const freq = Math.floor(Number(freqArg.getValue()));
+        const dayCount = Math.floor(Number(dayCountArg.getValue()));
+        if ([actualRate, face, freq, dayCount].some(Number.isNaN)) return ErrorValueObject.create(ErrorType.VALUE);
+        if (issueDate < 1 || firstDate < 1 || Math.floor(issueDate) >= Math.floor(settlementDate) ||
+            actualRate <= 0 || face <= 0 || ![1, 2, 4].includes(freq) || dayCount < 0 || dayCount > 4) {
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        let firstDateSerialNumber = issueSerialNumber > coupDateSerialNumber ? issueSerialNumber : coupDateSerialNumber;
-
-        let { days } = getTwoDateDaysByBasis(firstDateSerialNumber, settlementSerialNumber, basisValue, this.getDateSystem());
-        if (couppcd >= issueSerialNumber) {
-            const { days: DFS } = getTwoDateDaysByBasis(firstDateSerialNumber, settlementSerialNumber, !basisValue ? 0 : 4, this.getDateSystem());
-            days = DFS;
-        }
-        if (settlementSerialNumber < firstDateSerialNumber) {
-            days = -days;
-        }
-
-        let coupdays = calculateCoupdays(startsAtFirstCoupon ? issueSerialNumber : coupDateSerialNumber, firstInterestSerialNumber, frequencyValue, basisValue, this.getDateSystem());
-        let accruedDaysSum = days / coupdays;
-        let startDateSerialNumber = coupDateSerialNumber;
-        let endDateSerialNumber = issueSerialNumber;
-
-        while (startDateSerialNumber > issueSerialNumber) {
-            endDateSerialNumber = startDateSerialNumber;
-            startDateSerialNumber = getDateSerialNumberByMonths(startDateSerialNumber, -numMonths, lastDayOfMonthF, this.getDateSystem());
-            firstDateSerialNumber = issueSerialNumber > startDateSerialNumber ? issueSerialNumber : startDateSerialNumber;
-            const { days: DFE } = getTwoDateDaysByBasis(firstDateSerialNumber, endDateSerialNumber, basisValue, this.getDateSystem());
-
-            if (basisValue === 0) {
-                if (endDateSerialNumber >= firstDateSerialNumber || issueSerialNumber <= startDateSerialNumber) {
-                    days = DFE;
-                } else {
-                    days = -DFE;
-                }
-
-                coupdays = calculateCoupdays(startDateSerialNumber, endDateSerialNumber, frequencyValue, basisValue, this.getDateSystem());
-            } else {
-                days = endDateSerialNumber < firstDateSerialNumber ? -DFE : DFE;
-
-                if (basisValue === 3) {
-                    coupdays = 365 / frequencyValue;
-                } else {
-                    const { days: DSE } = getTwoDateDaysByBasis(startDateSerialNumber, endDateSerialNumber, basisValue, this.getDateSystem());
-                    coupdays = endDateSerialNumber < startDateSerialNumber ? -DSE : DSE;
-                }
-            }
-
-            accruedDaysSum += (issueSerialNumber <= startDateSerialNumber) ? (calcMethodValue ? 1 : 0) : days / coupdays;
-        }
-
-        const result = parValue * rateValue / frequencyValue * accruedDaysSum;
-
-        return NumberValueObject.create(result);
+        const result = calculateAccruedInterest(Math.floor(issueDate), Math.floor(firstDate), Math.floor(settlementDate), actualRate, face, freq, dayCount, Boolean(fromIssue.getValue()), dateSystem);
+        return typeof result === 'number' ? NumberValueObject.create(result) : ErrorValueObject.create(result);
     }
 }

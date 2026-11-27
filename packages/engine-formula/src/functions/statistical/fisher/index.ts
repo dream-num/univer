@@ -50,7 +50,7 @@ export class Fisher extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = Math.log((1 + xValue) / (1 - xValue)) / 2;
+        const result = Math.atanh(xValue);
 
         return NumberValueObject.create(result);
     }

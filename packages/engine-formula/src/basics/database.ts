@@ -15,6 +15,7 @@
  */
 
 import type { DateSystem } from '@univerjs/core';
+import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
@@ -25,7 +26,14 @@ import { ErrorType } from './error-type';
 
 type DatabaseValueType = string | number | null;
 
-export function checkDatabase(database: BaseValueObject) {
+export type DatabaseCriterionEvaluator = (databaseRow: number, criteriaRow: number, criteriaColumn: number) => boolean | undefined;
+
+function toValue(value: FunctionVariantType): BaseValueObject {
+    return value.isReferenceObject() ? (value as BaseReferenceObject).toArrayValueObject() : value as BaseValueObject;
+}
+
+export function checkDatabase(input: FunctionVariantType) {
+    const database = toValue(input);
     const databaseValues: DatabaseValueType[][] = [];
 
     if (database.isError()) {
@@ -64,7 +72,7 @@ export function checkDatabase(database: BaseValueObject) {
                 value = value.toLocaleUpperCase();
             }
 
-            if (valueObject.isNumber() || isRealNum(value)) {
+            if (valueObject.isNumber()) {
                 row.push(+value);
                 continue;
             }
@@ -82,7 +90,12 @@ export function checkDatabase(database: BaseValueObject) {
     };
 }
 
-export function checkField(field: BaseValueObject, database: DatabaseValueType[][]) {
+export function checkField(input: FunctionVariantType, database: DatabaseValueType[][], allowOmitted = false) {
+    const field = toValue(input);
+    if (allowOmitted && !input.isReferenceObject() && field.isNull()) {
+        return { isError: false, errorObject: null, fieldIndex: -1 };
+    }
+
     let fieldIndex: number = -1;
 
     if (field.isError()) {
@@ -112,7 +125,7 @@ export function checkField(field: BaseValueObject, database: DatabaseValueType[]
         fieldValue = 0;
     } else if (fieldObject.isBoolean()) {
         fieldValue = fieldObject.getValue() ? 1 : 0;
-    } else if (fieldObject.isNumber() || isRealNum(fieldValue)) {
+    } else if (fieldObject.isNumber()) {
         fieldValue = Math.floor(+fieldValue);
     }
 
@@ -151,7 +164,8 @@ export function checkField(field: BaseValueObject, database: DatabaseValueType[]
     };
 }
 
-export function checkCriteria(criteria: BaseValueObject) {
+export function checkCriteria(input: FunctionVariantType) {
+    const criteria = toValue(input);
     const criteriaValues: DatabaseValueType[][] = [];
 
     if (criteria.isError()) {
@@ -217,7 +231,8 @@ export function isCriteriaMatch(
     criteria: DatabaseValueType[][],
     database: DatabaseValueType[][],
     databaseRowIndex: number,
-    dateSystem: DateSystem
+    dateSystem: DateSystem,
+    evaluateCriterion?: DatabaseCriterionEvaluator
 ) {
     const rowCount = criteria.length;
     const columnCount = criteria[0].length;
@@ -230,6 +245,14 @@ export function isCriteriaMatch(
         let isRowMatch = true;
 
         for (let c = 0; c < columnCount; c++) {
+            const calculated = evaluateCriterion?.(databaseRowIndex, r, c);
+            if (calculated !== undefined) {
+                if (!calculated) {
+                    isRowMatch = false;
+                    break;
+                }
+                continue;
+            }
             const criteriaValue = criteria[r][c];
 
             if (criteriaValue === null) {

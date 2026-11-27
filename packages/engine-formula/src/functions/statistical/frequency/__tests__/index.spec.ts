@@ -175,10 +175,7 @@ describe('Test frequency function', () => {
             });
             const binsArray = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(dataArray, binsArray);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0],
-                [9],
-            ]);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
 
             const dataArray2 = ErrorValueObject.create(ErrorType.NAME);
             const binsArray2 = ArrayValueObject.create({

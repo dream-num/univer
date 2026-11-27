@@ -47,4 +47,14 @@ describe('KBD', () => {
         );
         expect(separators.length).toBe(2);
     });
+
+    it('should render individual keycaps without overriding workbench font-family', () => {
+        const { container } = render(<KBD keyboard="⌘ + K" />);
+        const wrapper = container.querySelector('[data-u-comp="kbd"]');
+        expect(wrapper?.className).not.toContain('font-mono');
+        const kbds = container.querySelectorAll('kbd');
+        expect(kbds).toHaveLength(2);
+        expect(kbds[0]?.textContent).toBe('⌘');
+        expect(kbds[1]?.textContent).toBe('K');
+    });
 });

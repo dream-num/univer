@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { BaseValueObject } from '../engine/value-object/base-value-object';
+import type { NullValueObject } from '../engine/value-object/primitive-object';
 import {
     DateSystem,
     excelDateSerial,
@@ -23,7 +25,6 @@ import {
     isRealNum,
     numfmt,
 } from '@univerjs/core';
-import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { ErrorType } from './error-type';
 
@@ -206,35 +207,35 @@ export function countWorkingDays(startDateSerialNumber: number, endDateSerialNum
 
     const start = Math.floor(startDateSerialNumber);
     const end = Math.floor(endDateSerialNumber);
-    const startSerialNumber = end > start ? start : end;
-
-    let workingDays = 0;
-
-    const daysDiff = Math.abs(Math.floor(endDateSerialNumber) - Math.floor(startDateSerialNumber)) + 1;
-
-    for (let i = 0; i < daysDiff; i++) {
-        const currentDateSerialNumber = startSerialNumber + i;
-
-        if (holidays && holidays.length > 0 && holidays.some((item) => Math.floor(item) === currentDateSerialNumber)) {
-            continue;
+    const first = Math.min(start, end);
+    const last = Math.max(start, end);
+    const days = last - first + 1;
+    const isWeekday = (serial: number) => !weekendArray.includes(getWeekDayByDateSerialNumber(serial, dateSystem));
+    let workingDays = Math.floor(days / 7) * (7 - weekendArray.length);
+    for (let serial = first; serial < first + days % 7; serial++) {
+        if (isWeekday(serial)) {
+            workingDays++;
         }
-
-        const weekDay = getWeekDayByDateSerialNumber(currentDateSerialNumber, dateSystem);
-
-        if (weekendArray.includes(weekDay)) {
-            continue;
-        }
-
-        workingDays++;
     }
-
-    return end >= start ? workingDays : -workingDays;
+    const excluded = new Set<number>();
+    for (const holiday of holidays ?? []) {
+        const serial = Math.floor(holiday);
+        if (serial >= first && serial <= last && isWeekday(serial)) {
+            excluded.add(serial);
+        }
+    }
+    const count = workingDays - excluded.size;
+    return end >= start ? count : -count;
 }
 
 export function getDateSerialNumberByWorkingDays(startDateSerialNumber: number, workingDays: number, weekend: number | string = 1, holidays?: number[], dateSystem = DateSystem.Date1900): number | ErrorValueObject {
     const weekendArray = getWeekendArray(weekend);
 
     const _startDateSerialNumber = Math.floor(startDateSerialNumber);
+    const maxSerial = getDateSystemMaxSerial(dateSystem);
+    if (workingDays < -_startDateSerialNumber || workingDays > maxSerial - _startDateSerialNumber) {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
     let targetDateSerialNumber = _startDateSerialNumber;
 
     let days = Math.abs(workingDays);
@@ -242,7 +243,7 @@ export function getDateSerialNumberByWorkingDays(startDateSerialNumber: number, 
     for (let i = 1; i <= days; i++) {
         const currentDateSerialNumber = workingDays < 0 ? _startDateSerialNumber - i : _startDateSerialNumber + i;
 
-        if (currentDateSerialNumber < 0) {
+        if (currentDateSerialNumber < 0 || currentDateSerialNumber > maxSerial) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
@@ -266,7 +267,8 @@ export function getDateSerialNumberByWorkingDays(startDateSerialNumber: number, 
 
 export function getDateSerialNumberByObject(
     serialNumberObject: BaseValueObject,
-    dateSystem?: DateSystem
+    dateSystem?: DateSystem,
+    allowLastDayTime = false
 ): ErrorValueObject | number {
     if (serialNumberObject.isError()) {
         return serialNumberObject as ErrorValueObject;
@@ -274,41 +276,29 @@ export function getDateSerialNumberByObject(
 
     const dateValue = serialNumberObject.getValue();
     const maxSerial = getDateSystemMaxSerial(dateSystem);
+    let serial: number;
 
     if (serialNumberObject.isString()) {
-        let dateSerial: any;
         const options = { dateSystem };
-
-        if (parseFormattedDate(`${dateValue}`, options)) {
-            dateSerial = parseFormattedDate(`${dateValue}`, options)!.v;
-        } else if (parseFormattedTime(`${dateValue}`, options)) {
-            dateSerial = parseFormattedTime(`${dateValue}`, options)!.v;
-        } else if (parseEnglishMonthNameDate(`${dateValue}`)) {
-            dateSerial = parseEnglishMonthNameDate(`${dateValue}`)!;
+        const input = String(dateValue);
+        const parsed = parseFormattedDate(input, options) ?? parseFormattedTime(input, options);
+        const date = parsed == null ? parseEnglishMonthNameDate(input) : null;
+        if (parsed) {
+            serial = parsed.v;
+        } else if (date) {
+            serial = excelDateTimeSerial(date, dateSystem);
         } else if (isRealNum(dateValue)) {
-            dateSerial = +dateValue;
+            serial = +dateValue;
         } else {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
-
-        if (dateSerial instanceof Date) {
-            dateSerial = excelDateTimeSerial(dateSerial, dateSystem);
-        }
-
-        if (+dateSerial < 0 || +dateSerial > maxSerial) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        return +dateSerial;
     } else {
-        const dateSerial = +serialNumberObject.getValue();
-
-        if (dateSerial < 0 || dateSerial > maxSerial) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        return dateSerial;
+        serial = +dateValue;
     }
+    if (serial < 0 || (allowLastDayTime ? serial >= maxSerial + 1 : serial > maxSerial)) {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
+    return serial;
 }
 
 export function getWeekDayByDateSerialNumber(dateSerialNumber: number, dateSystem = DateSystem.Date1900): number {
@@ -401,6 +391,64 @@ export function getTwoDateDaysByBasis(startDateSerialNumber: number, endDateSeri
     }
 }
 
+/** Financial scalars retain their own Boolean and omitted-argument rules. */
+export function getFinancialNumberByObject(value: BaseValueObject, dateSystem = DateSystem.Date1900): number | ErrorValueObject {
+    if (value.isError()) return value as ErrorValueObject;
+    if (value.isBoolean()) return ErrorValueObject.create(ErrorType.VALUE);
+    if (value.isNull()) return (value as NullValueObject).isOmitted() ? ErrorValueObject.create(ErrorType.NA) : 0;
+    const parsed = value.isString() ? value.withDateSystem(dateSystem).convertToNumberObjectValue() : value;
+    if (parsed.isError()) return parsed as ErrorValueObject;
+    const number = Number(parsed.getValue());
+    if (!Number.isFinite(number)) return ErrorValueObject.create(ErrorType.VALUE);
+    return number;
+}
+
+/** Converts a financial date while preserving Excel's numeric versus text path. */
+export function getFinancialDateSerialNumberByObject(value: BaseValueObject, dateSystem = DateSystem.Date1900): number | ErrorValueObject {
+    if (value.isBoolean()) return ErrorValueObject.create(ErrorType.VALUE);
+    const serial = getFinancialNumberByObject(value, dateSystem);
+    if (typeof serial !== 'number') return serial;
+    const day = Math.floor(serial);
+    if (day < 0 || day > getDateSystemMaxSerial(dateSystem)) return ErrorValueObject.create(ErrorType.NUM);
+    return day + (dateSystem === DateSystem.Date1904 && !value.isString() ? 1462 : 0);
+}
+
+/** YEARFRAC's day-count convention is also used by the simple security functions. */
+export function getYearFraction(first: number, last: number, basis: number, dateSystem = DateSystem.Date1900): number {
+    const start = Math.min(first, last);
+    const end = Math.max(first, last);
+    // Calendar-dependent bases cannot decompose dates beyond Excel's last year.
+    if ((basis === 1 || ((basis === 0 || basis === 4) && start !== end)) && end > getDateSystemMaxSerial(dateSystem)) return NaN;
+    if (start === end) return 0;
+    let { days, yearDays } = getTwoDateDaysByBasis(start, end, basis, dateSystem);
+    if (basis === 0 || basis === 4) {
+        const [startYear, startMonth, originalDay] = getFinancialDateParts(start, dateSystem);
+        const [endYear, endMonth, originalEndDay] = getFinancialDateParts(end, dateSystem);
+        let startDay = Math.min(originalDay, 30);
+        let endDay = originalEndDay;
+        if (basis === 4) {
+            endDay = Math.min(endDay, 30);
+        } else {
+            if (endDay === 31 && originalDay >= 30) endDay = 30;
+            if (startMonth === 2 && originalDay === getDaysInMonth(startYear, 1)) {
+                startDay = 30;
+                if (endMonth === 2 && endDay === getDaysInMonth(endYear, 1)) endDay = 30;
+            }
+        }
+        days = (endYear - startYear) * 360 + (endMonth - startMonth) * 30 + endDay - startDay;
+    }
+    return days / yearDays;
+}
+
+function getFinancialDateParts(serial: number, dateSystem: DateSystem): [number, number, number] {
+    if (dateSystem === DateSystem.Date1900) {
+        if (serial === 0) return [1900, 1, 0];
+        if (serial === 60) return [1900, 2, 29];
+    }
+    const date = excelSerialToDate(serial, dateSystem);
+    return [date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate()];
+}
+
 function getDaysByNASD(startDateSerialNumber: number, endDateSerialNumber: number, dateSystem: DateSystem): ITwoDateDaysType {
     const startDateDate = excelSerialToDate(startDateSerialNumber, dateSystem);
     const startIsDate1900SerialZero = dateSystem === DateSystem.Date1900 && startDateSerialNumber === 0;
@@ -449,61 +497,29 @@ function getDaysByNASD(startDateSerialNumber: number, endDateSerialNumber: numbe
     };
 }
 
-function getDaysByActual(startDateSerialNumber: number, endDateSerialNumber: number, dateSystem: DateSystem): ITwoDateDaysType {
-    const startDateDate = excelSerialToDate(startDateSerialNumber, dateSystem);
-    const startIsDate1900SerialZero = dateSystem === DateSystem.Date1900 && startDateSerialNumber === 0;
-    const startYear = startIsDate1900SerialZero ? 1900 : startDateDate.getUTCFullYear();
-    const startMonth = startIsDate1900SerialZero ? 1 : startDateDate.getUTCMonth() + 1;
-    const startDay = startIsDate1900SerialZero ? 0 : startDateDate.getUTCDate();
-
-    const endDateDate = excelSerialToDate(endDateSerialNumber, dateSystem);
-    const endIsDate1900SerialZero = dateSystem === DateSystem.Date1900 && endDateSerialNumber === 0;
-    const endYear = endIsDate1900SerialZero ? 1900 : endDateDate.getUTCFullYear();
-    const endMonth = endIsDate1900SerialZero ? 1 : endDateDate.getUTCMonth() + 1;
-    const endDay = endIsDate1900SerialZero ? 0 : endDateDate.getUTCDate();
-
-    const totalDays = Math.abs(endDateSerialNumber - startDateSerialNumber);
-
-    // A period from a date to the same date in a later year is a whole number of years.
-    // Excel uses the actual length of those years instead of averaging both boundary years.
-    if (endDateSerialNumber >= startDateSerialNumber && endYear > startYear && startMonth === endMonth && startDay === endDay) {
-        return {
-            days: totalDays,
-            yearDays: totalDays / (endYear - startYear),
-        };
+function getDaysByActual(start: number, end: number, dateSystem: DateSystem): ITwoDateDaysType {
+    const earlier = Math.min(start, end);
+    const later = Math.max(start, end);
+    const startDate = excelSerialToDate(earlier, dateSystem);
+    const endDate = excelSerialToDate(later, dateSystem);
+    const startZero = dateSystem === DateSystem.Date1900 && earlier === 0;
+    const endZero = dateSystem === DateSystem.Date1900 && later === 0;
+    const startYear = startZero ? 1900 : startDate.getUTCFullYear();
+    const endYear = endZero ? 1900 : endDate.getUTCFullYear();
+    const startMonth = startZero ? 1 : startDate.getUTCMonth() + 1;
+    const endMonth = endZero ? 1 : endDate.getUTCMonth() + 1;
+    const startDay = startZero ? 0 : startDate.getUTCDate();
+    const endDay = endZero ? 0 : endDate.getUTCDate();
+    const days = later - earlier;
+    if (startYear === endYear) return { days, yearDays: isLeapYear(startYear) ? 366 : 365 };
+    if (endYear === startYear + 1 && (endMonth < startMonth || (endMonth === startMonth && endDay <= startDay))) {
+        const containsLeapDay = (isLeapYear(startYear) && startMonth <= 2)
+            || (isLeapYear(endYear) && (endMonth > 2 || (endMonth === 2 && endDay === 29)));
+        return { days, yearDays: containsLeapDay ? 366 : 365 };
     }
-
-    const totalYear = Math.abs(endYear - startYear) + 1;
-
-    let startYearFirstDaySerialNumber;
-    let endYearLastDaySerialNumber;
-
-    if (endYear < startYear) {
-        const startYearFirstDay = new Date(Date.UTC(endYear, 0, 1));
-        const endYearLastDay = new Date(Date.UTC(startYear, 11, 31));
-
-        startYearFirstDaySerialNumber = excelDateSerial(startYearFirstDay, dateSystem);
-        endYearLastDaySerialNumber = excelDateSerial(endYearLastDay, dateSystem);
-
-        if (dateSystem === DateSystem.Date1900 && endYear === 1900) { // Special handle. excel 1900 days = 365, 1900/12/31 SerialNumber = 366. so start add 1
-            startYearFirstDaySerialNumber += 1;
-        }
-    } else {
-        const startYearFirstDay = new Date(Date.UTC(startYear, 0, 1));
-        const endYearLastDay = new Date(Date.UTC(endYear, 11, 31));
-
-        startYearFirstDaySerialNumber = excelDateSerial(startYearFirstDay, dateSystem);
-        endYearLastDaySerialNumber = excelDateSerial(endYearLastDay, dateSystem);
-
-        if (dateSystem === DateSystem.Date1900 && startYear === 1900) { // Special handle. excel 1900 days = 365, 1900/12/31 SerialNumber = 366. so start add 1
-            startYearFirstDaySerialNumber += 1;
-        }
-    }
-
-    return {
-        days: totalDays,
-        yearDays: (endYearLastDaySerialNumber - startYearFirstDaySerialNumber + 1) / totalYear,
-    };
+    let totalYearDays = 0;
+    for (let year = startYear; year <= endYear; year++) totalYearDays += isLeapYear(year) ? 366 : 365;
+    return { days, yearDays: totalYearDays / (endYear - startYear + 1) };
 }
 
 function getDaysByEuropean(startDateSerialNumber: number, endDateSerialNumber: number, dateSystem: DateSystem): ITwoDateDaysType {

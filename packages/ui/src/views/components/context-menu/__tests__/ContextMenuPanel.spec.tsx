@@ -551,14 +551,6 @@ describe('ContextMenuPanel', () => {
     );
 
     it.each(['parent', 'submenu'])('closes the submenu when the pointer leaves the window from its %s', async (origin) => {
-        const contains = Node.prototype.contains;
-        // The test DOM accepts Window here, whereas browsers require a Node.
-        vi.spyOn(Node.prototype, 'contains').mockImplementation(function (this: Node, other) {
-            if (other !== null && !(other instanceof Node)) {
-                throw new TypeError('Node.contains requires a Node');
-            }
-            return contains.call(this, other);
-        });
         renderWithDependencies(<ContextMenuPanel menuType="root" />, {
             root: [{
                 key: 'color',
@@ -576,7 +568,7 @@ describe('ContextMenuPanel', () => {
         await nextFrame();
         const submenu = document.getElementById(trigger.getAttribute('aria-controls')!)!;
 
-        fireEvent.mouseLeave(origin === 'parent' ? trigger : submenu, { relatedTarget: window });
+        fireEvent.mouseLeave(origin === 'parent' ? trigger : submenu, { relatedTarget: new EventTarget() });
 
         expect(screen.queryByText('Red')).toBeNull();
         expect(trigger.getAttribute('aria-expanded')).toBe('false');

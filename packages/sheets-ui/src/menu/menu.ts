@@ -1158,9 +1158,8 @@ export function FitContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem<
         icon: 'AutoHeightDoubleIcon',
         title: 'sheets-ui.rightClick.fitContent',
         disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetSetRowStylePermission, WorksheetEditPermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
+            workbookTypes: [],
+            worksheetTypes: [WorksheetSetRowStylePermission],
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -1173,9 +1172,8 @@ export function ColAutoWidthMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         icon: 'AutoWidthDoubleIcon',
         title: 'sheets-ui.rightClick.fitContent',
         disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetSetRowStylePermission, WorksheetEditPermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
+            workbookTypes: [],
+            worksheetTypes: [WorksheetSetColumnStylePermission],
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -1330,9 +1328,8 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
             return disposable.dispose;
         })),
         hidden$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
+            workbookTypes: [],
+            worksheetTypes: [WorksheetSetRowStylePermission],
         }),
     };
 }
@@ -1376,9 +1373,8 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             return disposable.dispose;
         })),
         hidden$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
+            workbookTypes: [],
+            worksheetTypes: [WorksheetSetColumnStylePermission],
         }),
     };
 }

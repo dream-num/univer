@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Observable } from 'rxjs';
 import type { IBorderInfo } from '@univerjs/sheets';
 import type {
     IDisplayMenuItem,
@@ -118,6 +119,7 @@ interface IMobileNumberFormatMenuConfig {
 
 export type MobileNumberFormatItem = IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, unknown>> & {
     mobileNumberFormat?: IMobileNumberFormatMenuConfig;
+    mobileNumberFormat$?: Observable<IMobileNumberFormatMenuConfig>;
 };
 
 type ConfiguredMobileNumberFormatItem = MobileNumberFormatItem & {
@@ -286,7 +288,7 @@ function MobileStylePanelContent(props: IMobileStylePanelProps) {
     }
 
     if (currentView.kind === 'custom-number-format') {
-        return <MobileCustomNumberFormat config={currentView.config} onBack={onBack} onExecute={onExecute} />;
+        return <MobileCustomNumberFormat item={currentView.item} config={currentView.config} onBack={onBack} onExecute={onExecute} />;
     }
 
     const value: IBorderInfo = currentBorderInfo ?? {
@@ -565,7 +567,7 @@ function MobileNumberFormatGroup(props: {
 }) {
     const { schemas, schema, onOpenView, onExecute } = props;
     const item = schema.item;
-    const config = item.mobileNumberFormat;
+    const config = useObservable(item.mobileNumberFormat$, item.mobileNumberFormat) ?? item.mobileNumberFormat;
     const localeService = useDependency(LocaleService);
     const status = useToolbarItemStatus(item);
 
@@ -702,7 +704,8 @@ function MobileNumberFormatDetails(props: {
     onOpenView: (view: MobileStyleView) => void;
     onExecute: (params: IMobileStyleCommand) => void;
 }) {
-    const { item, config, onOpenView, onExecute } = props;
+    const { item, onOpenView, onExecute } = props;
+    const config = useObservable(item.mobileNumberFormat$, props.config) ?? props.config;
     const localeService = useDependency(LocaleService);
     const status = useToolbarItemStatus(item);
 
@@ -764,11 +767,13 @@ function MobileNumberFormatDetails(props: {
 }
 
 function MobileCustomNumberFormat(props: {
+    item: MobileNumberFormatItem;
     config: IMobileNumberFormatMenuConfig;
     onBack: () => void;
     onExecute: (params: IMobileStyleCommand) => void;
 }) {
-    const { config, onBack, onExecute } = props;
+    const { item, onBack, onExecute } = props;
+    const config = useObservable(item.mobileNumberFormat$, props.config) ?? props.config;
     const componentManager = useDependency(ComponentManager);
     const CustomFormat = componentManager.get(config.customComponent);
 

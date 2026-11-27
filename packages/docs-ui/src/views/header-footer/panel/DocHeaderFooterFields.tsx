@@ -15,15 +15,15 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import type { IInsertHeaderFooterFieldParams } from '../../../commands/commands/insert-header-footer-field.command';
-import type { LocaleKey } from '../../../locale/types';
-import type { DateTimeFieldFormat } from '../../../utils/date-time-field';
 import { ICommandService, IUniverInstanceService, LOCALE_META, LocaleService } from '@univerjs/core';
 import { Button, Checkbox, Dialog, DropdownMenu, selectClassName } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { CalendarIcon, MoreDownIcon, NumberIcon } from '@univerjs/icons';
 import { ILayoutService, IShortcutService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
+import type { IInsertHeaderFooterFieldParams } from '../../../commands/commands/insert-header-footer-field.command';
+import type { LocaleKey } from '../../../locale/types';
+import type { DateTimeFieldFormat } from '../../../utils/date-time-field';
 import { InsertHeaderFooterFieldCommand } from '../../../commands/commands/insert-header-footer-field.command';
 import { RefreshHeaderFooterFieldsCommand } from '../../../commands/commands/refresh-header-footer-fields.command';
 import { createDateTimeField } from '../../../utils/date-time-field';
@@ -113,8 +113,15 @@ export function DocHeaderFooterFields({ unitId, disabled }: { unitId: string; di
             >
                 <Button className="univer-justify-start" data-u-command={InsertHeaderFooterFieldCommand.id} size="small" variant="text" disabled={disabled} onMouseDown={(event) => event.preventDefault()}>
                     <NumberIcon aria-hidden="true" />
-                    <span className="univer-flex-1 univer-text-start">{localeService.t<LocaleKey>('docs-ui.headerFooter.pageNumber')}</span>
-                    <MoreDownIcon aria-hidden="true" />
+                    <span
+                        className="
+                          univer-flex-1 univer-text-start
+                          [[data-u-comp='ribbon-grid-toolbar']_&]:univer-flex-none
+                        "
+                    >
+                        {localeService.t<LocaleKey>('docs-ui.headerFooter.pageNumber')}
+                    </span>
+                    <MoreDownIcon aria-hidden="true" className="!univer-size-3" />
                 </Button>
             </DropdownMenu>
             <Button className="univer-justify-start" data-u-command={InsertHeaderFooterFieldCommand.id} size="small" variant="text" disabled={disabled} onMouseDown={(event) => event.preventDefault()} onClick={openDateTime}>

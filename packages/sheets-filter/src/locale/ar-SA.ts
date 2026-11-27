@@ -24,6 +24,9 @@ const locale: typeof enUS = {
         msg: {
             'filter-header-forbidden': 'لا يمكنك نقل صف الرأس الخاص بالتصفية.',
         },
+        permission: {
+            filterErr: 'النطاق محمي، وليس لديك إذن بالتصفية. للتصفية، يرجى التواصل مع المنشئ.',
+        },
     },
 };
 

@@ -26,6 +26,15 @@ describe('ColorKit', () => {
         expect(new ColorKit('hsv(240,100,100)').toRgb()).toEqual({ r: 0, g: 0, b: 255 });
     });
 
+    it('should keep the transparent keyword fully transparent', () => {
+        const color = new ColorKit('transparent');
+
+        expect(color.isValid).toBe(true);
+        expect(color.toRgb()).toEqual({ r: 255, g: 255, b: 255, a: 0 });
+        expect(color.getAlpha()).toBe(0);
+        expect(color.toRgbString()).toBe('rgba(255,255,255,0)');
+    });
+
     it('should stringify colors and support short hex output when possible', () => {
         const color = new ColorKit({ r: 255, g: 255, b: 255, a: 0 });
 
@@ -53,6 +62,27 @@ describe('ColorKit', () => {
         expect(ColorKit.mix('#000000', '#ffffff', 2).toHexString()).toBe('#ffffff');
         expect(ColorKit.mix('#000000', '#ffffff', 0.5).toHexString()).toBe('#808080');
         expect(ColorKit.getContrastRatio('#000000', '#ffffff')).toBe(21);
+    });
+
+    it('should resolve named colors to their CSS values', () => {
+        const named: [string, string][] = [
+            ['blanchedalmond', '#ffebcd'],
+            ['darkgoldenrod', '#b8860b'],
+            ['floralwhite', '#fffaf0'],
+            ['midnightblue', '#191970'],
+            ['plum', '#dda0dd'],
+            ['slategray', '#708090'],
+            ['slategrey', '#708090'],
+            ['snow', '#fffafa'],
+            ['yellowgreen', '#9acd32'],
+        ];
+
+        named.forEach(([name, hex]) => {
+            const color = new ColorKit(name);
+
+            expect(color.isValid).toBe(true);
+            expect(color.toHexString()).toBe(hex);
+        });
     });
 
     it('should mark invalid colors and throw on malformed known formats', () => {

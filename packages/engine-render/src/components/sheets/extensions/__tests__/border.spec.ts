@@ -142,8 +142,8 @@ describe('border extension', () => {
             [BORDER_TYPE.TOP]: { type: BORDER_TYPE.TOP, style: BorderStyleTypes.THIN, color: '#111' },
         });
         const skeleton = {
+            getRowVisible: vi.fn(() => true),
             worksheet: {
-                getRowVisible: vi.fn(() => true),
                 getColVisible: vi.fn(() => true),
             },
             rowHeightAccumulation: [10],
@@ -201,8 +201,8 @@ describe('border extension', () => {
         const overflowCache = new ObjectMatrix<any>();
 
         const skeleton = {
+            getRowVisible: vi.fn(() => false),
             worksheet: {
-                getRowVisible: vi.fn(() => false),
                 getColVisible: vi.fn(() => true),
             },
             stylesCache: { border: new ObjectMatrix() },
@@ -225,7 +225,7 @@ describe('border extension', () => {
         const hiddenResult = extension.renderBorderByCell(renderBorderContext, 0, 0, borderConfig);
         expect(hiddenResult).toBe(true);
 
-        skeleton.worksheet.getRowVisible = vi.fn(() => true);
+        skeleton.getRowVisible = vi.fn(() => true);
         skeleton.worksheet.getColVisible = vi.fn(() => true);
         const outOfDiff = extension.renderBorderByCell(renderBorderContext, 0, 0, borderConfig);
         expect(outOfDiff).toBe(true);
@@ -277,8 +277,8 @@ describe('border extension', () => {
         } as any;
 
         const skeleton = {
+            getRowVisible: vi.fn(() => true),
             worksheet: {
-                getRowVisible: vi.fn(() => true),
                 getColVisible: vi.fn(() => true),
             },
             stylesCache: { border: borderMatrix },

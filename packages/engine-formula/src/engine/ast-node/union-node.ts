@@ -43,6 +43,16 @@ export class UnionNode extends BaseAstNode {
         return NodeType.UNION;
     }
 
+    override isAddress() {
+        return this.getToken() === matchToken.COLON && this.getChildren().some((child) => {
+            if (child.nodeType === NodeType.UNION) {
+                return child.isAddress();
+            }
+            // Literal references and sheet-name tokens have fixed endpoints.
+            return child.nodeType !== NodeType.REFERENCE && child.nodeType !== NodeType.VALUE;
+        });
+    }
+
     override execute() {
         const children = this.getChildren();
         const leftChild = children[0];
@@ -107,12 +117,19 @@ export class UnionNode extends BaseAstNode {
         variant1: FunctionVariantType,
         variant2: FunctionVariantType
     ): FunctionVariantType {
-        if (variant1.isError() || variant2.isError()) {
-            return ErrorValueObject.create(ErrorType.REF);
+        if (variant1.isError()) {
+            return variant1;
+        }
+        if (variant2.isError()) {
+            return variant2;
         }
 
         if (!(variant1 instanceof BaseReferenceObject) || !(variant2 instanceof BaseReferenceObject)) {
-            return ErrorValueObject.create(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        if (this.isAddress() && (variant1.getUnitId() !== variant2.getUnitId() || variant1.getSheetId() !== variant2.getSheetId())) {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         return getRangeReferenceObjectFromCache(variant1, variant2);

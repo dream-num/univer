@@ -43,10 +43,6 @@ export class Concat extends BaseFunction {
         };
 
         for (const textValue of textValues) {
-            if (textValue.isError()) {
-                return textValue;
-            }
-
             if (textValue.isArray()) {
                 (textValue as ArrayValueObject).iterator((valueObject) => {
                     if (valueObject == null || valueObject.isNull()) {
@@ -58,18 +54,33 @@ export class Concat extends BaseFunction {
                         return false; // break
                     }
 
-                    appendText(formatValueForFormulaText(valueObject.getValue()));
+                    appendText(this._formatText(valueObject.getValue()));
                 });
 
                 if (isError) {
                     return isError;
                 }
+            } else if (textValue.isError()) {
+                if (this._propagatesScalarErrors()) {
+                    return textValue;
+                }
             } else if (!textValue.isNull()) {
-                // Direct concatenation if it's a single value
-                appendText(formatValueForFormulaText(textValue.getValue()));
+                appendText(this._formatText(textValue.getValue()));
             }
         }
 
-        return exceedsCellLimit ? ErrorValueObject.create(ErrorType.VALUE) : StringValueObject.create(concatenatedString);
+        return exceedsCellLimit ? this._createLengthError() : StringValueObject.create(concatenatedString);
+    }
+
+    protected _createLengthError(): ErrorValueObject {
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    protected _propagatesScalarErrors(): boolean {
+        return false;
+    }
+
+    protected _formatText(value: string | number | boolean | null): string {
+        return formatValueForFormulaText(value);
     }
 }

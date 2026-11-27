@@ -24,6 +24,9 @@ const locale: typeof enUS = {
         msg: {
             'filter-header-forbidden': 'Anda tidak dapat memindahkan baris header filter.',
         },
+        permission: {
+            filterErr: 'Rentang dilindungi, dan Anda tidak memiliki izin untuk memfilter. Untuk memfilter, hubungi pembuat.',
+        },
     },
 };
 

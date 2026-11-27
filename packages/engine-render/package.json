@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/engine-render",
-    "version": "1.5.2",
+    "version": "1.6.2",
     "private": false,
     "description": "Canvas rendering engine for Univer documents, sheets, and slides.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -75,8 +75,8 @@
     },
     "dependencies": {
         "@floating-ui/dom": "^1.8.0",
-        "@floating-ui/utils": "^0.2.12",
         "@univerjs/core": "workspace:*",
+        "@univerjs/icons-svg": "1.50.1",
         "franc-min": "^6.2.0"
     },
     "devDependencies": {
@@ -85,7 +85,7 @@
         "rollup-plugin-polyfill-node": "^0.13.0",
         "rxjs": "7.8.2",
         "tsdown": "^0.23.7",
-        "tsrs": "0.23.0-ts7.1.0-beta",
-        "vitest": "^5.1.0"
+        "tsrs": "7.1.0-beta.tsrs5",
+        "vitest": "^5.1.1"
     }
 }

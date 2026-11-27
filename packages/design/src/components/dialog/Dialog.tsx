@@ -117,6 +117,9 @@ export interface IDialogProps {
      */
     onClose?: () => void;
 
+    /** Restore focus to the control that opened a programmatically controlled dialog. */
+    onCloseAutoFocus?: (event: Event) => void;
+
     showOk?: boolean;
     showCancel?: boolean;
 
@@ -282,6 +285,7 @@ export function Dialog(props: IDialogProps) {
         showCancel,
         onOpenChange,
         onClose,
+        onCloseAutoFocus,
         onOk,
         onCancel,
     } = props;
@@ -362,6 +366,7 @@ export function Dialog(props: IDialogProps) {
                 overlayClassName={overlayClassName}
                 dir={direction}
                 onClickClose={handleClickClose}
+                onCloseAutoFocus={onCloseAutoFocus}
                 onEscapeKeyDown={(e) => {
                     if (e.isComposing) {
                         e.preventDefault();

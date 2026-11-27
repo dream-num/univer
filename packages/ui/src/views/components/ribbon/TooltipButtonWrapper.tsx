@@ -41,6 +41,7 @@ import { combineLatest, map, merge, of, scan, startWith, switchMap } from 'rxjs'
 import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
 import { IContextMenuHostService } from '../../../services/contextmenu/contextmenu-host.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
+import { isSingleEmbeddedMenuPanel } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { IShortcutService } from '../../../services/shortcut/shortcut.service';
 import { useDependency, useObservable } from '../../../utils/di';
@@ -554,11 +555,7 @@ export function DropdownMenuWrapper({
 
     // options menu
     if (options?.length) {
-        const isSingleEmbeddedCustomPanel = filteredMenuItems.length === 0 &&
-            options.length === 1 &&
-            typeof options[0].label === 'object' &&
-            options[0].label?.hoverable === false &&
-            options[0].label.props?.embedded === true;
+        const isSingleEmbeddedCustomPanel = filteredMenuItems.length === 0 && isSingleEmbeddedMenuPanel(options);
         const items: IDropdownMenuProps['items'] = options.map((option) => ({
             type: 'item',
             className: clsx({

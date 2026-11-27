@@ -20,11 +20,43 @@ import { ArrayValueObject, transformToValueObject } from '../../../../engine/val
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../util';
+import { excelTextSerializationFunctions } from '../../excel-text-serialization';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Textjoin } from '../index';
 
 describe('Test textjoin function', () => {
     const testFunction = new Textjoin(FUNCTION_NAMES_TEXT.TEXTJOIN);
+
+    describe('Registered Excel TEXTJOIN length handling', () => {
+        const registration = excelTextSerializationFunctions.find(([, name]) => name === FUNCTION_NAMES_TEXT.TEXTJOIN);
+        if (!registration) {
+            throw new Error('Missing Excel TEXTJOIN registration');
+        }
+        const [ExcelTextjoin] = registration;
+        const registeredFunction = new ExcelTextjoin(FUNCTION_NAMES_TEXT.TEXTJOIN);
+        if (!(registeredFunction instanceof Textjoin)) {
+            throw new TypeError('Excel TEXTJOIN must extend Textjoin');
+        }
+        const excelFunction = registeredFunction;
+
+        it.each([32766, 32767, 32768])('retains the registered Excel length result at %s characters', (length) => {
+            const left = 'a'.repeat(16000);
+            const right = 'b'.repeat(length - 16001);
+            const values = ArrayValueObject.createByArray([[left, right]]);
+            const result = excelFunction.calculate(StringValueObject.create(','), BooleanValueObject.create(true), values);
+            expect(result.getValue()).toBe(length > 32767 ? ErrorType.CALC : `${left},${right}`);
+        });
+
+        it('retains delimiter limits, per-result filtering and input-error precedence', () => {
+            const delimiter = StringValueObject.create('-'.repeat(32766));
+            const ignoreEmpty = ArrayValueObject.createByArray([[true, false]]);
+            const text = ArrayValueObject.createByArray([['a', '', null]]);
+            expect(getObjectValue(excelFunction.calculate(delimiter, ignoreEmpty, text))).toStrictEqual([['a', ErrorType.CALC]]);
+
+            const error = ErrorValueObject.create(ErrorType.NA);
+            expect(excelFunction.calculate(delimiter, BooleanValueObject.create(false), StringValueObject.create('x'.repeat(32768)), error)).toBe(error);
+        });
+    });
 
     describe('Textjoin', () => {
         it.each([32766, 32767, 32768])('counts text and delimiters toward the %s-character output', (length) => {

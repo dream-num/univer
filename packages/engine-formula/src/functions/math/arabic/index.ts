@@ -41,7 +41,6 @@ export class Arabic extends BaseFunction {
         return this._handleSingleObject(text);
     }
 
-    // eslint-disable-next-line
     private _handleSingleObject(text: BaseValueObject): BaseValueObject {
         if (text.isError()) {
             return text;
@@ -55,42 +54,33 @@ export class Arabic extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        let textValue = text.getValue().toLocaleString().toLocaleUpperCase();
+        let textValue = String(text.getValue()).toUpperCase();
 
         if (textValue.length > 255) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const isNegtive = textValue.startsWith('-');
+        textValue = textValue.replace(/^[\t\n\v\f\r ]+|[\t\n\v\f\r ]+$/g, '');
+        const isNegative = textValue.startsWith('-');
 
-        if (isNegtive) {
+        if (isNegative) {
             textValue = textValue.slice(1);
+            if (!textValue) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
         }
 
         let result = 0;
-
-        for (let i = 0; i < textValue.length; i++) {
-            const currentCharValue = romanToArabicMap.get(textValue[i]) || 0;
-            const nextCharValue = romanToArabicMap.get(textValue[i + 1]) || 0;
-            const nextnextCharValue = romanToArabicMap.get(textValue[i + 2]) || 0;
-            const nextnextnextCharValue = romanToArabicMap.get(textValue[i + 3]) || 0;
-
-            if (
-                !currentCharValue ||
-                (nextnextCharValue >= nextCharValue && nextnextCharValue > currentCharValue) ||
-                (currentCharValue === nextCharValue && currentCharValue === nextnextCharValue && currentCharValue === nextnextnextCharValue) ||
-                currentCharValue === nextCharValue / 2
-            ) {
+        let largest = 0;
+        for (let i = textValue.length - 1; i >= 0; i--) {
+            const value = romanToArabicMap.get(textValue[i]);
+            if (value == null) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
-
-            if (currentCharValue < nextCharValue) {
-                result -= currentCharValue;
-            } else {
-                result += currentCharValue;
-            }
+            result += value < largest ? -value : value;
+            largest = Math.max(largest, value);
         }
 
-        return NumberValueObject.create(isNegtive ? -result : result);
+        return NumberValueObject.create(isNegative ? -result : result);
     }
 }

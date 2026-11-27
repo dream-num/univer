@@ -93,7 +93,7 @@ export class BaseValueObject extends ObjectClassType {
     }
 
     /** Bind the current calculation context in place before the value is used. */
-    withDateSystem(dateSystem: DateSystem): this {
+    withDateSystem(dateSystem: DateSystem, _readRegion?: () => string): this {
         this._dateSystem = dateSystem;
         return this;
     }
@@ -502,6 +502,14 @@ export class BaseValueObject extends ObjectClassType {
         /** abstract */
         return ErrorValueObject.create(ErrorType.VALUE);
     }
+}
+
+export function arithmeticOperandError(value: BaseValueObject): BaseValueObject | undefined {
+    if (!value.isString()) {
+        return;
+    }
+    const converted = value.convertToNumberObjectValue();
+    return converted.isError() ? converted : undefined;
 }
 
 export function formatValueForFormulaText(value: string | number | boolean | null): string {

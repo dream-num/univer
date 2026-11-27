@@ -46,6 +46,19 @@ export enum ErrorType {
     NULL = '#NULL!',
 }
 
+export const ERROR_TYPE_NUMBER = new Map<ErrorType, number>([
+    [ErrorType.NULL, 1],
+    [ErrorType.DIV_BY_ZERO, 2],
+    [ErrorType.VALUE, 3],
+    [ErrorType.REF, 4],
+    [ErrorType.NAME, 5],
+    [ErrorType.NUM, 6],
+    [ErrorType.NA, 7],
+    [ErrorType.CONNECT, 8],
+    [ErrorType.SPILL, 9],
+    [ErrorType.CALC, 14],
+]);
+
 export const ERROR_TYPE_SET = new Set(Object.values(ErrorType));
 
 export const ERROR_TYPE_COUNT_ARRAY = [...new Set(Object.values(ErrorType).map((error) => error.length))];

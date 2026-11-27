@@ -10,7 +10,7 @@
 
 | Package | UMD global | CSS | Locales | Facade entry | Worker entry |
 | --- | --- | :---: | :---: | :---: | :---: |
-| `@univerjs/sheets-numfmt` | `UniverSheetsNumfmt` | No | No | Yes | No |
+| `@univerjs/sheets-numfmt` | `UniverSheetsNumfmt` | No | Yes | Yes | No |
 
 ## Installation
 

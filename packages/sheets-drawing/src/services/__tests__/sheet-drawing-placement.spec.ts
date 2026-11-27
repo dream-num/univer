@@ -20,14 +20,17 @@ import {
     SetRowHiddenCommand,
     SetSpecificColsVisibleCommand,
     SetSpecificRowsVisibleCommand,
+    SetWorksheetRowHeightMutation,
     SheetSkeletonService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { ISheetDrawingPlacement } from '../sheet-drawing-placement';
 import type { ISheetDrawing } from '../sheet-drawing.service';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
+import { transformToAxisAlignPosition, transformToDrawingPosition } from '../../basics/transform-position';
 import {
     applySheetDrawingPlacement,
+    getSheetDrawingTransformWithOrientation,
     normalizeSheetDrawingPlacement,
     refreshSheetDrawingPlacement,
     transformDrawingsToChartSheet,
@@ -42,11 +45,139 @@ describe('sheet drawing placement extents', () => {
     });
     afterEach(() => bed.univer.dispose());
 
+    it('keeps an explicit two-cell extent beyond the last row and column after refresh', () => {
+        const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const { worksheet } = skeleton;
+        const cell = skeleton.getNoMergeCellWithCoordByIndex(worksheet.getRowCount() - 1, worksheet.getColumnCount() - 1);
+        const bounds = { left: cell.startX, top: cell.startY, width: cell.endX - cell.startX + 54, height: cell.endY - cell.startY + 42 };
+        const anchors = transformToDrawingPosition(bounds, skeleton);
+        const drawing = applySheetDrawingPlacement({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'beyond-sheet',
+            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            sheetTransform: anchors,
+            axisAlignSheetTransform: anchors,
+        }, { kind: SheetDrawingAnchorType.Both, bounds }, skeleton);
+        expect(drawing.transform).toMatchObject(bounds);
+        expect(refreshSheetDrawingPlacement(drawing, skeleton).transform).toMatchObject(bounds);
+    });
+
+    it.each([undefined, 0])('hydrates imported rotation over pixel angle %s and clamps oversized offsets without rewriting them', (angle) => {
+        const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const from = { row: 3, column: 1, rowOffset: 144, columnOffset: 0 };
+        const to = { row: 8, column: 3, rowOffset: 0, columnOffset: 0 };
+        const drawing = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'imported',
+            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            anchorType: SheetDrawingAnchorType.Both,
+            sheetTransform: { from, to, angle: 90, flipX: true },
+            axisAlignSheetTransform: { from, to, angle: 90, flipX: true },
+            transform: { left: 0, top: 0, width: 0, height: 0, ...(angle === undefined ? {} : { angle }) },
+        } as ISheetDrawing;
+        const before = Tools.deepClone(drawing);
+        const result = refreshSheetDrawingPlacement(drawing, skeleton);
+        const anchorCell = skeleton.getNoMergeCellWithCoordByIndex(3, 1);
+        const expectedAxisTop = anchorCell.endY;
+        expect(result.transform).toMatchObject({ angle: 90, flipX: true });
+        expect(result.transform!.top! + result.transform!.height! / 2 - result.transform!.width! / 2).toBeCloseTo(expectedAxisTop);
+        expect(result.axisAlignSheetTransform).toEqual({ from, to });
+        expect(drawing).toEqual(before);
+    });
+
+    it.each([0, 44.999, 45, 90, 134.999, 135, 180, 224.999, 225, 270, 314.999, 315, 360, -90])('resizes the Excel anchor box for rotation %s', (angle) => {
+        const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const transform = { left: 200, top: 200, width: 160, height: 40, angle };
+        const drawing = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'rotated',
+            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            anchorType: SheetDrawingAnchorType.Both,
+            transform,
+            sheetTransform: transformToDrawingPosition(transform, skeleton),
+            axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton),
+        } as ISheetDrawing;
+        const row = drawing.axisAlignSheetTransform.from.row;
+        const sheet = bed.workbook.getSheetBySheetId('sheet1')!;
+        const originalHeight = sheet.getRowHeight(row);
+        expect(bed.commandService.syncExecuteCommand(SetWorksheetRowHeightMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            rowHeight: originalHeight + 40,
+            ranges: [{ startRow: row, endRow: row, startColumn: 0, endColumn: 19 }],
+        })).toBe(true);
+        skeleton.makeDirty(true);
+        skeleton.calculate();
+        const result = refreshSheetDrawingPlacement(drawing, skeleton);
+        const normalizedAngle = ((angle % 360) + 360) % 360;
+        const swapped = (normalizedAngle >= 45 && normalizedAngle < 135) || (normalizedAngle >= 225 && normalizedAngle < 315);
+        expect(result.transform).toMatchObject(swapped
+            ? { left: 180, top: 220, width: 200, height: 40, angle }
+            : { left: 200, top: 200, width: 160, height: 80, angle });
+        expect(result.axisAlignSheetTransform).toEqual(drawing.axisAlignSheetTransform);
+        expect(refreshSheetDrawingPlacement(result, skeleton)).toEqual(result);
+    });
+
+    it.each([SheetDrawingAnchorType.Position, SheetDrawingAnchorType.Both].flatMap((anchorType) =>
+        [30, 90].map((angle) => ({ anchorType, angle }))))('projects the raw XLSX marker box for anchor $anchorType at $angle°', ({ anchorType, angle }) => {
+        const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const bounds = { left: 200, top: 200, width: 160, height: 40, angle, flipX: true };
+        const sheetTransform = transformToAxisAlignPosition(bounds, skeleton);
+        const drawing = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'xlsx-image',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            anchorType,
+            axisAlignSheetTransform: sheetTransform,
+            transform: { left: 0, top: 0, width: 0, height: 0, angle, flipX: true },
+        } as ISheetDrawing;
+        const result = refreshSheetDrawingPlacement(drawing, skeleton);
+        expect(result.anchorType).toBe(anchorType);
+        expect(result.transform).toMatchObject(bounds);
+        expect(result.axisAlignSheetTransform).toEqual(sheetTransform);
+        expect(refreshSheetDrawingPlacement(result, skeleton).transform).toMatchObject(bounds);
+        expect(drawing.transform).toEqual({ left: 0, top: 0, width: 0, height: 0, angle, flipX: true });
+    });
+
+    it('uses stored orientation for an absolute image and fills missing orientation from XLSX', () => {
+        const drawing = {
+            anchorType: SheetDrawingAnchorType.None,
+            transform: { left: 12, top: 40, width: 160, height: 50 },
+            sheetTransform: { angle: 90, flipX: true },
+        } as ISheetDrawing;
+        expect(getSheetDrawingTransformWithOrientation(drawing)).toEqual({ ...drawing.transform, angle: 90, flipX: true });
+        const authored = { ...drawing, transform: { ...drawing.transform, angle: 0, flipX: false } };
+        expect(getSheetDrawingTransformWithOrientation(authored)).toEqual(authored.transform);
+    });
+
+    it.each([undefined, null, { row: -2, column: -2, rowOffset: 0, columnOffset: 0 }])('rebuilds a one-cell derived endpoint %j from its anchor and fixed extent', (to) => {
+        const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const from = { row: 3, column: 2, rowOffset: 144, columnOffset: 0 };
+        const drawing = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'legacy-one-cell',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            anchorType: SheetDrawingAnchorType.Position,
+            sheetTransform: { from, to },
+            transform: { left: 0, top: 0, width: 160, height: 40 },
+        } as ISheetDrawing;
+        const result = refreshSheetDrawingPlacement(drawing, skeleton);
+        expect(result.transform).toMatchObject({ left: 222, top: 116, width: 160, height: 40 });
+        expect(result.axisAlignSheetTransform.from).toEqual(from);
+        expect(result.axisAlignSheetTransform.to).toEqual({ row: 5, column: 3, rowOffset: 16, columnOffset: 72 });
+        expect(drawing.sheetTransform!.to).toEqual(to);
+    });
+
     it.each([
         ['missing markers', { sheetTransform: undefined }],
         ['null markers', { sheetTransform: null }],
         ['missing from', { sheetTransform: { to: { row: 2, column: 2, rowOffset: 0, columnOffset: 0 } } }],
-        ['null to', { sheetTransform: { from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 }, to: null } }],
+        ['null two-cell endpoint', { anchorType: SheetDrawingAnchorType.Both, sheetTransform: { from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 }, to: null } }],
         ['invalid cell', { sheetTransform: {
             from: { row: NaN, column: 1, rowOffset: 0, columnOffset: 0 },
             to: { row: 2, column: 2, rowOffset: 0, columnOffset: 0 },
@@ -105,7 +236,8 @@ describe('sheet drawing placement extents', () => {
     ])('preserves a line bounding box of %s by %s in every anchor mode', (width, height) => {
         const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
         const from = { row: 2, column: 2, rowOffset: 0, columnOffset: 0 };
-        const to = { ...from, rowOffset: height, columnOffset: width };
+        const cell = skeleton.getNoMergeCellWithCoordByIndex(from.row, from.column);
+        const to = skeleton.getCellIndexAndOffsetByPosition(cell.startX + width, cell.startY + height, 1, 1, { x: 0, y: 0 });
         const drawing: ISheetDrawing = {
             unitId: 'test',
             subUnitId: 'sheet1',
@@ -160,7 +292,7 @@ describe('sheet drawing placement extents', () => {
         skeleton.makeDirty(true);
         skeleton.calculate();
         const hidden = refreshSheetDrawingPlacement(drawing, skeleton);
-        expect(hidden.sheetTransform).toEqual(drawing.sheetTransform);
+        expect(hidden.axisAlignSheetTransform).toEqual(drawing.axisAlignSheetTransform);
         expect(hidden.transform?.[rows ? 'height' : 'width']).toBe(0);
         expect(refreshSheetDrawingPlacement(hidden, skeleton)).toEqual(hidden);
         expect(await bed.commandService.executeCommand(
@@ -250,7 +382,9 @@ describe('Drawing transfer to Chart Sheet model coordinates', () => {
         const copy = transformDrawingsToChartSheet([drawing], { left: 0, top: 0, width: 40, height: 40 }, true)![0];
         expect(copy.transform).toMatchObject({ width: 40, height: 20, angle: 90, flipX: true });
         expect(copy.transform!.left!).toBeCloseTo(10);
-        expect(copy.transform!.top!).toBeCloseTo(30);
+        expect(copy.transform!.top!).toBeCloseTo(10);
+        // A content flip must keep the rotated frame inside the chart page.
+        expect(copy.transform!.top! + copy.transform!.height! / 2 - copy.transform!.width! / 2).toBeCloseTo(0);
     });
 
     it('retains zero-width Shape lines and rejects malformed image geometry before creating a copy', () => {

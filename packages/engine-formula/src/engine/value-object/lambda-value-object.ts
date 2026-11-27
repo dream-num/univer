@@ -15,64 +15,53 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { BaseAstNode } from '../ast-node/base-ast-node';
-import type { LambdaParameterNode } from '../ast-node/lambda-parameter-node';
+import type { BaseAstNode, LambdaPrivacyVarType } from '../ast-node/base-ast-node';
+import type { LambdaNode } from '../ast-node/lambda-node';
 import type { Interpreter } from '../interpreter/interpreter';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { PrimitiveValueType } from './primitive-object';
 import { ErrorType } from '../../basics/error-type';
-import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../../basics/token-type';
+import { LambdaParameterNode } from '../ast-node/lambda-parameter-node';
+import { NodeType } from '../ast-node/node-type';
 import { AsyncObject } from '../reference-object/base-reference-object';
 import { generateExecuteAstNodeData } from '../utils/ast-node-tool';
 import { ValueObjectFactory } from './array-value-object';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
+import { NullValueObject } from './primitive-object';
 
-function getRootLexerHasValueNode(node: Nullable<BaseAstNode>): Nullable<BaseAstNode> {
-    if (!node) {
-        return;
+const MAX_LAMBDA_CALL_DEPTH = 64;
+
+function visitLambdaTree(node: BaseAstNode, visit: (child: BaseAstNode) => void): void {
+    visit(node);
+    for (const child of node.getChildren()) {
+        visitLambdaTree(child, visit);
     }
-    if (node.getToken() !== DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER) {
-        return node;
-    }
-
-    const parameterNode = node as LambdaParameterNode;
-    const currentLambdaPrivacyVar = parameterNode.getCurrentLambdaPrivacyVar();
-    const lambdaParameter = parameterNode.getLambdaParameter();
-
-    if (!currentLambdaPrivacyVar) {
-        return;
-    }
-
-    const chainNode = currentLambdaPrivacyVar.get(lambdaParameter);
-
-    if (chainNode == null && node.getValue()) {
-        return node;
-    }
-
-    return getRootLexerHasValueNode(chainNode);
 }
 
 export class LambdaValueObjectObject extends BaseValueObject {
-    static create(lambdaNode: BaseAstNode, interpreter: Interpreter, lambdaPrivacyVarKeys: string[]) {
-        return new LambdaValueObjectObject(lambdaNode, interpreter, lambdaPrivacyVarKeys);
+    private static readonly _callDepth = new WeakMap<LambdaNode, number>();
+
+    static create(lambdaNode: LambdaNode, interpreter: Interpreter, optionalParameters: ReadonlySet<string>) {
+        return new LambdaValueObjectObject(lambdaNode, interpreter, optionalParameters);
     }
 
-    private _lambdaPrivacyValueMap = new Map<string, FunctionVariantType>();
+    private readonly _captured = new Map<LambdaPrivacyVarType, Map<string, FunctionVariantType>>();
+    private _lambdaPrivacyVarKeys: string[] = [];
 
     constructor(
-        private _lambdaNode: Nullable<BaseAstNode>,
-
+        private _lambdaNode: Nullable<LambdaNode>,
         private _interpreter: Nullable<Interpreter>,
-
-        private _lambdaPrivacyVarKeys: string[]
+        private readonly _optionalParameters: ReadonlySet<string>
     ) {
         super();
-        this._lambdaPrivacyValueMap.clear();
+        if (_lambdaNode) {
+            this._lambdaPrivacyVarKeys = Array.from(_lambdaNode.getScope().keys());
+            this._captureBindings(_lambdaNode);
+        }
     }
 
     override dispose(): void {
-        this._lambdaPrivacyValueMap.clear();
-        this._lambdaPrivacyValueMap = new Map();
+        this._captured.clear();
         this._lambdaNode = null;
         this._interpreter = null;
         this._lambdaPrivacyVarKeys = [];
@@ -83,38 +72,71 @@ export class LambdaValueObjectObject extends BaseValueObject {
     }
 
     execute(...variants: FunctionVariantType[]) {
-        const paramCount = this._lambdaPrivacyVarKeys.length;
-        if (variants.length !== paramCount || !this._interpreter || !this._lambdaNode) {
+        const value = this.executeWithReference(...variants);
+        return value.isReferenceObject() ? (value as BaseReferenceObject).toArrayValueObject() : value as BaseValueObject | AsyncObject;
+    }
+
+    executeWithReference(...variants: FunctionVariantType[]): FunctionVariantType | AsyncObject {
+        const node = this._lambdaNode;
+        const interpreter = this._interpreter;
+        const keys = this._lambdaPrivacyVarKeys;
+        if (!node || !interpreter || variants.length > keys.length ||
+            keys.slice(variants.length).some((key) => !this._optionalParameters.has(key))) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        this._setLambdaPrivacyValueMap(variants);
-
-        this._setLambdaNodeValue(this._lambdaNode);
-
-        this._lambdaNode.setNotEmpty(false);
-
-        let value: AsyncObject | BaseValueObject;
-        if (this._interpreter.checkAsyncNode(this._lambdaNode)) {
-            value = new AsyncObject(this._interpreter.executeAsync(generateExecuteAstNodeData(this._lambdaNode)) as Promise<BaseValueObject>);
-        } else {
-            const o = this._interpreter.execute(generateExecuteAstNodeData(this._lambdaNode));
-            if (o.isReferenceObject()) {
-                value = (o as BaseReferenceObject).toArrayValueObject();
-            } else {
-                value = o as BaseValueObject;
-            }
+        const depths = LambdaValueObjectObject._callDepth;
+        const depth = depths.get(node) ?? 0;
+        if (depth >= MAX_LAMBDA_CALL_DEPTH) {
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        this._lambdaNode.setNotEmpty(true);
+        const previousValues = new Map<BaseAstNode, Nullable<FunctionVariantType>>();
+        if (depth > 0) {
+            // The recursive call shares this AST, including already evaluated sibling nodes.
+            visitLambdaTree(node, (child) => previousValues.set(child, child.getValue()));
+        } else {
+            // A LET binding can still point to this node after the invocation.
+            previousValues.set(node, node.getValue());
+        }
+        const values = new Map(keys.map((key, index) => [key, variants[index] ?? NullValueObject.create(true)]));
+        const restoreBindings = [LambdaParameterNode.bindValues(node.getScope(), values)];
+        for (const [scope, bindings] of this._captured) {
+            restoreBindings.push(LambdaParameterNode.bindValues(scope, bindings));
+        }
+        node.setNotEmpty(false);
+        depths.set(node, depth + 1);
+        const restoreInvocation = () => {
+            for (const [child, value] of previousValues) {
+                child.setValue(value);
+            }
+            for (const restore of restoreBindings) {
+                restore();
+            }
+            node.setNotEmpty(depth === 0);
+            if (depth === 0) {
+                depths.delete(node);
+            } else {
+                depths.set(node, depth);
+            }
+        };
 
-        return value;
+        const data = generateExecuteAstNodeData(node);
+        let asynchronous = false;
+        try {
+            if (interpreter.checkAsyncNode(node)) {
+                const result = interpreter.executeAsync(data) as Promise<BaseValueObject>;
+                asynchronous = true;
+                return new AsyncObject(result.finally(restoreInvocation));
+            }
+            return interpreter.execute(data);
+        } finally {
+            if (!asynchronous) {
+                restoreInvocation();
+            }
+        }
     }
 
-    /**
-     * Execute custom lambda function, handle basic types
-     * @param variants
-     */
     executeCustom(...variants: PrimitiveValueType[]) {
         const dateSystem = this._interpreter?.getDateSystem();
         // Primitive arguments must be converted before nested execution, using the same workbook context.
@@ -122,42 +144,34 @@ export class LambdaValueObjectObject extends BaseValueObject {
         return this.execute(...baseValueObjects);
     }
 
-    private _setLambdaNodeValue(node: Nullable<BaseAstNode>) {
-        if (!node) {
-            return;
-        }
-        const children = node.getChildren();
-        const childrenCount = children.length;
-        for (let i = 0; i < childrenCount; i++) {
-            const item = children[i];
-            const token = item.getToken();
-
-            if (token === DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER) {
-                const lambdaParameter = (item as LambdaParameterNode).getLambdaParameter();
-                const value = this._lambdaPrivacyValueMap.get(lambdaParameter);
-                if (value) {
-                    (item as LambdaParameterNode).setValue(value);
-                } else {
-                    const currentLambdaPrivacyVar = (item as LambdaParameterNode).getCurrentLambdaPrivacyVar();
-                    const node = getRootLexerHasValueNode(currentLambdaPrivacyVar.get(lambdaParameter));
-                    if (node != null) {
-                        (item as LambdaParameterNode).setValue(node.getValue());
-                    }
-                }
+    private _captureBindings(node: LambdaNode): void {
+        const localScopes = new Set<LambdaPrivacyVarType>();
+        const references: LambdaParameterNode[] = [];
+        visitLambdaTree(node, (child) => {
+            if (child.nodeType === NodeType.LAMBDA) {
+                localScopes.add((child as LambdaNode).getScope());
+            } else if (child.nodeType === NodeType.LAMBDA_PARAMETER) {
+                references.push(child as LambdaParameterNode);
+            }
+        });
+        for (const reference of references) {
+            const scope = reference.getCurrentLambdaPrivacyVar();
+            if (localScopes.has(scope)) {
                 continue;
             }
-
-            this._setLambdaNodeValue(item);
+            const name = reference.getLambdaParameter();
+            const value = LambdaParameterNode.getBinding(scope, name);
+            if (value == null) {
+                continue;
+            }
+            const bindings = this._captured.get(scope) ?? new Map<string, FunctionVariantType>();
+            bindings.set(name, value);
+            this._captured.set(scope, bindings);
         }
     }
 
-    private _setLambdaPrivacyValueMap(variants: FunctionVariantType[]) {
-        for (let i = 0; i < variants.length; i++) {
-            const variant = variants[i];
-            const key = this._lambdaPrivacyVarKeys[i];
-
-            this._lambdaPrivacyValueMap.set(key, variant);
-        }
+    acceptsArity(count: number): boolean {
+        return this._lambdaPrivacyVarKeys.length === count;
     }
 
     getLambdaPrivacyVarKeys() {

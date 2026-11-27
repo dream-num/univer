@@ -94,6 +94,8 @@ describe('marker extension', () => {
         };
         const skeleton = {
             worksheet,
+            getRowVisible: worksheet.getRowVisible,
+            getCell: worksheet.getCell,
             stylesCache: createStylesCache(),
             rowColumnSegment: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
             getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
@@ -146,6 +148,8 @@ describe('marker extension', () => {
         };
         const skeleton = {
             worksheet,
+            getRowVisible: worksheet.getRowVisible,
+            getCell: worksheet.getCell,
             stylesCache: createStylesCache(),
             rowColumnSegment: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 1 },
             getCellWithCoordByIndex: vi.fn((row: number, col: number) => {
@@ -181,6 +185,8 @@ describe('marker extension', () => {
         };
         const skeleton = {
             worksheet,
+            getRowVisible: worksheet.getRowVisible,
+            getCell: worksheet.getCell,
             stylesCache: createStylesCache(),
             rowColumnSegment: { startRow: 0, endRow: 9, startColumn: 0, endColumn: 0 },
             getCellWithCoordByIndex: vi.fn((row: number) => createCellInfo({
@@ -215,6 +221,8 @@ describe('marker extension', () => {
         };
         const skeleton = {
             worksheet,
+            getRowVisible: worksheet.getRowVisible,
+            getCell: worksheet.getCell,
             stylesCache: createStylesCache(),
             rowColumnSegment: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
             getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
@@ -238,6 +246,8 @@ describe('marker extension', () => {
         };
         const skeleton = {
             worksheet,
+            getRowVisible: worksheet.getRowVisible,
+            getCell: worksheet.getCell,
             stylesCache: createStylesCache(cachedCell),
             rowColumnSegment: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
             getCellWithCoordByIndex: vi.fn(() => createCellInfo()),

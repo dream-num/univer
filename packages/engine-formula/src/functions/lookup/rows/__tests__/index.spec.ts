@@ -27,6 +27,7 @@ import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-to
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
+import { ISuperTableService } from '../../../../services/super-table.service';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Rows } from '../index';
@@ -103,6 +104,24 @@ describe('Test rows', () => {
 
             expect((result as BaseValueObject).getValue()).toBe(2);
         });
+        it('includes the totals row only when it is displayed in a data-and-totals reference', () => {
+            const runtime = get(IFormulaRuntimeService);
+            const tables = get(ISuperTableService);
+            for (const showFooter of [true, false]) {
+                tables.registerTable(runtime.currentUnitId, 'Sales', {
+                    sheetId: runtime.currentSubUnitId,
+                    range: { startRow: 0, endRow: showFooter ? 3 : 2, startColumn: 0, endColumn: 0 },
+                    titleMap: new Map([['Amount', 0]]),
+                    showHeader: true,
+                    showFooter,
+                });
+                const formula = '=ROWS(Sales[[#Data],[#Totals],[Amount]])';
+                const astNode = astTreeBuilder.parse(lexer.treeBuilder(formula) as LexerNode);
+                const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+                expect((result as BaseValueObject).getValue()).toBe(showFooter ? 3 : 2);
+            }
+        });
+
         it('No reference', () => {
             const lexerNode = lexer.treeBuilder('=ROWS()');
 

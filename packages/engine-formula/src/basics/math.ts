@@ -673,3 +673,18 @@ export const romanFormArray: number[][] = [
     [1, 4, 5, 9, 10, 40, 45, 49, 50, 90, 95, 99, 100, 400, 450, 490, 495, 500, 900, 950, 990, 995, 1000, 4000],
     [1, 4, 5, 9, 10, 40, 45, 49, 50, 90, 95, 99, 100, 400, 450, 490, 495, 499, 500, 900, 950, 990, 995, 999, 1000, 4000],
 ];
+
+const exponentBits = new DataView(new ArrayBuffer(8));
+
+export function cancelsToZero(left: number, right: number, result: number, subtract: boolean): boolean {
+    const difference = Math.abs(result);
+    if (left === 0 || right === 0 ||
+        ((left < 0) === (right < 0)) !== subtract ||
+        difference > Math.abs(left) * (8 * Number.EPSILON)) {
+        return false;
+    }
+    exponentBits.setFloat64(0, left);
+    const exponent = (exponentBits.getUint32(0) >>> 20) & 0x7FF;
+    // Eight binary spacings at the exponent of the first operand.
+    return difference < 2 ** (exponent - 1072);
+}

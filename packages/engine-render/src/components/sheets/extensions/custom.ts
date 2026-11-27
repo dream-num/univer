@@ -53,16 +53,16 @@ export class Custom extends SheetExtension {
 
         renderRanges.forEach((range) => {
             Range.foreach(range, (row, col) => {
-                if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
+                if (!skeleton.getRowVisible(row) || !worksheet.getColVisible(col)) {
                     return;
                 }
 
                 let primaryWithCoord = skeleton.getCellWithCoordByIndex(row, col, false);
                 const { mergeInfo } = primaryWithCoord;
 
-                let cellData = worksheet.getCell(row, col);
+                let cellData = skeleton.getCell(row, col);
                 if (primaryWithCoord.isMerged) {
-                    cellData = worksheet.getCell(mergeInfo.startRow, mergeInfo.startColumn);
+                    cellData = skeleton.getCell(mergeInfo.startRow, mergeInfo.startColumn);
                 }
 
                 if (!cellData?.customRender) {

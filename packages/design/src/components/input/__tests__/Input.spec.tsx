@@ -102,4 +102,29 @@ describe('Input', () => {
         );
         expect(getByRole('button', { name: '清空输入' })).toBeDefined();
     });
+
+    it('preserves default trailing padding when no slot or clear button is active', () => {
+        const { container } = render(<Input value="hello" />);
+        const input = container.querySelector('input') as HTMLInputElement;
+
+        expect(input.style.paddingRight).toBe('');
+        expect(input.style.paddingLeft).toBe('');
+    });
+
+    it('keeps input focused and avoids premature blur when clicking clear', () => {
+        const onChange = vi.fn();
+        const onBlur = vi.fn();
+        const { container } = render(<Input allowClear value="abc" onChange={onChange} onBlur={onBlur} />);
+        const input = container.querySelector('input') as HTMLInputElement;
+        const clearButton = container.querySelector('button[type="button"]') as HTMLButtonElement;
+
+        input.focus();
+        const mouseDownEvent = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+        expect(clearButton.dispatchEvent(mouseDownEvent)).toBe(false);
+
+        fireEvent.click(clearButton);
+        expect(onChange).toHaveBeenCalledWith('');
+        expect(onBlur).not.toHaveBeenCalled();
+        expect(document.activeElement).toBe(input);
+    });
 });

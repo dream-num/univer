@@ -15,7 +15,7 @@
  */
 
 import type { LocaleService, RegionService } from '@univerjs/core';
-import { aliasedBuiltins, getFunctionName } from '../../services/formula/utils';
+import { getFunctionAliases } from '../../services/formula/utils';
 import { normalizeLambdaVariable } from '../utils/function-definition';
 
 /** The input language and region of a single formula edit. */
@@ -31,6 +31,7 @@ interface ISeparators {
     decimal: string;
     argument: string;
     column: string;
+    row: string;
     number: RegExp;
 }
 
@@ -38,7 +39,7 @@ function numberPattern(decimal: string): RegExp {
     return new RegExp(`(?:\\d+(?:[${decimal}]\\d*)?|[${decimal}]\\d+)(?:[Ee][+-]?\\d+)?`, 'y');
 }
 
-const standard: ISeparators = { decimal: '.', argument: ',', column: ',', number: numberPattern('.') };
+const standard: ISeparators = { decimal: '.', argument: ',', column: ',', row: ';', number: numberPattern('.') };
 const separator = /^[.,;\\٫؛،]$/;
 
 /** Return the exclusive end of a quoted literal, sheet name or bracketed reference, or start for other tokens. */
@@ -86,7 +87,8 @@ interface IAliases {
 }
 
 function translateCall(name: string, aliases: IAliases, scopes: (IBindingScope | null)[], input: boolean) {
-    const key = name.toUpperCase();
+    if (!input && /^_xludf\./i.test(name)) return name.slice(7);
+    const key = input ? name.toUpperCase() : name.toUpperCase().replace(/^_XLFN\.(?:_XLWS\.)?/, '');
     const alias = (input ? aliases.standard : aliases.local).get(key);
     if (alias) return alias;
     const unqualified = input ? key : key.replace(/^_XLPM\./, '');
@@ -95,7 +97,8 @@ function translateCall(name: string, aliases: IAliases, scopes: (IBindingScope |
         if (input) return `_xlpm.${name}`;
         if (key !== unqualified) return name.slice(6);
     }
-    return name;
+    // Excel stores an untranslated function typed under its foreign name as an unresolved UDF.
+    return input && aliases.local.has(key) ? `_xludf.${name}` : name;
 }
 
 function followsValue(text: string, index: number): boolean {
@@ -104,7 +107,7 @@ function followsValue(text: string, index: number): boolean {
     return previous >= 0 && /[\p{L}\p{N}_$)\]}"%]/u.test(text[previous]);
 }
 
-// eslint-disable-next-line complexity -- One scanner keeps separators, protected spans and draft offsets in sync.
+// eslint-disable-next-line complexity, max-lines-per-function -- One scanner preserves token boundaries and offsets across locale conversions.
 function translate(text: string, from: ISeparators, to: ISeparators, aliases: IAliases | undefined, strict: boolean): string | null {
     const scopes: (IBindingScope | null)[] = [];
     const trackBindings = aliases?.local.size && /(?:LET|LAMBDA)\(/i.test(text);
@@ -115,6 +118,8 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
     let i = 0;
     // A digit can begin an unquoted sheet name. Consume its period as part of the name.
     const identifier = /[\p{L}\p{N}_$][\p{L}\p{M}\p{N}.$_]*!|[\p{L}_$][\p{L}\p{M}\p{N}.$_]*/uy;
+    const arrayName = /[\p{L}_][\p{L}\p{M}\p{N}_]*/uy;
+    const dotSeparatesArray = from.column === '.' || from.row === '.';
     const number = from.number;
     while (i < text.length) {
         const char = text[i];
@@ -125,13 +130,24 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
             continue;
         }
 
-        identifier.lastIndex = i;
-        const name = identifier.exec(text);
+        const namePattern = inArray && dotSeparatesArray ? arrayName : identifier;
+        namePattern.lastIndex = i;
+        const name = namePattern.exec(text);
         if (name) {
-            const end = identifier.lastIndex;
+            const end = namePattern.lastIndex;
             const isCall = text[end] === '(' && text[i - 1] !== '!' && text[i - 1] !== '\\';
             if (isCall) nextCall = name[0].toUpperCase().replace(/^_XLFN\./, '');
-            result += aliases && isCall ? translateCall(name[0], aliases, scopes, strict) : name[0];
+            if (aliases && isCall) {
+                result += translateCall(name[0], aliases, scopes, strict);
+            } else if (aliases && inArray) {
+                const key = name[0].toUpperCase();
+                const standardName = strict ? aliases.standard.get(key) : key;
+                result += standardName === 'TRUE' || standardName === 'FALSE'
+                    ? (strict ? standardName : aliases.local.get(key) ?? name[0])
+                    : name[0];
+            } else {
+                result += name[0];
+            }
             i = end;
             continue;
         }
@@ -173,8 +189,10 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
 
         if (isArgument || (inArray && char === from.column)) {
             result += inArray ? to.column : to.argument;
+        } else if (inArray && char === from.row) {
+            result += to.row;
         } else {
-            if (strict && separator.test(char) && !(inArray && char === ';')) {
+            if (strict && (separator.test(char) || (inArray && char === ':'))) {
                 // A backslash can begin an Excel defined name outside an array.
                 if (!(char === '\\' && !inArray && /[\p{L}_]/u.test(text[i + 1] ?? ''))) return null;
             }
@@ -188,17 +206,12 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
 }
 
 export function getFormulaSyntax(regionService: RegionService, localeService: LocaleService): IFormulaSyntax {
-    const { decimal, argument, arrayColumn } = regionService.getFormulaSeparators();
-    const local = { decimal, argument, column: arrayColumn, number: numberPattern(decimal) };
+    const { decimal, argument, arrayColumn, arrayRow } = regionService.getFormulaSeparators();
+    const local = { decimal, argument, column: arrayColumn, row: arrayRow, number: numberPattern(decimal) };
     const aliases: IAliases = { local: new Map(), standard: new Map() };
-    if (localeService.getLocales()) {
-        for (const item of aliasedBuiltins.values()) {
-            const alias = getFunctionName(item, localeService);
-            if (alias !== item.functionName) {
-                aliases.local.set(item.functionName, alias);
-                aliases.standard.set(alias.toUpperCase(), item.functionName);
-            }
-        }
+    for (const [name, local] of Object.entries(getFunctionAliases(localeService))) {
+        aliases.local.set(name, local);
+        aliases.standard.set(local.toUpperCase(), name);
     }
     return {
         argumentSeparator: local.argument,

@@ -20,6 +20,7 @@ import type { IFormulaSeparators } from './formula-separators';
 import type { IRegionalNumberFormat } from './number-format';
 import { Inject } from '../../common/di';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
+import { getRegionTag } from '../../types/enum/locale-type';
 import { LocaleService } from '../locale/locale.service';
 import { getFormulaSeparators } from './formula-separators';
 import { getRegionalNumberFormat } from './number-format';
@@ -52,9 +53,22 @@ export class RegionService extends Disposable {
         this._currentRegion$.next(region);
     }
 
-    /** Excel formula punctuation for the current region, independent of the interface language packs. */
+    /** Excel reads the decimal and list separators from the region and array syntax from the interface language. */
     getFormulaSeparators(): IFormulaSeparators {
-        return getFormulaSeparators(this.getCurrentRegion());
+        const separators = getFormulaSeparators(this.getCurrentRegion());
+        const { decimal } = separators;
+        const [language] = getRegionTag(this._localeService.getCurrentLocale()).toLowerCase().split('-');
+        switch (language) {
+            case 'de':
+            case 'fr':
+                return { ...separators, arrayColumn: decimal === '.' ? '\\' : '.' };
+            case 'it':
+                return { ...separators, arrayRow: decimal === '.' ? '\\' : '.' };
+            case 'ru':
+                return { ...separators, arrayColumn: ';', arrayRow: ':' };
+            default:
+                return separators;
+        }
     }
 
     getNumberFormat(): IRegionalNumberFormat {

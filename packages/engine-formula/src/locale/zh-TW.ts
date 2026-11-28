@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type enUS from './en-US';
-
+import type { FormulaLanguagePack } from './types';
 import array from './function-list/array/zh-TW';
 import compatibility from './function-list/compatibility/zh-TW';
 import cube from './function-list/cube/zh-TW';
@@ -32,8 +31,12 @@ import text from './function-list/text/zh-TW';
 import univer from './function-list/univer/zh-TW';
 import web from './function-list/web/zh-TW';
 
-const locale: typeof enUS = {
+const locale: FormulaLanguagePack = {
     'engine-formula': {
+        // Built-in names returned by Excel FormulaLocal for this interface language.
+        functionAliases: {
+            DBCS: 'BIG5',
+        },
         functionList: {
             ...array,
             ...compatibility,

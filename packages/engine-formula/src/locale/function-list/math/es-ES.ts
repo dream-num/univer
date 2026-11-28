@@ -988,7 +988,6 @@ const locale = {
         },
     },
     SUM: {
-        aliasFunctionName: 'SUMA',
         description: 'Puede sumar valores individuales, referencias de celda o rangos, o una mezcla de los tres.',
         abstract: 'Suma sus argumentos',
         links: [

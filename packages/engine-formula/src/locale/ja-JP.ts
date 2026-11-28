@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type enUS from './en-US';
-
+import type { FormulaLanguagePack } from './types';
 import array from './function-list/array/ja-JP';
 import compatibility from './function-list/compatibility/ja-JP';
 import cube from './function-list/cube/ja-JP';
@@ -32,8 +31,13 @@ import text from './function-list/text/ja-JP';
 import univer from './function-list/univer/ja-JP';
 import web from './function-list/web/ja-JP';
 
-const locale: typeof enUS = {
+const locale: FormulaLanguagePack = {
     'engine-formula': {
+        // Built-in names returned by Excel FormulaLocal for this interface language.
+        functionAliases: {
+            DBCS: 'JIS',
+            DOLLAR: 'YEN',
+        },
         functionList: {
             ...array,
             ...compatibility,

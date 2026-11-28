@@ -1394,7 +1394,6 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     },
     {
         functionName: FUNCTION_NAMES_MATH.SUM,
-        aliasFunctionName: 'engine-formula.functionList.SUM.aliasFunctionName',
         functionType: FunctionType.Math,
         description: 'engine-formula.functionList.SUM.description',
         abstract: 'engine-formula.functionList.SUM.abstract',
@@ -1417,7 +1416,6 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     },
     {
         functionName: FUNCTION_NAMES_MATH.SUMIF,
-        aliasFunctionName: 'engine-formula.functionList.SUMIF.aliasFunctionName',
         functionType: FunctionType.Math,
         description: 'engine-formula.functionList.SUMIF.description',
         abstract: 'engine-formula.functionList.SUMIF.abstract',

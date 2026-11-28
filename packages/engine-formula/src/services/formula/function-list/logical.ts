@@ -269,7 +269,6 @@ export const FUNCTION_LIST_LOGICAL: IFunctionInfo[] = [
     },
     {
         functionName: FUNCTION_NAMES_LOGICAL.MAKEARRAY,
-        aliasFunctionName: 'engine-formula.functionList.MAKEARRAY.aliasFunctionName',
         functionType: FunctionType.Logical,
         description: 'engine-formula.functionList.MAKEARRAY.description',
         abstract: 'engine-formula.functionList.MAKEARRAY.abstract',

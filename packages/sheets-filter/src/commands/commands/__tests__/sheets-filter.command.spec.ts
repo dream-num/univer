@@ -23,11 +23,15 @@ import {
     LocaleType,
     Plugin,
     RANGE_TYPE,
+    RedoCommand,
+    UndoCommand,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
     MarkDirtyFilterChangeMutation,
+    SetWorksheetNameMutation,
+    SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -92,6 +96,7 @@ class SheetsFilterCommandTestPlugin extends Plugin {
     override onStarting(): void {
         this._injector.add([SheetsFilterService]);
         this._injector.add([SheetsSelectionsService]);
+        this._injector.add([SheetInterceptorService]);
     }
 }
 
@@ -123,6 +128,7 @@ describe('sheet filter commands', () => {
             ClearSheetsFilterCriteriaCommand,
             ReCalcSheetsFilterCommand,
             SmartToggleSheetsFilterCommand,
+            SetWorksheetNameMutation,
         ];
 
         for (const command of commands) {
@@ -261,20 +267,42 @@ describe('sheet filter commands', () => {
         expect(sheetsFilterService.isInitialFilterCatchUp(unitId)).toBe(false);
     });
 
-    it('removes an existing filter model from the worksheet', async () => {
+    it('removes a filter with companion mutations and undoes and redoes them together', async () => {
         await commandService.executeCommand(SetSheetFilterRangeCommand.id, {
             unitId,
             subUnitId,
             range: { startRow: 0, startColumn: 0, endRow: 3, endColumn: 0 },
         });
 
-        const result = await commandService.executeCommand(RemoveSheetFilterCommand.id, {
-            unitId,
-            subUnitId,
+        const interceptor = univer.__getInjector().get(SheetInterceptorService).interceptCommand({
+            getMutations: ({ id }) => ({
+                preRedos: id === RemoveSheetFilterCommand.id
+                    ? [{ id: SetWorksheetNameMutation.id, params: { unitId, subUnitId, name: 'Detached' } }]
+                    : [],
+                redos: [],
+                undos: id === RemoveSheetFilterCommand.id
+                    ? [{ id: SetWorksheetNameMutation.id, params: { unitId, subUnitId, name: 'Sheet 1' } }]
+                    : [],
+            }),
         });
-
-        expect(result).toBe(true);
-        expect(sheetsFilterService.getFilterModel(unitId, subUnitId)).toBeNull();
+        try {
+            expect(await commandService.executeCommand(RemoveSheetFilterCommand.id, { unitId, subUnitId })).toBe(true);
+            expect(sheetsFilterService.getFilterModel(unitId, subUnitId)).toBeNull();
+            expect(workbook.getSheetBySheetId(subUnitId)?.getName()).toBe('Detached');
+            expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+            expect(sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange()).toEqual({
+                startRow: 0,
+                startColumn: 0,
+                endRow: 3,
+                endColumn: 0,
+            });
+            expect(workbook.getSheetBySheetId(subUnitId)?.getName()).toBe('Sheet 1');
+            expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+            expect(sheetsFilterService.getFilterModel(unitId, subUnitId)).toBeNull();
+            expect(workbook.getSheetBySheetId(subUnitId)?.getName()).toBe('Detached');
+        } finally {
+            interceptor.dispose();
+        }
     });
 
     it('toggles the current selection into and out of a sheet filter', async () => {

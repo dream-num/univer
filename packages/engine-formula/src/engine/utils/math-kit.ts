@@ -47,10 +47,19 @@ export function divide(a: number, b: number): number {
  * @returns The rounded number.
  */
 export function round(base: number, precision: number): number {
-    if (Number.isInteger(base) && precision >= 0) return base;
-    const factor = 10 ** Math.trunc(precision);
-    const epsilon = baseEpsilon(base, factor);
-    return Math.round(multiply(base, factor) + epsilon) / factor;
+    if (!Number.isFinite(base) || !Number.isFinite(precision)) return NaN;
+    if (base === 0) return 0;
+    // Excel first rounds the binary64 input to 15 decimal significant digits, then rounds the requested place.
+    const [mantissa, exponent] = Math.abs(base).toExponential(14).split('e');
+    const places = Math.max(-0x7FFFFFFF, Math.min(0x7FFFFFFF, Math.trunc(precision)));
+    // Excel calculates the retained digit count with signed 32-bit addition after saturating the input.
+    const retained = (Number(exponent) + places + 1) | 0;
+    if (retained >= 15) return Math.sign(base) * Number(`${mantissa}e${exponent}`);
+    if (retained < 0) return Math.sign(base) * 0;
+
+    const digits = mantissa.replace('.', '');
+    const rounded = Number(digits.slice(0, retained)) + Number(digits[retained] >= '5');
+    return Math.sign(base) * Number(`${rounded}e${-places}`);
 }
 
 /**

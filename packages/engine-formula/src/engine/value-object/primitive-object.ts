@@ -1365,8 +1365,7 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            // for excel negative special handle
-            const result = currentValue < 0 ? -round(Math.abs(currentValue), value) : round(currentValue, value);
+            const result = round(currentValue, value);
 
             if (!Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);

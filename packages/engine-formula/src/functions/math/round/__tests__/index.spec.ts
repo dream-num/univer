@@ -33,6 +33,22 @@ describe('Test round function', () => {
             expect(result.getValue()).toBe(2.2);
         });
 
+        it.each([
+            [0.7711054127039705, 15, 0.77110541270397],
+            [1 / 3, 17, 0.333333333333333],
+            [0.12345678901234548, 15, 0.123456789012345],
+            [0.12345678901234552, 15, 0.123456789012346],
+            [1.005, 2, 1.01],
+            [-1.005, 2, -1.01],
+            [2 ** 53 - 1, 0, 9007199254740990],
+            [1, 2 ** 31, 0],
+            [0.125, 2 ** 31, 0.125],
+            [1e-300, -(2 ** 31), 1e-300],
+            [0.01, -(2 ** 31), 0],
+        ])('rounds %s to %s places using Excel decimal precision', (value, places, expected) => {
+            expect(testFunction.calculate(NumberValueObject.create(value), NumberValueObject.create(places)).getValue()).toBe(expected);
+        });
+
         it('Value is normal number 2', () => {
             const number = NumberValueObject.create(2.149);
             const numDigits = NumberValueObject.create(1);

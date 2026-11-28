@@ -347,6 +347,7 @@ describe('Test cut command with formulas', () => {
     });
 
     it('pastes regional formulas alongside invalid literal text from TSV and HTML', async () => {
+        get(LocaleService).setLocale(LocaleType.EN_US);
         const target = { unitId: 'test', subUnitId: 'sheet1', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } };
         for (const [region, formula, canonical] of [
             ['es-ES', '=SUM(1,5;2,5)', '=SUM(1.5,2.5)'],

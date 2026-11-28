@@ -188,6 +188,7 @@ function acceptsArabicPunctuation(language: string, script?: string, territory?:
         case 'lrc': return !script;
         case 'ps': return !(script === 'latn' && territory === 'PK');
         case 'syr': return !(territory === 'IQ' && (script === 'syre' || script === 'syrj' || script === 'syrn'));
+        case 'zgh':
         case 'tzm': return territory !== 'MA';
         default: return arabicPunctuationLanguages.has(language);
     }

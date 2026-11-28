@@ -1,14 +1,10 @@
-import { LOCALE_META, LocaleType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-
 import {
     clearWorkbenchSettings,
     getDefaultWorkbenchSettings,
     getEffectiveWorkbenchRegion,
     getWorkbenchUIChromeVisibility,
     readWorkbenchSettings,
-    WORKBENCH_LOCALE_META,
-    WORKBENCH_LOCALES,
     writeWorkbenchSettings,
 } from '../workbench-settings';
 
@@ -32,8 +28,8 @@ describe('readWorkbenchSettings', () => {
             zoomRatio: 1.25,
         })).toEqual({
             device: 'mobile',
-            locale: 'arSA',
-            region: 'frFR',
+            locale: 'ar-SA',
+            region: 'fr-FR',
             direction: 'rtl',
             theme: 'green',
             darkMode: true,
@@ -56,14 +52,9 @@ describe('readWorkbenchSettings', () => {
     });
 
     it('supports every built-in locale and follows its default direction', () => {
-        expect(WORKBENCH_LOCALES).toEqual(Object.values(LocaleType));
-        expect(WORKBENCH_LOCALE_META).toEqual(Object.fromEntries(Object.values(LocaleType).map((locale) => [
-            locale,
-            { direction: LOCALE_META[locale].direction, tag: LOCALE_META[locale].tag },
-        ])));
-        expect(readStoredSettings({ locale: 'faIR' }).direction).toBe('rtl');
-        expect(readStoredSettings({ locale: 'frFR' }).direction).toBe('ltr');
-        expect(readStoredSettings({ locale: 'arSA', direction: 'ltr' }).direction).toBe('ltr');
+        expect(readStoredSettings({ locale: 'fa-IR' }).direction).toBe('rtl');
+        expect(readStoredSettings({ locale: 'fr-FR' }).direction).toBe('ltr');
+        expect(readStoredSettings({ locale: 'ar-SA', direction: 'ltr' }).direction).toBe('ltr');
     });
 
     it('persists settings through local storage', () => {
@@ -76,8 +67,8 @@ describe('readWorkbenchSettings', () => {
         };
         const settings = {
             device: 'mobile',
-            locale: 'enUS',
-            region: 'frFR',
+            locale: 'en-US',
+            region: 'fr-FR',
             direction: 'rtl',
             theme: 'purple',
             darkMode: true,
@@ -99,8 +90,8 @@ describe('readWorkbenchSettings', () => {
     });
 
     it('resolves automatic regions from language while preserving explicit regions', () => {
-        expect(getEffectiveWorkbenchRegion({ locale: 'enUS', region: 'auto' })).toBe('enUS');
-        expect(getEffectiveWorkbenchRegion({ locale: 'enUS', region: 'frFR' })).toBe('frFR');
+        expect(getEffectiveWorkbenchRegion({ locale: 'en-US', region: 'auto' })).toBe('en-US');
+        expect(getEffectiveWorkbenchRegion({ locale: 'en-US', region: 'fr-FR' })).toBe('fr-FR');
     });
 
     it('maps UI chrome modes to the parts developers expect to keep visible', () => {

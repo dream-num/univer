@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, LocaleType, Nullable } from '@univerjs/core';
+import type { IRange, Nullable } from '@univerjs/core';
+import { DateSystem, normalizeLocaleTag } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
 import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
 import type {
@@ -29,7 +30,6 @@ import type { FormulaFunctionResultValueType, FormulaFunctionValueType } from '.
 import type { FormulaDataModel } from '../models/formula-data.model';
 import type { IDefinedNameMapItem } from '../services/defined-names.service';
 import type { IFormulaUnitReferenceResolver } from '../services/unit-reference-resolver.service';
-import { DateSystem } from '@univerjs/core';
 import { ErrorType } from '../basics/error-type';
 import { regexTestSingeRange, regexTestSingleColumn, regexTestSingleRow } from '../basics/regex';
 import { compareToken } from '../basics/token';
@@ -53,7 +53,7 @@ export class BaseFunction {
     private _currentFormulaColumnCount: number = 1;
     private _currentArrayFormula = false;
     private _definedNames: Nullable<IDefinedNameMapItem>;
-    private _locale: LocaleType;
+    private _locale: string;
     private _dateSystem = DateSystem.Date1900;
     private _sheetOrder: string[];
     private _sheetNameMap: { [sheetId: string]: string };
@@ -204,8 +204,8 @@ export class BaseFunction {
         return this._locale;
     }
 
-    setLocale(locale: LocaleType) {
-        this._locale = locale;
+    setLocale(locale: string) {
+        this._locale = normalizeLocaleTag(locale);
     }
 
     getDateSystem() {

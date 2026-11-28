@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentStatistics, IDocumentStatisticsOptions } from './document-data-model';
-import { LOCALE_META } from '../../types/enum/locale-type';
+import { getIntlLocaleTag } from '../../types/enum/locale-type';
 import { DataStreamTreeTokenType } from './types';
 
 const CONTROL_TOKENS = new Set<string>([
@@ -104,7 +104,7 @@ export async function calculateDocumentStatistics(
     options: IDocumentStatisticsOptions
 ): Promise<IDocumentStatistics> {
     const { locale, ranges, signal } = options;
-    const localeTag = locale == null ? undefined : LOCALE_META[locale].tag;
+    const localeTag = locale == null ? undefined : getIntlLocaleTag(locale);
     const graphemeSegmenter = new Intl.Segmenter(localeTag, { granularity: 'grapheme' });
     const wordSegmenter = new Intl.Segmenter(localeTag, { granularity: 'word' });
     const statistics = emptyStatistics();

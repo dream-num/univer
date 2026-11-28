@@ -93,7 +93,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData): ITestBed {
     const injector = univer.__getInjector();
 
     // load i18n
-    injector.get(LocaleService).load({ zhCN, enUS });
+    injector.get(LocaleService).load({ 'zh-CN': zhCN, 'en-US': enUS });
 
     // load theme service
     const themeService = injector.get(ThemeService);

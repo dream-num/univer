@@ -47,8 +47,8 @@ const booleanMap: { [key: string]: string } = {
 };
 
 // TODO@Dushusir: add more locales
-export function isCJKLocale(locale: LocaleType) {
-    return [LocaleType.ZH_CN, LocaleType.ZH_TW].includes(locale);
+export function isCJKLocale(locale: string) {
+    return locale === LocaleType.ZH_CN || locale === LocaleType.ZH_TW;
 }
 
 /**
@@ -69,7 +69,7 @@ export function isCJKLocale(locale: LocaleType) {
  * @param lexerTreeBuilder
  * @returns
  */
-export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder, currentLocale: LocaleType, functionService: IFunctionService) {
+export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder, currentLocale: string, functionService: IFunctionService) {
     let normalStr = str;
 
     if (isCJKLocale(currentLocale)) {

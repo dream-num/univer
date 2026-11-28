@@ -16,7 +16,7 @@
 
 import type { ImageSourceType } from '../services/image-io/image-io.service';
 import type { IResources } from '../services/resource-manager/type';
-import type { CellValueType, LocaleType } from '../types/enum';
+import type { CellValueType } from '../types/enum';
 import type { IDocumentData } from '../types/interfaces';
 
 export type BaseId = string;
@@ -304,7 +304,7 @@ export interface IBaseSnapshot {
     name: string;
     rev?: number;
     appVersion?: string;
-    locale?: LocaleType;
+    locale?: string;
     schemaVersion: number;
     tables: Record<TableId, ITableSnapshot>;
     tableOrder: TableId[];

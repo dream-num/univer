@@ -88,7 +88,7 @@ describe('SheetTableMoveController', () => {
         injector.add([ZebraCrossingCacheController]);
         injector.add([ISheetRowFilteredService, { useClass: SheetRowFilteredService }]);
         const locale = injector.get(LocaleService);
-        locale.load({ enUS });
+        locale.load({ 'en-US': enUS });
         locale.setLocale(LocaleType.EN_US);
         locale.setDirection('ltr');
         injector.get(WorkbookPermissionService);

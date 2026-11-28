@@ -15,7 +15,6 @@
  */
 
 import type { DocumentDataModel, ICommand, ITextRange } from '@univerjs/core';
-import type { DateTimeFieldFormat } from '../../utils/date-time-field';
 import {
     BooleanNumber,
     CommandType,
@@ -25,7 +24,6 @@ import {
     ICommandService,
     IPermissionService,
     IUniverInstanceService,
-    LOCALE_META,
     LocaleService,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -37,6 +35,7 @@ import {
     InsertTextCommand,
 } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { DateTimeFieldFormat } from '../../utils/date-time-field';
 import { getTextRunForSelection } from '../../basics/paragraph';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { createDateTimeField } from '../../utils/date-time-field';
@@ -82,7 +81,7 @@ export const InsertHeaderFooterFieldCommand: ICommand<IInsertHeaderFooterFieldPa
             selection.endOffset > range.startIndex)) {
             return false;
         }
-        const locale = LOCALE_META[accessor.get(LocaleService).getCurrentLocale()].tag;
+        const locale = accessor.get(LocaleService).getCurrentLocale();
         let properties;
         if (params.fieldType === 'DATE' || params.fieldType === 'TIME') {
             const format = params.format ?? (params.fieldType === 'TIME' ? 'time' : 'short');

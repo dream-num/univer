@@ -53,7 +53,7 @@ describe('Test copy worksheet commands', () => {
         commandService.registerCommand(RemoveSheetCommand);
         commandService.registerCommand(RemoveSheetMutation);
 
-        get(LocaleService).load({ zhCN, enUS });
+        get(LocaleService).load({ 'zh-CN': zhCN, 'en-US': enUS });
     });
 
     afterEach(() => {

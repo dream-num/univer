@@ -87,7 +87,7 @@ export function createDvUiTestBed() {
     const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, Tools.deepClone(TEST_WORKBOOK_DATA));
     get(IUniverInstanceService).focusUnit(workbook.getUnitId());
     get(ILogService).setLogLevel(LogLevel.SILENT);
-    get(LocaleService).load({ enUS });
+    get(LocaleService).load({ 'en-US': enUS });
     get(LocaleService).setLocale(LocaleType.EN_US);
 
     injector.add([ISheetClipboardService, { useClass: TestSheetClipboardService as never }]);

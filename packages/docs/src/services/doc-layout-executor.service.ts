@@ -22,7 +22,6 @@ import type {
     IDocumentData,
     ILanguagePack,
     JSONXActions,
-    LocaleType,
     Nullable,
 } from '@univerjs/core';
 import type {
@@ -94,7 +93,7 @@ export interface IDocLayoutCreateSessionRequest {
     sessionEpoch: number;
     snapshot: IDocumentData;
     modelRevision: number;
-    locale: LocaleType;
+    locale: string;
     localeData?: ILanguagePack;
     direction: 'ltr' | 'rtl';
 }

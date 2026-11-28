@@ -1,43 +1,19 @@
 import type { Plugin, PluginCtor } from '@univerjs/core';
-import type { MountExample } from '../mount-example';
-import type { IWorkbenchMountOptions } from '../workbench-settings';
 import { UniverDocsLayoutWorkerPlugin } from '@univerjs/docs';
 import { SetDocZoomRatioOperation, UniverDocsMobileUIPlugin } from '@univerjs/docs-ui';
 import { UniverDocsCorePreset } from '@univerjs/preset-docs-core';
 import { UniverDocsDrawingMobileUIPlugin, UniverDocsDrawingPreset, UniverDrawingMobileUIPlugin } from '@univerjs/preset-docs-drawing';
 import { UniverDocsHyperLinkMobileUIPlugin, UniverDocsHyperLinkPreset } from '@univerjs/preset-docs-hyper-link';
 import { UniverDocsThreadCommentMobileUIPlugin, UniverDocsThreadCommentPreset, UniverThreadCommentMobileUIPlugin } from '@univerjs/preset-docs-thread-comment';
-import { createUniver, LocaleType, UniverInstanceType } from '@univerjs/presets';
-
+import { createUniver, UniverInstanceType } from '@univerjs/presets';
 import { UniverMobileUIPlugin, UniverUIPlugin } from '@univerjs/ui';
 import { loadDocumentLocale } from 'virtual:univer-examples-document-locale';
+import type { MountExample } from '../mount-example';
 import { applyWorkbenchUIChrome, createMountedUniver, replacePresetPlugins } from '../mount-example';
 import { getEffectiveWorkbenchRegion } from '../workbench-settings';
 import { createDocumentFixture } from './create-document-fixture';
 import '@univerjs/ui/facade';
 import './global.css';
-
-const UNIVER_LOCALES = {
-    [LocaleType.ZH_CN]: LocaleType.ZH_CN,
-    [LocaleType.EN_US]: LocaleType.EN_US,
-    [LocaleType.AR_SA]: LocaleType.AR_SA,
-    [LocaleType.FR_FR]: LocaleType.FR_FR,
-    [LocaleType.RU_RU]: LocaleType.RU_RU,
-    [LocaleType.ZH_TW]: LocaleType.ZH_TW,
-    [LocaleType.ZH_HK]: LocaleType.ZH_HK,
-    [LocaleType.VI_VN]: LocaleType.VI_VN,
-    [LocaleType.FA_IR]: LocaleType.FA_IR,
-    [LocaleType.JA_JP]: LocaleType.JA_JP,
-    [LocaleType.KO_KR]: LocaleType.KO_KR,
-    [LocaleType.ES_ES]: LocaleType.ES_ES,
-    [LocaleType.CA_ES]: LocaleType.CA_ES,
-    [LocaleType.SK_SK]: LocaleType.SK_SK,
-    [LocaleType.PT_BR]: LocaleType.PT_BR,
-    [LocaleType.DE_DE]: LocaleType.DE_DE,
-    [LocaleType.IT_IT]: LocaleType.IT_IT,
-    [LocaleType.ID_ID]: LocaleType.ID_ID,
-    [LocaleType.PL_PL]: LocaleType.PL_PL,
-} satisfies Record<IWorkbenchMountOptions['locale'], LocaleType>;
 
 const MOBILE_PLUGINS = new Map<string, PluginCtor<Plugin>>([
     UniverDocsMobileUIPlugin,
@@ -51,7 +27,6 @@ MOBILE_PLUGINS.set(UniverUIPlugin.pluginName, UniverMobileUIPlugin);
 
 export const mount: MountExample = async (host, options) => {
     const locale = await loadDocumentLocale(options.locale);
-    const localeType = UNIVER_LOCALES[options.locale];
     const presets = [
         UniverDocsCorePreset({ container: host, ribbonType: options.ribbonType, toc: true }),
         UniverDocsDrawingPreset(),
@@ -59,8 +34,8 @@ export const mount: MountExample = async (host, options) => {
         UniverDocsThreadCommentPreset(),
     ];
     const { univer, univerAPI } = createUniver({
-        locale: localeType,
-        region: UNIVER_LOCALES[getEffectiveWorkbenchRegion(options)],
+        locale: options.locale,
+        region: getEffectiveWorkbenchRegion(options),
         locales: {
             [options.locale]: locale,
         },
@@ -77,7 +52,7 @@ export const mount: MountExample = async (host, options) => {
         applyWorkbenchUIChrome(univerAPI, options.uiChrome);
         univer.createUnit(
             UniverInstanceType.UNIVER_DOC,
-            createDocumentFixture(localeType, options.direction, options.zoomRatio)
+            createDocumentFixture(options.locale, options.direction, options.zoomRatio)
         );
         return createMountedUniver(
             host,

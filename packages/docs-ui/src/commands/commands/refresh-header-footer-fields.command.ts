@@ -21,11 +21,11 @@ import {
     CustomRangeType,
     DataStreamTreeTokenType,
     getRichTextEditPath,
+    getStoredLocaleTag,
     ICommandService,
     IPermissionService,
     IUniverInstanceService,
     JSONX,
-    LOCALE_META,
     LocaleService,
     TextX,
     UniverInstanceType,
@@ -53,7 +53,7 @@ export const RefreshHeaderFooterFieldsCommand: ICommand<{ unitId: string; onOpen
             return false;
         }
         const permissions = accessor.get(IPermissionService);
-        const locale = LOCALE_META[accessor.get(LocaleService).getCurrentLocale()].tag;
+        const locale = accessor.get(LocaleService).getCurrentLocale();
         const now = new Date();
         const selections = accessor.get(DocSelectionManagerService).getTextRanges({ unitId: params.unitId, subUnitId: params.unitId }) ?? [];
         let actions: JSONXActions = null;
@@ -117,7 +117,7 @@ function refreshDateTimeFields(body: IDocumentBody, locale: string, date: Date, 
         }
         const start = field.startIndex;
         const run = body.textRuns?.find((run) => run.st <= start + 1 && run.ed > start + 1);
-        const value = resolveDateTimeField(properties.instruction, run?.ts?.lang ?? locale, date);
+        const value = resolveDateTimeField(properties.instruction, getStoredLocaleTag(run?.ts?.lang) ?? run?.ts?.lang ?? locale, date);
         if (value == null || start < cursor || (body.dataStream.slice(start + 1, field.endIndex) === value && properties.cachedResult === value)) {
             continue;
         }

@@ -271,7 +271,7 @@ export function fixLineWidthByScale(num: number, scale: number) {
 export function resolveDocumentDefaultFont(
     textStyle: ITextStyle,
     documentStyle: IDocumentStyle | undefined,
-    locale: LocaleType
+    locale: string
 ): ITextStyle {
     const group = documentStyle?.defaultFontTheme;
     if (textStyle.ff || !group) {

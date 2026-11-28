@@ -112,7 +112,7 @@ export function createSheetsDrawingTestBed(workbookData?: IWorkbookData, depende
     get(ILogService).setLogLevel(LogLevel.SILENT);
 
     const localeService = get(LocaleService);
-    localeService.load({ enUS });
+    localeService.load({ 'en-US': enUS });
     localeService.setLocale(LocaleType.EN_US);
 
     return {

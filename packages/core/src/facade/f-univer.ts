@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, IDocumentData, IExecutionOptions, ILanguagePack, IParagraphStyle, ITextDecoration, ITextStyle, LifecycleStages, LocaleType } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, IDocumentData, IExecutionOptions, ILanguagePack, IParagraphStyle, ITextDecoration, ITextStyle, LifecycleStages } from '@univerjs/core';
 import type { Theme } from '@univerjs/themes';
 import type { Subscription } from 'rxjs';
-import type { ICommandEvent, IEventParamConfig } from './f-event';
 import {
     CanceledError,
     Disposable,
@@ -31,6 +30,7 @@ import {
     LifecycleService,
 
     LocaleService,
+    normalizeLocaleTag,
 
     ParagraphStyleBuilder,
     ParagraphStyleValue,
@@ -47,6 +47,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
+import type { ICommandEvent, IEventParamConfig } from './f-event';
 import { FBlob } from './f-blob';
 import { FDoc } from './f-doc';
 import { FEnum } from './f-enum';
@@ -438,14 +439,14 @@ export class FUniver extends Disposable {
      * @param {ILanguagePack} locales  - The locales object containing the translations.
      * @example
      * ```ts
-     * univerAPI.loadLocales('esES', {
+     * univerAPI.loadLocales('es-ES', {
      *   'Hello World': 'Hola Mundo',
      * });
      * ```
      */
     loadLocales(locale: string, locales: ILanguagePack): void {
         const localeService = this._injector.get(LocaleService);
-        localeService.load({ [locale]: locales });
+        localeService.load({ [normalizeLocaleTag(locale)]: locales });
     }
 
     /**
@@ -453,12 +454,12 @@ export class FUniver extends Disposable {
      * @param {string} locale - A unique locale identifier.
      * @example
      * ```ts
-     * univerAPI.setLocale('esES');
+     * univerAPI.setLocale('es-ES');
      * ```
      */
     setLocale(locale: string): void {
         const localeService = this._injector.get(LocaleService);
-        localeService.setLocale(locale as LocaleType);
+        localeService.setLocale(locale);
     }
 
     /**
@@ -466,7 +467,7 @@ export class FUniver extends Disposable {
      * @param {string} region - A unique region identifier.
      * @example
      * ```ts
-     * univerAPI.setRegion('enUS');
+     * univerAPI.setRegion('en-US');
      * ```
      */
     setRegion(region: string): void {

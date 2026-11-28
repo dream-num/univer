@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-
 import { loadDevLocale } from '../dev-locale-loader';
 
 describe('loadDevLocale', () => {
@@ -11,7 +10,7 @@ describe('loadDevLocale', () => {
             ],
         }));
 
-        await expect(loadDevLocale('sheets', 'enUS', fetchLocale)).resolves.toEqual({
+        await expect(loadDevLocale('sheets', 'en-US', fetchLocale)).resolves.toEqual({
             sheets: {
                 copy: 'Copy',
             },
@@ -27,7 +26,7 @@ describe('loadDevLocale', () => {
             { status: 500 }
         );
 
-        await expect(loadDevLocale('docs', 'arSA', fetchLocale)).rejects.toThrow(
+        await expect(loadDevLocale('docs', 'ar-SA', fetchLocale)).rejects.toThrow(
             'Could not load docs locale ar-SA. Locale module failed to load.'
         );
     });

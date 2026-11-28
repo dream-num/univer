@@ -17,7 +17,10 @@
 import { defaultTheme } from '@univerjs/themes';
 import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import type { DocumentDataModel } from '../docs/data-model/document-data-model';
 import type { ILocales } from '../shared/locale';
+import type { Workbook } from '../sheets/workbook';
+import { BaseDataModel } from '../bases/base-data-model';
 import { Inject, Injector } from '../common/di';
 import { UnitModel, UniverInstanceType } from '../common/unit';
 import { COMMAND_LOG_EXECUTION_CONFIG_KEY } from '../services/command/command.service';
@@ -110,6 +113,21 @@ describe('Univer', () => {
         univer.setRegion(LocaleType.JA_JP);
         expect(regionService.getCurrentRegion()).toBe(LocaleType.JA_JP);
 
+        univer.dispose();
+    });
+
+    it.each(['zhCN', 'zh-CN', 'zh-cn', 'ZH-CN', 'sr-Latn-RS'])('preserves the stored locale %s through model edits and serialization', (locale) => {
+        const univer = new Univer({ locale: 'en-US' });
+        const workbook = univer.createUnit<{ locale: string }, Workbook>(UniverInstanceType.UNIVER_SHEET, { locale });
+        const document = univer.createUnit<{ locale: string }, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, { locale });
+        const base = new BaseDataModel({ locale });
+        for (const unit of [workbook, document, base]) {
+            unit.setName('edited');
+        }
+        expect(workbook.save().locale).toBe(locale);
+        expect(document.getSnapshot().locale).toBe(locale);
+        expect(base.getSnapshot().locale).toBe(locale);
+        base.dispose();
         univer.dispose();
     });
 

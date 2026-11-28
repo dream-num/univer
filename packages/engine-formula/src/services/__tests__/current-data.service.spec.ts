@@ -53,7 +53,7 @@ function createService(withCurrentWorkbook = true) {
         ),
     };
     const localeService = {
-        getCurrentLocale: vi.fn(() => 'zhCN'),
+        getCurrentLocale: vi.fn(() => 'zh-CN'),
     };
     const formulaDataModel = {
         getCalculateData: vi.fn(() => ({
@@ -379,7 +379,7 @@ describe('FormulaCurrentConfigService', () => {
         workbookById.set('unit-current', {
             getSnapshot: () => ({ locale: LocaleType.FR_FR }),
         });
-        expect(service.getLocale()).toBe('zhCN');
+        expect(service.getLocale()).toBe('zh-CN');
         expect(localeService.getCurrentLocale).toHaveBeenCalled();
         workbookById.set('date-1904', { getDateSystem: () => DateSystem.Date1904 });
         expect(service.getDateSystem('date-1904')).toBe(DateSystem.Date1904);

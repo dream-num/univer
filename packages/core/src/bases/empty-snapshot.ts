@@ -112,7 +112,7 @@ export function createDefaultBaseTableSnapshot(options: ICreateDefaultBaseTableS
 export function getEmptySnapshot(
     unitId: string = generateRandomId(),
     name: string = '',
-    locale: LocaleType = LocaleType.ZH_CN
+    locale: string = LocaleType.ZH_CN
 ): IBaseSnapshot {
     const now = Date.now();
     const tableId = 'table-1';

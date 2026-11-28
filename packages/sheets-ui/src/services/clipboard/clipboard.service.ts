@@ -38,7 +38,6 @@ import type {
 import type { Observable } from 'rxjs';
 import {
     BooleanNumber,
-    CanceledError,
     CellModeEnum,
     CellValueType,
     cloneCellDataWithSpanAndDisplay,
@@ -943,24 +942,18 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         const redoMutationsInfo: IMutationInfo[] = [];
         const undoMutationsInfo: IMutationInfo[] = [];
-        try {
-            enabledHooks.forEach((h) => {
-                const contentReturn = generateMutations(h, {
-                    unitId,
-                    subUnitId,
-                    range,
-                });
-
-                if (contentReturn) {
-                    redoMutationsInfo.push(...contentReturn.redos);
-                    undoMutationsInfo.push(...contentReturn.undos);
-                }
+        enabledHooks.forEach((h) => {
+            const contentReturn = generateMutations(h, {
+                unitId,
+                subUnitId,
+                range,
             });
-        } catch (error) {
-            if (!(error instanceof CanceledError)) throw error;
-            enabledHooks.forEach((h) => h.onAfterPaste?.(false));
-            return false;
-        }
+
+            if (contentReturn) {
+                redoMutationsInfo.push(...contentReturn.redos);
+                undoMutationsInfo.push(...contentReturn.undos);
+            }
+        });
         const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
         if (result) {
             // add to undo redo services
@@ -1473,9 +1466,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             result = executePaste();
         } catch (error) {
             if (!objectOnly) {
-                if (!(error instanceof CanceledError)) throw error;
-                enabledHooks.forEach((h) => h.onAfterPaste?.(false));
-                return false;
+                throw error;
             }
             pasteThrew = true;
             pasteError = error;

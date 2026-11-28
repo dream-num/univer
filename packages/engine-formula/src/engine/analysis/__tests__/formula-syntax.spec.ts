@@ -305,7 +305,7 @@ describe('regional formula editing', () => {
     it('rejects leading and interior omitted arguments with Arabic list punctuation but accepts a trailing omission', () => {
         const univer = new Univer({ locale: LocaleType.EN_US });
         try {
-            for (const [region, separator] of [['fa-IR', '؛'], ['dv-MV', '،'], ['dv-MV', ',']]) {
+            for (const [region, separator] of [['fa-IR', '؛'], ['fa-IR', ';'], ['dv-MV', '،'], ['dv-MV', ',']]) {
                 const syntax = syntaxFor(univer, region);
                 expect(syntax.toStandard(`=SUM( ${separator}2)`)).toBeNull();
                 expect(syntax.toStandard(`=SUM(A1${separator} ${separator} A2)`)).toBeNull();
@@ -319,8 +319,55 @@ describe('regional formula editing', () => {
         }
     });
 
-    it('uses the current input syntax for ambiguous commas and rejects mixed separators', () => {
-        const univer = new Univer();
+    it('accepts alternate punctuation only in the delimiter positions that Excel recognizes', () => {
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        try {
+            for (const [region, local, alternate] of [
+                ['dv-MV', '،', ','],
+                ['he-IL', ',', '،'],
+                ['ar-SA', ';', '؛'],
+                ['fa-IR', '؛', ';'],
+            ]) {
+                const syntax = syntaxFor(univer, region);
+                for (const [first, second] of [[local, alternate], [alternate, local]]) {
+                    expect(syntax.toStandard(`=SUM(A1${first}A2${second}A1)`)).toBe('=SUM(A1,A2,A1)');
+                    expect(syntax.toStandard(`=LET(x${first}A1${second}x+A2)`)).toBe('=LET(x,A1,x+A2)');
+                    expect(syntax.toStandard(`=LET(A1${first}2${second}A1)`)).toBeNull();
+                }
+                expect(syntax.toLocal('=SUM(A1,A2,A1)')).toBe(`=SUM(A1${local}A2${local}A1)`);
+                expect(syntax.toStandard('=SUM({1،2؛3,4})')).toBe('=SUM({1,2;3,4})');
+                expect(syntax.toStandard('="،؛"')).toBe('="،؛"');
+                expect(syntax.toStandard('=SUM(A1،A2؛A1)')).toBeNull();
+            }
+            expect(syntaxFor(univer, 'en-MV').toStandard('=SUM(A1،A2,A1)')).toBeNull();
+            expect(syntaxFor(univer, 'de-DE').toStandard('=SUM(A1;A2؛A1)')).toBeNull();
+            expect(syntaxFor(univer, 'ar-MA').toStandard('=1،234')).toBeNull();
+        } finally {
+            univer.dispose();
+        }
+    });
+
+    it('uses the interface input rules while keeping the displayed regional punctuation', () => {
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        try {
+            const locale = univer.__getInjector().get(LocaleService);
+            locale.setLocale(LocaleType.AR_SA);
+            expect(syntaxFor(univer, 'en-US').toStandard('=SUM(A1،A2,A1)')).toBe('=SUM(A1,A2,A1)');
+            locale.setLocale(LocaleType.JA_JP);
+            const dv = syntaxFor(univer, 'dv-MV');
+            expect(dv.toStandard('=SUM(A1،A2،A1)')).toBe('=SUM(A1,A2,A1)');
+            expect(dv.toStandard('=SUM(A1،A2,A1)')).toBeNull();
+            locale.setLocale(LocaleType.EN_US);
+            expect(syntaxFor(univer, 'en-Arab-US').toStandard('=SUM(A1،A2,A1)')).toBe('=SUM(A1,A2,A1)');
+            expect(syntaxFor(univer, 'ku-Latn-IQ').toStandard('=SUM(A1،A2,A1)')).toBeNull();
+            expect(syntaxFor(univer, 'pa-PK').toStandard('=SUM(1٫5,2٫5)')).toBe('=SUM(1.5,2.5)');
+        } finally {
+            univer.dispose();
+        }
+    });
+
+    it('uses the regional syntax for ambiguous commas in the English interface', () => {
+        const univer = new Univer({ locale: LocaleType.EN_US });
         try {
             const us = syntaxFor(univer, 'en-US');
             const es = syntaxFor(univer, 'es-ES');
@@ -337,7 +384,7 @@ describe('regional formula editing', () => {
             expect(es.toLocal('=SUM(1,5)')).toBe('=SUM(1;5)');
             expect(us.toStandard('=SUM(1;5)')).toBeNull();
             expect(us.toStandard('=SUM(1،5)')).toBeNull();
-            expect(dv.toStandard('=SUM(1،2,3)')).toBeNull();
+            expect(dv.toStandard('=SUM(1،2,3)')).toBe('=SUM(1,2,3)');
             expect(syntaxFor(univer, 'de-CH').toStandard("=SUM(1'234.5;2)")).toBeNull();
             expect(syntaxFor(univer, 'fr-FR').toStandard('=SUM(1\u202F234,5;2)')).toBeNull();
             expect(syntaxFor(univer, 'ar-SA').toStandard('=SUM(1٬234٫5;2)')).toBeNull();

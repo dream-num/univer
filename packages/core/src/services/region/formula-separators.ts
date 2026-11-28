@@ -21,6 +21,7 @@ export interface IFormulaSeparators {
     readonly argument: string;
     readonly arrayColumn: string;
     readonly arrayRow: string;
+    readonly arabicPunctuation?: boolean;
 }
 
 // The English interface uses a semicolon between array rows.
@@ -33,18 +34,29 @@ const commaSemicolon = profile(',', ';');
 const dotSemicolon = profile('.', ';');
 const arabicDecimal = profile('٫', ';');
 const arabicSemicolon = profile('٫', '؛');
+const arabicDecimalComma = profile('٫', ',');
 const arabicComma = profile('.', '،');
 
 const rules = new RegionRules<IFormulaSeparators>();
 
 // Excel for Mac 16.115, measured with FormulaLocal. More specific rules precede language defaults.
 // Script changes the grammar for some languages even within the same territory.
-rules.add(dotComma, 'ff', 'NG', 'adlm');
+rules.add(arabicDecimal, 'ckb', 'IQ', 'arab');
+rules.add(dotComma, 'dv', 'MV', 'latn');
+rules.add(dotComma, 'fa ps', 'AF IR', 'aran cyrl latn');
+rules.add(dotComma, 'ff fo', 'NG', 'arab');
+rules.add(dotComma, 'ff', 'NG', 'adlm cyrl');
+rules.add(dotComma, 'ff', 'AF EG', 'adlm');
+rules.add(commaSemicolon, 'ff', 'FR MA ZZ', 'adlm');
+rules.add(dotComma, 'ks', 'PK');
+rules.add(dotComma, 'ks', 'IN', 'aran cyrl deva latn');
+rules.add(dotComma, 'ku', 'IQ IR SY');
+rules.add(dotComma, 'pa', 'PK', 'aran cyrl');
+rules.add(dotSemicolon, 'tzm', 'MA', 'tfng');
 rules.add(dotComma, 'kk', 'CN', 'arab');
-rules.add(dotComma, 'ks', 'IN', 'aran deva');
-rules.add(dotComma, 'ku', 'IQ SY', 'latn');
 rules.add(dotComma, 'ms', 'BN CC MY', 'arab');
 rules.add(arabicDecimal, 'pa', 'PK', 'arab');
+rules.add(arabicDecimalComma, 'pa', 'PK');
 rules.add(dotSemicolon, 'sd', 'PK', 'arab');
 rules.add(dotComma, 'ur', 'IN PK', 'arab');
 rules.add(dotSemicolon, 'az', 'IR', 'cyrl');
@@ -87,7 +99,7 @@ rules.add(dotComma, 'st', 'LS');
 rules.add(dotComma, 'sw', 'TZ UG');
 rules.add(commaSemicolon, 'sw', 'CD');
 rules.add(dotSemicolon, 'ta', 'LK');
-rules.add(commaSemicolon, 'tzm', 'MA');
+rules.add(commaSemicolon, 'tzm', 'DZ MA');
 rules.add(commaSemicolon, 'yi', 'UA');
 rules.add(commaSemicolon, 'yo', 'BJ');
 
@@ -112,10 +124,9 @@ export function isExcelRegionLanguage(language: string): boolean {
     return rules.has(language);
 }
 
-export function getFormulaSeparators(region: string): IFormulaSeparators {
-    const parts = getRegionParts(region);
-    if (!parts) return dotComma;
-    const { language, script, territory } = parts;
+function resolveProfile(region: string, language: string, script?: string, territory?: string): IFormulaSeparators {
+    // Excel recognizes Dari with Afghan settings and uses the root grammar for other territories.
+    if (language === 'prs' && (!territory || territory === 'AF')) return script ? dotComma : arabicSemicolon;
     if (!rules.has(language)) return dotSemicolon;
     if (territory && commaDecimalTerritories.has(territory)) return commaSemicolon;
     if (territory === 'US' || territory === 'CA' || territory === 'GB' || territory === 'CH') {
@@ -134,4 +145,32 @@ export function getFormulaSeparators(region: string): IFormulaSeparators {
     // A private-use territory has no regional number settings. ZZ (unknown region) inherits the language settings.
     if (territory && territory !== 'XK' && /^(?:X[A-Z]|Q[M-Z])$/.test(territory)) return dotComma;
     return rules.resolve(region) ?? dotComma;
+}
+
+// These are input aliases. Excel still displays the region's preferred separators.
+const arabicPunctuationLanguages = new Set('ar dv fa he mzn nqo prs ug ur yi'.split(' '));
+const arabicPunctuationScripts = new Set('adlm arab cprt hebr khar nkoo syrc thaa'.split(' '));
+const fulahTerritories = new Set('BF CM GH GM GN GW LR MR NE NG SL SN'.split(' '));
+
+function acceptsArabicPunctuation(language: string, script?: string, territory?: string): boolean {
+    if (script && arabicPunctuationScripts.has(script)) {
+        return !(language === 'ff' && script === 'adlm' && (!territory || fulahTerritories.has(territory)));
+    }
+    switch (language) {
+        case 'ks': return script !== 'deva';
+        case 'ku': return territory !== 'TR' && !(script === 'latn' && (territory === 'IQ' || territory === 'SY'));
+        case 'lrc': return !script;
+        case 'ps': return !(script === 'latn' && territory === 'PK');
+        case 'syr': return !(territory === 'IQ' && (script === 'syre' || script === 'syrj' || script === 'syrn'));
+        case 'tzm': return territory !== 'MA';
+        default: return arabicPunctuationLanguages.has(language);
+    }
+}
+
+export function getFormulaSeparators(region: string): IFormulaSeparators {
+    const parts = getRegionParts(region);
+    if (!parts) return dotComma;
+    const { language, script, territory } = parts;
+    const separators = resolveProfile(region, language, script, territory);
+    return acceptsArabicPunctuation(language, script, territory) ? { ...separators, arabicPunctuation: true } : separators;
 }

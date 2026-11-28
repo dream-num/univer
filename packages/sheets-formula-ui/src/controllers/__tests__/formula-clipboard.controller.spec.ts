@@ -346,20 +346,23 @@ describe('Test cut command with formulas', () => {
         univer.dispose();
     });
 
-    it('parses external text for the current region and rejects mixed separators before changing cells', async () => {
-        get(RegionService).setRegion('es-ES');
+    it('pastes regional formulas alongside invalid literal text from TSV and HTML', async () => {
         const target = { unitId: 'test', subUnitId: 'sheet1', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } };
-        expect(await sheetClipboardService.legacyPaste(undefined, '=SUM(1,5;2,5)', undefined, undefined, target)).toBe(true);
-        expect(getValues(0, 0, 0, 0)?.[0][0]?.f).toBe('=SUM(1.5,2.5)');
-        expect(await sheetClipboardService.legacyPaste(undefined, '=SUM(A1;A2,A1)', undefined, undefined, target)).toBe(false);
-        expect(getValues(0, 0, 0, 0)?.[0][0]?.f).toBe('=SUM(1.5,2.5)');
-
-        expect(await sheetClipboardService.legacyPaste(undefined, '=SUM(1;5)\t=SUM(A1;A2,A1)', undefined, undefined, target)).toBe(false);
-        expect(getValues(0, 0, 0, 1)?.[0].map((cell) => cell?.f ?? cell?.v)).toEqual(['=SUM(1.5,2.5)', 2]);
-        expect(await sheetClipboardService.legacyPaste(undefined, '=SUM(1.5,2.5)', undefined, undefined, target)).toBe(true);
-        expect(getValues(0, 0, 0, 0)?.[0][0]).toMatchObject({ v: '=SUM(1.5,2.5)', t: CellValueType.STRING });
-        expect(await sheetClipboardService.legacyPaste(undefined, '=SUM(1;5)\t=SUM(1,5)', undefined, undefined, target)).toBe(true);
-        expect(getValues(0, 0, 0, 1)?.[0].map((cell) => cell?.f)).toEqual(['=SUM(1,5)', '=SUM(1.5)']);
+        for (const [region, formula, canonical] of [
+            ['es-ES', '=SUM(1,5;2,5)', '=SUM(1.5,2.5)'],
+            ['dv-MV', '=SUM(2،3,2)', '=SUM(2,3,2)'],
+        ]) {
+            get(RegionService).setRegion(region);
+            const invalid = '=SUM(A1;A2,A1)';
+            const html = `<table><tr><td>${formula}</td><td>${invalid}</td></tr></table>`;
+            for (const [sourceHtml, text] of [[undefined, `${formula}\t${invalid}`], [html, undefined]]) {
+                expect(await sheetClipboardService.legacyPaste(sourceHtml, text, undefined, undefined, target)).toBe(true);
+                const cells = getValues(0, 0, 0, 1)?.[0];
+                expect(cells?.[0]?.f).toBe(canonical);
+                expect(cells?.[1]).toMatchObject({ t: CellValueType.STRING, v: invalid });
+                expect(cells?.[1]?.f).toBeFalsy();
+            }
+        }
     });
 
     it('stores invalid external formulas as text alongside formulas that calculate', async () => {

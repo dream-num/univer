@@ -14,83 +14,63 @@
  * limitations under the License.
  */
 
-import type { LocaleService } from '@univerjs/core';
-import type { DataValidatorRegistryService } from '@univerjs/data-validation';
-import type { SheetInterceptorService } from '@univerjs/sheets';
-import type { SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
-import type { IDialogService } from '@univerjs/ui';
-import { DataValidationErrorStyle, DataValidationStatus } from '@univerjs/core';
-import { VALIDATE_CELL } from '@univerjs/sheets';
-import { describe, expect, it, vi } from 'vitest';
+import { DataValidationErrorStyle, DataValidationOperator, DataValidationType } from '@univerjs/core';
+import { AddDataValidationMutation } from '@univerjs/data-validation';
+import { SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { IDialogService } from '@univerjs/ui';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createDvUiTestBed } from '../../__tests__/create-dv-ui-test-bed';
 import { DataValidationRejectInputController } from '../dv-reject-input.controller';
 
-interface IInterceptContext {
-    row: number;
-    col: number;
-    unitId: string;
-    subUnitId: string;
-}
-
 describe('DataValidationRejectInputController', () => {
-    it('intercepts invalid STOP rules and opens a reject dialog, while allowing valid cases through', async () => {
-        let interceptedHandler:
-            | ((lastResult: Promise<boolean>, context: IInterceptContext, next: (value: Promise<boolean>) => Promise<boolean>) => Promise<boolean>)
-            | undefined;
-        const open = vi.fn();
-        const close = vi.fn();
-        const getRuleById = vi.fn(() => ({ type: 'list', errorStyle: DataValidationErrorStyle.STOP, showErrorMessage: true }));
-        const model = {
-            getRuleIdByLocation: vi.fn(() => 'rule-1'),
-            getRuleById,
-        };
-        const validator = { getRuleFinalError: vi.fn(() => 'Invalid value') };
-        const controller = new DataValidationRejectInputController(
-            {
-                writeCellInterceptor: {
-                    intercept: vi.fn((name, config) => {
-                        expect(name).toBe(VALIDATE_CELL);
-                        interceptedHandler = config.handler;
-                        return { dispose: vi.fn() };
-                    }),
-                },
-            } as unknown as SheetInterceptorService,
-            model as unknown as SheetDataValidationModel,
-            { getValidatorItem: vi.fn(() => validator) } as unknown as DataValidatorRegistryService,
-            { open, close } as unknown as IDialogService,
-            { t: (key: string) => key } as LocaleService,
-            {
-                validatorCell: vi.fn()
-                    .mockResolvedValueOnce(DataValidationStatus.INVALID)
-                    .mockResolvedValueOnce(DataValidationStatus.VALID),
-            } as unknown as SheetsDataValidationValidatorService
-        );
-
-        expect(controller).toBeTruthy();
-        expect(interceptedHandler).toBeDefined();
-
-        const next = (value: Promise<boolean>) => value;
-        const context: IInterceptContext = { row: 1, col: 2, unitId: 'book-1', subUnitId: 'sheet-1' };
-
-        await expect(interceptedHandler!(Promise.resolve(false), context, next)).resolves.toBe(false);
+    let bed: ReturnType<typeof createDvUiTestBed>;
+    let interceptor: SheetInterceptorService;
+    let open: ReturnType<typeof vi.fn>;
+    beforeEach(() => {
+        bed = createDvUiTestBed();
+        open = vi.fn();
+        bed.injector.add([IDialogService, { useValue: { open, close: vi.fn() } as never }]);
+        bed.injector.add([DataValidationRejectInputController]);
+        interceptor = bed.injector.get(SheetInterceptorService);
+        bed.injector.get(DataValidationRejectInputController);
+    });
+    afterEach(() => bed.univer.dispose());
+    function addRule(style = DataValidationErrorStyle.STOP) {
+        bed.commandService.syncExecuteCommand(AddDataValidationMutation.id, { unitId: 'test', subUnitId: 'sheet1', rule: {
+            uid: 'strict',
+            type: DataValidationType.DECIMAL,
+            operator: DataValidationOperator.GREATER_THAN,
+            formula1: '1',
+            errorStyle: style,
+            showErrorMessage: true,
+            ranges: [{ startRow: 6, endRow: 6, startColumn: 3, endColumn: 3 }],
+        } });
+    }
+    it('does not retroactively reject this input under a newly inherited STOP rule, but rejects the next edit', async () => {
+        const sheet = bed.workbook.getActiveSheet()!;
+        const before = interceptor.captureCellValidation(bed.workbook, sheet, 6, 3);
+        bed.commandService.syncExecuteCommand(SetRangeValuesMutation.id, { unitId: 'test', subUnitId: 'sheet1', cellValue: { 6: { 3: { v: 0 } } } });
+        addRule();
+        expect(await interceptor.onValidateCell(bed.workbook, sheet, 6, 3, before)).toBe(true);
         expect(open).not.toHaveBeenCalled();
-
-        await expect(interceptedHandler!(Promise.resolve(true), context, next)).resolves.toBe(false);
-        expect(open).toHaveBeenCalledWith(expect.objectContaining({
-            id: 'reject-input-dialog',
-            children: { title: 'Invalid value' },
-        }));
-
-        await expect(interceptedHandler!(Promise.resolve(true), context, next)).resolves.toBe(true);
-
-        getRuleById.mockReturnValue({ type: 'list', errorStyle: DataValidationErrorStyle.STOP, showErrorMessage: false });
-        await expect(interceptedHandler!(Promise.resolve(true), context, next)).resolves.toBe(true);
-
-        getRuleById.mockReturnValue({ type: 'list', errorStyle: DataValidationErrorStyle.WARNING, showErrorMessage: true });
-        await expect(interceptedHandler!(Promise.resolve(true), context, next)).resolves.toBe(true);
-
-        controller.showReject('Bad input');
-        expect(open).toHaveBeenLastCalledWith(expect.objectContaining({
-            children: { title: 'Bad input' },
-        }));
+        expect(await interceptor.onValidateCell(bed.workbook, sheet, 6, 3)).toBe(false);
+        expect(open).toHaveBeenCalledWith(expect.objectContaining({ id: 'reject-input-dialog' }));
+    });
+    it('keeps preexisting STOP validation and allows valid values', async () => {
+        addRule();
+        const sheet = bed.workbook.getActiveSheet()!;
+        const before = interceptor.captureCellValidation(bed.workbook, sheet, 6, 3);
+        bed.commandService.syncExecuteCommand(SetRangeValuesMutation.id, { unitId: 'test', subUnitId: 'sheet1', cellValue: { 6: { 3: { v: 0 } } } });
+        expect(await interceptor.onValidateCell(bed.workbook, sheet, 6, 3, before)).toBe(false);
+        bed.commandService.syncExecuteCommand(SetRangeValuesMutation.id, { unitId: 'test', subUnitId: 'sheet1', cellValue: { 6: { 3: { v: 5 } } } });
+        expect(await interceptor.onValidateCell(bed.workbook, sheet, 6, 3, before)).toBe(true);
+    });
+    it('allows warning rules and uses the existing rejection dialog', async () => {
+        addRule(DataValidationErrorStyle.WARNING);
+        const sheet = bed.workbook.getActiveSheet()!;
+        bed.commandService.syncExecuteCommand(SetRangeValuesMutation.id, { unitId: 'test', subUnitId: 'sheet1', cellValue: { 6: { 3: { v: 0 } } } });
+        expect(await interceptor.onValidateCell(bed.workbook, sheet, 6, 3)).toBe(true);
+        bed.injector.get(DataValidationRejectInputController).showReject('Bad input');
+        expect(open).toHaveBeenLastCalledWith(expect.objectContaining({ children: { title: 'Bad input' } }));
     });
 });

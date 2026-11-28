@@ -16,11 +16,11 @@
 
 import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType } from '@univerjs/core';
 import type { LexerTreeBuilder } from '@univerjs/engine-formula';
-import type { Table } from '../../models/table';
-import type { ITableCalculatedColumnConfig } from '../../types/type';
 import { BooleanNumber, FormulaType } from '@univerjs/core';
 import { serializeRange } from '@univerjs/engine-formula';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
+import type { Table } from '../../models/table';
+import type { ITableCalculatedColumnConfig } from '../../types/type';
 
 export function getCalculatedColumnFillMutation(
     table: Table,
@@ -86,7 +86,7 @@ export function getCalculatedColumnFillMutation(
     };
 }
 
-function normalizeCalculatedColumnFormula(formula: string, tableName: string): string {
+export function normalizeCalculatedColumnFormula(formula: string, tableName: string): string {
     let result = '';
     for (let index = 0; index < formula.length; index++) {
         const start = index;

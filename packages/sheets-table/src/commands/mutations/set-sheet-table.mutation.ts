@@ -15,8 +15,8 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import type { ITableSetConfig } from '../../types/type';
 import { CommandType } from '@univerjs/core';
+import type { ITableSetConfig } from '../../types/type';
 import { TableManager } from '../../models/table-manager';
 
 export interface ISetSheetTableMutationParams {
@@ -35,6 +35,13 @@ export const SetSheetTableMutation: IMutation<ISetSheetTableMutationParams> = {
         }
 
         const { unitId, tableId, config } = params;
+        const update = config?.updateRange;
+        if (update?.columns && (!Array.isArray(update.columns)
+            || update.columns.length !== update.newRange.endColumn - update.newRange.startColumn + 1
+            || update.columns.some((column) => !column || typeof column.id !== 'string' || !column.id || typeof column.displayName !== 'string')
+            || new Set(update.columns.map((column) => column.id)).size !== update.columns.length)) {
+            return false;
+        }
         const tableManager = accessor.get(TableManager);
         tableManager.setTableByConfig(unitId, tableId, config);
 

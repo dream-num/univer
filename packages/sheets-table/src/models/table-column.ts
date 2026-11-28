@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IStyleData } from '@univerjs/core';
+import type { ISheetDataValidationRule, IStyleData } from '@univerjs/core';
 import type { TableMetaType } from '../types/type';
 import { TableColumnDataTypeEnum } from '../types/enum';
 
@@ -30,6 +30,7 @@ export class TableColumn {
     showFilterButton: boolean;
     meta: TableMetaType;
     style: IStyleData;
+    dataValidation?: Omit<ISheetDataValidationRule, 'uid' | 'ranges'>;
     constructor(id: string, name: string) {
         this.id = id;
         this.displayName = name;
@@ -65,6 +66,7 @@ export class TableColumn {
             showFilterButton: this.showFilterButton,
             meta: this.meta,
             style: this.style,
+            dataValidation: this.dataValidation,
         };
     }
 
@@ -80,6 +82,7 @@ export class TableColumn {
         this.showFilterButton = json.showFilterButton ?? true;
         this.meta = json.meta;
         this.style = json.style;
+        this.dataValidation = json.dataValidation;
     }
 
     isShowFilterButton() {

@@ -24,6 +24,7 @@ import {
 } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
 import type { ITableManualFilterItem } from '../../../types/type';
+import { Table } from '../../../models/table';
 import { TableManager } from '../../../models/table-manager';
 import { TableColumnFilterTypeEnum } from '../../../types/enum';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../../../types/type';
@@ -170,12 +171,8 @@ describe('sheets-table commands', () => {
             preUndos: [{ id: 'formula.undo.before', params: { phase: 'pre' } }],
             undos: [{ id: 'formula.undo.after', params: { phase: 'post' } }],
         }));
-        const table = {
-            getDisplayName: () => 'OldName',
-            getRange: () => ({ startRow: 1, endRow: 4, startColumn: 1, endColumn: 3 }),
-            getSubunitId: () => 's1',
-            getTableStyleId: () => 'theme-old',
-        };
+        const table = new Table('t1', 'OldName', { startRow: 1, endRow: 4, startColumn: 1, endColumn: 3 }, ['A', 'B', 'C'], { tableStyleId: 'theme-old' });
+        table.setSubunitId('s1');
 
         const accessor = createAccessor([
             [TableManager, { getTableById: () => table, getTableList: () => [] }],

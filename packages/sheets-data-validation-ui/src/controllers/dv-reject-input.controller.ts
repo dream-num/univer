@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../locale/types';
 import { DataValidationErrorStyle, DataValidationStatus, Disposable, Inject, LocaleService } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
-import { SheetInterceptorService, VALIDATE_CELL } from '@univerjs/sheets';
+import { CAPTURE_CELL_VALIDATION, SheetInterceptorService, VALIDATE_CELL } from '@univerjs/sheets';
 import { SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { IDialogService } from '@univerjs/ui';
 import { createElement } from 'react';
+import type { LocaleKey } from '../locale/types';
 
 export class DataValidationRejectInputController extends Disposable {
     constructor(
@@ -37,6 +37,12 @@ export class DataValidationRejectInputController extends Disposable {
     }
 
     private _initEditorBridgeInterceptor() {
+        this.disposeWithMe(this._sheetInterceptorService.writeCellInterceptor.intercept(CAPTURE_CELL_VALIDATION, {
+            handler: (value, context, next) => next({
+                ...value,
+                dataValidationRuleId: this._dataValidationModel.getRuleIdByLocation(context.unitId, context.subUnitId, context.row, context.col) ?? null,
+            }),
+        }));
         this.disposeWithMe(this._sheetInterceptorService.writeCellInterceptor.intercept(
             VALIDATE_CELL,
             {
@@ -47,6 +53,11 @@ export class DataValidationRejectInputController extends Disposable {
                     const rule = ruleId ? this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId) : undefined;
                     if (cell === false) {
                         return next(Promise.resolve(false))!;
+                    }
+
+                    // A newly inherited rule applies to subsequent edits, not retroactively to this input.
+                    if (context.validationContext?.dataValidationRuleId === null) {
+                        return next(Promise.resolve(true))!;
                     }
 
                     if (!rule || rule.showErrorMessage === false || rule.errorStyle !== DataValidationErrorStyle.STOP) {

@@ -33,7 +33,9 @@ import { defaultPluginConfig, SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from
 import { DataValidationAlertController } from './controllers/dv-alert.controller';
 import { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
 import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
+import { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
 import { SheetsDataValidationReRenderController } from './controllers/dv-rerender.controller';
+import { DataValidationTableAutoExpandController } from './controllers/dv-table-auto-expand.controller';
 import { MobileComponentsController } from './controllers/mobile/components.controller';
 import { SheetsDataValidationMobileRenderController } from './controllers/mobile/dv-render.controller';
 import { SheetsDataValidationUIController } from './controllers/ui.controller';
@@ -82,6 +84,8 @@ export class UniverSheetsDataValidationMobileUIPlugin extends Plugin {
             [DataValidationAutoFillController],
             [SheetsDataValidationMobileRenderController],
             [DataValidationCopyPasteController],
+            [DataValidationTableAutoExpandController],
+            [DataValidationRejectInputController],
             [SheetsDataValidationUIController],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
@@ -99,6 +103,8 @@ export class UniverSheetsDataValidationMobileUIPlugin extends Plugin {
 
     override onReady(): void {
         this._injector.get(DataValidationCopyPasteController);
+        this._injector.get(DataValidationTableAutoExpandController);
+        this._injector.get(DataValidationRejectInputController);
 
         const renderManager = this._injector.get(IRenderManagerService);
         renderManager.registerRenderModule(

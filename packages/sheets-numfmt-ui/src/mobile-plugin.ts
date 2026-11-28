@@ -15,7 +15,6 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsNumfmtUIConfig } from './config/config';
 import {
     DependentOn,
     IConfigService,
@@ -32,12 +31,14 @@ import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
 import { UniverMobileUIPlugin } from '@univerjs/ui';
+import type { IUniverSheetsNumfmtUIConfig } from './config/config';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_NUMFMT_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { MobileComponentsController } from './controllers/mobile/components.controller';
 import { SheetNumfmtMobileUIController } from './controllers/mobile/ui.controller';
 import { NumfmtAlertRenderController } from './controllers/numfmt-alert-render.controller';
 import { NumfmtRepeatLastActionController } from './controllers/numfmt-repeat-last-action.controller';
+import { NumfmtTableAutoExpandController } from './controllers/numfmt-table-auto-expand.controller';
 import { NumfmtEditorController } from './controllers/numfmt.editor.controller';
 import { MobileNumfmtMenuController } from './menu/mobile-numfmt.menu.controller';
 
@@ -74,6 +75,7 @@ export class UniverSheetsNumfmtMobileUIPlugin extends Plugin {
             [MobileComponentsController],
             [SheetNumfmtMobileUIController],
             [NumfmtEditorController],
+            [NumfmtTableAutoExpandController],
             [MobileNumfmtMenuController],
             [NumfmtRepeatLastActionController],
         ]);
@@ -95,6 +97,7 @@ export class UniverSheetsNumfmtMobileUIPlugin extends Plugin {
 
         touchDependencies(this._injector, [
             [NumfmtEditorController],
+            [NumfmtTableAutoExpandController],
             [MobileNumfmtMenuController],
             [NumfmtRepeatLastActionController],
         ]);

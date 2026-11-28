@@ -54,6 +54,9 @@ export interface ISetRangeValuesMutationParams extends IMutationCommonParams {
      */
     isOverrideStyle?: boolean;
 
+    /** Sheet names captured for deterministic qualified-reference rebasing without model reads. */
+    formulaSheetNames?: Record<string, string>;
+
     /** Formula identities retained for conditional result application across Worker replay. */
     sourceFormulaData?: IObjectMatrixPrimitiveType<Pick<ICellData, 'f' | 'si'>>;
 }
@@ -160,6 +163,11 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
 
     handler: (accessor, params) => {
         const { cellValue, subUnitId, unitId, isOverrideStyle, sourceFormulaData } = params;
+        const names = params.formulaSheetNames;
+        if (names !== undefined && (!names || typeof names !== 'object' || Array.isArray(names)
+            || Object.values(names).some((name) => typeof name !== 'string'))) {
+            return false;
+        }
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getUnit<Workbook>(unitId);
         if (!workbook) {

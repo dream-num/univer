@@ -15,7 +15,6 @@
  */
 
 import type { IAccessor, ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
-import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     CommandType,
     ICommandService,
@@ -27,8 +26,14 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import {
+    createSheetValueChangeContext,
+    executeSheetValueChangeEffects,
+    getExplicitNumberFormatRanges,
+} from '../../services/sheet-interceptor/sheet-value-change';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { followSelectionOperation } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
@@ -44,6 +49,8 @@ export interface ISetRangeValuesCommandParams extends Partial<ISheetCommandShare
     value: ICellData | ICellData[][] | IObjectMatrixPrimitiveType<ICellData>;
 
     redoUndoId?: string;
+    /** Interactive editor origin; programmatic writes do not add affiliated changes. */
+    valueChangeSource?: 'editor';
 }
 
 /**
@@ -113,6 +120,8 @@ export const SetRangeValuesCommand: ICommand = {
         const setRangeValuesMutationUndoParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationRedoParams);
         const cellHeights = mapObjectMatrix(setRangeValuesMutationRedoParams.cellValue, (row, col) => worksheet.getCellHeight(row, col) || undefined);
 
+        const valueContext = params.valueChangeSource && createSheetValueChangeContext(unitId, subUnitId, params.valueChangeSource, worksheet, [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationRedoParams }], ranges);
+
         const setValueMutationResult = commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationRedoParams);
         if (!setValueMutationResult) return false;
 
@@ -120,6 +129,11 @@ export const SetRangeValuesCommand: ICommand = {
             id: SetRangeValuesCommand.id,
             params: setRangeValuesMutationRedoParams,
         });
+        if (valueContext) {
+            valueContext.mutations = [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationRedoParams }, ...redos];
+            valueContext.explicitStyleRanges = getExplicitNumberFormatRanges(worksheet, valueContext.source, valueContext.mutations, unitId, subUnitId);
+        }
+        const valueEffects = valueContext ? sheetInterceptorService.onValueChange(valueContext) : [];
 
         const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
             unitId,
@@ -130,13 +144,16 @@ export const SetRangeValuesCommand: ICommand = {
 
         const result = sequenceExecute([...redos, ...autoHeightRedos], commandService);
         if (result.result) {
+            const affiliated = executeSheetValueChangeEffects(valueEffects, commandService);
             const redoMutations = [
                 { id: SetRangeValuesMutation.id, params: setRangeValuesMutationRedoParams },
                 ...redos,
                 ...autoHeightRedos,
+                ...affiliated.redos,
                 followSelectionOperation(ranges[ranges.length - 1], workbook, worksheet),
             ];
             const undoMutations = [
+                ...affiliated.undos,
                 { id: SetRangeValuesMutation.id, params: setRangeValuesMutationUndoParams },
                 ...undos,
                 ...autoHeightUndos,

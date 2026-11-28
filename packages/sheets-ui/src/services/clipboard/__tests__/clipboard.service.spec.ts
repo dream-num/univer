@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, IRange, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
+import type { ISheetValueChangeContext } from '@univerjs/sheets';
 import type { IClipboardInterfaceService } from '@univerjs/ui';
 import {
     BooleanNumber,
@@ -49,6 +50,7 @@ import {
     MoveRangeMutation,
     RefRangeService,
     RemoveWorksheetMergeMutation,
+    SetRangeValuesCommand,
     SetRangeValuesMutation,
     SetSelectionsOperation,
     SetWorksheetActiveOperation,
@@ -228,6 +230,214 @@ describe('Test clipboard', () => {
         expect(getValues(0, 0, 0, 0)?.[0][0]).toMatchObject(previous);
         expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
         assertReplaced();
+    });
+
+    it.each(['plain', 'matrix'])('prepares optional value effects before a %s paste and includes them in the same undo', async (kind) => {
+        let context: ISheetValueChangeContext | undefined;
+        get(SheetInterceptorService).interceptValueChange((ctx) => {
+            context = ctx;
+            return [{
+                redo: { id: SetRangeValuesMutation.id, params: { unitId: 'test', subUnitId: 'sheet1', cellValue: { 10: { 10: { v: 'Inherited' } } } } },
+                undo: { id: SetRangeValuesMutation.id, params: { unitId: 'test', subUnitId: 'sheet1', cellValue: { 10: { 10: null } } } },
+            }];
+        });
+        get(SheetsSelectionsService).setSelections('test', 'sheet1', [{
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            primary: null,
+            style: null,
+        }]);
+        const before = Tools.deepClone(getValues(0, 0, 0, 0)?.[0][0] ?? null);
+        const result = kind === 'matrix'
+            ? await sheetClipboardService.legacyPaste(undefined, 'One\tTwo\n\t')
+            : await sheetClipboardService.paste({
+                presentationStyle: 'unspecified',
+                types: ['text/plain'],
+                getType: async () => new Blob(['One'], { type: 'text/plain' }),
+            });
+        expect(result).toBe(true);
+        expect(context?.source).toBe('paste');
+        expect(context?.beforeCells[0][0]).toEqual(before);
+        expect(context?.ranges[0]).toMatchObject({ startRow: 0, startColumn: 0, endRow: kind === 'matrix' ? 1 : 0, endColumn: kind === 'matrix' ? 1 : 0 });
+        if (kind === 'matrix') {
+            expect(Object.prototype.hasOwnProperty.call(context?.contentWrites[1], 1)).toBe(true);
+        }
+        expect(getValues(10, 10, 10, 10)?.[0][0]?.v).toBe('Inherited');
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getValues(10, 10, 10, 10)?.[0][0]?.v).toBeFalsy();
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getValues(10, 10, 10, 10)?.[0][0]?.v).toBe('Inherited');
+    });
+
+    it('preserves every explicitly blank cell in an all-blank TSV rectangle', async () => {
+        let context: ISheetValueChangeContext | undefined;
+        get(SheetInterceptorService).interceptValueChange((ctx) => {
+            context = ctx;
+            return [];
+        });
+        get(SheetsSelectionsService).setSelections('test', 'sheet1', [{ range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }, primary: null, style: null }]);
+        expect(await sheetClipboardService.legacyPaste(undefined, '\t\n\t')).toBe(true);
+        expect(context?.ranges).toMatchObject([{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }]);
+        for (const row of [0, 1]) {
+            for (const col of [0, 1]) {
+                expect(Object.prototype.hasOwnProperty.call(context?.contentWrites[row], col)).toBe(true);
+            }
+        }
+    });
+
+    it('uses the same rectangular text semantics for ClipboardItem and native paste, including trailing blank rows', async () => {
+        let context: ISheetValueChangeContext | undefined;
+        get(SheetInterceptorService).interceptValueChange((ctx) => {
+            context = ctx;
+            return [];
+        });
+        get(SheetsSelectionsService).setSelections('test', 'sheet1', [{ range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }, primary: null, style: null }]);
+        expect(await sheetClipboardService.paste({ presentationStyle: 'unspecified', types: ['text/plain'], getType: async () => new Blob(['x\t2\n\t\n\t'], { type: 'text/plain' }) })).toBe(true);
+        expect(context?.ranges).toMatchObject([{ startRow: 0, endRow: 2, startColumn: 0, endColumn: 1 }]);
+    });
+
+    it.each(['native', 'ClipboardItem'])('preserves the next row when %s TSV ends in a newline', async (route) => {
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 11: { 0: { v: 'Keep A12' }, 1: { v: 'Keep B12' } } },
+        });
+        get(SheetsSelectionsService).setSelections('test', 'sheet1', [{
+            range: { startRow: 10, endRow: 10, startColumn: 0, endColumn: 0 },
+            primary: null,
+            style: null,
+        }]);
+        const result = route === 'native'
+            ? await sheetClipboardService.legacyPaste(undefined, 'Alice\t7\n')
+            : await sheetClipboardService.paste({
+                presentationStyle: 'unspecified',
+                types: ['text/plain'],
+                getType: async () => new Blob(['Alice\t7\n'], { type: 'text/plain' }),
+            });
+        expect(result).toBe(true);
+        expect(getValues(10, 0, 11, 1)?.map((row) => row.map((cell) => cell?.v))).toEqual([
+            ['Alice', 7],
+            ['Keep A12', 'Keep B12'],
+        ]);
+    });
+
+    it.each(['A&amp;B', 'A&amp;B\t7\n'])('keeps literal HTML entities in plain text (%s)', async (text) => {
+        get(SheetsSelectionsService).setSelections('test', 'sheet1', [{
+            range: { startRow: 10, endRow: 10, startColumn: 0, endColumn: 0 },
+            primary: null,
+            style: null,
+        }]);
+        expect(await sheetClipboardService.legacyPaste(undefined, text)).toBe(true);
+        expect(getValues(10, 0, 10, 0)?.[0][0]?.v).toBe('A&amp;B');
+    });
+
+    it('keeps a prior paste and its history when a replacement is vetoed or an unrelated edit intervenes', async () => {
+        get(SheetsSelectionsService).setSelections('test', 'sheet1', [{ range: { startRow: 10, endRow: 10, startColumn: 0, endColumn: 0 }, primary: null, style: null }]);
+        expect(await sheetClipboardService.legacyPaste(undefined, 'First\t2')).toBe(true);
+        const history = get(IUndoRedoService);
+        const original = history.pitchTopUndoElement();
+        const veto = sheetClipboardService.addClipboardHook({ id: 'veto-replacement', onBeforePaste: () => false });
+        expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(false);
+        expect(history.pitchTopUndoElement()).toBe(original);
+        expect(getValues(10, 0, 10, 0)?.[0][0]?.v).toBe('First');
+        veto.dispose();
+        commandService.registerCommand(SetRangeValuesCommand);
+        commandService.syncExecuteCommand(SetRangeValuesCommand.id, { unitId: 'test', subUnitId: 'sheet1', range: { startRow: 11, endRow: 11, startColumn: 0, endColumn: 0 }, value: { v: 'Other edit' } });
+        expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(false);
+        expect(getValues(11, 0, 11, 0)?.[0][0]?.v).toBe('Other edit');
+    });
+
+    it.each(['false', 'throw'])('restores a prior paste when a later inverse fails with %s', async (failure) => {
+        get(SheetsSelectionsService).setSelections('test', 'sheet1', [{ range: { startRow: 10, endRow: 10, startColumn: 0, endColumn: 0 }, primary: null, style: null }]);
+        commandService.registerCommand({ id: 'test.mutation.paste-resource', type: CommandType.MUTATION, handler: () => true });
+        commandService.registerCommand({ id: 'test.mutation.unavailable-paste-inverse', type: CommandType.MUTATION, handler: () => {
+            if (failure === 'throw') throw new Error('Paste inverse failed');
+            return false;
+        } });
+        sheetClipboardService.addClipboardHook({ id: 'resource-inverse', priority: 1000, onPasteCells: () => ({
+            redos: [{ id: 'test.mutation.paste-resource', params: { unitId: 'test', subUnitId: 'sheet1' } }],
+            undos: [{ id: 'test.mutation.unavailable-paste-inverse', params: { unitId: 'test', subUnitId: 'sheet1' } }],
+        }) });
+        expect(await sheetClipboardService.legacyPaste(undefined, 'First\t2')).toBe(true);
+        const history = get(IUndoRedoService);
+        const original = history.pitchTopUndoElement();
+        expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(false);
+        expect(history.pitchTopUndoElement()).toBe(original);
+        expect(getValues(10, 0, 10, 0)?.[0][0]?.v).toBe('First');
+    });
+
+    it('keeps committed replacement data and history consistent when an after-paste hook throws', async () => {
+        get(SheetsSelectionsService).setSelections('test', 'sheet1', [{ range: { startRow: 10, endRow: 10, startColumn: 0, endColumn: 0 }, primary: null, style: null }]);
+        let replacement = false;
+        sheetClipboardService.addClipboardHook({
+            id: 'after-replacement',
+            priority: 1000,
+            onBeforePaste: (_location, payload) => {
+                replacement = payload?.pasteType === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE;
+                return true;
+            },
+            onPasteCells: () => ({
+                redos: [{ id: SetRangeValuesMutation.id, params: { unitId: 'test', subUnitId: 'sheet1', cellValue: { 10: { 0: { v: replacement ? 'Replacement' : 'First' } } } } }],
+                undos: [{ id: SetRangeValuesMutation.id, params: { unitId: 'test', subUnitId: 'sheet1', cellValue: { 10: { 0: null } } } }],
+            }),
+            onAfterPaste: (success) => {
+                if (success && replacement) throw new Error('After paste failed');
+            },
+        });
+        expect(await sheetClipboardService.legacyPaste(undefined, 'First\t2')).toBe(true);
+        const history = get(IUndoRedoService);
+        const original = history.pitchTopUndoElement();
+        expect(() => sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toThrow('After paste failed');
+        expect(history.pitchTopUndoElement()).not.toBe(original);
+        expect(getValues(10, 0, 10, 0)?.[0][0]?.v).toBe('Replacement');
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getValues(10, 0, 10, 0)?.[0][0]?.v).toBe('Replacement');
+    });
+
+    it.each(['false', 'throw'])('rolls back partial replacement writes before restoring the old paste on %s', async (failure) => {
+        get(SheetsSelectionsService).setSelections('test', 'sheet1', [{ range: { startRow: 10, endRow: 10, startColumn: 0, endColumn: 0 }, primary: null, style: null }]);
+        const beforeExtra = Tools.deepClone(getValues(10, 2, 10, 2)?.[0][0] ?? null);
+        commandService.registerCommand({ id: 'test.mutation.failed-paste-replacement', type: CommandType.MUTATION, handler: () => {
+            if (failure === 'throw') throw new Error('Paste replacement failed');
+            return false;
+        } });
+        sheetClipboardService.addClipboardHook({ id: 'partial-replacement', priority: 1000, onPasteCells: (_from, _to, _matrix, payload) => {
+            if (payload.pasteType !== PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE) return { redos: [], undos: [] };
+            return {
+                redos: [
+                    { id: SetRangeValuesMutation.id, params: { unitId: 'test', subUnitId: 'sheet1', cellValue: { 10: { 2: { v: 'Partial replacement' } } } } },
+                    { id: 'test.mutation.failed-paste-replacement', params: { unitId: 'test', subUnitId: 'sheet1' } },
+                ],
+                undos: [{ id: SetRangeValuesMutation.id, params: { unitId: 'test', subUnitId: 'sheet1', cellValue: { 10: { 2: beforeExtra } } } }],
+            };
+        } });
+        expect(await sheetClipboardService.legacyPaste(undefined, 'First\t2')).toBe(true);
+        const history = get(IUndoRedoService);
+        const original = history.pitchTopUndoElement();
+        if (failure === 'throw') expect(() => sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toThrow('Paste replacement failed');
+        else expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(false);
+        expect(history.pitchTopUndoElement()).toBe(original);
+        expect(getValues(10, 0, 10, 0)?.[0][0]?.v).toBe('First');
+        expect(getValues(10, 2, 10, 2)?.[0][0] ?? null).toEqual(beforeExtra);
+    });
+
+    it.each(['false', 'throw'])('restores plain-text paste writes and leaves history unchanged after %s', async (failure) => {
+        get(SheetsSelectionsService).setSelections('test', 'sheet1', [{ range: { startRow: 10, endRow: 10, startColumn: 0, endColumn: 0 }, primary: null, style: null }]);
+        const before = Tools.deepClone(getValues(10, 0, 10, 0)?.[0][0] ?? null);
+        commandService.registerCommand({ id: 'test.mutation.failed-plain-text-paste', type: CommandType.MUTATION, handler: () => {
+            if (failure === 'throw') throw new Error('Plain text paste failed');
+            return false;
+        } });
+        sheetClipboardService.addClipboardHook({ id: 'fail-plain-text', priority: 1000, onPastePlainText: () => ({
+            redos: [{ id: 'test.mutation.failed-plain-text-paste', params: { unitId: 'test', subUnitId: 'sheet1' } }],
+            undos: [],
+        }) });
+        const history = get(IUndoRedoService);
+        const original = history.pitchTopUndoElement();
+        if (failure === 'throw') await expect(sheetClipboardService.legacyPaste(undefined, 'Partial text')).rejects.toThrow('Plain text paste failed');
+        else expect(await sheetClipboardService.legacyPaste(undefined, 'Partial text')).toBe(false);
+        expect(history.pitchTopUndoElement()).toBe(original);
+        expect(getValues(10, 0, 10, 0)?.[0][0] ?? null).toEqual(before);
     });
 
     it('keeps the original selection while clipboard data is read asynchronously', async () => {

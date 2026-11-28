@@ -425,12 +425,12 @@ describe('SheetClipboardService', () => {
             },
         } as never);
 
-        const textItem = new MockClipboardItem({ 'text/plain': 'North\tSouth' });
+        const textItem = new MockClipboardItem({ 'text/plain': 'North South' });
         const imageItem = new MockClipboardItem({ 'image/png': 'image-bytes' });
 
         expect(await service.paste(textItem as unknown as ClipboardItem, PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE)).toBe(true);
         expect(await service.paste(imageItem as unknown as ClipboardItem, PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT)).toBe(true);
-        expect(pastedTexts).toEqual([{ text: 'North\tSouth', pasteType: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE }]);
+        expect(pastedTexts).toEqual([{ text: 'North South', pasteType: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE }]);
         expect(pastedFiles).toEqual([{ name: 'clipboard-image.png', pasteType: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT }]);
     });
 

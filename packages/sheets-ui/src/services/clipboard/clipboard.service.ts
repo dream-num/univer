@@ -59,6 +59,7 @@ import {
     LocaleService,
     ObjectMatrix,
     sequenceExecute,
+    sequenceExecuteAsync,
     SheetTypes,
     ThemeService,
     toDisposable,
@@ -67,7 +68,9 @@ import {
 } from '@univerjs/core';
 import { getFocusedRenderForUnit, IRenderManagerService } from '@univerjs/engine-render';
 import {
+    createSheetValueChangeContext,
     discreteRangeToRange,
+    executeSheetValueChangeEffects,
     getPrimaryForRange,
     MoveRangeCommand,
     rangeToDiscreteRange,
@@ -590,12 +593,19 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
         const result = sequenceExecute(element.undoMutations, this._commandService);
-        if (!result.result) return false;
+        if (!result.result) {
+            if ((result.index > 0 || result.error) && !sequenceExecute(element.redoMutations, this._commandService).result) {
+                throw new Error('[SheetClipboardService] Could not restore the previous paste.');
+            }
+            return false;
+        }
         undoRedoService.popUndoToRedo();
 
         const { cellMatrix, rowProperties = [], colProperties = [], source } = pasteOptionsCache;
 
         let replaced = false;
+        let pasteThrew = false;
+        let pasteError: unknown;
         try {
             // Undo invalidates this display for recalculation, but the validated logical target stays the same.
             replaced = this._pasteUSM({
@@ -603,27 +613,29 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 colProperties,
                 rowProperties,
             }, target, PREDEFINED_HOOK_NAME_PASTE[type], source, location, view);
-            return replaced;
-        } finally {
-            if (!replaced) {
-                const replacement = this._pasteOptionViews.get(target.pastedRange);
-                if (replacement && replacement !== captured && undoRedoService.pitchTopUndoElement() === replacement.undoItem) {
-                    const reverted = sequenceExecute(replacement.undoItem.undoMutations, this._commandService);
-                    if (reverted.result) undoRedoService.popUndoToRedo();
-                }
-                const restored = sequenceExecute(element.redoMutations, this._commandService);
-                if (restored.result) {
-                    if (undoRedoService.pitchTopRedoElement() === element) {
-                        undoRedoService.popRedoToUndo();
-                    } else {
-                        undoRedoService.pushUndoRedo(element);
-                    }
-                    this._pasteOptionViews.set(target.pastedRange, captured);
-                    this.updatePasteOptionsCache(pasteOptionsCache);
-                    this.setShowMenu(false);
-                }
-            }
+        } catch (error) {
+            pasteThrew = true;
+            pasteError = error;
         }
+        // A post-paste hook can throw after the replacement commits its data and history.
+        const replacement = this._pasteOptionViews.get(target.pastedRange);
+        const committed = replacement && replacement !== captured && undoRedoService.pitchTopUndoElement() === replacement.undoItem;
+        if (!replaced && !committed) {
+            const restored = sequenceExecute(element.redoMutations, this._commandService);
+            if (!restored.result) {
+                throw new Error('[SheetClipboardService] Could not restore the previous paste.');
+            }
+            if (undoRedoService.pitchTopRedoElement() === element) {
+                undoRedoService.popRedoToUndo();
+            } else {
+                undoRedoService.pushUndoRedo(element);
+            }
+            this._pasteOptionViews.set(target.pastedRange, captured);
+            this.updatePasteOptionsCache(pasteOptionsCache);
+            this.setShowMenu(false);
+        }
+        if (pasteThrew) throw pasteError;
+        return replaced;
     }
 
     updatePasteOptionsCache(cache: IPasteOptionCache | null): void {
@@ -956,14 +968,26 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 undoMutationsInfo.push(...contentReturn.undos);
             }
         });
-        const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
+        const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
+        const context = worksheet && createSheetValueChangeContext(unitId, subUnitId, 'paste', worksheet, redoMutationsInfo);
+        const effects = context ? this._injector.get(SheetInterceptorService).onValueChange(context) : [];
+        const execution = await sequenceExecuteAsync(redoMutationsInfo, this._commandService);
+        const result = execution.result;
         if (result) {
+            const affiliated = executeSheetValueChangeEffects(effects, this._commandService);
+            redoMutationsInfo.push(...affiliated.redos);
+            undoMutationsInfo.unshift(...affiliated.undos);
             // add to undo redo services
             this._undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: undoMutationsInfo,
                 redoMutations: redoMutationsInfo,
             });
+        } else {
+            if (!(await sequenceExecuteAsync(undoMutationsInfo, this._commandService)).result) {
+                throw new Error('[SheetClipboardService] Could not roll back the failed paste.');
+            }
+            if (execution.error) throw execution.error;
         }
 
         return result;
@@ -1305,6 +1329,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
         const { rowProperties, colProperties, cellMatrix } = data;
         const { unitId, subUnitId, pastedRange } = target;
+        const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return false;
+        }
         const objectOnly = source?.skipCellCopy === true;
         const payload: ICopyPastePayload = {
             copyType: source?.copyType || COPY_TYPE.COPY,
@@ -1412,8 +1440,16 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 redoMutationsInfo,
             });
 
-            const result = redoMutationsInfo.every((m) => this._commandService.syncExecuteCommand(m.id, m.params));
+            const context = !objectOnly && payload.copyType !== COPY_TYPE.CUT
+                ? createSheetValueChangeContext(unitId, subUnitId, 'paste', worksheet, redoMutationsInfo, [discreteRangeToRange(pastedRange)])
+                : undefined;
+            const effects = context ? this._injector.get(SheetInterceptorService).onValueChange(context) : [];
+            const execution = sequenceExecute(redoMutationsInfo, this._commandService);
+            const result = execution.result;
             if (result) {
+                const affiliated = executeSheetValueChangeEffects(effects, this._commandService);
+                redoMutationsInfo.push(...affiliated.redos);
+                undoMutationsInfo.unshift(...affiliated.undos);
                 // handle auto row height for pasted range
                 const autoHeightMutation = objectOnly
                     ? null
@@ -1457,6 +1493,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 const currentWorkbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                 this.setShowMenu(currentWorkbook?.getUnitId() === unitId && currentWorkbook.getActiveSheet()?.getSheetId() === subUnitId &&
                     (!location || view?.render === getFocusedRenderForUnit(this._renderManagerService, unitId)));
+            } else {
+                if (!sequenceExecute(undoMutationsInfo, this._commandService).result) {
+                    throw new Error('[SheetClipboardService] Could not roll back the failed paste.');
+                }
+                if (execution.error) throw execution.error;
             }
 
             if (!objectOnly) {

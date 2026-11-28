@@ -112,7 +112,13 @@ export class SheetTableFormulaController extends Disposable {
         const tableInfo = table.getTableInfo();
         const name = tableInfo.name;
         const columns = tableInfo.columns;
-        const titleMap = Object.fromEntries(columns.map((column, index) => [column.displayName, index]));
+        const titles = new Map<string, number>();
+        columns.forEach((column, index) => {
+            if (!titles.has(column.displayName)) {
+                titles.set(column.displayName, index);
+            }
+        });
+        const titleMap = Object.fromEntries(titles);
         this._commandService.executeCommand<ISetSuperTableMutationParam>(SetSuperTableMutation.id, {
             unitId,
             tableName: name,

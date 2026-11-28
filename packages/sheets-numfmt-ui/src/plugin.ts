@@ -15,7 +15,6 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsNumfmtUIConfig } from './config/config';
 import {
     DependentOn,
     IConfigService,
@@ -31,11 +30,13 @@ import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engin
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import type { IUniverSheetsNumfmtUIConfig } from './config/config';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_NUMFMT_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
 import { NumfmtAlertRenderController } from './controllers/numfmt-alert-render.controller';
 import { NumfmtRepeatLastActionController } from './controllers/numfmt-repeat-last-action.controller';
+import { NumfmtTableAutoExpandController } from './controllers/numfmt-table-auto-expand.controller';
 import { NumfmtEditorController } from './controllers/numfmt.editor.controller';
 import { SheetNumfmtUIController } from './controllers/ui.controller';
 import { UserHabitController } from './controllers/user-habit.controller';
@@ -81,6 +82,7 @@ export class UniverSheetsNumfmtUIPlugin extends Plugin {
             [SheetNumfmtUIController],
             [NumfmtEditorController],
             [UserHabitController],
+            [NumfmtTableAutoExpandController],
             [NumfmtMenuController],
             [NumfmtRepeatLastActionController],
         ]);
@@ -89,6 +91,7 @@ export class UniverSheetsNumfmtUIPlugin extends Plugin {
     override onRendered(): void {
         this._registerRenderModules();
         touchDependencies(this._injector, [
+            [NumfmtTableAutoExpandController],
             [SheetNumfmtUIController],
             [NumfmtEditorController],
             [NumfmtMenuController],

@@ -51,15 +51,12 @@ rules.add(dotSemicolon, 'az', 'IR', 'cyrl');
 rules.add(dotSemicolon, 'uz', 'AF', 'cyrl');
 rules.add(dotComma, 'az', 'IR');
 rules.add(dotComma, 'uz', 'AF');
-rules.add(dotComma, 'und', 'CH');
-rules.add(dotSemicolon, 'sr', 'CH', 'latn');
 
 rules.add(dotComma, 'af', 'NA');
 rules.add(dotComma, 'ar', '001 EH ER IL KM PS SD SO SS TD');
 rules.add(commaSemicolon, 'ar', 'DJ DZ LY MA MR TN');
 rules.add(dotSemicolon, 'ar', 'AE');
 rules.add(dotComma, 'ckb', 'IQ IR');
-rules.add(dotSemicolon, 'de fr it', 'CH');
 rules.add(dotSemicolon, 'de', 'LI');
 rules.add(dotSemicolon, 'dz', 'BT');
 rules.add(commaSemicolon, 'ee', 'TG');
@@ -71,7 +68,7 @@ rules.add(commaSemicolon, 'ff', 'BF GN GW MR SN');
 rules.add(dotComma, 'ff', 'CM GH GM LR NE SL');
 rules.add(dotComma, 'fr', 'BI KM MG MU NE RW SC SY TD VU');
 rules.add(dotSemicolon, 'ga', 'IE');
-rules.add(dotComma, 'gsw', 'CH LI');
+rules.add(dotComma, 'gsw', 'LI');
 rules.add(dotComma, 'ha', 'GH NE NG');
 rules.add(dotSemicolon, 'ko', 'KP');
 rules.add(commaSemicolon, 'kpe', 'GN');
@@ -81,7 +78,7 @@ rules.add(dotSemicolon, 'ne', 'IN');
 rules.add(dotComma, 'nl', 'SX');
 rules.add(dotComma, 'om so', 'KE');
 rules.add(dotComma, 'ps', 'PK');
-rules.add(dotComma, 'pt', 'CH MO');
+rules.add(dotComma, 'pt', 'MO');
 rules.add(dotSemicolon, 'qu', 'EC PE');
 rules.add(dotComma, 'so', 'ET');
 rules.add(commaSemicolon, 'so', 'DJ');
@@ -121,9 +118,13 @@ export function getFormulaSeparators(region: string): IFormulaSeparators {
     const { language, script, territory } = parts;
     if (!rules.has(language)) return dotSemicolon;
     if (territory && commaDecimalTerritories.has(territory)) return commaSemicolon;
-    if (territory === 'US' || territory === 'CA' || territory === 'GB') {
+    if (territory === 'US' || territory === 'CA' || territory === 'GB' || territory === 'CH') {
+        if (territory === 'CH' && (!script || script === 'latn')) {
+            if (language === 'rm') return commaSemicolon;
+            if (language === 'de' || language === 'fr' || language === 'it') return dotSemicolon;
+        }
         if (territory === 'CA' && language === 'fr') return commaSemicolon;
-        if (language === 'und' || (territory === 'US' && language === 'haw') ||
+        if ((language === 'und' && territory !== 'CH') || (territory === 'US' && language === 'haw') ||
             (territory === 'GB' && (language === 'cy' || language === 'gd')) ||
             (script === 'latn' && language === 'sr') || (script === 'cyrl' && (language === 'az' || language === 'uz'))) {
             return dotSemicolon;

@@ -33,6 +33,14 @@ import web from './function-list/web/pt-BR';
 
 const locale: FormulaLanguagePack = {
     'engine-formula': {
+        errorAliases: {
+            '#N/A': '#N/D',
+            '#NUM!': '#NÚM!',
+            '#VALUE!': '#VALOR!',
+            '#NAME?': '#NOME?',
+            '#NULL!': '#NULO!',
+            '#GETTING_DATA': '#OBTENDO_DADOS',
+        },
         // Built-in names returned by Excel FormulaLocal for this interface language.
         functionAliases: {
             ACCRINT: 'JUROSACUM',

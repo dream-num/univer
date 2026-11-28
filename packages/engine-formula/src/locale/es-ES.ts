@@ -33,6 +33,16 @@ import web from './function-list/web/es-ES';
 
 const locale: FormulaLanguagePack = {
     'engine-formula': {
+        errorAliases: {
+            '#DIV/0!': '#¡DIV/0!',
+            '#N/A': '#N/D',
+            '#NUM!': '#¡NUM!',
+            '#REF!': '#¡REF!',
+            '#VALUE!': '#¡VALOR!',
+            '#NAME?': '#¿NOMBRE?',
+            '#NULL!': '#¡NULO!',
+            '#GETTING_DATA': '#OBTENIENDO_DATOS',
+        },
         // Built-in names returned by Excel FormulaLocal for this interface language.
         functionAliases: {
             ACCRINT: 'INT.ACUM',

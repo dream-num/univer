@@ -17,7 +17,8 @@
 import type { LocaleService, RegionService } from '@univerjs/core';
 import { columnLabelToNumber, LocaleType, MAX_COLUMN_COUNT, MAX_ROW_COUNT, normalizeNativeDigits } from '@univerjs/core';
 import { parseArrayConstant } from '../../basics/array-constant';
-import { getFunctionAliases } from '../../services/formula/utils';
+import { ERROR_LITERALS } from '../../basics/error-type';
+import { getErrorAliases, getFunctionAliases } from '../../services/formula/utils';
 import { normalizeLambdaVariable } from '../utils/function-definition';
 
 /** The input language and region of a single formula edit. */
@@ -85,6 +86,7 @@ function endBindingArgument(scope: IBindingScope, text: string, index: number) {
 }
 
 interface IAliases {
+    errors: readonly [string, string][];
     local: Map<string, string>;
     standard: Map<string, string>;
 }
@@ -152,6 +154,18 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
             }
             i = protectedEnd;
             continue;
+        }
+
+        if (char === '#' && aliases) {
+            const rest = text.slice(i).toUpperCase();
+            const match = aliases.errors.find(([canonical, label]) => rest.startsWith(strict ? label : canonical));
+            if (match) {
+                result += strict ? match[0] : match[1];
+                i += (strict ? match[1] : match[0]).length;
+                continue;
+            }
+            // A value can end with the spill operator. A leading hash must introduce a local error token.
+            if (strict && !followsValue(text, i)) return null;
         }
 
         const namePattern = inArray && dotSeparatesArray ? arrayName : identifier;
@@ -255,7 +269,12 @@ export function getFormulaSyntax(regionService: RegionService, localeService: Lo
     const { decimal, argument, arrayColumn, arrayRow } = regionService.getFormulaSeparators();
     const fullWidthDigits = [LocaleType.ZH_CN, LocaleType.ZH_TW, LocaleType.ZH_HK, LocaleType.JA_JP, LocaleType.KO_KR].includes(localeService.getCurrentLocale());
     const local = { decimal, argument, column: arrayColumn, row: arrayRow, number: numberPattern(decimal), fullWidthDigits };
-    const aliases: IAliases = { local: new Map(), standard: new Map() };
+    const errorLabels = getErrorAliases(localeService);
+    const aliases: IAliases = {
+        local: new Map(),
+        standard: new Map(),
+        errors: Array.from(ERROR_LITERALS, (code) => [code, errorLabels[code] ?? code]),
+    };
     for (const [name, local] of Object.entries(getFunctionAliases(localeService))) {
         aliases.local.set(name, local);
         aliases.standard.set(local.toUpperCase(), name);

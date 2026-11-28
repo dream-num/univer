@@ -115,6 +115,22 @@ describe('regional formula editing', () => {
         }
     });
 
+    it('round-trips error literals without translating strings, structured references or spill operators', () => {
+        const univer = new Univer({ locale: LocaleType.DE_DE, locales: { [LocaleType.DE_DE]: deDE } });
+        try {
+            const syntax = syntaxFor(univer, 'de-DE');
+            const canonical = '=IFERROR(#VALUE!,"#VALUE!")';
+            const local = '=WENNFEHLER(#WERT!;"#VALUE!")';
+            expect(syntax.toLocal(canonical)).toBe(local);
+            expect(syntax.toStandard(local)).toBe(canonical);
+            expect(syntax.toStandard('=#VALUE!')).toBeNull();
+            expect(syntax.toStandard('=#SPILL!')).toBeNull();
+            expect(syntax.toStandard('=SUMME(A1#;Table1[Column #WERT!])')).toBe('=SUM(A1#,Table1[Column #WERT!])');
+        } finally {
+            univer.dispose();
+        }
+    });
+
     it('normalizes Excel numeric scripts inside numbers and A1 references while keeping names, bindings and strings', async () => {
         const univer = new Univer({ locale: LocaleType.EN_US });
         try {

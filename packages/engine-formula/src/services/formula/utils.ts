@@ -15,6 +15,7 @@
  */
 
 import type { ILanguagePack, LocaleService } from '@univerjs/core';
+import type { ErrorType } from '../../basics/error-type';
 import type { IFunctionInfo, IFunctionParam } from '../../basics/function';
 import { FUNCTION_LIST } from './function-list/function-list';
 
@@ -23,6 +24,11 @@ export const builtinsByName = new Map(FUNCTION_LIST.map((item) => [item.function
 export function getFunctionAliases(localeService: LocaleService): Readonly<Record<string, string>> {
     const pack = localeService.getLocales()?.['engine-formula'] as ILanguagePack | undefined;
     return (pack?.functionAliases as Record<string, string> | undefined) ?? {};
+}
+
+export function getErrorAliases(localeService: LocaleService): Readonly<Partial<Record<ErrorType, string>>> {
+    const pack = localeService.getLocales()?.['engine-formula'] as ILanguagePack | undefined;
+    return pack?.errorAliases as Partial<Record<ErrorType, string>> ?? {};
 }
 
 export function getFunctionName(item: IFunctionInfo, localeService: LocaleService) {

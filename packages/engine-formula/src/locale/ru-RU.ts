@@ -33,6 +33,16 @@ import web from './function-list/web/ru-RU';
 
 const locale: FormulaLanguagePack = {
     'engine-formula': {
+        errorAliases: {
+            '#DIV/0!': '#ДЕЛ/0!',
+            '#N/A': '#Н/Д',
+            '#NUM!': '#ЧИСЛО!',
+            '#REF!': '#ССЫЛКА!',
+            '#VALUE!': '#ЗНАЧ!',
+            '#NAME?': '#ИМЯ?',
+            '#NULL!': '#ПУСТО!',
+            '#GETTING_DATA': '#ОЖИДАНИЕ_ДАННЫХ',
+        },
         // Built-in names returned by Excel FormulaLocal for this interface language.
         functionAliases: {
             ACCRINT: 'НАКОПДОХОД',

@@ -59,6 +59,9 @@ export const ERROR_TYPE_NUMBER = new Map<ErrorType, number>([
     [ErrorType.CALC, 14],
 ]);
 
+/** Error values Excel accepts as literals in a cell or formula. */
+export const ERROR_LITERALS = [ErrorType.NULL, ErrorType.DIV_BY_ZERO, ErrorType.VALUE, ErrorType.REF, ErrorType.NAME, ErrorType.NUM, ErrorType.NA, ErrorType.CONNECT];
+
 export const ERROR_TYPE_SET = new Set(Object.values(ErrorType));
 
 export const ERROR_TYPE_COUNT_ARRAY = [...new Set(Object.values(ErrorType).map((error) => error.length))];

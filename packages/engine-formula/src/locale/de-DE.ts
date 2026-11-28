@@ -33,6 +33,13 @@ import web from './function-list/web/de-DE';
 
 const locale: FormulaLanguagePack = {
     'engine-formula': {
+        errorAliases: {
+            '#N/A': '#NV',
+            '#NUM!': '#ZAHL!',
+            '#REF!': '#BEZUG!',
+            '#VALUE!': '#WERT!',
+            '#GETTING_DATA': '#DATEN_ABRUFEN',
+        },
         // Built-in names returned by Excel FormulaLocal for this interface language.
         functionAliases: {
             ACCRINT: 'AUFGELZINS',

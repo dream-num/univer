@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type enUS from './en-US';
-
+import type { FormulaLanguagePack } from './types';
 import array from './function-list/array/sk-SK';
 import compatibility from './function-list/compatibility/sk-SK';
 import cube from './function-list/cube/sk-SK';
@@ -32,8 +31,18 @@ import text from './function-list/text/sk-SK';
 import univer from './function-list/univer/sk-SK';
 import web from './function-list/web/sk-SK';
 
-const locale: typeof enUS = {
+const locale: FormulaLanguagePack = {
     'engine-formula': {
+        errorAliases: {
+            '#DIV/0!': '#DELENIENULOU!',
+            '#N/A': '#NEDOSTUPNÝ',
+            '#NUM!': '#ČÍSLO!',
+            '#REF!': '#ODKAZ!',
+            '#VALUE!': '#HODNOTA!',
+            '#NAME?': '#NÁZOV?',
+            '#NULL!': '#NEPLATNÝ!',
+            '#GETTING_DATA': '#ZÍSKANIE_ÚDAJOV',
+        },
         functionList: {
             ...array,
             ...compatibility,

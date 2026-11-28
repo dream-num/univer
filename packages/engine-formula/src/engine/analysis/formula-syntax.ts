@@ -153,6 +153,8 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
     const trackBindings = /(?:LET|LAMBDA)\(/i.test(text);
     let argumentUsed: string | undefined;
     let nextCall = '';
+    const operatorClosings: string[] | undefined = from === standard && /_xlfn\.(SINGLE|ANCHORARRAY)\(/i.test(text) ? [] : undefined;
+    let operatorClosing: string | undefined;
     let result = '';
     let arrayStart = -1;
     let i = 0;
@@ -216,6 +218,9 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
             } else if (from === standard && /^_xlnm\.[a-z]{1,3}\d+$/i.test(name)) {
                 // Excel displays unresolved names that look like cells in single quotes.
                 result += `'${name.slice(6)}'`;
+            } else if (operatorClosings && isCall && (key === '_XLFN.SINGLE' || key === '_XLFN.ANCHORARRAY')) {
+                if (key === '_XLFN.SINGLE') result += '@';
+                operatorClosing = key === '_XLFN.SINGLE' ? '' : '#';
             } else if (aliases && isCall) {
                 result += translateCall(name, aliases, scopes, strict);
             } else {
@@ -245,6 +250,7 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
             if (strict && char === from.decimal && followsValue(text, i)) return reject('separator');
             // A list separator cannot turn a standalone number into a reference union.
             if (strict && /^[,;،؛]/.test(text.slice(end).trimStart()) && /^=\s*[+-]?\s*$/.test(text.slice(0, i))) return reject('separator');
+            if (strict && value.includes(from.decimal) && scan[end] === from.decimal) return reject('syntax');
             // Number grouping is not formula syntax. A space after a row range may be an intersection.
             if (strict && /^(?:['’٬\u00A0\u202F]| +)\d/.test(scan.slice(end)) && !text.slice(0, i).trimEnd().endsWith(':')) return reject('separator');
             if (strict && value.endsWith(from.decimal) && /^\s*[\p{L}\p{N}_$"[(]/u.test(scan.slice(end))) return reject('separator');
@@ -274,6 +280,20 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
             }
         }
 
+        if (operatorClosings && !inArray) {
+            if (char === '(') {
+                operatorClosings.push(operatorClosing ?? ')');
+                if (operatorClosing !== undefined) {
+                    operatorClosing = undefined;
+                    i++;
+                    continue;
+                }
+            } else if (char === ')') {
+                result += operatorClosings.pop() ?? ')';
+                i++;
+                continue;
+            }
+        }
         if (isArgument || (inArray && char === from.column)) {
             result += inArray ? to.column : to.argument;
         } else if (inArray && char === from.row) {

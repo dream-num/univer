@@ -171,6 +171,36 @@ describe('regional formula editing', () => {
         }
     });
 
+    it('renders stored implicit intersection and spill operators inside nested expressions', () => {
+        const univer = new Univer();
+        try {
+            const syntax = syntaxFor(univer, 'de-DE');
+            expect(syntax.toLocal('=_xlfn.LET(_xlpm.A1,_xlfn.SINGLE(_xlnm.A1),_xlpm.A1)')).toBe("=LET(A1;@'A1';A1)");
+            expect(syntax.toLocal('=_xlfn.ANCHORARRAY(A1):_xlfn.ANCHORARRAY(A2)')).toBe('=A1#:A2#');
+            expect(syntax.toLocal('=IFERROR(_xlfn.SINGLE(_xlfn.ANCHORARRAY((_xlfn.SINGLE(A1)))),0)')).toBe('=IFERROR(@(@A1)#;0)');
+            expect(syntax.toLocal('="_xlfn.SINGLE(A1)"')).toBe('="_xlfn.SINGLE(A1)"');
+        } finally {
+            univer.dispose();
+        }
+    });
+
+    it('rejects repeated decimal marks without changing quoted text or omitted arguments', () => {
+        const univer = new Univer();
+        try {
+            const us = syntaxFor(univer, 'en-US');
+            const fr = syntaxFor(univer, 'fr-FR');
+            expect(us.toStandard('=1..2')).toBeNull();
+            expect(us.toStandard('=SUM(1.5.2)')).toBeNull();
+            expect(us.toStandard('=IF(1,,2)')).toBe('=IF(1,,2)');
+            expect(fr.toStandard('=IF(1,,2)')).toBeNull();
+            expect(fr.toStandard('=1,5,2')).toBeNull();
+            expect(fr.toStandard('="1,,2"')).toBe('="1,,2"');
+            expect(fr.toStandard('=IF(1;;2)')).toBe('=IF(1,,2)');
+        } finally {
+            univer.dispose();
+        }
+    });
+
     it('validates names in A1 entry separately from loading a stored Excel formula', () => {
         const univer = new Univer({ locale: LocaleType.EN_US });
         try {

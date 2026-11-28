@@ -166,6 +166,20 @@ describe('DocHeaderFooterController', () => {
         expect(cover.evented).toBe(false);
         expect(render.scene.pick(new Vector2(bounds[0][0] + 1, bounds[0][1] + 1))).not.toBe(cover);
 
+        const page = manager.getSkeleton().getSkeletonData()!.pages[0];
+        page.isLayoutPlaceholder = true;
+        rects.mockClear();
+        cover.render(ctx);
+        expect(rects.mock.calls).toEqual(bounds);
+
+        const sections = page.sections;
+        page.sections = [];
+        rects.mockClear();
+        cover.render(ctx);
+        expect(rects).not.toHaveBeenCalled();
+        page.sections = sections;
+        page.isLayoutPlaceholder = false;
+
         manager.getViewModel().setEditArea(DocumentEditArea.HEADER);
         fill.mockClear();
         cover.render(ctx);

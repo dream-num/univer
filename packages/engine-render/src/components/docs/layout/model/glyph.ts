@@ -255,7 +255,8 @@ const WHOLE_ENTITY_RENDER_MARKER = '\u200B';
 export function createSkeletonWholeEntityGlyph(
     raw: string,
     config: IFontCreateConfig,
-    glyphMetrics: { ascent?: number; descent?: number; width?: number }
+    glyphMetrics: { ascent?: number; descent?: number; width?: number },
+    rangeId: string
 ): IDocumentSkeletonGlyph {
     const glyph = createSkeletonLetterGlyph(raw, config, glyphMetrics);
 
@@ -267,6 +268,7 @@ export function createSkeletonWholeEntityGlyph(
     glyph.bBox.width = glyph.width;
     glyph.content = WHOLE_ENTITY_RENDER_MARKER;
     glyph.count = raw.length;
+    glyph.glyphId = rangeId;
     glyph.glyphType = GlyphType.PLACEHOLDER;
     glyph.isJustifiable = false;
     glyph.raw = raw;

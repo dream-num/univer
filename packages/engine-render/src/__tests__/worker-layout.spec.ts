@@ -24,6 +24,7 @@ import {
     DocumentDataModel,
     DocumentFlavor,
     DrawingTypeEnum,
+    Injector,
     JSONX,
     LocaleService,
     LocaleType,
@@ -1214,6 +1215,63 @@ describe('worker document layout session', () => {
         referenceModel.dispose();
         dataModel.dispose();
         localeService.dispose();
+    });
+
+    it('keeps adjacent materialized pages visible until their own Worker edit publication', () => {
+        mockWorkerCanvas();
+        const model = createDocumentModelWithStyle(`${'Adjacent page content '.repeat(240)}\r`, {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.TRADITIONAL });
+        model.updateDocumentDataPageSize(240, 180);
+        const injector = new Injector([
+            [LocaleService],
+            [DocumentViewModel, {
+                useFactory: function createViewModel(di: Injector) {
+                    return di.createInstance(DocumentViewModel, model);
+                },
+                deps: [Injector],
+            }],
+            [DocumentSkeleton, { useFactory: DocumentSkeleton.create, deps: [DocumentViewModel, LocaleService] }],
+            [DocumentLayoutSession, {
+                useFactory: function createWorkerSession(di: Injector) {
+                    return di.createInstance(DocumentLayoutSession, model, di.get(LocaleService));
+                },
+                deps: [Injector],
+            }],
+        ]);
+        try {
+            const main = injector.get(DocumentSkeleton);
+            const worker = injector.get(DocumentLayoutSession);
+            main.calculate();
+            const pages = main.getSkeletonData()!.pages;
+            expect(pages.length).toBeGreaterThan(5);
+            const anchorPage = pages[0];
+            main.beginExternalLayout({
+                reason: 'edit',
+                protectedRange: { mode: 'paginated', startPageIndex: 0, endPageIndex: 0 },
+            });
+            const generation = worker.start({ reason: 'edit', anchor: 0 });
+            const pageRange = { startPageIndex: 0, endPageIndex: 4 };
+            let nextPageIndex = 0;
+            for (let step = 0; step < 2_000 && nextPageIndex < 5; step++) {
+                const { publication, progress } = worker.step(generation, 0);
+                if (publication?.kind !== 'page' || !publication.pages.length) {
+                    continue;
+                }
+                main.applyLayoutPublication(publication, progress, pageRange);
+                nextPageIndex = progress.publishedPageCount;
+                expect(progress.complete).toBe(false);
+                expect(pages[0]).toBe(anchorPage);
+                for (let i = 1; i <= pageRange.endPageIndex; i++) {
+                    expect(pages[i].sections.length).toBeGreaterThan(0);
+                    expect(Boolean(pages[i].isLayoutPlaceholder)).toBe(i >= nextPageIndex);
+                }
+                expect(pages[5].sections).toHaveLength(0);
+            }
+            expect(nextPageIndex).toBeGreaterThanOrEqual(5);
+        } finally {
+            injector.dispose();
+            model.dispose();
+        }
     });
 
     it('keeps a divergent Main interaction boundary stable while publishing the Worker tail progressively', () => {

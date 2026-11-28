@@ -194,7 +194,7 @@ function createMeasuredWholeEntityGlyph(
         return undefined;
     }
 
-    return createSkeletonWholeEntityGlyph(raw, config, metrics);
+    return createSkeletonWholeEntityGlyph(raw, config, metrics, range.rangeId);
 }
 
 function getShapedGlyphText(glyph: IDocumentSkeletonGlyph): string {

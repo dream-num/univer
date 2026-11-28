@@ -1117,6 +1117,7 @@ describe('shaping', () => {
         const emSize = formulaGlyph.fontStyle.originFontSize / 0.75;
         expect(formulaGlyph.content).toBe('\u200B');
         expect(formulaGlyph.count).toBe(source.length);
+        expect(formulaGlyph.glyphId).toBe(range.rangeId);
         expect(formulaGlyph.width).toBeCloseTo(emSize * 7.25);
         expect(formulaGlyph.bBox.ba).toBeCloseTo(emSize * 1.75);
         expect(formulaGlyph.bBox.bd).toBeCloseTo(emSize * 1.25);

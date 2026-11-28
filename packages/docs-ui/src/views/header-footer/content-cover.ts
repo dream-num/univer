@@ -69,7 +69,7 @@ export class HeaderFooterContentCover extends BaseObject {
         let pageLeft = 0;
         let pageTop = 0;
         for (const page of data.pages) {
-            if (!page.isLayoutPlaceholder && !page.isMaterializationPlaceholder
+            if (!page.isMaterializationPlaceholder && (!page.isLayoutPlaceholder || page.sections.length > 0)
                 && !this._documents.isSkipByDiffBounds(page, pageTop, pageLeft, viewport)) {
                 const pageBounds = this._transformBounds({ left: pageLeft, top: pageTop, right: pageLeft + page.pageWidth, bottom: pageTop + page.pageHeight });
                 const header = data.skeHeaders.get(page.headerId)?.get(page.headerLayoutKey ?? page.pageWidth);

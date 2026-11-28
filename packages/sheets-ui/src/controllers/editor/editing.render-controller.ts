@@ -32,7 +32,7 @@ import type {
 } from '@univerjs/core';
 import type { IInsertTextCommandParams, IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IInnerPasteCommandParams } from '@univerjs/docs-ui';
-import type { FormulaInputError, IFormulaSyntax } from '@univerjs/engine-formula';
+import type { ErrorType, FormulaInputError, IFormulaSyntax } from '@univerjs/engine-formula';
 import type {
     ISetRangeValuesCommandParams,
     ISetWorksheetActivateCommandParams,

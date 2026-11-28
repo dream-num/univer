@@ -25,7 +25,6 @@ import {
     IPermissionService,
     IUniverInstanceService,
     JSONX,
-    LOCALE_META,
     LocaleService,
     TextX,
     UniverInstanceType,
@@ -53,7 +52,7 @@ export const RefreshHeaderFooterFieldsCommand: ICommand<{ unitId: string; onOpen
             return false;
         }
         const permissions = accessor.get(IPermissionService);
-        const locale = LOCALE_META[accessor.get(LocaleService).getCurrentLocale()].tag;
+        const locale = accessor.get(LocaleService).getCurrentLocale();
         const now = new Date();
         const selections = accessor.get(DocSelectionManagerService).getTextRanges({ unitId: params.unitId, subUnitId: params.unitId }) ?? [];
         let actions: JSONXActions = null;

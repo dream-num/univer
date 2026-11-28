@@ -107,9 +107,9 @@ describe('FUniver integration', () => {
         univerAPI.setRegion('frFR');
         univerAPI.setDirection('rtl');
 
-        expect(localeService.getCurrentLocale()).toBe('esES');
-        expect(regionService.getCurrentRegion()).toBe('frFR');
-        expect(univerAPI.getCurrentRegion()).toBe('frFR');
+        expect(localeService.getCurrentLocale()).toBe('es-ES');
+        expect(regionService.getCurrentRegion()).toBe('fr-FR');
+        expect(univerAPI.getCurrentRegion()).toBe('fr-FR');
         expect(localeService.getDirection()).toBe('rtl');
         expect(localeService.t('facade.hello', 'Univer')).toBe('Hola Univer');
 
@@ -300,7 +300,7 @@ describe('FUniver integration', () => {
 
         extendedAPI.loadLocales('frFR', { facade: { hello: 'Bonjour {0}' } } as never);
         extendedAPI.setLocale('frFR');
-        expect(extendedAPI.getCurrentLocale()).toBe('frFR');
+        expect(extendedAPI.getCurrentLocale()).toBe('fr-FR');
         const locales = extendedAPI.getLocales();
         if (!locales) {
             throw new Error('Expected loaded facade locales to be available.');

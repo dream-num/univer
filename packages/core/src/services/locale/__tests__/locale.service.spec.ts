@@ -47,6 +47,20 @@ describe('LocaleService', () => {
         localeService.load(testLocales);
     });
 
+    it.each([true, false])('merges both pack spellings with the standard key taking precedence (%s)', (standardFirst) => {
+        const injector = new Injector([[LocaleService]]);
+        const locales = injector.get(LocaleService);
+        const legacy = { zhCN: { app: { shared: 'legacy', old: 'old' } } };
+        const standard = { 'zh-CN': { app: { shared: 'standard', added: 'added' } } };
+        locales.load(standardFirst ? { ...standard, ...legacy } : { ...legacy, ...standard });
+        locales.setLocale('zhCN');
+        expect(locales.getLocales()).toEqual({ app: { shared: 'standard', old: 'old', added: 'added' } });
+        locales.load({ zhCN: { app: { shared: 'updated' } } });
+        expect(locales.t('app.shared')).toBe('updated');
+        expect(locales.t('app.added')).toBe('added');
+        injector.dispose();
+    });
+
     it('should translate simple keys', () => {
         expect(localeService.t('greeting')).toBe('你好');
         localeService.setLocale(LocaleType.EN_US);

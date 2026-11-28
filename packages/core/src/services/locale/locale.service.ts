@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import type { ILanguagePack, ILocales, LanguageValue } from '../../shared/locale';
 import { BehaviorSubject, Subject } from 'rxjs';
+import type { ILanguagePack, ILocales, LanguageValue } from '../../shared/locale';
 import { merge } from '../../common/lodash';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
-import { LocaleType } from '../../types/enum/locale-type';
+import { LocaleType, normalizeLocaleTag } from '../../types/enum/locale-type';
 
 /**
  * This service provides i18n and timezone / location features to other modules.
  */
 export class LocaleService extends Disposable {
-    private _currentLocale$ = new BehaviorSubject<LocaleType>(LocaleType.ZH_CN);
+    private _currentLocale$ = new BehaviorSubject<string>(LocaleType.ZH_CN);
     readonly currentLocale$ = this._currentLocale$.asObservable();
-    private get _currentLocale(): LocaleType { return this._currentLocale$.value; }
+    private get _currentLocale(): string { return this._currentLocale$.value; }
 
     private _direction$ = new BehaviorSubject<'ltr' | 'rtl'>('ltr');
     readonly direction$ = this._direction$.asObservable();
 
     private _locales: ILocales | null = null;
 
-    localeChanged$ = new Subject<void>();
+    localeChanged$ = new Subject<string>();
 
     constructor() {
         super();
@@ -52,7 +52,14 @@ export class LocaleService extends Disposable {
      * @param locales - Locale object
      */
     load(locales: ILocales) {
-        this._locales = merge(this._locales ?? {}, locales);
+        // Compatibility: remove alias ordering once compact language-pack keys are retired.
+        // A standard key wins within one load. Later loads still override earlier translations.
+        const entries = Object.entries(locales).map(([key, pack]) => ({ key, tag: normalizeLocaleTag(key), pack }));
+        entries.sort((a, b) => Number(a.key === a.tag) - Number(b.key === b.tag));
+        this._locales ??= {};
+        for (const { tag, pack } of entries) {
+            this._locales[tag] = merge(this._locales[tag] ?? {}, pack);
+        }
     }
 
     /**
@@ -96,9 +103,10 @@ export class LocaleService extends Disposable {
         }
     };
 
-    setLocale(locale: LocaleType) {
-        this._currentLocale$.next(locale);
-        this.localeChanged$.next();
+    setLocale(locale: string) {
+        const tag = normalizeLocaleTag(locale);
+        this._currentLocale$.next(tag);
+        this.localeChanged$.next(tag);
     }
 
     getLocales() {

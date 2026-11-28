@@ -18,6 +18,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 import { Inject } from '../../common/di';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
+import { normalizeLocaleTag } from '../../types/enum/locale-type';
 import { LocaleService } from '../locale/locale.service';
 
 export class RegionService extends Disposable {
@@ -43,8 +44,9 @@ export class RegionService extends Disposable {
     }
 
     setRegion(region: string): void {
+        const tag = normalizeLocaleTag(region);
         this._hasExplicitRegion = true;
-        this._currentRegion$.next(region);
+        this._currentRegion$.next(tag);
     }
 
     getExplicitRegion(): string | undefined {

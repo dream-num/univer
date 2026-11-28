@@ -16,7 +16,7 @@
 
 import type { ParseData } from './api';
 import type { ParseOptions } from './parse-value';
-import { LocaleType } from '../../types/enum/locale-type';
+import { getRegionTag, LocaleType } from '../../types/enum/locale-type';
 import { parseDate, parseNumber, parseTime, tokenize, tokenTypes } from './api';
 import { reCurrencySymbols } from './constants';
 import { currencySymbolFromLiteral } from './currency-symbols';
@@ -63,8 +63,9 @@ export type INumfmtLocaleTag =
     | 'tr'
     | 'vi';
 
-export function getNumfmtLocaleTag(locale: LocaleType): INumfmtLocaleTag {
-    switch (locale) {
+export function getNumfmtLocaleTag(locale: string): INumfmtLocaleTag {
+    // Compatibility: remove compact-tag conversion when legacy workbook snapshots are retired.
+    switch (getRegionTag(locale)) {
         case LocaleType.FR_FR:
             return 'fr';
         case LocaleType.RU_RU:

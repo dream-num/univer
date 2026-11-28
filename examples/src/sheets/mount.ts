@@ -1,5 +1,4 @@
 import type { Plugin, PluginCtor } from '@univerjs/core';
-import { LocaleType } from '@univerjs/core';
 import { UniverDocsMobileUIPlugin } from '@univerjs/docs-ui';
 import { UniverSheetsConditionalFormattingMobileUIPlugin, UniverSheetsConditionalFormattingPreset } from '@univerjs/preset-sheets-conditional-formatting';
 import {
@@ -21,34 +20,11 @@ import { createUniver } from '@univerjs/presets';
 import { UniverMobileUIPlugin, UniverUIPlugin } from '@univerjs/ui';
 import { loadSheetLocale } from 'virtual:univer-examples-sheet-locale';
 import type { MountExample } from '../mount-example';
-import type { IWorkbenchMountOptions } from '../workbench-settings';
 import { applyWorkbenchUIChrome, createMountedUniver, replacePresetPlugins } from '../mount-example';
 import { getEffectiveWorkbenchRegion } from '../workbench-settings';
 import { applyWorkbookZoom } from './apply-workbook-zoom';
 import { createSheetFixture } from './create-sheet-fixture';
 import './global.css';
-
-const UNIVER_LOCALES = {
-    [LocaleType.ZH_CN]: LocaleType.ZH_CN,
-    [LocaleType.EN_US]: LocaleType.EN_US,
-    [LocaleType.AR_SA]: LocaleType.AR_SA,
-    [LocaleType.FR_FR]: LocaleType.FR_FR,
-    [LocaleType.RU_RU]: LocaleType.RU_RU,
-    [LocaleType.ZH_TW]: LocaleType.ZH_TW,
-    [LocaleType.ZH_HK]: LocaleType.ZH_HK,
-    [LocaleType.VI_VN]: LocaleType.VI_VN,
-    [LocaleType.FA_IR]: LocaleType.FA_IR,
-    [LocaleType.JA_JP]: LocaleType.JA_JP,
-    [LocaleType.KO_KR]: LocaleType.KO_KR,
-    [LocaleType.ES_ES]: LocaleType.ES_ES,
-    [LocaleType.CA_ES]: LocaleType.CA_ES,
-    [LocaleType.SK_SK]: LocaleType.SK_SK,
-    [LocaleType.PT_BR]: LocaleType.PT_BR,
-    [LocaleType.DE_DE]: LocaleType.DE_DE,
-    [LocaleType.IT_IT]: LocaleType.IT_IT,
-    [LocaleType.ID_ID]: LocaleType.ID_ID,
-    [LocaleType.PL_PL]: LocaleType.PL_PL,
-} satisfies Record<IWorkbenchMountOptions['locale'], LocaleType>;
 
 const MOBILE_PLUGINS = new Map<string, PluginCtor<Plugin>>([
     UniverDocsMobileUIPlugin,
@@ -72,7 +48,6 @@ MOBILE_PLUGINS.set(UniverUIPlugin.pluginName, UniverMobileUIPlugin);
 
 export const mount: MountExample = async (host, options) => {
     const { darkMode, direction, locale, ribbonType, theme, zoomRatio } = options;
-    const univerLocale = UNIVER_LOCALES[locale];
     const localePack = await loadSheetLocale(locale);
     const presets = [
         UniverSheetsCorePreset({ container: host, ribbonType }),
@@ -88,10 +63,10 @@ export const mount: MountExample = async (host, options) => {
         UniverSheetsThreadCommentPreset(),
     ];
     const { univer, univerAPI } = createUniver({
-        locale: univerLocale,
-        region: UNIVER_LOCALES[getEffectiveWorkbenchRegion(options)],
+        locale,
+        region: getEffectiveWorkbenchRegion(options),
         locales: {
-            [univerLocale]: localePack,
+            [locale]: localePack,
         },
         theme,
         darkMode,
@@ -101,7 +76,7 @@ export const mount: MountExample = async (host, options) => {
 
     try {
         applyWorkbenchUIChrome(univerAPI, options.uiChrome);
-        univerAPI.createWorkbook(createSheetFixture(univerLocale, direction, zoomRatio));
+        univerAPI.createWorkbook(createSheetFixture(locale, direction, zoomRatio));
         return createMountedUniver(
             host,
             univer,

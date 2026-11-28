@@ -1,3 +1,4 @@
+import { LOCALE_META } from '@univerjs/core';
 import type { ExampleLoader } from './mount-example';
 import type {
     WorkbenchDevice,
@@ -15,7 +16,6 @@ import {
     getDefaultWorkbenchSettings,
     getWorkbenchTheme,
     readWorkbenchSettings,
-    WORKBENCH_LOCALE_META,
     writeWorkbenchSettings,
 } from './workbench-settings';
 import { renderWorkbenchSettingsControl, unmountWorkbenchSettingsControl } from './workbench-settings-control';
@@ -81,7 +81,7 @@ function getMountOptions(currentSettings = settings) {
 function renderWorkbenchSettings(currentSettings = settings) {
     const theme = getWorkbenchTheme(currentSettings.theme);
 
-    document.documentElement.lang = WORKBENCH_LOCALE_META[currentSettings.locale].tag;
+    document.documentElement.lang = LOCALE_META[currentSettings.locale].tag;
     document.documentElement.dir = currentSettings.direction;
     document.documentElement.dataset.theme = currentSettings.theme;
     document.documentElement.classList.toggle('univer-dark', currentSettings.darkMode);
@@ -186,7 +186,7 @@ async function onLocaleChange(locale: WorkbenchLocale) {
     await updateWorkbenchSettings({
         ...settings,
         locale,
-        direction: WORKBENCH_LOCALE_META[locale].direction,
+        direction: LOCALE_META[locale].direction,
     });
 }
 

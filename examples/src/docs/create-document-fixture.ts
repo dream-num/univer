@@ -3,7 +3,6 @@ import type {
     IDocumentData,
     IParagraph,
     ISectionBreak,
-    LocaleType,
 } from '@univerjs/core';
 import {
     BaselineOffset,
@@ -34,7 +33,6 @@ import {
 import { buildDocTransform, createSectionColumnProperties, docDrawingPositionToTransform } from '@univerjs/docs';
 import { genTableSource, getTableColumn } from '@univerjs/docs-ui';
 import { DOCS_DRAWING_PLUGIN } from '@univerjs/preset-docs-drawing';
-
 import { createGeneratedSvg } from '../generated-svg';
 
 const BLOCK_END_PLACEHOLDER = '\uE001';
@@ -693,7 +691,7 @@ function createCommentResource() {
 }
 
 export function createDocumentFixture(
-    locale: LocaleType,
+    locale: string,
     direction: 'ltr' | 'rtl' = 'ltr',
     zoomRatio: number = 1
 ): IDocumentData {

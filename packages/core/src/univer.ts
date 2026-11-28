@@ -21,7 +21,6 @@ import type { LogLevel } from './services/log/log.service';
 import type { DependencyOverride } from './services/plugin/plugin-override';
 import type { Plugin, PluginCtor } from './services/plugin/plugin.service';
 import type { ILocales } from './shared/locale';
-import type { LocaleType } from './types/enum/locale-type';
 import { Injector, touchDependencies } from './common/di';
 import { UniverInstanceType } from './common/unit';
 import { DocumentDataModel } from './docs/data-model/document-data-model';
@@ -72,12 +71,12 @@ export interface IUniverConfig {
     darkMode?: boolean;
 
     /**
-     * The locale of the Univer instance.
+     * BCP 47 interface language tag, e.g. en-US.
      */
-    locale?: LocaleType;
+    locale?: string;
 
     /**
-     * The region of the Univer instance. It follows locale until explicitly configured.
+     * The BCP 47 tag used for regional formatting. It follows locale until explicitly configured.
      */
     region?: string;
 
@@ -146,8 +145,8 @@ export class Univer implements IDisposable {
         if (theme) this._injector.get(ThemeService).setTheme(theme);
         if (darkMode) this._injector.get(ThemeService).setDarkMode(darkMode);
         if (locales) this._injector.get(LocaleService).load(locales);
-        if (locale) this._injector.get(LocaleService).setLocale(locale);
-        if (region) this._injector.get(RegionService).setRegion(region);
+        if (locale !== undefined) this._injector.get(LocaleService).setLocale(locale);
+        if (region !== undefined) this._injector.get(RegionService).setRegion(region);
         if (direction) this._injector.get(LocaleService).setDirection(direction);
         if (logLevel) this._injector.get(ILogService).setLogLevel(logLevel);
         if (logCommandExecution !== undefined) {
@@ -186,7 +185,7 @@ export class Univer implements IDisposable {
         this._injector.dispose();
     }
 
-    setLocale(locale: LocaleType): void {
+    setLocale(locale: string): void {
         this._injector.get(LocaleService).setLocale(locale);
     }
 

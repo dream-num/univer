@@ -1,4 +1,5 @@
 import type { IDropdownMenuProps } from '@univerjs/design';
+import { LOCALE_META } from '@univerjs/core';
 import { Button, ConfigProvider, DropdownMenu, render, unmount } from '@univerjs/design';
 import { MoreDownIcon } from '@univerjs/icons';
 import type {
@@ -15,7 +16,6 @@ import type {
 import {
     WORKBENCH_DEVICES,
     WORKBENCH_DIRECTIONS,
-    WORKBENCH_LOCALE_META,
     WORKBENCH_LOCALES,
     WORKBENCH_REGIONS,
     WORKBENCH_RIBBON_TYPES,
@@ -27,25 +27,25 @@ import {
 const DEVICE_LABELS = { desktop: 'Desktop', mobile: 'Mobile' } satisfies Record<WorkbenchDevice, string>;
 
 const LOCALE_LABELS = {
-    arSA: 'العربية',
-    caES: 'Català',
-    deDE: 'Deutsch',
-    enUS: 'English',
-    esES: 'Español',
-    faIR: 'فارسی',
-    frFR: 'Français',
-    idID: 'Bahasa Indonesia',
-    itIT: 'Italiano',
-    jaJP: '日本語',
-    koKR: '한국어',
-    plPL: 'Polski',
-    ptBR: 'Português (Brasil)',
-    ruRU: 'Русский',
-    skSK: 'Slovenčina',
-    viVN: 'Tiếng Việt',
-    zhCN: '简体中文',
-    zhHK: '繁體中文（香港）',
-    zhTW: '繁體中文',
+    'ar-SA': 'العربية',
+    'ca-ES': 'Català',
+    'de-DE': 'Deutsch',
+    'en-US': 'English',
+    'es-ES': 'Español',
+    'fa-IR': 'فارسی',
+    'fr-FR': 'Français',
+    'id-ID': 'Bahasa Indonesia',
+    'it-IT': 'Italiano',
+    'ja-JP': '日本語',
+    'ko-KR': '한국어',
+    'pl-PL': 'Polski',
+    'pt-BR': 'Português (Brasil)',
+    'ru-RU': 'Русский',
+    'sk-SK': 'Slovenčina',
+    'vi-VN': 'Tiếng Việt',
+    'zh-CN': '简体中文',
+    'zh-HK': '繁體中文（香港）',
+    'zh-TW': '繁體中文',
 } satisfies Record<WorkbenchLocale, string>;
 
 const THEME_LABELS = {
@@ -66,26 +66,28 @@ const RIBBON_TYPE_LABELS = {
 } satisfies Record<WorkbenchRibbonType, string>;
 
 const REGION_LABELS = {
-    arSA: 'Saudi Arabia',
+    'ar-SA': 'Saudi Arabia',
     auto: 'Follow language',
-    caES: 'Catalonia (Spain)',
-    deDE: 'Germany',
-    enUS: 'United States',
-    esES: 'Spain',
-    faIR: 'Iran',
-    frFR: 'France',
-    idID: 'Indonesia',
-    itIT: 'Italy',
-    jaJP: 'Japan',
-    koKR: 'South Korea',
-    plPL: 'Poland',
-    ptBR: 'Brazil',
-    ruRU: 'Russia',
-    skSK: 'Slovakia',
-    viVN: 'Vietnam',
-    zhCN: 'China',
-    zhHK: 'Hong Kong',
-    zhTW: 'Taiwan',
+    'ca-ES': 'Catalonia (Spain)',
+    'de-DE': 'Germany',
+    'en-US': 'United States',
+    'es-419': 'Latin America',
+    'es-ES': 'Spain',
+    'fa-IR': 'Iran',
+    'fr-FR': 'France',
+    'id-ID': 'Indonesia',
+    'it-IT': 'Italy',
+    'ja-JP': 'Japan',
+    'ko-KR': 'South Korea',
+    'pl-PL': 'Poland',
+    'pt-BR': 'Brazil',
+    'ru-RU': 'Russia',
+    'sk-SK': 'Slovakia',
+    'sr-Latn-RS': 'Serbia (Latin script)',
+    'vi-VN': 'Vietnam',
+    'zh-CN': 'China',
+    'zh-HK': 'Hong Kong',
+    'zh-TW': 'Taiwan',
 } satisfies Record<WorkbenchRegion, string>;
 
 const UI_CHROME_LABELS = {
@@ -158,8 +160,8 @@ function WorkbenchSettingsControl(props: IWorkbenchSettingsControlProps) {
                     value,
                     label: (
                         <span
-                            dir={WORKBENCH_LOCALE_META[value].direction}
-                            lang={WORKBENCH_LOCALE_META[value].tag}
+                            dir={LOCALE_META[value].direction}
+                            lang={LOCALE_META[value].tag}
                         >
                             {LOCALE_LABELS[value]}
                         </span>
@@ -176,7 +178,7 @@ function WorkbenchSettingsControl(props: IWorkbenchSettingsControlProps) {
                 value: settings.region,
                 options: WORKBENCH_REGIONS.map((value) => ({
                     value,
-                    label: REGION_LABELS[value],
+                    label: value === 'auto' ? REGION_LABELS[value] : `${REGION_LABELS[value]} (${value})`,
                 })),
                 onSelect: (value) => onRegionChange(value as WorkbenchRegion),
             }],

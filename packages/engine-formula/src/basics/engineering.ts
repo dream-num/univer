@@ -488,7 +488,7 @@ export function excelErfc(x: number): number {
 }
 
 export function erfc(x: number): number {
-    return 1 - erf(x);
+    return excelErfc(x);
 }
 
 export function erfcINV(p: number): number {

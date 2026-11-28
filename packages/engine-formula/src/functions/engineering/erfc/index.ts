@@ -46,7 +46,8 @@ export class Erfc extends BaseFunction {
 
         const result = this._erfc(xValue);
 
-        return NumberValueObject.create(result);
+        // Excel worksheets flush subnormal results to positive zero.
+        return NumberValueObject.create(Math.abs(result) < 2 ** -1022 ? 0 : result);
     }
 }
 

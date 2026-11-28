@@ -87,3 +87,27 @@ describe('Test erfc function', () => {
         });
     });
 });
+
+describe('Distribution tail formulas', () => {
+    // References evaluated with 120-digit mpmath arithmetic.
+    function expectRelative(actual: number, expected: number) {
+        expect(Math.abs(actual / expected - 1)).toBeLessThan(1e-12);
+    }
+
+    it('ERFC and ERFC.PRECISE return the complementary tail', () => {
+        for (const fn of [new Erfc(FUNCTION_NAMES_ENGINEERING.ERFC)]) {
+            const result = fn.calculate(NumberValueObject.create(10));
+            expectRelative(getObjectValue(result) as number, 2.088487583762545e-45);
+        }
+    });
+
+    it('ERFC formulas keep normal tails and flush subnormal worksheet results', () => {
+        for (const fn of [new Erfc(FUNCTION_NAMES_ENGINEERING.ERFC)]) {
+            expectRelative(getObjectValue(fn.calculate(NumberValueObject.create(26.54))) as number, 2.6455581744685104e-308);
+            for (const x of [26.55, 26.6, 27]) {
+                expect(getObjectValue(fn.calculate(NumberValueObject.create(x)))).toBe(0);
+                expect(getObjectValue(fn.calculate(NumberValueObject.create(-x)))).toBe(2);
+            }
+        }
+    });
+});

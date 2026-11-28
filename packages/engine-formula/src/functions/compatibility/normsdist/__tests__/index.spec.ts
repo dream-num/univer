@@ -92,3 +92,35 @@ describe('Test normsdist function', () => {
         });
     });
 });
+
+describe('Distribution tail formulas', () => {
+    // References evaluated with 120-digit mpmath arithmetic.
+    function expectRelative(actual: number, expected: number) {
+        expect(Math.abs(actual / expected - 1)).toBeLessThan(1e-12);
+    }
+
+    it('normal CDF formulas retain lower tails through array evaluation', () => {
+        const x = ArrayValueObject.createByArray([[-8, -10, -20, -37]]);
+        const expected = [6.220960574271784e-16, 7.619853024160525e-24, 2.7536241186062337e-89, 5.725571222524577e-300];
+        const results = [
+            new Normsdist(FUNCTION_NAMES_COMPATIBILITY.NORMSDIST).calculate(x),
+        ];
+        for (const result of results) {
+            const actual = getObjectValue(result) as number[][];
+            for (let i = 0; i < expected.length; i++) expectRelative(actual[0][i], expected[i]);
+        }
+    });
+
+    it('normal CDF formulas flush only final results below the normal boundary', () => {
+        const x = ArrayValueObject.createByArray([[-37.5, -37.51, -37.52, -38]]);
+        const results = [
+            new Normsdist(FUNCTION_NAMES_COMPATIBILITY.NORMSDIST).calculate(x),
+        ];
+        for (const result of results) {
+            const actual = getObjectValue(result) as number[][];
+            expectRelative(actual[0][0], 4.605353009581955e-308);
+            expectRelative(actual[0][1], 3.1642088986155016e-308);
+            expect(actual[0].slice(2)).toEqual([0, 0]);
+        }
+    });
+});

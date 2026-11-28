@@ -26,6 +26,7 @@ import type {
     ResolvedFormatOptions,
 } from './types';
 import { getRegionalDatePattern, getRegionalTimePattern } from '../../services/region/date-format';
+import { getRegionParts } from '../../services/region/region-rules';
 import { DateSystem } from '../../types/enum/date-system';
 import { clamp } from './clamp';
 import {
@@ -45,6 +46,7 @@ import { isGroupingBoundary } from './grouping';
 import { defaultLocale } from './locale';
 import { getExponent, getSignificand } from './number-props';
 import { pad } from './pad';
+import { getJapaneseEra } from './regional-calendar';
 import { getDateSystemMaxSerial } from './serial-date';
 import { toYMD } from './to-ymd';
 
@@ -326,8 +328,10 @@ export function runPart(
     };
 
     let denominatorFixed = false;
-    const dateRegion = section.date ? options.region : undefined;
+    const dateRegion = section.date || section.digitZero ? options.region : undefined;
     const digitZero = section.digitZero;
+    const nativeLanguage = digitZero && dateRegion ? getRegionParts(dateRegion)?.language : undefined;
+    const mIsMinute = nativeLanguage === 'fi' || nativeLanguage === 'sv' || nativeLanguage === 'de' || nativeLanguage === 'tr';
     const counter = { int: 0, frac: 0, man: 0, num: 0, den: 0 };
     for (let tokenIndex = 0, tokenLength = section.tokens.length; tokenIndex < tokenLength; tokenIndex++) {
         const token = section.tokens[tokenIndex];
@@ -494,6 +498,15 @@ export function runPart(
                 output.push(digit);
             }
             counter.den += length;
+        } else if (tokenType.startsWith('era-')) {
+            const japanese = getRegionParts(section.locale || options.locale)?.language === 'ja';
+            const era = japanese ? getJapaneseEra(year, month, day) : undefined;
+            if (tokenType === 'era-year') {
+                const displayYear = era ? year - Math.floor(era.start / 10000) + 1 : year;
+                output.push(era && token.pad && displayYear < 10 ? '0' : '', displayYear);
+            } else if (era) {
+                output.push(tokenType === 'era-name' ? era.name : tokenType === 'era-short' ? era.name[0] : era.initial);
+            }
         } else if (tokenType === 'year') {
             if (year < 0) {
                 output.push(l10n.negative);
@@ -503,7 +516,8 @@ export function runPart(
             const shortYear = year % 100;
             output.push(shortYear < 10 ? '0' : '', shortYear);
         } else if (tokenType === 'month') {
-            output.push(token.pad && month < 10 ? '0' : '', month);
+            const field = mIsMinute ? minute : month;
+            output.push(token.pad && field < 10 ? '0' : '', field);
         } else if (tokenType === 'monthname-single') {
             // This is what Excel does.
             // The Vietnamese list goes:
@@ -537,7 +551,8 @@ export function runPart(
             const displayHour = hour % section.clock || (section.clock < 24 ? section.clock : 0);
             output.push(token.pad && displayHour < 10 ? '0' : '', displayHour);
         } else if (tokenType === 'min') {
-            output.push(token.pad && minute < 10 ? '0' : '', minute);
+            const field = nativeLanguage === 'hu' && !token.pad ? month : minute;
+            output.push(token.pad && field < 10 ? '0' : '', field);
         } else if (tokenType === 'sec') {
             output.push(token.pad && second < 10 ? '0' : '', second);
         } else if (tokenType === 'subsec') {
@@ -579,7 +594,7 @@ export function runPart(
         }
         if (digitZero && tokenType !== 'string') {
             for (let index = outputStart; index < output.length; index++) {
-                output[index] = String(output[index]).replace(/\d/g, (digit) => String.fromCharCode(digitZero + Number(digit)));
+                output[index] = String(output[index]).replace(/\d/g, (digit) => (digitZero === 0x0BE6 && digit === '0' ? digit : String.fromCharCode(digitZero + Number(digit))));
             }
         }
     }

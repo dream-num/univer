@@ -15,15 +15,16 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { excelDateTimeSerial, getNumfmtParseValueFilter } from '@univerjs/core';
-import { isDate } from '../../../basics/date';
+import { parseFormattedDate, parseFormattedTime } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { getFractionalPart } from '../../../engine/utils/math-kit';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
-import { BaseFunction } from '../../base-function';
+import { RegionalNumberFormatFunction } from '../../text/regional-number-format.function';
 
-export class Timevalue extends BaseFunction {
+export class Timevalue extends RegionalNumberFormatFunction {
+    override needsLocale = true;
+
     override minParams = 1;
 
     override maxParams = 1;
@@ -47,20 +48,9 @@ export class Timevalue extends BaseFunction {
 
         if (timeTextObject.isString()) {
             const value = `${timeTextObject.getValue()}`;
-            const parsedTime = getNumfmtParseValueFilter(value, {
-                dateSystem: this.getDateSystem(),
-            });
-            if (parsedTime) {
-                let { v, z } = parsedTime;
-
-                if (z && isDate(z)) {
-                    if ((v as any) instanceof Date) {
-                        v = excelDateTimeSerial((v as any), this.getDateSystem());
-                    }
-
-                    return NumberValueObject.create(getFractionalPart(+v));
-                }
-            }
+            const options = { dateSystem: this.getDateSystem(), region: this.getNumberFormatRegion(), locale: this.getLocale() };
+            const parsed = parseFormattedDate(value, options) ?? parseFormattedTime(value, options);
+            if (parsed) return NumberValueObject.create(getFractionalPart(parsed.v));
         }
 
         return ErrorValueObject.create(ErrorType.VALUE);

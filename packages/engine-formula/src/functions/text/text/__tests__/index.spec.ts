@@ -24,6 +24,19 @@ import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Text } from '../index';
 
 describe('Test text function', () => {
+    it('distinguishes decimal, literal and date punctuation in a regional numeric format', () => {
+        const text = new Text(FUNCTION_NAMES_TEXT.TEXT);
+        const percent = NumberValueObject.create(0.125);
+        const mask = StringValueObject.create('0.00%');
+        text.bindCalculationRegion(() => 'en-US');
+        expect(text.calculate(percent, mask).getValue()).toBe('12.50%');
+        text.bindCalculationRegion(() => 'sv-NO');
+        expect(text.calculate(percent, mask).getValue()).toBe('0.13%');
+        text.bindCalculationRegion(() => 'fr-FI');
+        expect(text.calculate(percent, mask).getValue()).toBe(ErrorType.VALUE);
+        expect(text.calculate(percent, StringValueObject.create('0\\.00%')).getValue()).toBe('0.13%');
+    });
+
     const testFunction = new Text(FUNCTION_NAMES_TEXT.TEXT);
 
     describe('Text', () => {

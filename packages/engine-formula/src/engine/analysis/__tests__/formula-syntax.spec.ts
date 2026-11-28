@@ -208,7 +208,7 @@ describe('regional formula editing', () => {
                 expect(us.toStandard(`=INDEX({${array}},1,2)`)).toBeNull();
             }
             const good = '=INDEX({"a,b;""c",#N/A;TRUE,-2.5E2},2,2)';
-            expect(us.toStandard(good)).toBe(good);
+            expect(us.toStandard(good)).toBe('=INDEX({"a,b;""c",#N/A;TRUE,-250},2,2)');
             const calculate = univer.__getInjector().get(ICalculateFormulaService);
             const result = await calculate.executeFormulas({ book: { sheet: { 3: { 2: ['=INDEX({1;2,3},1,2)', good, '=2+3'] } } } });
             expect(result.book?.sheet[3][2].map((cell) => cell.value)).toEqual(['#VALUE!', -250, 5]);

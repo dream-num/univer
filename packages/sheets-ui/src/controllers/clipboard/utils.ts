@@ -33,7 +33,6 @@ import {
     ErrorService,
     generateRandomId,
     getNumfmtParseValueFilter,
-    getRegionalNumberFormat,
     isRealNum,
     isTextFormat,
     IUniverInstanceService,
@@ -42,9 +41,8 @@ import {
     Rectangle,
     RegionService,
     Tools,
-    willLoseNumericPrecision,
 } from '@univerjs/core';
-import { getFormulaSyntax } from '@univerjs/engine-formula';
+import { getFormulaSyntax, parseCellLiteral } from '@univerjs/engine-formula';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
@@ -111,7 +109,8 @@ export function getDefaultOnPasteCellMutations(
         pasteTo,
         pasteFrom,
         data,
-        accessor
+        accessor,
+        payload.inputSource
     );
     redoMutationsInfo.push(redo);
     undoMutationsInfo.push(undo);
@@ -181,6 +180,7 @@ export function getMoveRangeMutations(
 export function getExternalPasteNumberFormatResult(
     value: ICellData['v'],
     currentCellStyle: Nullable<IStyleData> | undefined,
+    localeService: LocaleService,
     parseOptions?: Parameters<typeof getNumfmtParseValueFilter>[1]
 ): IExternalPasteNumberFormatResult {
     if (isTextFormat(currentCellStyle?.n?.pattern)) {
@@ -191,20 +191,18 @@ export function getExternalPasteNumberFormatResult(
     }
 
     if (typeof value === 'number') return { v: value, t: CellValueType.NUMBER };
-    const content = String(value).trim();
-    const numfmtValue = getNumfmtParseValueFilter(content, parseOptions);
+    const raw = String(value);
+    // HTML collapses ordinary leading and trailing whitespace. TSV preserves it as part of a text literal.
+    const literalText = parseOptions?.inputSource === 'html-paste' ? raw.replace(/^[\t\n\f\r ]+|[\t\n\f\r ]+$/g, '') : raw;
+    const literal = parseCellLiteral(literalText, localeService);
+    if (literal?.t != null) return { t: literal.t, v: literal.v };
+    const content = raw.trim();
+    const numfmtValue = getNumfmtParseValueFilter(content, { inputSource: 'text-paste', ...parseOptions });
     const result: IExternalPasteNumberFormatResult = {};
 
     if (numfmtValue?.v !== undefined && typeof numfmtValue.v === 'number') {
-        // If the numeric string will lose precision when converted to a number, set the cell type to force string
-        // e.g. 123456789123456789
-        // e.g. 1212121212121212.2345
-        if (!numfmtValue.z && willLoseNumericPrecision(content.replace(getRegionalNumberFormat(parseOptions?.region).decimal, '.'))) {
-            result.t = CellValueType.FORCE_STRING;
-        } else {
-            result.v = numfmtValue.v;
-            result.t = CellValueType.NUMBER;
-        }
+        result.v = numfmtValue.v;
+        result.t = CellValueType.NUMBER;
     } else if (isRealNum(content)) {
         result.t = CellValueType.STRING;
     }
@@ -220,7 +218,8 @@ export function getSetCellDataMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-    accessor: IAccessor
+    accessor: IAccessor,
+    inputSource: ICopyPastePayload['inputSource'] = 'text-paste'
 ): {
     redo: IMutationInfo;
     undo: IMutationInfo;
@@ -228,7 +227,8 @@ export function getSetCellDataMutations(
     const { unitId, subUnitId, range } = pasteTo;
     const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
     const worksheet = target?.worksheet;
-    const parseOptions = getPasteNumberOptions(target?.workbook, accessor);
+    const parseOptions = { ...getPasteNumberOptions(target?.workbook, accessor), inputSource };
+    const localeService = accessor.get(LocaleService);
     const { mapFunc } = virtualizeDiscreteRanges([range]);
 
     const cellValueMatrix = new ObjectMatrix<ICellData>();
@@ -266,7 +266,7 @@ export function getSetCellDataMutations(
              * 2. If the above case does not apply, parse the value to check whether it has a number format.
              */
             const currentCellStyle = worksheet?.getCellStyle(row, col);
-            const numfmtResult = getExternalPasteNumberFormatResult(value.v, currentCellStyle, parseOptions);
+            const numfmtResult = getExternalPasteNumberFormatResult(value.v, currentCellStyle, localeService, parseOptions);
 
             if (numfmtResult.n) {
                 newStyle.n = numfmtResult.n;
@@ -311,7 +311,8 @@ export function getSetCellValueMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-    accessor: IAccessor
+    accessor: IAccessor,
+    inputSource: ICopyPastePayload['inputSource'] = 'text-paste'
 ): {
     redo: IMutationInfo;
     undo: IMutationInfo;
@@ -319,7 +320,8 @@ export function getSetCellValueMutations(
     const { unitId, subUnitId, range } = pasteTo;
     const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
     const worksheet = target?.worksheet;
-    const parseOptions = getPasteNumberOptions(target?.workbook, accessor);
+    const parseOptions = { ...getPasteNumberOptions(target?.workbook, accessor), inputSource };
+    const localeService = accessor.get(LocaleService);
     const { mapFunc } = virtualizeDiscreteRanges([range]);
 
     const cellValueMatrix = new ObjectMatrix<ICellData>();
@@ -347,7 +349,7 @@ export function getSetCellValueMutations(
              * 2. If the above case does not apply, parse the value to check whether it has a number format.
              */
             const currentCellStyle = worksheet?.getCellStyle(row, col);
-            const numfmtResult = getExternalPasteNumberFormatResult(value.v, currentCellStyle, parseOptions);
+            const numfmtResult = getExternalPasteNumberFormatResult(value.v, currentCellStyle, localeService, parseOptions);
 
             if (numfmtResult.t !== undefined) {
                 cellValue.t = numfmtResult.t;
@@ -386,7 +388,8 @@ export function getSetCellStyleMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-    accessor: IAccessor
+    accessor: IAccessor,
+    inputSource: ICopyPastePayload['inputSource'] = 'text-paste'
 ): {
     redo: IMutationInfo;
     undo: IMutationInfo;
@@ -394,7 +397,8 @@ export function getSetCellStyleMutations(
     const { unitId, subUnitId, range } = pasteTo;
     const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
     const worksheet = target?.worksheet;
-    const parseOptions = getPasteNumberOptions(target?.workbook, accessor);
+    const parseOptions = { ...getPasteNumberOptions(target?.workbook, accessor), inputSource };
+    const localeService = accessor.get(LocaleService);
     const { mapFunc } = virtualizeDiscreteRanges([range]);
 
     const cellValueMatrix = new ObjectMatrix<ICellData>();
@@ -421,7 +425,7 @@ export function getSetCellStyleMutations(
              * 2. If the above case does not apply, parse the value to check whether it has a number format.
              */
             const currentCellStyle = worksheet?.getCellStyle(row, col);
-            const numfmtResult = getExternalPasteNumberFormatResult(value.v, currentCellStyle, parseOptions);
+            const numfmtResult = getExternalPasteNumberFormatResult(value.v, currentCellStyle, localeService, parseOptions);
 
             if (numfmtResult.n) {
                 newStyle.n = numfmtResult.n;

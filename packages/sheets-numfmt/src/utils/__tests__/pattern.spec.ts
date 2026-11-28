@@ -67,6 +67,8 @@ describe('getPatternPreview', () => {
 
         expect(getPatternType('0%')).toBe('percent');
         expect(getPatternPreview('0.00', 12.3)).toEqual({ result: '12.30' });
+        expect(getPatternPreview('0.00%', 0.125, 'en', undefined, 'se-NO').result).toBe('12,50 %');
+        expect(getPatternPreview('0.00%', 0.125, 'en', undefined, 'se-SE').result).toBe('12,50%');
         expect(getPatternPreviewIgnoreGeneral(DEFAULT_NUMBER_FORMAT, 0.1 + 0.2)).toEqual({ result: '0.3' });
         expect(getPatternPreview('[invalid', 42)).toEqual({ result: '42' });
     });

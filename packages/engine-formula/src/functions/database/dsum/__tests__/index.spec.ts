@@ -32,9 +32,9 @@ describe('Test dsum function', () => {
             const database = ArrayValueObject.createByArray([['Amount'], [2], [3]]);
             const criteria = ArrayValueObject.createByArray([['Amount'], ['>1,5']]);
             const field = StringValueObject.create('Amount');
-            criteria.withDateSystem(DateSystem.Date1900, () => 'de-DE');
+            criteria.withDateSystem(DateSystem.Date1900, { getCalculationRegion: () => 'de-DE', getLocale: () => undefined });
             expect(testFunction.calculate(database, field, criteria).getValue()).toBe(5);
-            criteria.withDateSystem(DateSystem.Date1900, () => 'en-US');
+            criteria.withDateSystem(DateSystem.Date1900, { getCalculationRegion: () => 'en-US', getLocale: () => undefined });
             expect(testFunction.calculate(database, field, criteria).getValue()).toBe(0);
         });
 

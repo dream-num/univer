@@ -55,7 +55,7 @@ describe('getDateFormatOptions', () => {
         const namedMonth = belgian.find(({ value }) => value === '[$-fr-BE]d mmmm');
         expect(namedMonth?.label).toBe('5 août');
         expect(numfmt.format(namedMonth!.value, 11175, { locale: 'en' })).toBe(namedMonth!.label);
-        expect(getDateFormatOptions(LocaleType.EN_US, 'd mmmm', 'fr-BE')[0]).toEqual({ label: '5 August', value: 'd mmmm' });
+        expect(getDateFormatOptions(LocaleType.EN_US, 'd mmmm', 'fr-BE')[0]).toEqual({ label: '5 août', value: 'd mmmm' });
     });
 
     it('does not offer Chinese literals in English presets', () => {

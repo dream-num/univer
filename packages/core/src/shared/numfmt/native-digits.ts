@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import { getRegionalNumberFormat } from '../../services/region/number-format';
+import { getRegionParts } from '../../services/region/region-rules';
+
 // Excel encodes a digit system in the high byte of a number format's locale ID.
 const digitSystems = [
     [0x02, 0x0660, 0x0401],
@@ -41,7 +44,22 @@ export function getDigitZero(localeCode: number): number | undefined {
     return zeros.get(localeCode >>> 24);
 }
 
-export function normalizeNativeDigits(input: string) {
+export function normalizeNativeDigits(input: string, region?: string, uiLocale?: string) {
+    const ui = getRegionParts(uiLocale ?? '')?.language;
+    if (ui === 'ja' || ui === 'ko' || ui === 'zh') {
+        input = input.replace(/[！-～]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xFEE0));
+    }
+    if (/[،٪]/.test(input)) {
+        const { language, script, territory } = getRegionParts(region ?? '') ?? {};
+        // Excel recognizes Arabic punctuation with these writing systems even when the digits are ASCII.
+        const regionalPunctuation = script
+            ? (/^(?:arab|hebr|thaa)$/.test(script) || ((language === 'ks' || language === 'ur') && script === 'aran'))
+            : /^(?:ar|dv|fa|he|ks|lrc|mzn|nqo|ps|syr|ug|ur|yi)$/.test(language ?? '');
+        if (ui === 'ar' || ui === 'he' || regionalPunctuation || (!territory && /^(?:ku|tzm|zgh)$/.test(language ?? ''))) {
+            input = input.replace(/٪/g, '%');
+            if (getRegionalNumberFormat(region).group === ',') input = input.replace(/،/g, ',');
+        }
+    }
     let system = 0;
     let locale = 0;
     const value = input.replace(nativeDigitPattern, (digit) => {

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { RegionRules } from './region-rules';
+import { isExcelRegionLanguage } from './formula-separators';
+import { getRegionParts, RegionRules } from './region-rules';
 
 // Excel for Mac 16.115 short dates. Regions sharing a pattern share the same rule.
 const rules = new RegionRules<string>();
@@ -192,7 +193,26 @@ times.add('hh:mm:ss', 'myv mzn nb nd nds ne nl nmg nn nnh no nqo nr nso nyn oc o
 times.add('hh:mm:ss', 'sbp sc scn se seh ses sg shi shn sjd sje sju sl sn sr ss st sv sw szl teo tg th tk tn tr ts twq tyv tzm ug uk uz ve');
 times.add('hh:mm:ss', 'vec vi vmw vun wa wae wo xh xog yav yi yrl za zgh zh zu');
 
-export function getRegionalDatePattern(region: string): string {
+export function getRegionalDatePattern(region: string, locale?: string): string {
+    const parts = getRegionParts(region);
+    const language = parts?.language;
+    if (locale && language === 'ja' && getRegionParts(locale)?.language === 'ja' && (!parts?.territory || parts.territory === 'JP')) return 'yyyy/m/d';
+    if (language && !isExcelRegionLanguage(language)) return 'm/d/yy';
+    if (parts?.territory && parts.territory !== 'XK' && /^(?:X[A-Z]|Q[M-Z])$/.test(parts.territory)) return 'm/d/yy';
+    if (language) {
+        switch (parts?.territory) {
+            case 'AX': return 'd.m.yyyy';
+            case 'FI': return language === 'se' ? 'dd.mm.yyyy' : 'd.m.yyyy';
+            case 'SJ': return 'dd.mm.yyyy';
+            case 'SE': return 'yyyy-mm-dd';
+            case 'NO':
+                if (language === 'se') return 'yyyy-mm-dd';
+                return /^(?:nb|nn|no)$/.test(language) ? 'dd.mm.yyyy' : 'dd/mm/yyyy';
+            case 'US':
+                if (language === 'haw') return 'd/m/yy';
+                if (language !== 'und') return 'm/d/yy';
+        }
+    }
     // The Taraskievica variant uses a padded day and a four-digit year.
     if (/^be(?:-cyrl)?(?:-by)?-tarask(?:-|$)/i.test(region)) return 'dd.mm.yyyy';
     return rules.resolve(region) ?? 'dd/mm/yyyy';

@@ -399,6 +399,7 @@ export type {
     ISingleFunctionRegisterParams,
     IUnregisterFunctionParams,
 } from './services/formula/register-function.service';
+export { getErrorAliases, getFunctionAliases, parseCellLiteral } from './services/formula/utils';
 export { generateParam, getFunctionName } from './services/formula/utils';
 export { FunctionService } from './services/function.service';
 export type { IFunctionRegistration } from './services/function.service';

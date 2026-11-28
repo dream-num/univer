@@ -610,7 +610,7 @@ export class SheetClipboardController extends RxDisposable {
                 };
             } else {
                 const style = workbook?.getSheetBySheetId(subUnitId)?.getComposedCellStyle(range.rows[0], range.cols[0]);
-                const { v, t, n } = getExternalPasteNumberFormatResult(text, style, parseOptions);
+                const { v, t, n } = getExternalPasteNumberFormatResult(text, style, this._localService, parseOptions);
                 const cell: ICellData = { v: v ?? text, t, f: null };
                 if (n && (payload.pasteType === PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE ||
                     payload.pasteType === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_BESIDES_BORDER)) {
@@ -665,9 +665,9 @@ export class SheetClipboardController extends RxDisposable {
             specialPasteInfo: {
                 label: 'specialPaste.value',
             },
-            onPasteCells: (pasteFrom, pasteTo, data) => {
+            onPasteCells: (pasteFrom, pasteTo, data, payload) => {
                 return this._injector.invoke((accessor) => {
-                    const { redo, undo } = getSetCellValueMutations(pasteTo, pasteFrom, data, accessor);
+                    const { redo, undo } = getSetCellValueMutations(pasteTo, pasteFrom, data, accessor, payload.inputSource);
                     return {
                         redos: [redo],
                         undos: [undo],
@@ -680,7 +680,7 @@ export class SheetClipboardController extends RxDisposable {
             specialPasteInfo: {
                 label: 'specialPaste.format',
             },
-            onPasteCells: (pasteFrom, pasteTo, matrix) => {
+            onPasteCells: (pasteFrom, pasteTo, matrix, payload) => {
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
 
@@ -690,7 +690,8 @@ export class SheetClipboardController extends RxDisposable {
                         pasteTo,
                         pasteFrom,
                         matrix,
-                        accessor
+                        accessor,
+                        payload.inputSource
                     );
                 });
                 redoMutationsInfo.push(redo);

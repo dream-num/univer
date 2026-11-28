@@ -52,3 +52,10 @@ export function groupIntegerDigits(digits: string, separator: string, grouping: 
     }
     return result;
 }
+
+/** Excel permits wider groups on input. Only the minimum widths constrain a numeric token. */
+export function isValidNumberGrouping(integer: string, separator: string, secondary: number): boolean {
+    const groups = integer.split(separator);
+    return /[1-9]/.test(groups[0]) && groups[groups.length - 1].length >= 3 &&
+        groups.slice(1, -1).every((group) => group.length >= secondary);
+}

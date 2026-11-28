@@ -33,6 +33,29 @@ describe('Excel regional number formats', () => {
         }
     });
 
+    it.each([
+        ['uz-Cyrl-CA', '1,234,567.5', 1234],
+        ['uz-Cyrl-GB', '1,234,567.5', 1234],
+        ['fr-CA', '1 234 567,5', 1.234],
+        ['sh-CH', "1'234'567.5", '1,234'],
+        ['rm-Latn-CH', '1 234 567,5', 1.234],
+        ['rm-Cyrl-CH', "1'234'567.5", '1,234'],
+        ['la', '1234567.5', '1,234'],
+        ['la-CA', '1,234,567.5', 1234],
+    ] as const)('round-trips grouped numbers and interprets direct commas in %s', (region, display, commaInput) => {
+        expect(format('#,##0.0', 1234567.5, { region })).toBe(display);
+        expect(getNumfmtParseValueFilter(display, { region })?.v).toBe(1234567.5);
+        expect(getNumfmtParseValueFilter('1,234', { region })?.v ?? '1,234').toBe(commaInput);
+    });
+
+    it('uses HTML grouping only for an external table in regions with ungrouped display', () => {
+        for (const [region, input] of [['la', '1,234'], ['und-CA', '1,234'], ['fa-AF', '1٬234']]) {
+            expect(getNumfmtParseValueFilter(input, { region, inputSource: 'text-paste' })).toBeNull();
+            expect(getNumfmtParseValueFilter(input, { region, inputSource: 'html-paste' })?.v).toBe(1234);
+        }
+        expect(getNumfmtParseValueFilter('1,234', { region: 'en-US-u-va-posix', inputSource: 'html-paste' })).toBeNull();
+    });
+
     it('validates integer group widths and keeps punctuation in quoted format text', () => {
         expect(getNumfmtParseValueFilter('1,23,456', { region: 'en-IN' })?.v).toBe(123456);
         expect(getNumfmtParseValueFilter('1,23,456', { region: 'en-US' })).toBeNull();

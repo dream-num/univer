@@ -32,9 +32,9 @@ import {
     isRealNum,
     isTextFormat,
     IUniverInstanceService,
+    LocaleService,
     Optional,
     toDisposable,
-    willLoseNumericPrecision,
 } from '@univerjs/core';
 import { stripErrorMargin } from '@univerjs/engine-formula';
 import {
@@ -85,6 +85,7 @@ export class NumfmtEditorController extends Disposable {
         @Inject(INumfmtService) private _numfmtService: INumfmtService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private _injector: Injector,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(SheetsNumfmtCellContentController) private _sheetsNumfmtCellContentController: SheetsNumfmtCellContentController,
         @Optional(IEditorBridgeService) private _editorBridgeService?: IEditorBridgeService
     ) {
@@ -121,6 +122,7 @@ export class NumfmtEditorController extends Disposable {
                                 // Excel completes omitted components in the active date/clock format without changing the stored numfmt.
                                 const canonicalValue = serializeTemporalEditorValue({
                                     serial: Number(rawCell.v),
+                                    region: this._sheetsNumfmtCellContentController.region,
                                     pattern: numfmtCell.pattern,
                                     locale: this._sheetsNumfmtCellContentController.getLocale(context.workbook),
                                     dateSystem: context.workbook.getDateSystem(),
@@ -189,7 +191,7 @@ export class NumfmtEditorController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._sheetInterceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT, {
-                    // eslint-disable-next-line max-lines-per-function,complexity
+                    // eslint-disable-next-line complexity
                     handler: (value, context, next) => {
                         if (!value?.v && !value?.p) {
                             return next(value);
@@ -207,7 +209,7 @@ export class NumfmtEditorController extends Disposable {
                         const originCell = context.worksheet.getCellRaw(context.row, context.col);
 
                         // if the cell is text format or force string, do not convert the value
-                        if (isTextFormat(currentNumfmtValue?.pattern) || value.t === CellValueType.FORCE_STRING) {
+                        if (isTextFormat(currentNumfmtValue?.pattern) || value.t === CellValueType.FORCE_STRING || value.t === CellValueType.BOOLEAN) {
                             return next(value);
                         }
 
@@ -216,7 +218,7 @@ export class NumfmtEditorController extends Disposable {
                         const locale = this._sheetsNumfmtCellContentController.getLocale(context.workbook);
                         const dateSystem = context.workbook.getDateSystem();
                         const region = context.editRegion ?? this._sheetsNumfmtCellContentController.region;
-                        const numfmtInfo = getNumfmtParseValueFilter(content, { locale, dateSystem, region });
+                        const numfmtInfo = getNumfmtParseValueFilter(content, { locale, dateSystem, region, uiLocale: this._localeService.getCurrentLocale() });
 
                         if (body) {
                             if (!canConvertRichTextToNumfmt(body)) {
@@ -246,26 +248,6 @@ export class NumfmtEditorController extends Disposable {
                         }
 
                         if (numfmtInfo) {
-                            // If the content is parsed to a number format or the origin cell has a number format, do not need judge whether it will lose precision.
-                            // If the cell type is string or force string, do not need judge whether it will lose precision.
-                            // If the numeric string will lose precision when converted to a number, set the cell type to force string
-                            // e.g. 123456789123456789
-                            // e.g. 1212121212121212.2345
-                            if (
-                                !numfmtInfo.z &&
-                                !currentNumfmtValue?.pattern &&
-                                originCell?.t !== CellValueType.STRING &&
-                                originCell?.t !== CellValueType.FORCE_STRING &&
-                                willLoseNumericPrecision(content.replace(getRegionalNumberFormat(region).decimal, '.'))
-                            ) {
-                                return next({
-                                    ...value,
-                                    p: undefined,
-                                    v: content,
-                                    t: CellValueType.FORCE_STRING,
-                                });
-                            }
-
                             /**
                              * Only when the content has number format pattern but the current cell has no pattern, or the pattern type is different, need to update the number format.
                              * Different currency symbols also should not be updated in Excel.

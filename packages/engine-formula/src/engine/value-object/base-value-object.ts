@@ -24,6 +24,11 @@ import { compareToken } from '../../basics/token';
 
 export type callbackMapFnType = (currentValue: BaseValueObject, row: number, column: number) => BaseValueObject;
 
+export interface ICalculationLocale {
+    getCalculationRegion(): string;
+    getLocale(): string | undefined;
+}
+
 export interface IArrayValueObject {
     calculateValueList: Nullable<BaseValueObject>[][];
     rowCount: number;
@@ -88,6 +93,10 @@ export class BaseValueObject extends ObjectClassType {
         return this._customData;
     }
 
+    getCalculationLocale(): string | undefined {
+        return undefined;
+    }
+
     getCalculationRegion(): string | undefined {
         return undefined;
     }
@@ -97,7 +106,7 @@ export class BaseValueObject extends ObjectClassType {
     }
 
     /** Bind the current calculation context in place before the value is used. */
-    withDateSystem(dateSystem: DateSystem, _readRegion?: () => string): this {
+    withDateSystem(dateSystem: DateSystem, _regionalContext?: ICalculationLocale): this {
         this._dateSystem = dateSystem;
         return this;
     }

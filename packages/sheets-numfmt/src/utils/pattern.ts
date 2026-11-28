@@ -16,7 +16,7 @@
 
 import type { DateSystem, INumfmtLocaleTag } from '@univerjs/core';
 import type { FormatType } from '@univerjs/sheets';
-import { DEFAULT_NUMBER_FORMAT, numfmt } from '@univerjs/core';
+import { DEFAULT_NUMBER_FORMAT, getRegionalNumberFormat, numfmt } from '@univerjs/core';
 
 export const getPatternType = (pattern: string): FormatType => {
     const type = numfmt.getFormatInfo(pattern).type || 'unknown';
@@ -41,7 +41,11 @@ export const getPatternPreview = (
     try {
         const formatColor = numfmt.formatColor(pattern, value);
         const color = formatColor ? String(formatColor) : undefined;
-        const result = numfmt.format(pattern, value, { locale, dateSystem, region, throws: false });
+        // Excel localizes the built-in cell percent formats. Explicit format codes in TEXT retain their spacing.
+        const displayPattern = (pattern === '0%' || pattern === '0.00%') && getRegionalNumberFormat(region).spaceBeforePercent
+            ? pattern.replace('%', ' %')
+            : pattern;
+        const result = numfmt.format(displayPattern, value, { locale, dateSystem, region, throws: false });
         return {
             result,
             color,

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import type { BaseFunction } from '../../functions/base-function';
 import type { Anchorarray } from '../../functions/lookup/anchorarray';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
-import type { BaseValueObject } from '../value-object/base-value-object';
-import { DateSystem } from '@univerjs/core';
+import type { BaseValueObject, ICalculationLocale } from '../value-object/base-value-object';
 import { ErrorType } from '../../basics/error-type';
 import { suffixToken } from '../../basics/token';
 import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
@@ -43,7 +43,7 @@ export class SuffixNode extends BaseAstNode {
         return NodeType.SUFFIX;
     }
 
-    override execute(dateSystem: DateSystem = DateSystem.Date1900, readRegion?: () => string) {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900, regionalContext?: ICalculationLocale) {
         const children = this.getChildren();
         let value = children[0]?.getValue();
         let result: FunctionVariantType;
@@ -54,24 +54,18 @@ export class SuffixNode extends BaseAstNode {
 
         if (this._operatorString === suffixToken.PERCENTAGE) {
             if (value.isReferenceObject()) {
-                value = (value as BaseReferenceObject).withDateSystem(dateSystem, readRegion).toArrayValueObject();
+                value = (value as BaseReferenceObject).withDateSystem(dateSystem, regionalContext).toArrayValueObject();
             }
             result = this._functionExecutor.calculate(
-                (value as BaseValueObject).withDateSystem(dateSystem, readRegion),
+                (value as BaseValueObject).withDateSystem(dateSystem, regionalContext),
                 NumberValueObject.create(100)
             ) as FunctionVariantType;
-
-            // set number format
-            if ((result as NumberValueObject).isNumber()) {
-                const value = Number((result as NumberValueObject).getValue());
-                result = NumberValueObject.create(value, '0.00%');
-            }
         } else if (this._operatorString === suffixToken.POUND) {
             result = this._handlerPound(value);
         } else {
             result = ErrorValueObject.create(ErrorType.VALUE);
         }
-        this.setValue(result.withDateSystem(dateSystem, readRegion));
+        this.setValue(result.withDateSystem(dateSystem, regionalContext));
     }
 
     private _handlerPound(value: FunctionVariantType): FunctionVariantType {

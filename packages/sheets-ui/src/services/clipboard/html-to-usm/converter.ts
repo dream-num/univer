@@ -20,6 +20,7 @@ import type { ICustomRange, IDocumentBody, IDocumentData, IStyleData, ITextRun, 
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import {
+    CellValueType,
     createDocumentModelWithStyle,
     createParagraphId,
     CustomRangeType,
@@ -28,6 +29,7 @@ import {
     getNumfmtParseValueFilter,
     isDefaultFormat,
     isSafeUrl,
+    isTextFormat,
     numfmt,
     ObjectMatrix,
     skipParseTagNames,
@@ -296,20 +298,8 @@ export class HtmlToUSMService {
         while ((match = ruleRegex.exec(rawCssText)) !== null) {
             const selectors = match[1].trim();
             const declarations = match[2];
-            const numfmtMatch = declarations.match(/mso-number-format\s*:\s*("(?:[^"\\]|\\.)*"|[^;]+)/i);
-            if (!numfmtMatch) continue;
-
-            let value = numfmtMatch[1].trim();
-            // Remove surrounding CSS quotes if present
-            if (value.startsWith('"') && value.endsWith('"')) {
-                value = value.slice(1, -1);
-            }
-            const decoded = decodeMsoNumberFormat(value);
-            // Excel can emit named formats such as `Percent` that are not valid Univer numfmt patterns.
-            // Skip them so the external paste flow can infer a valid pattern from the displayed value.
-            if (!numfmt.isValidFormat(decoded)) {
-                continue;
-            }
+            const decoded = this._readMsoNumfmt(declarations);
+            if (!decoded) continue;
             // A rule can have multiple comma-separated selectors
             selectors.split(',').forEach((sel) => {
                 this._msoNumfmtMap.set(sel.trim(), decoded);
@@ -321,7 +311,18 @@ export class HtmlToUSMService {
      * Get the mso-number-format value for a given DOM node,
      * following the same priority as _getStyle: class > id > tag.
      */
+    private _readMsoNumfmt(declarations: string): string | undefined {
+        const match = /mso-number-format\s*:\s*("(?:[^"\\]|\\.)*"|[^;]+)/i.exec(declarations);
+        if (!match) return;
+        let value = match[1].trim();
+        if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
+        const pattern = decodeMsoNumberFormat(value);
+        return numfmt.isValidFormat(pattern) ? pattern : undefined;
+    }
+
     private _getMsoNumfmtForNode(node: HTMLElement): string | undefined {
+        const inline = this._readMsoNumfmt(node.getAttribute('style') ?? '');
+        if (inline) return inline;
         for (const className of node.classList) {
             const fmt = this._msoNumfmtMap.get(`.${className}`);
             if (fmt) return fmt;
@@ -472,7 +473,8 @@ export class HtmlToUSMService {
                             pattern: value.numfmtPattern,
                         },
                     };
-                    cellValue.v = Number(cellValue.v);
+                    if (isTextFormat(value.numfmtPattern)) cellValue.t = CellValueType.STRING;
+                    else cellValue.v = Number(cellValue.v);
                 }
 
                 valueMatrix.setValue(row, col, cellValue);
@@ -539,7 +541,12 @@ export class HtmlToUSMService {
                 let numfmtPattern: string | undefined;
 
                 const pattern = this._getMsoNumfmtForNode(cell as HTMLElement);
-                if (!isDefaultFormat(pattern)) {
+                if (isTextFormat(pattern)) {
+                    const text = this._getCellTextAndRichText(cell, cellStyle, skeleton);
+                    cellText = text.cellText;
+                    cellRichStyle = text.cellRichStyle;
+                    numfmtPattern = pattern;
+                } else if (!isDefaultFormat(pattern)) {
                     cellText = cell.childElementCount === 0 ? normalizePlainCellText(cell.textContent ?? '') : cell.innerHTML;
                     const hasSpacerun = cellText.includes('mso-spacerun:yes');
                     if (hasSpacerun) {
@@ -1004,7 +1011,7 @@ function decodeHTMLEntities(input: string): string {
 }
 
 function normalizePlainCellText(input: string): string {
-    return input.replace(/[\r\n]/g, '').replace(/\u00A0/g, ' ');
+    return input.replace(/[\r\n]/g, '');
 }
 
 /**

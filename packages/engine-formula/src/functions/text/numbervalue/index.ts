@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getRegionalNumberFormat } from '@univerjs/core';
+import { getRegionalNumberFormat, normalizeNativeDigits } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
@@ -24,6 +24,8 @@ import { NumberValueObject, parseFormulaNumericText, StringValueObject } from '.
 import { RegionalNumberFormatFunction } from '../regional-number-format.function';
 
 export class Numbervalue extends RegionalNumberFormatFunction {
+    override needsLocale = true;
+
     override minParams = 1;
 
     override maxParams = 3;
@@ -98,6 +100,7 @@ export class Numbervalue extends RegionalNumberFormatFunction {
             : format.group || (format.decimal === '.' ? ',' : '٬');
         if (groupSeparator && group === decimal) return ErrorValueObject.create(ErrorType.VALUE);
         let content = String(text.getValue()).replace(/\s+/g, '');
+        if (/[^\p{ASCII}]/u.test(content)) content = normalizeNativeDigits(content, region, this.getLocale()).value;
         if (text.isNumber()) content = content.replace('.', format.decimal);
         if (!content) return NumberValueObject.create(0);
         const percent = content.match(/%+$/)?.[0].length ?? 0;
@@ -107,7 +110,7 @@ export class Numbervalue extends RegionalNumberFormatFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (group && group !== decimal) parts[0] = parts[0].split(group).join('');
-        const parsed = parseFormulaNumericText(parts.join(format.decimal), text.getDateSystem(), region);
+        const parsed = parseFormulaNumericText(parts.join(format.decimal), text.getDateSystem(), region, this.getLocale());
         return parsed && 'v' in parsed && !parsed.z?.includes('%')
             ? NumberValueObject.create(parsed.v / 100 ** percent)
             : ErrorValueObject.create(ErrorType.VALUE);

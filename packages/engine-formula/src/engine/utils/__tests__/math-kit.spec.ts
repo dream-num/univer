@@ -87,6 +87,7 @@ describe('Test math kit', () => {
         expect(round(1.23456789, 2)).toBe(1.23);
         expect(round(1.235, 2)).toBe(1.24);
         expect(round(1.23456789, 0)).toBe(1);
+        expect(round(12345678901234500, 0)).toBe(12345678901234500);
         expect(round(1.23456789, 1)).toBe(1.2);
         expect(round(1.23456789, 3)).toBe(1.235);
         expect(round(1.23456789, 4)).toBe(1.2346);

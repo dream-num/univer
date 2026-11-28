@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import { DateSystem, isRealNum } from '@univerjs/core';
 import type { FormulaCalculationCache } from '../../services/formula-cache.service';
-import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
+import type { callbackMapFnType, IArrayValueObject, ICalculationLocale } from './base-value-object';
 import { NUMBER_LITERAL_REGEX, parseArrayConstant } from '../../basics/array-constant';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
@@ -1074,11 +1074,11 @@ export class ArrayValueObject extends BaseValueObject {
         return accumulatorAll;
     }
 
-    override withDateSystem(dateSystem: DateSystem, readRegion?: () => string): this {
+    override withDateSystem(dateSystem: DateSystem, regionalContext?: ICalculationLocale): this {
         super.withDateSystem(dateSystem);
         // Child values read their own date system during parsing and formatting.
-        this._values.forEach((row) => row.forEach((valueObject) => valueObject?.withDateSystem(dateSystem, readRegion)));
-        this._defaultValue?.withDateSystem(dateSystem, readRegion);
+        this._values.forEach((row) => row.forEach((valueObject) => valueObject?.withDateSystem(dateSystem, regionalContext)));
+        this._defaultValue?.withDateSystem(dateSystem, regionalContext);
         return this;
     }
 

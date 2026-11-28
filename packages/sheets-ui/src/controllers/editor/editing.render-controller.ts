@@ -87,7 +87,7 @@ import {
     SetDocInputStyleCommand,
     VIEWPORT_KEY,
 } from '@univerjs/docs-ui';
-import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
+import { ERROR_TYPE_SET, IFunctionService, LexerTreeBuilder, matchToken, parseCellLiteral } from '@univerjs/engine-formula';
 import {
     convertTextRotation,
     DeviceInputEventType,
@@ -1150,7 +1150,7 @@ export function getCellDataByInput(
         cellData.f = null;
         cellData.si = null;
         cellData.p = null;
-        cellData.t = CellValueType.STRING;
+        cellData.t = ERROR_TYPE_SET.has(newDataStream as ErrorType) ? CellValueType.FORCE_STRING : CellValueType.STRING;
 
         // Text format supports rich text
         if (isRichText(body)) {
@@ -1194,6 +1194,7 @@ export function getCellDataByInput(
             return null;
         }
         cellData.v = newDataStream === '' ? null : newDataStream;
+        Object.assign(cellData, parseCellLiteral(newDataStream, localeService));
         cellData.f = null;
         cellData.si = null;
         cellData.p = null;

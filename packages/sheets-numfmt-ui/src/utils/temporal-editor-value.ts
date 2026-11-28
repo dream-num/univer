@@ -15,9 +15,10 @@
  */
 
 import type { DateSystem, INumfmtLocaleTag } from '@univerjs/core';
-import { excelSerialToDateTimeParts, numfmt } from '@univerjs/core';
+import { getRegionalDatePattern, getRegionalNumberFormat, getRegionalTimePattern, numfmt } from '@univerjs/core';
 
 interface ITemporalEditorValueOptions {
+    region?: string;
     serial: number;
     pattern: string;
     locale: INumfmtLocaleTag;
@@ -46,24 +47,7 @@ function getTemporalType(pattern: string): TemporalType | null {
     return type === 'date' || type === 'datetime' || type === 'time' ? type : null;
 }
 
-function trimFraction(value: string, locale: INumfmtLocaleTag): string {
-    const decimal = numfmt.getLocale(locale)?.decimal ?? '.';
-    const decimalIndex = value.lastIndexOf(decimal);
-    if (decimalIndex < 0) {
-        return value;
-    }
-
-    const suffixStart = value.indexOf(' ', decimalIndex);
-    const end = suffixStart < 0 ? value.length : suffixStart;
-    let fractionEnd = end;
-    while (fractionEnd > decimalIndex + 1 && value[fractionEnd - 1] === '0') {
-        fractionEnd--;
-    }
-
-    return value.slice(0, fractionEnd) + value.slice(end);
-}
-
-function serializeDuration(serial: number, locale: INumfmtLocaleTag): string {
+function serializeDuration(serial: number, clock: string, decimal: string): string {
     // Round once at the editor's millisecond precision so carries stay consistent across every component.
     const totalMilliseconds = Math.round(Math.abs(serial) * 86400000);
     const hours = Math.floor(totalMilliseconds / 3600000);
@@ -71,33 +55,43 @@ function serializeDuration(serial: number, locale: INumfmtLocaleTag): string {
     const seconds = Math.floor(totalMilliseconds / 1000) % 60;
     const milliseconds = totalMilliseconds % 1000;
     const fraction = milliseconds
-        ? `${numfmt.getLocale(locale)?.decimal ?? '.'}${String(milliseconds).padStart(3, '0').replace(/0+$/, '')}`
+        ? `${decimal}${String(milliseconds).padStart(3, '0').replace(/0+$/, '')}`
         : '';
-    return `${serial < 0 ? '-' : ''}${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}${fraction}`;
+    return `${serial < 0 ? '-' : ''}${hours}${clock}${String(minutes).padStart(2, '0')}${clock}${String(seconds).padStart(2, '0')}${fraction}`;
 }
 
 export function serializeTemporalEditorValue(options: ITemporalEditorValueOptions): string | null {
-    const { serial, pattern, locale, dateSystem } = options;
+    const { serial, pattern, locale, dateSystem, region } = options;
     const type = getTemporalType(pattern);
     if (!type || !Number.isFinite(serial) || (serial < 0 && type !== 'duration')) {
         return null;
     }
-    if (type === 'duration') return serializeDuration(serial, locale);
+    if (type === 'duration') {
+        const clock = region ? getRegionalTimePattern(region).match(/[:. ]/)![0] : ':';
+        const decimal = region ? getRegionalNumberFormat(region).decimal : numfmt.getLocale(locale)?.decimal ?? '.';
+        return serializeDuration(serial, clock, decimal);
+    }
 
-    const parts = excelSerialToDateTimeParts(serial, { dateSystem });
-    if (!parts) return null;
-    const hasFraction = Math.round(parts.fractionalSecond * 1000) > 0;
-    // This complete pattern is only for the editable text; the cell's persisted numfmt remains unchanged.
-    const canonicalPattern = numfmt.getDateTimeEditPattern(pattern, serial);
+    let canonicalPattern = numfmt.getDateTimeEditPattern(pattern, serial);
     if (!canonicalPattern) return null;
-
-    const value = numfmt.format(canonicalPattern, serial, { locale, dateSystem, throws: false });
-    return hasFraction ? trimFraction(value, locale) : value;
+    if (region && type === 'time') {
+        // The edit field retains the format's hour width and shows every clock component.
+        const separator = getRegionalTimePattern(region).match(/[:. ]/)![0];
+        canonicalPattern = canonicalPattern.replace(/:/g, `"${separator}"`);
+    } else if (region && (type === 'date' || type === 'datetime')) {
+        const shortDate = getRegionalDatePattern(region, locale).replace(/y+/, 'yyyy').replace(/[.-]/g, '/');
+        canonicalPattern = type === 'date' ? shortDate : `${shortDate} h:mm:ss`;
+    }
+    return numfmt.format(canonicalPattern, serial, { locale, region, dateSystem, throws: false });
 }
 
-function parseDuration(content: string, locale: INumfmtLocaleTag): number | null {
-    const decimal = numfmt.getLocale(locale)?.decimal ?? '.';
-    const normalized = decimal === '.' ? content : content.replace(decimal, '.');
+function parseDuration(content: string, locale: INumfmtLocaleTag, region?: string): number | null {
+    const decimal = region ? getRegionalNumberFormat(region).decimal : numfmt.getLocale(locale)?.decimal ?? '.';
+    const clock = region ? getRegionalTimePattern(region).match(/[:. ]/)![0] : ':';
+    const fields = content.trim().split(clock);
+    if (fields.length !== 3 || (decimal !== '.' && fields[2].includes('.'))) return null;
+    fields[2] = fields[2].replace(decimal, '.');
+    const normalized = fields.join(':');
     const match = /^\s*([+-])?(\d+):([0-5]?\d):([0-5]?\d)(\.\d{1,10})?\s*$/.exec(normalized);
     if (!match) {
         return null;
@@ -118,8 +112,10 @@ export function parseTemporalEditorValue(options: IParseTemporalEditorValueOptio
         return null;
     }
 
+    // The formula bar rounds time to seconds. Accepting its unchanged content preserves the hidden fraction.
+    if (content === serializeTemporalEditorValue({ ...options, serial: originalSerial })) return originalSerial;
     if (type === 'duration') {
-        return parseDuration(content, locale);
+        return parseDuration(content, locale, options.region);
     }
 
     if (type === 'time') {

@@ -28,17 +28,17 @@ import {
 } from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
 
-export function createCriteriaValueObject(content: string, dateSystem?: DateSystem, region?: string): BaseValueObject {
+export function createCriteriaValueObject(content: string, dateSystem?: DateSystem, region?: string, locale?: string): BaseValueObject {
     if (region && /[.,٫٬'/: -]|[^\p{ASCII}]/u.test(content.trim())) {
         const { decimal } = getRegionalNumberFormat(region);
         const decimalText = decimal === '.' ? content : content.replace(decimal, '.');
         if ((decimal === '.' || !content.includes('.')) && /^ *[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)? *$/i.test(decimalText)) {
             content = decimalText;
         } else {
-            const parsed = getNumfmtParseValueFilter(content, { region, dateSystem });
+            const parsed = getNumfmtParseValueFilter(content, { region, dateSystem, locale });
             return typeof parsed?.v === 'number'
                 ? createNumberValueObjectByRawValue(parsed.v, parsed.z)
-                : StringValueObject.create(content).withDateSystem(dateSystem ?? DateSystem.Date1900, () => region);
+                : StringValueObject.create(content).withDateSystem(dateSystem ?? DateSystem.Date1900, { getCalculationRegion: () => region, getLocale: () => locale });
         }
     }
     if (isRealNum(content)) {
@@ -54,7 +54,7 @@ export function createCriteriaValueObject(content: string, dateSystem?: DateSyst
     return ValueObjectFactory.create(content, false, dateSystem);
 }
 
-export function findCompareToken(str: string, dateSystem?: DateSystem, region?: string): [compareToken, BaseValueObject] {
+export function findCompareToken(str: string, dateSystem?: DateSystem, region?: string, locale?: string): [compareToken, BaseValueObject] {
     const comparisonTokens: compareToken[] = [
         compareToken.EQUALS,
         compareToken.NOT_EQUAL,
@@ -76,7 +76,7 @@ export function findCompareToken(str: string, dateSystem?: DateSystem, region?: 
 
     // Criteria accept numeric text such as "01" and "1.0" even though a
     // worksheet cell containing that text must retain its string type.
-    return [operator, createCriteriaValueObject(content, dateSystem, region)];
+    return [operator, createCriteriaValueObject(content, dateSystem, region, locale)];
 }
 
 /**
@@ -94,7 +94,8 @@ export function valueObjectCompare(range: BaseValueObject, criteria: BaseValueOb
             const [token, criteriaStringObject] = findCompareToken(
                 criteriaValueString,
                 criteria.getDateSystem(),
-                criteria.getCalculationRegion()
+                criteria.getCalculationRegion(),
+                criteria.getCalculationLocale()
             );
             operator = token;
             criteria = criteriaStringObject;

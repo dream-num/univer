@@ -74,6 +74,33 @@ afterEach(() => {
     injectors.splice(0).forEach((injector) => injector.dispose());
 });
 
+describe('regional cell literals', () => {
+    it('distinguishes localized values, untranslated text and forced text on entry', () => {
+        const bed = createTestBed();
+        try {
+            const locale = bed.get(LocaleService);
+            locale.load({ [LocaleType.FR_FR]: { 'engine-formula': { functionAliases: { TRUE: 'VRAI', FALSE: 'FAUX' }, errorAliases: { '#VALUE!': '#VALEUR!' } } } });
+            locale.setLocale(LocaleType.FR_FR);
+            const enter = (input: string) => getCellDataByInput(
+                {},
+                { id: 'editor', body: { dataStream: input }, documentStyle: {} },
+                bed.get(LexerTreeBuilder),
+                locale,
+                bed.get(IFunctionService),
+                bed.sheet.getStyles(),
+                getFormulaSyntax(bed.get(RegionService), locale)
+            );
+            expect(enter('faux')).toMatchObject({ v: 0, t: CellValueType.BOOLEAN });
+            expect(enter('FALSE')).toMatchObject({ v: 'FALSE', t: CellValueType.STRING });
+            expect(enter('#valeur!')).toMatchObject({ v: '#VALUE!', t: CellValueType.STRING });
+            expect(enter('#VALUE!')).toMatchObject({ v: '#VALUE!', t: CellValueType.FORCE_STRING });
+            expect(enter("'#VALEUR!")).toMatchObject({ v: '#VALEUR!', t: CellValueType.FORCE_STRING });
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
 describe('imported formula metadata when editing', () => {
     it.each([BooleanNumber.FALSE, BooleanNumber.TRUE])('clears copied metadata on edits and keeps unchanged formulas (fd=%s)', (fd) => {
         const testBed = createTestBed();

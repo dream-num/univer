@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IRange } from '@univerjs/core';
-
+import { DateSystem, Inject, Injector } from '@univerjs/core';
 import type { BaseFunction } from '../../functions/base-function';
 import type { ArgumentArrayContext } from '../../functions/implicit-intersection-arguments';
 import type { LexerNode } from '../analysis/lexer-node';
@@ -27,9 +27,8 @@ import type {
     NodeValueType,
 } from '../reference-object/base-reference-object';
 import type { MultiAreaReferenceObject } from '../reference-object/multi-area-reference-object';
-import type { BaseValueObject } from '../value-object/base-value-object';
+import type { BaseValueObject, ICalculationLocale } from '../value-object/base-value-object';
 import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
-import { DateSystem, Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { normalizeFunctionToken } from '../../basics/function';
@@ -49,9 +48,11 @@ import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISuperTableService } from '../../services/super-table.service';
 import { IFormulaUnitReferenceResolver } from '../../services/unit-reference-resolver.service';
 import { getFixedArrayResultRange, isExplicitDynamicArrayFormula } from '../utils/array-object';
+import { temporalSumPattern } from '../utils/numfmt-kit';
 import { prefixHandler } from '../utils/prefix-handler';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
+import { NumberValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -190,14 +191,14 @@ export class FunctionNode extends BaseAstNode {
             this._functionExecutor.lazyIfReferenceArrayArgumentIndexes.includes(index);
     }
 
-    override async executeAsync(dateSystem: DateSystem = DateSystem.Date1900, readRegion?: () => string) {
+    override async executeAsync(dateSystem: DateSystem = DateSystem.Date1900, regionalContext?: ICalculationLocale) {
         const children = this.getChildren();
 
         this._compatibility();
 
         const resultVariant = this._calculateReferenceEndpoint(children) ?? (this._functionExecutor.needsAstChildren
             ? this._calculateAst(children, dateSystem)
-            : await this._calculateAsync(this._collectVariants(children, dateSystem, readRegion), dateSystem));
+            : await this._calculateAsync(this._collectVariants(children, dateSystem, regionalContext), dateSystem));
         let result: FunctionVariantType;
 
         if (resultVariant.isAsyncObject() || resultVariant.isAsyncArrayObject()) {
@@ -206,7 +207,7 @@ export class FunctionNode extends BaseAstNode {
             result = resultVariant as FunctionVariantType;
         }
 
-        result = this._normalizeTopLevelLegacyArrayResult(result).withDateSystem(dateSystem, readRegion) as FunctionVariantType;
+        result = this._normalizeTopLevelLegacyArrayResult(result).withDateSystem(dateSystem, regionalContext) as FunctionVariantType;
 
         this._setEmbeddedArrayFormulaToResult(result);
 
@@ -218,16 +219,16 @@ export class FunctionNode extends BaseAstNode {
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
-    override execute(dateSystem: DateSystem = DateSystem.Date1900, readRegion?: () => string) {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900, regionalContext?: ICalculationLocale) {
         const children = this.getChildren();
 
         this._compatibility();
 
         const resultVariant = (this._calculateReferenceEndpoint(children) ?? (this._functionExecutor.needsAstChildren
             ? this._calculateAst(children, dateSystem)
-            : this._calculate(this._collectVariants(children, dateSystem, readRegion), dateSystem))) as FunctionVariantType;
+            : this._calculate(this._collectVariants(children, dateSystem, regionalContext), dateSystem))) as FunctionVariantType;
 
-        const result = this._normalizeTopLevelLegacyArrayResult(resultVariant).withDateSystem(dateSystem, readRegion) as FunctionVariantType;
+        const result = this._normalizeTopLevelLegacyArrayResult(resultVariant).withDateSystem(dateSystem, regionalContext) as FunctionVariantType;
 
         this._setEmbeddedArrayFormulaToResult(result);
 
@@ -261,12 +262,12 @@ export class FunctionNode extends BaseAstNode {
         return calculate.call(this._functionExecutor, variants);
     }
 
-    private _collectVariants(children: BaseAstNode[], dateSystem: DateSystem, readRegion?: () => string): BaseValueObject[] {
+    private _collectVariants(children: BaseAstNode[], dateSystem: DateSystem, regionalContext?: ICalculationLocale): BaseValueObject[] {
         const variants: BaseValueObject[] = [];
         const childrenCount = children.length;
 
         for (let i = 0; i < childrenCount; i++) {
-            const object = this._getChildVariant(children[i], dateSystem, readRegion);
+            const object = this._getChildVariant(children[i], dateSystem, regionalContext);
 
             if (object == null) {
                 continue;
@@ -278,7 +279,7 @@ export class FunctionNode extends BaseAstNode {
         return variants;
     }
 
-    private _getChildVariant(child: BaseAstNode, dateSystem: DateSystem, readRegion?: () => string): FunctionVariantType | undefined {
+    private _getChildVariant(child: BaseAstNode, dateSystem: DateSystem, regionalContext?: ICalculationLocale): FunctionVariantType | undefined {
         const object = child.getValue();
 
         if (object == null) {
@@ -302,10 +303,10 @@ export class FunctionNode extends BaseAstNode {
         // In the SUBTOTAL function, we need to get rowData information, we can only use ReferenceObject
         if (object.isReferenceObject() && !this._functionExecutor.needsReferenceObject) {
             // Array converted from reference object needs to be marked
-            return (object as BaseReferenceObject).withDateSystem(dateSystem, readRegion).toArrayValueObject();
+            return (object as BaseReferenceObject).withDateSystem(dateSystem, regionalContext).toArrayValueObject();
         }
 
-        return object.withDateSystem(dateSystem, readRegion);
+        return object.withDateSystem(dateSystem, regionalContext);
     }
 
     isAffectedBySheetMetadata(sheetOrderChanged: boolean, sheetSizeChanged: boolean): boolean {
@@ -492,6 +493,12 @@ export class FunctionNode extends BaseAstNode {
         } else {
             this._handleAddressFunction();
             resultVariant = this._functionExecutor.calculate(...variants);
+            const name = this._functionExecutor.name;
+            if (resultVariant instanceof NumberValueObject && (name === 'SUM' || name === 'AVERAGE' || name === 'MIN' || name === 'MAX')) {
+                const patterns = variants.map((arg) => arg.isArray() ? (arg as ArrayValueObject).getFirstCell().getPattern() : arg.getPattern());
+                const format = temporalSumPattern(patterns);
+                if (format !== undefined) resultVariant = NumberValueObject.create(resultVariant.getValue(), format);
+            }
         }
 
         return resultVariant;

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { DateSystem, excelDateSerial, getNumfmtParseValueFilter, getRegionalNumberFormat, isRealNum, normalizeNativeDigits, numfmt, Tools } from '@univerjs/core';
+import { DateSystem, excelDateSerial, getNumfmtParseValueFilter, getRegionalNumberFormat, isRealNum, isValidNumberGrouping, normalizeNativeDigits, numfmt, Tools } from '@univerjs/core';
+import type { ICalculationLocale } from './base-value-object';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
@@ -35,14 +36,7 @@ export type FormulaFunctionResultValueType = PrimitiveValueType | PrimitiveValue
 function isValidGroupedMantissa(mantissa: string, secondaryGroupSize: number): boolean {
     const parts = mantissa.split('.');
     if (parts.length > 2 || (parts.length === 2 && !/^\d*$/.test(parts[1]))) return false;
-    const groups = parts[0].split(',');
-    if (!/[1-9]/.test(groups[0]) || groups[groups.length - 1].length < 3) return false;
-    let shortest = 3;
-    for (let index = 1; index < groups.length - 1; index++) {
-        shortest = Math.min(shortest, groups[index].length);
-    }
-    // Wider groups are accepted. Only two-digit interior groups distinguish regions.
-    return shortest >= 3 || (shortest === 2 && secondaryGroupSize === 2);
+    return isValidNumberGrouping(parts[0], ',', secondaryGroupSize);
 }
 
 // Convert only punctuation used by this region before applying Excel's precision and exponent limits.
@@ -58,9 +52,9 @@ function normalizeFormulaMantissa(text: string, decimal: string, group: string):
     return invalid ? null : normalized;
 }
 
-function parseNumericLiteral(text: string, region?: string): { v: number; z?: string } | ErrorValueObject | null {
+function parseNumericLiteral(text: string, region?: string, locale?: string): { v: number; z?: string } | ErrorValueObject | null {
     const format = getRegionalNumberFormat(region);
-    const nativeText = /[^\p{ASCII}]/u.test(text) ? normalizeNativeDigits(text).value : text;
+    const nativeText = /[^\p{ASCII}]/u.test(text) ? normalizeNativeDigits(text, region, locale).value : text;
     const rawValue = normalizeFormulaMantissa(nativeText, format.decimal, format.group);
     if (rawValue === null) return null;
     const match = rawValue.match(/([0-9.,]+)(?:[eE]([+-]?[0-9]+))?/);
@@ -105,10 +99,10 @@ function parseNumericLiteral(text: string, region?: string): { v: number; z?: st
     return { v: number, z: pattern };
 }
 
-export function parseFormulaNumericText(text: string, dateSystem: DateSystem, region?: string): { v: number; z?: string } | ErrorValueObject | null {
-    const numeric = parseNumericLiteral(text, region);
+export function parseFormulaNumericText(text: string, dateSystem: DateSystem, region?: string, locale?: string): { v: number; z?: string } | ErrorValueObject | null {
+    const numeric = parseNumericLiteral(text, region, locale);
     if (numeric && !(numeric instanceof ErrorValueObject)) return numeric;
-    const options = { dateSystem, region };
+    const options = { dateSystem, region, locale };
     // A rejected grouped number such as German "1.23" can still be a valid month/year.
     const parsed = numeric
         ? region && numfmt.parseDate(text, options)
@@ -1529,15 +1523,19 @@ const regionalText = /\p{Nd}/u;
 
 export const StringValueObjectCache = new FormulaAstLRU<StringValueObject>(STRING_CACHE_LRU_COUNT);
 export class StringValueObject extends BaseValueObject {
-    private _readRegion?: () => string;
+    private _regionalContext?: ICalculationLocale;
 
-    override withDateSystem(dateSystem: DateSystem, readRegion?: () => string): this {
-        this._readRegion = regionalText.test(this._value) ? readRegion : undefined;
+    override withDateSystem(dateSystem: DateSystem, regionalContext?: ICalculationLocale): this {
+        this._regionalContext = regionalText.test(this._value) ? regionalContext : undefined;
         return super.withDateSystem(dateSystem);
     }
 
     override getCalculationRegion(): string | undefined {
-        return this._readRegion?.();
+        return this._regionalContext?.getCalculationRegion();
+    }
+
+    override getCalculationLocale(): string | undefined {
+        return this._regionalContext?.getLocale();
     }
 
     private _value: string;
@@ -1730,7 +1728,7 @@ export class StringValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const parseData = parseFormulaNumericText(rawValue, this.getDateSystem(), this.getCalculationRegion());
+        const parseData = parseFormulaNumericText(rawValue, this.getDateSystem(), this.getCalculationRegion(), this.getCalculationLocale());
         if (parseData instanceof ErrorValueObject) return parseData;
 
         // A parse result is authoritative even when the input carries no number

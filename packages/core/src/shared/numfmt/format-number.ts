@@ -29,6 +29,7 @@ import { indexColors, TOKEN_TEXT } from './constants';
 import { decimalFromNumber } from './decimal';
 import { defaultLocale, getLocale } from './locale';
 import { parseFormatSection } from './parse-format-section';
+import { getRegionalCalendarLocale } from './regional-calendar';
 import { runPart } from './run-part';
 
 const defaultText = parseFormatSection([
@@ -142,8 +143,8 @@ export function formatValue(
 
     if (options.region) {
         const { decimal, group } = getRegionalNumberFormat(options.region);
-        const base = locale ?? defaultLocale;
-        if (decimal !== base.decimal || group !== base.group) {
+        const base = isParsedSection(part) && part.date && !pattern.locale ? getRegionalCalendarLocale(options.region, options.locale) : locale ?? defaultLocale;
+        if (base !== locale || decimal !== base.decimal || group !== base.group) {
             return runPart(value, part, options, { ...base, decimal, group }, decimalValue);
         }
     }

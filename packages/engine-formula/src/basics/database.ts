@@ -230,7 +230,7 @@ export function isCriteriaMatch(
             const criteriaValue = condition.isBoolean() ? Number(condition.getValue()) : condition.getValue();
             if (criteriaTitleIndex === -1) {
                 const value = condition.isString()
-                    ? createCriteriaValueObject(String(criteriaValue), dateSystem, condition.getCalculationRegion())
+                    ? createCriteriaValueObject(String(criteriaValue), dateSystem, condition.getCalculationRegion(), condition.getCalculationLocale())
                     : condition;
                 if ((!value.isNumber() && !value.isBoolean()) || !value.getValue()) {
                     isRowMatch = false;
@@ -244,7 +244,7 @@ export function isCriteriaMatch(
                     break;
                 }
 
-                const [compareToken, criteriaObject] = findCompareToken(String(criteriaValue), dateSystem, condition.getCalculationRegion());
+                const [compareToken, criteriaObject] = findCompareToken(String(criteriaValue), dateSystem, condition.getCalculationRegion(), condition.getCalculationLocale());
                 const compareObject = ValueObjectFactory.create(`${databaseValue}`, false, dateSystem).compare(criteriaObject, compareToken);
                 const compareValue = compareObject.getValue();
 

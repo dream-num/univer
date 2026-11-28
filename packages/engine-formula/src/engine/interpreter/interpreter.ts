@@ -15,6 +15,7 @@
  */
 
 import type { DateSystem, Nullable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { LambdaNode } from '../ast-node/lambda-node';
 import type { ReferenceNode } from '../ast-node/reference-node';
@@ -23,7 +24,6 @@ import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
 import type { PreCalculateNodeType } from '../utils/node-type';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
-import { Disposable } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { operatorToken } from '../../basics/token';
@@ -33,8 +33,9 @@ import { FunctionNode } from '../ast-node/function-node';
 import { NodeType } from '../ast-node/node-type';
 import { MultiAreaReferenceObject } from '../reference-object/multi-area-reference-object';
 import { isExplicitDynamicArrayFormula } from '../utils/array-object';
+import { isTemporalNumberFormat } from '../utils/numfmt-kit';
 import { ErrorValueObject } from '../value-object/base-value-object';
-import { BooleanValueObject, NullValueObject } from '../value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject } from '../value-object/primitive-object';
 
 type InterpreterRuntimeService = Pick<
     IFormulaRuntimeService,
@@ -48,8 +49,6 @@ export class Interpreter extends Disposable {
     ) {
         super();
     }
-
-    private readonly _readRegion = (): string => this._currentConfigService.getCalculationRegion();
 
     async executeAsync(nodeData: IExecuteAstNodeData): Promise<FunctionVariantType> {
         // if (!this._interpreterCalculateProps) {
@@ -168,9 +167,9 @@ export class Interpreter extends Disposable {
         }
 
         if (node.isAsync()) {
-            await node.executeAsync(dateSystem, this._readRegion);
+            await node.executeAsync(dateSystem, this._currentConfigService);
         } else {
-            node.execute(dateSystem, this._readRegion);
+            node.execute(dateSystem, this._currentConfigService);
         }
 
         this._intersectBoundReference(node);
@@ -210,7 +209,7 @@ export class Interpreter extends Disposable {
             (node as ReferenceNode).setRefOffset(refOffsetX, refOffsetY);
         }
 
-        node.execute(dateSystem, this._readRegion);
+        node.execute(dateSystem, this._currentConfigService);
         this._intersectBoundReference(node);
 
         return AstNodePromiseType.SUCCESS;
@@ -439,6 +438,7 @@ export class Interpreter extends Disposable {
 
         if (!value.isArray()) {
             const baseValue = value as BaseValueObject;
+            if (baseValue instanceof NumberValueObject && isTemporalNumberFormat(baseValue.getPattern())) return NumberValueObject.create(baseValue.getValue());
             if (!baseValue.isNull()) return baseValue;
             if (baseValue instanceof NullValueObject && baseValue.isOmitted() && node instanceof FunctionNode) {
                 return node.getOmittedIfBranchResult() ?? NullValueObject.create();
@@ -446,7 +446,8 @@ export class Interpreter extends Disposable {
             return NullValueObject.create();
         }
 
-        return value;
+        return (value as ArrayValueObject).mapValue((cell) =>
+            cell instanceof NumberValueObject && isTemporalNumberFormat(cell.getPattern()) ? NumberValueObject.create(cell.getValue()) : cell);
     }
 
     private _preserveLazyIfSelectedReferenceArray(node: BaseAstNode): boolean {

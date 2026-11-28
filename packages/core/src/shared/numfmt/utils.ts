@@ -217,7 +217,7 @@ export const getNumfmtParseValueFilter = (value: string, options: ParseOptions =
          * '5 A' => 'h:mm AM/PM' ----- This is supported by Excel
          * '5:00 AM' => 'h:mm AM/PM' ----- correct
          */
-        if (ignoreAMPMPatterns.has(z) && !/\s(A|AM|P|PM)$/i.test(value)) return null;
+        if (!options.region && ignoreAMPMPatterns.has(z) && !/\s(A|AM|P|PM)$/i.test(value)) return null;
 
         /**
          * Verify by formatting back to string

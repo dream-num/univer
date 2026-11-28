@@ -384,7 +384,7 @@ function getEqualityValueKeys(value: BaseValueObject, numberKey = stripErrorMarg
         return keys;
     }
 
-    const number = value.isNumber() ? value : createCriteriaValueObject(String(value.getValue()), value.getDateSystem(), value.getCalculationRegion());
+    const number = value.isNumber() ? value : createCriteriaValueObject(String(value.getValue()), value.getDateSystem(), value.getCalculationRegion(), value.getCalculationLocale());
     if (number.isNumber() && Number.isFinite(Number(number.getValue()))) {
         keys.push(numberKey(Number(number.getValue())));
     }
@@ -503,7 +503,7 @@ function getExactCriteriaKeys(criteria: Nullable<BaseValueObject>): Array<string
     }
 
     const [operator, value] = criteria.isString()
-        ? findCompareToken(String(criteria.getValue()), criteria.getDateSystem(), criteria.getCalculationRegion())
+        ? findCompareToken(String(criteria.getValue()), criteria.getDateSystem(), criteria.getCalculationRegion(), criteria.getCalculationLocale())
         : [compareToken.EQUALS, criteria];
     if (operator !== compareToken.EQUALS || value.isDateFormat()) {
         return undefined;
@@ -770,7 +770,7 @@ export function filterSameValueObjectResult(
     criteria: BaseValueObject
 ): ArrayValueObject {
     const [operator, criteriaObject] = criteria.isString()
-        ? findCompareToken(`${criteria.getValue()}`, criteria.getDateSystem(), criteria.getCalculationRegion())
+        ? findCompareToken(`${criteria.getValue()}`, criteria.getDateSystem(), criteria.getCalculationRegion(), criteria.getCalculationLocale())
         : [compareToken.EQUALS, criteria];
 
     return array.mapValue((valueObject, r, c) => {
@@ -831,7 +831,7 @@ export function filterSameValueObjectResult(
         }
 
         if (rangeValueObject?.isNumber() && criteriaObject.isString()) {
-            const criteriaNumber = createCriteriaValueObject(`${criteriaObject.getValue()}`, criteriaObject.getDateSystem(), criteriaObject.getCalculationRegion());
+            const criteriaNumber = createCriteriaValueObject(`${criteriaObject.getValue()}`, criteriaObject.getDateSystem(), criteriaObject.getCalculationRegion(), criteriaObject.getCalculationLocale());
 
             if (criteriaNumber.isNumber()) {
                 return rangeValueObject.compare(criteriaNumber, operator);
@@ -869,7 +869,7 @@ export function filterSameValueObjectResult(
          */
         if (operator === compareToken.EQUALS || operator === compareToken.NOT_EQUAL) {
             if (operator === compareToken.EQUALS && criteriaObject.isNumber() && rangeValueObject?.isString()) {
-                const rangeNumber = createCriteriaValueObject(`${rangeValueObject.getValue()}`, rangeValueObject.getDateSystem(), rangeValueObject.getCalculationRegion());
+                const rangeNumber = createCriteriaValueObject(`${rangeValueObject.getValue()}`, rangeValueObject.getDateSystem(), rangeValueObject.getCalculationRegion(), rangeValueObject.getCalculationLocale());
 
                 if (rangeNumber.isNumber()) {
                     return rangeNumber.compare(criteriaObject, operator);

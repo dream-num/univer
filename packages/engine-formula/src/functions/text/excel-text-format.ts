@@ -134,6 +134,7 @@ export class ExcelText extends Text {
             const dateSystem = cell.getDateSystem();
             const region = this.getNumberFormatRegion();
             let pattern = normalizeExcelFormatCode(code, region);
+            if (pattern == null) return ErrorValueObject.create(ErrorType.VALUE);
             let input = value;
             let prefix = '';
             if (typeof value === 'number' && Number.isFinite(value)) {

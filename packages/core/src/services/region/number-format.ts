@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import { getFormulaSeparators } from './formula-separators';
-import { RegionRules } from './region-rules';
+import { getFormulaSeparators, isExcelRegionLanguage } from './formula-separators';
+import { getRegionParts, RegionRules } from './region-rules';
 
 export interface IRegionalNumberFormat {
     readonly decimal: string;
+    readonly spaceBeforePercent: boolean;
     readonly group: string;
+    readonly htmlGroup: string;
     readonly grouping: readonly [number, number];
 }
 
@@ -33,8 +35,7 @@ rules.add('paired', 'ks', 'IN', 'aran');
 rules.add('paired', 'mni', 'IN', 'mtei');
 rules.add('default', 'pa', '', 'arab');
 rules.add('default', 'sr', 'XK', 'latn');
-rules.add("'", 'en fr it pt', 'CH');
-rules.add("'", 'de', 'CH LI');
+rules.add("'", 'de', 'LI');
 rules.add('٬', 'sd', 'PK');
 rules.add('paired', 'rhg', 'BD');
 rules.add('paired', 'en', 'BD IN');
@@ -66,19 +67,39 @@ rules.add('default', 'ss', 'SZ');
 rules.add("'", 'gsw tn wae');
 rules.add('paired', 'as bgc bho bn brx ccp doi dz gu hi kn kok kxv mai ml mr ne nnp or pa raj sa sat ta te ur xnr');
 rules.add(' ', 'acf af ba be bg blo br bua ce cs cv et fi fr gcf ht hu hy ie inh ka kea kk ky ln lt lu lv mgh myv nb nn no nqo nr oc os pl rm ru sah se seh sjd sje sju sk smn sq ss sv tg tk ts tt tyv uk uz ve vmw xh');
-rules.add('', 'quc und');
+rules.add('', 'la quc und');
 
 let lastRegion: string | undefined;
-let lastFormat: IRegionalNumberFormat = { decimal: '.', group: ',', grouping: standard };
+let lastFormat: IRegionalNumberFormat = { decimal: '.', group: ',', htmlGroup: ',', grouping: standard, spaceBeforePercent: false };
 
 export function getRegionalNumberFormat(region = ''): IRegionalNumberFormat {
     if (region !== lastRegion) {
         const { decimal } = getFormulaSeparators(region);
-        const style = /^en-(?:latn-)?us-(?:u-va-)?posix$/i.test(region) ? '' : rules.resolve(region);
+        const parts = getRegionParts(region);
+        const recognized = !parts || isExcelRegionLanguage(parts.language);
+        const territory = parts?.territory;
+        const posix = /^en-(?:latn-)?us-(?:u-va-)?posix$/i.test(region);
+        let style = rules.resolve(region);
+        if (!recognized || posix) {
+            style = '';
+        } else if (territory && /^(?:AX|FI|NO|SE|SJ)$/.test(territory)) {
+            style = ' ';
+        } else if (territory === 'CH') {
+            style = decimal === ',' ? ' ' : "'";
+        } else if (territory === 'US' || territory === 'CA' || territory === 'GB') {
+            style = decimal === ',' ? ' ' : parts?.language === 'und' ? '' : 'default';
+        } else if (territory && territory !== 'XK' && /^(?:X[A-Z]|Q[M-Z])$/.test(territory)) {
+            style = 'default';
+        }
         const defaultGroup = decimal === ',' ? '.' : decimal === '٫' ? '٬' : ',';
         const group = style == null || style === 'default' || style === 'paired' ? defaultGroup : style;
+        // Excel's HTML importer recognizes grouped numbers even when the region does not display grouping.
+        const htmlGroup = posix ? '' : group || defaultGroup;
         const grouping = style === 'paired' ? paired : group ? standard : ungrouped;
-        lastFormat = Object.freeze({ decimal, group, grouping });
+        const spaceBeforePercent = recognized && (territory
+            ? /^(?:AX|FI|NO|SJ)$/.test(territory)
+            : /^(?:fi|nb|nn|no|se|smn)$/.test(parts?.language ?? ''));
+        lastFormat = Object.freeze({ decimal, group, htmlGroup, grouping, spaceBeforePercent });
         lastRegion = region;
     }
     return lastFormat;

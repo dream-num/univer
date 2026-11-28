@@ -42,6 +42,7 @@ export function divide(a: number, b: number): number {
  * @returns The rounded number.
  */
 export function round(base: number, precision: number): number {
+    if (Number.isInteger(base) && precision >= 0) return base;
     const factor = 10 ** Math.trunc(precision);
     const epsilon = baseEpsilon(base, factor);
     return Math.round(multiply(base, factor) + epsilon) / factor;

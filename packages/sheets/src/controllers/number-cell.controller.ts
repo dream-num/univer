@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-import { CellValueType, Disposable, Inject, InterceptorEffectEnum, isDefaultFormat, isRealNum, numfmt, RegionService } from '@univerjs/core';
+import type { ErrorType } from '@univerjs/engine-formula';
+import { CellValueType, Disposable, Inject, InterceptorEffectEnum, isDefaultFormat, isRealNum, LocaleService, numfmt, RegionService } from '@univerjs/core';
+import { getErrorAliases, getFunctionAliases } from '@univerjs/engine-formula';
+import { extractBooleanValue } from '../basics/cell-value';
 import { INTERCEPTOR_POINT } from '../services/sheet-interceptor/interceptor-const';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 
 export class NumberCellDisplayController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(RegionService) private readonly _regionService: RegionService
+        @Inject(RegionService) private readonly _regionService: RegionService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
 
@@ -41,6 +45,15 @@ export class NumberCellDisplayController extends Disposable {
                 handler: (cell, location, next) => {
                     if (!cell) {
                         return next(cell);
+                    }
+
+                    if (cell.t === CellValueType.BOOLEAN) {
+                        const token = extractBooleanValue(cell.v) ? 'TRUE' : 'FALSE';
+                        const label = getFunctionAliases(this._localeService)[token];
+                        if (label) return next({ ...cell, v: label });
+                    } else if (cell.t === CellValueType.STRING && typeof cell.v === 'string' && cell.v.startsWith('#')) {
+                        const label = getErrorAliases(this._localeService)[cell.v as ErrorType];
+                        if (label) return next({ ...cell, v: label });
                     }
 
                     // Skip if the cell contains a numfmt pattern

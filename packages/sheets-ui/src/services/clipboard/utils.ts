@@ -16,7 +16,7 @@
 
 import type { IAccessor, ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IDiscreteRange, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { getNumfmtLocaleTag, ObjectMatrix, RegionService } from '@univerjs/core';
+import { getNumfmtLocaleTag, LocaleService, ObjectMatrix, RegionService } from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 
 export function getPasteNumberOptions(workbook: Nullable<Workbook>, accessor: IAccessor) {
@@ -24,6 +24,7 @@ export function getPasteNumberOptions(workbook: Nullable<Workbook>, accessor: IA
     return {
         region: accessor.get(RegionService).getCurrentRegion(),
         locale: getNumfmtLocaleTag(workbook.getSnapshot().locale),
+        uiLocale: accessor.get(LocaleService).getCurrentLocale(),
         dateSystem: workbook.getDateSystem(),
     };
 }

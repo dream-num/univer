@@ -64,13 +64,51 @@ const NumberFormatTypeMap = {
     time: NumberFormatType.Time,
     unknown: NumberFormatType.Custom,
 };
+const builtinDatePatterns = new Set(['m/d/yy', 'd-mmm-yy', 'd-mmm', 'mmm-yy', 'm/d/yy h:mm']);
+const builtinTimePatterns = new Set(['h:mm am/pm', 'h:mm:ss am/pm', 'h:mm', 'h:mm:ss', 'mm:ss', '[h]:mm:ss', 'mm:ss.0']);
+
+function useInferredTemporalFormat(existing: string, inferred: string): boolean {
+    const current = existing.toLowerCase();
+    const incoming = inferred.toLowerCase();
+    const newDate = builtinDatePatterns.has(incoming);
+    const newTime = builtinTimePatterns.has(incoming);
+    if (!newDate && !newTime) return false;
+    return current === 'general' || current === '0%' || current === '0.00%' ||
+        (newDate && builtinTimePatterns.has(current)) || (newTime && builtinDatePatterns.has(current));
+}
+
+export function isTemporalNumberFormat(pattern: string): boolean {
+    if (!pattern) return false;
+    const type = getNumberFormatType(pattern);
+    return type === NumberFormatType.Date || type === NumberFormatType.Time;
+}
+
+/** A date or clock adds its display format to an unformatted number. Two dates give a plain serial. */
+export function temporalSumPattern(patterns: readonly string[]): string | undefined {
+    let first = '';
+    let dates = 0;
+    let hasOther = false;
+    for (const pattern of patterns) {
+        if (!pattern) continue;
+        const type = getNumberFormatType(pattern);
+        if (type === NumberFormatType.Date || type === NumberFormatType.Time) {
+            if (!first) first = pattern;
+            if (type === NumberFormatType.Date) dates++;
+        } else if (type !== NumberFormatType.General) {
+            hasOther = true;
+        }
+    }
+    if (!first) return undefined;
+    return dates > 1 || hasOther ? '' : first;
+}
+
 /**
  * Handling number formats in styles
  *
  * @param oldCell
  * @param cell
  */
-export function handleNumfmtInCell(oldCell: Nullable<ICellData>, cell: Nullable<ICellData>, styles: Styles | undefined) {
+export function handleNumfmtInCell(oldCell: Nullable<ICellData>, cell: Nullable<ICellData>, styles: Styles | undefined, newlyEntered = false) {
     if (oldCell == null || cell == null) {
         return cell;
     }
@@ -89,14 +127,10 @@ export function handleNumfmtInCell(oldCell: Nullable<ICellData>, cell: Nullable<
         return cell;
     }
 
-    // The number format calculated by the formula, if the current cell already has a number format, the original format is used, if not, a new one is set.
-    // Why?
-    // Due to the forced calculation mechanism during initialization, if the formula may overwrite the original number format, the number format set for the formula cell may never take effect.
-    const newPattern = oldPattern || pattern;
-
-    cellStyle!.n!.pattern = newPattern;
-
-    return cell;
+    // Entering a date or time formula can change an existing built-in format. Recalculation
+    // must preserve formatting applied afterwards, including when a workbook is reopened.
+    if (!oldPattern || oldPattern === pattern || (newlyEntered && useInferredTemporalFormat(oldPattern, pattern))) return cell;
+    return { ...cell, s: { ...cellStyle, n: { ...cellStyle.n, pattern: oldPattern } } };
 }
 
 /**

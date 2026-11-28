@@ -822,6 +822,40 @@ describe('parseDate', () => {
 });
 
 describe('regional Excel input', () => {
+    it('stores 15 significant input digits and observes the numeric limits of a cell', () => {
+        const options = { region: 'en-US' };
+        expect(parseNumber('00012345678901234567', options)?.v).toBe(12345678901234500);
+        expect(parseNumber('123456789012345.99', options)?.v).toBe(123456789012345);
+        expect(parseNumber('1E308', options)).toBeNull();
+        expect(parseNumber('0E308', options)?.v).toBe(0);
+        expect(parseNumber('2.22507385850720E-308', options)?.v).toBe(0);
+        expect(parseNumber('2.22507385850721E-308', options)?.v).toBe(2.22507385850721e-308);
+    });
+
+    it('distinguishes standard grouping from regional keyboard and plain text grouping', () => {
+        const region = 'en-IN';
+        expect(parseNumber('1,2345,678', { region })?.v).toBe(12345678);
+        expect(parseNumber('123,45,678', { region, inputSource: 'text-paste' })?.v).toBe(12345678);
+        expect(parseNumber('123,45,678', { region, inputSource: 'html-paste' })).toBeNull();
+        expect(parseNumber('1 234 567,89', { region: 'de-NO' })?.v).toBe(1234567.89);
+        expect(parseNumber('1,234,567.89', { region: 'nb-US' })?.v).toBe(1234567.89);
+        expect(parseNumber('1,234,567', { region, inputSource: 'html-paste' })?.v).toBe(1234567);
+        expect(parseNumber('00,123', { region })).toBeNull();
+    });
+
+    it('uses the UI language for full-width input and the grouping separator for Arabic comma', () => {
+        expect(parseNumber('１２．５０％', { region: 'en-US', locale: 'ja' })?.v).toBe(0.125);
+        expect(parseNumber('１２．５０％', { region: 'ja-JP', locale: 'en' })).toBeNull();
+        expect(parseNumber('12٪', { region: 'en-US', locale: 'ar' })?.v).toBe(0.12);
+        expect(parseNumber('1،234', { region: 'en-US', locale: 'ar' })?.v).toBe(1234);
+        expect(parseNumber('1،234', { region: 'fr-FR', locale: 'ar' })).toBeNull();
+        expect(parseNumber('12٪', { region: 'ks-Aran-IN' })?.v).toBe(0.12);
+        expect(parseNumber('12٪', { region: 'pa-Aran-PK' })).toBeNull();
+        const options = { region: 'ta-IN' };
+        const number = parseNumber('௧௨,௩௪,௫௬௭.௮௯', options)!;
+        expect(format(number.z!, number.v, options)).toBe('௧௨,௩௪,௫௬௭.௮௯0');
+    });
+
     it('uses the active region for date order, separators and short date display', () => {
         const options = { locale: 'en', region: 'de-DE' };
         const february = parseDate('01/02/2025', options);
@@ -863,5 +897,53 @@ describe('regional Excel input', () => {
         const elapsed = parseTime('१२३.४५', { region: 'id-ID' });
         expect(elapsed?.v).toBe(5.15625);
         expect(format(elapsed!.z!, elapsed!.v, { region: 'id-ID' })).toBe('१२३.४५.००');
+    });
+});
+
+describe('Excel regional date and time entry', () => {
+    it.each([
+        ['en-US', 'pl-PL', '29 lut 2024', '29.lut.24'],
+        ['en-US', 'fr-CA', '29 février 2024', '29-févr-24'],
+        ['en-US', 'bn-BD', '২৯ ফেব্রুয়ারি ২০২৪', '২৯-ফেব-২৪'],
+        ['en-US', 'hi-IN', '२९/०२/२०२४', '२९/०२/२४'],
+        ['ja-JP', 'ja-JP', 'R6.2.29', 'R6.2.29'],
+        ['ko-KR', 'ko-KR', '2024년 2월 29일', '2024년 2월 29일'],
+    ])('stores a numeric leap day and renders it for %s / %s', (locale, region, input, display) => {
+        const options = { locale, region };
+        const result = parseDate(input, options);
+        expect(result?.v).toBe(45351);
+        expect(format(result!.z!, result!.v, options)).toBe(display);
+    });
+
+    it('formats era tokens using the explicit format locale or the UI language', () => {
+        expect(format('ge', 45351, { locale: 'en', region: 'ja-JP' })).toBe('2024');
+        expect(format('ge', 45351, { locale: 'ja', region: 'en-US' })).toBe('R6');
+        expect(format('[$-409]ggg', 45351, { locale: 'ja', region: 'ja-JP' })).toBe('');
+        expect(format('[$-411]ggee', 45351, { locale: 'en', region: 'en-US' })).toBe('令06');
+    });
+
+    it('reads the entered era and displays the era in force on that day', () => {
+        const options = { locale: 'ja', region: 'ja-JP' };
+        const result = parseDate('平成31年5月1日', options)!;
+        expect(format(result.z!, result.v, options)).toBe('令和1年5月1日');
+        expect(parseDate('令和1年5月1日', { ...options, locale: 'en' })).toBeNull();
+    });
+
+    it('preserves text that the regional calendar does not accept', () => {
+        expect(parseDate('29 lutego 2024', { locale: 'pl', region: 'pl-PL' })).toBeNull();
+        expect(parseDate('29 February 2024', { locale: 'en', region: 'pl-PL' })).toBeNull();
+        expect(parseDate('2024. 2. 29.', { locale: 'ko', region: 'ko-KR' })).toBeNull();
+    });
+
+    it('accepts elapsed hours, normalizes a single overflowing field, and rounds fractional input to milliseconds', () => {
+        const options = { locale: 'en', region: 'id-ID' };
+        expect(parseTime('25.30', options)).toEqual({ v: 1.0625, z: '[h]:mm:ss' });
+        expect(parseTime('1:60', options)).toEqual({ v: 2 / 24 });
+        expect(parseTime('25:60', options)).toBeNull();
+        expect(parseTime('10000:00', options)).toBeNull();
+        const fraction = parseTime('1:02:03,4999', options)!;
+        expect(fraction.v).toBeCloseTo(3723.5 / 86400, 14);
+        expect(format(fraction.z!, fraction.v, options)).toBe('02.03,5');
+        expect(parseTime('1:02:03,5', { region: 'en-US' })).toBeNull();
     });
 });

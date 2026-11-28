@@ -33,7 +33,7 @@ export class Now extends BaseFunction {
     override calculate() {
         const now = new Date(this._getTimestamp?.() ?? Date.now());
         // Here we use local time to calculate UTC date time serial number
-        const utcNow = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds()));
+        const utcNow = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds()));
         const currentSerial = excelDateTimeSerial(utcNow, this.getDateSystem());
         const valueObject = NumberValueObject.create(currentSerial, DEFAULT_NOW_FORMAT);
         return valueObject;

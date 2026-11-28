@@ -225,7 +225,7 @@ describe('NumfmtEditorController explicit command targets', () => {
             ['fr-CH', '1,234', '1,234', CellValueType.STRING],
             ['de-DE', '1234.56', '1234.56', CellValueType.STRING],
             ['en-IN', '1,23,456.70', 123456.7, CellValueType.NUMBER],
-            ['fr-FR', '123456789123456789,01', '123456789123456789,01', CellValueType.FORCE_STRING],
+            ['fr-FR', '123456789123456789,01', 123456789123456000, CellValueType.NUMBER],
         ] as const;
         for (const [row, [tag, input, expected, type]] of samples.entries()) {
             region.setRegion(tag);
@@ -238,6 +238,28 @@ describe('NumfmtEditorController explicit command targets', () => {
             });
             expect(worksheet.getCellRaw(row, 1)).toMatchObject({ v: expected, t: type });
         }
+    });
+
+    it('uses the active UI language for full-width entry when opening an English workbook', async () => {
+        const injector = univer.__getInjector();
+        const workbook = injector.get(IUniverInstanceService).createUnit<IWorkbookData, Workbook>(
+            UniverInstanceType.UNIVER_SHEET,
+            workbookData('full-width')
+        );
+        injector.get(NumfmtEditorController);
+        const worksheet = workbook.getSheetBySheetId('sheet2')!;
+        const edit = injector.get(SheetInterceptorService).writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT);
+        const target = { unitId: 'full-width', subUnitId: 'sheet2' };
+        injector.get(RegionService).setRegion('en-US');
+        const locales = injector.get(LocaleService);
+        locales.setLocale(LocaleType.JA_JP);
+        const value = edit({ v: '１２．５' }, { ...target, row: 0, col: 0, workbook, worksheet, origin: null });
+        await injector.get(ICommandService).executeCommand(SetRangeValuesCommand.id, {
+            ...target,
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            value,
+        });
+        expect(worksheet.getCellRaw(0, 0)).toMatchObject({ v: 12.5, t: CellValueType.NUMBER });
     });
 
     it('writes accounting negatives without inventing a number format', async () => {
@@ -652,8 +674,8 @@ describe('number format editor interceptors', () => {
 
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
 
-        expect(result?.v).toBe('123456789123456789');
-        expect(result?.t).toBe(CellValueType.FORCE_STRING);
+        expect(result?.v).toBe(123456789123456000);
+        expect(result?.t).toBe(CellValueType.NUMBER);
     });
 
     it('edit number 1212121212121212.2345', () => {
@@ -671,8 +693,8 @@ describe('number format editor interceptors', () => {
 
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
 
-        expect(result?.v).toBe('1212121212121212.2345');
-        expect(result?.t).toBe(CellValueType.FORCE_STRING);
+        expect(result?.v).toBe(1212121212121210);
+        expect(result?.t).toBe(CellValueType.NUMBER);
     });
 
     it('edit number 1212121212121212', () => {
@@ -690,7 +712,7 @@ describe('number format editor interceptors', () => {
 
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
 
-        expect(result?.v).toBe(1212121212121212);
+        expect(result?.v).toBe(1212121212121210);
         expect(result?.t).toBe(CellValueType.NUMBER);
     });
 

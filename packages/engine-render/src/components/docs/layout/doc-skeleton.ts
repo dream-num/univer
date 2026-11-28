@@ -3484,7 +3484,16 @@ export class DocumentSkeleton extends Skeleton {
                     continue;
                 }
 
-                const placeholderPage = clonePageLayoutPlaceholderForPublish(currentPage);
+                // Keep visible edit previews non-interactive until the Worker publishes each page.
+                const keepPreview = progress.reason === 'edit' &&
+                    materializedPageRange != null &&
+                    pageIndex >= materializedPageRange.startPageIndex &&
+                    pageIndex <= materializedPageRange.endPageIndex &&
+                    !currentPage.isMaterializationPlaceholder &&
+                    currentPage.sections.length > 0;
+                const placeholderPage = keepPreview
+                    ? clonePageLayoutPreviewForPublish(currentPage, 0)
+                    : clonePageLayoutPlaceholderForPublish(currentPage);
                 skeletonData.pages[pageIndex] = placeholderPage;
                 placeholderPages.push(placeholderPage);
             }

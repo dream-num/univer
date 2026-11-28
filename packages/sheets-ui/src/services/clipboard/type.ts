@@ -49,6 +49,7 @@ export interface IParsedCellValueByClipboard {
 }
 
 export interface IUniverSheetCopyDataModel {
+    inputSource?: 'html-paste' | 'text-paste';
     rowProperties?: IClipboardPropertyItem[];
     colProperties?: IClipboardPropertyItem[];
     cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>;
@@ -61,6 +62,7 @@ export interface IPasteTarget {
 }
 
 export interface ICopyPastePayload {
+    inputSource?: IUniverSheetCopyDataModel['inputSource'];
     copyType?: COPY_TYPE;
     copyId?: string;
     pasteType: IPasteHookValueType;

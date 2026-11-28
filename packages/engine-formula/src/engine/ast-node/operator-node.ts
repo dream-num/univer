@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import type { compareToken } from '../../basics/token';
 import type { BaseFunction } from '../../functions/base-function';
 import type { Compare } from '../../functions/meta/compare';
 import type { FunctionVariantType } from '../reference-object/base-reference-object';
 import type { ArrayValueObject } from '../value-object/array-value-object';
-import type { BaseValueObject } from '../value-object/base-value-object';
-import { DateSystem } from '@univerjs/core';
+import type { BaseValueObject, ICalculationLocale } from '../value-object/base-value-object';
 import { ErrorType } from '../../basics/error-type';
-import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../../basics/token';
+import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken, suffixToken } from '../../basics/token';
 import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { FUNCTION_NAMES_TEXT } from '../../functions/text/function-names';
@@ -32,9 +32,10 @@ import { LexerNode } from '../analysis/lexer-node';
 import { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { MultiAreaArrayMode, MultiAreaReferenceObject } from '../reference-object/multi-area-reference-object';
 import { RangeReferenceObject } from '../reference-object/range-reference-object';
+import { temporalSumPattern } from '../utils/numfmt-kit';
 import { copyReferenceContext } from '../utils/three-dimensional-reference';
 import { arithmeticOperandError, ErrorValueObject } from '../value-object/base-value-object';
-import { NullValueObject } from '../value-object/primitive-object';
+import { NullValueObject, NumberValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -125,7 +126,7 @@ export class OperatorNode extends BaseAstNode {
         }
     }
 
-    override execute(dateSystem: DateSystem = DateSystem.Date1900, readRegion?: () => string) {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900, regionalContext?: ICalculationLocale) {
         const children = this.getChildren();
         if (this._functionExecutor.name === FUNCTION_NAMES_META.COMPARE) {
             (this._functionExecutor as Compare).setCompareType(this.getToken() as compareToken);
@@ -160,8 +161,8 @@ export class OperatorNode extends BaseAstNode {
             object2 = this._referenceToOperatorValue(object2 as BaseReferenceObject);
         }
 
-        object1 = object1.withDateSystem(dateSystem, readRegion);
-        object2 = object2.withDateSystem(dateSystem, readRegion);
+        object1 = object1.withDateSystem(dateSystem, regionalContext);
+        object2 = object2.withDateSystem(dateSystem, regionalContext);
         let result: FunctionVariantType;
         if (object1.isError() && object2.isArray()) {
             result = (object2 as ArrayValueObject).mapValue(() => object1 as BaseValueObject);
@@ -181,9 +182,38 @@ export class OperatorNode extends BaseAstNode {
             result = array.mapValue((value) => value?.isError() ? value : error);
         }
 
+        if (token === operatorToken.PLUS || token === operatorToken.MINUS) {
+            const left = object1 as BaseValueObject;
+            const right = object2 as BaseValueObject;
+            if (left.getPattern() || right.getPattern() || left.isArray() || right.isArray()) {
+                const patternAt = (value: BaseValueObject, child: BaseAstNode | undefined, row: number, column: number) => {
+                    if (child?.getToken() === suffixToken.PERCENTAGE) return '0%';
+                    if (!value.isArray()) return value.getPattern();
+                    const array = value as ArrayValueObject;
+                    return array.get(array.getRowCount() === 1 ? 0 : row, array.getColumnCount() === 1 ? 0 : column)?.getPattern() ?? '';
+                };
+                const apply = (cell: BaseValueObject, row: number, column: number) => {
+                    if (!(cell instanceof NumberValueObject)) return cell;
+                    const format = temporalSumPattern([patternAt(left, child1, row, column), patternAt(right, child2, row, column)]);
+                    return format === undefined || format === cell.getPattern() ? cell : NumberValueObject.create(cell.getValue(), format);
+                };
+                if (result.isArray()) {
+                    const array = result as ArrayValueObject;
+                    array.iterator((value, row, column) => {
+                        if (value) {
+                            const formatted = apply(value, row, column);
+                            if (formatted !== value) array.set(row, column, formatted);
+                        }
+                        return true;
+                    });
+                } else {
+                    result = apply(result as BaseValueObject, 0, 0);
+                }
+            }
+        }
         this._setEmbeddedArrayFormulaToResult(result);
 
-        this.setValue(result.withDateSystem(dateSystem, readRegion));
+        this.setValue(result.withDateSystem(dateSystem, regionalContext));
     }
 
     private _calculateOperator(left: BaseValueObject, right: BaseValueObject): FunctionVariantType {

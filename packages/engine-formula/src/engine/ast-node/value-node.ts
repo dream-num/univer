@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { ErrorType } from '../../basics/error-type';
-import type { FunctionNode } from './function-node';
 import { DateSystem } from '@univerjs/core';
+import type { ErrorType } from '../../basics/error-type';
+import type { ICalculationLocale } from '../value-object/base-value-object';
+import type { FunctionNode } from './function-node';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { prefixToken } from '../../basics/token';
@@ -38,12 +39,12 @@ export class ValueNode extends BaseAstNode {
         return NodeType.VALUE;
     }
 
-    override execute(dateSystem: DateSystem = DateSystem.Date1900, readRegion?: () => string): void {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900, regionalContext?: ICalculationLocale): void {
         const token = this.getToken();
         const tokenTrim = token.trim();
         if (tokenTrim.startsWith('"') && tokenTrim.endsWith('"')) {
             this.setValue(
-                StringValueObject.create(tokenTrim.slice(1, -1).replace(/""/g, '"')).withDateSystem(dateSystem, readRegion)
+                StringValueObject.create(tokenTrim.slice(1, -1).replace(/""/g, '"')).withDateSystem(dateSystem, regionalContext)
             );
             return;
         }

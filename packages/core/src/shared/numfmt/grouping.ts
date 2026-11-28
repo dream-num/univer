@@ -15,67 +15,10 @@
  */
 
 import type { NumberGrouping } from './types';
-import { getRegionLocale } from '../../types/enum/locale-type';
-
-const standard = [3, 3] as const;
-const paired = [3, 2] as const;
-
-// Excel uses the Windows monetary grouping for both number and currency formats.
-// Profiles that use the default three-digit grouping need no entry.
-const pairedRegions = new Set([
-    'as',
-    'as-in',
-    'bn',
-    'bn-bd',
-    'bn-in',
-    'brx',
-    'brx-in',
-    'ccp',
-    'ccp-cakm',
-    'ccp-cakm-bd',
-    'ccp-cakm-in',
-    'dz',
-    'dz-bt',
-    'en-in',
-    'gu',
-    'gu-in',
-    'hi',
-    'hi-in',
-    'hi-latn',
-    'hi-latn-in',
-    'ne',
-    'ne-in',
-    'ne-np',
-    'pa',
-    'pa-guru',
-    'pa-in',
-    'sa',
-    'sa-in',
-    'ta',
-    'ta-in',
-    'ta-lk',
-    'te',
-    'te-in',
-]);
-
-function resolveNumberGrouping(region?: string): typeof standard | typeof paired {
-    const locale = region && getRegionLocale(region);
-    if (!locale) return standard;
-    if (pairedRegions.has(locale.baseName.toLowerCase())) return paired;
-    if (locale.script && locale.region && pairedRegions.has(`${locale.language}-${locale.region.toLowerCase()}`)) return paired;
-    return standard;
-}
-
-// A workbook formats many cells with the same region.
-let lastRegion: string | undefined;
-let lastGrouping: typeof standard | typeof paired = standard;
+import { getRegionalNumberFormat } from '../../services/region/number-format';
 
 export function getNumberGrouping(region?: string): readonly [number, number] {
-    if (lastRegion !== region) {
-        lastGrouping = resolveNumberGrouping(region);
-        lastRegion = region;
-    }
-    return lastGrouping;
+    return getRegionalNumberFormat(region).grouping;
 }
 
 // The tuple predates explicit grouping sequences. It repeats the second size,
@@ -85,7 +28,7 @@ export function isGroupingBoundary(digitsToRight: number, grouping: NumberGroupi
     if (!('sizes' in grouping)) {
         const [primary = 3, secondary = primary] = grouping;
         const offset = digitsToRight - primary;
-        return offset >= 0 && offset % secondary === 0;
+        return primary > 0 && secondary > 0 && offset >= 0 && offset % secondary === 0;
     }
 
     let remainder = digitsToRight;
@@ -108,4 +51,11 @@ export function groupIntegerDigits(digits: string, separator: string, grouping: 
         }
     }
     return result;
+}
+
+/** Excel permits wider groups on input. Only the minimum widths constrain a numeric token. */
+export function isValidNumberGrouping(integer: string, separator: string, secondary: number): boolean {
+    const groups = integer.split(separator);
+    return /[1-9]/.test(groups[0]) && groups[groups.length - 1].length >= 3 &&
+        groups.slice(1, -1).every((group) => group.length >= secondary);
 }

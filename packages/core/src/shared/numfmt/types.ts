@@ -104,6 +104,7 @@ export interface ResolvedFormatOptions {
     locale: string;
     ignoreTimezone: boolean;
     grouping: NumberGrouping;
+    region?: string;
     indexColors: boolean;
     skipChar: string | boolean;
     fillChar: string | boolean;
@@ -133,6 +134,7 @@ export interface RenderToken {
 }
 
 export interface ParsedFormatSection {
+    digitZero?: number;
     scale: number;
     scaleExponent: number;
     percent: boolean;

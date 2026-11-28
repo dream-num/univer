@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { currencySymbols, excelDateTimeSerial, getNumfmtLocaleTag, getRegionLocale, numfmt } from '@univerjs/core';
-import { getDateFormatLocale, getDateFormatPatterns } from '../base/const/date-format';
+import { currencySymbols, excelDateTimeSerial, getNumfmtLocaleTag, getRegionParts, numfmt } from '@univerjs/core';
+import { getDateFormatLocale, getDateFormatPatterns, getDateFormatRegionTag } from '../base/const/date-format';
 import { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from '../base/const/formatdetail';
 
 export const getCurrencyOptions = () => currencySymbols.map((item) => ({ label: item, value: item }));
@@ -35,7 +35,7 @@ export const getDateFormatOptions = (locale?: string, currentPattern?: string, r
     }
 
     const effectiveRegion = region ?? locale;
-    const regionTag = region && getRegionLocale(region)?.baseName;
+    const regionTag = region && getDateFormatRegionTag(region);
     const patterns = getDateFormatPatterns(effectiveRegion, region !== undefined || !getDateFormatLocale(effectiveRegion)).map((pattern) =>
         regionTag && /mmm|ddd|am\/pm/i.test(pattern) ? `[$-${regionTag}]${pattern}` : pattern);
     if (currentPattern && !patterns.includes(currentPattern)) {
@@ -43,9 +43,9 @@ export const getDateFormatOptions = (locale?: string, currentPattern?: string, r
     }
 
     const workbookLocale = getDateFormatLocale(locale);
-    const previewLocale = workbookLocale ? getNumfmtLocaleTag(workbookLocale) : getRegionLocale(locale)?.language;
+    const previewLocale = workbookLocale ? getNumfmtLocaleTag(workbookLocale) : getRegionParts(locale)?.language;
     return patterns.map((pattern) => ({
-        label: numfmt.format(pattern, DATE_FORMAT_PREVIEW_VALUE, { locale: previewLocale ?? 'en' }),
+        label: numfmt.format(pattern, DATE_FORMAT_PREVIEW_VALUE, { locale: previewLocale ?? 'en', region }),
         value: pattern,
     }));
 };

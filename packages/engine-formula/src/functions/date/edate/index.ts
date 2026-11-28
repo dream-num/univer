@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
+import { excelDateSerial, excelSerialToDate } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { excelDateSerial, excelSerialToDate } from '@univerjs/core';
-import { DEFAULT_DATE_FORMAT } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -90,7 +89,7 @@ export class Edate extends BaseFunction {
             const resultDate = new Date(Date.UTC(year, month, Math.min(day, lastDayOfTargetMonth)));
             const currentSerial = excelDateSerial(resultDate, this.getDateSystem());
 
-            return NumberValueObject.create(currentSerial, DEFAULT_DATE_FORMAT);
+            return NumberValueObject.create(currentSerial);
         });
     }
 }

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import { DateSystem, excelSerialToDateTimeParts, getRegionalNumberFormat, numfmt } from '@univerjs/core';
 import type { BaseValueObject } from '../../engine/value-object/base-value-object';
-import { DateSystem, excelSerialToDateTimeParts, numfmt } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { ErrorValueObject } from '../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../engine/value-object/primitive-object';
@@ -23,7 +23,7 @@ import { mapFinancialScalars } from '../financial/scalar-arguments';
 import { formatExcelFixedDecimal, groupExcelInteger } from './excel-fixed-decimal';
 import { formatExcelTextNumber } from './format-excel-text-number';
 import { formatJapaneseGeneral } from './japanese-number-format';
-import { normalizeExcelWeekdayFormat, Text } from './text';
+import { normalizeExcelFormatCode, Text } from './text';
 
 const JAPANESE_ERAS = [
     { start: 20190501, narrow: 'R', abbreviated: '令', name: '令和' },
@@ -47,7 +47,7 @@ function formatLiteralDigits(code: string, value: number, region?: string): stri
     const minimum = wholePlaceholders.length;
     const wholeNumber = integer === '0' && minimum === 0 ? '' : integer.padStart(minimum, '0');
     const whole = prefix.includes(',') ? groupExcelInteger(wholeNumber, region) : wholeNumber;
-    const fractional = decimals || fractionLiteral ? `.${fraction}${fractionLiteral ?? ''}` : '';
+    const fractional = decimals || fractionLiteral ? `${getRegionalNumberFormat(region).decimal}${fraction}${fractionLiteral ?? ''}` : '';
     return `${value < 0 ? '-' : ''}${literal}${whole}${fractional}`;
 }
 
@@ -133,11 +133,12 @@ export class ExcelText extends Text {
         try {
             const dateSystem = cell.getDateSystem();
             const region = this.getNumberFormatRegion();
-            let pattern = normalizeExcelWeekdayFormat(code);
+            let pattern = normalizeExcelFormatCode(code, region);
+            if (pattern == null) return ErrorValueObject.create(ErrorType.VALUE);
             let input = value;
             let prefix = '';
             if (typeof value === 'number' && Number.isFinite(value)) {
-                const digitFormat = formatLiteralDigits(code, value, region);
+                const digitFormat = formatLiteralDigits(pattern, value, region);
                 if (digitFormat !== undefined) return this._result(digitFormat);
                 const dbNumber = /^\[DBNum([1-3])\](\[\$-[^\]]+\])?General$/i.exec(code);
                 if (dbNumber) {

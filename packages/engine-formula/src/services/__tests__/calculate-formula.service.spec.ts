@@ -32,6 +32,15 @@ import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
 import { Subtotal } from '../../functions/math/subtotal';
 import { Sum } from '../../functions/math/sum';
 import { Sumifs } from '../../functions/math/sumifs';
+import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
+import { Multiply } from '../../functions/meta/multiply';
+import { Countif } from '../../functions/statistical/countif';
+import { FUNCTION_NAMES_STATISTICAL } from '../../functions/statistical/function-names';
+import { Dollar } from '../../functions/text/dollar';
+import { FUNCTION_NAMES_TEXT } from '../../functions/text/function-names';
+import { Numbervalue } from '../../functions/text/numbervalue';
+import { Text } from '../../functions/text/text';
+import { Value } from '../../functions/text/value';
 import { FormulaDataModel } from '../../models/formula-data.model';
 import { CalculateFormulaService, ICalculateFormulaService } from '../calculate-formula.service';
 import { IFormulaCurrentConfigService } from '../current-data.service';
@@ -892,6 +901,42 @@ describe('CalculateFormulaService', () => {
 });
 
 describe('executeFormulas conditional aggregate criteria', () => {
+    it('uses the calculation region for numeric text, criteria and formatted strings', async () => {
+        const bed = createCommandTestBed();
+        bed.get(IFunctionService).registerExecutors(
+            new Multiply(FUNCTION_NAMES_META.MULTIPLY),
+            new Value(FUNCTION_NAMES_TEXT.VALUE),
+            new Numbervalue(FUNCTION_NAMES_TEXT.NUMBERVALUE),
+            new Text(FUNCTION_NAMES_TEXT.TEXT),
+            new Dollar(FUNCTION_NAMES_TEXT.DOLLAR),
+            new Countif(FUNCTION_NAMES_STATISTICAL.COUNTIF)
+        );
+        const formulas = [
+            '=VALUE("1.234,56")',
+            '="1,234"*2',
+            '=NUMBERVALUE("1,234")',
+            '=NUMBERVALUE("1.234,56",",",".")',
+            '=COUNTIF(B1:B2,">1,5")',
+            '=TEXT(12345.67,"#.##0,00")',
+            '=DOLLAR(12345.67,2)',
+        ];
+        const result = await bed.get(ICalculateFormulaService).executeFormulas({
+            [bed.unitId]: { [bed.sheetId]: { 0: { 5: formulas } } },
+        }, bed.sheetData as never, 'de-DE');
+        expect(result[bed.unitId]?.[bed.sheetId]?.[0]?.[5]?.map((entry) => entry.value))
+            .toEqual([1234.56, 2.468, 1.234, 1234.56, 2, '12.345,67', '12.345,67 €']);
+        const french = await bed.get(ICalculateFormulaService).executeFormulas({
+            [bed.unitId]: { [bed.sheetId]: { 0: { 5: ['=COUNTIF(B1:B2,">1.5")'] } } },
+        }, bed.sheetData as never, 'fr-FR');
+        expect(french[bed.unitId]?.[bed.sheetId]?.[0]?.[5]?.[0].value).toBe(0);
+        const groups = ['=VALUE("1 234,5")', '=VALUE("1\u00A0234,5")', '=VALUE("12 1/2")'];
+        const grouped = await bed.get(ICalculateFormulaService).executeFormulas({
+            [bed.unitId]: { [bed.sheetId]: { 0: { 5: groups } } },
+        }, bed.sheetData as never, 'fr-FR');
+        expect(grouped[bed.unitId]?.[bed.sheetId]?.[0]?.[5]?.map((entry) => entry.value))
+            .toEqual([1234.5, ErrorType.VALUE, 12.5]);
+    });
+
     it('keeps a date-formatted serial distinct from a plain number', async () => {
         // Date comparisons round the serial, so a date-formatted `1` matches a
         // date-formatted 1.000000001 while a plain `1` does not. Both values are

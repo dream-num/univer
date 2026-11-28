@@ -216,11 +216,12 @@ export class SheetsNumfmtCellContentController extends Disposable {
         return cell.t === CellValueType.NUMBER || checkCellValueType(cell.v, cell.t) === CellValueType.NUMBER || (
             isTextFormat(pattern) &&
             typeof cell.v === 'string' &&
-            typeof getNumfmtParseValueFilter(cell.v, { locale, dateSystem })?.v === 'number'
+            typeof getNumfmtParseValueFilter(cell.v, { locale, dateSystem, region: this.region })?.v === 'number'
         );
     }
 
     setNumfmtLocal(locale: INumfmtLocaleTag) {
+        this._regionService.setDefaultRegion(locale);
         this._locale$.next(locale);
     }
 }

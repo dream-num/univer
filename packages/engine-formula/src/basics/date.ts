@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../engine/value-object/base-value-object';
-import type { NullValueObject } from '../engine/value-object/primitive-object';
 import {
     DateSystem,
     excelDateSerial,
@@ -25,12 +23,14 @@ import {
     isRealNum,
     numfmt,
 } from '@univerjs/core';
+import type { BaseValueObject } from '../engine/value-object/base-value-object';
+import type { NullValueObject } from '../engine/value-object/primitive-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { ErrorType } from './error-type';
 
-export const DEFAULT_DATE_FORMAT = 'yyyy/mm/dd;@';
-export const DEFAULT_NOW_FORMAT = 'yyyy/mm/dd hh:mm';
-export const DEFAULT_TIME_FORMAT = 'h:mm A/P';
+export const DEFAULT_DATE_FORMAT = 'm/d/yy';
+export const DEFAULT_NOW_FORMAT = 'm/d/yy h:mm';
+export const DEFAULT_TIME_FORMAT = 'h:mm AM/PM';
 
 export function formatDateDefault(date: Date): string {
     // Get the year from the date object

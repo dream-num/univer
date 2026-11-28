@@ -14,15 +14,44 @@
  * limitations under the License.
  */
 
-import type { ISetRangeValuesMutationParams } from '../../commands/mutations/set-range-values.mutation';
 import { BooleanNumber, CellValueType, FormulaType, ICommandService, Tools } from '@univerjs/core';
 import { ErrorType, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { describe, expect, it } from 'vitest';
+import type { ISetRangeValuesMutationParams } from '../../commands/mutations/set-range-values.mutation';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { CalculateResultApplyController } from '../calculate-result-apply.controller';
 import { createFunctionTestBed } from './formula/create-function-test-bed';
 
 describe('CalculateResultApplyController', () => {
+    it('infers the date format on entry and preserves subsequent manual formatting on recalculation', () => {
+        const testBed = createFunctionTestBed();
+        const commands = testBed.get(ICommandService);
+        commands.registerCommand(SetRangeValuesMutation);
+        commands.registerCommand(SetFormulaCalculationResultMutation);
+        testBed.get(CalculateResultApplyController);
+        const workbook = testBed.sheet;
+        const worksheet = workbook.getSheetBySheetId(testBed.sheetId)!;
+        const target = { unitId: testBed.unitId, subUnitId: testBed.sheetId };
+        const clock = { n: { pattern: 'h:mm AM/PM' } };
+        const result = { v: 45323, t: CellValueType.NUMBER, s: { n: { pattern: 'm/d/yy' } } };
+        const calculate = () => commands.syncExecuteCommand(SetFormulaCalculationResultMutation.id, {
+            unitData: { [target.unitId]: { [target.subUnitId]: { 8: { 8: result } } } },
+            unitOtherData: {},
+        });
+        const format = () => workbook.getStyles().getStyleByCell(worksheet.getCellRaw(8, 8))?.n?.pattern;
+        try {
+            commands.syncExecuteCommand(SetRangeValuesMutation.id, { ...target, cellValue: { 8: { 8: { s: clock } } } });
+            commands.syncExecuteCommand(SetRangeValuesMutation.id, { ...target, cellValue: { 8: { 8: { f: '=DATE(2024,2,1)', v: null } } } });
+            calculate();
+            expect(format()).toBe('m/d/yy');
+            commands.syncExecuteCommand(SetRangeValuesMutation.id, { ...target, cellValue: { 8: { 8: { s: clock } } } });
+            calculate();
+            expect(format()).toBe('h:mm AM/PM');
+        } finally {
+            testBed.univer.dispose();
+        }
+    });
+
     it('skips non-sheet unit results without blocking later sheet results', async () => {
         const testBed = createFunctionTestBed();
         const commandService = testBed.get(ICommandService);

@@ -35,6 +35,25 @@ describe('Test numbervalue function', () => {
             expect(getObjectValue(result)).toStrictEqual(2500.27);
         });
 
+        it('uses the supplied separator literally and recognizes regional native digits', () => {
+            const decimal = StringValueObject.create('a');
+            const group = StringValueObject.create('b');
+            expect(testFunction.calculate(StringValueObject.create('1a23'), decimal, group).getValue()).toBe(1.23);
+            expect(testFunction.calculate(StringValueObject.create('1A23'), decimal, group).getValue()).toBe(ErrorType.VALUE);
+            const arabic = new Numbervalue(FUNCTION_NAMES_TEXT.NUMBERVALUE);
+            arabic.bindCalculationRegion(() => 'ar-SA');
+            expect(arabic.calculate(StringValueObject.create('١٢٣٫٤٥')).getValue()).toBe(123.45);
+            expect(arabic.calculate(StringValueObject.create('१२३.४५')).getValue()).toBe(ErrorType.VALUE);
+        });
+
+        it('coerces the regional result after substituting explicit separators', () => {
+            const german = new Numbervalue(FUNCTION_NAMES_TEXT.NUMBERVALUE);
+            german.bindCalculationRegion(() => 'de-DE');
+            const percent = german.calculate(StringValueObject.create('1.23%'), StringValueObject.create('/'), StringValueObject.create('_'));
+            expect(percent.getValue()).toBe(449.27);
+            expect(german.calculate(StringValueObject.create('$1.20')).getValue()).toBe(ErrorType.VALUE);
+        });
+
         it('Value is has percentage', () => {
             const text = StringValueObject.create('3.5%');
             const result = testFunction.calculate(text);
@@ -58,7 +77,7 @@ describe('Test numbervalue function', () => {
 
             const decimalSeparator4 = BooleanValueObject.create(true);
             const result4 = testFunction.calculate(text, decimalSeparator4, groupSeparator);
-            expect(getObjectValue(result4)).toStrictEqual(250027);
+            expect(getObjectValue(result4)).toStrictEqual(ErrorType.VALUE);
         });
 
         it('GroupSeparator value test', () => {

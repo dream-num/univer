@@ -63,4 +63,17 @@ describe('temporal editor values', () => {
         expect(parseTemporalEditorValue({ content: '31:15:30.5', originalSerial: 1.25, pattern: '[h]:mm', locale: 'en', dateSystem }))
             .toBeCloseTo((31 * 3600 + 15 * 60 + 30.5) / 86400, 12);
     });
+    it('opens and saves an ambiguous date using the same region as the initial input', () => {
+        const options = { pattern: 'm/d/yy', locale: 'en' as const, dateSystem, region: 'en-GB' };
+        const originalSerial = serial(2025, 7, 8, 13);
+        expect(serializeTemporalEditorValue({ ...options, serial: originalSerial })).toBe('08/07/2025');
+        expect(parseTemporalEditorValue({ ...options, originalSerial, content: '09/07/2025' })).toBe(serial(2025, 7, 9, 13));
+    });
+
+    it('preserves full elapsed hours and the regional fractional-second separator through an edit', () => {
+        const options = { pattern: '[h]:mm:ss', locale: 'en' as const, dateSystem, region: 'id-ID' };
+        const originalSerial = 1 + (90 * 60 + 0.25) / 86400;
+        expect(serializeTemporalEditorValue({ ...options, serial: originalSerial })).toBe('25.30.00,25');
+        expect(parseTemporalEditorValue({ ...options, originalSerial, content: '25.30.01,25' })).toBeCloseTo(originalSerial + 1 / 86400, 12);
+    });
 });

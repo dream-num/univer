@@ -40,8 +40,6 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
     extractPureTextFromCell,
-    getNumfmtLocaleTag,
-    getNumfmtParseValueFilter,
     handleStyleToString,
     ICommandService,
     IConfigService,
@@ -108,6 +106,7 @@ import {
     PREDEFINED_HOOK_NAME_COPY,
     PREDEFINED_HOOK_NAME_PASTE,
 } from '../../services/clipboard/clipboard.service';
+import { getPasteNumberOptions } from '../../services/clipboard/utils';
 import { ISheetEmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { whenSheetEditorFocused } from '../shortcuts/utils';
@@ -117,6 +116,7 @@ import {
     generateBody,
     getClearAndSetMergeMutations,
     getDefaultOnPasteCellMutations,
+    getExternalPasteNumberFormatResult,
     getSetCellStyleMutations,
     getSetCellValueMutations,
 } from './utils';
@@ -578,9 +578,7 @@ export class SheetClipboardController extends RxDisposable {
     private _onPastePlainText(pasteTo: ISheetDiscreteRangeLocation, text: string, payload: ICopyPastePayload) {
         const { range, unitId, subUnitId } = pasteTo;
         const workbook = this._instanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
-        const parseOptions = workbook
-            ? { locale: getNumfmtLocaleTag(workbook.getSnapshot().locale), dateSystem: workbook.getDateSystem() }
-            : undefined;
+        const parseOptions = getPasteNumberOptions(workbook, this._injector);
         let cellValue: IObjectMatrixPrimitiveType<ICellData>;
         if (/\r|\n/.test(text) || Tools.isLegalUrl(text)) {
             const body = generateBody(text);
@@ -610,24 +608,14 @@ export class SheetClipboardController extends RxDisposable {
                     },
                 };
             } else {
-                const pattern = getNumfmtParseValueFilter(text, parseOptions);
-                if (pattern?.z) {
-                    const cell: ICellData = { v: pattern.v, f: null };
-                    if (payload.pasteType === PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE ||
-                        payload.pasteType === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_BESIDES_BORDER) {
-                        cell.s = { n: { pattern: pattern.z } };
-                    }
-                    cellValue = { [range.rows[0]]: { [range.cols[0]]: cell } };
-                } else {
-                    cellValue = {
-                        [range.rows[0]]: {
-                            [range.cols[0]]: {
-                                v: text,
-                                f: null,
-                            },
-                        },
-                    };
+                const style = workbook?.getSheetBySheetId(subUnitId)?.getComposedCellStyle(range.rows[0], range.cols[0]);
+                const { v, t, n } = getExternalPasteNumberFormatResult(text, style, this._localService, parseOptions);
+                const cell: ICellData = { v: v ?? text, t, f: null };
+                if (n && (payload.pasteType === PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE ||
+                    payload.pasteType === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_BESIDES_BORDER)) {
+                    cell.s = { n };
                 }
+                cellValue = { [range.rows[0]]: { [range.cols[0]]: cell } };
             }
         }
 
@@ -676,9 +664,9 @@ export class SheetClipboardController extends RxDisposable {
             specialPasteInfo: {
                 label: 'specialPaste.value',
             },
-            onPasteCells: (pasteFrom, pasteTo, data) => {
+            onPasteCells: (pasteFrom, pasteTo, data, payload) => {
                 return this._injector.invoke((accessor) => {
-                    const { redo, undo } = getSetCellValueMutations(pasteTo, pasteFrom, data, accessor);
+                    const { redo, undo } = getSetCellValueMutations(pasteTo, pasteFrom, data, accessor, payload.inputSource);
                     return {
                         redos: [redo],
                         undos: [undo],
@@ -691,7 +679,7 @@ export class SheetClipboardController extends RxDisposable {
             specialPasteInfo: {
                 label: 'specialPaste.format',
             },
-            onPasteCells: (pasteFrom, pasteTo, matrix) => {
+            onPasteCells: (pasteFrom, pasteTo, matrix, payload) => {
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
 
@@ -701,7 +689,8 @@ export class SheetClipboardController extends RxDisposable {
                         pasteTo,
                         pasteFrom,
                         matrix,
-                        accessor
+                        accessor,
+                        payload.inputSource
                     );
                 });
                 redoMutationsInfo.push(redo);

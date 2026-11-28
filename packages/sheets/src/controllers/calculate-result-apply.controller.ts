@@ -26,7 +26,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { handleNumfmtInCell, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
-import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
+import { consumeEnteredFormulaFormat, SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 
 export class CalculateResultApplyController extends Disposable {
     constructor(
@@ -140,7 +140,8 @@ export class CalculateResultApplyController extends Disposable {
                 cellDataMatrix.realDeleteValue(row, col);
                 return;
             }
-            const newCell = handleNumfmtInCell(oldCell, cell, styles);
+            const newlyEntered = !!oldCell && consumeEnteredFormulaFormat(oldCell, styles?.getStyleByCell(oldCell)?.n?.pattern);
+            const newCell = handleNumfmtInCell(oldCell, cell, styles, newlyEntered);
             cellDataMatrix.setValue(row, col, newCell);
         });
 

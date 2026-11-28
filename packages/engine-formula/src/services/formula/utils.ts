@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { ILanguagePack, LocaleService } from '@univerjs/core';
+import type { ICellData, ILanguagePack, LocaleService } from '@univerjs/core';
+import { CellValueType } from '@univerjs/core';
 import type { ErrorType } from '../../basics/error-type';
 import type { IFunctionInfo, IFunctionParam } from '../../basics/function';
+import { ERROR_LITERALS, ERROR_TYPE_SET } from '../../basics/error-type';
 import { FUNCTION_LIST } from './function-list/function-list';
 
 export const builtinsByName = new Map(FUNCTION_LIST.map((item) => [item.functionName, item]));
@@ -29,6 +31,23 @@ export function getFunctionAliases(localeService: LocaleService): Readonly<Recor
 export function getErrorAliases(localeService: LocaleService): Readonly<Partial<Record<ErrorType, string>>> {
     const pack = localeService.getLocales()?.['engine-formula'] as ILanguagePack | undefined;
     return pack?.errorAliases as Partial<Record<ErrorType, string>> ?? {};
+}
+
+/** Parse keyboard or clipboard literals using the interface language active at entry. */
+export function parseCellLiteral(value: string, localeService: LocaleService): Pick<ICellData, 't' | 'v'> | undefined {
+    const token = value.toUpperCase();
+    if (token.startsWith('#')) {
+        const aliases = getErrorAliases(localeService);
+        for (const code of ERROR_LITERALS) {
+            if ((aliases[code] ?? code) === token) return { t: CellValueType.STRING, v: code };
+        }
+        if (ERROR_TYPE_SET.has(token as ErrorType)) return { t: CellValueType.FORCE_STRING, v: value };
+        return;
+    }
+    const aliases = getFunctionAliases(localeService);
+    if (token === (aliases.TRUE ?? 'TRUE')) return { t: CellValueType.BOOLEAN, v: 1 };
+    if (token === (aliases.FALSE ?? 'FALSE')) return { t: CellValueType.BOOLEAN, v: 0 };
+    if (token === 'TRUE' || token === 'FALSE') return { t: CellValueType.STRING, v: value };
 }
 
 export function getFunctionName(item: IFunctionInfo, localeService: LocaleService) {

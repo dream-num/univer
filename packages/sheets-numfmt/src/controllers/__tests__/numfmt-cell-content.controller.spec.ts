@@ -493,5 +493,9 @@ describe('SheetsNumfmtCellContentController', () => {
         controller.setNumfmtLocal('fr');
         expect(getInterceptedCell(sheet1, workbook, 1, 1, get)).toMatchObject({ v: '1234,50' });
         expect(getInterceptedCell(sheet2, workbook, 1, 1, get)).toMatchObject({ v: '9,9' });
+
+        get(RegionService).setRegion('en-US');
+        controller.setNumfmtLocal('de');
+        expect(getInterceptedCell(sheet1, workbook, 1, 1, get)).toMatchObject({ v: '1234.50' });
     });
 });

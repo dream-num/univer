@@ -25,6 +25,8 @@ import type {
     ParsedPattern,
     ResolvedFormatOptions,
 } from './types';
+import { getRegionalCurrencyFormat } from '../../services/region/currency-format';
+import { getRegionParts } from '../../services/region/region-rules';
 import {
     TOKEN_AMPM,
     TOKEN_BREAK,
@@ -67,6 +69,7 @@ import { formatValue, formatColor as formatValueColor } from './format-number';
 import { getNumberGrouping } from './grouping';
 import { defaultOptions } from './options';
 import { parsePattern } from './parse-pattern';
+import { localizeBuiltInDatePattern } from './regional-calendar';
 import { dateToSerial as handleDates } from './serial-date';
 
 export { dec2frac } from './dec-to-frac';
@@ -130,7 +133,21 @@ export function format(
         ...options,
         grouping: options.grouping ?? getNumberGrouping(options.region),
     };
-    const data = prepareFormatterData(pattern, resolvedOptions.throws);
+    // Built-in short date and currency formats keep the invariant pattern in the workbook.
+    let displayPattern = pattern;
+    if (options.region && pattern) {
+        const datePattern = localizeBuiltInDatePattern(pattern, options.region, options.locale);
+        if (datePattern) {
+            displayPattern = datePattern;
+        } else if (pattern === '$#,##0_);[Red]($#,##0)' || pattern === '$#,##0.00_);[Red]($#,##0.00)') {
+            const { symbol, positive, negative } = getRegionalCurrencyFormat(options.region);
+            const yen = symbol === '¥' && getRegionParts(options.region)?.language === 'ja' && getRegionParts(options.locale ?? '')?.language === 'ja';
+            const amount = pattern.includes('.') ? '#,##0.00' : '#,##0';
+            const pad = !yen && negative.endsWith(')') ? '_)' : '';
+            displayPattern = `${positive}${pad};[Red]${yen ? '$-#' : negative}`.replace(/[#$]/g, (char) => char === '#' ? amount : `"${symbol}"`);
+        }
+    }
+    const data = prepareFormatterData(displayPattern, resolvedOptions.throws);
     const normalizedValue = handleDates(value, resolvedOptions) ?? value;
     return formatValue(normalizedValue, data, resolvedOptions);
 }

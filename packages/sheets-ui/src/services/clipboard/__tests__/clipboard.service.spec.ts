@@ -43,6 +43,7 @@ import {
     Rectangle,
     RedoCommand,
     RegionService,
+
     SheetTypes,
     ThemeService,
     Tools,
@@ -95,6 +96,7 @@ import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.servic
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE, SheetClipboardService } from '../clipboard.service';
 import { COPY_TYPE } from '../type';
 import { clipboardTestBed } from './clipboard-test-bed';
+import { excelSample2, excelSample3 } from './constant';
 import { MockClipboard, MockClipboardItem } from './mock-clipboard';
 
 const EXPECTED_EXTERNAL_PASTE_STYLE = {
@@ -247,6 +249,67 @@ describe('Test clipboard', () => {
         expect(getValues(0, 0, 0, 0)?.[0][0]).toMatchObject(previous);
         expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
         assertReplaced();
+    });
+
+    it('preserves text and cell styling when Excel HTML repeats a text-formatted cell across a range', async () => {
+        const clipboard = get(ISheetClipboardService);
+        const target = { unitId: 'test', subUnitId: 'sheet1', range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 1 } };
+        await commandService.executeCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 30: { 0: { v: 1, s: { bl: 1 } }, 1: { v: 'text', s: { n: { pattern: '@' } } } } },
+        });
+        expect(await clipboard.legacyPaste(excelSample2, undefined, undefined, undefined, target)).toBe(true);
+        const text = { v: '000123456', t: CellValueType.STRING };
+        expect(getValues(30, 0, 30, 1)?.[0]).toMatchObject([text, text]);
+        const style = { ff: '等线', fs: 11, it: 0, bl: 0, cl: { rgb: 'rgb(0,0,0)' }, vt: 2, tb: 1, n: { pattern: '@' } };
+        expect(getStyles(30, 0, 30, 1)?.[0]).toMatchObject([style, style]);
+    });
+
+    it('distinguishes 18-digit text in an Excel number format from General when importing HTML', async () => {
+        const clipboard = get(ISheetClipboardService);
+        const target = { unitId: 'test', subUnitId: 'sheet1', range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0 } };
+        expect(await clipboard.legacyPaste(excelSample3, undefined, undefined, undefined, target)).toBe(true);
+        expect(getValues(30, 0, 30, 0)?.[0]?.[0]).toMatchObject({ v: '123456789123456789', t: CellValueType.STRING });
+        const general = '<table><tr><td style="mso-number-format:General">123456789123456789</td></tr></table>';
+        target.range.startRow = target.range.endRow = 31;
+        expect(await clipboard.legacyPaste(general, undefined, undefined, undefined, target)).toBe(true);
+        expect(getValues(31, 0, 31, 0)?.[0]?.[0]).toMatchObject({ v: 123456789123456000, t: CellValueType.NUMBER });
+    });
+
+    it.each(['text/plain', 'text/html'])('interprets regional numbers and localized literals pasted as %s', async (mime) => {
+        const clipboard = get(ISheetClipboardService);
+        const locales = get(LocaleService);
+        locales.load({ [LocaleType.DE_DE]: { 'engine-formula': { functionAliases: { TRUE: 'WAHR', FALSE: 'FALSCH' }, errorAliases: { '#VALUE!': '#WERT!' } } } });
+        locales.setLocale(LocaleType.DE_DE);
+        get(RegionService).setRegion('en-IN');
+        const target = { unitId: 'test', subUnitId: 'sheet1', range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0 } };
+        const inputs = ['12,34,567.89', '12345678901234567', 'wahr', '#WERT!', 'TRUE', '#VALUE!'];
+        const body = mime === 'text/html' ? `<table><tr>${inputs.map((v) => `<td>${v}</td>`).join('')}</tr></table>` : inputs.join('\t');
+        expect(await clipboard.legacyPaste(mime === 'text/html' ? body : undefined, mime === 'text/plain' ? body : undefined, undefined, undefined, target)).toBe(true);
+        const cells = getValues(30, 0, 30, 5)?.[0];
+        expect(cells?.map((cell) => cell?.v)).toEqual([mime === 'text/html' ? inputs[0] : 1234567.89, 12345678901234500, 1, '#VALUE!', 'TRUE', '#VALUE!']);
+        expect(cells?.map((cell) => cell?.t)).toEqual([mime === 'text/html' ? CellValueType.STRING : CellValueType.NUMBER, CellValueType.NUMBER, CellValueType.BOOLEAN, CellValueType.STRING, CellValueType.STRING, CellValueType.FORCE_STRING]);
+    });
+
+    it.each(['text/plain', 'text/html'])('keeps nonbreaking spaces in literals pasted as %s and uses the active UI for full-width digits', async (mime) => {
+        const clipboard = get(ISheetClipboardService);
+        const locales = get(LocaleService);
+        locales.load({ [LocaleType.FR_FR]: { 'engine-formula': { functionAliases: { TRUE: 'VRAI' }, errorAliases: { '#VALUE!': '#VALEUR!' } } } });
+        locales.setLocale(LocaleType.FR_FR);
+        get(RegionService).setRegion('en-US');
+        const target = { unitId: 'test', subUnitId: 'sheet1', range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0 } };
+        const texts = [' VRAI ', ' #VALEUR! ', '\u00A0VRAI\u00A0', '１２．５'];
+        const html = mime === 'text/html' ? `<table><tr>${texts.map((v) => `<td>${v}</td>`).join('')}</tr></table>` : undefined;
+        expect(await clipboard.legacyPaste(html, html ? undefined : texts.join('\t'), undefined, undefined, target)).toBe(true);
+        const cells = getValues(30, 0, 30, 3)?.[0];
+        expect(cells?.map((cell) => cell?.v)).toEqual(html ? [1, '#VALUE!', texts[2], texts[3]] : texts);
+        expect(cells?.map((cell) => cell?.t)).toEqual([
+            html ? CellValueType.BOOLEAN : CellValueType.STRING,
+            CellValueType.STRING,
+            CellValueType.STRING,
+            CellValueType.STRING,
+        ]);
     });
 
     it('preserves literal external table text when the formula clipboard plugin is absent', async () => {
@@ -2447,6 +2510,7 @@ describe('SheetClipboardService', () => {
         injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
         injector.add([ThemeService]);
         injector.add([LocaleService]);
+        injector.add([RegionService]);
         injector.add([ErrorService]);
         injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
         const localeService = injector.get(LocaleService);

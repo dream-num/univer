@@ -15,15 +15,6 @@
  */
 
 import type { ICellData, IRange, IUnitRange, Nullable } from '@univerjs/core';
-import type {
-    IArrayFormulaRangeType,
-    IRuntimeUnitDataType,
-    IUnitData,
-    IUnitSheetNameMap,
-    IUnitStylesData,
-} from '../../basics/common';
-import type { FormulaCalculationCache } from '../../services/formula-cache.service';
-import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
 import {
     CellValueType,
     DateSystem,
@@ -34,6 +25,15 @@ import {
     moveRangeByOffset,
     ObjectMatrix,
 } from '@univerjs/core';
+import type {
+    IArrayFormulaRangeType,
+    IRuntimeUnitDataType,
+    IUnitData,
+    IUnitSheetNameMap,
+    IUnitStylesData,
+} from '../../basics/common';
+import type { FormulaCalculationCache } from '../../services/formula-cache.service';
+import type { BaseValueObject, IArrayValueObject, ICalculationLocale } from '../value-object/base-value-object';
 import { CLEAR_IMPORTED_SPILL_CELL } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
@@ -65,7 +65,7 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     private _dateSystem = DateSystem.Date1900;
-    private _readRegion?: () => string;
+    private _regionalContext?: ICalculationLocale;
 
     private _forcedSheetId: Nullable<string> = '';
 
@@ -182,8 +182,8 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._dateSystem;
     }
 
-    withDateSystem(dateSystem: DateSystem, readRegion?: () => string): this {
-        this._readRegion = readRegion;
+    withDateSystem(dateSystem: DateSystem, regionalContext?: ICalculationLocale): this {
+        this._regionalContext = regionalContext;
         this._dateSystem = dateSystem;
         return this;
     }
@@ -518,21 +518,21 @@ export class BaseReferenceObject extends ObjectClassType {
             const pattern = this._getPatternByCell(cell);
 
             if (isTextFormat(pattern)) {
-                return StringValueObject.create(value.toString()).withDateSystem(this._dateSystem, this._readRegion);
+                return StringValueObject.create(value.toString()).withDateSystem(this._dateSystem, this._regionalContext);
             }
 
             return createNumberValueObjectByRawValue(value, pattern).withDateSystem(this._dateSystem);
         }
         if (cellValueType === CellValueType.STRING || cellValueType === CellValueType.FORCE_STRING) {
             // A1 is `"test"`, =A1 also needs to get `"test"`
-            return StringValueObject.create(value.toString()).withDateSystem(this._dateSystem, this._readRegion);
+            return StringValueObject.create(value.toString()).withDateSystem(this._dateSystem, this._regionalContext);
         }
         if (cellValueType === CellValueType.BOOLEAN) {
             return createBooleanValueObjectByRawValue(value);
         }
 
         const result = ValueObjectFactory.create(value, false, this._dateSystem);
-        return result.isString() ? result.withDateSystem(this._dateSystem, this._readRegion) : result;
+        return result.isString() ? result.withDateSystem(this._dateSystem, this._regionalContext) : result;
     }
 
     private _getPatternByCell(cell: ICellData) {

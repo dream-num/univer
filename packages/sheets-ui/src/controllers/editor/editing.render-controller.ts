@@ -32,7 +32,7 @@ import type {
 } from '@univerjs/core';
 import type { IInsertTextCommandParams, IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IInnerPasteCommandParams } from '@univerjs/docs-ui';
-import type { FormulaInputError, IFormulaSyntax } from '@univerjs/engine-formula';
+import type { ErrorType, FormulaInputError, IFormulaSyntax } from '@univerjs/engine-formula';
 import type {
     ISetRangeValuesCommandParams,
     ISetWorksheetActivateCommandParams,
@@ -87,7 +87,7 @@ import {
     SetDocInputStyleCommand,
     VIEWPORT_KEY,
 } from '@univerjs/docs-ui';
-import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
+import { ERROR_TYPE_SET, IFunctionService, LexerTreeBuilder, matchToken, parseCellLiteral } from '@univerjs/engine-formula';
 import {
     convertTextRotation,
     DeviceInputEventType,
@@ -890,7 +890,7 @@ export class EditingRenderController extends Disposable {
         // Remove the same style attributes that have been set by composed style in the cell data.
         this._removeComposedCellStyleInCellData(cellData, worksheet.getComposedCellStyleWithoutSelf(row, column));
 
-        const finalCell = this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData) as ICellData;
+        const finalCell = this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData, syntax.region) as ICellData;
 
         // If the cell data after interceptor is the same as the raw cell data, there is no need to execute setRangeValue command, just return directly.
         const rawCell = worksheet.getCellRaw(row, column);
@@ -1150,7 +1150,7 @@ export function getCellDataByInput(
         cellData.f = null;
         cellData.si = null;
         cellData.p = null;
-        cellData.t = CellValueType.STRING;
+        cellData.t = ERROR_TYPE_SET.has(newDataStream as ErrorType) ? CellValueType.FORCE_STRING : CellValueType.STRING;
 
         // Text format supports rich text
         if (isRichText(body)) {
@@ -1194,6 +1194,7 @@ export function getCellDataByInput(
             return null;
         }
         cellData.v = newDataStream === '' ? null : newDataStream;
+        Object.assign(cellData, parseCellLiteral(newDataStream, localeService));
         cellData.f = null;
         cellData.si = null;
         cellData.p = null;

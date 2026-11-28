@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import { getRegionalCurrencyFormat, getRegionalNumberFormat, groupNumfmtIntegerDigits } from '@univerjs/core';
 import type { BaseValueObject } from '../../engine/value-object/base-value-object';
-import { getCurrencySymbolByLocale, getNumfmtNumberGrouping, groupNumfmtIntegerDigits } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { ErrorValueObject } from '../../engine/value-object/base-value-object';
 import { NullValueObject, StringValueObject } from '../../engine/value-object/primitive-object';
@@ -23,7 +23,8 @@ import { mapFinancialScalars } from '../financial/scalar-arguments';
 import { RegionalNumberFormatFunction } from './regional-number-format.function';
 
 export function groupExcelInteger(whole: string, region?: string): string {
-    return groupNumfmtIntegerDigits(whole, ',', getNumfmtNumberGrouping(region));
+    const { group, grouping } = getRegionalNumberFormat(region);
+    return groupNumfmtIntegerDigits(whole, group, grouping);
 }
 
 export function formatExcelFixedDecimal(value: number, decimals: number, groupThousands: boolean, region?: string): string {
@@ -38,7 +39,12 @@ export function formatExcelFixedDecimal(value: number, decimals: number, groupTh
     const sign = value < 0 && retained !== 0 ? '-' : '';
     const whole = padded.slice(0, point);
     const integer = groupThousands ? groupExcelInteger(whole, region) : whole;
-    return `${sign}${integer}${decimalPlaces ? `.${padded.slice(point)}` : ''}`;
+    return `${sign}${integer}${decimalPlaces ? `${getRegionalNumberFormat(region).decimal}${padded.slice(point)}` : ''}`;
+}
+
+export function formatCurrencyAmount(amount: string, negative: boolean, region?: string): string {
+    const format = getRegionalCurrencyFormat(region);
+    return (negative ? format.negative : format.positive).replace(/[#\$]/g, (token) => token === '#' ? amount : format.symbol);
 }
 
 export class ExcelFixed extends RegionalNumberFormatFunction {
@@ -77,10 +83,10 @@ export class ExcelFixed extends RegionalNumberFormatFunction {
         }
 
         const decimal = formatExcelFixedDecimal(Math.abs(number), digits, true, region);
-        const amount = `${getCurrencySymbolByLocale(region ?? this.getLocale())}${decimal}`;
         const negative = number < 0 && (digits >= 0 || decimal !== '0');
-        if (amount.length + (negative ? 2 : 1) > 255) return ErrorValueObject.create(ErrorType.VALUE);
-        return StringValueObject.create(negative ? `(${amount})` : amount);
+        const amount = formatCurrencyAmount(decimal, negative, region ?? this.getLocale());
+        if (amount.length + (negative ? 0 : 1) > 255) return ErrorValueObject.create(ErrorType.VALUE);
+        return StringValueObject.create(amount);
     }
 }
 

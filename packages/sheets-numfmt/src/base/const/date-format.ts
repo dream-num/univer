@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getRegionLocale, getRegionTag, LocaleType } from '@univerjs/core';
+import { getRegionalDatePattern, getRegionParts, LocaleType } from '@univerjs/core';
 
 interface IDateFormatProfile {
     dates: readonly string[];
@@ -80,29 +80,26 @@ const DATE_FORMAT_PROFILES: Record<LocaleType, IDateFormatProfile> = {
     },
 };
 
-const builtInRegions = new Map(Object.values(LocaleType).map((locale) => [getRegionTag(locale).toLowerCase(), locale]));
+const builtInRegions = Object.values(LocaleType);
+
+export function getDateFormatRegionTag(region: string): string | undefined {
+    const parts = getRegionParts(region);
+    if (!parts) return undefined;
+    const script = parts.script && parts.script[0].toUpperCase() + parts.script.slice(1);
+    return [parts.language, script, parts.territory].filter(Boolean).join('-');
+}
 
 export function getDateFormatLocale(region: string): LocaleType | undefined {
-    const locale = getRegionLocale(region);
-    return locale && builtInRegions.get(locale.baseName.toLowerCase());
+    const tag = getDateFormatRegionTag(region);
+    return builtInRegions.find((locale) => locale === tag);
 }
 
 function getDateProfile(region: string): IDateFormatProfile {
     const locale = getDateFormatLocale(region);
     if (locale) return DATE_FORMAT_PROFILES[locale];
-    const tag = getRegionTag(region);
-    try {
-        if (Intl.DateTimeFormat.supportedLocalesOf(tag).length) {
-            const parts = new Intl.DateTimeFormat(tag, { calendar: 'gregory', timeZone: 'UTC' }).formatToParts(0);
-            const first = parts.find(({ type }) => type === 'day' || type === 'month' || type === 'year')?.type;
-            if (first === 'month') return MDY_DATE_PROFILE;
-            if (first === 'day') {
-                return parts.some(({ type, value }) => type === 'literal' && value.includes('.')) ? DMY_DOT_DATE_PROFILE : DMY_DATE_PROFILE;
-            }
-        }
-    } catch (error) {
-        if (!(error instanceof RangeError)) throw error;
-    }
+    const date = getRegionalDatePattern(region);
+    if (date.startsWith('m')) return MDY_DATE_PROFILE;
+    if (date.startsWith('d')) return date.includes('.') ? DMY_DOT_DATE_PROFILE : DMY_DATE_PROFILE;
     return ISO_DATE_PROFILE;
 }
 

@@ -27,6 +27,18 @@ describe('Test dollar function', () => {
     const testFunction = new Dollar(FUNCTION_NAMES_TEXT.DOLLAR);
 
     describe('Dollar', () => {
+        it.each([
+            ['de-DE', '1.234,56 €', '-1.234,56 €'],
+            ['de-CH', "CHF 1'234.56", "CHF -1'234.56"],
+            ['ar-AE', '1,234.56د.إ.', '(1,234.56د.إ.)'],
+            ['zh-CN', '¥1,234.56', '(¥1,234.56)'],
+        ])('formats both signs using the currency and layout of %s', (region, positive, negative) => {
+            const dollar = new Dollar(FUNCTION_NAMES_TEXT.DOLLAR);
+            dollar.bindCalculationRegion(() => region);
+            expect(dollar.calculate(NumberValueObject.create(1234.56)).getValue()).toBe(positive);
+            expect(dollar.calculate(NumberValueObject.create(-1234.56)).getValue()).toBe(negative);
+        });
+
         it('Value is normal', () => {
             const number = NumberValueObject.create(1234.567);
             const result = testFunction.calculate(number);

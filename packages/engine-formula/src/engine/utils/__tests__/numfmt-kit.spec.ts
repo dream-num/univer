@@ -22,6 +22,7 @@ import {
     compareNumfmtPriority,
     comparePatternPriority,
     stringIsNumberPattern,
+    temporalSumPattern,
 } from '../numfmt-kit';
 
 const numfmtMap = {
@@ -41,6 +42,14 @@ const numfmtMap = {
 };
 
 describe('Test numfmt kit', () => {
+    it('keeps a date plus a day in date format and a difference between two dates in General', () => {
+        expect(temporalSumPattern(['m/d/yy', ''])).toBe('m/d/yy');
+        expect(temporalSumPattern(['m/d/yy', 'm/d/yy'])).toBe('');
+        expect(temporalSumPattern(['m/d/yy', 'h:mm AM/PM'])).toBe('m/d/yy');
+        expect(temporalSumPattern(['h:mm AM/PM', 'm/d/yy'])).toBe('h:mm AM/PM');
+        expect(temporalSumPattern(['m/d/yy', '0%'])).toBe('');
+    });
+
     it('Function compareNumfmtPriority', () => {
         expect(compareNumfmtPriority(numfmtMap.currency, numfmtMap.currency)).toBe(numfmtMap.currency);
         expect(compareNumfmtPriority(numfmtMap.currency, numfmtMap.date)).toBe(numfmtMap.currency);

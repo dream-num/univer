@@ -38,6 +38,11 @@ describe('Test now function', () => {
             expect(stripErrorMargin(result.getValue())).toBe(43831.085462963);
         });
 
+        it('preserves the fractional second of the calculation timestamp', () => {
+            vi.setSystemTime(new Date(2020, 0, 1, 0, 0, 0, 375));
+            expect(testFunction.calculate().getValue()).toBe(43831 + 0.375 / 86400);
+        });
+
         it('uses the configured date system', () => {
             testFunction.setDateSystem(DateSystem.Date1900);
             const date1900 = testFunction.calculate().getValue();

@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import { ErrorType } from '../../basics/error-type';
+import { fractionalPower } from './fractional-power';
+
+export const EXCEL_MIN_NORMAL_NUMBER = 2 ** -1022;
+
 /**
  * Since Excel follows the IEEE 754 specification, it only handles precision issues when displaying cells. For example, =0.1+0.2, the stored value in XML is 0.30000000000000004, and the displayed value is 0.3. The accuracy of the calculation process does not need to be considered. We only focus on the accuracy of the calculation results. Any result is processed within 15 digits.
 
@@ -42,9 +47,19 @@ export function divide(a: number, b: number): number {
  * @returns The rounded number.
  */
 export function round(base: number, precision: number): number {
-    const factor = 10 ** Math.trunc(precision);
-    const epsilon = baseEpsilon(base, factor);
-    return Math.round(multiply(base, factor) + epsilon) / factor;
+    if (!Number.isFinite(base) || !Number.isFinite(precision)) return NaN;
+    if (base === 0) return 0;
+    // Excel first rounds the binary64 input to 15 decimal significant digits, then rounds the requested place.
+    const [mantissa, exponent] = Math.abs(base).toExponential(14).split('e');
+    const places = Math.max(-0x7FFFFFFF, Math.min(0x7FFFFFFF, Math.trunc(precision)));
+    // Excel calculates the retained digit count with signed 32-bit addition after saturating the input.
+    const retained = (Number(exponent) + places + 1) | 0;
+    if (retained >= 15) return Math.sign(base) * Number(`${mantissa}e${exponent}`);
+    if (retained < 0) return Math.sign(base) * 0;
+
+    const digits = mantissa.replace('.', '');
+    const rounded = Number(digits.slice(0, retained)) + Number(digits[retained] >= '5');
+    return Math.sign(base) * Number(`${rounded}e${-places}`);
 }
 
 /**
@@ -111,15 +126,71 @@ export function mod(base: number, divisor: number): number {
     return base - divisor * Math.floor(base / divisor);
 }
 
-/**
- * Raises a base number to the power of the exponent.
- *
- * @param base The base number.
- * @param exponent The exponent.
- * @returns The result of base raised to the power of exponent.
- */
+// Use binary multiplication in Excel's order while the exponent fits its unsigned integer fast path.
+function integerPower(base: number, exponent: number): number {
+    if (base === 10 && exponent > 22) {
+        if (exponent > 308) return Infinity;
+        // Excel's positive powers of ten match rounding first to 64 significand bits, then to binary64.
+        const exact = 10n ** BigInt(exponent);
+        const discardedBits = BigInt(exact.toString(2).length - 64);
+        const half = 1n << (discardedBits - 1n);
+        const lastRetainedBit = (exact >> discardedBits) & 1n;
+        const rounded = (exact + half - 1n + lastRetainedBit) >> discardedBits;
+        return Number(rounded << discardedBits);
+    }
+    let product = 1;
+    let factor = base;
+    for (let remaining = exponent; remaining > 0; remaining = Math.floor(remaining / 2)) {
+        if (remaining % 2 === 1) product *= factor;
+        if (remaining > 1) factor *= factor;
+    }
+    return product;
+}
+
 export function pow(base: number, exponent: number): number {
-    return base ** exponent;
+    if (base === 0 || !Number.isFinite(base) || !Number.isFinite(exponent)) return base ** exponent;
+    const magnitude = Math.abs(exponent);
+    let result: number;
+    if (magnitude === 0.5) {
+        result = Math.sqrt(base);
+    } else if (Number.isInteger(magnitude) && magnitude < 0xFFFFFFFF) {
+        result = integerPower(base, magnitude);
+    } else {
+        if (base < 0 && !Number.isInteger(magnitude)) return NaN;
+        result = fractionalPower(Math.abs(base), magnitude);
+        if (base < 0 && magnitude % 2 === 1) result = -result;
+    }
+    return exponent < 0 ? 1 / result : result;
+}
+
+function negativeBasePowerSign(magnitude: number): number {
+    if (magnitude >= 0xFFFFFFFF) return NaN;
+    if (Number.isInteger(magnitude)) return magnitude % 2 === 1 ? -1 : 1;
+    // Excel accepts odd roots after rounding the reciprocal to 15 significant digits.
+    const denominator = Number((1 / magnitude).toPrecision(15));
+    return denominator < 0x7FFFFFFF && denominator % 2 === 1 ? -1 : NaN;
+}
+
+export function excelPowerValue(base: number, exponent: number): number | ErrorType {
+    if (!Number.isFinite(base) || !Number.isFinite(exponent)) return ErrorType.NUM;
+    if (exponent === 0) return base === 0 ? ErrorType.NUM : 1;
+    if (base === 0) return exponent < 0 ? ErrorType.DIV_BY_ZERO : 0;
+
+    const magnitude = Math.abs(exponent);
+    const integral = Number.isInteger(magnitude);
+    const sign = base < 0 ? negativeBasePowerSign(magnitude) : 1;
+    if (Number.isNaN(sign)) return ErrorType.NUM;
+    let result = Math.abs(pow(integral ? base : Math.abs(base), magnitude));
+    // Excel treats overflow of the logarithm-times-exponent intermediate as an overflowing positive power.
+    if (Number.isNaN(result)) return exponent < 0 ? 0 : ErrorType.NUM;
+    if (exponent < 0) {
+        // Excel flushes a subnormal denominator before taking a reciprocal.
+        if (result < EXCEL_MIN_NORMAL_NUMBER) return ErrorType.DIV_BY_ZERO;
+        result = 1 / result;
+    }
+    if (!Number.isFinite(result)) return ErrorType.NUM;
+    if ((integral || exponent < 0) && result < EXCEL_MIN_NORMAL_NUMBER) return 0;
+    return sign * result;
 }
 
 /**

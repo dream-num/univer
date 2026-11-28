@@ -15,10 +15,10 @@
  */
 
 import type { IUnitRange, Nullable } from '@univerjs/core';
+import { DateSystem } from '@univerjs/core';
 import type { BaseFunction } from '../../functions/base-function';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
-import type { BaseValueObject } from '../value-object/base-value-object';
-import { DateSystem } from '@univerjs/core';
+import type { BaseValueObject, ICalculationLocale } from '../value-object/base-value-object';
 import { ErrorType } from '../../basics/error-type';
 import { OPERATOR_TOKEN_COMPARE_SET, operatorToken, prefixToken } from '../../basics/token';
 import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
@@ -26,6 +26,7 @@ import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
+import { isTemporalNumberFormat } from '../utils/numfmt-kit';
 import { ArrayValueObject } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NullValueObject, NumberValueObject } from '../value-object/primitive-object';
@@ -52,7 +53,7 @@ export class PrefixNode extends BaseAstNode {
         return NodeType.PREFIX;
     }
 
-    override execute(dateSystem: DateSystem = DateSystem.Date1900, readRegion?: () => string) {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900, regionalContext?: ICalculationLocale) {
         this._referenceRanges = null;
         const children = this.getChildren();
         let value = children[0].getValue();
@@ -65,16 +66,19 @@ export class PrefixNode extends BaseAstNode {
 
         if (this._operatorString === prefixToken.MINUS) {
             if (value.isReferenceObject()) {
-                const array = (value as BaseReferenceObject).withDateSystem(dateSystem, readRegion).toArrayValueObject();
+                const array = (value as BaseReferenceObject).withDateSystem(dateSystem, regionalContext).toArrayValueObject();
                 value = array.getRowCount() === 1 && array.getColumnCount() === 1 ? array.getFirstCell() : array;
             }
             result = this._functionExecutor!.calculate(
                 NumberValueObject.create(0),
-                (value as BaseValueObject).withDateSystem(dateSystem, readRegion)
+                (value as BaseValueObject).withDateSystem(dateSystem, regionalContext)
             ) as FunctionVariantType;
+            if (result instanceof NumberValueObject && isTemporalNumberFormat(value.getPattern())) {
+                result = NumberValueObject.create(result.getValue() as number, value.getPattern());
+            }
         } else if (this._operatorString === prefixToken.PLUS) {
             if (value.isReferenceObject()) {
-                const reference = (value as BaseReferenceObject).withDateSystem(dateSystem, readRegion);
+                const reference = (value as BaseReferenceObject).withDateSystem(dateSystem, regionalContext);
                 if (reference.getRowCount() === 1 && reference.getColumnCount() === 1) {
                     const { startRow, startColumn } = reference.getRangePosition();
                     result = reference.isCellBlank(startRow, startColumn) ? NullValueObject.create() : reference.getFirstCell();
@@ -89,7 +93,7 @@ export class PrefixNode extends BaseAstNode {
         } else {
             result = ErrorValueObject.create(ErrorType.VALUE);
         }
-        this.setValue(result.withDateSystem(dateSystem, readRegion));
+        this.setValue(result.withDateSystem(dateSystem, regionalContext));
     }
 
     private _handlerAT(value: FunctionVariantType) {

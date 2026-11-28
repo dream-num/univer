@@ -26,14 +26,15 @@ import {
     CellValueType,
     Disposable,
     getNumfmtParseValueFilter,
+    getRegionalNumberFormat,
     Inject,
     Injector,
     isRealNum,
     isTextFormat,
     IUniverInstanceService,
+    LocaleService,
     Optional,
     toDisposable,
-    willLoseNumericPrecision,
 } from '@univerjs/core';
 import { stripErrorMargin } from '@univerjs/engine-formula';
 import {
@@ -84,6 +85,7 @@ export class NumfmtEditorController extends Disposable {
         @Inject(INumfmtService) private _numfmtService: INumfmtService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private _injector: Injector,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(SheetsNumfmtCellContentController) private _sheetsNumfmtCellContentController: SheetsNumfmtCellContentController,
         @Optional(IEditorBridgeService) private _editorBridgeService?: IEditorBridgeService
     ) {
@@ -120,6 +122,7 @@ export class NumfmtEditorController extends Disposable {
                                 // Excel completes omitted components in the active date/clock format without changing the stored numfmt.
                                 const canonicalValue = serializeTemporalEditorValue({
                                     serial: Number(rawCell.v),
+                                    region: this._sheetsNumfmtCellContentController.region,
                                     pattern: numfmtCell.pattern,
                                     locale: this._sheetsNumfmtCellContentController.getLocale(context.workbook),
                                     dateSystem: context.workbook.getDateSystem(),
@@ -140,7 +143,9 @@ export class NumfmtEditorController extends Disposable {
                                 case 'number': {
                                     const cell: Nullable<ICellData> = { ...context.worksheet.getCellRaw(row, col) };
                                     if (cell?.t === CellValueType.NUMBER && isRealNum(cell.v)) {
-                                        cell.v = stripErrorMargin(Number(cell.v));
+                                        const raw = stripErrorMargin(Number(cell.v));
+                                        const decimal = getRegionalNumberFormat(this._sheetsNumfmtCellContentController.region).decimal;
+                                        cell.v = decimal === '.' ? raw : String(raw).replace('.', decimal);
                                     }
                                     return next && next(cell);
                                 }
@@ -152,7 +157,8 @@ export class NumfmtEditorController extends Disposable {
                                 case 'percent': {
                                     const cell: Nullable<ICellDataForSheetInterceptor> = { ...context.worksheet.getCellRaw(row, col) };
                                     if (cell?.t === CellValueType.NUMBER && isRealNum(cell.v)) {
-                                        cell.v = `${stripErrorMargin(Number(cell.v) * 100)}%`;
+                                        const decimal = getRegionalNumberFormat(this._sheetsNumfmtCellContentController.region).decimal;
+                                        cell.v = `${String(stripErrorMargin(Number(cell.v) * 100)).replace('.', decimal)}%`;
                                         cell.isPercentFormat = true;
                                     }
                                     return next && next(cell);
@@ -185,7 +191,7 @@ export class NumfmtEditorController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._sheetInterceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT, {
-                    // eslint-disable-next-line max-lines-per-function,complexity
+                    // eslint-disable-next-line complexity
                     handler: (value, context, next) => {
                         if (!value?.v && !value?.p) {
                             return next(value);
@@ -203,7 +209,7 @@ export class NumfmtEditorController extends Disposable {
                         const originCell = context.worksheet.getCellRaw(context.row, context.col);
 
                         // if the cell is text format or force string, do not convert the value
-                        if (isTextFormat(currentNumfmtValue?.pattern) || value.t === CellValueType.FORCE_STRING) {
+                        if (isTextFormat(currentNumfmtValue?.pattern) || value.t === CellValueType.FORCE_STRING || value.t === CellValueType.BOOLEAN) {
                             return next(value);
                         }
 
@@ -211,7 +217,8 @@ export class NumfmtEditorController extends Disposable {
                         const content = value?.p?.body?.dataStream ? value.p.body.dataStream.replace(/\r\n$/, '') : String(value.v);
                         const locale = this._sheetsNumfmtCellContentController.getLocale(context.workbook);
                         const dateSystem = context.workbook.getDateSystem();
-                        const numfmtInfo = getNumfmtParseValueFilter(content, { locale, dateSystem });
+                        const region = context.editRegion ?? this._sheetsNumfmtCellContentController.region;
+                        const numfmtInfo = getNumfmtParseValueFilter(content, { locale, dateSystem, region, uiLocale: this._localeService.getCurrentLocale() });
 
                         if (body) {
                             if (!canConvertRichTextToNumfmt(body)) {
@@ -230,36 +237,17 @@ export class NumfmtEditorController extends Disposable {
                             const temporalValue = parseTemporalEditorValue({
                                 content,
                                 originalSerial: Number(originCell.v),
+                                region,
                                 pattern: currentNumfmtValue.pattern,
                                 locale,
                                 dateSystem,
                             });
                             if (temporalValue != null) {
-                                return next({ ...value, p: undefined, v: stripErrorMargin(temporalValue, 16), t: CellValueType.NUMBER });
+                                return next({ ...value, p: undefined, v: temporalValue, t: CellValueType.NUMBER });
                             }
                         }
 
                         if (numfmtInfo) {
-                            // If the content is parsed to a number format or the origin cell has a number format, do not need judge whether it will lose precision.
-                            // If the cell type is string or force string, do not need judge whether it will lose precision.
-                            // If the numeric string will lose precision when converted to a number, set the cell type to force string
-                            // e.g. 123456789123456789
-                            // e.g. 1212121212121212.2345
-                            if (
-                                !numfmtInfo.z &&
-                                !currentNumfmtValue?.pattern &&
-                                originCell?.t !== CellValueType.STRING &&
-                                originCell?.t !== CellValueType.FORCE_STRING &&
-                                willLoseNumericPrecision(content)
-                            ) {
-                                return next({
-                                    ...value,
-                                    p: undefined,
-                                    v: content,
-                                    t: CellValueType.FORCE_STRING,
-                                });
-                            }
-
                             /**
                              * Only when the content has number format pattern but the current cell has no pattern, or the pattern type is different, need to update the number format.
                              * Different currency symbols also should not be updated in Excel.
@@ -276,11 +264,12 @@ export class NumfmtEditorController extends Disposable {
                                 );
                             }
 
-                            const v = stripErrorMargin(Number(numfmtInfo.v), 16);
+                            const v = Number(numfmtInfo.v);
 
                             return next({ ...value, p: undefined, v, t: CellValueType.NUMBER });
                         }
 
+                        if (!value.f && isRealNum(content)) return next({ ...value, t: CellValueType.STRING });
                         return next(value);
                     },
                 })

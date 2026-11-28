@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { getRegionalDatePattern, getRegionalNumberFormat } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { getNumfmtParseValueFilter, isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { getFormatPreview } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -25,6 +25,8 @@ import { parseFormulaNumericText, StringValueObject } from '../../../engine/valu
 import { RegionalNumberFormatFunction } from '../regional-number-format.function';
 
 export class Text extends RegionalNumberFormatFunction {
+    override needsLocale = true;
+
     override minParams = 2;
 
     override maxParams = 2;
@@ -38,14 +40,8 @@ export class Text extends RegionalNumberFormatFunction {
         if (value.isBoolean()) return value.getValue() ? 'TRUE' : 'FALSE';
         if (value.isNumber()) return Number(value.getValue());
         const raw = String(value.getValue());
-        if (isRealNum(raw)) return Number(raw);
-        if (raw.includes(',')) {
-            const region = this.getNumberFormatRegion();
-            const parsed = parseFormulaNumericText(raw, region ? () => region : undefined);
-            if (parsed) return 'v' in parsed ? parsed.v : raw;
-        }
-        const parsed = getNumfmtParseValueFilter(raw, { dateSystem: value.getDateSystem() });
-        return typeof parsed?.v === 'number' ? parsed.v : raw;
+        const numeric = parseFormulaNumericText(raw, value.getDateSystem(), this.getNumberFormatRegion(), this.getLocale());
+        return numeric && 'v' in numeric ? numeric.v : raw;
     }
 
     override calculate(text: BaseValueObject, formatText: BaseValueObject) {
@@ -96,8 +92,9 @@ export class Text extends RegionalNumberFormatFunction {
             }
 
             const formatTextValueString = `${formatTextValue.getValue()}`;
-            const normalizedFormatTextValueString = normalizeExcelWeekdayFormat(formatTextValueString);
+            const normalizedFormatTextValueString = normalizeExcelFormatCode(formatTextValueString, this.getNumberFormatRegion());
 
+            if (normalizedFormatTextValueString == null) return ErrorValueObject.create(ErrorType.VALUE);
             const previewText = getFormatPreview(
                 normalizedFormatTextValueString,
                 this.getFormatInput(textValue),
@@ -116,7 +113,27 @@ export class Text extends RegionalNumberFormatFunction {
     }
 }
 
-export function normalizeExcelWeekdayFormat(formatText: string): string {
+export function normalizeExcelFormatCode(formatText: string, region?: string): string | null {
+    const format = getRegionalNumberFormat(region);
+    const { decimal } = format;
+    const group = format.group || (decimal === '٫' ? '٬' : ',');
+    let invalid = false;
+    // Leave quoted literals, escapes and bracket directives intact. Bare punctuation belongs to the local format grammar.
+    formatText = formatText.replace(/"[^"]*"|\[[^\]]*\]|[\\_*].|[.,:٫٬' ]/g, (token, index: number) => {
+        const beforeDigit = /[0#?]/.test(formatText[index + 1] ?? '');
+        const afterDigit = /[0#?]/.test(formatText[index - 1] ?? '');
+        if (token === decimal && (beforeDigit || afterDigit)) return '.';
+        if (token === group && afterDigit && (group !== ' ' || beforeDigit)) return ',';
+        // A group symbol preceding the first digit is printed literally.
+        if (token === group && !afterDigit && beforeDigit && token === '.') return '\\.';
+        if (token === ':' && afterDigit && beforeDigit) invalid = true;
+        if ((token === '.' || token === ',') && token !== decimal && token !== group && (beforeDigit || afterDigit)) {
+            if (beforeDigit && region && getRegionalDatePattern(region).includes(token)) invalid = true;
+            return `\\${token}`;
+        }
+        return token;
+    });
+    if (invalid) return null;
     if (!formatText.includes('\u00C5')) {
         return formatText;
     }

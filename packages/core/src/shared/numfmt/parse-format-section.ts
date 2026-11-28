@@ -65,6 +65,7 @@ import {
     u_YEAR,
 } from './constants';
 import { resolveLocale } from './locale';
+import { getDigitZero } from './native-digits';
 
 type NumberPatternName = 'int' | 'frac' | 'man' | 'den' | 'num';
 
@@ -248,7 +249,7 @@ export function parseFormatSection(inputTokens: FormatToken[]): ParsedFormatSect
                 currentPattern = 'den';
                 add({ type: 'div' }, outputTokens);
             } else {
-                add(token.value, outputTokens);
+                add({ type: 'date-separator', value: '/' }, outputTokens);
             }
         } else if (type === TOKEN_COMMA) {
             add(',', outputTokens);
@@ -339,7 +340,8 @@ export function parseFormatSection(inputTokens: FormatToken[]): ParsedFormatSect
                 bit.type = 'year-short';
             } else if (startsWith === 'y' || startsWith === 'e') {
                 bit.size = u_YEAR;
-                bit.type = 'year';
+                bit.type = startsWith === 'e' ? 'era-year' : 'year';
+                bit.pad = startsWith === 'e' && value.length > 1;
             } else if (value === 'b' || value === 'bb') {
                 bit.size = u_YEAR;
                 bit.type = 'b-year-short';
@@ -405,7 +407,9 @@ export function parseFormatSection(inputTokens: FormatToken[]): ParsedFormatSect
                     bit.used = true;
                 }
             } else if (startsWith === 'g') {
-                // TODO: Don't know what this does? (yet!)
+                bit.size = u_YEAR;
+                if (value.length >= 3) bit.type = 'era-name';
+                else bit.type = value.length === 2 ? 'era-short' : 'era-initial';
             }
             // signal date calc and track smallest needed unit
             part.date = part.date | bit.size;
@@ -418,6 +422,8 @@ export function parseFormatSection(inputTokens: FormatToken[]): ParsedFormatSect
             part.date_eval = true;
             token.short = token.value === 'A/P';
             add(token, outputTokens);
+        } else if (type === TOKEN_CHAR && token.value === ':') {
+            add({ type: 'time-separator', value: ':' }, outputTokens);
         } else if (type === TOKEN_STRING || type === TOKEN_ESCAPED || type === TOKEN_CHAR) {
             add(token.value, outputTokens);
         } else if (type === TOKEN_CONDITION) {
@@ -431,11 +437,12 @@ export function parseFormatSection(inputTokens: FormatToken[]): ParsedFormatSect
                 add({ type: 'string', value: currency, currency: true }, outputTokens);
             }
 
-            const locale = resolveLocale(code);
+            const windowsCode = Number.parseInt(code, 16);
+            const locale = /^[a-f\d]+$/i.test(code) && !(windowsCode & 0xFFFF) ? null : resolveLocale(code);
             if (locale) {
                 part.locale = locale;
             }
-            const windowsCode = Number.parseInt(code, 16);
+            part.digitZero = getDigitZero(windowsCode);
             if (Number.isFinite(windowsCode) && (windowsCode & 0xFF0000)) {
                 const calendar = (windowsCode >> 16) & 0xFF;
                 if (calendar === 6) {
@@ -494,7 +501,7 @@ export function parseFormatSection(inputTokens: FormatToken[]): ParsedFormatSect
         (part.grouping && !part.int_pattern.length) ||
         (part.fractions && part.exponential) ||
         (part.fractions && (part.den_pattern.length * part.num_pattern.length) === 0) ||
-        (haveSlash && !part.fractions && !part.date) ||
+        (haveSlash && !part.fractions && !part.date && !part.digitZero) ||
         (part.exponential && ((part.int_pattern.length || part.frac_pattern.length) * part.man_pattern.length) === 0)
     ) {
         throw new SyntaxError(`Invalid pattern: ${patternSource}`);

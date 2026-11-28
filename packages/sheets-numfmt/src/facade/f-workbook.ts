@@ -20,7 +20,7 @@ import { FWorkbook } from '@univerjs/sheets/facade';
 
 export interface IFWorkbookSheetsNumfmtMixin {
     /**
-     * Set the locale for number formatting.
+     * Set the number-format language. It also supplies the default region until setRegion is called.
      * @param {INumfmtLocaleTag} locale zh_CN,zh_TW,zh_HK,ja,ko,th,cs,da,nl,en,en_AU,en_CA,en_GB,en_IE,fi,fr,fr_CA,fr_CH,de,de_CH,el,hu,is,id,it,it_CH,nb,no,pl,pt,pt_BR,ru,sk,es,es_AR,es_BO,es_CL,es_CO,es_EC,es_MX,es_PY,es_UY,es_VE,sv,tr,cy,az,be,bg,ca,fil,gu,he,hr,hy,ka,kk,kn,lt,lv,ml,mn,mr,my,pa,ro,sl,sr,ta,te,uk,vi,ar,bn,hi
      * @returns {FWorkbook} The FWorkbook instance for chaining.
      * @memberof IFWorkbookNumfmtMixin

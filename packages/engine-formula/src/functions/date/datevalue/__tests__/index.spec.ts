@@ -28,6 +28,18 @@ describe('Test datevalue function', () => {
     const testFunction = new Datevalue(FUNCTION_NAMES_DATE.DATEVALUE);
 
     describe('Datevalue', () => {
+        it('calculates an ambiguous date in the active region', () => {
+            const fn = new Datevalue(FUNCTION_NAMES_DATE.DATEVALUE);
+            let region = 'en-US';
+            fn.bindCalculationRegion(() => region);
+            const date = StringValueObject.create('01/02/2025');
+            expect(getObjectValue(fn.calculate(date))).toBe(45659);
+            region = 'en-GB';
+            expect(getObjectValue(fn.calculate(date))).toBe(45689);
+            region = 'ja-JP';
+            expect(getObjectValue(fn.calculate(date))).toBe(ErrorType.VALUE);
+        });
+
         it('Date text string', () => {
             const dateText = StringValueObject.create('2020-01-02');
             const result = testFunction.calculate(dateText);

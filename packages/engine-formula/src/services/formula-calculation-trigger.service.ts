@@ -15,13 +15,13 @@
  */
 
 import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
+import { Disposable, ICommandService, Optional, Rectangle, RegionService } from '@univerjs/core';
+import { distinctUntilChanged, skip } from 'rxjs';
 import type { IDirtyUnitFeatureMap } from '../basics/common';
 import type {
     ISetFormulaCalculationNotificationMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import type { IFormulaDirtyData } from './current-data.service';
-import { Disposable, getRegionLocale, ICommandService, Optional, Rectangle, RegionService } from '@univerjs/core';
-import { distinctUntilChanged, map, skip } from 'rxjs';
 import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
@@ -70,7 +70,6 @@ export class FormulaCalculationTriggerService extends Disposable {
         this._started = true;
         if (this._regionService) {
             this.disposeWithMe(this._regionService.currentRegion$.pipe(
-                map((region) => getRegionLocale(region)?.baseName ?? region),
                 distinctUntilChanged(),
                 skip(1)
             ).subscribe(() => {

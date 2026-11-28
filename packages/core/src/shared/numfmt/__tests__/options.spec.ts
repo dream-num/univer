@@ -22,7 +22,6 @@
 import { expect } from 'vitest';
 import { getCurrencySymbolByLocale } from '../../../services/locale/currency-symbol';
 import { DateSystem } from '../../../types/enum/date-system';
-import { LocaleType } from '../../../types/enum/locale-type';
 import { format, getFormatInfo } from '../api';
 import { currencySymbols } from '../currency-symbols';
 import { getNumfmtCurrencySymbol } from '../utils';
@@ -102,18 +101,10 @@ numfmtTest('option: nbsp', (t) => {
     t.format('0 "foo bar" .0', 1.1, '1 foo bar .1', { nbsp: true });
 });
 
-numfmtTest('groups numbers for each built-in region', (t) => {
-    for (const region of Object.values(LocaleType)) {
-        t.format('#,##0', 1234567890, '1,234,567,890', { region });
-    }
-});
-
 numfmtTest('uses Excel monetary grouping for both numbers and currency', (t) => {
-    for (const region of ['ml-IN', 'mr-IN', 'or-IN']) {
-        t.format('#,##0', 1234567890, '1,234,567,890', { region });
-        t.format('"₹"#,##0', 1234567890, '₹1,234,567,890', { region });
-    }
-    for (const region of ['bn-BD', 'hi-IN', 'en-IN']) {
+    t.format('#,##0', 1234567890, '1,234,567,890', { region: 'en-US' });
+    t.format('"₹"#,##0', 1234567890, '₹1,234,567,890', { region: 'en-US' });
+    for (const region of ['ml-IN', 'mr-IN', 'or-IN', 'bn-BD', 'hi-IN', 'en-IN']) {
         t.format('#,##0', 1234567890, '1,23,45,67,890', { region });
         t.format('"₹"#,##0', 1234567890, '₹1,23,45,67,890', { region });
     }
@@ -124,7 +115,7 @@ numfmtTest('uses the same currency tokens for classification, selection and mone
         const pattern = `"${symbol}"#,##0`;
         expect(getFormatInfo(pattern).type, symbol).toBe('currency');
         expect(getNumfmtCurrencySymbol(pattern), symbol).toBe(symbol);
-        t.format(pattern, 123456789, `${symbol}123,456,789`, { region: 'ml-IN' });
+        t.format(pattern, 123456789, `${symbol}12,34,56,789`, { region: 'ml-IN' });
     }
     expect(getNumfmtCurrencySymbol('0.00,"K"')).toBeUndefined();
     expect(getFormatInfo('#,##0"L"').type).toBe('grouped');
@@ -132,7 +123,7 @@ numfmtTest('uses the same currency tokens for classification, selection and mone
     t.format('0" hours"', 12, '12 hours');
     expect(getFormatInfo('#,##0" Reports"').type).toBe('grouped');
     expect(getNumfmtCurrencySymbol('[$-409]#,##0;[Red]-#,##0')).toBeUndefined();
-    t.format('[$ABC-409]#,##0', 123456789, 'ABC123,456,789', { region: 'ml-IN' });
+    t.format('[$ABC-409]#,##0', 123456789, 'ABC12,34,56,789', { region: 'ml-IN' });
     expect(getFormatInfo('"Rp"#,##0', { currency: 'USD' }).type).toBe('grouped');
     expect(getFormatInfo('"Rp"#,##0').type).toBe('currency');
 });
@@ -142,7 +133,7 @@ numfmtTest('keeps grouping for equivalent regional tags and scripts', (t) => {
         t.format('#,##0', 123456789, '12,34,56,789', { region });
     }
     t.format('#,##0', 123456789, '12,34,56,789', { region: 'en-IN-x-test' });
-    t.format('#,##0', 123456789, '123,456,789', { region: 'pa-Arab-PK' });
+    t.format('#,##0', 123456789, '123٬456٬789', { region: 'pa-Arab-PK' });
 });
 
 numfmtTest('uses regional currency symbols including language and script variants', () => {

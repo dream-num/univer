@@ -15,14 +15,15 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { excelDateTimeSerial } from '@univerjs/core';
-import { isDate, parseFormattedDate, parseFormattedTime } from '../../../basics/date';
+import { parseFormattedDate, parseFormattedTime } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
-import { BaseFunction } from '../../base-function';
+import { RegionalNumberFormatFunction } from '../../text/regional-number-format.function';
 
-export class Datevalue extends BaseFunction {
+export class Datevalue extends RegionalNumberFormatFunction {
+    override needsLocale = true;
+
     override minParams = 1;
 
     override maxParams = 1;
@@ -46,23 +47,9 @@ export class Datevalue extends BaseFunction {
 
         if (dateTextObject.isString()) {
             const value = `${dateTextObject.getValue()}`;
-            const options = { dateSystem: this.getDateSystem() };
-            let parsedDate = parseFormattedDate(value, options);
-            if (parsedDate === null) {
-                parsedDate = parseFormattedTime(value, options);
-            }
-            if (parsedDate) {
-                let { v, z } = parsedDate;
-
-                // currently, we the v is a number by numfmt the 3.2
-                if (z && isDate(z)) {
-                    if ((v as any) instanceof Date) {
-                        v = excelDateTimeSerial(v as any, this.getDateSystem());
-                    }
-
-                    return NumberValueObject.create(Math.trunc(+v));
-                }
-            }
+            const options = { dateSystem: this.getDateSystem(), region: this.getNumberFormatRegion(), locale: this.getLocale() };
+            const parsed = parseFormattedDate(value, options) ?? parseFormattedTime(value, options);
+            if (parsed) return NumberValueObject.create(Math.trunc(parsed.v));
         }
 
         return ErrorValueObject.create(ErrorType.VALUE);

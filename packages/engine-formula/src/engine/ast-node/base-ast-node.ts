@@ -15,9 +15,9 @@
  */
 
 import type { DateSystem, IRange, Nullable } from '@univerjs/core';
-
 import type { ErrorType } from '../../basics/error-type';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { ICalculationLocale } from '../value-object/base-value-object';
 import { AstNodePromiseType } from '../../basics/common';
 import { operatorToken } from '../../basics/token';
 import { ErrorValueObject } from '../value-object/base-value-object';
@@ -197,7 +197,7 @@ export class BaseAstNode {
         this._calculateState = true;
     }
 
-    execute(_dateSystem?: DateSystem, _readRegion?: () => string) {
+    execute(_dateSystem?: DateSystem, _regionalContext?: ICalculationLocale) {
         /* abstract */
     }
 
@@ -205,7 +205,7 @@ export class BaseAstNode {
         /* abstract */
     }
 
-    async executeAsync(_dateSystem?: DateSystem, _readRegion?: () => string): Promise<AstNodePromiseType> {
+    async executeAsync(_dateSystem?: DateSystem, _regionalContext?: ICalculationLocale): Promise<AstNodePromiseType> {
         /* abstract */
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }

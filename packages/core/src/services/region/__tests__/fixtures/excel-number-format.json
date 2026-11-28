@@ -1,0 +1,62 @@
+[
+    {
+        "regions": "acf af af-ZA ar-DJ be be-BY be-tarask bg bg-BG bg-Cyrl-BG blo blo-BJ br br-FR bua bua-RU ca-FR ce ce-RU cs cs-CZ cs-Latn-CZ cv cv-RU de-AT de-Latn-AT ee-TG en-AL en-BG en-CV en-CZ en-EE en-FI en-FR en-GE en-HU en-LT en-LV en-Latn-ZA en-NO en-PT en-RU en-SE en-SK en-UA en-ZA et et-EE et-Latn-EE ff-Adlm-BF ff-Adlm-GN ff-Adlm-GW ff-Latn-BF ff-Latn-GN ff-Latn-GW fi fi-FI fi-Latn-FI fr fr-BE fr-BF fr-BJ fr-BL fr-CA fr-CD fr-CG fr-CI fr-CM fr-DJ fr-FR fr-GA fr-GF fr-GN fr-GP fr-HT fr-Latn-BF fr-Latn-BJ fr-Latn-BL fr-Latn-CD fr-Latn-CG fr-Latn-CI fr-Latn-CM fr-Latn-DJ fr-Latn-FR fr-Latn-GA fr-Latn-GF fr-Latn-GN fr-Latn-GP fr-Latn-MC fr-Latn-MF fr-Latn-MQ fr-Latn-NC fr-Latn-PF fr-Latn-PM fr-Latn-RE fr-Latn-TF fr-Latn-TG fr-Latn-WF fr-Latn-YT fr-MC fr-MF fr-ML fr-MQ fr-NC fr-PF fr-PM fr-RE fr-SN fr-TG fr-WF fr-YT gcf hu hu-HU hu-Latn-HU hy hy-AM hy-Armn-AM ie ie-EE inh ka ka-GE ka-Geor-GE kea kea-CV kk kk-Arab kk-Cyrl kk-Cyrl-KZ kk-KZ kpe-GN ky ky-Cyrl-KG ky-KG ln ln-AO ln-CD ln-CG lt lt-LT lt-Latn-LT lu lu-CD lv lv-LV lv-Latn-LV mgh mgh-MZ myv myv-RU nb nb-Latn-NO nb-Latn-SJ nb-NO nb-SJ nn nn-NO no no-Latn-BV nqo nqo-GN nr nr-ZA oc oc-FR os os-GE os-RU pl pl-Latn-PL pl-PL pt-AO pt-CV pt-FR pt-GW pt-Latn-AO pt-Latn-CV pt-Latn-GW pt-Latn-MZ pt-Latn-PT pt-Latn-ST pt-Latn-TL pt-MZ pt-PT pt-ST pt-TL rm rm-CH ru ru-BY ru-Cyrl-BY ru-Cyrl-KZ ru-Cyrl-RU ru-KG ru-KZ ru-MD ru-RU ru-UA sah sah-RU se se-FI se-NO se-SE seh seh-MZ sjd sje sju sk sk-Latn-SK sk-SK smn smn-FI so-DJ sq sq-AL sq-Latn-AL sq-Latn-XK sq-XK sr-Cyrl-XK ss ss-ZA sv sv-AX sv-FI sv-Latn-AX sv-Latn-SE sv-SE sw-CD tg tg-Cyrl-TJ tg-TJ tk tk-Latn-TM tk-TM ts ts-ZA tt tt-RU tyv tyv-RU uk uk-Cyrl-UA uk-UA uz uz-Arab uz-Cyrl uz-Cyrl-UZ uz-Latn uz-Latn-UZ ve ve-ZA vmw vmw-MZ yi-UA yo-BJ",
+        "general": "1234,56",
+        "formatted": "1 234 567 890 123,75",
+        "direct": 1.234
+    },
+    {
+        "regions": "af-Latn-NA af-NA agq agq-CM ain ain-JP ak ak-GH ak-Latn-GH am am-ET am-Ethi-ET apw apw-US ar-001 ar-AE ar-Arab-AE ar-Arab-EH ar-Arab-KM ar-Arab-PS ar-Arab-SD ar-Arab-SS ar-Arab-TD ar-EH ar-ER ar-IL ar-KM ar-PS ar-SD ar-SO ar-SS ar-TD arn arn-CL asa asa-TZ bas bas-CM bem bem-ZM bez bez-TZ bla bm bm-Latn-ML bm-ML bo bo-CN byn byn-ER ceb ceb-PH cgg cgg-UG cho cho-US chr chr-US cic cic-US ckb-IQ ckb-IR co co-FR com cr crj crk crl crm cst csw csw-CA cy cy-GB dav dav-KE dje dje-NE dua dua-CM dv dv-MV dv-Thaa-MV ebu ebu-KE ee ee-GH el-CY el-Grek-CY en en-001 en-150 en-AE en-AG en-AI en-AS en-AU en-BB en-BI en-BM en-BN en-BS en-BW en-BZ en-CA en-CC en-CK en-CM en-CN en-CX en-CY en-DG en-DM en-ER en-FJ en-FK en-FM en-GB en-GD en-GG en-GH en-GI en-GM en-GS en-GU en-GY en-HK en-IE en-IL en-IM en-IO en-JE en-JM en-JP en-KE en-KI en-KN en-KR en-KY en-LC en-LR en-LS en-Latn-AC en-Latn-AG en-Latn-AI en-Latn-AQ en-Latn-AU en-Latn-BB en-Latn-BM en-Latn-BS en-Latn-BW en-Latn-BZ en-Latn-CA en-Latn-CK en-Latn-CP en-Latn-CQ en-Latn-CX en-Latn-DG en-Latn-DM en-Latn-FJ en-Latn-FK en-Latn-FM en-Latn-GB en-Latn-GD en-Latn-GG en-Latn-GI en-Latn-GM en-Latn-GS en-Latn-GU en-Latn-GY en-Latn-HM en-Latn-IE en-Latn-IM en-Latn-IO en-Latn-JE en-Latn-JM en-Latn-KI en-Latn-KN en-Latn-KY en-Latn-LC en-Latn-LR en-Latn-MH en-Latn-MP en-Latn-MS en-Latn-MW en-Latn-NF en-Latn-NG en-Latn-NR en-Latn-NU en-Latn-NZ en-Latn-PN en-Latn-SB en-Latn-SG en-Latn-SH en-Latn-SL en-Latn-SX en-Latn-SZ en-Latn-TA en-Latn-TC en-Latn-TT en-Latn-UM en-Latn-US en-Latn-VC en-Latn-VG en-Latn-VI en-Latn-ZM en-MG en-MH en-MM en-MO en-MP en-MS en-MT en-MU en-MV en-MW en-MX en-MY en-NA en-NF en-NG en-NR en-NU en-NZ en-PG en-PH en-PK en-PN en-PR en-PW en-RW en-SA en-SB en-SC en-SD en-SG en-SH en-SL en-SS en-SX en-SZ en-TC en-TH en-TK en-TO en-TT en-TV en-TW en-TZ en-UG en-UM en-US en-VC en-VG en-VI en-VU en-WS en-ZM en-ZW eo eo-001 es-003 es-419 es-AG es-BB es-BM es-BS es-BZ es-CA es-CU es-DM es-DO es-GD es-GT es-GY es-HN es-KN es-KY es-LC es-Latn-CU es-Latn-DO es-Latn-GT es-Latn-HN es-Latn-MX es-Latn-NI es-Latn-PA es-Latn-PE es-Latn-PR es-Latn-SV es-MX es-NI es-PA es-PE es-PH es-PR es-SV es-TC es-TT es-US es-VC es-VG es-VI ewo ewo-CM ff ff-Adlm ff-Adlm-CM ff-Adlm-GH ff-Adlm-GM ff-Adlm-LR ff-Adlm-NE ff-Adlm-NG ff-Adlm-SL ff-Latn ff-Latn-CM ff-Latn-GH ff-Latn-GM ff-Latn-LR ff-Latn-NE ff-Latn-NG ff-Latn-SL fil fil-Latn-PH fil-PH fla fr-BI fr-KM fr-Latn-MU fr-Latn-SC fr-MG fr-MU fr-NE fr-RW fr-SC fr-SY fr-TD fr-VU ga ga-GB ga-IE gaa gaa-GH gd gd-GB gn gn-Latn-PY gn-PY guz guz-KE gv gv-IM ha ha-GH ha-Latn-NE ha-NE ha-NG haw haw-US hch he he-Hebr-IL he-IL hmn hmn-CN ia ia-001 ig ig-NG ii ii-CN io io-001 isc iu iu-CA ja ja-JP ja-Jpan-JP jbo jbo-001 jgo jgo-CM jmc jmc-TZ kaj kaj-NG kam kam-KE kcg kcg-NG kde kde-TZ khq khq-ML ki ki-KE kio kk-Arab-CN kkj kkj-CM kln kln-KE km km-KH km-Khmr-KH ko ko-CN ko-KP ko-KR ko-Kore-KP ko-Kore-KR kpe kpe-LR ks-Deva-IN ksb ksb-TZ ksf ksf-CM ku-Latn-IQ ku-Latn-SY kw kw-GB lag lag-TZ lg lg-UG lkt lkt-US lrc lrc-IQ lrc-IR luo luo-KE lut luy luy-KE mas mas-KE mas-TZ mer mer-KE mfe mfe-MU mg mg-Latn-MG mg-MG mgo mgo-CM mi mi-NZ mic mic-CA mid mid-IQ mn mn-Cyrl-MN mn-MN mni mni-Beng mni-Beng-IN mni-Mtei moh moh-CA ms ms-Arab ms-Arab-BN ms-Arab-CC ms-Arab-MY ms-Latn-MY ms-MY ms-SG mt mt-Latn-MT mt-MT mua mua-CM mus mus-US my my-MM my-Mymr-MM mzn mzn-IR naq naq-NA nd nd-ZW nez nl-SX nmg nmg-CM nnh nnh-CM nso nso-ZA nus nus-SS nv nv-US ny ny-MW nyn nyn-UG om om-ET om-KE osa osa-US pa-Arab pa-Aran-PK pcm pcm-NG pqm pqm-CA ps-PK pt-MO qu-EC qu-PE rhg rhg-Rohg rhg-Rohg-MM rn rn-BI rn-Latn-BI rof rof-TZ rwk rwk-TZ saq saq-KE sbp sbp-TZ sd sd-Arab sd-Deva sd-Deva-IN ses ses-ML shn shn-MM shn-TH shp si si-LK si-Sinh-LK sm sm-AS sm-Latn-AS sm-Latn-WS sm-WS sn sn-Latn-ZW sn-ZW so so-ET so-KE so-Latn-SO so-SO srs ss-SZ st st-LS st-Latn-LS st-ZA sw sw-KE sw-Latn-KE sw-Latn-TZ sw-Latn-UG sw-TZ sw-UG syr syr-IQ syr-SY ta-MY ta-SG teo teo-KE teo-UG th th-TH th-Thai-TH ti ti-ER ti-ET ti-Ethi-ER tig tig-ER to to-Latn-TO to-TO tok tok-001 tr-CY trv trv-TW twq twq-NE tzm ug ug-CN uz-Arab-AF vai vai-Latn vai-Latn-LR vai-Vaii vai-Vaii-LR vun vun-TZ wal wal-ET xog xog-UG yav yav-CM yi yo yo-NG yue yue-Hans yue-Hans-CN yue-Hant yue-Hant-CN yue-Hant-HK yue-Hant-MO za za-CN zh zh-CN zh-HK zh-Hans zh-Hans-CN zh-Hans-HK zh-Hans-JP zh-Hans-MO zh-Hans-MY zh-Hans-SG zh-Hant zh-Hant-CN zh-Hant-HK zh-Hant-JP zh-Hant-MO zh-Hant-MY zh-Hant-TW zh-TW zu zu-ZA",
+        "general": "1234.56",
+        "formatted": "1,234,567,890,123.75",
+        "direct": 1234
+    },
+    {
+        "regions": "ar ar-Arab-BH ar-Arab-EG ar-Arab-IQ ar-Arab-JO ar-Arab-KW ar-Arab-LB ar-Arab-OM ar-Arab-QA ar-Arab-SA ar-Arab-SY ar-Arab-YE ar-BH ar-EG ar-IQ ar-JO ar-KW ar-LB ar-OM ar-QA ar-SA ar-SY ar-YE ckb fa fa-Arab-IR fa-IR ks ks-Arab ks-Arab-IN ks-Deva pa-Arab-PK ps ps-AF",
+        "general": "1234٫56",
+        "formatted": "1٬234٬567٬890٬123٫75",
+        "direct": "1,234"
+    },
+    {
+        "regions": "ar-Arab-DZ ar-Arab-LY ar-Arab-MA ar-Arab-MR ar-Arab-TN ar-DZ ar-LY ar-MA ar-MR ar-TN ast ast-ES az az-Cyrl az-Cyrl-AZ az-Latn az-Latn-AZ ber ber-Latn ber-Latn-MA ber-Tfng ber-Tfng-MA bs bs-Cyrl bs-Cyrl-BA bs-Latn bs-Latn-BA ca ca-AD ca-ES ca-ES-valencia ca-IT ca-Latn-AD da da-DK da-GL da-Latn-DK de de-BE de-DE de-IT de-LU de-Latn-DE dsb dsb-DE dyo dyo-SN el el-GR el-Grek-GR el-polyton en-AR en-AT en-BE en-BR en-CL en-CO en-DE en-DK en-ES en-GR en-ID en-IT en-NL en-PL en-RO en-SI en-TR es es-AR es-BO es-BQ es-BR es-CL es-CO es-CR es-CW es-EA es-EC es-ES es-GQ es-IC es-Latn-AR es-Latn-BO es-Latn-CL es-Latn-CO es-Latn-CR es-Latn-EA es-Latn-EC es-Latn-ES es-Latn-GQ es-Latn-IC es-Latn-UY es-Latn-VE es-PY es-UY es-VE eu eu-ES ff-Adlm-MR ff-Adlm-SN ff-Latn-MR ff-Latn-SN fo fo-DK fo-FO fo-Latn-FO fr-CF fr-DZ fr-GQ fr-LU fr-Latn-LU fr-MA fr-MR fr-TN fur fur-IT fy fy-NL gl gl-ES hr hr-BA hr-HR hr-Latn-HR hsb hsb-DE id id-ID id-Latn-ID is is-IS is-Latn-IS it it-IT it-Latn-IT it-Latn-SM it-Latn-VA it-SM it-VA jv jv-ID kab kab-DZ kgp kgp-BR kl kl-GL kl-Latn-GL ksh ksh-DE ku ku-Latn ku-Latn-TR ku-TR lb lb-LU lij lij-IT lmo lmo-IT ln-CF lo lo-LA lo-Laoo-LA mk mk-Cyrl-MK mk-MK ms-BN ms-ID ms-Latn-BN nds nds-DE nds-NL nl nl-AW nl-BE nl-BQ nl-CW nl-Latn-AW nl-Latn-BE nl-Latn-NL nl-Latn-SR nl-NL nl-SR oc-ES pap-Latn-BQ pap-Latn-CW pms pms-IT prg prg-PL pt pt-BR pt-GQ pt-LU pt-Latn-BR qu qu-BO rej rej-ID rej-Rjng rej-Rjng-ID ro ro-Latn-MD ro-Latn-RO ro-MD ro-RO rw rw-Latn-RW rw-RW sc sc-IT scn scn-IT sg sg-CF sg-Latn-CF shi shi-Latn shi-Latn-MA shi-Tfng shi-Tfng-MA sl sl-Latn-SI sl-SI sq-MK sr sr-Cyrl sr-Cyrl-BA sr-Cyrl-ME sr-Cyrl-RS sr-Latn sr-Latn-BA sr-Latn-ME sr-Latn-RS sr-Latn-XK su su-Latn su-Latn-ID szl szl-PL tr tr-Latn-TR tr-TR tzm-MA vec vec-IT vi vi-Latn-VN vi-VN wa wa-BE wo wo-Latn-SN wo-SN yrl yrl-BR yrl-CO yrl-VE zgh zgh-MA",
+        "general": "1234,56",
+        "formatted": "1.234.567.890.123,75",
+        "direct": 1.234
+    },
+    {
+        "regions": "as as-IN bgc bgc-IN bho bho-IN bn bn-BD bn-Beng-BD bn-IN bo-IN brx brx-IN ccp ccp-BD ccp-IN doi doi-IN dz dz-BT dz-Tibt-BT en-BD en-IN gu gu-IN hi hi-Deva-IN hi-IN hi-Latn hi-Latn-IN kn kn-IN kok kok-Deva kok-Deva-IN kok-Latn kok-Latn-IN ks-Aran-IN kxv kxv-Deva kxv-Deva-IN kxv-Latn kxv-Latn-IN kxv-Orya kxv-Orya-IN kxv-Telu kxv-Telu-IN mai mai-IN ml ml-IN mni-Mtei-IN mr mr-IN ne ne-Deva-NP ne-IN ne-NP nnp nnp-IN or or-IN pa pa-Guru pa-Guru-IN raj raj-IN rhg-Rohg-BD sa sa-IN sat sat-Deva sat-Deva-IN sat-Olck sat-Olck-IN ta ta-IN ta-LK te te-IN ur ur-Arab ur-Arab-IN ur-Arab-PK ur-Aran-IN ur-Aran-PK ur-IN xnr xnr-IN",
+        "general": "1234.56",
+        "formatted": "12,34,56,78,90,123.75",
+        "direct": 1234
+    },
+    {
+        "regions": "ba ba-RU es-HT ht ht-HT ht-Latn-HT xh xh-ZA",
+        "general": "1234.56",
+        "formatted": "1 234 567 890 123.75",
+        "direct": "1,234"
+    },
+    {
+        "regions": "de-CH de-LI de-Latn-CH de-Latn-LI en-CH fr-CH gsw gsw-CH gsw-FR gsw-LI it-CH pt-CH tn tn-BW tn-ZA wae wae-CH",
+        "general": "1234.56",
+        "formatted": "1'234'567'890'123.75",
+        "direct": "1,234"
+    },
+    {
+        "regions": "en-US-u-va-posix quc und",
+        "general": "1234.56",
+        "formatted": "1234567890123.75",
+        "direct": "1,234"
+    },
+    {
+        "regions": "fa-AF fa-Arab-AF",
+        "general": "1234٫56",
+        "formatted": "1234567890123٫75",
+        "direct": "1,234"
+    },
+    {
+        "regions": "sd-Arab-PK",
+        "general": "1234.56",
+        "formatted": "1٬234٬567٬890٬123.75",
+        "direct": "1,234"
+    }
+]

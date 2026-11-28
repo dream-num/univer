@@ -27,6 +27,7 @@ import {
     IUniverInstanceService,
     LocaleService,
     Range,
+    RegionService,
     ThemeService,
     toDisposable,
     UniverInstanceType,
@@ -74,6 +75,7 @@ export class SheetNumfmtUIController extends Disposable {
         @IRenderManagerService private _renderManagerService: IRenderManagerService,
         @INumfmtService private _numfmtService: INumfmtService,
         @ISidebarService private _sidebarService: ISidebarService,
+        @Inject(RegionService) private readonly _regionService: RegionService,
         @Inject(LocaleService) private _localeService: LocaleService,
         @Inject(SheetsNumfmtCellContentController) private _sheetsNumfmtCellContentController: SheetsNumfmtCellContentController
     ) {
@@ -87,7 +89,7 @@ export class SheetNumfmtUIController extends Disposable {
     }
 
     private _initNumfmtLocalChange() {
-        this.disposeWithMe(merge(this._sheetsNumfmtCellContentController.locale$, this._localeService.currentLocale$).subscribe(() => {
+        this.disposeWithMe(merge(this._sheetsNumfmtCellContentController.locale$, this._localeService.currentLocale$, this._regionService.currentRegion$).subscribe(() => {
             this._forceUpdate();
         }));
     }

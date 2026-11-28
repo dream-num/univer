@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { localeTagPattern } from '../../types/locale-tag-pattern';
+import { getRegionParts, RegionRules } from './region-rules';
 
 export interface IFormulaSeparators {
     readonly decimal: string;
@@ -37,116 +37,97 @@ const arabicSemicolon = profile('٫', '؛');
 const arabicDecimalComma = profile('٫', ',');
 const arabicComma = profile('.', '،');
 
-interface IRegionalRule {
-    separators: IFormulaSeparators;
-    territories?: string[];
-    scripts?: string[];
-}
-
-const rulesByLanguage = new Map<string, IRegionalRule[]>();
-
-function register(separators: IFormulaSeparators, languages: string, territories?: string, scripts?: string): void {
-    const rule = { separators, territories: territories?.split(' '), scripts: scripts?.split(' ') };
-    for (const language of languages.split(' ')) {
-        const rules = rulesByLanguage.get(language);
-        if (rules) rules.push(rule);
-        else rulesByLanguage.set(language, [rule]);
-    }
-}
+const rules = new RegionRules<IFormulaSeparators>();
 
 // Excel for Mac 16.115, measured with FormulaLocal. More specific rules precede language defaults.
 // Script changes the grammar for some languages even within the same territory.
-register(arabicDecimal, 'ckb', 'IQ', 'arab');
-register(dotComma, 'dv', 'MV', 'latn');
-register(dotComma, 'fa ps', 'AF IR', 'aran cyrl latn');
-register(dotComma, 'ff fo', 'NG', 'arab');
-register(dotComma, 'ff', 'NG', 'adlm cyrl');
-register(dotComma, 'ff', 'AF EG', 'adlm');
-register(commaSemicolon, 'ff', 'FR MA ZZ', 'adlm');
-register(dotComma, 'ks', 'PK');
-register(dotComma, 'ks', 'IN', 'aran cyrl deva latn');
-register(dotComma, 'ku', 'IQ IR SY');
-register(dotComma, 'pa', 'PK', 'aran cyrl');
-register(dotSemicolon, 'tzm', 'MA', 'tfng');
-register(dotComma, 'kk', 'CN', 'arab');
-register(dotComma, 'ms', 'BN CC MY', 'arab');
-register(arabicDecimal, 'pa', 'PK', 'arab');
-register(arabicDecimalComma, 'pa', 'PK');
-register(dotSemicolon, 'sd', 'PK', 'arab');
-register(dotComma, 'ur', 'IN PK', 'arab');
-register(dotSemicolon, 'az', 'IR', 'cyrl');
-register(dotSemicolon, 'uz', 'AF', 'cyrl');
-register(dotComma, 'az', 'IR');
-register(dotComma, 'uz', 'AF');
+rules.add(arabicDecimal, 'ckb', 'IQ', 'arab');
+rules.add(dotComma, 'dv', 'MV', 'latn');
+rules.add(dotComma, 'fa ps', 'AF IR', 'aran cyrl latn');
+rules.add(dotComma, 'ff fo', 'NG', 'arab');
+rules.add(dotComma, 'ff', 'NG', 'adlm cyrl');
+rules.add(dotComma, 'ff', 'AF EG', 'adlm');
+rules.add(commaSemicolon, 'ff', 'FR MA ZZ', 'adlm');
+rules.add(dotComma, 'ks', 'PK');
+rules.add(dotComma, 'ks', 'IN', 'aran cyrl deva latn');
+rules.add(dotComma, 'ku', 'IQ IR SY');
+rules.add(dotComma, 'pa', 'PK', 'aran cyrl');
+rules.add(dotSemicolon, 'tzm', 'MA', 'tfng');
+rules.add(dotComma, 'kk', 'CN', 'arab');
+rules.add(dotComma, 'ms', 'BN CC MY', 'arab');
+rules.add(arabicDecimal, 'pa', 'PK', 'arab');
+rules.add(arabicDecimalComma, 'pa', 'PK');
+rules.add(dotSemicolon, 'sd', 'PK', 'arab');
+rules.add(dotComma, 'ur', 'IN PK', 'arab');
+rules.add(dotSemicolon, 'az', 'IR', 'cyrl');
+rules.add(dotSemicolon, 'uz', 'AF', 'cyrl');
+rules.add(dotComma, 'az', 'IR');
+rules.add(dotComma, 'uz', 'AF');
 
-register(dotComma, 'af', 'NA');
-register(dotComma, 'ar', '001 EH ER IL KM PS SD SO SS TD');
-register(commaSemicolon, 'ar', 'DJ DZ LY MA MR TN');
-register(dotSemicolon, 'ar', 'AE');
-register(dotComma, 'ckb', 'IQ IR');
-register(dotSemicolon, 'de', 'LI');
-register(dotSemicolon, 'dz', 'BT');
-register(commaSemicolon, 'ee', 'TG');
-register(dotComma, 'el tr', 'CY');
-register(commaSemicolon, 'en zh', 'AL AR AT BE BG BR CL CO CV CZ DE DK EE ES FI FR GE GR HU ID IT LT LV NL NO PL PT RO RU SE SI SK TR UA ZA');
-register(dotComma, 'es', '003 AG BB BM BS BZ CA DM GD GY HT KN KY LC MX PH TC TT US VC VG VI');
-register(dotSemicolon, 'es', '419 CU DO GT HN NI PA PE PR SV');
-register(commaSemicolon, 'ff', 'BF GN GW MR SN');
-register(dotComma, 'ff', 'CM GH GM LR NE SL');
-register(dotComma, 'fr', 'BI KM MG MU NE RW SC SY TD VU');
-register(dotSemicolon, 'ga', 'IE');
-register(dotComma, 'gsw', 'LI');
-register(dotComma, 'ha', 'GH NE NG');
-register(dotSemicolon, 'ko', 'KP');
-register(commaSemicolon, 'kpe', 'GN');
-register(commaSemicolon, 'ms', 'BN ID');
-register(dotComma, 'ms', 'SG');
-register(dotSemicolon, 'ne', 'IN');
-register(dotComma, 'nl', 'SX');
-register(dotComma, 'om so', 'KE');
-register(dotComma, 'ps', 'PK');
-register(dotComma, 'pt', 'MO');
-register(dotSemicolon, 'qu', 'EC PE');
-register(dotComma, 'so', 'ET');
-register(commaSemicolon, 'so', 'DJ');
-register(dotComma, 'ss', 'SZ');
-register(dotComma, 'st', 'LS');
-register(dotComma, 'sw', 'TZ UG');
-register(commaSemicolon, 'sw', 'CD');
-register(dotSemicolon, 'ta', 'LK');
-register(commaSemicolon, 'tzm', 'DZ MA');
-register(commaSemicolon, 'yi', 'UA');
-register(commaSemicolon, 'yo', 'BJ');
+rules.add(dotComma, 'af', 'NA');
+rules.add(dotComma, 'ar', '001 EH ER IL KM PS SD SO SS TD');
+rules.add(commaSemicolon, 'ar', 'DJ DZ LY MA MR TN');
+rules.add(dotSemicolon, 'ar', 'AE');
+rules.add(dotComma, 'ckb', 'IQ IR');
+rules.add(dotSemicolon, 'de', 'LI');
+rules.add(dotSemicolon, 'dz', 'BT');
+rules.add(commaSemicolon, 'ee', 'TG');
+rules.add(dotComma, 'el tr', 'CY');
+rules.add(commaSemicolon, 'en zh', 'AL AR AT BE BG BR CL CO CV CZ DE DK EE ES FI FR GE GR HU ID IT LT LV NL NO PL PT RO RU SE SI SK TR UA ZA');
+rules.add(dotComma, 'es', '003 AG BB BM BS BZ CA DM GD GY HT KN KY LC MX PH TC TT US VC VG VI');
+rules.add(dotSemicolon, 'es', '419 CU DO GT HN NI PA PE PR SV');
+rules.add(commaSemicolon, 'ff', 'BF GN GW MR SN');
+rules.add(dotComma, 'ff', 'CM GH GM LR NE SL');
+rules.add(dotComma, 'fr', 'BI KM MG MU NE RW SC SY TD VU');
+rules.add(dotSemicolon, 'ga', 'IE');
+rules.add(dotComma, 'gsw', 'LI');
+rules.add(dotComma, 'ha', 'GH NE NG');
+rules.add(dotSemicolon, 'ko', 'KP');
+rules.add(commaSemicolon, 'kpe', 'GN');
+rules.add(commaSemicolon, 'ms', 'BN ID');
+rules.add(dotComma, 'ms', 'SG');
+rules.add(dotSemicolon, 'ne', 'IN');
+rules.add(dotComma, 'nl', 'SX');
+rules.add(dotComma, 'om so', 'KE');
+rules.add(dotComma, 'ps', 'PK');
+rules.add(dotComma, 'pt', 'MO');
+rules.add(dotSemicolon, 'qu', 'EC PE');
+rules.add(dotComma, 'so', 'ET');
+rules.add(commaSemicolon, 'so', 'DJ');
+rules.add(dotComma, 'ss', 'SZ');
+rules.add(dotComma, 'st', 'LS');
+rules.add(dotComma, 'sw', 'TZ UG');
+rules.add(commaSemicolon, 'sw', 'CD');
+rules.add(dotSemicolon, 'ta', 'LK');
+rules.add(commaSemicolon, 'tzm', 'DZ MA');
+rules.add(commaSemicolon, 'yi', 'UA');
+rules.add(commaSemicolon, 'yo', 'BJ');
 
-register(commaSemicolon, 'acf af ast az be ber bg blo br bs bua ca ce cs cv da de dsb dyo el es et eu fi fo fr fur fy gcf gl hr hsb hu');
-register(commaSemicolon, 'hy id ie inh is it jv ka kab kea kgp kk kl ksh ku ky lb lij lmo ln lo lt lu lv mgh mk myv nb nds nl nn no nqo');
-register(commaSemicolon, 'nr oc os pap pl pms prg pt qu rej rm ro ru rw sah sc scn se seh sg shi sjd sje sju sk sl smn sq sr ss su sv');
-register(commaSemicolon, 'szl tg tk tr ts tt tyv uk uz ve vec vi vmw wa wo yrl zgh');
-register(dotSemicolon, 'am ba co cy ff fil gd gsw ha haw ig ii ml mn ms mt my nso om si so st sw te ti tn tzm und ur xh yi yo zu');
-register(arabicDecimal, 'ar ckb ks ps');
-register(arabicSemicolon, 'fa');
-register(arabicComma, 'dv');
+rules.add(commaSemicolon, 'acf af ast az be ber bg blo br bs bua ca ce cs cv da de dsb dyo el es et eu fi fo fr fur fy gcf gl hr hsb hu');
+rules.add(commaSemicolon, 'hy id ie inh is it jv ka kab kea kgp kk kl ksh ku ky lb lij lmo ln lo lt lu lv mgh mk myv nb nds nl nn no nqo');
+rules.add(commaSemicolon, 'nr oc os pap pl pms prg pt qu rej rm ro ru rw sah sc scn se seh sg shi sjd sje sju sk sl smn sq sr ss su sv');
+rules.add(commaSemicolon, 'szl tg tk tr ts tt tyv uk uz ve vec vi vmw wa wo yrl zgh');
+rules.add(dotSemicolon, 'am ba co cy ff fil gd gsw ha haw ig ii ml mn ms mt my nso om si so st sw te ti tn tzm und ur xh yi yo zu');
+rules.add(arabicDecimal, 'ar ckb ks ps');
+rules.add(arabicSemicolon, 'fa');
+rules.add(arabicComma, 'dv');
 
 // These measured languages use the default punctuation. A language unknown to Excel uses the root list separator.
-register(dotComma, 'la agq ain ak apw arn as asa bas bem bez bgc bho bla bm bn bo brx byn ccp ceb cgg cho chr cic com cr crj crk crl');
-register(dotComma, 'crm cst csw dav dje doi dua ebu eo ewo fla gaa gn gu guz gv hch he hi hmn ht ia io isc iu ja jbo jgo jmc kaj kam');
-register(dotComma, 'kcg kde khq ki kio kkj kln km kn kok ksb ksf kw kxv lag lg lkt lrc luo lut luy mai mas mer mfe mg mgo mi mic mid');
-register(dotComma, 'mni moh mr mua mus mzn naq nd nez nmg nnh nnp nus nv ny nyn or osa pcm pqm quc raj rhg rn rof rwk sa saq sat sbp');
-register(dotComma, 'ses shn shp sm sn srs syr teo th tig to tok trv twq ug vai vun wae wal xnr xog yav yue za zh');
+rules.add(dotComma, 'la agq ain ak apw arn as asa bas bem bez bgc bho bla bm bn bo brx byn ccp ceb cgg cho chr cic com cr crj crk crl');
+rules.add(dotComma, 'crm cst csw dav dje doi dua ebu eo ewo fla gaa gn gu guz gv hch he hi hmn ht ia io isc iu ja jbo jgo jmc kaj kam');
+rules.add(dotComma, 'kcg kde khq ki kio kkj kln km kn kok ksb ksf kw kxv lag lg lkt lrc luo lut luy mai mas mer mfe mg mgo mi mic mid');
+rules.add(dotComma, 'mni moh mr mua mus mzn naq nd nez nmg nnh nnp nus nv ny nyn or osa pcm pqm quc raj rhg rn rof rwk sa saq sat sbp');
+rules.add(dotComma, 'ses shn shp sm sn srs syr teo th tig to tok trv twq ug vai vun wae wal xnr xog yav yue za zh');
 
 const commaDecimalTerritories = new Set(['AX', 'DE', 'FI', 'NO', 'SE', 'SJ']);
-// Excel resolves these older language names using the modern formatting data.
-const languageAliases = new Map([['cmn', 'zh'], ['sh', 'sr'], ['tl', 'fil']]);
-
 export function isExcelRegionLanguage(language: string): boolean {
-    return rulesByLanguage.has(languageAliases.get(language) ?? language);
+    return rules.has(language);
 }
 
-function resolveProfile(language: string, script?: string, territory?: string): IFormulaSeparators {
-    const languageRules = rulesByLanguage.get(language);
+function resolveProfile(region: string, language: string, script?: string, territory?: string): IFormulaSeparators {
     // Excel recognizes Dari with Afghan settings and uses the root grammar for other territories.
     if (language === 'prs' && (!territory || territory === 'AF')) return script ? dotComma : arabicSemicolon;
-    if (!languageRules) return dotSemicolon;
+    if (!rules.has(language)) return dotSemicolon;
     if (language === 'zh') {
         if (script === 'arab') return dotSemicolon;
         if (script === 'hans' || script === 'hant') return dotComma;
@@ -167,10 +148,7 @@ function resolveProfile(language: string, script?: string, territory?: string): 
     }
     // A private-use territory has no regional number settings. ZZ (unknown region) inherits the language settings.
     if (territory && territory !== 'XK' && /^(?:X[A-Z]|Q[M-Z])$/.test(territory)) return dotComma;
-    return languageRules.find((rule) =>
-        (!rule.territories || (territory && rule.territories.includes(territory))) &&
-        (!rule.scripts || (script && rule.scripts.includes(script)))
-    )?.separators ?? dotComma;
+    return rules.resolve(region) ?? dotComma;
 }
 
 // These are input aliases. Excel still displays the region's preferred separators.
@@ -195,15 +173,9 @@ function acceptsArabicPunctuation(language: string, script?: string, territory?:
 }
 
 export function getFormulaSeparators(region: string): IFormulaSeparators {
-    const parts = localeTagPattern.exec(region);
-    // Excel uses its default number settings for extended-language tags, including zh-cmn-Hans-DE.
+    const parts = getRegionParts(region);
     if (!parts) return region.startsWith('x-') ? dotSemicolon : dotComma;
-    if (parts[1].includes('-')) return dotComma;
-
-    const inputLanguage = parts[1].toLowerCase();
-    const language = languageAliases.get(inputLanguage) ?? inputLanguage;
-    const script = parts[2]?.toLowerCase() ?? (inputLanguage === 'sh' ? 'latn' : undefined);
-    const territory = parts[3]?.toUpperCase();
-    const separators = resolveProfile(language, script, territory);
+    const { language, script, territory } = parts;
+    const separators = resolveProfile(region, language, script, territory);
     return acceptsArabicPunctuation(language, script, territory) ? { ...separators, arabicPunctuation: true } : separators;
 }

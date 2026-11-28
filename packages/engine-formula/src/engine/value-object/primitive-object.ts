@@ -14,38 +14,48 @@
  * limitations under the License.
  */
 
-import { DateSystem, excelDateSerial, getNumfmtNumberGrouping, getNumfmtParseValueFilter, isRealNum, numfmt, Tools } from '@univerjs/core';
+import { DateSystem, excelDateSerial, getNumfmtParseValueFilter, getRegionalNumberFormat, isRealNum, isValidNumberGrouping, normalizeNativeDigits, numfmt, Tools } from '@univerjs/core';
+import type { ICalculationLocale } from './base-value-object';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { compareWithWildcard, isWildcard, normalizeTextForComparison } from '../utils/compare';
-import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt } from '../utils/math-kit';
+import { ceil, divide, equals, EXCEL_MIN_NORMAL_NUMBER, excelPowerValue, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, round, sqrt } from '../utils/math-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
 const EXCEL_TRIGONOMETRIC_LIMIT = 2 ** 27;
-const EXCEL_MIN_NORMAL_NUMBER = 2.2250738585072014e-308;
 
 export type PrimitiveValueType = string | boolean | number | null;
 
 export type FormulaFunctionValueType = PrimitiveValueType | PrimitiveValueType[][] | BaseValueObject;
 export type FormulaFunctionResultValueType = PrimitiveValueType | PrimitiveValueType[][];
 
-function isValidGroupedMantissa(mantissa: string, readRegion?: () => string): boolean {
+function isValidGroupedMantissa(mantissa: string, secondaryGroupSize: number): boolean {
     const parts = mantissa.split('.');
     if (parts.length > 2 || (parts.length === 2 && !/^\d*$/.test(parts[1]))) return false;
-    const groups = parts[0].split(',');
-    if (!/[1-9]/.test(groups[0]) || groups[groups.length - 1].length < 3) return false;
-    let shortest = 3;
-    for (let index = 1; index < groups.length - 1; index++) {
-        shortest = Math.min(shortest, groups[index].length);
-    }
-    // Wider groups are accepted. Only two-digit interior groups distinguish regions.
-    return shortest >= 3 || (shortest === 2 && getNumfmtNumberGrouping(readRegion?.())[1] === 2);
+    return isValidNumberGrouping(parts[0], ',', secondaryGroupSize);
 }
 
-export function parseFormulaNumericText(rawValue: string, readRegion?: () => string): { v: number; z?: string } | ErrorValueObject | null {
+// Convert only punctuation used by this region before applying Excel's precision and exponent limits.
+function normalizeFormulaMantissa(text: string, decimal: string, group: string): string | null {
+    let invalid = false;
+    const normalized = text.replace(/[.,٫٬'’ \u00A0\u202F]/g, (char, index: number) => {
+        const betweenDigits = /\d/.test(text[index - 1] ?? '') && /\d/.test(text[index + 1] ?? '');
+        if (char === decimal) return '.';
+        if (char === group && (group !== ' ' || betweenDigits)) return ',';
+        if (betweenDigits || '.,٫٬'.includes(char)) invalid = true;
+        return char;
+    });
+    return invalid ? null : normalized;
+}
+
+function parseNumericLiteral(text: string, region?: string, locale?: string): { v: number; z?: string } | ErrorValueObject | null {
+    const format = getRegionalNumberFormat(region);
+    const nativeText = /[^\p{ASCII}]/u.test(text) ? normalizeNativeDigits(text, region, locale).value : text;
+    const rawValue = normalizeFormulaMantissa(nativeText, format.decimal, format.group);
+    if (rawValue === null) return null;
     const match = rawValue.match(/([0-9.,]+)(?:[eE]([+-]?[0-9]+))?/);
     if (!match) return null;
     const mantissa = match[1];
@@ -60,13 +70,15 @@ export function parseFormulaNumericText(rawValue: string, readRegion?: () => str
     // Validate the original decorations without overflowing or underflowing the mantissa.
     const probe = mantissa.replace(/[0-9]/g, (_digit, index: number) => index === selectedDigit ? '1' : '0');
     const start = match.index!;
+    // Check currency spelling and placement separately from the mantissa's precision and grouping.
+    if (region && /\p{Sc}/u.test(text) && !numfmt.parseNumber(`${text.slice(0, start)}1${text.slice(start + match[0].length)}`, { region })) return null;
     const validation = rawValue.slice(0, start) + probe + rawValue.slice(start + match[0].length);
     if (/[0-9][eE][+-]?[0-9]/.test(validation)) return null;
     const parsed = numfmt.parseNumber(validation) ?? (mantissa.includes(',') ? numfmt.parseNumber(rawValue.slice(0, start) + probe.replace(/,/g, '') + rawValue.slice(start + match[0].length)) : null);
     if (!parsed) return null;
     const percentCount = (rawValue.match(/%/g) ?? []).length;
     const validMantissa = mantissa.includes(',')
-        ? isValidGroupedMantissa(mantissa, readRegion)
+        ? isValidGroupedMantissa(mantissa, format.grouping[1])
         : /^(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)$/.test(mantissa);
     if (!validMantissa || percentCount > 1) return ErrorValueObject.create(ErrorType.VALUE);
     const [integer, fraction = ''] = mantissa.replace(/,/g, '').split('.');
@@ -84,6 +96,17 @@ export function parseFormulaNumericText(rawValue: string, readRegion?: () => str
     if (!Number.isFinite(number)) return ErrorValueObject.create(ErrorType.VALUE);
     const pattern = match[2] == null ? parsed.z : numfmt.parseNumber(rawValue)?.z ?? parsed.z;
     return { v: number, z: pattern };
+}
+
+export function parseFormulaNumericText(text: string, dateSystem: DateSystem, region?: string, locale?: string): { v: number; z?: string } | ErrorValueObject | null {
+    const numeric = parseNumericLiteral(text, region, locale);
+    if (numeric && !(numeric instanceof ErrorValueObject)) return numeric;
+    const options = { dateSystem, region, locale };
+    // A rejected grouped number such as German "1.23" can still be a valid month/year.
+    const parsed = numeric
+        ? region && numfmt.parseDate(text, options)
+        : getNumfmtParseValueFilter(text, options);
+    return parsed && typeof parsed.v === 'number' ? { v: parsed.v, z: parsed.z } : numeric;
 }
 
 function parseCompactEnglishMonthYear(rawValue: string, dateSystem: DateSystem): number | null {
@@ -556,6 +579,15 @@ export class NumberValueObject extends BaseValueObject {
         return instance;
     }
 
+    static createPowerResult(base: number, exponent: number) {
+        const result = excelPowerValue(base, exponent);
+        if (typeof result !== 'number') return ErrorValueObject.create(result);
+        const number = new NumberValueObject(0);
+        // Positive fractional powers can produce a subnormal worksheet value in Excel.
+        number._value = result;
+        return number;
+    }
+
     constructor(rawValue: number, dateSystem: DateSystem = DateSystem.Date1900) {
         super(dateSystem);
 
@@ -982,29 +1014,7 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        if (currentValue === 0) {
-            if (value < 0) {
-                return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-            }
-
-            if (value === 0) {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
-
-            return NumberValueObject.create(0);
-        }
-
-        const result = pow(currentValue, value);
-
-        if (!Number.isFinite(result)) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        return NumberValueObject.create(result);
+        return NumberValueObject.createPowerResult(currentValue, value);
     }
 
     override sqrt(): BaseValueObject {
@@ -1355,17 +1365,17 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            // for excel negative special handle
-            const result = currentValue < 0 ? -round(Math.abs(currentValue), value) : round(currentValue, value);
+            const result = round(currentValue, value);
 
             if (!Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            return NumberValueObject.create(result);
+            // Excel stores a positive zero when ROUND removes the sign of the last nonzero digit.
+            return NumberValueObject.create(result + 0);
         }
         if (typeof value === 'boolean') {
-            return NumberValueObject.create(round(currentValue, value ? 1 : 0));
+            return NumberValueObject.create(round(currentValue, value ? 1 : 0) + 0);
         }
 
         return this;
@@ -1495,14 +1505,23 @@ export interface IStringValueObjectOptions {
 }
 
 const STRING_CACHE_LRU_COUNT = 100000;
+const regionalText = /\p{Nd}/u;
 
 export const StringValueObjectCache = new FormulaAstLRU<StringValueObject>(STRING_CACHE_LRU_COUNT);
 export class StringValueObject extends BaseValueObject {
-    private _readRegion?: () => string;
+    private _regionalContext?: ICalculationLocale;
 
-    override withDateSystem(dateSystem: DateSystem, readRegion?: () => string): this {
-        this._readRegion = this._value.includes(',') ? readRegion : undefined;
+    override withDateSystem(dateSystem: DateSystem, regionalContext?: ICalculationLocale): this {
+        this._regionalContext = regionalText.test(this._value) ? regionalContext : undefined;
         return super.withDateSystem(dateSystem);
+    }
+
+    override getCalculationRegion(): string | undefined {
+        return this._regionalContext?.getCalculationRegion();
+    }
+
+    override getCalculationLocale(): string | undefined {
+        return this._regionalContext?.getLocale();
     }
 
     private _value: string;
@@ -1512,8 +1531,8 @@ export class StringValueObject extends BaseValueObject {
     private _imageInfo: IStringValueObjectOptions['imageInfo'];
 
     static create(value: string, options?: IStringValueObjectOptions) {
-        // Grouped numeric text carries its evaluator's region reader. Keep it local to that evaluator.
-        const cacheable = !value.includes(',');
+        // Numeric and date text carry the evaluating workbook's regional settings.
+        const cacheable = !regionalText.test(value);
         const cached = cacheable && StringValueObjectCache.get(value);
         if (cached && options && this.checkCacheByOptions(cached, options)) {
             return cached;
@@ -1695,9 +1714,8 @@ export class StringValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const numeric = parseFormulaNumericText(rawValue, this._readRegion);
-        if (numeric instanceof ErrorValueObject) return numeric;
-        const parseData = numeric ?? getNumfmtParseValueFilter(rawValue, { dateSystem: this.getDateSystem() });
+        const parseData = parseFormulaNumericText(rawValue, this.getDateSystem(), this.getCalculationRegion(), this.getCalculationLocale());
+        if (parseData instanceof ErrorValueObject) return parseData;
 
         // A parse result is authoritative even when the input carries no number
         // format, e.g. "(5)" or "( 12.34 )": the value is a number, the pattern

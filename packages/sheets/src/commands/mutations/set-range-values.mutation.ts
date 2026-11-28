@@ -38,6 +38,17 @@ import { handleStyle, transformStyle } from '../../basics/cell-style';
 import { getCellType } from '../../basics/cell-type';
 import { getCellValue, setNull } from '../../basics/cell-value';
 
+// This transient input state is consumed by the first calculation. Reopening a workbook,
+// recalculating an existing formula and changing its number format do not reapply entry inference.
+const enteredFormulaFormats = new WeakMap<ICellData, { formula: string; pattern: string }>();
+
+export function consumeEnteredFormulaFormat(cell: ICellData, pattern?: string): boolean {
+    const entered = enteredFormulaFormats.get(cell);
+    if (!entered) return false;
+    enteredFormulaFormats.delete(cell);
+    return entered.formula === cell.f && entered.pattern === pattern;
+}
+
 /** Params of `SetRangeValuesMutation` */
 export interface ISetRangeValuesMutationParams extends IMutationCommonParams {
     subUnitId: string;
@@ -184,6 +195,13 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                 cellMatrix.realDeleteValue(row, col);
             } else {
                 let oldVal = cellMatrix.getValue(row, col) || {};
+                if (newVal.f && newVal.v == null && !isOverrideStyle) {
+                    const pattern = styles.getStyleByCell(oldVal)?.n?.pattern;
+                    const explicit = styles.getStyleByCell(newVal)?.n?.pattern;
+                    if (pattern && (!explicit || pattern === explicit)) {
+                        enteredFormulaFormats.set(oldVal, { formula: newVal.f, pattern });
+                    }
+                }
                 oldVal = mergeCellData(newVal, oldVal, styles, !!isOverrideStyle);
 
                 if (Tools.isEmptyObject(oldVal)) {

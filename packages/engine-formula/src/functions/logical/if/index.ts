@@ -19,6 +19,7 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { BooleanValue } from '../../../basics/common';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { isTemporalNumberFormat } from '../../../engine/utils/numfmt-kit';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -106,6 +107,7 @@ export class If extends BaseFunction {
     }
 
     private _coerceSelectedValue(value: BaseValueObject): BaseValueObject {
+        if (value.isNumber() && isTemporalNumberFormat(value.getPattern())) return NumberValueObject.create(value.getValue() as number);
         if (value instanceof NullValueObject && value.isOmitted()) return this.getOmittedBranchResult();
         return value.isNull() ? NullValueObject.create() : value;
     }

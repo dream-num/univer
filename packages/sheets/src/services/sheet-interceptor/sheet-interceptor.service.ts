@@ -84,6 +84,8 @@ export interface IAutoHeightInterceptors {
 }
 
 interface ISheetLocationForEditor extends ISheetLocation {
+    /** Region captured when the editor opened, if this write came from a draft. */
+    readonly editRegion?: string;
     origin: Nullable<ICellData>;
 }
 
@@ -324,7 +326,7 @@ export class SheetInterceptorService extends Disposable {
 
     // #region intercept on writing cell
 
-    onWriteCell(workbook: Workbook, worksheet: Worksheet, row: number, col: number, cellData: ICellData) {
+    onWriteCell(workbook: Workbook, worksheet: Worksheet, row: number, col: number, cellData: ICellData, editRegion?: string) {
         const context = {
             subUnitId: worksheet.getSheetId(),
             unitId: workbook.getUnitId(),
@@ -332,6 +334,7 @@ export class SheetInterceptorService extends Disposable {
             worksheet,
             row,
             col,
+            editRegion,
             origin: Tools.deepClone(cellData),
         };
 

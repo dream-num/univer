@@ -74,7 +74,7 @@ function parseCriterion(raw: BaseValueObject, compareText: ReturnType<typeof cre
         if (text === '') {
             return { matches: (cell) => cell.isNull() || (cell.isString() && cell.getValue() === '') };
         }
-        const [op, parsed] = findCompareToken(text, raw.getDateSystem());
+        const [op, parsed] = findCompareToken(text, raw.getDateSystem(), raw.getCalculationRegion(), raw.getCalculationLocale());
         operator = op;
         const body = text.startsWith(op) ? text.slice(op.length) : text;
         if (body === '') {
@@ -108,7 +108,7 @@ function parseCriterion(raw: BaseValueObject, compareText: ReturnType<typeof cre
 
     const order = (cell: BaseValueObject): number | undefined => {
         if (number !== undefined) {
-            const value = equality && cell.isString() ? findCompareToken(`=${cell.getValue()}`, cell.getDateSystem())[1] : cell;
+            const value = equality && cell.isString() ? findCompareToken(`=${cell.getValue()}`, cell.getDateSystem(), cell.getCalculationRegion(), cell.getCalculationLocale())[1] : cell;
             if (!value.isNumber()) return;
             const lhs = singleCriterionNumberKey(Number(value.getValue()));
             return lhs === number ? 0 : lhs < number ? -1 : 1;

@@ -19,6 +19,7 @@ import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
 import {
     BooleanNumber,
+    CellValueType,
     DisposableCollection,
     FormulaType,
     ICommandService,
@@ -357,6 +358,23 @@ describe('Test cut command with formulas', () => {
         expect(getValues(0, 0, 0, 1)?.[0].map((cell) => cell?.f ?? cell?.v)).toEqual(['=SUM(1.5,2.5)', 2]);
         expect(await sheetClipboardService.legacyPaste(undefined, '=SUM(1;5)\t=SUM(1,5)', undefined, undefined, target)).toBe(true);
         expect(getValues(0, 0, 0, 1)?.[0].map((cell) => cell?.f)).toEqual(['=SUM(1,5)', '=SUM(1.5)']);
+    });
+
+    it('stores invalid external formulas as text alongside formulas that calculate', async () => {
+        get(RegionService).setRegion('en-US');
+        const target = { unitId: 'test', subUnitId: 'sheet1', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } };
+        const clipboard = get(ISheetClipboardService);
+        await clipboard.legacyPaste(undefined, '=1+', undefined, undefined, target);
+        expect(getValues(0, 0, 0, 0)?.[0][0]).toMatchObject({ v: '=1+', t: CellValueType.STRING });
+
+        const inputs = ['=SUM(A1;A2)', '=BOGUS(1)', '=IF(1,,2)'];
+        const html = `<table><tr>${inputs.map((text) => `<td>${text}</td>`).join('')}</tr></table>`;
+        for (const [sourceHtml, text] of [[undefined, inputs.join('\t')], [html, undefined]]) {
+            expect(await clipboard.legacyPaste(sourceHtml, text, undefined, undefined, target)).toBe(true);
+            const cells = getValues(0, 0, 0, 2)?.[0];
+            expect(cells?.[0]).toMatchObject({ v: inputs[0], t: CellValueType.STRING });
+            expect(cells?.map((cell) => cell?.f ?? null)).toEqual([null, inputs[1], inputs[2]]);
+        }
     });
 
     it('preserves literal text when pasting formulas as values or into Text-formatted cells', async () => {

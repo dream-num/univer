@@ -142,6 +142,35 @@ describe('regional formula editing', () => {
         }
     });
 
+    it('reopens Excel bindings without turning unresolved names or range endpoints into calls', async () => {
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        try {
+            univer.registerPlugin(UniverFormulaEnginePlugin);
+            univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+                id: 'book',
+                sheetOrder: ['sheet'],
+                sheets: { sheet: { id: 'sheet', name: 'Sheet1', cellData: { 0: { 0: { v: 2 } }, 1: { 0: { v: 3 } } } } },
+            });
+            const syntax = syntaxFor(univer, 'en-US');
+            const formulas = [
+                '=_xlfn.LET(_xlpm.A1,_xlnm.A1,_xlpm.A1)',
+                '=_xlfn.LET(_xlpm.A1,42,_xlpm.A1)',
+                '=_xlfn.LET(_xlpm.A1,2,SUM(_xlpm.A1:_xlnm.A2))',
+                '=_xlfn.LET(_xlpm.x,A1,SUM(_xlpm.x:A2))',
+                '=_xlfn.LET(_xlpm.A1,2,_xlfn.LET(_xlpm.A1,_xlpm.A1+3,_xlpm.A1))',
+                '=IF(0,_xlfn.LET(_xlpm.A1,_xlnm.A1,_xlpm.A1),0)',
+            ];
+            const calculate = univer.__getInjector().get(ICalculateFormulaService);
+            const result = await calculate.executeFormulas({ book: { sheet: { 4: { 1: formulas } } } });
+            expect(result.book?.sheet[4][1].map((cell) => cell.value)).toEqual(['#NAME?', 42, '#NAME?', 5, 5, 0]);
+            expect(syntax.toLocal(formulas[0])).toBe("=LET(A1,'A1',A1)");
+            expect(syntax.toLocal(formulas[1])).toBe('=LET(A1,42,A1)');
+            expect(syntax.toLocal(formulas[2])).toBe("=LET(A1,2,SUM(A1:'A2'))");
+        } finally {
+            univer.dispose();
+        }
+    });
+
     it('normalizes Excel numeric scripts inside numbers and A1 references while keeping names, bindings and strings', async () => {
         const univer = new Univer({ locale: LocaleType.EN_US });
         try {

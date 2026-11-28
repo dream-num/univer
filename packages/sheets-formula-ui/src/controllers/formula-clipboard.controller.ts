@@ -373,7 +373,7 @@ function getExternalPasteValueMatrix(
 ): ObjectMatrix<ICellData> {
     const valueMatrix = new ObjectMatrix<ICellData>();
     const formulaData = formulaDataModel.getSheetFormulaData(unitId, subUnitId);
-    let parseFormula: ((text: string) => string) | undefined;
+    let parseFormula: ReturnType<typeof createPasteFormulaParser> | undefined;
 
     matrix.forValue((row, col, value) => {
         const toRow = range.rows[row];
@@ -384,8 +384,7 @@ function getExternalPasteValueMatrix(
         const isFormula = typeof text === 'string' && isFormulaString(text) && pasteType !== PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE;
         if (isFormula && !isTextFormat((value.s as IStyleData)?.n?.pattern ?? worksheet?.getComposedCellStyle(toRow, toCol).n?.pattern)) {
             parseFormula ??= createPasteFormulaParser(accessor);
-            valueObject.v = null;
-            valueObject.f = parseFormula(text);
+            Object.assign(valueObject, parseFormula(text));
             valueObject.si = null;
             valueObject.p = null;
 

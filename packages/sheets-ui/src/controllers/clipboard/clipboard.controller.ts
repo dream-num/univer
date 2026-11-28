@@ -600,10 +600,9 @@ export class SheetClipboardController extends RxDisposable {
                 cellValue = {
                     [range.rows[0]]: {
                         [range.cols[0]]: {
-                            f: parseFormula(text),
+                            ...parseFormula(text),
                             ft: null,
                             fd: null,
-                            v: null,
                             p: null,
                         },
                     },

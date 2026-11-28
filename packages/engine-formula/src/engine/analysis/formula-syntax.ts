@@ -39,6 +39,7 @@ interface ISeparators {
     row: string;
     number: RegExp;
     fullWidthDigits?: boolean;
+    rowColumnLetters?: string;
 }
 
 function numberPattern(decimal: string): RegExp {
@@ -46,6 +47,13 @@ function numberPattern(decimal: string): RegExp {
 }
 
 const standard: ISeparators = { decimal: '.', argument: ',', column: ',', row: ';', number: numberPattern('.') };
+const localRowColumnLetters: Partial<Record<LocaleType, string>> = {
+    [LocaleType.DE_DE]: 'ZS',
+    [LocaleType.FR_FR]: 'LC',
+    [LocaleType.PT_BR]: 'LC',
+    [LocaleType.ES_ES]: 'FC',
+    [LocaleType.PL_PL]: 'WK',
+};
 const separator = /^[.,;\\٫؛،]$/;
 
 /** Return the exclusive end of a quoted literal, sheet name or bracketed reference, or start for other tokens. */
@@ -99,11 +107,10 @@ function translateCall(name: string, aliases: IAliases, scopes: (IBindingScope |
     const alias = (input ? aliases.standard : aliases.local).get(key);
     if (alias) return alias;
     if (!input && (key === 'LET' || key === 'LAMBDA')) return key;
-    const unqualified = input ? key : key.replace(/^_XLPM\./, '');
-    if (aliases.local.has(unqualified) && scopes.some((scope) => scope?.bindings.has(unqualified))) {
+    if (!input && /^_xlpm\./i.test(name)) return name.slice(6);
+    if (input && aliases.local.has(key) && scopes.some((scope) => scope?.bindings.has(key))) {
         // SUM can be a local lambda name in Spanish. Mark its invocation to distinguish it from canonical SUM.
-        if (input) return `_xlpm.${name}`;
-        if (key !== unqualified) return name.slice(6);
+        return `_xlpm.${name}`;
     }
     // Excel stores an untranslated function typed under its foreign name as an unresolved UDF.
     return input && aliases.local.has(key) ? `_xludf.${name}` : name;
@@ -115,14 +122,22 @@ function followsValue(text: string, index: number): boolean {
     return previous >= 0 && /[\p{L}\p{N}_$)\]}"%]/u.test(text[previous]);
 }
 
-function referenceWithAsciiRow(name: string, normalized: string): string {
+function getA1Reference(normalized: string): string | undefined {
     const ref = /^(\$?)([a-z]{1,3})(\$?)(\d+)$/i.exec(normalized);
-    if (!ref) return name;
+    if (!ref) return;
     const column = ref[2].toUpperCase();
     const row = Number(ref[4]);
     return columnLabelToNumber(column) <= MAX_COLUMN_COUNT && row > 0 && row <= MAX_ROW_COUNT
         ? ref[1] + column + ref[3] + row
-        : name;
+        : undefined;
+}
+
+// A1 input accepts local bindings named R1C1, while an unbound R1C1 address is invalid in this mode.
+function isReservedRowColumnName(name: string, letters: string, columnRange: boolean) {
+    if (name === letters[0] || name === letters[1]) return !columnRange;
+    const token = /^([A-Z])(\d*)([A-Z])(\d*)$/.exec(name);
+    if (!token || token[1] + token[3] !== letters) return false;
+    return (!token[2] || (+token[2] > 0 && +token[2] <= MAX_ROW_COUNT)) && (!token[4] || +token[4] > 0);
 }
 
 // eslint-disable-next-line complexity, max-lines-per-function -- One scanner preserves token boundaries and offsets across locale conversions.
@@ -188,6 +203,14 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
             const declaration = scope && (scope.name === 'LAMBDA' || scope.pending === undefined) &&
                 !text.slice(scope.start, i).trim() && text.slice(end).trimStart().startsWith(from.argument);
             const bound = declaration || scopes.some((s) => s?.bindings.has(key));
+            if (strict && declaration && (getA1Reference(name) || scope.bindings.has(key))) return reject('syntax');
+            if (strict && !bound && !inArray && !name.endsWith('!') && text[end] !== '!' && !getA1Reference(name)) {
+                const columnRange = text.slice(0, i).trimEnd().endsWith(':') || text.slice(end).trimStart().startsWith(':');
+                if (isReservedRowColumnName(key, 'RC', columnRange) ||
+                    (from.rowColumnLetters && isReservedRowColumnName(key, from.rowColumnLetters, columnRange))) {
+                    return reject('syntax');
+                }
+            }
             if (from === standard && !isCall && !name.endsWith('!') && /^_xlpm\./i.test(name)) {
                 result += name.slice(6);
             } else if (from === standard && /^_xlnm\.[a-z]{1,3}\d+$/i.test(name)) {
@@ -206,7 +229,7 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
                     else if (inArray) return reject('syntax');
                     else result += `'${name}'`;
                 } else {
-                    result += strict && !bound && name !== match[0] ? referenceWithAsciiRow(name, match[0]) : name;
+                    result += strict && !bound && name !== match[0] ? (getA1Reference(match[0]) ?? name) : name;
                 }
             }
             i = end;
@@ -279,8 +302,17 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
 
 export function getFormulaSyntax(regionService: RegionService, localeService: LocaleService): IFormulaSyntax {
     const { decimal, argument, arrayColumn, arrayRow } = regionService.getFormulaSeparators();
-    const fullWidthDigits = [LocaleType.ZH_CN, LocaleType.ZH_TW, LocaleType.ZH_HK, LocaleType.JA_JP, LocaleType.KO_KR].includes(localeService.getCurrentLocale());
-    const local = { decimal, argument, column: arrayColumn, row: arrayRow, number: numberPattern(decimal), fullWidthDigits };
+    const locale = localeService.getCurrentLocale();
+    const fullWidthDigits = [LocaleType.ZH_CN, LocaleType.ZH_TW, LocaleType.ZH_HK, LocaleType.JA_JP, LocaleType.KO_KR].includes(locale);
+    const local = {
+        decimal,
+        argument,
+        column: arrayColumn,
+        row: arrayRow,
+        number: numberPattern(decimal),
+        fullWidthDigits,
+        rowColumnLetters: localRowColumnLetters[locale],
+    };
     const errorLabels = getErrorAliases(localeService);
     const aliases: IAliases = {
         local: new Map(),

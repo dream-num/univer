@@ -171,6 +171,32 @@ describe('regional formula editing', () => {
         }
     });
 
+    it('validates names in A1 entry separately from loading a stored Excel formula', () => {
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        try {
+            const syntax = syntaxFor(univer, 'en-US');
+            for (const input of ['=LET(A1,A1,A1)', '=LET(A01,42,A01)', '=LAMBDA($A$1,1)(2)', '=LET(x,1,X,2,X)', '=R1C1+2', '=RC+2', '=A1+R[0]C[-1]']) {
+                let error;
+                expect(syntax.toStandard(input, (reason) => {
+                    error = reason;
+                })).toBeNull();
+                expect(error).toBe('syntax');
+            }
+            for (const input of ['=LET(x,A1,x)', '=LET(R1C1,42,R1C1)', '=LET(x,42,LET(x,x+2,x))', '=LET(XFE1,4,XFE1)', '=RC1+2', '=SUM(C:C)', '=Z1S1+2']) {
+                expect(syntax.toStandard(input)).toBe(input);
+            }
+            const locale = univer.__getInjector().get(LocaleService);
+            for (const [ui, reserved] of [[LocaleType.DE_DE, 'Z1S1'], [LocaleType.FR_FR, 'L1C1'], [LocaleType.ES_ES, 'F1C1'], [LocaleType.PL_PL, 'W1K1']] as const) {
+                locale.setLocale(ui);
+                const local = syntaxFor(univer, 'en-US');
+                expect(local.toStandard(`=${reserved}+2`)).toBeNull();
+                expect(local.toStandard(`=LET(${reserved},42,${reserved})`)).toBe(`=LET(${reserved},42,${reserved})`);
+            }
+        } finally {
+            univer.dispose();
+        }
+    });
+
     it('normalizes Excel numeric scripts inside numbers and A1 references while keeping names, bindings and strings', async () => {
         const univer = new Univer({ locale: LocaleType.EN_US });
         try {
@@ -315,7 +341,7 @@ describe('regional formula editing', () => {
             expect(syntax.toStandard('=LET(sum;LAMBDA(x;x*2);sum(3))')).toBe('=LET(sum,LAMBDA(x,x*2),_xlpm.sum(3))');
             expect(syntax.toLocal('=LET(sum,LAMBDA(x,x*2),_xlpm.sum(3))')).toBe('=LET(sum;LAMBDA(x;x*2);sum(3))');
             expect(syntax.toStandard('=LAMBDA(sum;sum(3))(LAMBDA(x;x*2))')).toBe('=LAMBDA(sum,_xlpm.sum(3))(LAMBDA(x,x*2))');
-            expect(syntax.toStandard('=SUMA(R1C1;A1.1;_custom.fn(1,1);2025.1!$A$1)')).toBe('=SUM(R1C1,A1.1,_custom.fn(1.1),2025.1!$A$1)');
+            expect(syntax.toStandard('=SUMA(Q1Key;A1.1;_custom.fn(1,1);2025.1!$A$1)')).toBe('=SUM(Q1Key,A1.1,_custom.fn(1.1),2025.1!$A$1)');
             expect(syntax.toEditorTokens('=SUMA(1,5;')).toBe('=SUMA(1.5,');
             expect(syntax.toEditorTokens('=SUMA(1,5;A1')).toHaveLength('=SUMA(1,5;A1'.length);
             locale.setLocale(LocaleType.EN_US);

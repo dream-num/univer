@@ -31,6 +31,7 @@ import {
     getSheetCommandTarget,
     isSingleCellSelection,
     MarkDirtyFilterChangeMutation,
+    SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import type { LocaleKey } from '../../locale/types';
@@ -126,10 +127,22 @@ export const RemoveSheetFilterCommand: ICommand<ISheetCommandSharedParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const autoFilter = filterModel.serialize();
-        const undoMutations = destructFilterModel(unitId, subUnitId, autoFilter);
-        const redoMutations = [{ id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId } }];
+        const intercepted = accessor.get(SheetInterceptorService).onCommandExecute({
+            id: RemoveSheetFilterCommand.id,
+            params: { unitId, subUnitId },
+        });
+        const undoMutations = [
+            ...(intercepted.preUndos ?? []),
+            ...destructFilterModel(unitId, subUnitId, autoFilter),
+            ...intercepted.undos,
+        ];
+        const redoMutations = [
+            ...(intercepted.preRedos ?? []),
+            { id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId } },
+            ...intercepted.redos,
+        ];
 
-        const result = commandService.syncExecuteCommand(RemoveSheetsFilterMutation.id, { unitId, subUnitId });
+        const { result } = sequenceExecute(redoMutations, commandService);
         if (result) {
             sheetsFilterService.completeInitialFilterCatchUp(unitId);
             sheetsFilterService.notifyLocalFilterOperationSucceeded(unitId, subUnitId);

@@ -62,7 +62,7 @@ import { getFormulaInputErrorMessage } from '../utils/char-tools';
 import { virtualizeDiscreteRanges } from '../utils/range-tools';
 
 // Only punctuation outside strings, structured references and array constants belongs to the surrounding expression.
-function usesMixedPunctuation(text: string): boolean {
+function usesMixedListSeparators(text: string): boolean {
     let first = '';
     let inArray = false;
     for (let i = 0; i < text.length; i++) {
@@ -74,8 +74,7 @@ function usesMixedPunctuation(text: string): boolean {
         const char = text[i];
         if (char === '{') inArray = true;
         if (char === '}') inArray = false;
-        const punctuation = /[,;،؛٫]/.test(char) || (char === '.' && /\p{Nd}/u.test(text[i + 1] ?? ''));
-        if (inArray || !punctuation) continue;
+        if (inArray || !/[,;،؛]/.test(char)) continue;
         if (first && first !== char) return true;
         first = char;
     }
@@ -89,7 +88,7 @@ export function createPasteFormulaParser(accessor: IAccessor) {
     const lexer = accessor.get(LexerTreeBuilder);
     return (text: string): ICellData => {
         const standard = syntax.toStandard(text, (reason) => {
-            if (reason === 'separator' && usesMixedPunctuation(text)) {
+            if (reason === 'separator' && usesMixedListSeparators(text)) {
                 accessor.get(ErrorService).emit(getFormulaInputErrorMessage(reason, syntax, locale));
                 throw new CanceledError();
             }

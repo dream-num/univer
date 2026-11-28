@@ -351,11 +351,13 @@ describe('Test cut command with formulas', () => {
         const target = { unitId: 'test', subUnitId: 'sheet1', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } };
         expect(await sheetClipboardService.legacyPaste(undefined, '=SUM(1,5;2,5)', undefined, undefined, target)).toBe(true);
         expect(getValues(0, 0, 0, 0)?.[0][0]?.f).toBe('=SUM(1.5,2.5)');
-        expect(await sheetClipboardService.legacyPaste(undefined, '=SUM(1.5,2.5)', undefined, undefined, target)).toBe(false);
+        expect(await sheetClipboardService.legacyPaste(undefined, '=SUM(A1;A2,A1)', undefined, undefined, target)).toBe(false);
         expect(getValues(0, 0, 0, 0)?.[0][0]?.f).toBe('=SUM(1.5,2.5)');
 
-        expect(await sheetClipboardService.legacyPaste(undefined, '=SUM(1;5)\t=SUM(1.5,2.5)', undefined, undefined, target)).toBe(false);
+        expect(await sheetClipboardService.legacyPaste(undefined, '=SUM(1;5)\t=SUM(A1;A2,A1)', undefined, undefined, target)).toBe(false);
         expect(getValues(0, 0, 0, 1)?.[0].map((cell) => cell?.f ?? cell?.v)).toEqual(['=SUM(1.5,2.5)', 2]);
+        expect(await sheetClipboardService.legacyPaste(undefined, '=SUM(1.5,2.5)', undefined, undefined, target)).toBe(true);
+        expect(getValues(0, 0, 0, 0)?.[0][0]).toMatchObject({ v: '=SUM(1.5,2.5)', t: CellValueType.STRING });
         expect(await sheetClipboardService.legacyPaste(undefined, '=SUM(1;5)\t=SUM(1,5)', undefined, undefined, target)).toBe(true);
         expect(getValues(0, 0, 0, 1)?.[0].map((cell) => cell?.f)).toEqual(['=SUM(1,5)', '=SUM(1.5)']);
     });
@@ -364,8 +366,8 @@ describe('Test cut command with formulas', () => {
         get(RegionService).setRegion('en-US');
         const target = { unitId: 'test', subUnitId: 'sheet1', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } };
         const clipboard = get(ISheetClipboardService);
-        await clipboard.legacyPaste(undefined, '=1+', undefined, undefined, target);
-        expect(getValues(0, 0, 0, 0)?.[0][0]).toMatchObject({ v: '=1+', t: CellValueType.STRING });
+        await clipboard.legacyPaste(undefined, '=SUM(A1', undefined, undefined, target);
+        expect(getValues(0, 0, 0, 0)?.[0][0]).toMatchObject({ v: '=SUM(A1', t: CellValueType.STRING });
 
         const inputs = ['=SUM(A1;A2)', '=BOGUS(1)', '=IF(1,,2)'];
         const html = `<table><tr>${inputs.map((text) => `<td>${text}</td>`).join('')}</tr></table>`;

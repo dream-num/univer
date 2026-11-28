@@ -26,28 +26,6 @@ import {
 
 const DEVICE_LABELS = { desktop: 'Desktop', mobile: 'Mobile' } satisfies Record<WorkbenchDevice, string>;
 
-const LOCALE_LABELS = {
-    'ar-SA': 'العربية',
-    'ca-ES': 'Català',
-    'de-DE': 'Deutsch',
-    'en-US': 'English',
-    'es-ES': 'Español',
-    'fa-IR': 'فارسی',
-    'fr-FR': 'Français',
-    'id-ID': 'Bahasa Indonesia',
-    'it-IT': 'Italiano',
-    'ja-JP': '日本語',
-    'ko-KR': '한국어',
-    'pl-PL': 'Polski',
-    'pt-BR': 'Português (Brasil)',
-    'ru-RU': 'Русский',
-    'sk-SK': 'Slovenčina',
-    'vi-VN': 'Tiếng Việt',
-    'zh-CN': '简体中文',
-    'zh-HK': '繁體中文（香港）',
-    'zh-TW': '繁體中文',
-} satisfies Record<WorkbenchLocale, string>;
-
 const THEME_LABELS = {
     blue: 'Blue',
     'dark-blue': 'Dark blue',
@@ -152,7 +130,7 @@ function WorkbenchSettingsControl(props: IWorkbenchSettingsControlProps) {
         { type: 'separator' },
         {
             type: 'subItem',
-            children: renderSettingLabel('Language', LOCALE_LABELS[settings.locale]),
+            children: renderSettingLabel('Language', LOCALE_META[settings.locale].name),
             options: [{
                 type: 'radio',
                 value: settings.locale,
@@ -163,7 +141,7 @@ function WorkbenchSettingsControl(props: IWorkbenchSettingsControlProps) {
                             dir={LOCALE_META[value].direction}
                             lang={LOCALE_META[value].tag}
                         >
-                            {LOCALE_LABELS[value]}
+                            {LOCALE_META[value].name}
                         </span>
                     ),
                 })),

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IDocumentData, IDocumentRenderConfig } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import type { IWorkbookData } from '../typedef';
@@ -250,6 +250,76 @@ describe('SheetSkeleton dimension fallback', () => {
             expect(skeleton.rowHeightAccumulation[0]).toBe(0);
             expect(skeleton.rowTotalHeight).toBe(unfilteredHeight - 24);
         } finally {
+            skeleton.dispose();
+        }
+    });
+
+    it('matches the filtered layout when the row data contains an invalid entry', () => {
+        const worksheet = testBed.sheet.getActiveSheet()!;
+        const config = worksheet.getConfig();
+        config.rowCount = 4;
+        config.defaultRowHeight = 24;
+        Object.assign(config.rowData, { 1: false, 2: { h: 31 } });
+        const skeleton = testBed.univer.__getInjector().createInstance(SheetSkeleton, worksheet, testBed.sheet.getStyles());
+
+        try {
+            skeleton.setGapConfig({ rowGaps: { 1: { size: 6 }, 2: { size: 2 } } });
+            const unfilteredRows = skeleton.rowHeightAccumulation;
+            expect(unfilteredRows).toEqual([24, 57, 81]);
+
+            skeleton.setProjection({ isRowFiltered: () => false, getCell: () => undefined });
+            skeleton.calculate();
+            expect(skeleton.rowHeightAccumulation).toEqual(unfilteredRows);
+            expect(skeleton.rowTotalHeight).toBe(81);
+        } finally {
+            skeleton.dispose();
+        }
+    });
+
+    it('reuses row geometry when a display projection resolves with the same filter mask', () => {
+        const worksheet = testBed.sheet.getActiveSheet()!;
+        const config = worksheet.getConfig();
+        config.rowCount = 3;
+        config.defaultRowHeight = 24;
+        const skeleton = testBed.univer.__getInjector().createInstance(SheetSkeleton, worksheet, testBed.sheet.getStyles());
+        const projection = (row: number) => {
+            const filteredOutRows = new Set([row]);
+            return { filteredOutRows, isRowFiltered: (index: number) => filteredOutRows.has(index), getCell: () => undefined };
+        };
+
+        try {
+            skeleton.setProjection({ ...projection(1), placeholder: true });
+            skeleton.calculate();
+            const pendingRows = skeleton.rowHeightAccumulation;
+            expect(pendingRows).toEqual([24, 24, 48]);
+
+            skeleton.setProjection(projection(1));
+            expect(skeleton.dirty).toBe(true);
+            skeleton.calculate();
+            expect(skeleton.rowHeightAccumulation).toBe(pendingRows);
+
+            skeleton.setProjection(projection(0));
+            skeleton.calculate();
+            expect(skeleton.rowHeightAccumulation).toEqual([0, 24, 48]);
+        } finally {
+            skeleton.dispose();
+        }
+    });
+
+    it.each(['worksheet', 'skeleton'] as const)('honors an overridden row filter on the %s', (owner) => {
+        const worksheet = testBed.sheet.getActiveSheet()!;
+        const config = worksheet.getConfig();
+        config.rowCount = 3;
+        config.defaultRowHeight = 24;
+        const skeleton = testBed.univer.__getInjector().createInstance(SheetSkeleton, worksheet, testBed.sheet.getStyles());
+        const filter = vi.spyOn(owner === 'worksheet' ? worksheet : skeleton, 'getRowFiltered').mockImplementation((row) => row === 1);
+
+        try {
+            skeleton.calculate();
+            expect(skeleton.rowHeightAccumulation).toEqual([24, 24, 48]);
+            expect(filter).toHaveBeenCalledTimes(config.rowCount);
+        } finally {
+            filter.mockRestore();
             skeleton.dispose();
         }
     });

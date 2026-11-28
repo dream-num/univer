@@ -43,7 +43,7 @@ import {
     Tools,
     willLoseNumericPrecision,
 } from '@univerjs/core';
-import { getFormulaSyntax } from '@univerjs/engine-formula';
+import { getFormulaProtectedTokenEnd, getFormulaSyntax, LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
@@ -61,16 +61,44 @@ import { isRichText } from '../editor/editing.render-controller';
 import { getFormulaInputErrorMessage } from '../utils/char-tools';
 import { virtualizeDiscreteRanges } from '../utils/range-tools';
 
+// Only punctuation outside strings, structured references and array constants belongs to the surrounding expression.
+function usesMixedPunctuation(text: string): boolean {
+    let first = '';
+    let inArray = false;
+    for (let i = 0; i < text.length; i++) {
+        const end = getFormulaProtectedTokenEnd(text, i);
+        if (end > i) {
+            i = end - 1;
+            continue;
+        }
+        const char = text[i];
+        if (char === '{') inArray = true;
+        if (char === '}') inArray = false;
+        const punctuation = /[,;،؛٫]/.test(char) || (char === '.' && /\p{Nd}/u.test(text[i + 1] ?? ''));
+        if (inArray || !punctuation) continue;
+        if (first && first !== char) return true;
+        first = char;
+    }
+    return false;
+}
+
 /** Capture the input syntax once for all formula cells in an external paste. */
 export function createPasteFormulaParser(accessor: IAccessor) {
     const locale = accessor.get(LocaleService);
     const syntax = getFormulaSyntax(accessor.get(RegionService), locale);
-    return (text: string): string => {
+    const lexer = accessor.get(LexerTreeBuilder);
+    return (text: string): ICellData => {
         const standard = syntax.toStandard(text, (reason) => {
-            accessor.get(ErrorService).emit(getFormulaInputErrorMessage(reason, syntax, locale));
+            if (reason === 'separator' && usesMixedPunctuation(text)) {
+                accessor.get(ErrorService).emit(getFormulaInputErrorMessage(reason, syntax, locale));
+                throw new CanceledError();
+            }
         });
-        if (standard !== null) return standard;
-        throw new CanceledError();
+        // Excel preserves invalid external formulas as text, including the leading equals sign.
+        if (standard === null || typeof lexer.treeBuilder(standard) === 'string') {
+            return { f: null, v: text, t: CellValueType.STRING };
+        }
+        return { f: standard, v: null };
     };
 }
 

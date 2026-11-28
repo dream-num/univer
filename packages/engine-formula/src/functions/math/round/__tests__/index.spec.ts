@@ -38,6 +38,8 @@ describe('Test round function', () => {
             [1 / 3, 17, 0.333333333333333],
             [0.12345678901234548, 15, 0.123456789012345],
             [0.12345678901234552, 15, 0.123456789012346],
+            [-0.005, 0, 0],
+            [-1, -3, 0],
             [1.005, 2, 1.01],
             [-1.005, 2, -1.01],
             [2 ** 53 - 1, 0, 9007199254740990],
@@ -123,7 +125,7 @@ describe('Test round function', () => {
             });
             const result = testFunction.calculate(number, numDigits);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [2.2, 2.1, -1.58, 22, 630, 0, -0, ErrorType.NA, ErrorType.NA],
+                [2.2, 2.1, -1.58, 22, 630, 0, 0, ErrorType.NA, ErrorType.NA],
             ]);
         });
     });

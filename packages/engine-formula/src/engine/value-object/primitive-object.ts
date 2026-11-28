@@ -1371,10 +1371,11 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            return NumberValueObject.create(result);
+            // Excel stores a positive zero when ROUND removes the sign of the last nonzero digit.
+            return NumberValueObject.create(result + 0);
         }
         if (typeof value === 'boolean') {
-            return NumberValueObject.create(round(currentValue, value ? 1 : 0));
+            return NumberValueObject.create(round(currentValue, value ? 1 : 0) + 0);
         }
 
         return this;

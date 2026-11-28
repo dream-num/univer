@@ -66,6 +66,8 @@ register(dotSemicolon, 'az', 'IR', 'cyrl');
 register(dotSemicolon, 'uz', 'AF', 'cyrl');
 register(dotComma, 'az', 'IR');
 register(dotComma, 'uz', 'AF');
+register(dotComma, 'und', 'CH');
+register(dotSemicolon, 'sr', 'CH', 'latn');
 
 register(dotComma, 'af', 'NA');
 register(dotComma, 'ar', '001 EH ER IL KM PS SD SO SS TD');
@@ -116,18 +118,48 @@ register(arabicDecimal, 'ar ckb ks ps');
 register(arabicSemicolon, 'fa');
 register(arabicComma, 'dv');
 
+// These measured languages use the default punctuation. A language unknown to Excel uses the root list separator.
+register(dotComma, 'la agq ain ak apw arn as asa bas bem bez bgc bho bla bm bn bo brx byn ccp ceb cgg cho chr cic com cr crj crk crl');
+register(dotComma, 'crm cst csw dav dje doi dua ebu eo ewo fla gaa gn gu guz gv hch he hi hmn ht ia io isc iu ja jbo jgo jmc kaj kam');
+register(dotComma, 'kcg kde khq ki kio kkj kln km kn kok ksb ksf kw kxv lag lg lkt lrc luo lut luy mai mas mer mfe mg mgo mi mic mid');
+register(dotComma, 'mni moh mr mua mus mzn naq nd nez nmg nnh nnp nus nv ny nyn or osa pcm pqm quc raj rhg rn rof rwk sa saq sat sbp');
+register(dotComma, 'ses shn shp sm sn srs syr teo th tig to tok trv twq ug vai vun wae wal xnr xog yav yue za zh');
+
+const commaDecimalTerritories = new Set(['AX', 'DE', 'FI', 'NO', 'SE', 'SJ']);
+// Excel resolves these older language names using the modern formatting data.
+const languageAliases = new Map([['sh', 'sr'], ['tl', 'fil']]);
+
 // Read language, script and territory without using the host's locale data. Variants and extensions
 // do not change Excel's default formula punctuation.
 const regionTag = /^([a-z]{2,8})(?:-([a-z]{4}))?(?:-([a-z]{2}|[0-9]{3}))?(?:-(?:[a-z0-9]{5,8}|[0-9][a-z0-9]{3}))*(?:-[0-9a-wy-z](?:-[a-z0-9]{2,8})+)*(?:-x(?:-[a-z0-9]{1,8})+)?$/i;
+
+export function isExcelRegionLanguage(language: string): boolean {
+    return rulesByLanguage.has(languageAliases.get(language) ?? language);
+}
 
 export function getFormulaSeparators(region: string): IFormulaSeparators {
     const parts = regionTag.exec(getRegionTag(region));
     if (!parts) return dotComma;
 
-    const language = parts[1].toLowerCase();
-    const script = parts[2]?.toLowerCase();
+    const inputLanguage = parts[1].toLowerCase();
+    const language = languageAliases.get(inputLanguage) ?? inputLanguage;
+    const script = parts[2]?.toLowerCase() ?? (inputLanguage === 'sh' ? 'latn' : undefined);
     const territory = parts[3]?.toUpperCase();
-    return rulesByLanguage.get(language)?.find((rule) =>
+    const languageRules = rulesByLanguage.get(language);
+    if (!languageRules) return dotSemicolon;
+    if (territory && commaDecimalTerritories.has(territory)) return commaSemicolon;
+    if (territory === 'US' || territory === 'CA' || territory === 'GB') {
+        if (territory === 'CA' && language === 'fr') return commaSemicolon;
+        if (language === 'und' || (territory === 'US' && language === 'haw') ||
+            (territory === 'GB' && (language === 'cy' || language === 'gd')) ||
+            (script === 'latn' && language === 'sr') || (script === 'cyrl' && (language === 'az' || language === 'uz'))) {
+            return dotSemicolon;
+        }
+        return dotComma;
+    }
+    // A private-use territory has no regional number settings. ZZ (unknown region) inherits the language settings.
+    if (territory && territory !== 'XK' && /^(?:X[A-Z]|Q[M-Z])$/.test(territory)) return dotComma;
+    return languageRules.find((rule) =>
         (!rule.territories || (territory && rule.territories.includes(territory))) &&
         (!rule.scripts || (script && rule.scripts.includes(script)))
     )?.separators ?? dotComma;

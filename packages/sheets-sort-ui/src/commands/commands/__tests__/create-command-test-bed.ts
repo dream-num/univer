@@ -168,7 +168,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
 
     const localeService = injector.get(LocaleService);
-    localeService.load({ zhCN });
+    localeService.load({ 'zh-CN': zhCN });
 
     return {
         univer,

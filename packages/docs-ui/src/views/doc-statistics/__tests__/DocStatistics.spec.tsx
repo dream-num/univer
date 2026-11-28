@@ -252,5 +252,9 @@ describe('DocStatistics', () => {
         const values = Array.from(document.querySelectorAll('[role="dialog"] dd')).map((element) => element.textContent);
         expect(values).toContain('1\u202F105');
         expect(values).not.toContain('1,105');
+
+        act(() => rendered.regionService.setRegion('x-univer'));
+        expect(rendered.container.querySelector('button')?.textContent).toContain('1,105 words');
+        expect(document.querySelector('[role="dialog"]')?.textContent).toContain('1,937');
     });
 });

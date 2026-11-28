@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getRegionTag } from '../../types/enum/locale-type';
+import { localeTagPattern } from '../../types/locale-tag-pattern';
 
 export interface IFormulaSeparators {
     readonly decimal: string;
@@ -136,11 +136,7 @@ register(dotComma, 'ses shn shp sm sn srs syr teo th tig to tok trv twq ug vai v
 
 const commaDecimalTerritories = new Set(['AX', 'DE', 'FI', 'NO', 'SE', 'SJ']);
 // Excel resolves these older language names using the modern formatting data.
-const languageAliases = new Map([['sh', 'sr'], ['tl', 'fil']]);
-
-// Read language, script and territory without using the host's locale data. Variants and extensions
-// do not change Excel's default formula punctuation.
-const regionTag = /^([a-z]{2,8})(?:-([a-z]{4}))?(?:-([a-z]{2}|[0-9]{3}))?(?:-(?:[a-z0-9]{5,8}|[0-9][a-z0-9]{3}))*(?:-[0-9a-wy-z](?:-[a-z0-9]{2,8})+)*(?:-x(?:-[a-z0-9]{1,8})+)?$/i;
+const languageAliases = new Map([['cmn', 'zh'], ['sh', 'sr'], ['tl', 'fil']]);
 
 export function isExcelRegionLanguage(language: string): boolean {
     return rulesByLanguage.has(languageAliases.get(language) ?? language);
@@ -195,8 +191,9 @@ function acceptsArabicPunctuation(language: string, script?: string, territory?:
 }
 
 export function getFormulaSeparators(region: string): IFormulaSeparators {
-    const parts = regionTag.exec(getRegionTag(region));
-    if (!parts) return dotComma;
+    const parts = localeTagPattern.exec(region);
+    // Excel uses its default number settings for extended-language tags, including zh-cmn-Hans-DE.
+    if (!parts || parts[1].includes('-')) return dotComma;
 
     const inputLanguage = parts[1].toLowerCase();
     const language = languageAliases.get(inputLanguage) ?? inputLanguage;

@@ -19,7 +19,7 @@ import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 import type { IFormulaSeparators } from './formula-separators';
 import { Inject } from '../../common/di';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
-import { getRegionTag } from '../../types/enum/locale-type';
+import { normalizeLocaleTag } from '../../types/enum/locale-type';
 import { LocaleService } from '../locale/locale.service';
 import { getFormulaSeparators } from './formula-separators';
 
@@ -46,16 +46,17 @@ export class RegionService extends Disposable {
     }
 
     setRegion(region: string): void {
+        const tag = normalizeLocaleTag(region);
         this._hasExplicitRegion = true;
-        this._currentRegion$.next(region);
+        this._currentRegion$.next(tag);
     }
 
     /** Excel reads the decimal and list separators from the region and array syntax from the interface language. */
     getFormulaSeparators(): IFormulaSeparators {
         const separators = getFormulaSeparators(this.getCurrentRegion());
         const { decimal } = separators;
-        const [language] = getRegionTag(this._localeService.getCurrentLocale()).toLowerCase().split('-');
-        switch (language) {
+        const [uiLanguage] = this._localeService.getCurrentLocale().split('-');
+        switch (uiLanguage) {
             case 'ja':
             case 'ko':
             case 'zh':

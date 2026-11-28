@@ -16,13 +16,13 @@
 
 import type { Meta } from '@storybook/react';
 import type { IWorkbookData } from '@univerjs/core';
-import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
 import { CommandType, ICommandService, ILogService, Inject, Injector, LocaleService, LocaleType, LogLevel, Plugin, registerDependencies, Univer, UniverInstanceType } from '@univerjs/core';
 import { RefRangeService, SheetInterceptorService, SheetsSelectionsService, WorksheetProtectionPointModel } from '@univerjs/sheets';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { IShortcutService, IUIPartsService, RediContext, ShortcutService, UIPartsService } from '@univerjs/ui';
 import { useState } from 'react';
+import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
 import { WithCustomFilterModelFactory, WithValuesFilterModelFactory } from '../../__tests__/data';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import enUS from '../../locale/en-US';
@@ -100,7 +100,7 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
     univer.registerPlugin(UniverSheetsFilterPlugin);
 
     injector.get(LocaleService).setLocale(locale);
-    injector.get(LocaleService).load({ enUS, zhCN, ruRU });
+    injector.get(LocaleService).load({ 'en-US': enUS, 'zh-CN': zhCN, 'ru-RU': ruRU });
     injector.get(ILogService).setLogLevel(LogLevel.VERBOSE);
 
     const sheet = univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData);

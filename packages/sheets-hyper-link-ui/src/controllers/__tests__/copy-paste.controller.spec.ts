@@ -69,7 +69,7 @@ describe('SheetsHyperLinkCopyPasteController', () => {
             sheets: { sheet: { id: 'sheet', name: 'Sheet', cellData: {} } },
         });
         const locale = injector.get(LocaleService);
-        locale.load({ enUS });
+        locale.load({ 'en-US': enUS });
         locale.setLocale(LocaleType.EN_US);
         locale.setDirection('ltr');
         const model = injector.get(HyperLinkModel);

@@ -1,7 +1,6 @@
 import type { Plugin, PluginCtor, Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import type { IPreset } from '@univerjs/presets';
-
 import type { IWorkbenchMountOptions, WorkbenchLocale, WorkbenchUIChromeMode } from './workbench-settings';
 import { getEffectiveWorkbenchRegion, getWorkbenchUIChromeVisibility } from './workbench-settings';
 
@@ -29,7 +28,7 @@ interface IWorkbenchWindow {
 
 interface IAppliedWorkbenchSettings {
     locale: WorkbenchLocale;
-    region: WorkbenchLocale;
+    region: ReturnType<typeof getEffectiveWorkbenchRegion>;
     ribbonType: IWorkbenchMountOptions['ribbonType'];
     uiChrome: WorkbenchUIChromeMode;
     zoomRatio: IWorkbenchMountOptions['zoomRatio'];

@@ -55,8 +55,8 @@ const booleanMap: { [key: string]: string } = {
 };
 
 // TODO@Dushusir: add more locales
-export function isCJKLocale(locale: LocaleType) {
-    return [LocaleType.ZH_CN, LocaleType.ZH_TW].includes(locale);
+export function isCJKLocale(locale: string) {
+    return locale === LocaleType.ZH_CN || locale === LocaleType.ZH_TW;
 }
 
 /**
@@ -75,7 +75,7 @@ export function isCJKLocale(locale: LocaleType) {
  *
  * @returns The normalized input, or null for an invalid regional formula separator.
  */
-export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder, currentLocale: LocaleType, functionService: IFunctionService, syntax: IFormulaSyntax, onError?: (reason: FormulaInputError) => void) {
+export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder, currentLocale: string, functionService: IFunctionService, syntax: IFormulaSyntax, onError?: (reason: FormulaInputError) => void) {
     let normalStr = str;
 
     if (isCJKLocale(currentLocale)) {

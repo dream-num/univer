@@ -50,7 +50,7 @@ describe('SheetsTableThemeController', () => {
         ];
         dependencies.forEach((dependency) => injector.add(dependency));
         const locale = injector.get(LocaleService);
-        locale.load({ enUS });
+        locale.load({ 'en-US': enUS });
         locale.setLocale(LocaleType.EN_US);
         locale.setDirection('ltr');
         injector.get(SheetInterceptorService);
@@ -142,7 +142,7 @@ describe('SheetsTableThemeController', () => {
         const headless = new Univer();
         try {
             const locale = headless.__getInjector().get(LocaleService);
-            locale.load({ enUS });
+            locale.load({ 'en-US': enUS });
             locale.setLocale(LocaleType.EN_US);
             locale.setDirection('ltr');
             headless.registerPlugin(UniverSheetsPlugin);

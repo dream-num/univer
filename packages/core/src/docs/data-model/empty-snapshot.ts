@@ -33,7 +33,7 @@ import { createSectionId } from '../section-break-id';
 
 export function getEmptySnapshot(
     unitID = generateRandomId(6),
-    locale = LocaleType.EN_US,
+    locale: string = LocaleType.EN_US,
     title = '',
     documentFlavor: DocumentFlavor = DocumentFlavor.MODERN
 ): IDocumentData {

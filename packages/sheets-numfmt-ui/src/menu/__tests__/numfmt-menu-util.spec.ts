@@ -30,7 +30,7 @@ describe('getNumberFormatLabelKey', () => {
 
     it('uses the same regional date for desktop, mobile quick actions and mobile detail', () => {
         const pattern = 'dd/mm/yyyy;@';
-        const config = createMobileNumberFormatMenuConfig('₹', 'enIN');
+        const config = createMobileNumberFormatMenuConfig('₹', 'en-IN');
         expect(MENU_OPTIONS('₹', 'en-IN')).toContainEqual({ label: 'sheets-numfmt-ui.date', pattern });
         expect(config.detailOptions).toContainEqual({ label: 'sheets-numfmt-ui.date', value: pattern });
         expect(config.quickOptions).toContainEqual(expect.objectContaining({ label: 'sheets-numfmt-ui.date', value: pattern }));

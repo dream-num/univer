@@ -245,7 +245,7 @@ describe('Table selection and clipboard interaction', () => {
         bed = createClipboardTestBed();
         const { get } = bed;
         const locale = get(LocaleService);
-        locale.load({ enUS });
+        locale.load({ 'en-US': enUS });
         locale.setLocale(LocaleType.EN_US);
         locale.setDirection('ltr');
         get(WorkbookPermissionService);

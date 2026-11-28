@@ -99,7 +99,7 @@ describe('DatePanel', () => {
         if (explicitRegion) {
             act(() => injector.get(RegionService).setRegion(LocaleType.EN_US));
             expect(onActionChange.mock.lastCall![0]()).toBe('m/d/yyyy');
-            act(() => injector.get(RegionService).setRegion('enIN'));
+            act(() => injector.get(RegionService).setRegion('en-IN'));
             expect(container.querySelector('[role="option"]')?.textContent?.trim()).toBe('05/08/1930');
             expect(onActionChange.mock.lastCall![0]()).toBe('dd/mm/yyyy');
             expect(onChange.mock.calls).toEqual([['m/d/yyyy'], ['dd/mm/yyyy']]);

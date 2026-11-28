@@ -15,7 +15,21 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { isPatternEqualWithoutDecimal } from '../utils';
+import { getNumfmtLocaleTag, isPatternEqualWithoutDecimal } from '../utils';
+
+describe('getNumfmtLocaleTag', () => {
+    it.each([
+        ['zhCN', 'zh-CN'],
+        ['zh-cn', 'zh-CN'],
+        ['ZH-CN', 'zh-CN'],
+        ['zh-tw', 'zh-TW'],
+        ['de-de', 'de'],
+        ['FR-fr', 'fr'],
+        ['x-univer', 'en'],
+    ])('uses the workbook number-format locale for %s', (stored, expected) => {
+        expect(getNumfmtLocaleTag(stored)).toBe(expected);
+    });
+});
 
 describe('isPatternEqualWithoutDecimal', () => {
     it('isPatternEqualWithoutDecimal', () => {

@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LOCALE_META, LocaleService } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Button, Checkbox, Dialog, DropdownMenu, selectClassName } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { CalendarIcon, MoreDownIcon, NumberIcon } from '@univerjs/icons';
@@ -41,7 +41,7 @@ export function DocHeaderFooterFields({ unitId, disabled }: { unitId: string; di
     const [automatic, setAutomatic] = useState(true);
     const [error, setError] = useState(false);
     const [previewDate, setPreviewDate] = useState(() => new Date());
-    const locale = LOCALE_META[localeService.getCurrentLocale()].tag;
+    const locale = localeService.getCurrentLocale();
 
     const dialogOpen = target !== null;
     const dialogFocusRef = useRef<{ unitId: string; focusedUnitId: string | undefined } | null>(null);

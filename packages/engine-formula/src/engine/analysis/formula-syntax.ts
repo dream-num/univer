@@ -48,7 +48,8 @@ function numberPattern(decimal: string): RegExp {
 }
 
 const standard: ISeparators = { decimal: '.', argument: ',', column: ',', row: ';', number: numberPattern('.') };
-const localRowColumnLetters: Partial<Record<LocaleType, string>> = {
+const fullWidthDigitLocales = new Set<string>([LocaleType.ZH_CN, LocaleType.ZH_TW, LocaleType.ZH_HK, LocaleType.JA_JP, LocaleType.KO_KR]);
+const localRowColumnLetters: Partial<Record<string, string>> = {
     [LocaleType.DE_DE]: 'ZS',
     [LocaleType.FR_FR]: 'LC',
     [LocaleType.PT_BR]: 'LC',
@@ -330,14 +331,13 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
 export function getFormulaSyntax(regionService: RegionService, localeService: LocaleService): IFormulaSyntax {
     const { decimal, argument, arrayColumn, arrayRow, arabicPunctuation } = regionService.getFormulaSeparators();
     const locale = localeService.getCurrentLocale();
-    const fullWidthDigits = [LocaleType.ZH_CN, LocaleType.ZH_TW, LocaleType.ZH_HK, LocaleType.JA_JP, LocaleType.KO_KR].includes(locale);
     const local = {
         decimal,
         argument,
         column: arrayColumn,
         row: arrayRow,
         number: numberPattern(decimal),
-        fullWidthDigits,
+        fullWidthDigits: fullWidthDigitLocales.has(locale),
         arabicPunctuation,
         rowColumnLetters: localRowColumnLetters[locale],
     };

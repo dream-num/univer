@@ -21,7 +21,7 @@ import { LocaleType } from '../types/enum/locale-type';
 
 export function getEmptySnapshot(
     unitID = '',
-    locale = LocaleType.ZH_CN,
+    locale: string = LocaleType.ZH_CN,
     name = ''
 ): IWorkbookData {
     const DEFAULT_WORKBOOK_DATA: IWorkbookData = {

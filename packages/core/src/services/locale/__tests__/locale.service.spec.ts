@@ -47,6 +47,30 @@ describe('LocaleService', () => {
         localeService.load(testLocales);
     });
 
+    it('keeps existing translations when a pack contains a nonstandard key', () => {
+        const injector = new Injector([[LocaleService]]);
+        const service = injector.get(LocaleService);
+        service.load({ 'zh-CN': { greeting: 'original' } });
+        expect(() => service.load({ 'zh-CN': { greeting: 'updated' }, zhCN: {} })).toThrow(RangeError);
+        expect(service.t('greeting')).toBe('original');
+        injector.dispose();
+    });
+
+    it('merges equivalent case spellings independently of property order', () => {
+        const injector = new Injector([[LocaleService]]);
+        const service = injector.get(LocaleService);
+        service.setLocale('zh-CN');
+        const entries = [['zh-cn', { shared: 'lowercase' }], ['ZH-CN', { shared: 'uppercase' }]] as const;
+        for (const order of [entries, [...entries].reverse()]) {
+            const packs = Object.fromEntries(order);
+            service.load(packs);
+            expect(service.t('shared')).toBe('lowercase');
+            service.load({ 'zh-CN': { shared: 'preferred' }, ...packs });
+            expect(service.t('shared')).toBe('preferred');
+        }
+        injector.dispose();
+    });
+
     it('should translate simple keys', () => {
         expect(localeService.t('greeting')).toBe('你好');
         localeService.setLocale(LocaleType.EN_US);

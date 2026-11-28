@@ -786,7 +786,7 @@ export class MergeCellController extends Disposable {
         const redos = [{ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams }];
         const preUndos = [{ id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams }];
         const undos = [{ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams }];
-        return { preUndos, undos, preRedos, redos, rollbackMutations: [undos, preUndos] };
+        return { preUndos, undos, preRedos, redos };
     }
 
     private _handleInsertRangeMoveRightCommand(

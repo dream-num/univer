@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LOCALE_META, LocaleType } from '@univerjs/core';
+import { getRegionTag, LocaleType } from '@univerjs/core';
 
 export type TextComparer = (a: string, b: string) => number;
 export type TextColumnComparer = (aPosition: number, bPosition: number) => number;
@@ -34,7 +34,7 @@ const LETTER = /^[\p{L}\p{M}]/u;
 const LETTER_RUN = /^[\p{L}\p{M}]+$/u;
 const SIMPLE_ENGLISH_TEXT = /^[A-Za-z ]+$/;
 const LATIN_WORDS = /(?:\p{Script=Latin}\p{M}*)+/gu;
-const DEFAULT_LOCALE = LOCALE_META[LocaleType.EN_US].tag;
+const DEFAULT_LOCALE = LocaleType.EN_US;
 const collateLatinAccent = new Intl.Collator(DEFAULT_LOCALE, { sensitivity: 'accent' }).compare;
 
 enum UnitKind {
@@ -182,8 +182,8 @@ function prepareUnitColumn(
 }
 
 export function createRegionTextComparer(region: string): IRegionTextComparer {
-    const locale = LOCALE_META[region as LocaleType]?.tag ?? region.replace(/^([a-z]{2,3})([A-Z]{2})$/, '$1-$2');
-    let locales = [DEFAULT_LOCALE];
+    const locale = getRegionTag(region);
+    let locales: string[] = [DEFAULT_LOCALE];
     try {
         // Include the default explicitly so an unsupported region cannot fall back to the host.
         locales = Intl.getCanonicalLocales([locale, DEFAULT_LOCALE]);

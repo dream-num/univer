@@ -108,7 +108,7 @@ for (const Controller of controllers) {
             peer = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookSnapshot('peer', 70));
             const injector = univer.__getInjector();
             injector.get(ILogService).setLogLevel(LogLevel.SILENT);
-            injector.get(LocaleService).load({ enUS });
+            injector.get(LocaleService).load({ 'en-US': enUS });
             injector.get(LocaleService).setLocale(LocaleType.EN_US);
             injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);

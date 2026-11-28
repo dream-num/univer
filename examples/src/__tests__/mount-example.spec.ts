@@ -1,9 +1,8 @@
 import type { Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import type { IMountedExample, MountExample } from '../mount-example';
-
-import type { IWorkbenchMountOptions } from '../workbench-settings';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IMountedExample, MountExample } from '../mount-example';
+import type { IWorkbenchMountOptions } from '../workbench-settings';
 import { createExampleSwitcher, createMountedUniver, createUniverDisposer } from '../mount-example';
 
 afterEach(() => {
@@ -40,12 +39,12 @@ describe('mounted Univer lifecycle', () => {
         } as unknown as FUniver;
         const host = { replaceChildren: vi.fn() } as unknown as HTMLElement;
         const initialSettings = {
-            locale: 'zhCN',
+            locale: 'zh-CN',
             ribbonType: 'grid',
             zoomRatio: 1,
         } as IWorkbenchMountOptions;
         const nextSettings = {
-            locale: 'enUS',
+            locale: 'en-US',
             ribbonType: 'simple',
             zoomRatio: 1.25,
         } as IWorkbenchMountOptions;
@@ -84,7 +83,7 @@ describe('mounted Univer lifecycle', () => {
         } as unknown as FUniver;
         const host = { replaceChildren: vi.fn() } as unknown as HTMLElement;
         const initialSettings = {
-            locale: 'zhCN',
+            locale: 'zh-CN',
             ribbonType: 'grid',
             zoomRatio: 1,
         } as IWorkbenchMountOptions;
@@ -134,7 +133,7 @@ describe('mounted Univer lifecycle', () => {
         } as unknown as FUniver;
         const host = { replaceChildren: vi.fn() } as unknown as HTMLElement;
         const initialSettings = {
-            locale: 'zhCN',
+            locale: 'zh-CN',
             region: 'auto',
             ribbonType: 'grid',
             uiChrome: 'full',
@@ -142,7 +141,7 @@ describe('mounted Univer lifecycle', () => {
         } as IWorkbenchMountOptions;
         const nextSettings = {
             ...initialSettings,
-            region: 'frFR',
+            region: 'fr-FR',
             ribbonType: 'simple',
             uiChrome: 'canvas-only',
             zoomRatio: 1.25,
@@ -164,7 +163,7 @@ describe('mounted Univer lifecycle', () => {
         expect(univerAPI.setRibbonType).toHaveBeenCalledOnce();
         expect(univerAPI.setRibbonType).toHaveBeenCalledWith('simple');
         expect(univerAPI.setRegion).toHaveBeenCalledOnce();
-        expect(univerAPI.setRegion).toHaveBeenCalledWith('frFR');
+        expect(univerAPI.setRegion).toHaveBeenCalledWith('fr-FR');
         expect(univerAPI.setUIVisible).toHaveBeenCalledTimes(4);
         expect(univerAPI.setUIVisible).toHaveBeenNthCalledWith(1, 'header', false);
         expect(univerAPI.setUIVisible).toHaveBeenNthCalledWith(2, 'toolbar', false);
@@ -199,7 +198,7 @@ describe('mounted Univer lifecycle', () => {
         } as unknown as FUniver;
         const host = { replaceChildren: vi.fn() } as unknown as HTMLElement;
         const initialSettings = {
-            locale: 'zhCN',
+            locale: 'zh-CN',
             region: 'auto',
             ribbonType: 'grid',
             uiChrome: 'full',
@@ -207,8 +206,8 @@ describe('mounted Univer lifecycle', () => {
         } as IWorkbenchMountOptions;
         const nextSettings = {
             ...initialSettings,
-            locale: 'enUS',
-            region: 'frFR',
+            locale: 'en-US',
+            region: 'fr-FR',
             ribbonType: 'simple',
             uiChrome: 'canvas-only',
             zoomRatio: 1.25,
@@ -238,7 +237,7 @@ describe('mounted Univer lifecycle', () => {
 describe('createExampleSwitcher', () => {
     it('restarts the active example when its device changes and keeps other settings', async () => {
         const host = {} as HTMLElement;
-        const options = { device: 'desktop', locale: 'frFR', darkMode: true } as IWorkbenchMountOptions;
+        const options = { device: 'desktop', locale: 'fr-FR', darkMode: true } as IWorkbenchMountOptions;
         const events: string[] = [];
         const mount: MountExample = (_host, settings) => {
             events.push(`mount ${settings.device} ${settings.locale} ${settings.darkMode}`);
@@ -258,12 +257,12 @@ describe('createExampleSwitcher', () => {
         switcher.dispose();
 
         expect(events).toEqual([
-            'mount desktop frFR true',
+            'mount desktop fr-FR true',
             'dispose desktop',
-            'mount mobile frFR true',
+            'mount mobile fr-FR true',
             'update mobile false',
             'dispose mobile',
-            'mount desktop frFR true',
+            'mount desktop fr-FR true',
             'dispose desktop',
         ]);
     });
@@ -367,9 +366,9 @@ describe('createExampleSwitcher', () => {
 
     it('serializes settings selected while an example is finishing its mount', async () => {
         const host = {} as HTMLElement;
-        const initialSettings = { locale: 'zhCN' } as IWorkbenchMountOptions;
-        const pendingSettings = { locale: 'frFR' } as IWorkbenchMountOptions;
-        const latestSettings = { locale: 'enUS' } as IWorkbenchMountOptions;
+        const initialSettings = { locale: 'zh-CN' } as IWorkbenchMountOptions;
+        const pendingSettings = { locale: 'fr-FR' } as IWorkbenchMountOptions;
+        const latestSettings = { locale: 'en-US' } as IWorkbenchMountOptions;
         const updates: IWorkbenchMountOptions[] = [];
         let resolveMount!: (mounted: IMountedExample) => void;
         let resolvePendingUpdate!: () => void;

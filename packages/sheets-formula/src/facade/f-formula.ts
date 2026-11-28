@@ -164,14 +164,14 @@ export interface IFFormulaSheetsMixin {
      *   {
      *     description: 'customFunction.HELLO.description',
      *     locales: {
-     *       'zhCN': {
+     *       'zh-CN': {
      *         'customFunction': {
      *           'HELLO': {
      *             'description': '一个简单的问候函数'
      *           }
      *         }
      *       },
-     *       'enUS': {
+     *       'en-US': {
      *         'customFunction': {
      *           'HELLO': {
      *             'description': 'A simple greeting function'
@@ -252,14 +252,14 @@ export interface IFFormulaSheetsMixin {
      *   {
      *     description: 'customFunction.FETCH_USER_SCORE.description',
      *     locales: {
-     *       'zhCN': {
+     *       'zh-CN': {
      *         'customFunction': {
      *           'FETCH_USER_SCORE': {
      *             'description': '从数据库中获取用户分数'
      *           }
      *         }
      *       },
-     *       'enUS': {
+     *       'en-US': {
      *         'customFunction': {
      *           'FETCH_USER_SCORE': {
      *             'description': 'Mock fetching user score from database'

@@ -28,13 +28,25 @@ describe('RegionService', () => {
 
         expect(regionService.getCurrentRegion()).toBe(LocaleType.ZH_CN);
 
-        localeService.setLocale(LocaleType.EN_US);
+        const changes: string[] = [];
+        const regions: string[] = [];
+        localeService.localeChanged$.subscribe((locale) => changes.push(locale));
+        regionService.currentRegion$.subscribe((region) => regions.push(region));
+
+        expect(() => regionService.setRegion('en_US')).toThrow(RangeError);
+        localeService.setLocale('en-US');
         expect(regionService.getCurrentRegion()).toBe(LocaleType.EN_US);
 
         regionService.setRegion('en-IN');
         localeService.setLocale(LocaleType.JA_JP);
         expect(regionService.getCurrentRegion()).toBe('en-IN');
 
+        regionService.setRegion('sr-latn-rs');
+        localeService.setLocale('es-419');
+        expect(regionService.getExplicitRegion()).toBe('sr-Latn-RS');
+        expect(localeService.getCurrentLocale()).toBe('es-419');
+        expect(changes).toEqual(['en-US', 'ja-JP', 'es-419']);
+        expect(regions).toEqual(['zh-CN', 'en-US', 'en-IN', 'sr-Latn-RS']);
         injector.dispose();
     });
 });

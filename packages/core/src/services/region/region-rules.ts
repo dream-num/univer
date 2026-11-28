@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getRegionTag } from '../../types/enum/locale-type';
+import { localeTagPattern } from '../../types/locale-tag-pattern';
 
 interface IRegionalRule<T> {
     value: T;
@@ -23,13 +23,12 @@ interface IRegionalRule<T> {
 }
 
 // Excel resolves these older language names using the modern formatting data.
-const languageAliases = new Map([['sh', 'sr'], ['tl', 'fil']]);
-
-const regionTag = /^([a-z]{2,8})(?:-([a-z]{4}))?(?:-([a-z]{2}|[0-9]{3}))?(?:-(?:[a-z0-9]{5,8}|[0-9][a-z0-9]{3}))*(?:-[0-9a-wy-z](?:-[a-z0-9]{2,8})+)*(?:-x(?:-[a-z0-9]{1,8})+)?$/i;
+const languageAliases = new Map([['cmn', 'zh'], ['sh', 'sr'], ['tl', 'fil']]);
 
 export function getRegionParts(region: string): { language: string; script: string; territory: string } | undefined {
-    const parts = regionTag.exec(getRegionTag(region));
-    if (!parts) return undefined;
+    const parts = localeTagPattern.exec(region);
+    // Excel uses default number settings for extended-language tags, including zh-cmn-Hans-DE.
+    if (!parts || parts[1].includes('-')) return undefined;
     const inputLanguage = parts[1].toLowerCase();
     return {
         language: languageAliases.get(inputLanguage) ?? inputLanguage,

@@ -14,7 +14,19 @@
  * limitations under the License.
  */
 
-import type { BaseDataModel, ITableSnapshot, IUnitRange, IWorkbookCalculationSettings, LocaleType, Nullable, Workbook } from '@univerjs/core';
+import type { BaseDataModel, ITableSnapshot, IUnitRange, IWorkbookCalculationSettings, Nullable, Workbook } from '@univerjs/core';
+import {
+    createIdentifier,
+    DateSystem,
+    Disposable,
+    Inject,
+    IUniverInstanceService,
+    LocaleService,
+    ObjectMatrix,
+    Optional,
+    RegionService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IDirtyUnitDefinedNameMap,
@@ -35,18 +47,6 @@ import type {
     IUnitStylesData,
 } from '../basics/common';
 import type { IFormulaDataSnapshot } from '../models/formula-data-snapshot';
-import {
-    createIdentifier,
-    DateSystem,
-    Disposable,
-    Inject,
-    IUniverInstanceService,
-    LocaleService,
-    ObjectMatrix,
-    Optional,
-    RegionService,
-    UniverInstanceType,
-} from '@univerjs/core';
 import { convertUnitDataToRuntime, copyUnitData } from '../basics/runtime';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { ISheetRowFilteredService } from './sheet-row-filtered.service';
@@ -144,7 +144,7 @@ export interface IFormulaCurrentConfigService {
 
     getClearDependencyTreeCache(): IDirtyUnitSheetNameMap;
 
-    getLocale(): LocaleType;
+    getLocale(): string;
     readonly calculationRegionReadCount: number;
     getCalculationRegion(): string;
     getDateSystem(unitId?: string): DateSystem;

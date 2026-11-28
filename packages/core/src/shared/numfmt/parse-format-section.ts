@@ -408,7 +408,8 @@ export function parseFormatSection(inputTokens: FormatToken[]): ParsedFormatSect
                 }
             } else if (startsWith === 'g') {
                 bit.size = u_YEAR;
-                bit.type = value.length >= 3 ? 'era-name' : value.length === 2 ? 'era-short' : 'era-initial';
+                if (value.length >= 3) bit.type = 'era-name';
+                else bit.type = value.length === 2 ? 'era-short' : 'era-initial';
             }
             // signal date calc and track smallest needed unit
             part.date = part.date | bit.size;

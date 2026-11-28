@@ -220,7 +220,6 @@ export class UpdateDefinedNameController extends Disposable {
         return {
             redos: redoMutations,
             undos: undoMutations,
-            rollbackMutations: undoMutations.map((undo) => [undo]),
         };
     }
 

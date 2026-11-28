@@ -15,7 +15,6 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentData } from '@univerjs/core';
-import type { DateTimeFieldFormat } from '../../../utils/date-time-field';
 import {
     BooleanNumber,
     CustomRangeType,
@@ -53,6 +52,7 @@ import {
     UIRuntimeScopeService,
 } from '@univerjs/ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { DateTimeFieldFormat } from '../../../utils/date-time-field';
 import enUS from '../../../locale/en-US';
 import { UpdateDocFieldsShortcut } from '../../../shortcuts/format.shortcut';
 import { createDateTimeField } from '../../../utils/date-time-field';
@@ -90,7 +90,7 @@ function createTestBed(locked = false, multipleStories = false, format: DateTime
         headers: { header: { headerId: 'header', body: {
             dataStream: `${text} fixed\r\n`,
             customRanges: [{ rangeId: 'date-field', startIndex: 0, endIndex: text.length - 1, rangeType: CustomRangeType.FIELD, properties: { ...properties, locked: locked ? BooleanNumber.TRUE : BooleanNumber.FALSE } }],
-            textRuns: [{ st: 0, ed: text.length, ts: { lang: 'en-US', bl: BooleanNumber.TRUE } }],
+            textRuns: [{ st: 0, ed: text.length, ts: { lang: 'enUS', bl: BooleanNumber.TRUE } }],
             paragraphs: [{ paragraphId: 'date-paragraph', startIndex: text.length + 6 }],
             customDecorations: [],
             customBlocks: [],

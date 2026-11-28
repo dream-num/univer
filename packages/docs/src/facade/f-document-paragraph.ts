@@ -300,6 +300,7 @@ export class FDocumentParagraph extends FBaseInitialable {
 
     /**
      * Replace this paragraph's plain text.
+     * To edit formatted text in place, use `findText(...)` and call `replaceText` on the match.
      * @param {string} text The replacement text. Do not include the paragraph break.
      * @returns {boolean} `true` if the paragraph text was replaced.
      * @example

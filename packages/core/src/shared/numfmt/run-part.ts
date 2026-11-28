@@ -505,7 +505,8 @@ export function runPart(
                 const displayYear = era ? year - Math.floor(era.start / 10000) + 1 : year;
                 output.push(era && token.pad && displayYear < 10 ? '0' : '', displayYear);
             } else if (era) {
-                output.push(tokenType === 'era-name' ? era.name : tokenType === 'era-short' ? era.name[0] : era.initial);
+                if (tokenType === 'era-name') output.push(era.name);
+                else output.push(tokenType === 'era-short' ? era.name[0] : era.initial);
             }
         } else if (tokenType === 'year') {
             if (year < 0) {

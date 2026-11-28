@@ -17,9 +17,9 @@
 import type { Injector, ITextStyle } from '@univerjs/core';
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
-import { ICommandService, Tools, UpdateDocsAttributeType } from '@univerjs/core';
+import { DataStreamTreeTokenType, ICommandService, Tools, UpdateDocsAttributeType } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
-import { buildPlainTextInsertBody, replaceBodyRange, retainBodyRange } from './utils';
+import { buildPlainTextInsertBody, normalizePlainTextDataStream, replaceBodyRange, retainBodyRange } from './utils';
 
 /** A clipped text-style run in document offsets. */
 export interface IFDocumentTextStyleRun {
@@ -198,6 +198,7 @@ export class FDocumentTextRange extends FBaseInitialable {
 
     /**
      * Replaces the range with plain text while preserving document mutation semantics.
+     * Use `replaceText` to retain the character formatting of a matched range.
      * @param {string} text Replacement plain text. An empty string deletes the range.
      * @returns {boolean} Whether the replacement succeeded.
      * @example
@@ -214,6 +215,49 @@ export class FDocumentTextRange extends FBaseInitialable {
             this._document.getDocumentDataModel(),
             this._commandService
         );
+    }
+
+    /**
+     * Replaces the selected text using the first selected character's formatting for the
+     * entire replacement. Identical text succeeds without editing any character styles.
+     * At a caret, insertion takes the previous character's style within the paragraph,
+     * or the following character's style at the start of a paragraph.
+     * This range keeps its original offsets. To edit the replacement, resolve its new bounds.
+     * @param {string} text Replacement text. An empty string deletes even a mixed-style range.
+     * @returns {boolean} Whether the edit succeeded.
+     * @example
+     * ```ts
+     * const doc = univerAPI.getActiveDocument();
+     * const rate = doc?.getParagraphs()[0]?.findText('9%');
+     * if (doc && rate) {
+     *     const { startOffset, segmentId } = rate.getRange();
+     *     if (rate.replaceText('100%')) {
+     *         doc.getTextRange(startOffset, startOffset + '100%'.length, segmentId).setTextStyle({ bl: 1 });
+     *     }
+     * }
+     * ```
+     */
+    replaceText(text: string): boolean {
+        this._validateRange();
+        const body = this._document.getBody(this._segmentId);
+        const replacement = normalizePlainTextDataStream(text);
+        if (replacement.length === this._endOffset - this._startOffset && body.dataStream.startsWith(replacement, this._startOffset)) {
+            return true;
+        }
+
+        const insertBody = buildPlainTextInsertBody(replacement);
+        if (insertBody.dataStream.length > 0) {
+            let styleOffset = this._startOffset;
+            if (styleOffset === this._endOffset && styleOffset > 0 && body.dataStream[styleOffset - 1] !== DataStreamTreeTokenType.PARAGRAPH) {
+                styleOffset--;
+            }
+            const run = body.textRuns?.find(({ st, ed }) => st <= styleOffset && styleOffset < ed);
+            if (run) {
+                insertBody.textRuns = [{ ...Tools.deepClone(run), st: 0, ed: insertBody.dataStream.length }];
+            }
+        }
+
+        return replaceBodyRange(this.getRange(), insertBody, this._document.getDocumentDataModel(), this._commandService);
     }
 
     private _validateRange(): void {

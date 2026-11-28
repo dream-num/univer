@@ -60,7 +60,7 @@ describe('TableFilterController', () => {
         injector.add([ISheetRowFilteredService, { useClass: SheetRowFilteredService }]);
         injector.add([TableFilterController]);
         const locale = injector.get(LocaleService);
-        locale.load({ enUS });
+        locale.load({ 'en-US': enUS });
         locale.setLocale(LocaleType.EN_US);
         locale.setDirection('ltr');
         injector.get(SheetInterceptorService);

@@ -17,7 +17,6 @@
 import { BehaviorSubject } from 'rxjs';
 import type { Nullable } from '../../shared';
 import type { ITextRangeParam } from '../../sheets/typedef';
-import type { LocaleType } from '../../types/enum';
 import type {
     IDocumentBody,
     IDocumentData,
@@ -56,7 +55,7 @@ export interface IDocumentStatistics {
 }
 
 export interface IDocumentStatisticsOptions {
-    locale?: LocaleType;
+    locale?: string;
     ranges?: Readonly<ITextRangeParam[]>;
     signal?: AbortSignal;
 }

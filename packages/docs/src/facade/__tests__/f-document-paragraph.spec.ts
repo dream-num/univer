@@ -44,6 +44,99 @@ describe('FDocumentParagraph', () => {
         univer = null;
     });
 
+    it('replaces a formatted match, preserving its neighbors and undo history', () => {
+        const emphasis = { bl: BooleanNumber.TRUE, cl: { rgb: '#C00000' } };
+        createDocumentFacade(createDocumentData('doc', {
+            dataStream: 'Rate 9% today\r\n',
+            paragraphs: [{ startIndex: 13, paragraphId: 'rate' }],
+            textRuns: [{ st: 5, ed: 7, ts: emphasis }, { st: 8, ed: 13, ts: { it: BooleanNumber.TRUE } }],
+        }));
+        const p = document.getParagraphs()[0];
+        const before = p.getTextRange().getExplicitTextStyleRuns();
+        expect(p.findText('9%')!.replaceText('32%')).toBe(true);
+        expect(p.getText()).toBe('Rate 32% today');
+        expect(p.getTextRange().getExplicitTextStyleRuns()).toEqual([
+            { startOffset: 5, endOffset: 8, textStyle: emphasis },
+            { startOffset: 9, endOffset: 14, textStyle: { it: BooleanNumber.TRUE } },
+        ]);
+        expect(p.getTextRange().replaceText(p.getText())).toBe(true);
+        expect(document.undo()).toBe(true);
+        expect(p.getText()).toBe('Rate 9% today');
+        expect(p.getTextRange().getExplicitTextStyleRuns()).toEqual(before);
+        expect(document.redo()).toBe(true);
+        expect(p.getText()).toBe('Rate 32% today');
+        expect(p.setText(p.getText())).toBe(true);
+        expect(p.getTextRange().getExplicitTextStyleRuns()).toEqual([]);
+    });
+
+    it('uses the first selected style on replacement and preserves formatting outside local edits', () => {
+        createDocumentFacade(createDocumentData('doc', {
+            dataStream: '张三负责上海\r\n',
+            paragraphs: [{ startIndex: 6, paragraphId: 'assignment' }],
+            textRuns: [{ st: 2, ed: 4, ts: { bl: BooleanNumber.TRUE } }],
+        }));
+        const p = document.getParagraphs()[0];
+        expect(p.getTextRange().replaceText('张三和李四负责北京')).toBe(true);
+        expect(p.getText()).toBe('张三和李四负责北京');
+        expect(p.getTextRange().getExplicitTextStyleRuns()).toEqual([]);
+        expect(document.undo()).toBe(true);
+        expect(p.findText('张三')!.replaceText('张三和李四')).toBe(true);
+        expect(p.findText('上海')!.replaceText('北京')).toBe(true);
+        expect(p.getText()).toBe('张三和李四负责北京');
+        expect(p.getTextRange().getExplicitTextStyleRuns()).toEqual([
+            { startOffset: 5, endOffset: 7, textStyle: { bl: BooleanNumber.TRUE } },
+        ]);
+        expect(p.findText('李四负责')!.replaceText('')).toBe(true);
+        expect(p.getText()).toBe('张三和北京');
+    });
+
+    it('inherits the adjacent character style at a caret within the same paragraph', () => {
+        createDocumentFacade(createDocumentData('doc', {
+            dataStream: 'A😀B\rC\r\n',
+            paragraphs: [{ startIndex: 4, paragraphId: 'one' }, { startIndex: 6, paragraphId: 'two' }],
+            textRuns: [{ st: 1, ed: 3, ts: { bl: BooleanNumber.TRUE } }, { st: 5, ed: 6, ts: { it: BooleanNumber.TRUE } }],
+        }));
+        expect(document.getTextRange(5, 5).replaceText('新')).toBe(true);
+        expect(document.getTextRange(5, 7).getCommonExplicitTextStyle()).toEqual({ it: BooleanNumber.TRUE });
+        expect(document.getTextRange(3, 3).replaceText('!')).toBe(true);
+        expect(document.getTextRange(1, 4).getCommonExplicitTextStyle()).toEqual({ bl: BooleanNumber.TRUE });
+        expect(document.getTextRange(0, 0).replaceText('x')).toBe(true);
+        expect(document.getParagraphs().map((p) => p.getText())).toEqual(['xA😀!B', '新C']);
+    });
+
+    it('inherits the first named style of a mixed match and preserves the trailing style', () => {
+        createDocumentFacade(createDocumentData('doc', {
+            dataStream: 'ABCD\r\n',
+            paragraphs: [{ startIndex: 4, paragraphId: 'styles' }],
+            textRuns: [{ st: 0, ed: 2, sId: 'first' }, { st: 2, ed: 4, sId: 'second' }],
+        }));
+        const p = document.getParagraphs()[0];
+        expect(p.findText('BC')!.replaceText('😀!')).toBe(true);
+        expect(p.getText()).toBe('A😀!D');
+        expect(document.getBody().textRuns).toMatchObject([
+            { st: 0, ed: 4, sId: 'first' },
+            { st: 4, ed: 5, sId: 'second' },
+        ]);
+    });
+
+    it.each([
+        ['XYZ123', { bl: BooleanNumber.TRUE }, { it: BooleanNumber.TRUE }],
+        ['UVW', { it: BooleanNumber.TRUE }, { bl: BooleanNumber.TRUE }],
+        ['A78D', { bl: BooleanNumber.TRUE }, { it: BooleanNumber.TRUE }],
+    ] as const)('applies the first character style to the entire replacement %s', (replacement, first, last) => {
+        createDocumentFacade(createDocumentData('doc', {
+            dataStream: '[ABCD]\r\n',
+            paragraphs: [{ startIndex: 6, paragraphId: 'mixed' }],
+            textRuns: [{ st: 1, ed: 3, ts: first }, { st: 3, ed: 5, ts: last }],
+        }));
+        const p = document.getParagraphs()[0];
+        expect(p.findText('ABCD')!.replaceText(replacement)).toBe(true);
+        expect(p.getText()).toBe(`[${replacement}]`);
+        expect(p.getTextRange().getExplicitTextStyleRuns()).toEqual([
+            { startOffset: 1, endOffset: 1 + replacement.length, textStyle: first },
+        ]);
+    });
+
     it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('edits inherited character indents through save, undo and redo (%s)', (documentFlavor) => {
         const data = createSimpleDocument();
         data.documentStyle = { ...data.documentStyle, documentFlavor };

@@ -20,7 +20,7 @@ import type { IUniverUIConfig } from '@univerjs/ui';
 import {
     dateKit,
     generateRandomId,
-    getRegionTag,
+    getIntlLocaleTag,
     ICommandService,
     isSafeUrl,
     LocaleService,
@@ -136,7 +136,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const direction = useObservable(localeService.direction$, localeService.getDirection());
     function formatCommentDateTime(value: string, region: string): string {
         const date = dateKit(value);
-        const regionTag = getRegionTag(region);
+        const regionTag = getIntlLocaleTag(region);
 
         return date.formatIntl(regionTag, {
             year: 'numeric',

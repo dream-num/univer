@@ -18,7 +18,6 @@ import type { ImageSourceType } from '../services/image-io/image-io.service';
 import type { IResources } from '../services/resource-manager/type';
 import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { DateSystem } from '../types/enum/date-system';
-import type { LocaleType } from '../types/enum/locale-type';
 import type { SheetTypes } from '../types/enum/sheet-types';
 import type { BooleanNumber } from '../types/enum/text-style';
 import type { ICellCustomRender } from '../types/interfaces/i-cell-custom-render';
@@ -55,7 +54,7 @@ export interface IWorkbookData {
     /**
      * Locale of the document.
      */
-    locale: LocaleType;
+    locale: string;
 
     /** Date serial system used by this workbook. Missing values mean Excel 1900. */
     dateSystem?: DateSystem;

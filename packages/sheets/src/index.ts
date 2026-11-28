@@ -650,7 +650,7 @@ export {
     SheetInterceptorService,
     VALIDATE_CELL,
 } from './services/sheet-interceptor/sheet-interceptor.service';
-export type { IAutoHeightContext, ICommandMutationGroup } from './services/sheet-interceptor/sheet-interceptor.service';
+export type { IAutoHeightContext } from './services/sheet-interceptor/sheet-interceptor.service';
 export type {
     ISheetLocation,
     ISheetLocationBase,

@@ -168,11 +168,9 @@ export function checkCriteria(input: FunctionVariantType) {
     const criteria = toValue(input);
     const criteriaValues = criteria as ArrayValueObject;
     const valid = criteria.isArray() && criteriaValues.getRowCount() >= 2;
-    return {
-        isError: !valid,
-        errorObject: valid ? null : criteria.isError() ? criteria as ErrorValueObject : ErrorValueObject.create(ErrorType.VALUE),
-        criteriaValues,
-    };
+    if (valid) return { isError: false, errorObject: null, criteriaValues };
+    const errorObject = criteria.isError() ? criteria as ErrorValueObject : ErrorValueObject.create(ErrorType.VALUE);
+    return { isError: true, errorObject, criteriaValues };
 }
 
 /*

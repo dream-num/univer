@@ -42,6 +42,11 @@ APIs must adhere to the chaining principle:
 - APIs with `create` semantics should return the created instance.
 - APIs with `delete` semantics should return `true/false`.
 
+Docs text ranges have fixed start and end offsets. Their editing methods, including
+`FDocumentTextRange.replaceText()`, return a boolean indicating success. After a
+length-changing replacement, resolve a new range before formatting the replacement.
+Returning the original range for chaining would target its old offsets.
+
 ## Easy to Get
 
 All APIs/constants/enums should be accessible from the `univerAPI` variable.

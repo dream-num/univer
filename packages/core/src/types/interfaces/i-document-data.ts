@@ -21,7 +21,6 @@ import type {
     BooleanNumber,
     CellValueType,
     HorizontalAlign,
-    LocaleType,
     TextDirection,
     VerticalAlign,
     WrapStrategy,
@@ -39,7 +38,7 @@ export interface IDocumentData extends IReferenceSource {
     id: string;
     /** Revision of this document. Would be used in collaborated editing. Starts with zero. */
     rev?: number;
-    locale?: LocaleType;
+    locale?: string;
     title?: string;
     /** Organization associated with the document, used by built-in property fields. */
     company?: string;

@@ -187,7 +187,9 @@ export function getNativeCalendarFormat(input: string, region: string, system: n
         });
     } else if (pattern === 'mmm-yy') {
         const year = short.includes('yyyy') ? 'yyyy' : 'yy';
-        const month = language === 'fi' ? 'mm' : language === 'ku' ? literal('mmm') : 'mmm';
+        let month = 'mmm';
+        if (language === 'fi') month = 'mm';
+        else if (language === 'ku') month = literal(month);
         pattern = `${month}-${literalYear.has(language) ? literal(year) : year}`;
     } else if (pattern === 'd-mmm-yy') {
         pattern = 'dd-mmm-yy';
@@ -263,7 +265,8 @@ export function localizeBuiltInDatePattern(pattern: string, region: string, loca
         const short = getRegionalDatePattern(region, locale);
         const language = getRegionParts(region)?.language;
         const day = short.includes('dd') ? 'dd' : 'd';
-        const separator = language === 'pt' ? '"/"' : short.includes('.') ? '"."' : '"-"';
+        let separator = short.includes('.') ? '"."' : '"-"';
+        if (language === 'pt') separator = '"/"';
         const [before, after] = language === 'de' ? ['". "', '" "'] : [separator, separator];
         return `${pattern.startsWith('d') ? `${day}${before}` : ''}mmm${pattern.endsWith('yy') ? `${after}yy` : ''}`;
     }

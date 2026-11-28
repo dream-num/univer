@@ -127,62 +127,34 @@ export const RemoveSheetFilterCommand: ICommand<ISheetCommandSharedParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const autoFilter = filterModel.serialize();
-        const groups = accessor.get(SheetInterceptorService).getCommandMutationGroups({
+        const intercepted = accessor.get(SheetInterceptorService).onCommandExecute({
             id: RemoveSheetFilterCommand.id,
             params: { unitId, subUnitId },
         });
-        // A hook can have any number of inverse mutations. Never guess which inverse belongs
-        // to an unfinished step: multi-step hooks must supply explicit rollback boundaries.
-        if (groups.some((group) => {
-            const count = (group.preRedos?.length ?? 0) + group.redos.length;
-            return group.rollbackMutations ? group.rollbackMutations.length !== count : count > 1;
-        })) {
-            return false;
-        }
-        const filterUndos = destructFilterModel(unitId, subUnitId, autoFilter);
         const undoMutations = [
-            ...groups.flatMap((group) => group.preUndos ?? []),
-            ...filterUndos,
-            ...groups.flatMap((group) => group.undos),
+            ...(intercepted.preUndos ?? []),
+            ...destructFilterModel(unitId, subUnitId, autoFilter),
+            ...intercepted.undos,
         ];
-        const hookSteps = groups.map((group) => {
-            const pre = group.preRedos ?? [];
-            const rollback = group.rollbackMutations ?? [[...(group.preUndos ?? []), ...group.undos]];
-            return {
-                pre: pre.map((mutation, index) => ({ mutation, rollback: rollback[index] })),
-                post: group.redos.map((mutation, index) => ({ mutation, rollback: rollback[pre.length + index] })),
-            };
-        });
-        const steps = [
-            ...hookSteps.flatMap((group) => group.pre),
-            { mutation: { id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId } }, rollback: filterUndos },
-            ...hookSteps.flatMap((group) => group.post),
+        const redoMutations = [
+            ...(intercepted.preRedos ?? []),
+            { id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId } },
+            ...intercepted.redos,
         ];
-        const redoMutations = steps.map(({ mutation }) => mutation);
 
-        const hasCompanionMutations = redoMutations.length > 1;
-        // Keep the intermediate states local until the filter and its companion mutations all succeed.
-        const { result, index } = sequenceExecute(redoMutations, commandService, hasCompanionMutations ? { onlyLocal: true } : undefined);
-        if (!result) {
-            if (hasCompanionMutations && index > 0) {
-                const rollback = steps.slice(0, index).reverse().flatMap((step) => step.rollback);
-                sequenceExecute(rollback, commandService, { onlyLocal: true });
-            }
-            return false;
+        const { result } = sequenceExecute(redoMutations, commandService);
+        if (result) {
+            sheetsFilterService.completeInitialFilterCatchUp(unitId);
+            sheetsFilterService.notifyLocalFilterOperationSucceeded(unitId, subUnitId);
+            undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations, redoMutations });
+            commandService.syncExecuteCommand<IMarkDirtyFilterChangeMutationParams>(MarkDirtyFilterChangeMutation.id, {
+                unitId,
+                subUnitId,
+                filterRange,
+            });
         }
-        sheetsFilterService.completeInitialFilterCatchUp(unitId);
-        sheetsFilterService.notifyLocalFilterOperationSucceeded(unitId, subUnitId);
-        if (hasCompanionMutations) {
-            sequenceExecute(redoMutations, commandService, { syncOnly: true });
-        }
-        undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations, redoMutations });
-        commandService.syncExecuteCommand<IMarkDirtyFilterChangeMutationParams>(MarkDirtyFilterChangeMutation.id, {
-            unitId,
-            subUnitId,
-            filterRange,
-        });
 
-        return true;
+        return result;
     },
 };
 

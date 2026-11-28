@@ -71,7 +71,7 @@ describe('getDateFormatOptions', () => {
         expect(persian.some((option) => option.label === '8/5/1930')).toBe(false);
     });
 
-    it.each(['en-IN', 'enIN', 'en-GB', 'ml-IN'])('starts with day-first presets for %s', (region) => {
+    it.each(['en-IN', 'en-GB', 'ml-IN'])('starts with day-first presets for %s', (region) => {
         expect(getDateFormatOptions(region)[0]).toEqual({ label: '05/08/1930', value: 'dd/mm/yyyy' });
         expect(getDateFormatOptions(region, 'dd-mmm-yyyy')[0].value).toBe('dd-mmm-yyyy');
     });

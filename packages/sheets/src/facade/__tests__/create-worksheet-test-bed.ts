@@ -141,7 +141,7 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
     }
 
     // load i18n
-    injector.get(LocaleService).load({ zhCN, enUS });
+    injector.get(LocaleService).load({ 'zh-CN': zhCN, 'en-US': enUS });
 
     // load theme service
     const themeService = injector.get(ThemeService);

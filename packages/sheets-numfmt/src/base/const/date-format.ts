@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getRegionalDatePattern, getRegionParts, getRegionTag, LocaleType } from '@univerjs/core';
+import { getRegionalDatePattern, getRegionParts, LocaleType } from '@univerjs/core';
 
 interface IDateFormatProfile {
     dates: readonly string[];
@@ -80,7 +80,7 @@ const DATE_FORMAT_PROFILES: Record<LocaleType, IDateFormatProfile> = {
     },
 };
 
-const builtInRegions = new Map(Object.values(LocaleType).map((locale) => [getRegionTag(locale).toLowerCase(), locale]));
+const builtInRegions = Object.values(LocaleType);
 
 export function getDateFormatRegionTag(region: string): string | undefined {
     const parts = getRegionParts(region);
@@ -91,7 +91,7 @@ export function getDateFormatRegionTag(region: string): string | undefined {
 
 export function getDateFormatLocale(region: string): LocaleType | undefined {
     const tag = getDateFormatRegionTag(region);
-    return tag ? builtInRegions.get(tag.toLowerCase()) : undefined;
+    return builtInRegions.find((locale) => locale === tag);
 }
 
 function getDateProfile(region: string): IDateFormatProfile {

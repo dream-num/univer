@@ -16,7 +16,6 @@
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import type { ICopySheetCommandParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
-import type { ISheetNote } from '../../models/sheets-note.model';
 import {
     ICommandService,
     ILogService,
@@ -58,6 +57,7 @@ import {
 } from '@univerjs/sheets';
 import enUS from '@univerjs/sheets/locale/en-US';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { ISheetNote } from '../../models/sheets-note.model';
 // Note mutations are registered by SheetsNoteController.
 import { PLUGIN_NAME } from '../../const';
 import { SheetsNoteModel } from '../../models/sheets-note.model';
@@ -134,7 +134,7 @@ function createTestBed(resources?: Array<{ name: string; data: string }>) {
     logService.setLogLevel(LogLevel.SILENT);
 
     const localeService = get(LocaleService);
-    localeService.load({ enUS });
+    localeService.load({ 'en-US': enUS });
     localeService.setLocale(LocaleType.EN_US);
 
     const commandService = get(ICommandService);

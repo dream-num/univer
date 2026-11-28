@@ -22,7 +22,6 @@
 import { expect } from 'vitest';
 import { getCurrencySymbolByLocale } from '../../../services/locale/currency-symbol';
 import { DateSystem } from '../../../types/enum/date-system';
-import { LOCALE_META } from '../../../types/enum/locale-type';
 import { format, getFormatInfo } from '../api';
 import { currencySymbols } from '../currency-symbols';
 import { getNumfmtCurrencySymbol } from '../utils';
@@ -102,19 +101,10 @@ numfmtTest('option: nbsp', (t) => {
     t.format('0 "foo bar" .0', 1.1, '1 foo bar .1', { nbsp: true });
 });
 
-numfmtTest('preserves number grouping and currency for built-in locale IDs and tags', (t) => {
-    for (const [locale, { tag }] of Object.entries(LOCALE_META)) {
-        t.format('#,##0', 1234567890, format('#,##0', 1234567890, { region: tag }), { region: locale });
-        expect(getCurrencySymbolByLocale(tag)).toBe(getCurrencySymbolByLocale(locale));
-    }
-});
-
 numfmtTest('uses Excel monetary grouping for both numbers and currency', (t) => {
-    for (const region of ['en-US', 'enUS']) {
-        t.format('#,##0', 1234567890, '1,234,567,890', { region });
-        t.format('"₹"#,##0', 1234567890, '₹1,234,567,890', { region });
-    }
-    for (const region of ['ml-IN', 'mlIN', 'mr-IN', 'or-IN', 'bn-BD', 'hi-IN', 'enIN']) {
+    t.format('#,##0', 1234567890, '1,234,567,890', { region: 'en-US' });
+    t.format('"₹"#,##0', 1234567890, '₹1,234,567,890', { region: 'en-US' });
+    for (const region of ['ml-IN', 'mr-IN', 'or-IN', 'bn-BD', 'hi-IN', 'en-IN']) {
         t.format('#,##0', 1234567890, '1,23,45,67,890', { region });
         t.format('"₹"#,##0', 1234567890, '₹1,23,45,67,890', { region });
     }
@@ -139,7 +129,7 @@ numfmtTest('uses the same currency tokens for classification, selection and mone
 });
 
 numfmtTest('keeps grouping for equivalent regional tags and scripts', (t) => {
-    for (const region of ['enIN', 'en-IN-u-nu-latn', 'hi-Deva-IN', 'bn-Beng-BD']) {
+    for (const region of ['en-IN', 'en-IN-u-nu-latn', 'hi-Deva-IN', 'bn-Beng-BD']) {
         t.format('#,##0', 123456789, '12,34,56,789', { region });
     }
     t.format('#,##0', 123456789, '12,34,56,789', { region: 'en-IN-x-test' });
@@ -157,7 +147,7 @@ numfmtTest('uses regional currency symbols including language and script variant
         ['hu-HU', 'Ft'],
         ['da-DK', 'kr.'],
         ['en-HK', '$'],
-        ['zhHK', 'HK$'],
+        ['zh-HK', 'HK$'],
         ['zh-Hans-HK', '$'],
         ['bs-Cyrl-BA', 'КМ'],
         ['en-IN-u-nu-latn', '₹'],
@@ -181,7 +171,7 @@ numfmtTest('option: grouping', (t) => {
     t.format('#,##0', 1234567890, '1,234,567,890', { grouping: [3] });
     t.format('#,##0', 1234567890, '1,23,45,67,890', { grouping: [3, 2] });
     t.format('#,##0', 1234567890, '1,23,45,67,890', { region: 'en-IN' });
-    t.format('#,##0', 1234567890, '1,23,45,67,890', { region: 'enIN' });
+    t.format('#,##0', 1234567890, '1,23,45,67,890', { region: 'en-IN' });
     t.format('#,##0', 1234567890, '1,234,567,890', { region: 'en-IN', grouping: [3, 3] });
     t.format('0', 1234567890, '1234567890', { region: 'en-IN' });
     t.format('#,##0', 1234567890, '12,34,56,78,90', { grouping: [2, 2] });

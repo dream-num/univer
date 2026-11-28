@@ -40,9 +40,9 @@ rules.add('٬', 'sd', 'PK');
 rules.add('paired', 'rhg', 'BD');
 rules.add('paired', 'en', 'BD IN');
 rules.add('paired', 'bo', 'IN');
-rules.add(' ', 'en', 'AL BG CV CZ EE FI FR GE HU LT LV NO PT RU SE SK UA ZA');
+rules.add(' ', 'en zh', 'AL BG CV CZ EE FI FR GE HU LT LV NO PT RU SE SK UA ZA');
 rules.add(' ', 'pt', 'AO CV FR GW MZ PT ST TL');
-rules.add(' ', 'de', 'AT');
+rules.add(' ', 'de zh', 'AT');
 rules.add(' ', 'ff', 'BF GN GW');
 rules.add(' ', 'yo', 'BJ');
 rules.add(' ', 'sw', 'CD');
@@ -69,6 +69,8 @@ rules.add('paired', 'as bgc bho bn brx ccp doi dz gu hi kn kok kxv mai ml mr ne 
 rules.add(' ', 'acf af ba be bg blo br bua ce cs cv et fi fr gcf ht hu hy ie inh ka kea kk ky ln lt lu lv mgh myv nb nn no nqo nr oc os pl rm ru sah se seh sjd sje sju sk smn sq ss sv tg tk ts tt tyv uk uz ve vmw xh');
 rules.add('', 'la quc und');
 
+const defaultGroups: Record<string, string> = { '.': ',', ',': '.', '٫': '٬' };
+
 let lastRegion: string | undefined;
 let lastFormat: IRegionalNumberFormat = { decimal: '.', group: ',', htmlGroup: ',', grouping: standard, spaceBeforePercent: false };
 
@@ -80,26 +82,29 @@ export function getRegionalNumberFormat(region = ''): IRegionalNumberFormat {
         const territory = parts?.territory;
         const posix = /^en-(?:latn-)?us-(?:u-va-)?posix$/i.test(region);
         let style = rules.resolve(region);
-        if (!recognized || posix) {
+        if (!recognized || posix || (parts?.language === 'zh' && (parts.script === 'arab' || parts.script === 'cyrl'))) {
             style = '';
+        } else if (parts?.language === 'zh' && (parts.script === 'hans' || parts.script === 'hant')) {
+            style = 'default';
         } else if (territory && /^(?:AX|FI|NO|SE|SJ)$/.test(territory)) {
             style = ' ';
         } else if (territory === 'CH') {
             style = decimal === ',' ? ' ' : "'";
         } else if (territory === 'US' || territory === 'CA' || territory === 'GB') {
-            style = decimal === ',' ? ' ' : parts?.language === 'und' ? '' : 'default';
+            style = parts?.language === 'und' ? '' : 'default';
+            if (decimal === ',') style = ' ';
         } else if (territory && territory !== 'XK' && /^(?:X[A-Z]|Q[M-Z])$/.test(territory)) {
             style = 'default';
         }
-        const defaultGroup = decimal === ',' ? '.' : decimal === '٫' ? '٬' : ',';
+        const defaultGroup = defaultGroups[decimal];
         const group = style == null || style === 'default' || style === 'paired' ? defaultGroup : style;
         // Excel's HTML importer recognizes grouped numbers even when the region does not display grouping.
         const htmlGroup = posix ? '' : group || defaultGroup;
-        const grouping = style === 'paired' ? paired : group ? standard : ungrouped;
+        const grouping = style === 'paired' ? paired : standard;
         const spaceBeforePercent = recognized && (territory
             ? /^(?:AX|FI|NO|SJ)$/.test(territory)
             : /^(?:fi|nb|nn|no|se|smn)$/.test(parts?.language ?? ''));
-        lastFormat = Object.freeze({ decimal, group, htmlGroup, grouping, spaceBeforePercent });
+        lastFormat = Object.freeze({ decimal, group, htmlGroup, grouping: group ? grouping : ungrouped, spaceBeforePercent });
         lastRegion = region;
     }
     return lastFormat;

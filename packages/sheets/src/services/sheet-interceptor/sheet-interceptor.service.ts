@@ -24,7 +24,6 @@ import type {
     IComposeInterceptors,
     IDisposable,
     IInterceptor,
-    IMutationInfo,
     IRange,
     IUndoRedoCommandInfosByInterceptor,
     Nullable,
@@ -56,14 +55,7 @@ export interface IBeforeCommandInterceptor {
 
 export interface ICommandInterceptor {
     priority?: number;
-    getMutations(command: ICommandInfo): ICommandMutationGroup | ICommandMutationGroup[];
-}
-
-export interface ICommandMutationGroup extends IUndoRedoCommandInfosByInterceptor {
-    /** Inverses for each step in [...preRedos, ...redos]. Required for multi-step delete/filter removal hooks. */
-    rollbackMutations?: IMutationInfo[][];
-    /** Restore layout-dependent after-hook state once the command has restored the sheet structure. */
-    undoAfterBase?: boolean;
+    getMutations(command: ICommandInfo): IUndoRedoCommandInfosByInterceptor;
 }
 
 export interface IRangesInfo {
@@ -217,7 +209,7 @@ export class SheetInterceptorService extends Disposable {
      * @returns
      */
     onCommandExecute(info: ICommandInfo): IUndoRedoCommandInfosByInterceptor {
-        const infos = this.getCommandMutationGroups(info);
+        const infos = this._commandInterceptors.map((i) => i.getMutations(info));
 
         return {
             preUndos: infos.map((i) => i.preUndos ?? []).flat(),
@@ -225,11 +217,6 @@ export class SheetInterceptorService extends Disposable {
             preRedos: infos.map((i) => i.preRedos ?? []).flat(),
             redos: infos.map((i) => i.redos).flat(),
         };
-    }
-
-    /** Keeps each hook's inverse mutations paired with its work for transaction rollback. */
-    getCommandMutationGroups(info: ICommandInfo): ICommandMutationGroup[] {
-        return this._commandInterceptors.flatMap((interceptor) => interceptor.getMutations(info));
     }
 
     interceptAfterCommand(interceptor: ICommandInterceptor): IDisposable {
@@ -244,16 +231,12 @@ export class SheetInterceptorService extends Disposable {
     }
 
     afterCommandExecute(info: ICommandInfo): IUndoRedoCommandInfosByInterceptor {
-        const infos = this.getAfterCommandMutationGroups(info);
+        const infos = this._afterCommandInterceptors.map((i) => i.getMutations(info));
 
         return {
             undos: infos.map((i) => i.undos).flat(),
             redos: infos.map((i) => i.redos).flat(),
         };
-    }
-
-    getAfterCommandMutationGroups(info: ICommandInfo): ICommandMutationGroup[] {
-        return this._afterCommandInterceptors.flatMap((interceptor) => interceptor.getMutations(info));
     }
 
     interceptAutoHeight(interceptor: IAutoHeightInterceptors): IDisposable {

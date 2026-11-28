@@ -137,7 +137,7 @@ interface ITableOfContentsBuildOptions {
     showPageNumbers?: boolean;
     styles?: IDocStyles;
     documentStyle?: IDocumentStyle;
-    locale?: LocaleType;
+    locale?: string;
     lists?: ILists;
     tableSource?: ITables;
     preserveLeadingParagraph?: boolean;

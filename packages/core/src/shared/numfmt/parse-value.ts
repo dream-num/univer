@@ -744,8 +744,8 @@ function parseRegionalDateFields(parts: RegExpExecArray, pattern: string): IDate
     const first = Number(left);
     const second = Number(middle);
     const date = (yearText: string, month: number, day: number, path: string) => {
-        const yearNumber = Number(yearText);
-        const year = yearText.length <= 2 ? yearNumber + (yearNumber < 30 ? 2000 : 1900) : yearNumber;
+        let year = Number(yearText);
+        if (yearText.length <= 2) year += year < 30 ? 2000 : 1900;
         if (!isValidDate(year, month, day)) return undefined;
         return { year, month, day: String(day), _mon: String(month), sep, path };
     };
@@ -866,7 +866,8 @@ export function parseDate(value: string, options: ParseOptions = {}): ParseData<
                 }
                 // The regional date separator also delimits abbreviated month names (e.g. Russian).
                 if (text.includes('. ') && !shortDate.includes('.')) return null;
-                pattern = date.year === undefined ? 'd-mmm' : date.day ? 'd-mmm-yy' : 'mmm-yy';
+                if (date.year === undefined) pattern = 'd-mmm';
+                else pattern = date.day ? 'd-mmm-yy' : 'mmm-yy';
             } else {
                 return null;
             }
@@ -929,7 +930,10 @@ function parseRegionalTime(value: string, region: string, locale?: string): Pars
     const milliseconds = fraction === undefined ? 0 : Math.round(Number(`0.${fraction}`) * 1000);
     const v = ((hour * 60 + minute) * 60 + second + milliseconds / 1000) / 86400;
     if (fraction === undefined && (minute >= 60 || second >= 60)) return { v };
-    const z = fraction !== undefined ? 'mm:ss.0' : hour >= 24 ? '[h]:mm:ss' : `h:mm${hasSeconds ? ':ss' : ''}${suffix ? ' AM/PM' : ''}`;
+    let z: string;
+    if (fraction !== undefined) z = 'mm:ss.0';
+    else if (hour >= 24) z = '[h]:mm:ss';
+    else z = `h:mm${hasSeconds ? ':ss' : ''}${suffix ? ' AM/PM' : ''}`;
     if (native.system) {
         if (fraction !== undefined && decimal === '٫') return { v };
         const pattern = getNativeCalendarFormat(z, region, native.system, '');

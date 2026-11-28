@@ -73,7 +73,7 @@ rules.add(dotSemicolon, 'de', 'LI');
 rules.add(dotSemicolon, 'dz', 'BT');
 rules.add(commaSemicolon, 'ee', 'TG');
 rules.add(dotComma, 'el tr', 'CY');
-rules.add(commaSemicolon, 'en', 'AL AR AT BE BG BR CL CO CV CZ DE DK EE ES FI FR GE GR HU ID IT LT LV NL NO PL PT RO RU SE SI SK TR UA ZA');
+rules.add(commaSemicolon, 'en zh', 'AL AR AT BE BG BR CL CO CV CZ DE DK EE ES FI FR GE GR HU ID IT LT LV NL NO PL PT RO RU SE SI SK TR UA ZA');
 rules.add(dotComma, 'es', '003 AG BB BM BS BZ CA DM GD GY HT KN KY LC MX PH TC TT US VC VG VI');
 rules.add(dotSemicolon, 'es', '419 CU DO GT HN NI PA PE PR SV');
 rules.add(commaSemicolon, 'ff', 'BF GN GW MR SN');
@@ -128,6 +128,10 @@ function resolveProfile(region: string, language: string, script?: string, terri
     // Excel recognizes Dari with Afghan settings and uses the root grammar for other territories.
     if (language === 'prs' && (!territory || territory === 'AF')) return script ? dotComma : arabicSemicolon;
     if (!rules.has(language)) return dotSemicolon;
+    if (language === 'zh') {
+        if (script === 'arab') return dotSemicolon;
+        if (script === 'hans' || script === 'hant') return dotComma;
+    }
     if (territory && commaDecimalTerritories.has(territory)) return commaSemicolon;
     if (territory === 'US' || territory === 'CA' || territory === 'GB' || territory === 'CH') {
         if (territory === 'CH' && (!script || script === 'latn')) {
@@ -170,7 +174,7 @@ function acceptsArabicPunctuation(language: string, script?: string, territory?:
 
 export function getFormulaSeparators(region: string): IFormulaSeparators {
     const parts = getRegionParts(region);
-    if (!parts) return dotComma;
+    if (!parts) return region.startsWith('x-') ? dotSemicolon : dotComma;
     const { language, script, territory } = parts;
     const separators = resolveProfile(region, language, script, territory);
     return acceptsArabicPunctuation(language, script, territory) ? { ...separators, arabicPunctuation: true } : separators;

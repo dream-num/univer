@@ -70,9 +70,9 @@ describe('regional formula editing', () => {
         ['fi-US', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
         ['haw-US', '=SUM(1.5;2.5)', '=SUM({1.5,2;3,4})'],
         ['qaa-FI', '=SUM(1.5;2.5)', '=SUM({1.5,2;3,4})'],
-        ['enUS', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
+        ['en-US', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
         ['es-MX', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
-        ['esES', '=SUM(1,5;2,5)', '=SUM({1,5\\2;3\\4})'],
+        ['es-ES', '=SUM(1,5;2,5)', '=SUM({1,5\\2;3\\4})'],
         ['de-DE', '=SUM(1,5;2,5)', '=SUM({1,5\\2;3\\4})'],
         ['fr-FR', '=SUM(1,5;2,5)', '=SUM({1,5\\2;3\\4})'],
         ['de-CH', '=SUM(1.5;2.5)', '=SUM({1.5,2;3,4})'],
@@ -90,7 +90,13 @@ describe('regional formula editing', () => {
         ['rm-CH', '=SUM(1,5;2,5)', '=SUM({1,5\\2;3\\4})'],
         ['af-NA', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
         ['de-LI', '=SUM(1.5;2.5)', '=SUM({1.5,2;3,4})'],
-        ['bad tag', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
+        ['zh-cmn-Hans-DE', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
+        ['ar-arb-SA', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
+        ['cmn-DE', '=SUM(1,5;2,5)', '=SUM({1,5\\2;3\\4})'],
+        ['de-DE-u-nu-latn', '=SUM(1,5;2,5)', '=SUM({1,5\\2;3\\4})'],
+        ['zh-Hans-DE', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
+        ['cmn-Arab-IR', '=SUM(1.5;2.5)', '=SUM({1.5,2;3,4})'],
+        ['x-univer', '=SUM(1.5;2.5)', '=SUM({1.5,2;3,4})'],
     ])('round-trips numbers, arguments and both array dimensions in %s', (region, localSum, localArray) => {
         const univer = new Univer({ locale: LocaleType.EN_US });
         try {

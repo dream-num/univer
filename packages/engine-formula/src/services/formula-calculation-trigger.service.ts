@@ -15,8 +15,8 @@
  */
 
 import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
-import { Disposable, getRegionTag, ICommandService, Optional, Rectangle, RegionService } from '@univerjs/core';
-import { distinctUntilChanged, map, skip } from 'rxjs';
+import { Disposable, ICommandService, Optional, Rectangle, RegionService } from '@univerjs/core';
+import { distinctUntilChanged, skip } from 'rxjs';
 import type { IDirtyUnitFeatureMap } from '../basics/common';
 import type {
     ISetFormulaCalculationNotificationMutation,
@@ -70,7 +70,6 @@ export class FormulaCalculationTriggerService extends Disposable {
         this._started = true;
         if (this._regionService) {
             this.disposeWithMe(this._regionService.currentRegion$.pipe(
-                map((region) => getRegionTag(region).toLowerCase()),
                 distinctUntilChanged(),
                 skip(1)
             ).subscribe(() => {

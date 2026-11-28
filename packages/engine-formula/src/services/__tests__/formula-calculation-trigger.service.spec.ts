@@ -74,7 +74,7 @@ describe('FormulaCalculationTriggerService', () => {
         const bed = createTestBed(false);
         try {
             const hostLocale = vi.spyOn(Intl, 'Locale');
-            bed.region.setRegion('enUS');
+            bed.region.setRegion('en-us');
             bed.service.start();
             bed.region.setRegion('en-US');
             await vi.advanceTimersByTimeAsync(10);

@@ -1,5 +1,6 @@
 import type { Theme } from '@univerjs/themes';
 import type { RibbonType } from '@univerjs/ui';
+import { getStoredLocaleTag, LOCALE_META, LocaleType } from '@univerjs/core';
 import {
     blueTheme,
     darkBlueTheme,
@@ -10,37 +11,17 @@ import {
     yellowTheme,
 } from '@univerjs/themes';
 
-export const WORKBENCH_LOCALES = [
-    'enUS',
-    'frFR',
-    'zhCN',
-    'ruRU',
-    'zhTW',
-    'zhHK',
-    'viVN',
-    'faIR',
-    'jaJP',
-    'koKR',
-    'esES',
-    'caES',
-    'skSK',
-    'ptBR',
-    'deDE',
-    'itIT',
-    'idID',
-    'plPL',
-    'arSA',
-] as const;
+export const WORKBENCH_LOCALES: readonly WorkbenchLocale[] = Object.values(LocaleType);
 export const WORKBENCH_DIRECTIONS = ['ltr', 'rtl'] as const;
 export const WORKBENCH_DEVICES = ['desktop', 'mobile'] as const;
 export const WORKBENCH_THEMES = ['blue', 'green', 'orange', 'purple', 'red', 'yellow', 'dark-blue'] as const;
 export const WORKBENCH_RIBBON_TYPES = ['grid', 'classic', 'collapsed', 'simple'] as const satisfies readonly RibbonType[];
-export const WORKBENCH_REGIONS = ['auto', ...WORKBENCH_LOCALES] as const;
+export const WORKBENCH_REGIONS = ['auto', ...WORKBENCH_LOCALES, 'sr-Latn-RS', 'es-419'] as const;
 export const WORKBENCH_UI_CHROME_MODES = ['full', 'no-ribbon', 'canvas-only'] as const;
 export const WORKBENCH_ZOOM_RATIOS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 4] as const;
 export const WORKBENCH_SETTINGS_STORAGE_KEY = 'univer.examples.workbench.settings';
 
-export type WorkbenchLocale = (typeof WORKBENCH_LOCALES)[number];
+export type WorkbenchLocale = `${LocaleType}`;
 export type WorkbenchDirection = (typeof WORKBENCH_DIRECTIONS)[number];
 export type WorkbenchDevice = (typeof WORKBENCH_DEVICES)[number];
 export type WorkbenchTheme = (typeof WORKBENCH_THEMES)[number];
@@ -71,28 +52,6 @@ export interface IWorkbenchUIChromeVisibility {
     leftSidebar: boolean;
     toolbar: boolean;
 }
-
-export const WORKBENCH_LOCALE_META: Record<WorkbenchLocale, { direction: WorkbenchDirection; tag: string }> = {
-    arSA: { direction: 'rtl', tag: 'ar-SA' },
-    caES: { direction: 'ltr', tag: 'ca-ES' },
-    deDE: { direction: 'ltr', tag: 'de-DE' },
-    enUS: { direction: 'ltr', tag: 'en-US' },
-    esES: { direction: 'ltr', tag: 'es-ES' },
-    faIR: { direction: 'rtl', tag: 'fa-IR' },
-    frFR: { direction: 'ltr', tag: 'fr-FR' },
-    idID: { direction: 'ltr', tag: 'id-ID' },
-    itIT: { direction: 'ltr', tag: 'it-IT' },
-    jaJP: { direction: 'ltr', tag: 'ja-JP' },
-    koKR: { direction: 'ltr', tag: 'ko-KR' },
-    plPL: { direction: 'ltr', tag: 'pl-PL' },
-    ptBR: { direction: 'ltr', tag: 'pt-BR' },
-    ruRU: { direction: 'ltr', tag: 'ru-RU' },
-    skSK: { direction: 'ltr', tag: 'sk-SK' },
-    viVN: { direction: 'ltr', tag: 'vi-VN' },
-    zhCN: { direction: 'ltr', tag: 'zh-CN' },
-    zhHK: { direction: 'ltr', tag: 'zh-HK' },
-    zhTW: { direction: 'ltr', tag: 'zh-TW' },
-};
 
 const THEMES = {
     blue: blueTheme,
@@ -147,13 +106,14 @@ export function readWorkbenchSettings(storage: Pick<Storage, 'getItem'>): IWorkb
         // Ignore invalid development preferences and fall back to defaults.
     }
 
-    const locale = getAllowedValue(value.locale, WORKBENCH_LOCALES, defaults.locale);
+    // Compatibility: remove compact-tag conversion after old workbench preferences are retired.
+    const locale = getAllowedValue(getStoredLocaleTag(value.locale), WORKBENCH_LOCALES, defaults.locale);
 
     return {
         device: getAllowedValue(value.device, WORKBENCH_DEVICES, defaults.device),
         locale,
-        region: getAllowedValue(value.region, WORKBENCH_REGIONS, defaults.region),
-        direction: getAllowedValue(value.direction, WORKBENCH_DIRECTIONS, WORKBENCH_LOCALE_META[locale].direction),
+        region: getAllowedValue(getStoredLocaleTag(value.region), WORKBENCH_REGIONS, defaults.region),
+        direction: getAllowedValue(value.direction, WORKBENCH_DIRECTIONS, LOCALE_META[locale].direction),
         theme: getAllowedValue(value.theme, WORKBENCH_THEMES, defaults.theme),
         darkMode: value.darkMode === true,
         ribbonType: getAllowedValue(value.ribbonType, WORKBENCH_RIBBON_TYPES, defaults.ribbonType),
@@ -165,7 +125,7 @@ export function readWorkbenchSettings(storage: Pick<Storage, 'getItem'>): IWorkb
 export function getDefaultWorkbenchSettings(): IWorkbenchSettings {
     return {
         device: 'desktop',
-        locale: 'zhCN',
+        locale: 'zh-CN',
         region: 'auto',
         direction: 'ltr',
         theme: 'blue',
@@ -178,7 +138,7 @@ export function getDefaultWorkbenchSettings(): IWorkbenchSettings {
 
 export function getEffectiveWorkbenchRegion(
     settings: Pick<IWorkbenchSettings, 'locale' | 'region'>
-): WorkbenchLocale {
+): Exclude<WorkbenchRegion, 'auto'> {
     return settings.region === 'auto' ? settings.locale : settings.region;
 }
 

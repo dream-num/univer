@@ -122,7 +122,7 @@ function createService(useRecordingServices = false) {
     }
     injector.add([LocaleService]);
     injector.add([SheetsSortUIService]);
-    injector.get(LocaleService).load({ zhCN });
+    injector.get(LocaleService).load({ 'zh-CN': zhCN });
     const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
     const workbook = injector.createInstance(Workbook, {
         id: 'unit-1',

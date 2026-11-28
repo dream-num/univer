@@ -1,4 +1,4 @@
-import type { ICellData, IDocumentBody, IWorkbookData, IWorksheetData, LocaleType } from '@univerjs/core';
+import type { ICellData, IDocumentBody, IWorkbookData, IWorksheetData } from '@univerjs/core';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -17,7 +17,6 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-
 import { createGeneratedSvg } from '../generated-svg';
 
 type CellMatrix = NonNullable<IWorksheetData['cellData']>;
@@ -1086,7 +1085,7 @@ function createStyles(): IWorkbookData['styles'] {
 }
 
 export function createSheetFixture(
-    locale: LocaleType,
+    locale: string,
     direction: 'ltr' | 'rtl',
     zoomRatio: number = 1
 ): IWorkbookData {

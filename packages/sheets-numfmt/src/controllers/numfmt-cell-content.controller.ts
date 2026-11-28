@@ -221,7 +221,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
     }
 
     setNumfmtLocal(locale: INumfmtLocaleTag) {
-        this._regionService.setDefaultRegion(locale.replace(/_/g, '-'));
+        this._regionService.setDefaultRegion(locale);
         this._locale$.next(locale);
     }
 }

@@ -16,7 +16,6 @@
 
 import type { IMutationInfo, Workbook } from '@univerjs/core';
 import type {
-    ICommandMutationGroup,
     IInsertColCommandParams,
     IInsertRowCommandParams,
     IInsertRowMutationParams,
@@ -226,25 +225,24 @@ export class SheetTableRefRangeController extends Disposable {
     }
 
     private _generateTableMutationWithRemoveRow(removeParams: IRemoveRowColCommandParams) {
-        const groups: ICommandMutationGroup[] = [];
+        const undos: IMutationInfo[] = [];
+        const redos: IMutationInfo[] = [];
+        const preRedos: IMutationInfo[] = [];
+        const preUndos: IMutationInfo[] = [];
 
         const target = getSheetCommandTarget(this._univerInstanceService, removeParams);
         if (!target) {
-            return groups;
+            return { undos, redos, preRedos, preUndos };
         }
         const { unitId, subUnitId } = target;
         const allSubUnitTables = this._tableManager.getTablesBySubunitId(unitId, subUnitId);
         if (!allSubUnitTables.length) {
-            return groups;
+            return { undos, redos, preRedos, preUndos };
         }
         const { range } = removeParams;
         const removeRowCount = range.endRow - range.startRow + 1;
 
         allSubUnitTables.forEach((table) => {
-            const undos: IMutationInfo[] = [];
-            const redos: IMutationInfo[] = [];
-            const preRedos: IMutationInfo[] = [];
-            const preUndos: IMutationInfo[] = [];
             const tableRange = table.getRange();
             if (Rectangle.intersects(tableRange, range)) {
                 if (range.startRow <= tableRange.startRow && range.endRow >= tableRange.startRow) {
@@ -318,10 +316,9 @@ export class SheetTableRefRangeController extends Disposable {
                     });
                 }
             }
-            groups.push({ undos, redos, preRedos, preUndos });
         });
 
-        return groups;
+        return { undos, redos, preRedos, preUndos };
     }
 
     private _generateTableMutationWithRemoveCol(removeParams: IRemoveRowColCommandParams) {

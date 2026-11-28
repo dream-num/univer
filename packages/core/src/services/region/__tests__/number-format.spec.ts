@@ -42,6 +42,11 @@ describe('Excel regional number formats', () => {
         ['rm-Cyrl-CH', "1'234'567.5", '1,234'],
         ['la', '1234567.5', '1,234'],
         ['la-CA', '1,234,567.5', 1234],
+        ['cmn-FR', '1 234 567,5', 1.234],
+        ['zh-Hans-FR', '1,234,567.5', 1234],
+        ['cmn-Arab-IR', '1234567.5', '1,234'],
+        ['zh-cmn-Hans-DE', '1,234,567.5', 1234],
+        ['x-univer', '1,234,567.5', 1234],
     ] as const)('round-trips grouped numbers and interprets direct commas in %s', (region, display, commaInput) => {
         expect(format('#,##0.0', 1234567.5, { region })).toBe(display);
         expect(getNumfmtParseValueFilter(display, { region })?.v).toBe(1234567.5);

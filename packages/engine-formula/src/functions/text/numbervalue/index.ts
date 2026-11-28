@@ -95,9 +95,8 @@ export class Numbervalue extends RegionalNumberFormatFunction {
             return (value.isBoolean() ? string.toUpperCase() : string).charAt(0);
         };
         const decimal = separator(decimalSeparator);
-        const group = groupSeparator
-            ? separator(groupSeparator)
-            : format.group || (format.decimal === '.' ? ',' : '٬');
+        const defaultGroup = format.group || (format.decimal === '.' ? ',' : '٬');
+        const group = groupSeparator ? separator(groupSeparator) : defaultGroup;
         if (groupSeparator && group === decimal) return ErrorValueObject.create(ErrorType.VALUE);
         let content = String(text.getValue()).replace(/\s+/g, '');
         if (/[^\p{ASCII}]/u.test(content)) content = normalizeNativeDigits(content, region, this.getLocale()).value;

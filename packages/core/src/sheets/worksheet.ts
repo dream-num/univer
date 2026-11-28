@@ -643,6 +643,11 @@ export class Worksheet {
         return this._viewModel.getRowFiltered(row);
     }
 
+    /** @internal */
+    mayFilterRows(): boolean {
+        return this.getRowFiltered !== Worksheet.prototype.getRowFiltered || this._viewModel.mayFilterRows();
+    }
+
     /**
      * Get the filtered out rows in a given range. used for remove rows operation, etc.
      * @param range - The range to get filtered rows from.

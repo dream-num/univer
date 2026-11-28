@@ -143,6 +143,10 @@ export class FilterModel extends Disposable {
         return this._alreadyFilteredOutRows.has(row);
     }
 
+    hasFilteredOutRows(): boolean {
+        return this._alreadyFilteredOutRows.size > 0;
+    }
+
     getRange(): IRange {
         if (!this._range) {
             throw new Error('[FilterModel] could not get range before a range is set!');

@@ -129,6 +129,34 @@ describe('Test SheetInterceptorService', () => {
             expect(getRowFiltered(1)).toBeFalsy();
         });
 
+        it('skips row filter checks only when all registered handlers confirm the sheet is unfiltered', () => {
+            const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const sheet = workbook.getActiveSheet()!;
+            const service = get(SheetInterceptorService);
+            expect(sheet.mayFilterRows()).toBe(false);
+            let active = false;
+            const known = service.interceptRowFiltered({
+                mayFilterRows: (unitId, subUnitId) => active && unitId === workbook.getUnitId() && subUnitId === sheet.getSheetId(),
+                handler: (filtered, location, next) => active && location.row === 1 ? true : next(filtered),
+            });
+            expect(sheet.mayFilterRows()).toBe(false);
+            active = true;
+            expect(sheet.mayFilterRows()).toBe(true);
+            expect(sheet.getRowFiltered(1)).toBe(true);
+            active = false;
+
+            const custom = service.intercept(INTERCEPTOR_POINT.ROW_FILTERED, {
+                handler: (_filtered, location) => location.row === 2,
+            });
+            expect(sheet.mayFilterRows()).toBe(true);
+            expect(sheet.getRowFiltered(2)).toBe(true);
+            custom.dispose();
+            expect(sheet.mayFilterRows()).toBe(false);
+            active = true;
+            known.dispose();
+            expect(sheet.mayFilterRows()).toBe(false);
+        });
+
         it('should return filtered according to the interceptor when it is registed', () => {
             let realFiltered = false;
 

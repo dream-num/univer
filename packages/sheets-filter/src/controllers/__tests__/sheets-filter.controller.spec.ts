@@ -139,6 +139,7 @@ function createFilterControllerTestBed(workbookData?: IWorkbookData) {
             this._injector.add([SheetsSelectionsService]);
             this._injector.add([SheetInterceptorService]);
             this._injector.add([SheetLazyExecuteScheduleService]);
+            this._injector.get(SheetInterceptorService);
         }
 
         override onReady(): void {
@@ -208,6 +209,26 @@ describe('test controller of sheets filter', () => {
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    it('reports whether the current sheet filter hides any rows', async () => {
+        const unitId = 'test';
+        const subUnitId = 'sheet1';
+        const sheet = instanceService.getUnit<Workbook>(unitId)!.getSheetBySheetId(subUnitId)!;
+        expect(sheet.mayFilterRows()).toBe(true);
+        expect(sheet.getRowFiltered(4)).toBe(true);
+
+        const params = { unitId, subUnitId, col: 0 };
+        expect(await commandService.executeCommand(SetSheetsFilterCriteriaMutation.id, { ...params, criteria: null })).toBe(true);
+        expect(sheet.mayFilterRows()).toBe(false);
+        expect(sheet.getRowFiltered(4)).toBe(false);
+
+        expect(await commandService.executeCommand(SetSheetsFilterCriteriaMutation.id, {
+            ...params,
+            criteria: { colId: 0, filters: { filters: ['H'] } },
+        })).toBe(true);
+        expect(sheet.mayFilterRows()).toBe(true);
+        expect(sheet.getRowFiltered(5)).toBe(true);
     });
 
     describe('test remote structural range transforms', () => {

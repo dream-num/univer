@@ -90,6 +90,11 @@ interface ISheetLocationForEditor extends ISheetLocation {
 type ICellContentComposedInterceptor = ReturnType<IComposeInterceptors<ICellDataForSheetInterceptor, ICellContentLocation>>;
 type IRowFilteredComposedInterceptor = ReturnType<IComposeInterceptors<boolean, ISheetRowLocation>>;
 
+interface ISheetRowFilteredInterceptor extends IInterceptor<boolean, ISheetRowLocation> {
+    /** Return false if this handler filters no rows in the current worksheet. */
+    mayFilterRows?(unitId: string, subUnitId: string): boolean;
+}
+
 export const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('BEFORE_CELL_EDIT');
 export const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('AFTER_CELL_EDIT');
 export const VALIDATE_CELL = createInterceptorKey<Promise<boolean>, ISheetLocation>('VALIDATE_CELL');
@@ -353,6 +358,11 @@ export class SheetInterceptorService extends Disposable {
         return this.writeCellInterceptor.fetchThroughInterceptors(VALIDATE_CELL)(Promise.resolve(true), context);
     }
 
+    /** @internal */
+    interceptRowFiltered(interceptor: ISheetRowFilteredInterceptor): IDisposable {
+        return this.intercept(INTERCEPTOR_POINT.ROW_FILTERED, interceptor);
+    }
+
     intercept<T extends IInterceptor<any, any>>(name: T, interceptor: T): IDisposable {
         const key = name as unknown as string;
         if (!this._interceptorsByName.has(key)) {
@@ -444,6 +454,13 @@ export class SheetInterceptorService extends Disposable {
         return cache.interceptor;
     }
 
+    private _mayFilterRows(unitId: string, subUnitId: string): boolean {
+        const key = INTERCEPTOR_POINT.ROW_FILTERED as unknown as string;
+        const interceptors = this._interceptorsByName.get(key) as ISheetRowFilteredInterceptor[] | undefined;
+        // The whole chain can be skipped only if every handler opts out for this worksheet.
+        return interceptors?.some((interceptor) => interceptor.mayFilterRows?.(unitId, subUnitId) !== false) ?? false;
+    }
+
     private _interceptWorkbook(workbook: Workbook): void {
         const disposables = new DisposableCollection();
         const unitId = workbook.getUnitId();
@@ -496,6 +513,7 @@ export class SheetInterceptorService extends Disposable {
                 }));
 
                 sheetDisposables.add(viewModel.registerRowFilteredInterceptor({
+                    mayFilterRows: () => sheetInterceptorService._mayFilterRows(unitId, subUnitId),
                     getRowFiltered(row: number): boolean {
                         if (commonRowFilteredInterceptorVersion !== sheetInterceptorService._composedInterceptorVersion) {
                             commonRowFilteredInterceptor.interceptor = null;

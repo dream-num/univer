@@ -62,7 +62,6 @@ import {
     InsertColCommand,
     InsertRowCommand,
     InsertRowMutation,
-    INTERCEPTOR_POINT,
     MoveRangeCommand,
     MoveRowsCommand,
     RefRangeService,
@@ -1010,9 +1009,8 @@ export class SheetsFilterController extends Disposable {
     }
 
     private _initRowFilteredInterceptor(): void {
-        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.ROW_FILTERED, {
-
-            // sheet-interceptor.service.ts
+        this.disposeWithMe(this._sheetInterceptorService.interceptRowFiltered({
+            mayFilterRows: (unitId, subUnitId) => this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.hasFilteredOutRows() ?? false,
             handler: (filtered, rowLocation) => {
                 if (filtered) return true;
                 return this._sheetsFilterService.getFilterModel(

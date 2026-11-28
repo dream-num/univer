@@ -144,7 +144,6 @@ export class DataValidationFormulaRefRangeController extends Disposable {
             return {
                 undos,
                 redos,
-                rollbackMutations: undos.map((undo) => [undo]),
             };
         });
         const id = this._getIdWithUnitId(unitId, subUnitId, rule.uid);

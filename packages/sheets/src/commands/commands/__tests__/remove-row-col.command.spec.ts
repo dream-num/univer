@@ -16,7 +16,6 @@
 
 import type { ICellData, Injector, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import {
-    CommandType,
     ICommandService,
     IUniverInstanceService,
     LocaleType,
@@ -130,104 +129,6 @@ describe('Test remove rows cols', () => {
             skeleton.dispose();
         }
     });
-
-    it.each(['pre', 'post', 'post-prefix', 'unsafe', 'after-prefix', 'after-unsafe'])(
-        'restores completed rows and hooks after a partial delete fails (%s)',
-        async (phase) => {
-            const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
-            const worksheet = workbook.getActiveSheet()!;
-            const target = { unitId: 'test', subUnitId: worksheet.getSheetId() };
-            commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
-                ...target,
-                cellValue: {
-                    0: { 0: { v: 'A' } },
-                    1: { 0: { v: 'B' } },
-                    2: { 0: { v: 'C' } },
-                    3: { 0: { v: 'D' } },
-                    10: { 0: { v: 'Keep11' } },
-                    12: { 0: { v: 'Keep13' } },
-                },
-            });
-            const merge = { startRow: 0, endRow: 0, startColumn: 1, endColumn: 2 };
-            commandService.syncExecuteCommand(AddWorksheetMergeMutation.id, { ...target, ranges: [merge] });
-            univer.registerPlugin(UniverRenderEnginePlugin);
-            const renders = get(IRenderManagerService);
-            renders.createRender('test');
-            const pane = renders.createRender('test', { embeddedRender: true }, 'failure-pane');
-            const skeleton = get(SheetSkeletonService).createRenderSkeleton(worksheet, workbook.getStyles(), pane.scene);
-            skeleton.setProjection({ isRowFiltered: (row) => row === 1, getCell: () => undefined });
-            pane.mainComponent = univer.__getInjector().createInstance(Spreadsheet, 'failure-sheet', skeleton);
-            renders.focusRender?.('failure-pane');
-            commandService.registerCommand({ id: 'test.fail-delete', type: CommandType.MUTATION, handler: () => false });
-            const hookParams = { ...target, range: { startRow: 10, endRow: 10, startColumn: 0, endColumn: 19 } };
-            const interceptors = get(SheetInterceptorService);
-            const register = phase.startsWith('after')
-                ? interceptors.interceptAfterCommand.bind(interceptors)
-                : interceptors.interceptCommand.bind(interceptors);
-            const hook = register({ getMutations: (command) => {
-                const params = command.params as IRemoveRowColCommandParams;
-                if (command.id !== RemoveRowCommand.id || params.range?.startRow !== 0) {
-                    return { redos: [], undos: [] };
-                }
-                const fail = { id: 'test.fail-delete', params: {} };
-                if (phase === 'pre') {
-                    return { preRedos: [fail], redos: [], undos: [] };
-                }
-                if (phase === 'unsafe' || phase === 'after-unsafe') {
-                    return {
-                        redos: [
-                            { id: InsertRowMutation.id, params: hookParams },
-                            fail,
-                            { id: InsertRowMutation.id, params: hookParams },
-                        ],
-                        undos: [
-                            { id: RemoveRowMutation.id, params: hookParams },
-                            { id: RemoveRowMutation.id, params: hookParams },
-                        ],
-                    };
-                }
-                if (phase === 'post-prefix' || phase === 'after-prefix') {
-                    return {
-                        redos: [{ id: InsertRowMutation.id, params: hookParams }, fail],
-                        undos: [{ id: RemoveRowMutation.id, params: hookParams }],
-                        rollbackMutations: [[{ id: RemoveRowMutation.id, params: hookParams }], []],
-                    };
-                }
-                return { redos: [fail], undos: [] };
-            } });
-            const laterHook = register({ getMutations: (command) => {
-                const params = command.params as IRemoveRowColCommandParams;
-                if (command.id !== RemoveRowCommand.id || params.range?.startRow !== 0) {
-                    return { redos: [], undos: [] };
-                }
-                return {
-                    redos: [{ id: InsertRowMutation.id, params: hookParams }],
-                    undos: [{ id: RemoveRowMutation.id, params: hookParams }],
-                };
-            } });
-            try {
-                const rowCount = worksheet.getRowCount();
-                expect(await commandService.executeCommand(RemoveRowCommand.id, {
-                    ...target,
-                    range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 19 },
-                })).toBe(false);
-                expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
-                expect([0, 1, 2, 3].map((row) => worksheet.getCellRaw(row, 0)?.v)).toEqual(['A', 'B', 'C', 'D']);
-                expect(worksheet.getRowCount()).toBe(rowCount);
-                expect(worksheet.getCellRaw(10, 0)?.v).toBe('Keep11');
-                expect(worksheet.getCellRaw(12, 0)?.v).toBe('Keep13');
-                expect(worksheet.getMergeData()).toContainEqual(merge);
-                expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
-                expect([0, 1, 2].map((row) => worksheet.getCellRaw(row, 0)?.v))
-                    .toEqual(phase === 'pre' || phase === 'unsafe' ? ['A', 'B', 'D'] : ['B', 'D', undefined]);
-                expect(worksheet.getRowCount()).toBe(rowCount - (phase === 'post' || phase === 'after-unsafe' ? 2 : 1));
-            } finally {
-                hook.dispose();
-                laterHook.dispose();
-                skeleton.dispose();
-            }
-        }
-    );
 
     it('does not delete rows while the focused view projection is pending', async () => {
         const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;

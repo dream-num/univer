@@ -114,6 +114,7 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
         }
 
         const undoMutations: IMutationInfo[] = [];
+        const afterUndoMutations: IMutationInfo[] = [];
         const redoMutations: IMutationInfo[] = [];
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -149,98 +150,39 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
                 range: visibleRange,
                 ranges: [visibleRange],
             };
-            const groups = sheetInterceptorService.getCommandMutationGroups({
+            const intercepted = sheetInterceptorService.onCommandExecute({
                 id: RemoveRowCommandId,
                 params: interceptorParams,
             });
-            if (groups.some((group) => {
-                const count = (group.preRedos?.length ?? 0) + group.redos.length;
-                return group.rollbackMutations ? group.rollbackMutations.length !== count : count > 1;
-            })) {
-                if (redoMutations.length) {
-                    undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations, redoMutations });
-                }
-                return false;
-            }
-            const preRedos = groups.flatMap((group) => group.preRedos ?? []);
             const spanRedos = [
-                ...preRedos,
+                ...(intercepted.preRedos ?? []),
                 ...redos,
-                ...groups.flatMap((group) => group.redos),
+                ...intercepted.redos,
             ];
             const result = sequenceExecute(spanRedos, commandService);
             if (!result.result) {
-                // Recover the completed prefix of this span as well as earlier spans.
-                const preUndos: IMutationInfo[] = [];
-                const postUndos: IMutationInfo[] = [];
-                const rollbackPre: IMutationInfo[] = [];
-                const rollbackPost: IMutationInfo[] = [];
-                let preIndex = 0;
-                let postIndex = preRedos.length + redos.length;
-                for (const group of groups) {
-                    const preCount = group.preRedos?.length ?? 0;
-                    const completedPre = Math.max(0, Math.min(preCount, result.index - preIndex));
-                    const completedPost = Math.max(0, Math.min(group.redos.length, result.index - postIndex));
-                    if (group.rollbackMutations) {
-                        rollbackPre.unshift(...group.rollbackMutations.slice(0, completedPre).reverse().flat());
-                        rollbackPost.unshift(...group.rollbackMutations.slice(preCount, preCount + completedPost).reverse().flat());
-                    } else if (completedPre || completedPost) {
-                        // Legacy hooks restore state around the row insertion. Their preUndos
-                        // are not inverses of preRedos (merges, for example, use both phases).
-                        preUndos.push(...group.preUndos ?? []);
-                        postUndos.push(...group.undos);
-                    }
-                    preIndex += preCount;
-                    postIndex += group.redos.length;
-                }
-                undoMutations.unshift(
-                    ...rollbackPost,
-                    ...preUndos,
-                    ...(result.index > preRedos.length ? undos : []),
-                    ...postUndos,
-                    ...rollbackPre
-                );
-                redoMutations.push(...spanRedos.slice(0, result.index));
-                if (redoMutations.length) {
-                    undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations, redoMutations });
-                }
                 return false;
             }
 
-            const afterGroups = sheetInterceptorService.getAfterCommandMutationGroups({
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
                 id: RemoveRowCommandId,
                 params: interceptorParams,
             });
-            const unsafeAfterHook = afterGroups.some((group) => {
-                const count = (group.preRedos?.length ?? 0) + group.redos.length;
-                return group.rollbackMutations ? group.rollbackMutations.length !== count : count > 1;
-            });
-            const afterSteps = afterGroups.flatMap((group) => [
-                ...(group.preRedos ?? []),
-                ...group.redos,
-            ].map((mutation, index) => ({
-                mutation,
-                undo: group.rollbackMutations?.[index] ?? [...(group.preUndos ?? []), ...group.undos],
-                undoAfterBase: group.undoAfterBase === true,
-            })));
-            const afterResult = unsafeAfterHook
-                ? { result: false, index: 0 }
-                : sequenceExecute(afterSteps.map((step) => step.mutation), commandService);
-            const completedAfter = afterResult.result ? afterSteps : afterSteps.slice(0, afterResult.index);
+            sequenceExecute(afterInterceptors.redos, commandService);
 
             undoMutations.unshift(
-                ...completedAfter.slice().reverse().filter((step) => !step.undoAfterBase).flatMap((step) => step.undo),
-                ...groups.flatMap((group) => group.preUndos ?? []),
+                ...(intercepted.preUndos ?? []),
                 ...undos,
-                ...groups.flatMap((group) => group.undos),
-                ...completedAfter.slice().reverse().filter((step) => step.undoAfterBase).flatMap((step) => step.undo)
+                ...intercepted.undos
             );
-            redoMutations.push(...spanRedos, ...completedAfter.map((step) => step.mutation));
-            if (!afterResult.result) {
-                undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations, redoMutations });
-                return false;
-            }
+            // After hooks describe the sheet after the structural change, so their inverses run once the
+            // structure is restored.
+            afterUndoMutations.unshift(...afterInterceptors.undos);
+            redoMutations.push(...spanRedos, ...afterInterceptors.redos);
         }
+
+        undoMutations.push(...afterUndoMutations);
+
         setSelection(range, workbook, worksheet, commandService);
         undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations, redoMutations });
         return true;

@@ -20,13 +20,13 @@ import type {
     IDocumentData,
     IMutationInfo,
     IRange,
+    IUndoRedoCommandInfosByInterceptor,
     Nullable,
     Workbook,
     Worksheet,
 } from '@univerjs/core';
 import type {
     EffectRefRangeParams,
-    ICommandMutationGroup,
     IMoveRangeMutationParams,
     IReorderRangeMutationParams,
     ISetRangeValuesMutationParams,
@@ -224,7 +224,7 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
         link: IUpdateRichHyperLinkMutationParams,
         target: ISheetRange,
         command: EffectRefRangeParams
-    ): ICommandMutationGroup {
+    ): IUndoRedoCommandInfosByInterceptor {
         const source = cellToRange(link.row, link.col);
         let nextSource: { range: Nullable<IRange>; sheetId: string };
         let nextTarget: typeof nextSource;

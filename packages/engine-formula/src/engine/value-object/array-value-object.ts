@@ -15,9 +15,10 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import { DateSystem, isRealNum } from '@univerjs/core';
 import type { FormulaCalculationCache } from '../../services/formula-cache.service';
 import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
-import { DateSystem, isRealNum } from '@univerjs/core';
+import { NUMBER_LITERAL_REGEX, parseArrayConstant } from '../../basics/array-constant';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { regexTestArrayValue } from '../../basics/regex';
@@ -2067,35 +2068,34 @@ export class ArrayValueObject extends BaseValueObject {
 
             return rawValue.calculateValueList;
         }
-        rawValue = rawValue.slice(1, -1) as string;
-        const rowArray = splitArrayConstant(rawValue);
-        const rowArrayCount = rowArray.length;
-        const result: BaseValueObject[][] = [];
-        let maxColumnCount = 0;
-        for (let r = 0; r < rowArrayCount; r++) {
-            const columnArray = rowArray[r];
-            const columnArrayCount = columnArray.length;
+        // Direct array construction can also supply bare text elements.
+        const data = ArrayValueObject._parseConstant(rawValue, dateSystem, false);
+        this._rowCount = data?.rowCount ?? 1;
+        this._columnCount = data?.columnCount ?? 1;
+        return data?.calculateValueList ?? [[ErrorValueObject.create(ErrorType.VALUE)]];
+    }
 
-            if (maxColumnCount < columnArrayCount) {
-                maxColumnCount = columnArrayCount;
-            }
+    /** Canonical input from a formula or import may contain an invalid constant. */
+    static fromConstant(text: string, dateSystem: DateSystem): BaseValueObject {
+        const data = this._parseConstant(text, dateSystem);
+        return data ? this.create(data, dateSystem) : ErrorValueObject.create(ErrorType.VALUE);
+    }
 
-            const row: BaseValueObject[] = [];
-            for (let c = 0; c < columnArrayCount; c++) {
-                const cellRaw = columnArray[c].trim();
-                row.push(
-                    ValueObjectFactory.createNumberLiteral(cellRaw, dateSystem) ??
-                    ValueObjectFactory.create(cellRaw, false, dateSystem)
-                );
-            }
-            result.push(row);
-        }
+    private static _parseConstant(text: string, dateSystem?: DateSystem, formula = true): IArrayValueObject | null {
+        const rows = parseArrayConstant(text.slice(1, -1), formula);
+        if (!rows) return null;
 
-        this._rowCount = rowArrayCount;
-
-        this._columnCount = maxColumnCount;
-
-        return result;
+        return {
+            rowCount: rows.length,
+            columnCount: formula ? rows[0].length : rows.reduce((width, row) => Math.max(width, row.length), 0),
+            calculateValueList: rows.map((row) => row.map((token) =>
+                ValueObjectFactory.createNumberLiteral(token, dateSystem) ?? ValueObjectFactory.create(token, false, dateSystem)
+            )),
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        };
     }
 
     private _createNewArray(
@@ -2123,8 +2123,6 @@ export class ArrayValueObject extends BaseValueObject {
         return ArrayValueObject.create(arrayValueObjectData, this.getDateSystem()).withCalculationCache(this._calculationCache);
     }
 }
-
-const NUMBER_LITERAL_REGEX = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i;
 
 export class ValueObjectFactory {
     static create(
@@ -2167,7 +2165,7 @@ export class ValueObjectFactory {
 
             const rawValueSingleLine = rawValue.replace(/\n/g, '').replace(/\r/g, '');
             if (!isStringWrappedByDoubleQuotes(rawValueSingleLine) && regexTestArrayValue(rawValueSingleLine)) {
-                return ArrayValueObject.create(rawValue, dateSystem);
+                return ArrayValueObject.fromConstant(rawValue, dateSystem);
             }
 
             return createStringValueObjectByRawValue(rawValue).withDateSystem(dateSystem);
@@ -2208,30 +2206,6 @@ export class ValueObjectFactory {
         }
         return createNumberValueObjectByRawValue(Number(literal)).withDateSystem(dateSystem);
     }
-}
-
-function splitArrayConstant(value: string): string[][] {
-    const rows: string[][] = [[]];
-    let start = 0;
-    let inQuotes = false;
-    for (let index = 0; index <= value.length; index++) {
-        const character = value[index];
-        if (character === '"') {
-            if (inQuotes && value[index + 1] === '"') {
-                index++;
-                continue;
-            }
-            inQuotes = !inQuotes;
-        }
-        if (index === value.length || (!inQuotes && (character === ',' || character === ';'))) {
-            rows[rows.length - 1].push(value.slice(start, index));
-            start = index + 1;
-            if (character === ';') {
-                rows.push([]);
-            }
-        }
-    }
-    return rows;
 }
 
 function isStringWrappedByDoubleQuotes(input: string) {

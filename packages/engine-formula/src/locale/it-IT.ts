@@ -33,6 +33,13 @@ import web from './function-list/web/it-IT';
 
 const locale: FormulaLanguagePack = {
     'engine-formula': {
+        errorAliases: {
+            '#N/A': '#N/D',
+            '#REF!': '#RIF!',
+            '#VALUE!': '#VALORE!',
+            '#NAME?': '#NOME?',
+            '#GETTING_DATA': '#ESTRAZIONE_DATI_IN_CORSO',
+        },
         // Built-in names returned by Excel FormulaLocal for this interface language.
         functionAliases: {
             ABS: 'ASS',

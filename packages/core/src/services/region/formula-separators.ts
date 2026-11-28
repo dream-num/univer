@@ -47,7 +47,10 @@ rules.add(dotComma, 'ms', 'BN CC MY', 'arab');
 rules.add(arabicDecimal, 'pa', 'PK', 'arab');
 rules.add(dotSemicolon, 'sd', 'PK', 'arab');
 rules.add(dotComma, 'ur', 'IN PK', 'arab');
-rules.add(dotComma, 'uz', 'AF', 'arab');
+rules.add(dotSemicolon, 'az', 'IR', 'cyrl');
+rules.add(dotSemicolon, 'uz', 'AF', 'cyrl');
+rules.add(dotComma, 'az', 'IR');
+rules.add(dotComma, 'uz', 'AF');
 
 rules.add(dotComma, 'af', 'NA');
 rules.add(dotComma, 'ar', '001 EH ER IL KM PS SD SO SS TD');

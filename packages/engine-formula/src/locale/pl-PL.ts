@@ -33,6 +33,16 @@ import web from './function-list/web/pl-PL';
 
 const locale: FormulaLanguagePack = {
     'engine-formula': {
+        errorAliases: {
+            '#DIV/0!': '#DZIEL/0!',
+            '#N/A': '#N/D',
+            '#NUM!': '#LICZBA!',
+            '#REF!': '#ADR!',
+            '#VALUE!': '#ARG!',
+            '#NAME?': '#NAZWA?',
+            '#NULL!': '#ZERO!',
+            '#GETTING_DATA': '#POBIERANIE_DANYCH',
+        },
         // Built-in names returned by Excel FormulaLocal for this interface language.
         functionAliases: {
             ABS: 'MODUŁ.LICZBY',

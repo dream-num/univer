@@ -212,3 +212,8 @@ export function getRegionLocale(region: string): Intl.Locale | undefined {
     }
     return lastLocale;
 }
+
+/** ECMA-402 formatters accept a subset of BCP 47, excluding private-use-only and grandfathered tags. */
+export function getIntlLocaleTag(locale: string): string {
+    return getRegionLocale(locale)?.toString() ?? LocaleType.EN_US;
+}

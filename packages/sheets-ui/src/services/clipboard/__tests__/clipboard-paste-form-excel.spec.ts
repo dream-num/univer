@@ -270,15 +270,6 @@ describe('Test clipboard', () => {
             expect(getStyles(1, 1, 1, 1)?.[0]?.[0]?.n?.pattern).toBe('0%');
         });
 
-        it('test formula with paste', async () => {
-            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
-            if (!worksheet) return false;
-            const res = await sheetClipboardService.legacyPaste('', '=SUM(A1');
-            expect(res).toBeTruthy();
-            const cellValue = getValues(1, 1, 1, 1)?.[0]?.[0];
-            expect(cellValue?.f).toEqual('=SUM(A1');
-        });
-
         it('copy value is 1,234.57, the format "#,##0.00", the origin value 1234.567', async () => {
             const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;

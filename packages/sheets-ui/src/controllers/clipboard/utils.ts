@@ -60,6 +60,7 @@ import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocat
 import { COPY_TYPE } from '../../services/clipboard/type';
 import { getPasteNumberOptions } from '../../services/clipboard/utils';
 import { isRichText } from '../editor/editing.render-controller';
+import { getFormulaInputErrorMessage } from '../utils/char-tools';
 import { virtualizeDiscreteRanges } from '../utils/range-tools';
 
 /** Capture the input syntax once for all formula cells in an external paste. */
@@ -67,9 +68,10 @@ export function createPasteFormulaParser(accessor: IAccessor) {
     const locale = accessor.get(LocaleService);
     const syntax = getFormulaSyntax(accessor.get(RegionService), locale);
     return (text: string): string => {
-        const standard = syntax.toStandard(text);
+        const standard = syntax.toStandard(text, (reason) => {
+            accessor.get(ErrorService).emit(getFormulaInputErrorMessage(reason, syntax, locale));
+        });
         if (standard !== null) return standard;
-        accessor.get(ErrorService).emit(locale.t('sheets-ui.info.formulaSeparator', syntax.toLocal('=SUM(1.5,2.5)')));
         throw new CanceledError();
     };
 }

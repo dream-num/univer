@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { RegionRules } from './region-rules';
+import { getRegionParts, RegionRules } from './region-rules';
 
 export interface IFormulaSeparators {
     readonly decimal: string;
@@ -51,6 +51,8 @@ rules.add(dotSemicolon, 'az', 'IR', 'cyrl');
 rules.add(dotSemicolon, 'uz', 'AF', 'cyrl');
 rules.add(dotComma, 'az', 'IR');
 rules.add(dotComma, 'uz', 'AF');
+rules.add(dotComma, 'und', 'CH');
+rules.add(dotSemicolon, 'sr', 'CH', 'latn');
 
 rules.add(dotComma, 'af', 'NA');
 rules.add(dotComma, 'ar', '001 EH ER IL KM PS SD SO SS TD');
@@ -101,6 +103,34 @@ rules.add(arabicDecimal, 'ar ckb ks ps');
 rules.add(arabicSemicolon, 'fa');
 rules.add(arabicComma, 'dv');
 
+// These measured languages use the default punctuation. A language unknown to Excel uses the root list separator.
+rules.add(dotComma, 'la agq ain ak apw arn as asa bas bem bez bgc bho bla bm bn bo brx byn ccp ceb cgg cho chr cic com cr crj crk crl');
+rules.add(dotComma, 'crm cst csw dav dje doi dua ebu eo ewo fla gaa gn gu guz gv hch he hi hmn ht ia io isc iu ja jbo jgo jmc kaj kam');
+rules.add(dotComma, 'kcg kde khq ki kio kkj kln km kn kok ksb ksf kw kxv lag lg lkt lrc luo lut luy mai mas mer mfe mg mgo mi mic mid');
+rules.add(dotComma, 'mni moh mr mua mus mzn naq nd nez nmg nnh nnp nus nv ny nyn or osa pcm pqm quc raj rhg rn rof rwk sa saq sat sbp');
+rules.add(dotComma, 'ses shn shp sm sn srs syr teo th tig to tok trv twq ug vai vun wae wal xnr xog yav yue za zh');
+
+const commaDecimalTerritories = new Set(['AX', 'DE', 'FI', 'NO', 'SE', 'SJ']);
+export function isExcelRegionLanguage(language: string): boolean {
+    return rules.has(language);
+}
+
 export function getFormulaSeparators(region: string): IFormulaSeparators {
+    const parts = getRegionParts(region);
+    if (!parts) return dotComma;
+    const { language, script, territory } = parts;
+    if (!rules.has(language)) return dotSemicolon;
+    if (territory && commaDecimalTerritories.has(territory)) return commaSemicolon;
+    if (territory === 'US' || territory === 'CA' || territory === 'GB') {
+        if (territory === 'CA' && language === 'fr') return commaSemicolon;
+        if (language === 'und' || (territory === 'US' && language === 'haw') ||
+            (territory === 'GB' && (language === 'cy' || language === 'gd')) ||
+            (script === 'latn' && language === 'sr') || (script === 'cyrl' && (language === 'az' || language === 'uz'))) {
+            return dotSemicolon;
+        }
+        return dotComma;
+    }
+    // A private-use territory has no regional number settings. ZZ (unknown region) inherits the language settings.
+    if (territory && territory !== 'XK' && /^(?:X[A-Z]|Q[M-Z])$/.test(territory)) return dotComma;
     return rules.resolve(region) ?? dotComma;
 }

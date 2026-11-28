@@ -22,12 +22,20 @@ interface IRegionalRule<T> {
     scripts?: string[];
 }
 
+// Excel resolves these older language names using the modern formatting data.
+const languageAliases = new Map([['sh', 'sr'], ['tl', 'fil']]);
+
 const regionTag = /^([a-z]{2,8})(?:-([a-z]{4}))?(?:-([a-z]{2}|[0-9]{3}))?(?:-(?:[a-z0-9]{5,8}|[0-9][a-z0-9]{3}))*(?:-[0-9a-wy-z](?:-[a-z0-9]{2,8})+)*(?:-x(?:-[a-z0-9]{1,8})+)?$/i;
 
 export function getRegionParts(region: string): { language: string; script: string; territory: string } | undefined {
     const parts = regionTag.exec(getRegionTag(region));
     if (!parts) return undefined;
-    return { language: parts[1].toLowerCase(), script: parts[2]?.toLowerCase() ?? '', territory: parts[3]?.toUpperCase() ?? '' };
+    const inputLanguage = parts[1].toLowerCase();
+    return {
+        language: languageAliases.get(inputLanguage) ?? inputLanguage,
+        script: parts[2]?.toLowerCase() ?? (inputLanguage === 'sh' ? 'latn' : ''),
+        territory: parts[3]?.toUpperCase() ?? '',
+    };
 }
 
 export class RegionRules<T> {
@@ -40,6 +48,10 @@ export class RegionRules<T> {
             if (rules) rules.push(rule);
             else this._byLanguage.set(language, [rule]);
         }
+    }
+
+    has(language: string): boolean {
+        return this._byLanguage.has(language);
     }
 
     resolve(region: string): T | undefined {

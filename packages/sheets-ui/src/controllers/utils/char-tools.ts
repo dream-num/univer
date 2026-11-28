@@ -15,9 +15,11 @@
  */
 
 /* eslint-disable antfu/consistent-list-newline */
-import type { IFormulaSyntax, IFunctionService, ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
+import type { LocaleService } from '@univerjs/core';
+import type { FormulaInputError, IFormulaSyntax, IFunctionService, ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { getNumfmtParseValueFilter, LocaleType, numfmt } from '@univerjs/core';
 import { getFormulaProtectedTokenEnd, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
+import type { LocaleKey } from '../../locale/types';
 
 const fullWidthToHalfWidthMap: { [key: string]: string } = {
     '０': '0', '１': '1', '２': '2', '３': '3', '４': '4',
@@ -39,6 +41,12 @@ const fullWidthToHalfWidthMap: { [key: string]: string } = {
     '，': ',', '！': '!', '？': '?', '；': ';', '［': '[', '］': ']',
     '｛': '{', '｝': '}',
 };
+
+export function getFormulaInputErrorMessage(reason: FormulaInputError, syntax: IFormulaSyntax, locale: LocaleService): string {
+    return reason === 'separator'
+        ? locale.t<LocaleKey>('sheets-ui.info.formulaSeparator', syntax.toLocal('=SUM(1.5,2.5)'))
+        : locale.t<LocaleKey>('sheets-ui.definedName.formulaOrRefStringInvalid');
+}
 
 // Boolean conversion
 const booleanMap: { [key: string]: string } = {
@@ -67,7 +75,7 @@ export function isCJKLocale(locale: LocaleType) {
  *
  * @returns The normalized input, or null for an invalid regional formula separator.
  */
-export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder, currentLocale: LocaleType, functionService: IFunctionService, syntax: IFormulaSyntax) {
+export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder, currentLocale: LocaleType, functionService: IFunctionService, syntax: IFormulaSyntax, onError?: (reason: FormulaInputError) => void) {
     let normalStr = str;
 
     if (isCJKLocale(currentLocale)) {
@@ -81,7 +89,7 @@ export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder,
 
     // Check if it is a formula
     if (normalStr.startsWith('=')) {
-        const formula = syntax.toStandard(normalStr);
+        const formula = syntax.toStandard(normalStr, onError);
         if (formula === null) return null;
         return normalizeFormulaString(formula === normalStr ? str : formula, formula, lexerTreeBuilder, functionService);
     }

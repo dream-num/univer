@@ -62,6 +62,7 @@ import { IMessageService, KeyCode, MockMessageService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
+import enUS from '../../../locale/en-US';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../../services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../../../services/editor/cell-editor-resize.service';
@@ -552,6 +553,7 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
 
     return {
         controller,
+        injector,
         commandService,
         selectionManager,
         docModel,
@@ -642,6 +644,24 @@ describe('EditingRenderController business methods', () => {
                 cl: { rgb: '#f05252' },
             },
         });
+    });
+
+    it.each([
+        ['=SUM(1;2)', 'Use the formula separators for your region, as in =SUM(1.5,2.5).'],
+        ['=SUM({1,2;3})', 'Invalid formula or reference string'],
+        ['=#UNKNOWN!', 'Invalid formula or reference string'],
+    ])('explains why a submitted formula was rejected for %s', async (formula, message) => {
+        const { controller, injector } = createController();
+        injector.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
+        const show = vi.spyOn(injector.get(IMessageService), 'show');
+        const accepted = await controller._submitEdit({
+            body: { dataStream: `${formula}\r\n` },
+            documentStyle: {},
+        }, controller._editorBridgeService.getFormulaSyntax());
+
+        expect(accepted).toBe(false);
+        expect(show).toHaveBeenCalledWith(expect.objectContaining({ content: message }));
+        expect(controller._sheetInterceptorService.onWriteCell).not.toHaveBeenCalled();
     });
 
     it('submits edited cell content and rolls back when validation rejects the value', async () => {

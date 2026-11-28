@@ -21,11 +21,13 @@ import { ERROR_LITERALS } from '../../basics/error-type';
 import { getErrorAliases, getFunctionAliases } from '../../services/formula/utils';
 import { normalizeLambdaVariable } from '../utils/function-definition';
 
+export type FormulaInputError = 'separator' | 'syntax';
+
 /** The input language and region of a single formula edit. */
 export interface IFormulaSyntax {
     readonly region: string;
     readonly argumentSeparator: string;
-    toStandard(text: string): string | null;
+    toStandard(text: string, onError?: (reason: FormulaInputError) => void): string | null;
     toLocal(text: string): string;
     /** Normalize punctuation only, so editor token ranges still index the original draft. */
     toEditorTokens(text: string): string;
@@ -147,7 +149,11 @@ function referenceWithAsciiRow(name: string, normalized: string): string {
 }
 
 // eslint-disable-next-line complexity, max-lines-per-function -- One scanner preserves token boundaries and offsets across locale conversions.
-function translate(text: string, from: ISeparators, to: ISeparators, aliases: IAliases | undefined, strict: boolean): string | null {
+function translate(text: string, from: ISeparators, to: ISeparators, aliases: IAliases | undefined, strict: boolean, onError?: (reason: FormulaInputError) => void): string | null {
+    const reject = (reason: FormulaInputError) => {
+        onError?.(reason);
+        return null;
+    };
     const scopes: (IBindingScope | null)[] = [];
     // The shadow text has identical UTF-16 offsets. Only numeric tokens and valid reference rows are rewritten.
     const digits = from === standard ? text : normalizeNativeDigits(text).value;
@@ -170,7 +176,7 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
         if (protectedEnd !== i) {
             const token = text.slice(i, protectedEnd);
             if (char === "'" && text[protectedEnd] !== '!') {
-                if (strict) return null;
+                if (strict) return reject('syntax');
                 const literal = token.slice(1, -1).toUpperCase();
                 result += aliases?.local.has(literal) && /^(?:TRUE|FALSE)$/.test(literal) ? token.slice(1, -1) : token;
             } else {
@@ -189,7 +195,7 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
                 continue;
             }
             // A value can end with the spill operator. A leading hash must introduce a local error token.
-            if (strict && !followsValue(text, i)) return null;
+            if (strict && !followsValue(text, i)) return reject('syntax');
         }
 
         const namePattern = inArray && dotSeparatesArray ? arrayName : identifier;
@@ -211,11 +217,11 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
                 const builtin = strict ? aliases?.standard.get(key) ?? key : key;
                 if (aliases && (builtin === 'TRUE' || builtin === 'FALSE') && text[i - 1] !== '!' && text[end] !== '[') {
                     const local = aliases.local.get(builtin) ?? builtin;
-                    if (strict && declaration && key === local.toUpperCase()) return null;
+                    if (strict && declaration && key === local.toUpperCase()) return reject('syntax');
                     if (bound && !inArray) result += name;
                     else if (!strict) result += local;
                     else if (key === local.toUpperCase()) result += builtin;
-                    else if (inArray) return null;
+                    else if (inArray) return reject('syntax');
                     else result += `'${name}'`;
                 } else {
                     result += strict && !bound && name !== match[0] ? referenceWithAsciiRow(name, match[0]) : name;
@@ -231,16 +237,16 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
             const value = numeric[0];
             const end = number.lastIndex;
             // A decimal comma following a reference cannot start another numeric literal.
-            if (strict && char === from.decimal && followsValue(text, i)) return null;
+            if (strict && char === from.decimal && followsValue(text, i)) return reject('separator');
             // A list separator cannot turn a standalone number into a reference union.
-            if (strict && /^[,;،؛]/.test(text.slice(end).trimStart()) && /^=\s*[+-]?\s*$/.test(text.slice(0, i))) return null;
+            if (strict && /^[,;،؛]/.test(text.slice(end).trimStart()) && /^=\s*[+-]?\s*$/.test(text.slice(0, i))) return reject('separator');
             // Number grouping is not formula syntax. A space after a row range may be an intersection.
-            if (strict && /^(?:['’٬\u00A0\u202F]| +)\d/.test(scan.slice(end)) && !text.slice(0, i).trimEnd().endsWith(':')) return null;
-            if (strict && value.endsWith(from.decimal) && /^\s*[\p{L}\p{N}_$"[(]/u.test(scan.slice(end))) return null;
-            if (strict && /^[\p{L}_$]/u.test(scan.slice(end))) return null;
+            if (strict && /^(?:['’٬\u00A0\u202F]| +)\d/.test(scan.slice(end)) && !text.slice(0, i).trimEnd().endsWith(':')) return reject('separator');
+            if (strict && value.endsWith(from.decimal) && /^\s*[\p{L}\p{N}_$"[(]/u.test(scan.slice(end))) return reject('separator');
+            if (strict && /^[\p{L}_$]/u.test(scan.slice(end))) return reject('syntax');
             const literal = value.replace(from.decimal, '.');
             const normalized = aliases && /e/i.test(literal) ? normalizeScientificLiteral(literal) : literal;
-            if (normalized === null && strict) return null;
+            if (normalized === null && strict) return reject('syntax');
             result += (normalized ?? literal).replace('.', to.decimal);
             i = end;
             continue;
@@ -250,8 +256,8 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
         const isArgument = !inArray && (char === from.argument || (from.argument === '،' && char === ','));
         if (isArgument && strict) {
             // Excel's local Arabic punctuation accepts a trailing omitted argument, but requires a preceding one.
-            if ((from.argument === '،' || from.argument === '؛') && /[(,]\s*$/.test(result)) return null;
-            if (argumentUsed && argumentUsed !== char) return null;
+            if ((from.argument === '،' || from.argument === '؛') && /[(,]\s*$/.test(result)) return reject('syntax');
+            if (argumentUsed && argumentUsed !== char) return reject('separator');
             argumentUsed = char;
         }
         if (trackBindings && !inArray) {
@@ -273,23 +279,23 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
         } else {
             if (strict && (separator.test(char) || (inArray && char === ':'))) {
                 // A backslash can begin an Excel defined name outside an array.
-                if (!(char === '\\' && !inArray && /[\p{L}_]/u.test(text[i + 1] ?? ''))) return null;
+                if (!(char === '\\' && !inArray && /[\p{L}_]/u.test(text[i + 1] ?? ''))) return reject('separator');
             }
             if (char === '{') {
-                if (strict && inArray) return null;
+                if (strict && inArray) return reject('syntax');
                 arrayStart = result.length + 1;
             } else if (char === '}') {
-                if (strict && (!inArray || !parseArrayConstant(result.slice(arrayStart)))) return null;
+                if (strict && (!inArray || !parseArrayConstant(result.slice(arrayStart)))) return reject('syntax');
                 arrayStart = -1;
             } else if (strict && /\p{Nd}/u.test(char)) {
                 // Other BMP decimal scripts cannot start a number or defined name in Excel.
-                return null;
+                return reject('syntax');
             }
             result += char;
         }
         i++;
     }
-    return strict && arrayStart >= 0 ? null : result;
+    return strict && arrayStart >= 0 ? reject('syntax') : result;
 }
 
 export function getFormulaSyntax(regionService: RegionService, localeService: LocaleService): IFormulaSyntax {
@@ -309,7 +315,7 @@ export function getFormulaSyntax(regionService: RegionService, localeService: Lo
     return {
         region: regionService.getCurrentRegion(),
         argumentSeparator: local.argument,
-        toStandard: (text) => translate(text, local, standard, aliases, true),
+        toStandard: (text, onError) => translate(text, local, standard, aliases, true, onError),
         toLocal: (text) => translate(text, standard, local, aliases, false)!,
         toEditorTokens: (text) => translate(text, local, standard, undefined, false)!,
     };

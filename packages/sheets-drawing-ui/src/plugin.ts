@@ -15,7 +15,6 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsDrawingUIConfig } from './config/config';
 import {
     DependentOn,
     IConfigService,
@@ -34,6 +33,7 @@ import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engin
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import type { IUniverSheetsDrawingUIConfig } from './config/config';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
@@ -130,6 +130,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
         this._registerRenderModules();
 
         touchDependencies(this._injector, [
+            [DrawingContextMenuController],
             [SheetDrawingPermissionController],
             [SheetDrawingPrintingController],
             [SheetDrawingUIController],
@@ -141,7 +142,6 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
 
     override onSteady(): void {
         this._injector.get(DrawingPopupMenuController);
-        this._injector.get(DrawingContextMenuController);
     }
 
     private _registerRenderModules(): void {

@@ -25,6 +25,7 @@ interface ISheetBarTabsContextMenuProps {
     anchorRect: IContextMenuAnchorRect | null;
     showContextMenu: boolean;
     visible: boolean;
+    autoFocus?: boolean;
     onCommandSelect: (commandId: string, value?: string | number) => void;
     onVisibleChange: (visible: boolean) => void;
 }
@@ -45,6 +46,7 @@ export function SheetBarTabsContextMenu(props: ISheetBarTabsContextMenuProps) {
             <AnchoredContextMenu
                 hostId={hostIdRef.current}
                 visible={visible}
+                autoFocus={props.autoFocus}
                 anchorRect={anchorRect}
                 menuType={ContextMenuPosition.FOOTER_TABS}
                 anchorVertical="top"

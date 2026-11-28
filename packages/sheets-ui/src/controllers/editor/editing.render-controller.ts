@@ -32,7 +32,7 @@ import type {
 } from '@univerjs/core';
 import type { IInsertTextCommandParams, IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IInnerPasteCommandParams } from '@univerjs/docs-ui';
-import type { IFormulaSyntax } from '@univerjs/engine-formula';
+import type { FormulaInputError, IFormulaSyntax } from '@univerjs/engine-formula';
 import type {
     ISetRangeValuesCommandParams,
     ISetWorksheetActivateCommandParams,
@@ -119,7 +119,6 @@ import { DISABLE_AUTO_FOCUS_KEY, IMessageService, KeyCode, MetaKeys } from '@uni
 import { distinctUntilChanged, filter } from 'rxjs';
 import type { IDocObjectParam } from '../../basics/editor/get-editor-object';
 import type { IUniverSheetsUIConfig } from '../../config/config';
-import type { LocaleKey } from '../../locale/types';
 import type { ICellEditorState, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
@@ -136,7 +135,7 @@ import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-
 import { EditorBridgeRenderController } from '../render-controllers/editor-bridge.render-controller';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
-import { normalizeString } from '../utils/char-tools';
+import { getFormulaInputErrorMessage, normalizeString } from '../utils/char-tools';
 import { getEditCellInputPosition } from './utils/get-edit-cell-input-position';
 import { isRangeSelector } from './utils/is-range-selector';
 
@@ -846,7 +845,7 @@ export class EditingRenderController extends Disposable {
     }
 
     private _readCellDraft(snapshot: IDocumentData, syntax: IFormulaSyntax, workbook: Workbook, worksheet: Worksheet, row: number, column: number) {
-        const cell = getCellDataByInput(
+        return getCellDataByInput(
             { ...(worksheet.getCellRaw(row, column) || {}) },
             snapshot,
             this._lexerTreeBuilder,
@@ -854,15 +853,12 @@ export class EditingRenderController extends Disposable {
             this._functionService,
             workbook.getStyles(),
             syntax,
-            worksheet.getComposedCellStyleWithoutSelf(row, column).n?.pattern
-        );
-        if (cell === undefined) {
-            this._messageService.show({
+            worksheet.getComposedCellStyleWithoutSelf(row, column).n?.pattern,
+            (reason) => this._messageService.show({
                 type: MessageType.Error,
-                content: this._localService.t<LocaleKey>('sheets-ui.info.formulaSeparator', syntax.toLocal('=SUM(1.5,2.5)')),
-            });
-        }
-        return cell;
+                content: getFormulaInputErrorMessage(reason, syntax, this._localService),
+            })
+        );
     }
 
     private async _submitEdit(snapshot: IDocumentData, syntax: IFormulaSyntax, wholeSelection = false) {
@@ -1107,7 +1103,7 @@ export class EditingRenderController extends Disposable {
     }
 }
 
-/** Returns null for an unchanged draft and undefined for invalid regional formula separators. */
+/** Returns null for an unchanged draft and undefined for an invalid formula. */
 export function getCellDataByInput(
     cellData: ICellData,
     snapshot: Nullable<IDocumentData>,
@@ -1116,7 +1112,8 @@ export function getCellDataByInput(
     functionService: IFunctionService,
     styles: Styles,
     syntax: IFormulaSyntax,
-    inheritedPattern?: string
+    inheritedPattern?: string,
+    onFormulaError?: (reason: FormulaInputError) => void
 ) {
     if (snapshot?.body == null) {
         return null;
@@ -1133,7 +1130,7 @@ export function getCellDataByInput(
     const isText = isTextFormat(styles.get(cellData.s)?.n?.pattern ?? inheritedPattern);
     const cellImage = isCellImage(snapshot);
     if (!(isText && /^[=＝]/.test(newDataStream)) && !cellImage) {
-        const normalized = normalizeString(newDataStream, lexerTreeBuilder, currentLocale, functionService, syntax);
+        const normalized = normalizeString(newDataStream, lexerTreeBuilder, currentLocale, functionService, syntax, onFormulaError);
         if (normalized === null) return undefined;
         newDataStream = normalized;
     }

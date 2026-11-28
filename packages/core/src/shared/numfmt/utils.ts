@@ -107,7 +107,8 @@ export function getNumfmtLocaleTag(locale: LocaleType): INumfmtLocaleTag {
 
 /**
  * Determines whether two patterns are equal, excluding differences in decimal places.
- * This function ignores the decimal part of the patterns and the positive color will be ignored but negative color will be considered.
+ * The color of the positive section is ignored because it does not change the text, but
+ * the color and sign of a negative section are part of how a negative value is displayed.
  * more info can check the test case.
  */
 export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string): boolean => {
@@ -119,18 +120,17 @@ export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string)
         const tokens = tokenize(pattern);
         let result = '';
         let isDecimalPart = false;
-        let isColorBefore = false;
+        let sectionIndex = 0;
 
         for (const token of tokens) {
-            if (token.type === tokenTypes.POINT) {
-                isDecimalPart = true; // Start ignoring tokens after the decimal point
+            if (token.type === tokenTypes.BREAK) {
+                sectionIndex += 1;
+                isDecimalPart = false;
+                result += token.value || '';
                 continue;
             }
-            // for the excel number
-
-            // this if should be before the color token check
-            if (isColorBefore && token.type === tokenTypes.MINUS) {
-                // ignore the minus token in the decimal part after the color token
+            if (token.type === tokenTypes.POINT) {
+                isDecimalPart = true; // Start ignoring tokens after the decimal point
                 continue;
             }
 
@@ -140,10 +140,12 @@ export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string)
             }
 
             if (token.type === tokenTypes.COLOR) {
-                isColorBefore = true; // If we are in the decimal part, we ignore the color tokens
-                continue;
-            } else {
-                isColorBefore = false; // Reset after processing the color part
+                // The sections are independent: a color on the positive section only
+                // tints the value, but the color of the negative section is part of how
+                // a negative number is displayed.
+                if (sectionIndex === 0) {
+                    continue;
+                }
             }
 
             if (isDecimalPart && token.type === tokenTypes.ZERO) {

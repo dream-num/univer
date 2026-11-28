@@ -15,7 +15,6 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
-import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import {
     CellValueType,
     ContextService,
@@ -29,6 +28,7 @@ import {
     UniverInstanceService,
 } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
+import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import { ErrorType } from '../../basics/error-type';
 import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { createNewArray } from '../../engine/utils/array-object';
@@ -190,6 +190,41 @@ describe('FormulaRuntimeService', () => {
             expect(runtime.getAllRuntimeData().sourceFormulaData?.unit?.sheet?.[2]?.[3]?.f).toBe('=SUM(A1:B2)');
             runtime.reset();
             expect(runtime.getAllRuntimeData().sourceFormulaData).toEqual({});
+        } finally {
+            injector.dispose();
+        }
+    });
+
+    it('keeps the single-cell reference source from before the formula is cleared', () => {
+        const { injector, runtime, unitDataMatrix } = createRuntimeService();
+        try {
+            unitDataMatrix.setValue(3, 2, { f: '=$B$4' });
+            runtime.setCurrent(3, 2, 20, 20, 'sheet', 'unit');
+            unitDataMatrix.realDeleteValue(3, 2);
+            runtime.setRuntimeData(createNewArray([[NumberValueObject.create(50)]], 1, 1));
+
+            expect(runtime.getUnitData().unit?.sheet?.getValue(3, 2)?.v).toBe(50);
+            expect(runtime.getAllRuntimeData().sourceFormulaData?.unit?.sheet?.[3]?.[2]).toEqual({ f: '=$B$4' });
+        } finally {
+            injector.dispose();
+        }
+    });
+
+    it('keeps the array anchor source from before the formula is cleared', () => {
+        const { injector, runtime, unitDataMatrix } = createRuntimeService();
+        try {
+            unitDataMatrix.setValue(6, 2, { f: '=B5:B6' });
+            runtime.setCurrent(6, 2, 20, 20, 'sheet', 'unit');
+            unitDataMatrix.realDeleteValue(6, 2);
+            runtime.setRuntimeData(createNewArray(
+                [[NumberValueObject.create(0.25)], [NumberValueObject.create(50)]],
+                2,
+                1
+            ));
+
+            expect(runtime.getUnitData().unit?.sheet?.getValue(6, 2)?.v).toBe(0.25);
+            expect(runtime.getRuntimeArrayFormulaCellData().unit?.sheet?.getValue(7, 2)?.v).toBe(50);
+            expect(runtime.getAllRuntimeData().sourceFormulaData?.unit?.sheet?.[6]?.[2]).toEqual({ f: '=B5:B6' });
         } finally {
             injector.dispose();
         }

@@ -102,6 +102,49 @@ describe('FormulaResultService', () => {
         expect(forValue).not.toHaveBeenCalled();
     });
 
+    it('does not merge a spilled array result after its anchor formula is cleared', async () => {
+        const { injector, model, data } = createTestBed();
+        const spill = new ObjectMatrix({
+            6: { 2: { v: 0.25 } },
+            7: { 2: { v: 50 } },
+        });
+        data.arrayFormulaRange = {
+            book: { sheet: { 6: { 2: { startRow: 6, startColumn: 2, endRow: 7, endColumn: 2 } } } },
+        };
+        data.arrayFormulaCellData = { book: { sheet: spill } };
+        data.arrayFormulaEmbedded = { book: { sheet: { 6: { 2: true } } } };
+        data.sourceFormulaData = { book: { sheet: { 6: { 2: { f: '=B5:B6' } } } } };
+        (model as unknown as { matchesFormulaSource: () => boolean }).matchesFormulaSource = () => false;
+
+        await injector.get(FormulaResultService).applyResult(data);
+
+        expect(spill.getValue(6, 2)).toBeUndefined();
+        expect(spill.getValue(7, 2)).toBeUndefined();
+        expect(data.arrayFormulaRange.book?.sheet?.[6]?.[2]).toBeUndefined();
+        expect(data.arrayFormulaEmbedded.book?.sheet?.[6]?.[2]).toBeUndefined();
+        expect(model.mergeArrayFormulaCellData).toHaveBeenCalledWith(data.arrayFormulaCellData);
+    });
+
+    it('still merges a spilled array result when the anchor formula is unchanged', async () => {
+        const { injector, model, data } = createTestBed();
+        const spill = new ObjectMatrix({
+            6: { 2: { v: 0.25 } },
+            7: { 2: { v: 50 } },
+        });
+        data.arrayFormulaRange = {
+            book: { sheet: { 6: { 2: { startRow: 6, startColumn: 2, endRow: 7, endColumn: 2 } } } },
+        };
+        data.arrayFormulaCellData = { book: { sheet: spill } };
+        data.sourceFormulaData = { book: { sheet: { 6: { 2: { f: '=B5:B6' } } } } };
+        (model as unknown as { matchesFormulaSource: () => boolean }).matchesFormulaSource = () => true;
+
+        await injector.get(FormulaResultService).applyResult(data);
+
+        expect(spill.getValue(6, 2)?.v).toBe(0.25);
+        expect(spill.getValue(7, 2)?.v).toBe(50);
+        expect(data.arrayFormulaRange.book?.sheet?.[6]?.[2]?.endRow).toBe(7);
+    });
+
     it.each(['stop', 'dispose'])('does not submit values after %s during metadata application', async (action) => {
         const { injector, command, data, runtime } = createTestBed();
         const writer = injector.get(FormulaResultService);

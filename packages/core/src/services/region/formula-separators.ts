@@ -20,11 +20,12 @@ export interface IFormulaSeparators {
     readonly decimal: string;
     readonly argument: string;
     readonly arrayColumn: string;
+    readonly arrayRow: string;
 }
 
-// Each profile is shared by all matching regions. Excel uses a semicolon between array rows in all six.
+// The English interface uses a semicolon between array rows.
 function profile(decimal: string, argument: string): IFormulaSeparators {
-    return Object.freeze({ decimal, argument, arrayColumn: decimal === ',' ? '\\' : ',' });
+    return Object.freeze({ decimal, argument, arrayColumn: decimal === ',' ? '\\' : ',', arrayRow: ';' });
 }
 
 const dotComma = profile('.', ',');

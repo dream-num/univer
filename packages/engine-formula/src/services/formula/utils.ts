@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-import type { LocaleService } from '@univerjs/core';
+import type { ILanguagePack, LocaleService } from '@univerjs/core';
 import type { IFunctionInfo, IFunctionParam } from '../../basics/function';
 import { FUNCTION_LIST } from './function-list/function-list';
 
-export const aliasedBuiltins = new Map(FUNCTION_LIST.filter((item) => item.aliasFunctionName).map((item) => [item.functionName, item]));
+export const builtinsByName = new Map(FUNCTION_LIST.map((item) => [item.functionName, item]));
+
+export function getFunctionAliases(localeService: LocaleService): Readonly<Record<string, string>> {
+    const pack = localeService.getLocales()?.['engine-formula'] as ILanguagePack | undefined;
+    return (pack?.functionAliases as Record<string, string> | undefined) ?? {};
+}
 
 export function getFunctionName(item: IFunctionInfo, localeService: LocaleService) {
-    let functionName = '';
     if (item.aliasFunctionName) {
-        functionName = localeService.t(item.aliasFunctionName);
-
-        if (functionName === item.aliasFunctionName) {
-            functionName = item.functionName;
-        }
-    } else {
-        functionName = item.functionName;
+        const translated = localeService.t(item.aliasFunctionName);
+        if (translated !== item.aliasFunctionName) return translated;
     }
-
-    return functionName;
+    return getFunctionAliases(localeService)[item.functionName] ?? item.functionName;
 }
 
 export function generateParam(param: IFunctionParam) {

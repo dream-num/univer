@@ -16,6 +16,7 @@
 
 import { LocaleService, LocaleType, RegionService, Univer, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import deDE from '../../../locale/de-DE';
 import esES from '../../../locale/es-ES';
 import { UniverFormulaEnginePlugin } from '../../../plugin';
 import { ICalculateFormulaService } from '../../../services/calculate-formula.service';
@@ -88,6 +89,28 @@ describe('regional formula editing', () => {
         }
     });
 
+    it('keeps language-specific array dimensions separate from the regional decimal and argument separators', () => {
+        const univer = new Univer({ locale: LocaleType.DE_DE, locales: { [LocaleType.DE_DE]: deDE } });
+        try {
+            const injector = univer.__getInjector();
+            const german = syntaxFor(univer, 'de-DE');
+            expect(german.toLocal('=SUM({1.5,2;3,4})')).toBe('=SUMME({1,5.2;3.4})');
+            expect(german.toStandard('=SUM(A1;A2)')).toBe('=_xludf.SUM(A1,A2)');
+            expect(german.toLocal('=_xludf.SUM(A1,A2)')).toBe('=SUM(A1;A2)');
+            expect(german.toStandard('=INDEX({1.2};1;2)')).toBe('=INDEX({1,2},1,2)');
+            expect(german.toStandard('=INDEX({1\\2};1;2)')).toBeNull();
+            expect(syntaxFor(univer, 'en-US').toStandard('=SUMME({1.5\\2;3\\4})')).toBe('=SUM({1.5,2;3,4})');
+            injector.get(LocaleService).setLocale(LocaleType.IT_IT);
+            expect(syntaxFor(univer, 'de-DE').toStandard('=X({1,5\\2.3\\4})')).toBe('=X({1.5,2;3,4})');
+            injector.get(LocaleService).setLocale(LocaleType.RU_RU);
+            const russian = syntaxFor(univer, 'de-DE');
+            expect(russian.toStandard('=X({1,5;2:3;4};A1:A3)')).toBe('=X({1.5,2;3,4},A1:A3)');
+            expect(russian.toStandard('=X({1,5;2:3\\4};A1:A3)')).toBeNull();
+        } finally {
+            univer.dispose();
+        }
+    });
+
     it('uses the current input syntax for ambiguous commas and rejects mixed separators', () => {
         const univer = new Univer();
         try {
@@ -127,9 +150,9 @@ describe('regional formula editing', () => {
             const pairs = [
                 ['=SUMA((A1;A3);.5)', null],
                 ['=SUMA((A1;A3);,5E-2)', '=SUM((A1,A3),.5E-2)'],
-                ['=SUMA(1,5;STDEV.P(A1;B2))', '=SUM(1.5,STDEV.P(A1,B2))'],
+                ['=SUMA(1,5;DESVEST.P(A1;B2))', '=SUM(1.5,STDEV.P(A1,B2))'],
                 ['=SUMA(\'Q1;Q2\'\'s\'!A1;SUMA;Mi.Nombre)', '=SUM(\'Q1;Q2\'\'s\'!A1,SUMA,Mi.Nombre)'],
-                ['=LEN("a;b,1""SUMA(2)")', '=LEN("a;b,1""SUMA(2)")'],
+                ['=LARGO("a;b,1""SUMA(2)")', '=LEN("a;b,1""SUMA(2)")'],
                 ["=SUMA(Table1[[#Headers],[Col'[,;]];B1)", "=SUM(Table1[[#Headers],[Col'[,;]],B1)"],
             ] as const;
             for (const [local, standard] of pairs) {

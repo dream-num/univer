@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type enUS from './en-US';
-
+import type { FormulaLanguagePack } from './types';
 import array from './function-list/array/id-ID';
 import compatibility from './function-list/compatibility/id-ID';
 import cube from './function-list/cube/id-ID';
@@ -32,8 +31,13 @@ import text from './function-list/text/id-ID';
 import univer from './function-list/univer/id-ID';
 import web from './function-list/web/id-ID';
 
-const locale: typeof enUS = {
+const locale: FormulaLanguagePack = {
     'engine-formula': {
+        // Built-in names returned by Excel FormulaLocal for this interface language.
+        functionAliases: {
+            DAYS: 'HARI',
+            SHEET: 'LEMBAR',
+        },
         functionList: {
             ...array,
             ...compatibility,

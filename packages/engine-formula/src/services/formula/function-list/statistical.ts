@@ -43,7 +43,6 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
     },
     {
         functionName: FUNCTION_NAMES_STATISTICAL.AVERAGE,
-        aliasFunctionName: 'engine-formula.functionList.AVERAGE.aliasFunctionName',
         functionType: FunctionType.Statistical,
         description: 'engine-formula.functionList.AVERAGE.description',
         abstract: 'engine-formula.functionList.AVERAGE.abstract',
@@ -66,7 +65,6 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
     },
     {
         functionName: FUNCTION_NAMES_STATISTICAL.AVERAGE_WEIGHTED,
-        aliasFunctionName: 'engine-formula.functionList.AVERAGE_WEIGHTED.aliasFunctionName',
         functionType: FunctionType.Statistical,
         description: 'engine-formula.functionList.AVERAGE_WEIGHTED.description',
         abstract: 'engine-formula.functionList.AVERAGE_WEIGHTED.abstract',
@@ -588,7 +586,6 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
     },
     {
         functionName: FUNCTION_NAMES_STATISTICAL.COUNT,
-        aliasFunctionName: 'engine-formula.functionList.COUNT.aliasFunctionName',
         functionType: FunctionType.Statistical,
         description: 'engine-formula.functionList.COUNT.description',
         abstract: 'engine-formula.functionList.COUNT.abstract',
@@ -611,7 +608,6 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
     },
     {
         functionName: FUNCTION_NAMES_STATISTICAL.COUNTA,
-        aliasFunctionName: 'engine-formula.functionList.COUNTA.aliasFunctionName',
         functionType: FunctionType.Statistical,
         description: 'engine-formula.functionList.COUNTA.description',
         abstract: 'engine-formula.functionList.COUNTA.abstract',
@@ -1701,7 +1697,6 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
     },
     {
         functionName: FUNCTION_NAMES_STATISTICAL.MARGINOFERROR,
-        aliasFunctionName: 'engine-formula.functionList.MARGINOFERROR.aliasFunctionName',
         functionType: FunctionType.Statistical,
         description: 'engine-formula.functionList.MARGINOFERROR.description',
         abstract: 'engine-formula.functionList.MARGINOFERROR.abstract',
@@ -1724,7 +1719,6 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
     },
     {
         functionName: FUNCTION_NAMES_STATISTICAL.MAX,
-        aliasFunctionName: 'engine-formula.functionList.MAX.aliasFunctionName',
         functionType: FunctionType.Statistical,
         description: 'engine-formula.functionList.MAX.description',
         abstract: 'engine-formula.functionList.MAX.abstract',
@@ -1834,7 +1828,6 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
     },
     {
         functionName: FUNCTION_NAMES_STATISTICAL.MIN,
-        aliasFunctionName: 'engine-formula.functionList.MIN.aliasFunctionName',
         functionType: FunctionType.Statistical,
         description: 'engine-formula.functionList.MIN.description',
         abstract: 'engine-formula.functionList.MIN.abstract',

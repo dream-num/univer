@@ -22,7 +22,7 @@ import { isReferenceStrings } from '../../engine/utils/reference';
 import { ALL_IMPLEMENTED_FUNCTIONS_SET } from '../../functions';
 import { IFunctionService } from '../function.service';
 import { FUNCTION_LIST } from './function-list/function-list';
-import { aliasedBuiltins, getFunctionName } from './utils';
+import { builtinsByName, getFunctionName } from './utils';
 
 export interface ISearchItem {
     name: string;
@@ -190,7 +190,7 @@ export class DescriptionService extends Disposable implements IDescriptionServic
 
     getFunctionInfo(searchText: string) {
         const name = searchText.toUpperCase();
-        const item = this._descriptions.get(name) ?? aliasedBuiltins.get(name);
+        const item = this._descriptions.get(name) ?? builtinsByName.get(name);
         if (!item) {
             return;
         }

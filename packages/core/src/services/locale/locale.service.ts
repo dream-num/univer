@@ -53,9 +53,17 @@ export class LocaleService extends Disposable {
      */
     load(locales: ILocales) {
         // Compatibility: remove alias ordering once compact language-pack keys are retired.
-        // A standard key wins within one load. Later loads still override earlier translations.
-        const entries = Object.entries(locales).map(([key, pack]) => ({ key, tag: normalizeLocaleTag(key), pack }));
-        entries.sort((a, b) => Number(a.key === a.tag) - Number(b.key === b.tag));
+        const entries = Object.entries(locales).map(([key, pack]) => {
+            const tag = normalizeLocaleTag(key);
+            const priority = key === tag ? 2 : key.toLowerCase() === tag.toLowerCase() ? 1 : 0;
+            return { key, tag, pack, priority };
+        });
+        // Merge aliases first and the recommended spelling last. ASCII key order breaks casing ties.
+        entries.sort((a, b) => {
+            if (a.priority !== b.priority) return a.priority - b.priority;
+            if (a.key === b.key) return 0;
+            return a.key < b.key ? -1 : 1;
+        });
         this._locales ??= {};
         for (const { tag, pack } of entries) {
             this._locales[tag] = merge(this._locales[tag] ?? {}, pack);

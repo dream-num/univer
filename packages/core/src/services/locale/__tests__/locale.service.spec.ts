@@ -47,17 +47,34 @@ describe('LocaleService', () => {
         localeService.load(testLocales);
     });
 
-    it.each([true, false])('merges both pack spellings with the standard key taking precedence (%s)', (standardFirst) => {
+    it.each(['zh-CN', 'zh-cn', 'ZH-CN'])('prefers the BCP 47 pack key %s over a compact alias in either order', (key) => {
         const injector = new Injector([[LocaleService]]);
         const locales = injector.get(LocaleService);
         const legacy = { zhCN: { app: { shared: 'legacy', old: 'old' } } };
-        const standard = { 'zh-CN': { app: { shared: 'standard', added: 'added' } } };
-        locales.load(standardFirst ? { ...standard, ...legacy } : { ...legacy, ...standard });
+        const standard = { [key]: { app: { shared: 'standard', added: 'added' } } };
         locales.setLocale('zhCN');
-        expect(locales.getLocales()).toEqual({ app: { shared: 'standard', old: 'old', added: 'added' } });
+        for (const packs of [{ ...standard, ...legacy }, { ...legacy, ...standard }]) {
+            locales.load(packs);
+            expect(locales.getLocales()).toEqual({ app: { shared: 'standard', old: 'old', added: 'added' } });
+        }
         locales.load({ zhCN: { app: { shared: 'updated' } } });
         expect(locales.t('app.shared')).toBe('updated');
         expect(locales.t('app.added')).toBe('added');
+        injector.dispose();
+    });
+
+    it('merges equivalent case spellings independently of property order', () => {
+        const injector = new Injector([[LocaleService]]);
+        const service = injector.get(LocaleService);
+        service.setLocale('zh-CN');
+        const entries = [['zh-cn', { shared: 'lowercase' }], ['ZH-CN', { shared: 'uppercase' }]] as const;
+        for (const order of [entries, [...entries].reverse()]) {
+            const packs = Object.fromEntries(order);
+            service.load(packs);
+            expect(service.t('shared')).toBe('lowercase');
+            service.load({ 'zh-CN': { shared: 'preferred' }, ...packs });
+            expect(service.t('shared')).toBe('preferred');
+        }
         injector.dispose();
     });
 

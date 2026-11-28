@@ -148,11 +148,6 @@ export const LOCALE_META: Record<LocaleType, ILocaleMeta> = {
     },
 };
 
-export function getRegionTag(region: string = ''): string {
-    // Compatibility: remove compact language-region aliases after legacy SDK inputs and snapshots are retired.
-    return region.replace(/^([a-z]{2,3})([A-Z]{2})$/, '$1-$2');
-}
-
 // RFC 5646 language tags, including the reserved four-to-eight-letter primary subtags.
 // Capture the formatting fields separately from variants, extensions and private use.
 const localeTagPattern = /^([a-z]{2,3}(?:-[a-z]{3}){0,3}|[a-z]{4,8})(?:-([a-z]{4}))?(?:-([a-z]{2}|[0-9]{3}))?((?:-(?:[a-z0-9]{5,8}|[0-9][a-z0-9]{3}))*)((?:-[0-9a-wy-z](?:-[a-z0-9]{2,8})+)*)(-x(?:-[a-z0-9]{1,8})+)?$/i;
@@ -163,7 +158,8 @@ const irregularTags = ('en-GB-oed i-ami i-bnn i-default i-enochian i-hak i-kling
 
 function parseLocaleTag(input: string | undefined): string | undefined {
     if (typeof input !== 'string') return undefined;
-    const region = getRegionTag(input);
+    // Compatibility: remove compact language-region aliases after legacy SDK inputs and snapshots are retired.
+    const region = input.replace(/^([a-z]{2,3})([A-Z]{2})$/, '$1-$2');
     if (/^[a-z0-9-]+$/i.test(region)) {
         const parts = region.match(localeTagPattern);
         if (parts) {
@@ -183,13 +179,35 @@ function parseLocaleTag(input: string | undefined): string | undefined {
     return undefined;
 }
 
+/**
+ * Normalize the casing of a recognized tag or expand a compact language-region alias.
+ * Preserve unrecognized strings for callers that provide their own fallback.
+ * @example getRegionTag('zh-cn') // 'zh-CN'
+ */
+export function getRegionTag(region: string = ''): string {
+    return parseLocaleTag(region) ?? region;
+}
+
+/**
+ * Validate a locale or region input and normalize BCP 47 subtag casing without host locale data.
+ * Historical compact inputs such as enUS are interpreted as language-region pairs.
+ * @throws {RangeError} If the input is malformed.
+ * @example normalizeLocaleTag('sr-latn-rs') // 'sr-Latn-RS'
+ * @internal
+ */
 export function normalizeLocaleTag(input: string): string {
     const tag = parseLocaleTag(input);
     if (tag === undefined) throw new RangeError(`Invalid BCP 47 language tag: ${input}`);
     return tag;
 }
 
-/** Read untrusted workbook metadata without changing its serialized spelling. */
+/**
+ * Read a stored workbook locale using standard casing, keeping its serialized spelling intact.
+ * Missing, malformed and unassigned long primary language subtags yield undefined.
+ * Private-use and grandfathered tags remain valid identifiers for custom language packs.
+ * @example getWorkbookLocale(workbook.getSnapshot().locale) === LocaleType.ZH_CN
+ * @public
+ */
 export function getWorkbookLocale(input: string | undefined): string | undefined {
     const tag = parseLocaleTag(input);
     // Four-to-eight-letter primary language subtags are reserved or unassigned.
@@ -213,7 +231,12 @@ export function getRegionLocale(region: string): Intl.Locale | undefined {
     return lastLocale;
 }
 
-/** ECMA-402 formatters accept a subset of BCP 47, excluding private-use-only and grandfathered tags. */
+/**
+ * Select the tag for native formatting. Tags the host cannot represent, including private-use-only
+ * tags, use en-US. The configured UI language and region retain their original identities.
+ * @example getIntlLocaleTag('x-univer') // 'en-US'
+ * @internal
+ */
 export function getIntlLocaleTag(locale: string): string {
     return getRegionLocale(locale)?.toString() ?? LocaleType.EN_US;
 }

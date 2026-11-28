@@ -617,11 +617,11 @@ describe('ThreadCommentTree', () => {
         expect(menu?.parentElement?.getAttribute('dir')).toBe('rtl');
     });
 
-    it('formats comment timestamps with dateKit intl using the current region', () => {
+    it.each([LocaleType.EN_US, 'x-univer'])('formats comment timestamps for the current region %s', (region) => {
         const testBed = createTreeTestBed();
         const rawDate = '2026/07/07 20:35';
         testBed.injector.get(LocaleService).setLocale(LocaleType.ZH_CN);
-        testBed.injector.get(RegionService).setRegion(LocaleType.EN_US);
+        testBed.injector.get(RegionService).setRegion(region);
         addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1', dT: rawDate }));
 
         const rendered = renderDefaultTree(testBed.injector, 'root-thread');

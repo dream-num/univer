@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+import { getIntlLocaleTag, normalizeLocaleTag } from '@univerjs/core';
+
 export type DateTimeFieldFormat = 'short' | 'long' | 'time';
 
 export function createDateTimeField(format: DateTimeFieldFormat, locale: string, date: Date) {
     const options: Intl.DateTimeFormatOptions = format === 'time'
         ? { hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }
         : { year: 'numeric', month: format === 'long' ? 'long' : '2-digit', day: '2-digit' };
-    const formatter = new Intl.DateTimeFormat(locale, { ...options, calendar: 'gregory', numberingSystem: 'latn' });
+    const formatter = new Intl.DateTimeFormat(getIntlLocaleTag(normalizeLocaleTag(locale)), { ...options, calendar: 'gregory', numberingSystem: 'latn' });
     const parts = formatter.formatToParts(date);
     const tokens: Record<string, string> = {
         year: 'yyyy',
@@ -37,7 +39,7 @@ export function createDateTimeField(format: DateTimeFieldFormat, locale: string,
 
 export function resolveDateTimeField(instruction: string, locale: string, date: Date): string | undefined {
     try {
-        Intl.getCanonicalLocales(locale);
+        normalizeLocaleTag(locale);
     } catch {
         return undefined;
     }

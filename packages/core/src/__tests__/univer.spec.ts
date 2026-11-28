@@ -116,7 +116,7 @@ describe('Univer', () => {
         univer.dispose();
     });
 
-    it.each(['zhCN', 'zh-CN', 'sr-Latn-RS'])('preserves the stored locale %s through model edits and serialization', (locale) => {
+    it.each(['zhCN', 'zh-CN', 'zh-cn', 'ZH-CN', 'sr-Latn-RS'])('preserves the stored locale %s through model edits and serialization', (locale) => {
         const univer = new Univer({ locale: 'enUS' });
         const workbook = univer.createUnit<{ locale: string }, Workbook>(UniverInstanceType.UNIVER_SHEET, { locale });
         const document = univer.createUnit<{ locale: string }, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, { locale });

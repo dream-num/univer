@@ -264,10 +264,6 @@ export function getCurrencyFormat(locale: string, numberDigits: number = 2): str
     return `"${symbol}"#,##0${decimal}_);[Red]("${symbol}"#,##0${decimal})`;
 }
 
-export function applyCurrencyFormat(locale: string, number: number, numberDigits: number = 2): string {
-    return numfmt.format(getCurrencyFormat(locale, numberDigits), number, { region: locale });
-}
-
 /**
  * String is number pattern or date or time, for example
  * "20%"

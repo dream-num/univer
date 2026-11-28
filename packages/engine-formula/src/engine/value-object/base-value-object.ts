@@ -88,6 +88,10 @@ export class BaseValueObject extends ObjectClassType {
         return this._customData;
     }
 
+    getCalculationRegion(): string | undefined {
+        return undefined;
+    }
+
     getDateSystem() {
         return this._dateSystem;
     }

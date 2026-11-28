@@ -541,7 +541,8 @@ export class HtmlToUSMService {
                 const pattern = this._getMsoNumfmtForNode(cell as HTMLElement);
                 if (!isDefaultFormat(pattern)) {
                     cellText = cell.childElementCount === 0 ? normalizePlainCellText(cell.textContent ?? '') : cell.innerHTML;
-                    if (cellText.includes('mso-spacerun:yes')) {
+                    const hasSpacerun = cellText.includes('mso-spacerun:yes');
+                    if (hasSpacerun) {
                         cellText = cleanMsoSpaceRun(cellText);
                     }
 
@@ -560,11 +561,14 @@ export class HtmlToUSMService {
                         cellText = parseData.v.toString();
                         numfmtPattern = parseData.z;
                     } else if (!parseData) {
-                        const extractedNumber = extractNumber(cellText);
-
-                        if (extractedNumber !== null && !Number.isNaN(extractedNumber) && numfmt.format(pattern, extractedNumber, this._numfmtParseOptions) === cellText) {
-                            cellText = extractedNumber.toString();
-                            numfmtPattern = pattern;
+                        const extracted = extractFormattedNumber(cellText, this._numfmtParseOptions);
+                        if (extracted !== null) {
+                            const formatted = numfmt.format(pattern, extracted, this._numfmtParseOptions);
+                            // Excel expands accounting fill to column width in HTML spacerun spans.
+                            if (formatted === cellText || (hasSpacerun && formatted.replace(/\s/g, '') === cellText.replace(/\s/g, ''))) {
+                                cellText = extracted.toString();
+                                numfmtPattern = pattern;
+                            }
                         }
                     }
                 }
@@ -1106,25 +1110,10 @@ function cleanMsoSpaceRun(value: string): string {
         .replace(/\u00A0|&nbsp;/gi, '');
 }
 
-function extractNumber(value: string): number | null {
-    const match = value.match(/\(?-?\d[\d,]*(\.\d+)?%?\)?/);
-    if (!match) return null;
-
-    let numStr = match[0];
-
-    const isPercent = numStr.includes('%');
-
-    numStr = numStr.replace(/[,%]/g, '');
-
-    if (/^\(.*\)$/.test(numStr)) {
-        numStr = `-${numStr.slice(1, -1)}`;
-    }
-
-    let num = Number(numStr);
-
-    if (isPercent) {
-        num = num / 100;
-    }
-
-    return num;
+function extractFormattedNumber(value: string, options: Parameters<typeof numfmt.parseNumber>[1]): number | null {
+    const digits = /[+-]?\p{Nd}[\p{Nd}.,'’٫٬ \u00A0\u202F]*(?:[eE][+-]?\d+)?%?/u.exec(value)?.[0].trim();
+    if (!digits) return null;
+    const result = numfmt.parseNumber(digits, options);
+    if (!result) return null;
+    return value.trim().startsWith('(') && value.trim().endsWith(')') ? -result.v : result.v;
 }

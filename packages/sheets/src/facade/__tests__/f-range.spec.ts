@@ -187,6 +187,7 @@ describe('FRange effective values', () => {
                             0: { v: '1e+21', t: CellValueType.NUMBER },
                             1: { v: '001', t: CellValueType.FORCE_STRING },
                             2: { v: 'FALSE', t: CellValueType.BOOLEAN },
+                            3: { v: 0.10885416666666667, t: CellValueType.NUMBER },
                         },
                     },
                 },
@@ -197,6 +198,8 @@ describe('FRange effective values', () => {
             bed.get(NumberCellDisplayController);
             const sheet = bed.univerAPI.getActiveWorkbook()!.getActiveSheet();
             expect(sheet.getRange('A1').getDisplayValue()).toBe('1E+21');
+            expect(sheet.getRange('D1').getDisplayValue()).toBe('0.108854167');
+            expect(sheet.getRange('D1').getValue()).toBe(0.10885416666666667);
             expect(sheet.getRange('A1').getValue()).toBe(1e21);
             expect(sheet.getRange('A1:C1').getValues()).toEqual([[1e21, '001', false]]);
         } finally {

@@ -18,11 +18,14 @@
 // See packages/core/src/shared/numfmt/LICENSE.
 
 import type { LocaleData, ParseData } from './types';
+import { getRegionalCurrencyFormat } from '../../services/region/currency-format';
+import { getRegionalDatePattern, getRegionalTimePattern } from '../../services/region/date-format';
 import { getRegionalNumberFormat } from '../../services/region/number-format';
 import { DateSystem } from '../../types/enum/date-system';
 import { currencyInputCharacters, reCurrencySymbols } from './constants';
 import { groupIntegerDigits } from './grouping';
 import { defaultLocale, getLocale } from './locale';
+import { nativeDigitFormat, normalizeNativeDigits } from './native-digits';
 import { excelDateTimePartsToSerial } from './serial-date';
 
 // eslint-disable-next-line ts/naming-convention
@@ -206,9 +209,11 @@ const isDigit = (digit: string | undefined): boolean =>
 
 /** Parse a numeric string and return its value and inferred format. */
 // eslint-disable-next-line max-lines-per-function, complexity
-export function parseNumber(value: string, options: ParseOptions = {}): ParseData<number> | null {
+export function parseNumber(input: string, options: ParseOptions = {}): ParseData<number> | null {
     const l10n = getLocale(options.locale || '') || defaultLocale;
     const regional = options.region ? getRegionalNumberFormat(options.region) : undefined;
+    const native = regional && /[^\p{ASCII}]/u.test(input) ? normalizeNativeDigits(input) : undefined;
+    const value = native?.value ?? input;
     const decimal = regional?.decimal ?? l10n.decimal;
     const groupingChars = regional ? [regional.group] : [...(dec2group[decimal] || [AP, AG])];
     if (
@@ -231,10 +236,13 @@ export function parseNumber(value: string, options: ParseOptions = {}): ParseDat
     let currency = false;
     let currencySymbol = '';
     let currencyTrailing = false;
+    const regionalCurrency = options.region ? getRegionalCurrencyFormat(options.region) : undefined;
     let index = 0;
 
     const prefixChars = [SP, NS, NN, '+', '%', '(', '-'].concat(currencyInputCharacters);
-    while (prefixChars.includes(value.charAt(index))) {
+    const localSymbol = regionalCurrency?.symbol;
+    const localCurrencyAt = (offset: number) => localSymbol && value.startsWith(localSymbol, offset) ? localSymbol : undefined;
+    while (prefixChars.includes(value.charAt(index)) || localCurrencyAt(index)) {
         const char = value.charAt(index);
         if (char === '-') {
             if (minus || openParen) {
@@ -242,12 +250,13 @@ export function parseNumber(value: string, options: ParseOptions = {}): ParseDat
             }
             minus = true;
             sign = -1;
-        } else if (reCurrencySymbols.test(char)) {
+        } else if (localCurrencyAt(index) || reCurrencySymbols.test(char)) {
             if (currency) {
                 return null;
             }
             currency = true;
-            currencySymbol = char;
+            currencySymbol = localCurrencyAt(index) ?? char;
+            index += currencySymbol.length - 1;
         } else if (char === '+') {
             // Excel treats "(+5)" as text: a parenthesis already carries the
             // sign, so it cannot be combined with an explicit one.
@@ -321,14 +330,15 @@ export function parseNumber(value: string, options: ParseOptions = {}): ParseDat
     }
 
     const suffixChars = [SP, NS, NN, '%', '$', ')'].concat(currencyInputCharacters);
-    while (suffixChars.includes(value.charAt(index))) {
+    while (suffixChars.includes(value.charAt(index)) || localCurrencyAt(index)) {
         const char = value.charAt(index);
-        if (reCurrencySymbols.test(char)) {
+        if (localCurrencyAt(index) || reCurrencySymbols.test(char)) {
             if (currency) {
                 return null;
             }
             currency = true;
-            currencySymbol = char;
+            currencySymbol = localCurrencyAt(index) ?? char;
+            index += currencySymbol.length - 1;
             currencyTrailing = true;
         } else if (char === ')') {
             if (closeParen || !openParen) {
@@ -352,7 +362,21 @@ export function parseNumber(value: string, options: ParseOptions = {}): ParseDat
         return null;
     }
 
-    let numberValue = Number.parseFloat(number + exponent);
+    let mantissa = number;
+    let power = Number(exponent.slice(1)) - (percent ? 2 : 0);
+    if (native?.system) {
+        // Excel stores the first 15 significant input digits, including for decimal scripts.
+        const [whole, fraction = ''] = number.split('.');
+        const digits = whole + fraction;
+        const significantStart = digits.search(/[1-9]/);
+        const end = significantStart + 15;
+        if (significantStart >= 0 && end < digits.length) {
+            mantissa = digits.slice(significantStart, end);
+            power += whole.length - end;
+        }
+    }
+    // Apply percentage scaling in decimal before converting to a double.
+    const numberValue = Number(`${mantissa}e${power}`);
     if (!Number.isFinite(numberValue)) {
         return null;
     }
@@ -367,16 +391,37 @@ export function parseNumber(value: string, options: ParseOptions = {}): ParseDat
             return null;
         }
         format = number.includes('.') ? '0.00%' : '0%';
-        numberValue *= 0.01;
     } else if (currency) {
         const currencyFormat = number.includes('.') ? '#,##0.00' : '#,##0';
-        format = currencyTrailing
-            ? currencyFormat + currencySymbol
-            : currencySymbol + currencyFormat;
+        if (regionalCurrency) {
+            // Excel additionally recognizes the euro sign on either side, with General display.
+            const symbolMatches = currencySymbol === regionalCurrency.symbol;
+            if (!symbolMatches && currencySymbol !== '€') return null;
+            if (symbolMatches && currencyTrailing === regionalCurrency.positive.endsWith('$')) {
+                format = `$${currencyFormat}_);[Red]($${currencyFormat})`;
+            }
+        } else {
+            format = currencyTrailing ? currencyFormat + currencySymbol : currencySymbol + currencyFormat;
+        }
     } else if (grouping) {
         format = number.includes('.') ? '#,##0.00' : '#,##0';
     }
 
+    if (native?.system && !exponent) {
+        const fraction = number.split('.')[1];
+        if (!format) {
+            if (numberValue >= 1e11 || (numberValue > 0 && numberValue < 1e-9)) {
+                const [, mantissaFraction = ''] = numberValue.toExponential(5).split('e')[0].split('.');
+                const places = mantissaFraction.replace(/0+$/, '').length;
+                const point = places || fraction === undefined ? '.' : '';
+                format = `0${point}${'#'.repeat(places)}E${fraction === undefined ? '+' : '-'}00`;
+            } else {
+                const places = numberValue && Math.min(14, fraction?.length ?? 0);
+                format = places ? `0.${'#'.repeat(places)}` : '0';
+            }
+        }
+        format = nativeDigitFormat(native.system, native.locale, format);
+    }
     const result: ParseData<number> = { v: numberValue * sign };
     if (format) {
         result.z = format;
@@ -654,6 +699,33 @@ const getDateLocaleLookups = (locale: LocaleData): DateLocaleLookups => {
     return cached.lookups;
 };
 
+function parseRegionalDateFields(parts: RegExpExecArray, pattern: string): IDateParseState | undefined {
+    const [, left, sep, middle, right] = parts;
+    if (sep === '.' && !pattern.includes('.')) return undefined;
+    const first = Number(left);
+    const second = Number(middle);
+    const date = (yearText: string, month: number, day: number, path: string) => {
+        const yearNumber = Number(yearText);
+        const year = yearText.length <= 2 ? yearNumber + (yearNumber < 30 ? 2000 : 1900) : yearNumber;
+        if (!isValidDate(year, month, day)) return undefined;
+        return { year, month, day: String(day), _mon: String(month), sep, path };
+    };
+    if (right !== undefined) {
+        if (left.length === 4 || pattern.startsWith('y')) return date(left, second, Number(right), 'm/d/yy');
+        return pattern.startsWith('m') ? date(right, first, second, 'm/d/yy') : date(right, second, first, 'm/d/yy');
+    }
+
+    const currentYear = String(new Date().getUTCFullYear());
+    // A year-first region tries month/day, then day/month, before interpreting year/month.
+    if (pattern.startsWith('y')) {
+        return date(currentYear, first, second, 'd-mmm') ?? date(currentYear, second, first, 'd-mmm')
+            ?? (first > 0 ? date(left, second, 1, 'mmm-yy') : undefined);
+    }
+    const dayFirst = pattern.startsWith('d');
+    const monthDay = dayFirst ? date(currentYear, second, first, 'd-mmm') : date(currentYear, first, second, 'd-mmm');
+    return monthDay ?? (dayFirst && second === 0 ? undefined : date(middle, first, 1, 'mmm-yy'));
+}
+
 /** Parse a date or datetime string and return its serial value and format. */
 export function parseDate(value: string, options: ParseOptions = {}): ParseData<number> | null {
     const l10n = getLocale(options.locale || '') || defaultLocale;
@@ -662,16 +734,25 @@ export function parseDate(value: string, options: ParseOptions = {}): ParseData<
         locale: options.locale,
         dateSystem: options.dateSystem ?? DateSystem.Date1900,
     };
-    const date = nextToken(
-        normDateStr(value),
-        l10n.preferMDY ? dateTrieMD : dateTrieDM,
-        { path: '' },
-        localeData
-    );
+    const shortDate = options.region ? getRegionalDatePattern(options.region) : undefined;
+    const monthFirst = shortDate ? shortDate.startsWith('m') : l10n.preferMDY;
+    const text = normDateStr(value);
+    const fields = shortDate && /^(\d{1,4})([./-])(\d{1,4})(?:\2(\d{1,4}))?$/.exec(text);
+    const date = fields
+        ? parseRegionalDateFields(fields, shortDate!)
+        : nextToken(
+            text,
+            monthFirst ? dateTrieMD : dateTrieDM,
+            { path: '' },
+            localeData
+        );
     if (!date) {
         return null;
     }
-    if (date.sep === '.' && date.path.length === 3) {
+    if (options.region && date.sep === ' ' && /^[\d ]+$/.test(value.trim()) && getRegionalTimePattern(options.region).includes(' ')) {
+        return null;
+    }
+    if (date.sep === '.' && (shortDate ? !shortDate.includes('.') : date.path.length === 3)) {
         return null;
     }
     if (date.month == null || date._mon == null) {
@@ -718,7 +799,7 @@ export function parseDate(value: string, options: ParseOptions = {}): ParseData<
         }
         return (lead0 ? tx00[token] : tx0[token]) || token;
     });
-    return { v: dateValue, z: format };
+    return { v: dateValue, z: fields ? date.path : format };
 }
 
 const normAMPMStr = (string: string): string =>
@@ -728,6 +809,23 @@ const normAMPMStr = (string: string): string =>
 // eslint-disable-next-line complexity
 export function parseTime(value: string, options: ParseOptions = {}): ParseData<number> | null {
     const l10n = getLocale(options.locale || '') || defaultLocale;
+    // Excel also accepts the regional clock separator (for example, a period in Indonesia).
+    if (options.region && /[. ]/.test(value)) {
+        const pattern = getRegionalTimePattern(options.region);
+        const { value: ascii, system } = normalizeNativeDigits(value);
+        const clock = pattern.includes('.')
+            ? /^(\d+)\.(\d+)(?:\.(\d+))?$/.exec(ascii.trim())
+            : pattern.includes(' ') ? /^(\d+) (\d+)(?: (\d+))?$/.exec(ascii.trim()) : null;
+        if (clock) {
+            const hours = Number(clock[1]);
+            const minutes = Number(clock[2]);
+            const seconds = Number(clock[3] ?? 0);
+            const v = (hours * 3600 + minutes * 60 + seconds) / 86400;
+            if (minutes > 59 || seconds > 59) return { v };
+            const pattern = hours >= 24 ? '[h]:mm:ss' : clock[3] ? 'h:mm:ss' : 'h:mm';
+            return { v, z: system ? nativeDigitFormat(system, 0, pattern) : pattern };
+        }
+    }
     const parts = /^\s*([10]?\d|2[0-4])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?(\.\d{1,10})?(?=\s*[^\s\d]|$)/.exec(value);
     let ampm = '';
     if (parts) {

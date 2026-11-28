@@ -134,6 +134,7 @@ export interface RenderToken {
 }
 
 export interface ParsedFormatSection {
+    digitZero?: number;
     scale: number;
     scaleExponent: number;
     percent: boolean;

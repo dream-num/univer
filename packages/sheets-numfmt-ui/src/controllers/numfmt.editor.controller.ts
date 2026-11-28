@@ -215,7 +215,7 @@ export class NumfmtEditorController extends Disposable {
                         const content = value?.p?.body?.dataStream ? value.p.body.dataStream.replace(/\r\n$/, '') : String(value.v);
                         const locale = this._sheetsNumfmtCellContentController.getLocale(context.workbook);
                         const dateSystem = context.workbook.getDateSystem();
-                        const region = this._sheetsNumfmtCellContentController.region;
+                        const region = context.editRegion ?? this._sheetsNumfmtCellContentController.region;
                         const numfmtInfo = getNumfmtParseValueFilter(content, { locale, dateSystem, region });
 
                         if (body) {
@@ -235,12 +235,13 @@ export class NumfmtEditorController extends Disposable {
                             const temporalValue = parseTemporalEditorValue({
                                 content,
                                 originalSerial: Number(originCell.v),
+                                region,
                                 pattern: currentNumfmtValue.pattern,
                                 locale,
                                 dateSystem,
                             });
                             if (temporalValue != null) {
-                                return next({ ...value, p: undefined, v: stripErrorMargin(temporalValue, 16), t: CellValueType.NUMBER });
+                                return next({ ...value, p: undefined, v: temporalValue, t: CellValueType.NUMBER });
                             }
                         }
 
@@ -281,7 +282,7 @@ export class NumfmtEditorController extends Disposable {
                                 );
                             }
 
-                            const v = stripErrorMargin(Number(numfmtInfo.v), 16);
+                            const v = Number(numfmtInfo.v);
 
                             return next({ ...value, p: undefined, v, t: CellValueType.NUMBER });
                         }

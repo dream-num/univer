@@ -65,6 +65,7 @@ import {
     u_YEAR,
 } from './constants';
 import { resolveLocale } from './locale';
+import { getDigitZero } from './native-digits';
 
 type NumberPatternName = 'int' | 'frac' | 'man' | 'den' | 'num';
 
@@ -248,7 +249,7 @@ export function parseFormatSection(inputTokens: FormatToken[]): ParsedFormatSect
                 currentPattern = 'den';
                 add({ type: 'div' }, outputTokens);
             } else {
-                add(token.value, outputTokens);
+                add({ type: 'date-separator', value: '/' }, outputTokens);
             }
         } else if (type === TOKEN_COMMA) {
             add(',', outputTokens);
@@ -418,6 +419,8 @@ export function parseFormatSection(inputTokens: FormatToken[]): ParsedFormatSect
             part.date_eval = true;
             token.short = token.value === 'A/P';
             add(token, outputTokens);
+        } else if (type === TOKEN_CHAR && token.value === ':') {
+            add({ type: 'time-separator', value: ':' }, outputTokens);
         } else if (type === TOKEN_STRING || type === TOKEN_ESCAPED || type === TOKEN_CHAR) {
             add(token.value, outputTokens);
         } else if (type === TOKEN_CONDITION) {
@@ -436,6 +439,7 @@ export function parseFormatSection(inputTokens: FormatToken[]): ParsedFormatSect
                 part.locale = locale;
             }
             const windowsCode = Number.parseInt(code, 16);
+            part.digitZero = getDigitZero(windowsCode);
             if (Number.isFinite(windowsCode) && (windowsCode & 0xFF0000)) {
                 const calendar = (windowsCode >> 16) & 0xFF;
                 if (calendar === 6) {

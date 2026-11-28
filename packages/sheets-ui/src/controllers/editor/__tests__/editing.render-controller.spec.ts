@@ -659,7 +659,7 @@ describe('EditingRenderController business methods', () => {
             f: null,
             si: null,
             p: null,
-        });
+        }, controller._editorBridgeService.getFormulaSyntax().region);
         expect(controller._commandService.syncExecuteCommand).toHaveBeenCalledWith(SetRangeValuesCommand.id, expect.objectContaining({
             unitId: 'unit-1',
             subUnitId: 'sheet-1',

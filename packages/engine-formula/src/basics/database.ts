@@ -15,11 +15,11 @@
  */
 
 import type { DateSystem } from '@univerjs/core';
+import { isRealNum } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
-import { isRealNum } from '@univerjs/core';
-import { findCompareToken } from '../engine/utils/object-compare';
+import { createCriteriaValueObject, findCompareToken } from '../engine/utils/object-compare';
 import { ValueObjectFactory } from '../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { ErrorType } from './error-type';
@@ -166,59 +166,11 @@ export function checkField(input: FunctionVariantType, database: DatabaseValueTy
 
 export function checkCriteria(input: FunctionVariantType) {
     const criteria = toValue(input);
-    const criteriaValues: DatabaseValueType[][] = [];
-
-    if (criteria.isError()) {
-        return {
-            isError: true,
-            errorObject: criteria as ErrorValueObject,
-            criteriaValues,
-        };
-    }
-
-    const rowCount = criteria.isArray() ? (criteria as ArrayValueObject).getRowCount() : 1;
-    const columnCount = criteria.isArray() ? (criteria as ArrayValueObject).getColumnCount() : 1;
-
-    if (rowCount < 2) {
-        return {
-            isError: true,
-            errorObject: ErrorValueObject.create(ErrorType.VALUE),
-            criteriaValues,
-        };
-    }
-
-    for (let r = 0; r < rowCount; r++) {
-        const row: DatabaseValueType[] = [];
-
-        for (let c = 0; c < columnCount; c++) {
-            const valueObject = (criteria as ArrayValueObject).get(r, c) as BaseValueObject;
-
-            if (valueObject.isNull()) {
-                row.push(null);
-                continue;
-            }
-
-            const value = `${valueObject.getValue()}`;
-
-            if (valueObject.isBoolean()) {
-                row.push(valueObject.getValue() ? 1 : 0);
-                continue;
-            }
-
-            if (valueObject.isNumber() || isRealNum(value)) {
-                row.push(+value);
-                continue;
-            }
-
-            row.push(value);
-        }
-
-        criteriaValues.push(row);
-    }
-
+    const criteriaValues = criteria as ArrayValueObject;
+    const valid = criteria.isArray() && criteriaValues.getRowCount() >= 2;
     return {
-        isError: false,
-        errorObject: null,
+        isError: !valid,
+        errorObject: valid ? null : criteria.isError() ? criteria as ErrorValueObject : ErrorValueObject.create(ErrorType.VALUE),
         criteriaValues,
     };
 }
@@ -228,14 +180,14 @@ export function checkCriteria(input: FunctionVariantType) {
  * Boolean AND in row direction, then Boolean OR in column direction
  */
 export function isCriteriaMatch(
-    criteria: DatabaseValueType[][],
+    criteria: ArrayValueObject,
     database: DatabaseValueType[][],
     databaseRowIndex: number,
     dateSystem: DateSystem,
     evaluateCriterion?: DatabaseCriterionEvaluator
 ) {
-    const rowCount = criteria.length;
-    const columnCount = criteria[0].length;
+    const rowCount = criteria.getRowCount();
+    const columnCount = criteria.getColumnCount();
 
     const criteriaTitleIndexCache: Record<number, number> = {};
 
@@ -253,18 +205,20 @@ export function isCriteriaMatch(
                 }
                 continue;
             }
-            const criteriaValue = criteria[r][c];
+            const condition = criteria.get(r, c);
 
-            if (criteriaValue === null) {
+            if (!condition || condition.isNull()) {
                 continue;
             }
 
             let criteriaTitleIndex = criteriaTitleIndexCache[c];
 
             if (criteriaTitleIndex === undefined) {
-                const criteriaTitleValue = criteria[0][c];
+                const header = criteria.get(0, c);
+                const title = header?.getValue();
+                const criteriaTitleValue = header?.isBoolean() || isRealNum(title) ? Number(title) : title;
                 criteriaTitleIndex = database[0].findIndex((value) => {
-                    if (value === null || criteriaTitleValue === null) {
+                    if (value === null || criteriaTitleValue == null) {
                         return false;
                     }
 
@@ -273,10 +227,16 @@ export function isCriteriaMatch(
                 criteriaTitleIndexCache[c] = criteriaTitleIndex;
             }
 
-            if (criteriaTitleIndex === -1 && (typeof criteriaValue === 'string' || criteriaValue === 0)) {
-                isRowMatch = false;
-                break;
-            } else if (criteriaTitleIndex > -1) {
+            const criteriaValue = condition.isBoolean() ? Number(condition.getValue()) : condition.getValue();
+            if (criteriaTitleIndex === -1) {
+                const value = condition.isString()
+                    ? createCriteriaValueObject(String(criteriaValue), dateSystem, condition.getCalculationRegion())
+                    : condition;
+                if ((!value.isNumber() && !value.isBoolean()) || !value.getValue()) {
+                    isRowMatch = false;
+                    break;
+                }
+            } else {
                 const databaseValue = database[databaseRowIndex][criteriaTitleIndex];
 
                 if (databaseValue === null) {
@@ -284,7 +244,7 @@ export function isCriteriaMatch(
                     break;
                 }
 
-                const [compareToken, criteriaObject] = findCompareToken(`${criteriaValue}`, dateSystem);
+                const [compareToken, criteriaObject] = findCompareToken(String(criteriaValue), dateSystem, condition.getCalculationRegion());
                 const compareObject = ValueObjectFactory.create(`${databaseValue}`, false, dateSystem).compare(criteriaObject, compareToken);
                 const compareValue = compareObject.getValue();
 

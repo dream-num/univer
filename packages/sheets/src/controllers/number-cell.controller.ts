@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { CellValueType, Disposable, Inject, InterceptorEffectEnum, isDefaultFormat, isRealNum, RegionService } from '@univerjs/core';
-import { stripErrorMargin } from '@univerjs/engine-formula';
+import { CellValueType, Disposable, Inject, InterceptorEffectEnum, isDefaultFormat, isRealNum, numfmt, RegionService } from '@univerjs/core';
 import { INTERCEPTOR_POINT } from '../services/sheet-interceptor/interceptor-const';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 
@@ -60,14 +59,9 @@ export class NumberCellDisplayController extends Disposable {
                             cell = { ...location.rawData };
                         }
 
-                        cell.v = stripErrorMargin(Number(cell.v));
-
-                        // If the cell format is General and the value is a scientific notation number, prevent it from displaying lowercase e.
-                        const text = String(cell.v);
-                        const display = text.toUpperCase().replace('.', this._regionService.getNumberFormat().decimal);
-                        if (display !== text) {
-                            cell.v = display;
-                        }
+                        const value = Number(cell.v);
+                        const display = numfmt.format('General', value, { region: this._regionService.getCurrentRegion() });
+                        cell.v = display === String(value) ? value : display;
 
                         return next(cell);
                     }

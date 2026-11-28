@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
-import { CommandType, ICommandService, Univer } from '@univerjs/core';
+import { CommandType, ICommandService, RegionService, Univer } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IDirtyConversionManagerParams } from '../active-dirty-manager.service';
 import {
@@ -50,6 +50,7 @@ function createTestBed(start = true) {
     }
 
     return {
+        region: injector.get(RegionService),
         service,
         executed,
         conversions,
@@ -67,6 +68,27 @@ describe('FormulaCalculationTriggerService', () => {
     afterEach(() => {
         vi.useRealTimers();
         vi.restoreAllMocks();
+    });
+
+    it('recalculates regional formulas when a region extension changes number grouping', async () => {
+        const bed = createTestBed(false);
+        try {
+            const hostLocale = vi.spyOn(Intl, 'Locale');
+            bed.region.setRegion('enUS');
+            bed.service.start();
+            bed.region.setRegion('en-US');
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed).toHaveLength(0);
+            bed.region.setRegion('en-US-u-va-posix');
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed).toMatchObject([{
+                id: SetFormulaCalculationStartMutation.id,
+                params: { dirtyCalculationRegion: true },
+            }]);
+            expect(hostLocale).not.toHaveBeenCalled();
+        } finally {
+            bed.service.dispose();
+        }
     });
 
     it('batches reference context changes and preserves explicit full calculation on restart', async () => {

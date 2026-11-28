@@ -25,6 +25,7 @@ interface ITemporalEditorValueOptions {
 }
 
 interface IParseTemporalEditorValueOptions {
+    region?: string;
     content: string;
     originalSerial: number;
     pattern: string;
@@ -122,12 +123,12 @@ export function parseTemporalEditorValue(options: IParseTemporalEditorValueOptio
     }
 
     if (type === 'time') {
-        const parsed = numfmt.parseTime(content, { locale, dateSystem });
+        const parsed = numfmt.parseTime(content, { locale, dateSystem, region: options.region });
         // A time-only edit must not discard a date component hidden by the cell format.
         return parsed ? Math.floor(originalSerial) + Number(parsed.v) : null;
     }
 
-    const parsed = numfmt.parseDate(content, { locale, dateSystem });
+    const parsed = numfmt.parseDate(content, { locale, dateSystem, region: options.region });
     if (!parsed || typeof parsed.v !== 'number') {
         return null;
     }

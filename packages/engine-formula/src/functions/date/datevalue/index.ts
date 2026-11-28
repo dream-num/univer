@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { excelDateTimeSerial } from '@univerjs/core';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { isDate, parseFormattedDate, parseFormattedTime } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
-import { BaseFunction } from '../../base-function';
+import { RegionalNumberFormatFunction } from '../../text/regional-number-format.function';
 
-export class Datevalue extends BaseFunction {
+export class Datevalue extends RegionalNumberFormatFunction {
     override minParams = 1;
 
     override maxParams = 1;
@@ -46,7 +46,7 @@ export class Datevalue extends BaseFunction {
 
         if (dateTextObject.isString()) {
             const value = `${dateTextObject.getValue()}`;
-            const options = { dateSystem: this.getDateSystem() };
+            const options = { dateSystem: this.getDateSystem(), region: this.getNumberFormatRegion() };
             let parsedDate = parseFormattedDate(value, options);
             if (parsedDate === null) {
                 parsedDate = parseFormattedTime(value, options);

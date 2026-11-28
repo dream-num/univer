@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { getRegionalNumberFormat } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { getNumfmtParseValueFilter, isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { getFormatPreview } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -38,14 +38,8 @@ export class Text extends RegionalNumberFormatFunction {
         if (value.isBoolean()) return value.getValue() ? 'TRUE' : 'FALSE';
         if (value.isNumber()) return Number(value.getValue());
         const raw = String(value.getValue());
-        if (isRealNum(raw)) return Number(raw);
-        if (raw.includes(',')) {
-            const region = this.getNumberFormatRegion();
-            const parsed = parseFormulaNumericText(raw, region ? () => region : undefined);
-            if (parsed) return 'v' in parsed ? parsed.v : raw;
-        }
-        const parsed = getNumfmtParseValueFilter(raw, { dateSystem: value.getDateSystem() });
-        return typeof parsed?.v === 'number' ? parsed.v : raw;
+        const numeric = parseFormulaNumericText(raw, value.getDateSystem(), this.getNumberFormatRegion());
+        return numeric && 'v' in numeric ? numeric.v : raw;
     }
 
     override calculate(text: BaseValueObject, formatText: BaseValueObject) {
@@ -96,7 +90,7 @@ export class Text extends RegionalNumberFormatFunction {
             }
 
             const formatTextValueString = `${formatTextValue.getValue()}`;
-            const normalizedFormatTextValueString = normalizeExcelWeekdayFormat(formatTextValueString);
+            const normalizedFormatTextValueString = normalizeExcelFormatCode(formatTextValueString, this.getNumberFormatRegion());
 
             const previewText = getFormatPreview(
                 normalizedFormatTextValueString,
@@ -116,7 +110,20 @@ export class Text extends RegionalNumberFormatFunction {
     }
 }
 
-export function normalizeExcelWeekdayFormat(formatText: string): string {
+export function normalizeExcelFormatCode(formatText: string, region?: string): string {
+    const format = getRegionalNumberFormat(region);
+    const { decimal } = format;
+    const group = format.group || (decimal === '٫' ? '٬' : ',');
+    if (decimal !== '.' || group !== ',') {
+        // Quoted literals, escapes, spacing directives and bracket modifiers retain their punctuation.
+        formatText = formatText.replace(/"[^"]*"|\[[^\]]*\]|[\\_*].|[.,٫٬' ]/g, (token, index: number) => {
+            const beforeDigit = /[0#?]/.test(formatText[index + 1] ?? '');
+            const afterDigit = /[0#?]/.test(formatText[index - 1] ?? '');
+            if (token === decimal && (beforeDigit || afterDigit)) return '.';
+            if (token === group && afterDigit && (group !== ' ' || beforeDigit)) return ',';
+            return token;
+        });
+    }
     if (!formatText.includes('\u00C5')) {
         return formatText;
     }

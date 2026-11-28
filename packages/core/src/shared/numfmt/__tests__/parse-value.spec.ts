@@ -820,3 +820,48 @@ describe('parseDate', () => {
         expect(parseDate('21:21')).toBe(null);
     });
 });
+
+describe('regional Excel input', () => {
+    it('uses the active region for date order, separators and short date display', () => {
+        const options = { locale: 'en', region: 'de-DE' };
+        const february = parseDate('01/02/2025', options);
+        expect(february?.v).toBe(45689);
+        expect(format(february!.z!, february!.v, options)).toBe('01.02.25');
+        expect(format('dd/mm/yyyy', 45689, options)).toBe('01.02.2025');
+        expect(format('dd"/"mm"/"yyyy', 45689, options)).toBe('01/02/2025');
+        expect(format('# ?/?', 1.5, options)).toBe('1 1/2');
+        expect(parseDate('01/02/2025', { locale: 'de', region: 'en-US' })?.v).toBe(45659);
+        expect(parseDate('01/02/2025', { region: 'ja-JP' })).toBeNull();
+        expect(parseDate('2025/02/01', { region: 'ja-JP' })?.v).toBe(45689);
+        expect(parseDate('02.03.2025', { region: 'en-GB' })).toBeNull();
+        expect(parseDate('1.23', { region: 'de-DE' })?.v).toBe(44927);
+        expect(parseDate('1/2/25', { region: 'ja-JP' })?.v).toBe(dateToSerial([2001, 2, 25]));
+        expect(parseTime('1 30 20', { region: 'dz-BT' })?.v).toBe((3600 + 30 * 60 + 20) / 86400);
+    });
+
+    it('chooses the currency format only for the local symbol in its regional position', () => {
+        const options = { region: 'de-DE' };
+        expect(parseNumber('€ 1.234,56', options)).toEqual({ v: 1234.56 });
+        const result = parseNumber('1.234,56 €', options)!;
+        expect(format(result.z!, result.v, options)).toBe('1.234,56 €');
+    });
+
+    it('recognizes native digits with the regional separators and preserves their display', () => {
+        for (const [region, text] of [['ar-SA', '١٢٣٫٤٥'], ['fa-IR', '۱۲۳٫۴۵'], ['en-US', '१२३.४५']]) {
+            const result = parseNumber(text, { region });
+            expect(result?.v).toBe(123.45);
+            expect(format(result!.z!, result!.v, { region })).toBe(text);
+        }
+        const options = { region: 'en-US' };
+        const large = parseNumber('१२३४५६७८९०१२३४५६७८९०', options)!;
+        expect(large.v).toBe(1.23456789012345e19);
+        expect(format(large.z!, large.v, options)).toBe('१.२३४५७E+१९');
+        const fraction = parseNumber('०.१२३४५६७८९०१२३४५६७८९', options)!;
+        expect(fraction.v).toBe(0.123456789012345);
+        expect(format(fraction.z!, fraction.v, options)).toBe('०.१२३४५६७८९०१२३५');
+        expect(parseNumber('१२३.४५', { region: 'de-DE' })).toBeNull();
+        const elapsed = parseTime('१२३.४५', { region: 'id-ID' });
+        expect(elapsed?.v).toBe(5.15625);
+        expect(format(elapsed!.z!, elapsed!.v, { region: 'id-ID' })).toBe('१२३.४५.००');
+    });
+});

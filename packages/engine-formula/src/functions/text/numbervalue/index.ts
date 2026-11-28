@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+import { getRegionalNumberFormat } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
-import { BaseFunction } from '../../base-function';
+import { NumberValueObject, parseFormulaNumericText, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { RegionalNumberFormatFunction } from '../regional-number-format.function';
 
-export class Numbervalue extends BaseFunction {
+export class Numbervalue extends RegionalNumberFormatFunction {
     override minParams = 1;
 
     override maxParams = 3;
@@ -33,7 +33,7 @@ export class Numbervalue extends BaseFunction {
     }
 
     override calculate(text: BaseValueObject, decimalSeparator?: BaseValueObject, groupSeparator?: BaseValueObject): BaseValueObject {
-        const _decimalSeparator = decimalSeparator ?? StringValueObject.create('.');
+        const _decimalSeparator = decimalSeparator ?? StringValueObject.create(getRegionalNumberFormat(this.getNumberFormatRegion()).decimal);
 
         const maxRowLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getRowCount() : 1,
@@ -85,105 +85,31 @@ export class Numbervalue extends BaseFunction {
         return resultArray;
     }
 
-    // eslint-disable-next-line
     protected _handleSingleObject(text: BaseValueObject, decimalSeparator: BaseValueObject, groupSeparator: BaseValueObject | undefined): BaseValueObject {
-        let textValue = `${text.getValue()}`;
-        textValue = textValue.replace(/\s+/g, '');
-
-        let decimalSeparatorValue = `${decimalSeparator.getValue()}`;
-
-        if (decimalSeparator.isBoolean()) {
-            decimalSeparatorValue = decimalSeparatorValue.toLocaleUpperCase();
-        }
-
-        decimalSeparatorValue = decimalSeparatorValue.charAt(0);
-
-        let groupSeparatorValue: string | undefined;
-
-        if (groupSeparator) {
-            groupSeparatorValue = `${groupSeparator.getValue()}`;
-
-            if (groupSeparator.isBoolean()) {
-                groupSeparatorValue = groupSeparatorValue.toLocaleUpperCase();
-            }
-
-            groupSeparatorValue = groupSeparatorValue.charAt(0);
-
-            if (decimalSeparatorValue === groupSeparatorValue) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-        }
-
-        if (textValue.trim() === '') {
-            return NumberValueObject.create(0);
-        }
-
-        if (!textValue.match(/^\s*[+-]?\s*(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:[eE][+-]?\d+)?[ \t]*/)) {
+        const region = this.getNumberFormatRegion();
+        const format = getRegionalNumberFormat(region);
+        const separator = (value: BaseValueObject) => {
+            const string = String(value.getValue());
+            return (value.isBoolean() ? string.toUpperCase() : string).charAt(0);
+        };
+        const decimal = separator(decimalSeparator);
+        const group = groupSeparator
+            ? separator(groupSeparator)
+            : format.group || (format.decimal === '.' ? ',' : '٬');
+        if (groupSeparator && group === decimal) return ErrorValueObject.create(ErrorType.VALUE);
+        let content = String(text.getValue()).replace(/\s+/g, '');
+        if (text.isNumber()) content = content.replace('.', format.decimal);
+        if (!content) return NumberValueObject.create(0);
+        const percent = content.match(/%+$/)?.[0].length ?? 0;
+        if (percent) content = content.slice(0, -percent);
+        const parts = decimal ? content.split(decimal) : [content];
+        if (parts.length > 2 || (group && group !== decimal && parts[1]?.includes(group))) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
-
-        const splitText = textValue.split(decimalSeparatorValue);
-
-        if (splitText.length > 2) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        let integerPart = splitText[0].replace(/,/g, '');
-
-        if (groupSeparator) {
-            integerPart = integerPart.split(groupSeparatorValue as string).join('');
-        }
-
-        let result = 0;
-
-        if (splitText.length === 1) {
-            if (decimalSeparatorValue === ',') {
-                integerPart = integerPart.replace(/\./g, '');
-            }
-
-            let percentageCount = 0;
-
-            while (integerPart.endsWith('%')) {
-                integerPart = integerPart.slice(0, -1);
-                percentageCount++;
-            }
-
-            if (percentageCount > 0) {
-                result = +integerPart / (100 ** percentageCount);
-            } else {
-                result = +integerPart;
-            }
-        } else {
-            if (!isRealNum(integerPart)) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            let decimalPart = splitText[1];
-
-            let percentageCount = 0;
-
-            while (decimalPart.endsWith('%')) {
-                decimalPart = decimalPart.slice(0, -1);
-                percentageCount++;
-            }
-
-            const resultText = `${integerPart}.${decimalPart}`;
-
-            if (!isRealNum(resultText)) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            if (percentageCount > 0) {
-                result = +resultText / (100 ** percentageCount);
-            } else {
-                result = +resultText;
-            }
-        }
-
-        if (Number.isNaN(result)) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        return NumberValueObject.create(result);
+        if (group && group !== decimal) parts[0] = parts[0].split(group).join('');
+        const parsed = parseFormulaNumericText(parts.join(format.decimal), text.getDateSystem(), region);
+        return parsed && 'v' in parsed && !parsed.z?.includes('%')
+            ? NumberValueObject.create(parsed.v / 100 ** percent)
+            : ErrorValueObject.create(ErrorType.VALUE);
     }
 }

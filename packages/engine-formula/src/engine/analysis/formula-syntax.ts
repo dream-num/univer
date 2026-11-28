@@ -20,6 +20,7 @@ import { normalizeLambdaVariable } from '../utils/function-definition';
 
 /** The input language and region of a single formula edit. */
 export interface IFormulaSyntax {
+    readonly region: string;
     readonly argumentSeparator: string;
     toStandard(text: string): string | null;
     toLocal(text: string): string;
@@ -37,6 +38,29 @@ interface ISeparators {
 
 function numberPattern(decimal: string): RegExp {
     return new RegExp(`(?:\\d+(?:[${decimal}]\\d*)?|[${decimal}]\\d+)(?:[Ee][+-]?\\d+)?`, 'y');
+}
+
+// Excel stores 15 significant digits and expands an exponent when the result fits in 21 characters.
+function normalizeScientificLiteral(value: string): string | null {
+    const [mantissa, power] = value.toUpperCase().split('E');
+    const [integer, fraction = ''] = mantissa.split('.');
+    const digits = integer + fraction;
+    const first = digits.search(/[1-9]/);
+    const exponent = Number(power) + integer.length - first - 1;
+    if (first < 0) return Number(power) > 307 ? null : '0';
+    if (exponent > 307) return null;
+    if (Number(value) < 2 ** -1022) return '0';
+
+    const significant = digits.slice(first, first + 15).replace(/0+$/, '');
+    if (exponent > 20 || (exponent < 0 && significant.length - exponent > 20)) {
+        const prefix = significant.length === 1 ? significant : `${significant[0]}.${significant.slice(1)}`;
+        return `${prefix}E${exponent < 0 ? '-' : '+'}${String(Math.abs(exponent)).padStart(2, '0')}`;
+    }
+    if (exponent < 0) return `0.${'0'.repeat(-exponent - 1)}${significant}`;
+    const point = exponent + 1;
+    return significant.length <= point
+        ? significant.padEnd(point, '0')
+        : `${significant.slice(0, point)}.${significant.slice(point)}`;
 }
 
 const standard: ISeparators = { decimal: '.', argument: ',', column: ',', row: ';', number: numberPattern('.') };
@@ -164,7 +188,10 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
             // Number grouping is not formula syntax. A space after a row range may be an intersection.
             if (strict && /^(?:['’٬\u00A0\u202F]| +)\d/.test(text.slice(end)) && !text.slice(0, i).trimEnd().endsWith(':')) return null;
             if (strict && value.endsWith(from.decimal) && /^\s*[\p{L}\p{N}_$"[(]/u.test(text.slice(end))) return null;
-            result += value.replace(from.decimal, to.decimal);
+            const literal = value.replace(from.decimal, '.');
+            const normalized = aliases && /e/i.test(literal) ? normalizeScientificLiteral(literal) : literal;
+            if (normalized === null && strict) return null;
+            result += (normalized ?? literal).replace('.', to.decimal);
             i = end;
             continue;
         }
@@ -214,6 +241,7 @@ export function getFormulaSyntax(regionService: RegionService, localeService: Lo
         aliases.standard.set(local.toUpperCase(), name);
     }
     return {
+        region: regionService.getCurrentRegion(),
         argumentSeparator: local.argument,
         toStandard: (text) => translate(text, local, standard, aliases, true),
         toLocal: (text) => translate(text, standard, local, aliases, false)!,

@@ -20,9 +20,9 @@ import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { round } from '../../../engine/utils/math-kit';
-import { applyCurrencyFormat } from '../../../engine/utils/numfmt-kit';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { formatCurrencyAmount, formatExcelFixedDecimal } from '../excel-fixed-decimal';
 import { RegionalNumberFormatFunction } from '../regional-number-format.function';
 
 export class Dollar extends RegionalNumberFormatFunction {
@@ -95,7 +95,9 @@ export class Dollar extends RegionalNumberFormatFunction {
             decimalsValue = 0;
         }
 
-        const result = applyCurrencyFormat(this.getNumberFormatRegion() ?? this.getLocale(), numberValue, decimalsValue).trimEnd();
+        const region = this.getNumberFormatRegion() ?? this.getLocale();
+        const amount = formatExcelFixedDecimal(Math.abs(numberValue), decimalsValue, true, region);
+        const result = formatCurrencyAmount(amount, numberValue < 0, region);
 
         return StringValueObject.create(result);
     }

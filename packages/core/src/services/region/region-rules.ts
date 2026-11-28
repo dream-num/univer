@@ -24,6 +24,12 @@ interface IRegionalRule<T> {
 
 const regionTag = /^([a-z]{2,8})(?:-([a-z]{4}))?(?:-([a-z]{2}|[0-9]{3}))?(?:-(?:[a-z0-9]{5,8}|[0-9][a-z0-9]{3}))*(?:-[0-9a-wy-z](?:-[a-z0-9]{2,8})+)*(?:-x(?:-[a-z0-9]{1,8})+)?$/i;
 
+export function getRegionParts(region: string): { language: string; script: string; territory: string } | undefined {
+    const parts = regionTag.exec(getRegionTag(region));
+    if (!parts) return undefined;
+    return { language: parts[1].toLowerCase(), script: parts[2]?.toLowerCase() ?? '', territory: parts[3]?.toUpperCase() ?? '' };
+}
+
 export class RegionRules<T> {
     private readonly _byLanguage = new Map<string, IRegionalRule<T>[]>();
 
@@ -37,11 +43,10 @@ export class RegionRules<T> {
     }
 
     resolve(region: string): T | undefined {
-        const parts = regionTag.exec(getRegionTag(region));
+        const parts = getRegionParts(region);
         if (!parts) return undefined;
-        const script = parts[2]?.toLowerCase();
-        const territory = parts[3]?.toUpperCase() ?? '';
-        return this._byLanguage.get(parts[1].toLowerCase())?.find((rule) =>
+        const { language, script, territory } = parts;
+        return this._byLanguage.get(language)?.find((rule) =>
             (!rule.territories || rule.territories.includes(territory)) &&
             (!rule.scripts || (script && rule.scripts.includes(script)))
         )?.value;

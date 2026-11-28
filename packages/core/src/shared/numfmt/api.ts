@@ -25,6 +25,8 @@ import type {
     ParsedPattern,
     ResolvedFormatOptions,
 } from './types';
+import { getRegionalCurrencyFormat } from '../../services/region/currency-format';
+import { getRegionalDatePattern, getRegionalTimePattern } from '../../services/region/date-format';
 import {
     TOKEN_AMPM,
     TOKEN_BREAK,
@@ -130,7 +132,21 @@ export function format(
         ...options,
         grouping: options.grouping ?? getNumberGrouping(options.region),
     };
-    const data = prepareFormatterData(pattern, resolvedOptions.throws);
+    // Built-in short date and currency formats keep the invariant pattern in the workbook.
+    let displayPattern = pattern;
+    if (options.region && pattern) {
+        if (pattern.toLowerCase() === 'm/d/yy') {
+            displayPattern = getRegionalDatePattern(options.region).replace(/[.-]/g, '/');
+        } else if (pattern === 'h:mm' || pattern === 'h:mm:ss') {
+            displayPattern = getRegionalTimePattern(options.region).startsWith('hh') ? `h${pattern}` : pattern;
+        } else if (pattern === '$#,##0_);[Red]($#,##0)' || pattern === '$#,##0.00_);[Red]($#,##0.00)') {
+            const { symbol, positive, negative } = getRegionalCurrencyFormat(options.region);
+            const amount = pattern.includes('.') ? '#,##0.00' : '#,##0';
+            const pad = negative.endsWith(')') ? '_)' : '';
+            displayPattern = `${positive}${pad};[Red]${negative}`.replace(/[#$]/g, (char) => char === '#' ? amount : `"${symbol}"`);
+        }
+    }
+    const data = prepareFormatterData(displayPattern, resolvedOptions.throws);
     const normalizedValue = handleDates(value, resolvedOptions) ?? value;
     return formatValue(normalizedValue, data, resolvedOptions);
 }

@@ -25,6 +25,7 @@ import type {
     ParsedFormatSection,
     ResolvedFormatOptions,
 } from './types';
+import { getRegionalDatePattern, getRegionalTimePattern } from '../../services/region/date-format';
 import { DateSystem } from '../../types/enum/date-system';
 import { clamp } from './clamp';
 import {
@@ -325,9 +326,12 @@ export function runPart(
     };
 
     let denominatorFixed = false;
+    const dateRegion = section.date ? options.region : undefined;
+    const digitZero = section.digitZero;
     const counter = { int: 0, frac: 0, man: 0, num: 0, den: 0 };
     for (let tokenIndex = 0, tokenLength = section.tokens.length; tokenIndex < tokenLength; tokenIndex++) {
         const token = section.tokens[tokenIndex];
+        const outputStart = output.length;
         const tokenType = token.type;
         const length = token.num ? token.num.length : 0;
 
@@ -358,6 +362,10 @@ export function runPart(
             } else {
                 output.push(tokenValue.replace(/ /g, questionPadding));
             }
+        } else if (tokenType === 'date-separator') {
+            output.push(dateRegion ? getRegionalDatePattern(dateRegion).match(/[./-]/)?.[0] ?? '/' : '/');
+        } else if (tokenType === 'time-separator') {
+            output.push(dateRegion ? getRegionalTimePattern(dateRegion).match(/[:. ]/)?.[0] ?? ':' : ':');
         } else if (tokenType === 'space') {
             if (token.rule === 'num+int') {
                 if (
@@ -568,6 +576,11 @@ export function runPart(
         } else if (tokenType === 'b-year-short') {
             const shortYear = (year + 543) % 100;
             output.push(shortYear < 10 ? '0' : '', shortYear);
+        }
+        if (digitZero && tokenType !== 'string') {
+            for (let index = outputStart; index < output.length; index++) {
+                output[index] = String(output[index]).replace(/\d/g, (digit) => String.fromCharCode(digitZero + Number(digit)));
+            }
         }
     }
     return output.join('');

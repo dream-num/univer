@@ -149,7 +149,6 @@ describe('regional formula editing', () => {
             const syntax = syntaxFor(univer, 'es-ES');
             const pairs = [
                 ['=SUMA((A1;A3);.5)', null],
-                ['=SUMA((A1;A3);,5E-2)', '=SUM((A1,A3),.5E-2)'],
                 ['=SUMA(1,5;DESVEST.P(A1;B2))', '=SUM(1.5,STDEV.P(A1,B2))'],
                 ['=SUMA(\'Q1;Q2\'\'s\'!A1;SUMA;Mi.Nombre)', '=SUM(\'Q1;Q2\'\'s\'!A1,SUMA,Mi.Nombre)'],
                 ['=LARGO("a;b,1""SUMA(2)")', '=LEN("a;b,1""SUMA(2)")'],
@@ -159,6 +158,12 @@ describe('regional formula editing', () => {
                 expect(syntax.toStandard(local)).toBe(standard);
                 if (standard) expect(syntax.toLocal(standard)).toBe(local);
             }
+            expect(syntax.toStandard('=SUMA((A1;A3);,5E-2)')).toBe('=SUM((A1,A3),0.005)');
+            expect(syntax.toLocal('=1.25E-2+2')).toBe('=0,0125+2');
+            expect(syntax.toEditorTokens('=1,25E-2+2')).toBe('=1.25E-2+2');
+            expect(syntax.toStandard('=1,2345678901234567E-6')).toBe('=1.23456789012345E-06');
+            expect(syntax.toStandard('=1E-308')).toBe('=0');
+            expect(syntax.toStandard('=1E308')).toBeNull();
             expect(syntax.toStandard('=LET(suma;LAMBDA(x;x*2);suma(3))')).toBe('=LET(suma,LAMBDA(x,x*2),SUM(3))');
             expect(syntax.toStandard('=LET(sum;LAMBDA(x;x*2);sum(3))')).toBe('=LET(sum,LAMBDA(x,x*2),_xlpm.sum(3))');
             expect(syntax.toLocal('=LET(sum,LAMBDA(x,x*2),_xlpm.sum(3))')).toBe('=LET(sum;LAMBDA(x;x*2);sum(3))');

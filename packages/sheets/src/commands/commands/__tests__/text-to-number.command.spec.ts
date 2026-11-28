@@ -58,7 +58,7 @@ describe('TextToNumberCommand', () => {
             get(RegionService).setRegion('de-DE');
             get(SheetsSelectionsService).setSelections('test', 's', [{ range, primary: null, style: null }]);
             expect(await commands.executeCommand(TextToNumberCommand.id, target)).toBe(true);
-            expect(Array.from({ length: 6 }, (_, col) => worksheet.getCellRaw(0, col)?.v)).toEqual([1.234, 3, 'abc', 0.2, 1, '1234.56']);
+            expect(Array.from({ length: 6 }, (_, col) => worksheet.getCellRaw(0, col)?.v)).toEqual([1.234, 3, 'abc', 0.2, 31, '1234.56']);
             expect(worksheet.getCellRaw(0, 0)?.t).toBe(CellValueType.NUMBER);
             expect(numfmt.getValue('test', 's', 0, 1)).toBeNull();
             expect(numfmt.getValue('test', 's', 0, 3)?.pattern).toBe('0%');

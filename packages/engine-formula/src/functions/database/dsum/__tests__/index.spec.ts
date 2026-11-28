@@ -28,6 +28,16 @@ describe('Test dsum function', () => {
     const testFunction = new Dsum(FUNCTION_NAMES_DATABASE.DSUM);
 
     describe('Dsum', () => {
+        it('matches criteria in the region of the workbook', () => {
+            const database = ArrayValueObject.createByArray([['Amount'], [2], [3]]);
+            const criteria = ArrayValueObject.createByArray([['Amount'], ['>1,5']]);
+            const field = StringValueObject.create('Amount');
+            criteria.withDateSystem(DateSystem.Date1900, () => 'de-DE');
+            expect(testFunction.calculate(database, field, criteria).getValue()).toBe(5);
+            criteria.withDateSystem(DateSystem.Date1900, () => 'en-US');
+            expect(testFunction.calculate(database, field, criteria).getValue()).toBe(0);
+        });
+
         it('Value is normal', () => {
             const database = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

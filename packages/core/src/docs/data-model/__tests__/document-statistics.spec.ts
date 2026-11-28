@@ -34,7 +34,7 @@ describe('DocumentDataModel.getStatistics', () => {
 
     it('counts words when the UI uses a private-use language pack', async () => {
         const document = new DocumentDataModel({ body: { dataStream: 'Hello world.\r\n' } });
-        await expect(document.getStatistics({ locale: 'x-workbench' })).resolves.toMatchObject({ words: 2 });
+        await expect(document.getStatistics({ locale: 'x-univer' })).resolves.toMatchObject({ words: 2 });
     });
 
     it('merges overlapping selections before calculating statistics', async () => {

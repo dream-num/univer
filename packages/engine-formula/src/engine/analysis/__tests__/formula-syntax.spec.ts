@@ -61,6 +61,10 @@ describe('regional formula editing', () => {
     });
 
     it.each([
+        ['az-Arab-IR', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
+        ['uz-AF', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
+        ['az-Cyrl-IR', '=SUM(1.5;2.5)', '=SUM({1.5,2;3,4})'],
+        ['uz-Cyrl-AF', '=SUM(1.5;2.5)', '=SUM({1.5,2;3,4})'],
         ['enUS', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
         ['es-MX', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
         ['esES', '=SUM(1,5;2,5)', '=SUM({1,5\\2;3\\4})'],
@@ -106,6 +110,98 @@ describe('regional formula editing', () => {
             const russian = syntaxFor(univer, 'de-DE');
             expect(russian.toStandard('=X({1,5;2:3;4};A1:A3)')).toBe('=X({1.5,2;3,4},A1:A3)');
             expect(russian.toStandard('=X({1,5;2:3\\4};A1:A3)')).toBeNull();
+        } finally {
+            univer.dispose();
+        }
+    });
+
+    it('normalizes Excel numeric scripts inside numbers and A1 references while keeping names, bindings and strings', async () => {
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        try {
+            univer.registerPlugin(UniverFormulaEnginePlugin);
+            univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+                id: 'book',
+                sheetOrder: ['Sheet1'],
+                sheets: { Sheet1: { id: 'Sheet1', name: 'Sheet1', cellData: { 0: { 0: { v: 2 } }, 1: { 0: { v: 3 } } } } },
+            });
+            const us = syntaxFor(univer, 'en-US');
+            const formulas = ['=١٢+۳', '=A۰۱+$A$२', '=SUM(Sheet1!A۱:A۲)', '=SUM({๑,۲;३,៤})', '=LET(a۱,3,a۱+۲)', '=LAMBDA(x۱,x۱+۲)(۲)', '=𞥑.𞥒+1', '=１２+3'];
+            const parsed = formulas.map((formula) => us.toStandard(formula));
+            expect(parsed).toEqual(['=12+3', '=A1+$A$2', '=SUM(Sheet1!A1:A2)', '=SUM({1,2;3,4})', '=LET(a۱,3,a۱+2)', '=LAMBDA(x۱,x۱+2)(2)', '=𞥑.𞥒+1', '=１２+3']);
+            const calculate = univer.__getInjector().get(ICalculateFormulaService);
+            const result = await calculate.executeFormulas({ book: { Sheet1: { 5: { 1: parsed.filter((f) => f !== null) } } } });
+            expect(result.book?.Sheet1[5][1].map((cell) => cell.value)).toEqual([15, 5, 5, 10, 5, 4, '#NAME?', '#NAME?']);
+            expect(us.toStandard('=IF(۱,"۱۲","٣")')).toBe('=IF(1,"۱۲","٣")');
+            expect(us.toStandard("=FY۱۲!A۱+'A۱'!B۲+Table۱۲[Q۱]")).toBe("=FY۱۲!A1+'A۱'!B2+Table۱۲[Q۱]");
+            expect(us.toStandard('=XFE۱+A۰+A۱۰۴۸۵۷۷')).toBe('=XFE۱+A۰+A۱۰۴۸۵۷۷');
+            expect(us.toStandard('=߁߂+߃')).toBeNull();
+            expect(us.toStandard('=۱.۲a')).toBeNull();
+            expect(us.toEditorTokens('=SUM(A۰۱,۱۲)')).toHaveLength('=SUM(A۰۱,۱۲)'.length);
+            for (const locale of [LocaleType.JA_JP, LocaleType.ZH_CN, LocaleType.KO_KR]) {
+                univer.__getInjector().get(LocaleService).setLocale(locale);
+                const eastAsian = syntaxFor(univer, 'en-US');
+                expect(eastAsian.toStandard('=１２+A１+"３"')).toBe('=12+A1+"３"');
+            }
+            expect(us.toStandard('=１２.３')).toBe('=１２.３');
+        } finally {
+            univer.dispose();
+        }
+    });
+
+    it('reads and displays localized boolean literals without changing quoted values or scoped names', async () => {
+        const univer = new Univer({ locale: LocaleType.DE_DE, locales: { [LocaleType.DE_DE]: deDE } });
+        try {
+            univer.registerPlugin(UniverFormulaEnginePlugin);
+            univer.createUnit(UniverInstanceType.UNIVER_SHEET, { id: 'book', sheetOrder: ['sheet'], sheets: { sheet: { id: 'sheet' } } });
+            const de = syntaxFor(univer, 'de-DE');
+            const local = ['=WAHR+1', '=TRUE+1', '=LET(TRUE;2;TRUE)', '=LAMBDA(TRUE;TRUE+1)(2)', '=WENN(FALSCH;1;2)'];
+            const formulas = local.map((formula) => de.toStandard(formula));
+            expect(formulas).toEqual(['=TRUE+1', "='TRUE'+1", '=LET(TRUE,2,TRUE)', '=LAMBDA(TRUE,TRUE+1)(2)', '=IF(FALSE,1,2)']);
+            expect(formulas.map((f) => de.toLocal(f!))).toEqual(local);
+            expect(de.toStandard('=LET(WAHR;2;WAHR)')).toBeNull();
+            expect(de.toStandard('=SUMME({WAHR.FALSE})')).toBeNull();
+            expect(de.toStandard('=SUMME({WAHR.FALSCH})')).toBe('=SUM({TRUE,FALSE})');
+            expect(de.toStandard('="WAHR"')).toBe('="WAHR"');
+            expect(de.toStandard("='TRUE'!A1")).toBe("='TRUE'!A1");
+            const calculate = univer.__getInjector().get(ICalculateFormulaService);
+            const result = await calculate.executeFormulas({ book: { sheet: { 3: { 2: formulas.filter((f) => f !== null) } } } });
+            expect(result.book?.sheet[3][2].map((cell) => cell.value)).toEqual([2, '#NAME?', 2, 3, 2]);
+        } finally {
+            univer.dispose();
+        }
+    });
+
+    it('accepts complete rows of constants and keeps calculating after a malformed imported array', async () => {
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        try {
+            univer.registerPlugin(UniverFormulaEnginePlugin);
+            univer.createUnit(UniverInstanceType.UNIVER_SHEET, { id: 'book', sheetOrder: ['sheet'], sheets: { sheet: { id: 'sheet' } } });
+            const us = syntaxFor(univer, 'en-US');
+            for (const array of ['1;2,3', '1,2;3', '1,;2,3', '1,2;3,', '', '1,{2,3}', '1,A1', '1,2%', '1,2/3']) {
+                expect(us.toStandard(`=INDEX({${array}},1,2)`)).toBeNull();
+            }
+            const good = '=INDEX({"a,b;""c",#N/A;TRUE,-2.5E2},2,2)';
+            expect(us.toStandard(good)).toBe(good);
+            const calculate = univer.__getInjector().get(ICalculateFormulaService);
+            const result = await calculate.executeFormulas({ book: { sheet: { 3: { 2: ['=INDEX({1;2,3},1,2)', good, '=2+3'] } } } });
+            expect(result.book?.sheet[3][2].map((cell) => cell.value)).toEqual(['#VALUE!', -250, 5]);
+        } finally {
+            univer.dispose();
+        }
+    });
+
+    it('rejects leading and interior omitted arguments with Arabic list punctuation but accepts a trailing omission', () => {
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        try {
+            for (const [region, separator] of [['fa-IR', '؛'], ['dv-MV', '،'], ['dv-MV', ',']]) {
+                const syntax = syntaxFor(univer, region);
+                expect(syntax.toStandard(`=SUM( ${separator}2)`)).toBeNull();
+                expect(syntax.toStandard(`=SUM(A1${separator} ${separator} A2)`)).toBeNull();
+                expect(syntax.toStandard(`=SUM(A1${separator})`)).toBe('=SUM(A1,)');
+                expect(syntax.toStandard(`=SUM(A1${separator}0${separator}A2)`)).toBe('=SUM(A1,0,A2)');
+                expect(syntax.toLocal('=SUM(1,,2)')).toBe(`=SUM(1${syntax.argumentSeparator}${syntax.argumentSeparator}2)`);
+            }
+            expect(syntaxFor(univer, 'fr-CH').toStandard('=IF(1;;2)')).toBe('=IF(1,,2)');
         } finally {
             univer.dispose();
         }

@@ -62,7 +62,10 @@ register(dotComma, 'ms', 'BN CC MY', 'arab');
 register(arabicDecimal, 'pa', 'PK', 'arab');
 register(dotSemicolon, 'sd', 'PK', 'arab');
 register(dotComma, 'ur', 'IN PK', 'arab');
-register(dotComma, 'uz', 'AF', 'arab');
+register(dotSemicolon, 'az', 'IR', 'cyrl');
+register(dotSemicolon, 'uz', 'AF', 'cyrl');
+register(dotComma, 'az', 'IR');
+register(dotComma, 'uz', 'AF');
 
 register(dotComma, 'af', 'NA');
 register(dotComma, 'ar', '001 EH ER IL KM PS SD SO SS TD');

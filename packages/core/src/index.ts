@@ -173,6 +173,7 @@ export { ImageCacheMap } from './shared/cache/image-cache';
 export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
 export { customNameCharacterCheck, nameCharacterCheck } from './shared/name';
+export { normalizeNativeDigits } from './shared/numfmt/native-digits';
 export { RTree } from './shared/r-tree';
 export type { IRTreeItem } from './shared/r-tree';
 export { generateRandomId } from './shared/random-id';

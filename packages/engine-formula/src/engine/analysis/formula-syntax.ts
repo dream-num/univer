@@ -15,6 +15,8 @@
  */
 
 import type { LocaleService, RegionService } from '@univerjs/core';
+import { columnLabelToNumber, LocaleType, MAX_COLUMN_COUNT, MAX_ROW_COUNT, normalizeNativeDigits } from '@univerjs/core';
+import { parseArrayConstant } from '../../basics/array-constant';
 import { getFunctionAliases } from '../../services/formula/utils';
 import { normalizeLambdaVariable } from '../utils/function-definition';
 
@@ -33,6 +35,7 @@ interface ISeparators {
     column: string;
     row: string;
     number: RegExp;
+    fullWidthDigits?: boolean;
 }
 
 function numberPattern(decimal: string): RegExp {
@@ -107,53 +110,85 @@ function followsValue(text: string, index: number): boolean {
     return previous >= 0 && /[\p{L}\p{N}_$)\]}"%]/u.test(text[previous]);
 }
 
+function referenceWithAsciiRow(name: string, normalized: string): string {
+    const ref = /^(\$?)([a-z]{1,3})(\$?)(\d+)$/i.exec(normalized);
+    if (!ref) return name;
+    const column = ref[2].toUpperCase();
+    const row = Number(ref[4]);
+    return columnLabelToNumber(column) <= MAX_COLUMN_COUNT && row > 0 && row <= MAX_ROW_COUNT
+        ? ref[1] + column + ref[3] + row
+        : name;
+}
+
 // eslint-disable-next-line complexity, max-lines-per-function -- One scanner preserves token boundaries and offsets across locale conversions.
 function translate(text: string, from: ISeparators, to: ISeparators, aliases: IAliases | undefined, strict: boolean): string | null {
     const scopes: (IBindingScope | null)[] = [];
-    const trackBindings = aliases?.local.size && /(?:LET|LAMBDA)\(/i.test(text);
+    // The shadow text has identical UTF-16 offsets. Only numeric tokens and valid reference rows are rewritten.
+    const digits = from === standard ? text : normalizeNativeDigits(text).value;
+    const scan = from.fullWidthDigits ? digits.replace(/[０-９]/g, (digit) => String(digit.charCodeAt(0) - 0xFF10)) : digits;
+    const trackBindings = /(?:LET|LAMBDA)\(/i.test(text);
     let argumentUsed: string | undefined;
     let nextCall = '';
     let result = '';
-    let inArray = false;
+    let arrayStart = -1;
     let i = 0;
     // A digit can begin an unquoted sheet name. Consume its period as part of the name.
-    const identifier = /[\p{L}\p{N}_$][\p{L}\p{M}\p{N}.$_]*!|[\p{L}_$][\p{L}\p{M}\p{N}.$_]*/uy;
+    const identifier = /[\p{L}\p{N}_$][\p{L}\p{M}\p{N}.$_]*!|[\p{L}_$０-９\u{10000}-\u{10FFFF}][\p{L}\p{M}\p{N}.$_\u{10000}-\u{10FFFF}]*/uy;
     const arrayName = /[\p{L}_][\p{L}\p{M}\p{N}_]*/uy;
     const dotSeparatesArray = from.column === '.' || from.row === '.';
     const number = from.number;
     while (i < text.length) {
-        const char = text[i];
+        const inArray = arrayStart >= 0;
+        const char = scan[i];
         const protectedEnd = getFormulaProtectedTokenEnd(text, i);
         if (protectedEnd !== i) {
-            result += text.slice(i, protectedEnd);
+            const token = text.slice(i, protectedEnd);
+            if (char === "'" && text[protectedEnd] !== '!') {
+                if (strict) return null;
+                const literal = token.slice(1, -1).toUpperCase();
+                result += aliases?.local.has(literal) && /^(?:TRUE|FALSE)$/.test(literal) ? token.slice(1, -1) : token;
+            } else {
+                result += token;
+            }
             i = protectedEnd;
             continue;
         }
 
         const namePattern = inArray && dotSeparatesArray ? arrayName : identifier;
         namePattern.lastIndex = i;
-        const name = namePattern.exec(text);
-        if (name) {
+        const match = namePattern.exec(scan);
+        if (match) {
             const end = namePattern.lastIndex;
+            const name = text.slice(i, end);
             const isCall = text[end] === '(' && text[i - 1] !== '!' && text[i - 1] !== '\\';
-            if (isCall) nextCall = name[0].toUpperCase().replace(/^_XLFN\./, '');
+            if (isCall) nextCall = name.toUpperCase().replace(/^_XLFN\./, '');
+            const key = name.toUpperCase();
+            const scope = scopes[scopes.length - 1];
+            const declaration = scope && (scope.name === 'LAMBDA' || scope.pending === undefined) &&
+                !text.slice(scope.start, i).trim() && text.slice(end).trimStart().startsWith(from.argument);
+            const bound = declaration || scopes.some((s) => s?.bindings.has(key));
             if (aliases && isCall) {
-                result += translateCall(name[0], aliases, scopes, strict);
-            } else if (aliases && inArray) {
-                const key = name[0].toUpperCase();
-                const standardName = strict ? aliases.standard.get(key) : key;
-                result += standardName === 'TRUE' || standardName === 'FALSE'
-                    ? (strict ? standardName : aliases.local.get(key) ?? name[0])
-                    : name[0];
+                result += translateCall(name, aliases, scopes, strict);
             } else {
-                result += name[0];
+                const builtin = strict ? aliases?.standard.get(key) ?? key : key;
+                if (aliases && (builtin === 'TRUE' || builtin === 'FALSE') && text[i - 1] !== '!' && text[end] !== '[') {
+                    const local = aliases.local.get(builtin) ?? builtin;
+                    if (strict && declaration && key === local.toUpperCase()) return null;
+                    if (bound && !inArray) result += name;
+                    else if (!strict) result += local;
+                    else if (key === local.toUpperCase()) result += builtin;
+                    else if (inArray) return null;
+                    else result += `'${name}'`;
+                } else {
+                    result += strict && !bound && name !== match[0] ? referenceWithAsciiRow(name, match[0]) : name;
+                }
             }
             i = end;
             continue;
         }
 
         number.lastIndex = i;
-        const numeric = number.exec(text);
+        const numeric = number.exec(scan);
         if (numeric) {
             const value = numeric[0];
             const end = number.lastIndex;
@@ -162,8 +197,9 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
             // A list separator cannot turn a standalone number into a reference union.
             if (strict && /^[,;،؛]/.test(text.slice(end).trimStart()) && /^=\s*[+-]?\s*$/.test(text.slice(0, i))) return null;
             // Number grouping is not formula syntax. A space after a row range may be an intersection.
-            if (strict && /^(?:['’٬\u00A0\u202F]| +)\d/.test(text.slice(end)) && !text.slice(0, i).trimEnd().endsWith(':')) return null;
-            if (strict && value.endsWith(from.decimal) && /^\s*[\p{L}\p{N}_$"[(]/u.test(text.slice(end))) return null;
+            if (strict && /^(?:['’٬\u00A0\u202F]| +)\d/.test(scan.slice(end)) && !text.slice(0, i).trimEnd().endsWith(':')) return null;
+            if (strict && value.endsWith(from.decimal) && /^\s*[\p{L}\p{N}_$"[(]/u.test(scan.slice(end))) return null;
+            if (strict && /^[\p{L}_$]/u.test(scan.slice(end))) return null;
             result += value.replace(from.decimal, to.decimal);
             i = end;
             continue;
@@ -172,6 +208,8 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
         // Excel accepts an ASCII comma keyboard entry for the Divehi list separator.
         const isArgument = !inArray && (char === from.argument || (from.argument === '،' && char === ','));
         if (isArgument && strict) {
+            // Excel's local Arabic punctuation accepts a trailing omitted argument, but requires a preceding one.
+            if ((from.argument === '،' || from.argument === '؛') && /[(,]\s*$/.test(result)) return null;
             if (argumentUsed && argumentUsed !== char) return null;
             argumentUsed = char;
         }
@@ -196,18 +234,27 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
                 // A backslash can begin an Excel defined name outside an array.
                 if (!(char === '\\' && !inArray && /[\p{L}_]/u.test(text[i + 1] ?? ''))) return null;
             }
-            if (char === '{') inArray = true;
-            if (char === '}') inArray = false;
+            if (char === '{') {
+                if (strict && inArray) return null;
+                arrayStart = result.length + 1;
+            } else if (char === '}') {
+                if (strict && (!inArray || !parseArrayConstant(result.slice(arrayStart)))) return null;
+                arrayStart = -1;
+            } else if (strict && /\p{Nd}/u.test(char)) {
+                // Other BMP decimal scripts cannot start a number or defined name in Excel.
+                return null;
+            }
             result += char;
         }
         i++;
     }
-    return result;
+    return strict && arrayStart >= 0 ? null : result;
 }
 
 export function getFormulaSyntax(regionService: RegionService, localeService: LocaleService): IFormulaSyntax {
     const { decimal, argument, arrayColumn, arrayRow } = regionService.getFormulaSeparators();
-    const local = { decimal, argument, column: arrayColumn, row: arrayRow, number: numberPattern(decimal) };
+    const fullWidthDigits = [LocaleType.ZH_CN, LocaleType.ZH_TW, LocaleType.ZH_HK, LocaleType.JA_JP, LocaleType.KO_KR].includes(localeService.getCurrentLocale());
+    const local = { decimal, argument, column: arrayColumn, row: arrayRow, number: numberPattern(decimal), fullWidthDigits };
     const aliases: IAliases = { local: new Map(), standard: new Map() };
     for (const [name, local] of Object.entries(getFunctionAliases(localeService))) {
         aliases.local.set(name, local);

@@ -24,13 +24,11 @@ import type {
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
 import {
-    CanceledError,
     CellValueType,
     cloneCellDataMatrix,
     createParagraphId,
     createSectionId,
     CustomRangeType,
-    ErrorService,
     generateRandomId,
     getNumfmtLocaleTag,
     getNumfmtParseValueFilter,
@@ -43,7 +41,7 @@ import {
     Tools,
     willLoseNumericPrecision,
 } from '@univerjs/core';
-import { getFormulaProtectedTokenEnd, getFormulaSyntax, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { getFormulaSyntax, LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
@@ -58,41 +56,14 @@ import {
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 import { COPY_TYPE } from '../../services/clipboard/type';
 import { isRichText } from '../editor/editing.render-controller';
-import { getFormulaInputErrorMessage } from '../utils/char-tools';
 import { virtualizeDiscreteRanges } from '../utils/range-tools';
-
-// Only punctuation outside strings, structured references and array constants belongs to the surrounding expression.
-function usesMixedListSeparators(text: string): boolean {
-    let first = '';
-    let inArray = false;
-    for (let i = 0; i < text.length; i++) {
-        const end = getFormulaProtectedTokenEnd(text, i);
-        if (end > i) {
-            i = end - 1;
-            continue;
-        }
-        const char = text[i];
-        if (char === '{') inArray = true;
-        if (char === '}') inArray = false;
-        if (inArray || !/[,;،؛]/.test(char)) continue;
-        if (first && first !== char) return true;
-        first = char;
-    }
-    return false;
-}
 
 /** Capture the input syntax once for all formula cells in an external paste. */
 export function createPasteFormulaParser(accessor: IAccessor) {
-    const locale = accessor.get(LocaleService);
-    const syntax = getFormulaSyntax(accessor.get(RegionService), locale);
+    const syntax = getFormulaSyntax(accessor.get(RegionService), accessor.get(LocaleService));
     const lexer = accessor.get(LexerTreeBuilder);
     return (text: string): ICellData => {
-        const standard = syntax.toStandard(text, (reason) => {
-            if (reason === 'separator' && usesMixedListSeparators(text)) {
-                accessor.get(ErrorService).emit(getFormulaInputErrorMessage(reason, syntax, locale));
-                throw new CanceledError();
-            }
-        });
+        const standard = syntax.toStandard(text);
         // Excel preserves invalid external formulas as text, including the leading equals sign.
         if (standard === null || typeof lexer.treeBuilder(standard) === 'string') {
             return { f: null, v: text, t: CellValueType.STRING };

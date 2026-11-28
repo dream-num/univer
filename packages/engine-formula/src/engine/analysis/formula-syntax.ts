@@ -39,6 +39,7 @@ interface ISeparators {
     row: string;
     number: RegExp;
     fullWidthDigits?: boolean;
+    arabicPunctuation?: boolean;
     rowColumnLetters?: string;
 }
 
@@ -151,7 +152,17 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
     const digits = from === standard ? text : normalizeNativeDigits(text).value;
     const scan = from.fullWidthDigits ? digits.replace(/[０-９]/g, (digit) => String(digit.charCodeAt(0) - 0xFF10)) : digits;
     const trackBindings = /(?:LET|LAMBDA)\(/i.test(text);
-    let argumentUsed: string | undefined;
+    // Normalize only delimiter tokens. Quoted text and decimal literals retain their own grammar.
+    const punctuation = (char: string) => {
+        if (from.arabicPunctuation) {
+            if (char === '،') return ',';
+            if (char === '؛') return ';';
+        }
+        return char;
+    };
+    const argument = punctuation(from.argument);
+    const column = punctuation(from.column);
+    const row = punctuation(from.row);
     let nextCall = '';
     const operatorClosings: string[] | undefined = from === standard && /_xlfn\.(SINGLE|ANCHORARRAY)\(/i.test(text) ? [] : undefined;
     let operatorClosing: string | undefined;
@@ -203,7 +214,7 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
             const key = name.toUpperCase();
             const scope = scopes[scopes.length - 1];
             const declaration = scope && (scope.name === 'LAMBDA' || scope.pending === undefined) &&
-                !text.slice(scope.start, i).trim() && text.slice(end).trimStart().startsWith(from.argument);
+                !text.slice(scope.start, i).trim() && punctuation(text.slice(end).trimStart().charAt(0)) === argument;
             const bound = declaration || scopes.some((s) => s?.bindings.has(key));
             if (strict && declaration && (getA1Reference(name) || scope.bindings.has(key))) return reject('syntax');
             if (strict && !bound && !inArray && !name.endsWith('!') && text[end] !== '!' && !getA1Reference(name)) {
@@ -260,14 +271,10 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
             continue;
         }
 
-        // Excel accepts an ASCII comma keyboard entry for the Divehi list separator.
-        const isArgument = !inArray && (char === from.argument || (from.argument === '،' && char === ','));
-        if (isArgument && strict) {
-            // Excel's local Arabic punctuation accepts a trailing omitted argument, but requires a preceding one.
-            if ((from.argument === '،' || from.argument === '؛') && /[(,]\s*$/.test(result)) return reject('syntax');
-            if (argumentUsed && argumentUsed !== char) return reject('separator');
-            argumentUsed = char;
-        }
+        const delimiter = punctuation(char);
+        const isArgument = !inArray && delimiter === argument;
+        // Excel requires a preceding argument when its displayed list separator is Arabic.
+        if (strict && isArgument && (from.argument === '،' || from.argument === '؛') && /[(,]\s*$/.test(result)) return reject('syntax');
         if (trackBindings && !inArray) {
             if (char === '(') {
                 scopes.push(nextCall === 'LET' || nextCall === 'LAMBDA' ? { name: nextCall, start: i + 1, bindings: new Set() } : null);
@@ -294,9 +301,9 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
                 continue;
             }
         }
-        if (isArgument || (inArray && char === from.column)) {
+        if (isArgument || (inArray && delimiter === column)) {
             result += inArray ? to.column : to.argument;
-        } else if (inArray && char === from.row) {
+        } else if (inArray && delimiter === row) {
             result += to.row;
         } else {
             if (strict && (separator.test(char) || (inArray && char === ':'))) {
@@ -321,7 +328,7 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
 }
 
 export function getFormulaSyntax(regionService: RegionService, localeService: LocaleService): IFormulaSyntax {
-    const { decimal, argument, arrayColumn, arrayRow } = regionService.getFormulaSeparators();
+    const { decimal, argument, arrayColumn, arrayRow, arabicPunctuation } = regionService.getFormulaSeparators();
     const locale = localeService.getCurrentLocale();
     const fullWidthDigits = [LocaleType.ZH_CN, LocaleType.ZH_TW, LocaleType.ZH_HK, LocaleType.JA_JP, LocaleType.KO_KR].includes(locale);
     const local = {
@@ -331,6 +338,7 @@ export function getFormulaSyntax(regionService: RegionService, localeService: Lo
         row: arrayRow,
         number: numberPattern(decimal),
         fullWidthDigits,
+        arabicPunctuation,
         rowColumnLetters: localRowColumnLetters[locale],
     };
     const errorLabels = getErrorAliases(localeService);

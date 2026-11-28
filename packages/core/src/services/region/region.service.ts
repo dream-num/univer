@@ -56,6 +56,12 @@ export class RegionService extends Disposable {
         const { decimal } = separators;
         const [language] = getRegionTag(this._localeService.getCurrentLocale()).toLowerCase().split('-');
         switch (language) {
+            case 'ja':
+            case 'ko':
+            case 'zh':
+                return { ...separators, arabicPunctuation: false };
+            case 'ar':
+                return { ...separators, arabicPunctuation: true };
             case 'de':
             case 'fr':
                 return { ...separators, arrayColumn: decimal === '.' ? '\\' : '.' };

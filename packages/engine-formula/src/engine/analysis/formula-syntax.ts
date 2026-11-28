@@ -98,6 +98,7 @@ function translateCall(name: string, aliases: IAliases, scopes: (IBindingScope |
     const key = input ? name.toUpperCase() : name.toUpperCase().replace(/^_XLFN\.(?:_XLWS\.)?/, '');
     const alias = (input ? aliases.standard : aliases.local).get(key);
     if (alias) return alias;
+    if (!input && (key === 'LET' || key === 'LAMBDA')) return key;
     const unqualified = input ? key : key.replace(/^_XLPM\./, '');
     if (aliases.local.has(unqualified) && scopes.some((scope) => scope?.bindings.has(unqualified))) {
         // SUM can be a local lambda name in Spanish. Mark its invocation to distinguish it from canonical SUM.
@@ -187,7 +188,12 @@ function translate(text: string, from: ISeparators, to: ISeparators, aliases: IA
             const declaration = scope && (scope.name === 'LAMBDA' || scope.pending === undefined) &&
                 !text.slice(scope.start, i).trim() && text.slice(end).trimStart().startsWith(from.argument);
             const bound = declaration || scopes.some((s) => s?.bindings.has(key));
-            if (aliases && isCall) {
+            if (from === standard && !isCall && !name.endsWith('!') && /^_xlpm\./i.test(name)) {
+                result += name.slice(6);
+            } else if (from === standard && /^_xlnm\.[a-z]{1,3}\d+$/i.test(name)) {
+                // Excel displays unresolved names that look like cells in single quotes.
+                result += `'${name.slice(6)}'`;
+            } else if (aliases && isCall) {
                 result += translateCall(name, aliases, scopes, strict);
             } else {
                 const builtin = strict ? aliases?.standard.get(key) ?? key : key;

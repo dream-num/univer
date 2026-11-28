@@ -54,6 +54,8 @@ function _bindLambdaChildren(
     } else if (!letShadowing) {
         const name = normalizeLambdaVariable(parent.getToken());
         if (scope.has(name) && !shadowed.has(name)) {
+            // The lexer gives a bare range endpoint its own node, with no call arguments.
+            if (children.length === 0) parent.setToken(DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER);
             _bindLambdaNode(parent, lambdaId, scope, name);
         }
     }

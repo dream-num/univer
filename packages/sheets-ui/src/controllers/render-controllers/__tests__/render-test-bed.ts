@@ -508,7 +508,7 @@ export function createRenderTestBed(options?: { workbookData?: IWorkbookData; de
 
     const localeService = injector.get(LocaleService);
     localeService.setLocale(LocaleType.EN_US);
-    localeService.load({ enUS });
+    localeService.load({ 'en-US': enUS });
 
     injector.get(ILogService).setLogLevel(LogLevel.SILENT);
 

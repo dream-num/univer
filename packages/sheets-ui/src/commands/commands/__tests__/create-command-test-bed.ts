@@ -32,7 +32,6 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
     BorderStyleManagerService,
@@ -172,7 +171,7 @@ export function createCommandTestBed(
     logService.setLogLevel(LogLevel.VERBOSE); // change this to `LogLevel.VERBOSE` to debug tests via logs
 
     const localeService = injector.get(LocaleService);
-    localeService.load({ enUS });
+    localeService.load({ 'en-US': enUS });
 
     return {
         univer,

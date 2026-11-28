@@ -47,19 +47,12 @@ describe('LocaleService', () => {
         localeService.load(testLocales);
     });
 
-    it.each(['zh-CN', 'zh-cn', 'ZH-CN'])('prefers the BCP 47 pack key %s over a compact alias in either order', (key) => {
+    it('keeps existing translations when a pack contains a nonstandard key', () => {
         const injector = new Injector([[LocaleService]]);
-        const locales = injector.get(LocaleService);
-        const legacy = { zhCN: { app: { shared: 'legacy', old: 'old' } } };
-        const standard = { [key]: { app: { shared: 'standard', added: 'added' } } };
-        locales.setLocale('zhCN');
-        for (const packs of [{ ...standard, ...legacy }, { ...legacy, ...standard }]) {
-            locales.load(packs);
-            expect(locales.getLocales()).toEqual({ app: { shared: 'standard', old: 'old', added: 'added' } });
-        }
-        locales.load({ zhCN: { app: { shared: 'updated' } } });
-        expect(locales.t('app.shared')).toBe('updated');
-        expect(locales.t('app.added')).toBe('added');
+        const service = injector.get(LocaleService);
+        service.load({ 'zh-CN': { greeting: 'original' } });
+        expect(() => service.load({ 'zh-CN': { greeting: 'updated' }, zhCN: {} })).toThrow(RangeError);
+        expect(service.t('greeting')).toBe('original');
         injector.dispose();
     });
 

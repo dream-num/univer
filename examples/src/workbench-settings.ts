@@ -1,6 +1,6 @@
 import type { Theme } from '@univerjs/themes';
 import type { RibbonType } from '@univerjs/ui';
-import { getRegionTag, LOCALE_META, LocaleType } from '@univerjs/core';
+import { getStoredLocaleTag, LOCALE_META, LocaleType } from '@univerjs/core';
 import {
     blueTheme,
     darkBlueTheme,
@@ -107,12 +107,12 @@ export function readWorkbenchSettings(storage: Pick<Storage, 'getItem'>): IWorkb
     }
 
     // Compatibility: remove compact-tag conversion after old workbench preferences are retired.
-    const locale = getAllowedValue(typeof value.locale === 'string' ? getRegionTag(value.locale) : value.locale, WORKBENCH_LOCALES, defaults.locale);
+    const locale = getAllowedValue(getStoredLocaleTag(value.locale), WORKBENCH_LOCALES, defaults.locale);
 
     return {
         device: getAllowedValue(value.device, WORKBENCH_DEVICES, defaults.device),
         locale,
-        region: getAllowedValue(typeof value.region === 'string' ? getRegionTag(value.region) : value.region, WORKBENCH_REGIONS, defaults.region),
+        region: getAllowedValue(getStoredLocaleTag(value.region), WORKBENCH_REGIONS, defaults.region),
         direction: getAllowedValue(value.direction, WORKBENCH_DIRECTIONS, LOCALE_META[locale].direction),
         theme: getAllowedValue(value.theme, WORKBENCH_THEMES, defaults.theme),
         darkMode: value.darkMode === true,

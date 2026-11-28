@@ -87,7 +87,7 @@ export interface IUniverConfig {
     direction?: 'ltr' | 'rtl';
 
     /**
-     * The locales to be used
+     * Language packs keyed by BCP 47 tags.
      */
     locales?: ILocales;
 

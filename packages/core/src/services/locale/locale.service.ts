@@ -52,15 +52,13 @@ export class LocaleService extends Disposable {
      * @param locales - Locale object
      */
     load(locales: ILocales) {
-        // Compatibility: remove alias ordering once compact language-pack keys are retired.
         const entries = Object.entries(locales).map(([key, pack]) => {
             const tag = normalizeLocaleTag(key);
-            const priority = key === tag ? 2 : key.toLowerCase() === tag.toLowerCase() ? 1 : 0;
-            return { key, tag, pack, priority };
+            return { key, tag, pack, preferred: key === tag };
         });
-        // Merge aliases first and the recommended spelling last. ASCII key order breaks casing ties.
+        // Merge the recommended spelling last. ASCII key order breaks ties between case variants.
         entries.sort((a, b) => {
-            if (a.priority !== b.priority) return a.priority - b.priority;
+            if (a.preferred !== b.preferred) return a.preferred ? 1 : -1;
             if (a.key === b.key) return 0;
             return a.key < b.key ? -1 : 1;
         });

@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { getWorkbookLocale, LocaleType, normalizeLocaleTag } from '../locale-type';
+import { getStoredLocaleTag, LocaleType, normalizeLocaleTag } from '../locale-type';
 
 describe('locale tags', () => {
     it('exposes standard enum values and normalizes structured tags independently of the host', () => {
@@ -28,14 +28,14 @@ describe('locale tags', () => {
         expect(normalizeLocaleTag('X-DEMO')).toBe('x-demo');
     });
 
-    it.each(['en_US', 'en-x', 'de-1901-1901', 'en-a-foo-a-bar'])('rejects malformed input %s', (tag) => {
+    it.each(['enUS', 'en_US', 'en-x', 'de-1901-1901', 'en-a-foo-a-bar'])('rejects malformed input %s', (tag) => {
         expect(() => normalizeLocaleTag(tag)).toThrow(RangeError);
     });
 
     it('reads old workbook metadata and preserves the formatting fallback for unusable tags', () => {
-        expect(getWorkbookLocale('zhCN')).toBe('zh-CN');
-        expect(getWorkbookLocale('sr-Latn-RS')).toBe('sr-Latn-RS');
-        expect(getWorkbookLocale('invalid-locale')).toBeUndefined();
-        expect(getWorkbookLocale(undefined)).toBeUndefined();
+        expect(getStoredLocaleTag('zhCN')).toBe('zh-CN');
+        expect(getStoredLocaleTag('sr-Latn-RS')).toBe('sr-Latn-RS');
+        expect(getStoredLocaleTag('invalid-locale')).toBeUndefined();
+        expect(getStoredLocaleTag(undefined)).toBeUndefined();
     });
 });

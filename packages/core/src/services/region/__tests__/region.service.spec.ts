@@ -34,7 +34,7 @@ describe('RegionService', () => {
         regionService.currentRegion$.subscribe((region) => regions.push(region));
 
         expect(() => regionService.setRegion('en_US')).toThrow(RangeError);
-        localeService.setLocale('enUS');
+        localeService.setLocale('en-US');
         expect(regionService.getCurrentRegion()).toBe(LocaleType.EN_US);
 
         regionService.setRegion('en-IN');

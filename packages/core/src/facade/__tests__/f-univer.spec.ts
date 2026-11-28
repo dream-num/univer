@@ -100,11 +100,11 @@ describe('FUniver integration', () => {
             univerAPI.addEvent(univerAPI.Event.DocDisposed, ({ unitId }) => logs.push(`doc-disposed:${unitId}`))
         );
 
-        univerAPI.loadLocales('esES', {
+        univerAPI.loadLocales('es-ES', {
             facade: { hello: 'Hola {0}' },
         } as never);
-        univerAPI.setLocale('esES');
-        univerAPI.setRegion('frFR');
+        univerAPI.setLocale('es-ES');
+        univerAPI.setRegion('fr-FR');
         univerAPI.setDirection('rtl');
 
         expect(localeService.getCurrentLocale()).toBe('es-ES');
@@ -298,8 +298,8 @@ describe('FUniver integration', () => {
             'after:facade.hook.command:false',
         ]);
 
-        extendedAPI.loadLocales('frFR', { facade: { hello: 'Bonjour {0}' } } as never);
-        extendedAPI.setLocale('frFR');
+        extendedAPI.loadLocales('fr-FR', { facade: { hello: 'Bonjour {0}' } } as never);
+        extendedAPI.setLocale('fr-FR');
         expect(extendedAPI.getCurrentLocale()).toBe('fr-FR');
         const locales = extendedAPI.getLocales();
         if (!locales) {

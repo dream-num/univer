@@ -111,7 +111,7 @@ describe('SheetNumfmtPanel', () => {
     ] as const)('confirms %s using the regional default or saved choice %s', async (category, saved, expected, nextRegion) => {
         const { container, injector, onChange } = await renderPanel({ defaultValue: 100000, defaultPattern: '', row: 0, col: 0 });
         if (saved) await injector.get(ILocalStorageService).setItem('userHabitController_numfmtCurrency', [saved]);
-        await act(async () => injector.get(RegionService).setRegion('enIN'));
+        await act(async () => injector.get(RegionService).setRegion('en-IN'));
         await selectCategory(container, category);
         if (nextRegion && category === 'Currency') {
             const styles = container.querySelectorAll<HTMLButtonElement>('[role="option"]');
@@ -145,7 +145,7 @@ describe('SheetNumfmtPanel', () => {
         injector.add([ComponentsController]);
         injector.get(ComponentsController);
         const region = injector.get(RegionService);
-        await act(async () => region.setRegion('mlIN'));
+        await act(async () => region.setRegion('ml-IN'));
         const icons = injector.get(IconManager);
         const { icon } = getCurrencySymbolIconByLocale(region.getCurrentRegion());
         expect(icons.has(icon)).toBe(true);

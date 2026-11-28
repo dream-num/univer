@@ -105,7 +105,7 @@ export function createFormulaTestBed(workbookData?: IWorkbookData, dependencies?
         override onReady(): void {}
     }
 
-    injector.get(LocaleService).load({ zhCN, enUS });
+    injector.get(LocaleService).load({ 'zh-CN': zhCN, 'en-US': enUS });
 
     univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
     const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData || getTestWorkbookDataDemo());

@@ -105,7 +105,7 @@ function createTestBed(hasSkeleton = true, controllerType = SheetTableControlsRe
     disposables.push(univer);
     const injector = univer.__getInjector();
     const locale = injector.get(LocaleService);
-    locale.load({ enUS });
+    locale.load({ 'en-US': enUS });
     locale.setLocale(LocaleType.EN_US);
     locale.setDirection('ltr');
     injector.add([ICanvasColorService, { useClass: CanvasColorService }]);

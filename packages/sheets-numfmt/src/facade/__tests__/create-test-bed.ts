@@ -32,10 +32,8 @@ import {
 import { FUniver } from '@univerjs/core/facade';
 import { DefinedNamesService, FormulaDataModel, IDefinedNamesService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { INumfmtService, NumfmtService, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
-
 import '@univerjs/sheets/facade';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
@@ -126,7 +124,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
     }
 
     // load i18n
-    injector.get(LocaleService).load({ zhCN, enUS });
+    injector.get(LocaleService).load({ 'zh-CN': zhCN, 'en-US': enUS });
 
     // load theme service
     const themeService = injector.get(ThemeService);

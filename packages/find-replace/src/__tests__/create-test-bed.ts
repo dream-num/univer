@@ -114,7 +114,7 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
     logService.setLogLevel(LogLevel.SILENT);
 
     const localeService = injector.get(LocaleService);
-    localeService.load({ enUS });
+    localeService.load({ 'en-US': enUS });
 
     return {
         univer,

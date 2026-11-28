@@ -114,7 +114,7 @@ describe('MobileCustomFormat', () => {
         act(() => getButton(localeService.t('sheets-numfmt-ui.confirm')).dispatchEvent(new MouseEvent('click', { bubbles: true })));
         expect(onConfirm).toHaveBeenCalledExactlyOnceWith('m/d/yyyy');
 
-        act(() => injector.get(RegionService).setRegion('enIN'));
+        act(() => injector.get(RegionService).setRegion('en-IN'));
         act(() => select!.dispatchEvent(new MouseEvent('click', { bubbles: true })));
         act(() => getButton('dd/mm/yyyy').dispatchEvent(new MouseEvent('click', { bubbles: true })));
         expect(container.querySelector('input')?.value).toBe('dd/mm/yyyy');

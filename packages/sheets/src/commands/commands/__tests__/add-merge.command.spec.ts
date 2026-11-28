@@ -186,7 +186,7 @@ describe('add-merge-command', () => {
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(SetSelectionsOperation);
 
-        get(LocaleService).load({ zhCN, enUS });
+        get(LocaleService).load({ 'zh-CN': zhCN, 'en-US': enUS });
     });
     it('test merge cell contain merge cell', async () => {
         await commandService.executeCommand(SetSelectionsOperation.id, {
@@ -255,7 +255,7 @@ describe('add-merge-command', () => {
         localCommandService.registerCommand(RemoveWorksheetMergeMutation);
         localCommandService.registerCommand(AddWorksheetMergeMutation);
         localCommandService.registerCommand(SetSelectionsOperation);
-        localGet(LocaleService).load({ zhCN, enUS });
+        localGet(LocaleService).load({ 'zh-CN': zhCN, 'en-US': enUS });
 
         await expect(localCommandService.executeCommand(AddWorksheetMergeCommand.id, {
             unitId: 'test',

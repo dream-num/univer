@@ -126,7 +126,7 @@ function createFacadeTestBed(workbookData: IWorkbookData, dependencies: Dependen
         override onReady(): void {}
     }
 
-    injector.get(LocaleService).load({ zhCN, enUS });
+    injector.get(LocaleService).load({ 'zh-CN': zhCN, 'en-US': enUS });
 
     const themeService = injector.get(ThemeService);
     const theme = themeService.getCurrentTheme();

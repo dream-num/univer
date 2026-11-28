@@ -257,7 +257,7 @@ describe('DataValidationAlertController', () => {
             injector.add([CellAlertManagerService]);
             injector.add([HoverManagerService]);
             injector.add([DataValidationAlertController]);
-            injector.get(LocaleService).load({ enUS });
+            injector.get(LocaleService).load({ 'en-US': enUS });
             injector.get(DataValidationAlertController);
             const rule = {
                 uid: 'delayed-alert-rule',

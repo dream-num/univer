@@ -21,6 +21,7 @@ import {
     CustomRangeType,
     DataStreamTreeTokenType,
     getRichTextEditPath,
+    getStoredLocaleTag,
     ICommandService,
     IPermissionService,
     IUniverInstanceService,
@@ -116,7 +117,7 @@ function refreshDateTimeFields(body: IDocumentBody, locale: string, date: Date, 
         }
         const start = field.startIndex;
         const run = body.textRuns?.find((run) => run.st <= start + 1 && run.ed > start + 1);
-        const value = resolveDateTimeField(properties.instruction, run?.ts?.lang ?? locale, date);
+        const value = resolveDateTimeField(properties.instruction, getStoredLocaleTag(run?.ts?.lang) ?? run?.ts?.lang ?? locale, date);
         if (value == null || start < cursor || (body.dataStream.slice(start + 1, field.endIndex) === value && properties.cachedResult === value)) {
             continue;
         }

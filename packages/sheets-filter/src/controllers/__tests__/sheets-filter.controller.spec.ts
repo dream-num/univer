@@ -197,7 +197,7 @@ describe('test controller of sheets filter', () => {
         univer = testBed.univer;
         get = testBed.get;
 
-        get(LocaleService).load({ zhCN: {} });
+        get(LocaleService).load({ 'zh-CN': {} });
 
         commandService = get(ICommandService);
         sheetsFilterService = get(SheetsFilterService);

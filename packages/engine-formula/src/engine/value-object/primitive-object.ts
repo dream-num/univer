@@ -22,11 +22,10 @@ import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { compareWithWildcard, isWildcard, normalizeTextForComparison } from '../utils/compare';
-import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt } from '../utils/math-kit';
+import { ceil, divide, equals, EXCEL_MIN_NORMAL_NUMBER, excelPowerValue, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, round, sqrt } from '../utils/math-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
 const EXCEL_TRIGONOMETRIC_LIMIT = 2 ** 27;
-const EXCEL_MIN_NORMAL_NUMBER = 2.2250738585072014e-308;
 
 export type PrimitiveValueType = string | boolean | number | null;
 
@@ -580,6 +579,15 @@ export class NumberValueObject extends BaseValueObject {
         return instance;
     }
 
+    static createPowerResult(base: number, exponent: number) {
+        const result = excelPowerValue(base, exponent);
+        if (typeof result !== 'number') return ErrorValueObject.create(result);
+        const number = new NumberValueObject(0);
+        // Positive fractional powers can produce a subnormal worksheet value in Excel.
+        number._value = result;
+        return number;
+    }
+
     constructor(rawValue: number, dateSystem: DateSystem = DateSystem.Date1900) {
         super(dateSystem);
 
@@ -1006,29 +1014,7 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        if (currentValue === 0) {
-            if (value < 0) {
-                return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-            }
-
-            if (value === 0) {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
-
-            return NumberValueObject.create(0);
-        }
-
-        const result = pow(currentValue, value);
-
-        if (!Number.isFinite(result)) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        return NumberValueObject.create(result);
+        return NumberValueObject.createPowerResult(currentValue, value);
     }
 
     override sqrt(): BaseValueObject {

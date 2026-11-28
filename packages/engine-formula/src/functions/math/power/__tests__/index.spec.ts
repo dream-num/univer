@@ -33,6 +33,33 @@ describe('Test power function', () => {
             expect(getObjectValue(result)).toBe(25);
         });
 
+        it.each<[number, number, number | ErrorType]>([
+            [3.14159265358979, 32, 8105800789910447],
+            [2, -0.5, 0.7071067811865475],
+            [-2, 0.5, ErrorType.NUM],
+            [-8, 1 / 3, -1.9999999999999998],
+            [-8, 2 / 3, ErrorType.NUM],
+            [1e-100, 3.125, 3.16227766016e-313],
+            [1e-100, -3.125, ErrorType.DIV_BY_ZERO],
+            [38.89472629697586, -193.5055357939188, 0],
+            [10, 126, 1.0000000000000001e126],
+            [10, -307, 1.0000000000000001e-307],
+            [1.00000000000001, 2147483649, 1.0000214579021443],
+            [-1, 4294967294, 1],
+            [-1, 4294967295, ErrorType.NUM],
+            [-1, 2 ** 53, ErrorType.NUM],
+            [1.00000000000001, 2 ** 53, 1.2204032943172858e39],
+            [0.5, -1022, 4.49423283715579e307],
+            [0.5, -1023, ErrorType.DIV_BY_ZERO],
+            [2, -1023, 0],
+            [2, 1024, ErrorType.NUM],
+            [0.125, 1e308, ErrorType.NUM],
+            [0.125, -1e308, 0],
+        ])('matches Excel for %s raised to %s', (base, exponent, expected) => {
+            const result = testFunction.calculate(NumberValueObject.create(base), NumberValueObject.create(exponent));
+            expect(result.getValue()).toBe(expected);
+        });
+
         it('Number is single string number, power is single string number', () => {
             const number = new StringValueObject('5');
             const power = new StringValueObject('2');

@@ -20,6 +20,7 @@ import type { ArrayValueObject } from '../../engine/value-object/array-value-obj
 import type { BaseValueObject } from '../../engine/value-object/base-value-object';
 import { ErrorType } from '../../basics/error-type';
 import { cancelsToZero } from '../../basics/math';
+import { EXCEL_MIN_NORMAL_NUMBER, excelPowerValue } from '../../engine/utils/math-kit';
 import { ErrorValueObject } from '../../engine/value-object/base-value-object';
 import { NullValueObject, NumberValueObject } from '../../engine/value-object/primitive-object';
 import { BaseFunction } from '../base-function';
@@ -29,10 +30,8 @@ import { Randarray } from './randarray';
 import { Randbetween } from './randbetween';
 import { Sum } from './sum';
 
-const MIN_NORMAL = 2 ** -1022;
-
 function normalIntermediate(value: number): number {
-    return Math.abs(value) < MIN_NORMAL ? 0 : value;
+    return Math.abs(value) < EXCEL_MIN_NORMAL_NUMBER ? 0 : value;
 }
 
 function numberResult(value: number): BaseValueObject {
@@ -48,41 +47,6 @@ function strictNumber(value: BaseValueObject): BaseValueObject {
     return value.isBoolean() ? ErrorValueObject.create(ErrorType.VALUE) : coerceNumber(value);
 }
 
-function positivePower(base: number, exponent: number): number {
-    if (exponent === 0.5) return Math.sqrt(base);
-    if (!Number.isInteger(exponent) || exponent >= 0xFFFFFFFF) {
-        return normalIntermediate(Math.exp(exponent * Math.log(base)));
-    }
-    let product = 1;
-    let factor = base;
-    for (let remaining = exponent; remaining > 0; remaining = Math.floor(remaining / 2)) {
-        if (remaining % 2 === 1) product = normalIntermediate(product * factor);
-        if (remaining > 1) factor = normalIntermediate(factor * factor);
-    }
-    return product;
-}
-
-function powerValue(base: number, exponent: number): number | ErrorType {
-    if (exponent === 0) return base === 0 ? ErrorType.NUM : 1;
-    if (base === 0) return exponent < 0 ? ErrorType.DIV_BY_ZERO : 0;
-
-    const magnitude = Math.abs(exponent);
-    if (base < 0 && magnitude >= 0xFFFFFFFF) return ErrorType.NUM;
-    let negative = base < 0 && magnitude % 2 !== 0;
-    if (base < 0 && !Number.isInteger(magnitude)) {
-        // Excel tests the reciprocal after rounding it to display precision.
-        const denominator = Number((1 / magnitude).toPrecision(15));
-        if (denominator >= 0x7FFFFFFF || denominator % 2 !== 1) return ErrorType.NUM;
-        negative = true;
-    }
-    let result = positivePower(Math.abs(base), magnitude);
-    if (exponent < 0) {
-        if (result === 0) return ErrorType.DIV_BY_ZERO;
-        result = 1 / result;
-    }
-    return negative ? -result : result;
-}
-
 class ExcelPower extends BaseFunction {
     override minParams = 2;
     override maxParams = 2;
@@ -93,8 +57,7 @@ class ExcelPower extends BaseFunction {
             if (number.isError()) return number;
             const power = coerceNumber(exponent);
             if (power.isError()) return power;
-            const result = powerValue(Number(number.getValue()), Number(power.getValue()));
-            return typeof result === 'number' ? numberResult(result) : ErrorValueObject.create(result);
+            return NumberValueObject.createPowerResult(Number(number.getValue()), Number(power.getValue()));
         });
     }
 }
@@ -186,7 +149,7 @@ function seriesValue(base: number, initialExponent: number, step: number, coeffi
     let result = 0;
     const term = (coefficient: number) => {
         if (!(base < 0 && !Number.isInteger(exponent))) {
-            const factor = powerValue(base, exponent);
+            const factor = excelPowerValue(base, exponent);
             if (typeof factor !== 'number') return ErrorValueObject.create(ErrorType.NUM);
             result += normalIntermediate(factor * coefficient);
             if (!Number.isFinite(result)) return ErrorValueObject.create(ErrorType.NUM);

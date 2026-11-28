@@ -175,6 +175,11 @@ describe('Test math kit', () => {
         expect(pow(2, -2)).toBe(0.25);
         expect(pow(2, -3)).toBe(0.125);
         expect(stripErrorMargin(pow(0.2, 3))).toBe(0.008);
+        expect(pow(-Infinity, 0.5)).toBe(Infinity);
+        expect(pow(-0, -3)).toBe(-Infinity);
+        expect(pow(-2, Infinity)).toBe(Infinity);
+        expect(pow(NaN, 0)).toBe(1);
+        expect(pow(1, NaN)).toBeNaN();
     });
     // test sqrt
     it('Function sqrt', () => {

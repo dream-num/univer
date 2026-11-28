@@ -231,6 +231,7 @@ const locale: typeof enUS = {
             textToNumber: 'Text na číslo',
         },
         info: {
+            formulaSeparator: 'Použite oddeľovače vzorcov pre svoju oblasť, ako v príklade {0}.',
             problem: 'Vyskytol sa problém',
             error: 'Chyba',
             forceStringInfo: 'Číslo uložené ako text',

@@ -36,7 +36,7 @@ import { EditorService, IEditorService, IMEInputCommand } from '@univerjs/docs-u
 import { CanvasColorService, ICanvasColorService, IRenderManagerService, RenderManagerService, SHEET_VIEWPORT_KEY, Spreadsheet, Viewport } from '@univerjs/engine-render';
 import { UnitObject } from '@univerjs/protocol';
 import { EditStateEnum, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetPermissionCheckController, SheetsSelectionsService, UniverSheetsPlugin, ViewStateEnum, WorkbookDeleteSheetPermission, WorkbookEditablePermission, WorkbookHideSheetPermission, WorkbookRenameSheetPermission, WorksheetEditPermission, WorksheetSetColumnStylePermission } from '@univerjs/sheets';
-import { IDialogService, IPlatformService, IShortcutService, IUIRuntimeScopeService, KeyCode, PlatformService, ShortcutService, UIRuntimeScopeService } from '@univerjs/ui';
+import { IDialogService, IMessageService, IPlatformService, IShortcutService, IUIRuntimeScopeService, KeyCode, MockMessageService, PlatformService, ShortcutService, UIRuntimeScopeService } from '@univerjs/ui';
 import { EMPTY } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SheetCopyCommand, SheetCutCommand, SheetPasteCommand } from '../../../commands/commands/clipboard.command';
@@ -355,6 +355,7 @@ describe('editing after navigating multiple ranges', () => {
         injector.add([IShortcutService, { useClass: ShortcutService }]);
         injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
         injector.add([SheetPermissionCheckUIController]);
+        injector.add([IMessageService, { useClass: MockMessageService }]);
         injector.add([EditingRenderController]);
         const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
             id: 'multi-edit',

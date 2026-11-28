@@ -45,11 +45,12 @@ function rememberFunction(name: string): void {
 }
 
 export function MobileFunctionPanel(props: {
+    separator: string;
     open: boolean;
     onClose: () => void;
     onInsert: (name: string) => void;
 }) {
-    const { open, onClose, onInsert } = props;
+    const { separator, open, onClose, onInsert } = props;
     const descriptionService = useDependency(IDescriptionService);
     const localeService = useDependency(LocaleService);
     const copy = {
@@ -226,7 +227,7 @@ export function MobileFunctionPanel(props: {
                                       dark:!univer-bg-gray-900
                                     "
                                 >
-                                    {`${details.functionName}(${details.functionParameter.map((item) => item.name).join(', ')})`}
+                                    {`${details.functionName}(${details.functionParameter.map((item) => item.name).join(`${separator} `)})`}
                                 </code>
                             </div>
                             <button

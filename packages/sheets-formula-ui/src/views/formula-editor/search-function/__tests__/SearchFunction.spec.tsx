@@ -27,15 +27,17 @@ import {
     Injector,
     IUniverInstanceService,
     LocaleService,
+    RegionService,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { FunctionType, IDescriptionService, sequenceNodeType } from '@univerjs/engine-formula';
+import { FunctionType, getFormulaSyntax, IDescriptionService, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IShortcutService, ISidebarService, KeyCode, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { getEditorSequenceNodes } from '../../hooks/use-formula-token';
 import { SearchFunction } from '../SearchFunction';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -206,6 +208,7 @@ function createSearchFunctionTestBed() {
     const injector = new Injector();
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([LocaleService, { useClass: LocaleService }]);
+    injector.add([RegionService]);
     injector.add([IDescriptionService, { useClass: TestDescriptionService as never }]);
     injector.add([ICommandService, { useClass: TestCommandService as never }]);
     injector.add([IShortcutService, { useClass: TestShortcutService as never }]);
@@ -309,6 +312,34 @@ describe('SearchFunction', () => {
         expect(SearchFunctionState.selected).toEqual([{ text: 'SUM(', offset: -2 }]);
         expect(SearchFunctionState.focused).toBe(1);
         expect(document.body.textContent).not.toContain('Adds selected values.');
+    });
+
+    it('completes a function in a comma-decimal draft without changing the preceding argument', async () => {
+        const { injector, editor, commandService } = createSearchFunctionTestBed();
+        injector.get(RegionService).setRegion('es-ES');
+        injector.add([LexerTreeBuilder]);
+        const draft = 'IF(1,5;SU';
+        const syntax = getFormulaSyntax(injector.get(RegionService), injector.get(LocaleService));
+        const nodes = getEditorSequenceNodes(injector.get(LexerTreeBuilder), draft, syntax.toEditorTokens(draft));
+        const caret = editor.getSelectionRanges()[0];
+        caret.startOffset = caret.endOffset = draft.length + 1;
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <SearchFunction
+                        isFocus
+                        editor={editor}
+                        sequenceNodes={nodes}
+                        onSelect={(result) => SearchFunctionState.selected.push(result)}
+                    />
+                </RediContext.Provider>
+            );
+        });
+        await waitForSearchList(editor);
+        await runFormulaSearchKeyboardCommand(commandService, editor, KeyCode.ENTER);
+
+        expect(SearchFunctionState.selected).toEqual([{ text: 'IF(1,5;SUM(', offset: -2 }]);
     });
 
     it('accepts the highlighted formula suggestion from the registered keyboard command', async () => {

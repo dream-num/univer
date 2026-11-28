@@ -29,6 +29,7 @@ import { RediContext } from '@univerjs/ui';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import { useCurrentFormulaSyntax } from '../use-formula-editor-syntax';
 import {
     FormulaSelectingType,
     resolveFormulaSelectingIntent,
@@ -43,7 +44,9 @@ import {
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 function FormulaSelectionState({ isFocus }: { isFocus: boolean }) {
+    const syntax = useCurrentFormulaSyntax();
     const { isSelecting } = useFormulaSelecting({
+        syntax,
         editorId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
         unitId: 'formula-selection-sheet',
         subUnitId: 'sheet1',

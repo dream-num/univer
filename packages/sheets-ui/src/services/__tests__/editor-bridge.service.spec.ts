@@ -24,6 +24,7 @@ import {
     LocaleService,
     LocaleType,
     RedoCommand,
+    RegionService,
     ThemeService,
     UndoCommand,
     Univer,
@@ -153,7 +154,7 @@ function createService(options?: {
         getContextValue = mocks.contextService.getContextValue;
     }
 
-    const injector = new Injector();
+    const injector = new Injector([[LocaleService], [RegionService]]);
     injector.add([SheetInterceptorService, { useClass: TestSheetInterceptorService as never }]);
     injector.add([SheetSkeletonService, { useClass: TestSheetSkeletonService as never }]);
     injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);

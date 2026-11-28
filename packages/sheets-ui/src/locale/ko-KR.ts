@@ -231,6 +231,7 @@ const locale: typeof enUS = {
             textToNumber: '텍스트를 숫자로 변환',
         },
         info: {
+            formulaSeparator: '지역 설정에 맞는 수식 구분 기호를 사용하세요. 예: {0}',
             problem: '문제가 발생했습니다',
             error: '오류',
             forceStringInfo: '숫자가 텍스트로 저장되었습니다',

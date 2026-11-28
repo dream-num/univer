@@ -826,7 +826,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         for (let row = 0; row < rowCount; row++) {
             for (let column = 0; column < columnCount; column++) {
-                const formula = formulaOnlyHook?.onCopyCellContent?.(startRow + row, startColumn + column) ||
+                const formula = formulaOnlyHook?.getCopyCellFormula?.(startRow + row, startColumn + column) ||
                     copyContent.matrixFragment.getValue(row, column)?.f;
 
                 if (typeof formula === 'string' && isFormulaString(formula)) {

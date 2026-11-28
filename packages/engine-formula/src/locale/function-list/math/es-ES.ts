@@ -16,7 +16,7 @@
 
 import type enUS from './en-US';
 
-const locale: typeof enUS = {
+const locale = {
     ABS: {
         description: 'Devuelve el valor absoluto de un número. El valor absoluto de un número es el número sin su signo.',
         abstract: 'Devuelve el valor absoluto de un número',
@@ -1160,4 +1160,4 @@ const locale: typeof enUS = {
     },
 };
 
-export default locale;
+export default locale satisfies typeof enUS;

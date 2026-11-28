@@ -15,6 +15,9 @@
  */
 
 import type { LocaleLeafKeys } from '@univerjs/core';
+import type { ErrorType } from '../basics/error-type';
 import type enUS from './en-US';
 
 export type LocaleKey = LocaleLeafKeys<typeof enUS>;
+
+export type FormulaLanguagePack = typeof enUS & { 'engine-formula': { functionAliases?: Record<string, string>; errorAliases?: Partial<Record<ErrorType, string>> } };

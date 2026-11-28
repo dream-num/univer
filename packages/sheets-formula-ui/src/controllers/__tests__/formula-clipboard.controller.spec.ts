@@ -19,6 +19,7 @@ import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
 import {
     BooleanNumber,
+    CellValueType,
     DisposableCollection,
     FormulaType,
     ICommandService,
@@ -30,6 +31,7 @@ import {
     LogLevel,
     ObjectMatrix,
     RANGE_TYPE,
+    RegionService,
     UndoCommand,
     Univer,
     UniverInstanceType,
@@ -126,112 +128,6 @@ class testPlatformService {
     isMac: boolean = true;
     isLinux: boolean = false;
 }
-
-describe('FormulaClipboardController formula-only copy hook', () => {
-    it('copies only formulas, resolves shared formula strings and reports filtered rows', () => {
-        const hooks: any[] = [];
-        const worksheet = {
-            getSheetId: () => 'sheet1',
-            getUnitId: () => 'unit1',
-            getCellRaw: (row: number, col: number) => {
-                if (row === 0 && col === 0) return { f: '=A1' };
-                if (row === 0 && col === 1) return { si: 'shared-1' };
-                if (row === 0 && col === 2) return { v: 10 };
-                return null;
-            },
-            getRowFiltered: (row: number) => row === 2,
-        };
-        const workbook = {
-            getSheetBySheetId: () => worksheet,
-        };
-        const controller = new FormulaClipboardController(
-            {
-                getUnit: () => workbook,
-                getCurrentUnitOfType: () => ({ getActiveSheet: () => worksheet }),
-            } as never,
-            {} as never,
-            {
-                addClipboardHook: (hook: unknown) => {
-                    hooks.push(hook);
-                    return { dispose: () => undefined };
-                },
-            } as never,
-            {} as never,
-            { getFormulaStringByCell: () => '=A2' } as never
-        );
-        const formulaOnlyHook = hooks.find((hook) => hook.id === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY);
-
-        formulaOnlyHook.onBeforeCopy('unit1', 'sheet1');
-
-        expect(formulaOnlyHook.onCopyCellContent(0, 0)).toBe('=A1');
-        expect(formulaOnlyHook.onCopyCellContent(0, 1)).toBe('=A2');
-        expect(formulaOnlyHook.onCopyCellContent(0, 2)).toBe('');
-        expect(formulaOnlyHook.getFilteredOutRows('unit1', 'sheet1', {
-            startRow: 0,
-            endRow: 3,
-            startColumn: 0,
-            endColumn: 0,
-        })).toEqual([2]);
-
-        formulaOnlyHook.onAfterCopy();
-        expect(formulaOnlyHook.onCopyCellContent(0, 0)).toBe('');
-
-        controller.dispose();
-    });
-
-    it('writes formulas to copy matrices and clears non-formula cells in formula-only copy', () => {
-        const hooks: any[] = [];
-        const worksheet = {
-            getSheetId: () => 'sheet1',
-            getUnitId: () => 'unit1',
-            getCellRaw: () => null,
-            getRowFiltered: () => false,
-        };
-        const workbook = {
-            getSheetBySheetId: () => worksheet,
-        };
-        const controller = new FormulaClipboardController(
-            {
-                getUnit: () => workbook,
-                getCurrentUnitOfType: () => ({ getActiveSheet: () => worksheet }),
-            } as never,
-            {} as never,
-            {
-                addClipboardHook: (hook: unknown) => {
-                    hooks.push(hook);
-                    return { dispose: () => undefined };
-                },
-            } as never,
-            {} as never,
-            { getFormulaStringByCell: () => '=A2' } as never
-        );
-        const formulaOnlyHook = hooks.find((hook) => hook.id === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY);
-        const matrix = new ObjectMatrix<ICellDataWithSpanInfo>({
-            0: {
-                0: { f: '=A1' },
-                1: { si: 'shared-1' },
-                2: { v: 10 },
-            },
-        });
-        const matrixFragment = new ObjectMatrix<ICellDataWithSpanInfo>();
-        const plainMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
-
-        formulaOnlyHook.onBeforeCopy('unit1', 'sheet1');
-        formulaOnlyHook.handleMatrixOnCell(0, 0, 0, 0, matrix, matrixFragment, plainMatrix);
-        formulaOnlyHook.handleMatrixOnCell(0, 1, 0, 1, matrix, matrixFragment, plainMatrix);
-        formulaOnlyHook.handleMatrixOnCell(0, 2, 0, 2, matrix, matrixFragment, plainMatrix);
-
-        expect(matrixFragment.getValue(0, 0)).toMatchObject({ f: '=A1' });
-        expect(plainMatrix.getValue(0, 0)).toMatchObject({ f: '=A1', displayV: '=A1' });
-        expect(matrixFragment.getValue(0, 1)).toMatchObject({ f: '=A2' });
-        expect(plainMatrix.getValue(0, 1)).toMatchObject({ f: '=A2', displayV: '=A2' });
-        expect(matrixFragment.getValue(0, 2)).toMatchObject({ v: null, f: null, si: null, p: null });
-        expect(plainMatrix.getValue(0, 2)).toMatchObject({ v: null, f: null, si: null, p: null });
-        expect(matrix.getValue(0, 2)).toMatchObject({ v: null, f: null, si: null, p: null });
-
-        controller.dispose();
-    });
-});
 
 export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
@@ -448,6 +344,116 @@ describe('Test cut command with formulas', () => {
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    it('pastes regional formulas alongside invalid literal text from TSV and HTML', async () => {
+        get(LocaleService).setLocale(LocaleType.EN_US);
+        const target = { unitId: 'test', subUnitId: 'sheet1', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } };
+        for (const [region, formula, canonical] of [
+            ['es-ES', '=SUM(1,5;2,5)', '=SUM(1.5,2.5)'],
+            ['dv-MV', '=SUM(2،3,2)', '=SUM(2,3,2)'],
+        ]) {
+            get(RegionService).setRegion(region);
+            const invalid = '=SUM(A1;A2,A1)';
+            const html = `<table><tr><td>${formula}</td><td>${invalid}</td></tr></table>`;
+            for (const [sourceHtml, text] of [[undefined, `${formula}\t${invalid}`], [html, undefined]]) {
+                expect(await sheetClipboardService.legacyPaste(sourceHtml, text, undefined, undefined, target)).toBe(true);
+                const cells = getValues(0, 0, 0, 1)?.[0];
+                expect(cells?.[0]?.f).toBe(canonical);
+                expect(cells?.[1]).toMatchObject({ t: CellValueType.STRING, v: invalid });
+                expect(cells?.[1]?.f).toBeFalsy();
+            }
+        }
+    });
+
+    it('stores invalid external formulas as text alongside formulas that calculate', async () => {
+        get(RegionService).setRegion('en-US');
+        const target = { unitId: 'test', subUnitId: 'sheet1', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } };
+        const clipboard = get(ISheetClipboardService);
+        await clipboard.legacyPaste(undefined, '=SUM(A1', undefined, undefined, target);
+        expect(getValues(0, 0, 0, 0)?.[0][0]).toMatchObject({ v: '=SUM(A1', t: CellValueType.STRING });
+
+        const inputs = ['=SUM(A1;A2)', '=BOGUS(1)', '=IF(1,,2)'];
+        const html = `<table><tr>${inputs.map((text) => `<td>${text}</td>`).join('')}</tr></table>`;
+        for (const [sourceHtml, text] of [[undefined, inputs.join('\t')], [html, undefined]]) {
+            expect(await clipboard.legacyPaste(sourceHtml, text, undefined, undefined, target)).toBe(true);
+            const cells = getValues(0, 0, 0, 2)?.[0];
+            expect(cells?.[0]).toMatchObject({ v: inputs[0], t: CellValueType.STRING });
+            expect(cells?.map((cell) => cell?.f ?? null)).toEqual([null, inputs[1], inputs[2]]);
+        }
+    });
+
+    it('preserves literal text when pasting formulas as values or into Text-formatted cells', async () => {
+        const clipboard = get(ISheetClipboardService);
+        get(RegionService).setRegion('es-ES');
+        const target = { unitId: 'test', subUnitId: 'sheet1', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } };
+        const literal = '=SUM(1.5,2.5)';
+        const html = `<table><tr><td>${literal}</td><td>=SUM(1,5)</td></tr></table>`;
+        const item: ClipboardItem = {
+            presentationStyle: 'unspecified',
+            types: ['text/html'],
+            getType: async () => new Blob([html], { type: 'text/html' }),
+        };
+        expect(await clipboard.paste(item, PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE, target)).toBe(true);
+        const cells = getValues(0, 0, 0, 1)?.[0];
+        expect(cells?.map((cell) => cell?.v)).toEqual([literal, '=SUM(1,5)']);
+        expect(cells?.some((cell) => cell?.f)).toBe(false);
+
+        get(ICommandService).syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 0: { 0: { s: { n: { pattern: '@' } } } } },
+        });
+        expect(await clipboard.legacyPaste(undefined, literal, undefined, undefined, target)).toBe(true);
+        expect(getValues(0, 0, 0, 0)?.[0][0]?.v).toBe(literal);
+        expect(await clipboard.legacyPaste(undefined, `${literal}\t=SUM(1,5)`, undefined, undefined, target)).toBe(true);
+        expect(getValues(0, 0, 0, 1)?.[0].map((cell) => cell?.f ?? cell?.v)).toEqual([literal, '=SUM(1.5)']);
+    });
+
+    it('copies shared formulas at their own offsets and clears non-formula cells on formula-only copy', () => {
+        const { plain, matrixFragment } = sheetClipboardService.generateCopyContent('test', 'sheet1', {
+            startRow: 0,
+            endRow: 1,
+            startColumn: 9,
+            endColumn: 10,
+        }, { copyHookType: PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY })!;
+        expect(matrixFragment.getValue(0, 0)?.f).toBe('=F3');
+        expect(matrixFragment.getValue(0, 1)?.f).toBe('=A1');
+        expect(matrixFragment.getValue(1, 0)).toMatchObject({ v: null, f: null, p: null });
+        expect(matrixFragment.getValue(1, 1)?.f).toBe('=A2');
+        expect(plain).toBe('=F3\t=A1\n\t=A2');
+    });
+
+    it('omits filtered rows from formula-only copy and releases the previous copy source', () => {
+        const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+        worksheet.__interceptViewModel((view) => view.registerRowFilteredInterceptor({ getRowFiltered: (row) => row === 1 }));
+        const range = { startRow: 0, endRow: 1, startColumn: 10, endColumn: 10 };
+        const copyType = PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY;
+        const hook = sheetClipboardService.getClipboardHooks().find((hook) => hook.id === copyType)!;
+        expect(hook.getFilteredOutRows?.('test', 'sheet1', range)).toEqual([1]);
+        const content = sheetClipboardService.generateCopyContent('test', 'sheet1', range, { copyHookType: copyType });
+        expect(content?.plain).toBe('=A1');
+        expect(hook.onCopyCellContent?.(0, 10)).toBe('');
+    });
+
+    it('copies localized formula text while preserving the standard formula for internal and cross-page paste', () => {
+        get(RegionService).setRegion('es-ES');
+        const standard = '=IF(SUM(Sheet3!A1:A3,B1)<2,"<b>","A&B")';
+        get(ICommandService).syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 3: { 0: { f: standard } } },
+        });
+        const copy = get(ISheetClipboardService).generateCopyContent('test', 'sheet1', {
+            startRow: 3,
+            endRow: 3,
+            startColumn: 0,
+            endColumn: 0,
+        }, { copyHookType: PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY });
+        expect(copy?.plain).toBe('=IF(SUM(Sheet3!A1:A3;B1)<2;"<b>";"A&B")');
+        expect(copy?.html).toContain('=IF(SUM(Sheet3!A1:A3;B1)&lt;2;"&lt;b&gt;";"A&amp;B")');
+        expect(copy?.matrixFragment.getValue(0, 0)?.f).toBe(standard);
+        expect(JSON.parse(copy!.formulaClipboardPayload!).formulas[0].f).toBe(standard);
     });
 
     it.each([BooleanNumber.FALSE, BooleanNumber.TRUE])(

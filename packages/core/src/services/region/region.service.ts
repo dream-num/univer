@@ -16,10 +16,12 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
+import type { IFormulaSeparators } from './formula-separators';
 import { Inject } from '../../common/di';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { normalizeLocaleTag } from '../../types/enum/locale-type';
 import { LocaleService } from '../locale/locale.service';
+import { getFormulaSeparators } from './formula-separators';
 
 export class RegionService extends Disposable {
     private readonly _currentRegion$: BehaviorSubject<string>;
@@ -47,6 +49,30 @@ export class RegionService extends Disposable {
         const tag = normalizeLocaleTag(region);
         this._hasExplicitRegion = true;
         this._currentRegion$.next(tag);
+    }
+
+    /** Excel reads the decimal and list separators from the region and array syntax from the interface language. */
+    getFormulaSeparators(): IFormulaSeparators {
+        const separators = getFormulaSeparators(this.getCurrentRegion());
+        const { decimal } = separators;
+        const [uiLanguage] = this._localeService.getCurrentLocale().split('-');
+        switch (uiLanguage) {
+            case 'ja':
+            case 'ko':
+            case 'zh':
+                return { ...separators, arabicPunctuation: false };
+            case 'ar':
+                return { ...separators, arabicPunctuation: true };
+            case 'de':
+            case 'fr':
+                return { ...separators, arrayColumn: decimal === '.' ? '\\' : '.' };
+            case 'it':
+                return { ...separators, arrayRow: decimal === '.' ? '\\' : '.' };
+            case 'ru':
+                return { ...separators, arrayColumn: ';', arrayRow: ':' };
+            default:
+                return separators;
+        }
     }
 
     getExplicitRegion(): string | undefined {

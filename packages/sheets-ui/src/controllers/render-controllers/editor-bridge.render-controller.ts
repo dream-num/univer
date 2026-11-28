@@ -240,8 +240,8 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                 }
             }
         }
-        this._editorBridgeService.disableForceKeepVisible();
         this._hideEditor();
+        this._editorBridgeService.disableForceKeepVisible();
     }
 
     private _tryHideEditor() {
@@ -270,11 +270,12 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     private _hideEditor() {
         if (this._editorBridgeService.isVisible().visible !== true) return;
 
-        this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+        const closed = this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
             visible: false,
             eventType: DeviceInputEventType.PointerDown,
             unitId: this._context.unitId,
         });
+        if (!closed) throw new CanceledError();
     }
 
     private _getSheetObject(): Nullable<ISheetObjectParam> {

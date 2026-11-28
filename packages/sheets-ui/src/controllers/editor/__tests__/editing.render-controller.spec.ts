@@ -40,6 +40,7 @@ import {
     LocaleService,
     LocaleType,
     RedoCommand,
+    RegionService,
     Styles,
     Tools,
     UndoCommand,
@@ -48,7 +49,7 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, DocStateChangeManagerService, DocStateEmitService, InsertTextCommand, RichTextEditingMutation } from '@univerjs/docs';
 import { DocSelectionRenderService, IEditorService, InnerPasteCommand, MoveCursorOperation, MoveSelectionOperation, SetDocInputStyleCommand, VIEWPORT_KEY } from '@univerjs/docs-ui';
-import { IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { getFormulaSyntax, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
 import {
     SetRangeValuesCommand,
@@ -57,10 +58,11 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { KeyCode } from '@univerjs/ui';
+import { IMessageService, KeyCode, MockMessageService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
+import enUS from '../../../locale/en-US';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../../services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../../../services/editor/cell-editor-resize.service';
@@ -85,7 +87,8 @@ describe('imported formula metadata when editing', () => {
                 testBed.get(LexerTreeBuilder),
                 localeService,
                 testBed.get(IFunctionService),
-                testBed.sheet.getStyles()
+                testBed.sheet.getStyles(),
+                getFormulaSyntax(testBed.get(RegionService), testBed.get(LocaleService))
             );
             for (const input of ['=2+2', 'plain text', '']) {
                 expect(parseInput(input, { ...previous })).toMatchObject({ ft: null, fd: null });
@@ -95,6 +98,55 @@ describe('imported formula metadata when editing', () => {
             expect(unchanged).toMatchObject({ f: previous.f, ft: previous.ft, fd });
         } finally {
             testBed.univer.dispose();
+        }
+    });
+});
+
+describe('regional formula entry', () => {
+    it.each([LocaleType.EN_US, LocaleType.ZH_CN])('preserves quoted literals, sheet names and table captions in %s', (uiLocale) => {
+        const bed = createTestBed();
+        try {
+            const locale = bed.get(LocaleService);
+            bed.get(RegionService).setRegion('es-ES');
+            locale.setLocale(uiLocale);
+            const input = '=SUM(001,50;\'Bob\'\'s;Data\'!A1;Table1[Ｍixed，Case];"Ｘ""x,;")';
+            const cell = getCellDataByInput(
+                {},
+                { id: 'editor', body: { dataStream: `${input}\r\n` }, documentStyle: {} },
+                bed.get(LexerTreeBuilder),
+                locale,
+                bed.get(IFunctionService),
+                bed.sheet.getStyles(),
+                getFormulaSyntax(bed.get(RegionService), locale)
+            );
+            expect(cell?.f).toBe('=SUM(1.5,\'Bob\'\'s;Data\'!A1,Table1[Ｍixed，Case],"Ｘ""x,;")');
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('keeps formula-looking text verbatim for text formats and forced text', () => {
+        const bed = createTestBed();
+        try {
+            const locale = bed.get(LocaleService);
+            bed.get(RegionService).setRegion('es-ES');
+            const parse = (input: string, cell: ICellData, inheritedPattern?: string) => getCellDataByInput(
+                cell,
+                { id: 'editor', body: { dataStream: `${input}\r\n` }, documentStyle: {} },
+                bed.get(LexerTreeBuilder),
+                locale,
+                bed.get(IFunctionService),
+                bed.sheet.getStyles(),
+                getFormulaSyntax(bed.get(RegionService), locale),
+                inheritedPattern
+            );
+            const invalid = '=SUM(A1,B1;2)';
+            expect(parse(invalid, {})).toBeUndefined();
+            expect(parse(invalid, { s: { n: { pattern: '@' } } })).toMatchObject({ v: invalid, t: CellValueType.STRING, f: null });
+            expect(parse(invalid, {}, '@')).toMatchObject({ v: invalid, t: CellValueType.STRING, f: null });
+            expect(parse(`'${invalid}`, {})).toMatchObject({ v: invalid, t: CellValueType.FORCE_STRING, f: null });
+        } finally {
+            bed.univer.dispose();
         }
     });
 });
@@ -127,7 +179,8 @@ describe('clearing cell editor content', () => {
                 testBed.get(LexerTreeBuilder),
                 testBed.get(LocaleService),
                 testBed.get(IFunctionService),
-                testBed.sheet.getStyles()
+                testBed.sheet.getStyles(),
+                getFormulaSyntax(testBed.get(RegionService), testBed.get(LocaleService))
             );
             const commands = testBed.get(ICommandService);
             commands.registerCommand(SetRangeValuesMutation);
@@ -161,7 +214,8 @@ describe('clearing cell editor content', () => {
                 testBed.get(LexerTreeBuilder),
                 testBed.get(LocaleService),
                 testBed.get(IFunctionService),
-                testBed.sheet.getStyles()
+                testBed.sheet.getStyles(),
+                getFormulaSyntax(testBed.get(RegionService), testBed.get(LocaleService))
             );
             expect(incoming).not.toBeNull();
 
@@ -202,7 +256,8 @@ describe('clearing cell editor content', () => {
                 testBed.get(LexerTreeBuilder),
                 testBed.get(LocaleService),
                 testBed.get(IFunctionService),
-                testBed.sheet.getStyles()
+                testBed.sheet.getStyles(),
+                getFormulaSyntax(testBed.get(RegionService), testBed.get(LocaleService))
             );
 
             expect(incoming).toMatchObject(expected);
@@ -221,7 +276,8 @@ describe('clearing cell editor content', () => {
                 testBed.get(LexerTreeBuilder),
                 testBed.get(LocaleService),
                 testBed.get(IFunctionService),
-                testBed.sheet.getStyles()
+                testBed.sheet.getStyles(),
+                getFormulaSyntax(testBed.get(RegionService), testBed.get(LocaleService))
             );
 
             expect(incoming?.p).toEqual(snapshot);
@@ -361,6 +417,7 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
         getEditor: vi.fn((editorId: string) => editorId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY ? formulaBarEditor : null),
     };
     const editorBridgeService = {
+        getFormulaSyntax: () => getFormulaSyntax(injector.get(RegionService), injector.get(LocaleService)),
         currentEditCellState$: new Subject(),
         visible$: new Subject(),
         getEditCellState: vi.fn(() => ({
@@ -438,6 +495,7 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([ICommandService, { useClass: CommandService }]);
     injector.add([LocaleService]);
+    injector.add([RegionService]);
     injector.get(LocaleService).setLocale(LocaleType.EN_US);
     injector.add([LexerTreeBuilder]);
     injector.add([DocSelectionManagerService]);
@@ -488,12 +546,14 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
             }, selection);
         }
     });
+    injector.add([IMessageService, { useClass: MockMessageService }]);
     injector.add([EditingRenderController]);
     const controller = injector.get(EditingRenderController) as any;
     controller._editingUnit = 'unit-1';
 
     return {
         controller,
+        injector,
         commandService,
         selectionManager,
         docModel,
@@ -552,7 +612,7 @@ describe('EditingRenderController business methods', () => {
         const result = await controller._submitEdit({
             body: { dataStream: 'canonical display value\r\n' },
             documentStyle: {},
-        });
+        }, controller._editorBridgeService.getFormulaSyntax());
 
         expect(result).toBe(true);
         expect(worksheet.getCellRaw).not.toHaveBeenCalled();
@@ -586,6 +646,24 @@ describe('EditingRenderController business methods', () => {
         });
     });
 
+    it.each([
+        ['=SUM(1;2)', 'Use the formula separators for your region, as in =SUM(1.5,2.5).'],
+        ['=SUM({1,2;3})', 'Invalid formula or reference string'],
+        ['=#UNKNOWN!', 'Invalid formula or reference string'],
+    ])('explains why a submitted formula was rejected for %s', async (formula, message) => {
+        const { controller, injector } = createController();
+        injector.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
+        const show = vi.spyOn(injector.get(IMessageService), 'show');
+        const accepted = await controller._submitEdit({
+            body: { dataStream: `${formula}\r\n` },
+            documentStyle: {},
+        }, controller._editorBridgeService.getFormulaSyntax());
+
+        expect(accepted).toBe(false);
+        expect(show).toHaveBeenCalledWith(expect.objectContaining({ content: message }));
+        expect(controller._sheetInterceptorService.onWriteCell).not.toHaveBeenCalled();
+    });
+
     it('submits edited cell content and rolls back when validation rejects the value', async () => {
         const { controller } = createController();
         controller._sheetInterceptorService.onValidateCell.mockResolvedValue(false);
@@ -593,7 +671,7 @@ describe('EditingRenderController business methods', () => {
         const result = await controller._submitEdit({
             body: { dataStream: 'new value\r\n' },
             documentStyle: {},
-        });
+        }, controller._editorBridgeService.getFormulaSyntax());
 
         expect(result).toBe(false);
         expect(controller._sheetInterceptorService.onWriteCell).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), 2, 3, {
@@ -621,7 +699,7 @@ describe('EditingRenderController business methods', () => {
             documentStyle: {},
         };
 
-        await controller._submitEdit(snapshot);
+        await controller._submitEdit(snapshot, controller._editorBridgeService.getFormulaSyntax());
         const submitted = controller._commandService.syncExecuteCommand.mock.calls
             .find(([id]: [string]) => id === SetRangeValuesCommand.id)?.[1];
         snapshot.body.textRuns = [];
@@ -636,7 +714,7 @@ describe('EditingRenderController business methods', () => {
         await controller._submitEdit({
             body: { dataStream: 'fill\r\n' },
             documentStyle: {},
-        }, true);
+        }, controller._editorBridgeService.getFormulaSyntax(), true);
 
         expect(controller._commandService.syncExecuteCommand).toHaveBeenCalledWith(SetRangeValuesCommand.id, expect.objectContaining({
             range: { startRow: 1, startColumn: 1, endRow: 4, endColumn: 4 },

@@ -124,6 +124,8 @@ export interface ISheetClipboardHook {
      * @return content
      */
     onCopyCellContent?(row: number, col: number): string;
+    /** Standard formula used for cross-workbook paste, including resolved shared formulas. */
+    getCopyCellFormula?(row: number, col: number): string;
 
     /**
      * Properties that would be appended to the td element.

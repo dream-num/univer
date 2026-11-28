@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { localeTagPattern } from '../locale-tag-pattern';
+
 /**
  * Built-in locales.
  */
@@ -147,10 +149,6 @@ export const LOCALE_META: Record<LocaleType, ILocaleMeta> = {
         numberingSystem: 'arab',
     },
 };
-
-// Currently registered primary language subtags have two or three letters.
-// Capture the formatting fields separately from variants, extensions and private use.
-const localeTagPattern = /^([a-z]{2,3}(?:-[a-z]{3}){0,3})(?:-([a-z]{4}))?(?:-([a-z]{2}|[0-9]{3}))?((?:-(?:[a-z0-9]{5,8}|[0-9][a-z0-9]{3}))*)((?:-[0-9a-wy-z](?:-[a-z0-9]{2,8})+)*)(-x(?:-[a-z0-9]{1,8})+)?$/i;
 
 // Only the irregular grandfathered tags need a separate grammar (RFC 5646 §2.1).
 const irregularTags = ('en-GB-oed i-ami i-bnn i-default i-enochian i-hak i-klingon i-lux i-mingo i-navajo ' +

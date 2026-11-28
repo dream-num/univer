@@ -231,6 +231,7 @@ const locale: typeof enUS = {
             textToNumber: 'Преобразовать текст в число',
         },
         info: {
+            formulaSeparator: 'Используйте разделители формул для своего региона, как в примере {0}.',
             problem: 'Произошла проблема',
             error: 'Ошибка',
             forceStringInfo: 'Число хранится как текст',

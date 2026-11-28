@@ -15,13 +15,16 @@
  */
 
 import type { IRange } from '@univerjs/core';
+import { LocaleService, RegionService, Univer } from '@univerjs/core';
 import {
     getFormulaSequenceCharacterAtOffset,
+    getFormulaSyntax,
     isFormulaReferenceAddingContext,
     isFormulaReferenceAddingTextContext,
+    LexerTreeBuilder,
     sequenceNodeType,
 } from '@univerjs/engine-formula';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { FormulaSelectingType } from '../use-formula-selection';
 import {
     createSelectionChangeDuplicateEndGuard,
@@ -126,9 +129,12 @@ describe('use-sheet-selection-change regression scenarios', () => {
     });
 
     it('uses the formula text end as the insertion context when the embedded editor selection is temporarily empty', () => {
-        const lexerTreeBuilder = {
-            sequenceNodesBuilder: vi.fn(() => []),
-        };
+        const univer = new Univer();
+        onTestFinished(() => univer.dispose());
+        const injector = univer.__getInjector();
+        const syntax = getFormulaSyntax(injector.get(RegionService), injector.get(LocaleService));
+        injector.add([LexerTreeBuilder]);
+        const lexerTreeBuilder = injector.get(LexerTreeBuilder);
         const editor = {
             getSelectionRanges: vi.fn(() => []),
             getDocumentData: vi.fn(() => ({ body: { dataStream: '=\r\n' } })),
@@ -136,7 +142,8 @@ describe('use-sheet-selection-change regression scenarios', () => {
 
         expect(prepareSelectionChangeContext({
             editor: editor as never,
-            lexerTreeBuilder: lexerTreeBuilder as never,
+            lexerTreeBuilder,
+            syntax,
         })).toMatchObject({
             offset: 0,
             nodeIndex: -1,
@@ -146,9 +153,12 @@ describe('use-sheet-selection-change regression scenarios', () => {
     });
 
     it('does not create a fallback formula context for non-formula editor text', () => {
-        const lexerTreeBuilder = {
-            sequenceNodesBuilder: vi.fn(() => []),
-        };
+        const univer = new Univer();
+        onTestFinished(() => univer.dispose());
+        const injector = univer.__getInjector();
+        const syntax = getFormulaSyntax(injector.get(RegionService), injector.get(LocaleService));
+        injector.add([LexerTreeBuilder]);
+        const lexerTreeBuilder = injector.get(LexerTreeBuilder);
         const editor = {
             getSelectionRanges: vi.fn(() => []),
             getDocumentData: vi.fn(() => ({ body: { dataStream: 'plain\r\n' } })),
@@ -156,8 +166,29 @@ describe('use-sheet-selection-change regression scenarios', () => {
 
         expect(prepareSelectionChangeContext({
             editor: editor as never,
-            lexerTreeBuilder: lexerTreeBuilder as never,
+            lexerTreeBuilder,
+            syntax,
         })).toBeUndefined();
+    });
+
+    it('preserves regional text and reference offsets while selecting the next argument', () => {
+        const univer = new Univer();
+        onTestFinished(() => univer.dispose());
+        const injector = univer.__getInjector();
+        injector.get(RegionService).setRegion('es-ES');
+        injector.add([LexerTreeBuilder]);
+        const lexerTreeBuilder = injector.get(LexerTreeBuilder);
+        const syntax = getFormulaSyntax(injector.get(RegionService), injector.get(LocaleService));
+        const text = 'SUMA(1,5;A1;';
+        const editor = {
+            getSelectionRanges: () => [],
+            getDocumentData: () => ({ body: { dataStream: `=${text}\r\n` } }),
+        };
+        const context = prepareSelectionChangeContext({ editor: editor as never, lexerTreeBuilder, syntax })!;
+        expect(context.sequenceNodes.map((node) => typeof node === 'string' ? node : node.token).join('')).toBe(text);
+        expect(context.sequenceNodes).toContainEqual(expect.objectContaining({ token: 'A1', startIndex: 9, endIndex: 10 }));
+        expect(isFormulaReferenceAddingTextContext(context.tokenText, context.offset)).toBe(true);
+        expect(insertFormulaReferenceText(context.formulaText, 'B1', context.offset)).toBe('SUMA(1,5;A1;B1');
     });
 
     it('recognizes delimiter-adjacent formula context as a new reference insertion point', () => {

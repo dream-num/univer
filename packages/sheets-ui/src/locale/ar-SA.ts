@@ -231,6 +231,7 @@ const locale: typeof enUS = {
             textToNumber: 'نص إلى رقم',
         },
         info: {
+            formulaSeparator: 'استخدم فواصل الصيغ الخاصة بمنطقتك، كما في {0}.',
             problem: 'حدثت مشكلة',
             error: 'خطأ',
             forceStringInfo: 'رقم مخزن كنص',

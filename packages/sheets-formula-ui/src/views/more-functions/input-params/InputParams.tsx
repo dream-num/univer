@@ -22,18 +22,19 @@ import { FunctionParams } from '../function-params/FunctionParams';
 
 export interface IInputParamsProps {
     functionInfo: IFunctionInfo | null;
+    separator: string;
     onChange: (params: string[]) => void;
 }
 
 export function InputParams(props: IInputParamsProps) {
-    const { functionInfo, onChange } = props;
+    const { functionInfo } = props;
     if (!functionInfo) return null;
 
-    return <InputParamsInner functionInfo={functionInfo} onChange={onChange} />;
+    return <InputParamsInner {...props} functionInfo={functionInfo} />;
 }
 
 function InputParamsInner(props: IInputParamsProps & { functionInfo: IFunctionInfo }) {
-    const { functionInfo, onChange } = props;
+    const { functionInfo, onChange, separator } = props;
 
     const [params, setParams] = useState<string[]>([]);
     const [functionParameter, setFunctionParameter] = useState<IFunctionParam[]>(functionInfo.functionParameter);
@@ -77,7 +78,7 @@ function InputParamsInner(props: IInputParamsProps & { functionInfo: IFunctionIn
             <div className={clsx('univer-flex-1 univer-p-3', borderLeftClassName)}>
                 <FunctionParams
                     title={activeIndex === -1
-                        ? <FunctionHelp prefix={functionInfo.functionName} value={functionParameter} />
+                        ? <FunctionHelp separator={separator} prefix={functionInfo.functionName} value={functionParameter} />
                         : functionParameter[activeIndex].name}
                     value={activeIndex === -1 ? functionInfo.description : functionParameter[activeIndex].detail}
                 />

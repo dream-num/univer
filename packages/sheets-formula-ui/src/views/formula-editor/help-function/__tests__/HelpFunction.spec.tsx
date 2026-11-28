@@ -26,9 +26,10 @@ import {
     IUniverInstanceService,
     LocaleService,
     LocaleType,
+    RegionService,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { FunctionType, IDescriptionService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { FunctionType, getFormulaSyntax, IDescriptionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { ISidebarService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
@@ -132,6 +133,7 @@ function createHelpFunctionTestBed() {
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([IContextService, { useClass: ContextService }]);
     injector.add([LocaleService, { useClass: LocaleService }]);
+    injector.add([RegionService]);
     injector.add([LexerTreeBuilder, { useClass: LexerTreeBuilder }]);
     injector.add([IFormulaPromptService, { useClass: FormulaPromptService }]);
     injector.add([IDescriptionService, { useClass: HelpDescriptionService as never }]);
@@ -255,6 +257,30 @@ describe('HelpFunction', () => {
         }
     });
 
+    it('highlights the second argument after a Spanish decimal and argument separator', async () => {
+        const { injector, editor } = createHelpFunctionTestBed();
+        injector.get(RegionService).setRegion('es-ES');
+        const draft = '=SUM(1,5;';
+        const help = (
+            <HelpFunction
+                syntax={getFormulaSyntax(injector.get(RegionService), injector.get(LocaleService))}
+                isFocus
+                editor={editor}
+                formulaText={draft}
+            />
+        );
+        renderWithInjector(root, injector, help);
+        await act(async () => {
+            (editor.selectionChange$ as unknown as Subject<{ textRanges: Array<{ startOffset: number; endOffset: number; collapsed: boolean }> }>).next({
+                textRanges: [{ startOffset: draft.length, endOffset: draft.length, collapsed: true }],
+            });
+            await new Promise((resolve) => setTimeout(resolve, 80));
+        });
+        expect(document.body.textContent).toContain('SUM(number1;[number2;...])');
+        const active = document.body.querySelector('.univer-text-primary-500');
+        expect(active?.textContent).toBe('[number2;...]');
+    });
+
     it('expands the active function help and reports parameter switches', async () => {
         const { injector, editor } = createHelpFunctionTestBed();
 
@@ -262,6 +288,7 @@ describe('HelpFunction', () => {
             root,
             injector, (
                 <HelpFunction
+                    syntax={getFormulaSyntax(injector.get(RegionService), injector.get(LocaleService))}
                     isFocus
                     editor={editor}
                     formulaText="=SUM("
@@ -298,6 +325,7 @@ describe('HelpFunction', () => {
             root,
             injector, (
                 <HelpFunction
+                    syntax={getFormulaSyntax(injector.get(RegionService), injector.get(LocaleService))}
                     isFocus
                     editor={editor}
                     formulaText="=SUM("
@@ -339,6 +367,7 @@ describe('HelpFunction', () => {
             root,
             injector, (
                 <HelpFunction
+                    syntax={getFormulaSyntax(injector.get(RegionService), injector.get(LocaleService))}
                     isFocus
                     editor={editor}
                     formulaText="=SUM("
@@ -366,6 +395,7 @@ describe('HelpFunction', () => {
             root,
             injector, (
                 <HelpFunction
+                    syntax={getFormulaSyntax(injector.get(RegionService), injector.get(LocaleService))}
                     isFocus
                     editor={editor}
                     formulaText={formulaText}

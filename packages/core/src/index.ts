@@ -144,6 +144,7 @@ export { mergeOverrideWithDependencies } from './services/plugin/plugin-override
 export type { DependencyOverride } from './services/plugin/plugin-override';
 export type { PluginCtor } from './services/plugin/plugin.service';
 export { DependentOn, Plugin, PluginService } from './services/plugin/plugin.service';
+export type { IFormulaSeparators } from './services/region/formula-separators';
 export { RegionService } from './services/region/region.service';
 export { IResourceLoaderService } from './services/resource-loader/type';
 export { ResourceManagerService } from './services/resource-manager/resource-manager.service';
@@ -172,6 +173,7 @@ export { ImageCacheMap } from './shared/cache/image-cache';
 export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
 export { customNameCharacterCheck, nameCharacterCheck } from './shared/name';
+export { normalizeNativeDigits } from './shared/numfmt/native-digits';
 export { RTree } from './shared/r-tree';
 export type { IRTreeItem } from './shared/r-tree';
 export { generateRandomId } from './shared/random-id';

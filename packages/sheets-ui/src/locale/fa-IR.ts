@@ -231,6 +231,7 @@ const locale: typeof enUS = {
             textToNumber: 'متن به عدد',
         },
         info: {
+            formulaSeparator: 'از جداکننده‌های فرمول منطقهٔ خود استفاده کنید، مانند {0}.',
             problem: 'مشکلی پیش آمد',
             error: 'خطا',
             forceStringInfo: 'عدد به عنوان متن ذخیره شده',

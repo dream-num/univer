@@ -18,9 +18,9 @@
 
 import type { IRange, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
+import type { IFormulaSyntax } from '@univerjs/engine-formula';
 import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { RefObject } from 'react';
-import type { IRefSelection } from './use-highlight';
 import {
     DisposableCollection,
     FOCUSING_FX_BAR_EDITOR,
@@ -36,9 +36,9 @@ import { IEditorService } from '@univerjs/docs-ui';
 import {
     deserializeRangeWithSheet,
     generateStringWithSequence,
-    isFormulaReferenceAddingContext,
     isFormulaReferenceAddingTextContext,
     LexerTreeBuilder,
+    matchRefDrawToken,
     sequenceNodeType,
     serializeRange,
     serializeRangeWithSheet,
@@ -51,6 +51,7 @@ import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { merge } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import type { IRefSelection } from './use-highlight';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render.service';
 import {
     findIndexFromSequenceNodes,
@@ -60,15 +61,18 @@ import { getOffsetFromSequenceNodes } from '../../range-selector/utils/get-offse
 import { sequenceNodeToText } from '../../range-selector/utils/sequence-node-to-text';
 import { unitRangesToText } from '../../range-selector/utils/unit-ranges-to-text';
 import { FormulaSelectingType, resolveFormulaSelectionWorkbook } from './use-formula-selection';
+import { getEditorSequenceNodes } from './use-formula-token';
 import { calcHighlightRanges } from './use-highlight';
 import { isFormulaEditorInteractionOwner } from './use-left-and-right-arrow';
 import { useStateRef } from './use-state-ref';
 
-export const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTreeBuilder: LexerTreeBuilder }) => {
-    const { editor, lexerTreeBuilder } = opts;
+export const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTreeBuilder: LexerTreeBuilder; syntax: IFormulaSyntax }) => {
+    const { editor, lexerTreeBuilder, syntax } = opts;
     const currentDocSelections = editor?.getSelectionRanges();
     const dataStream = (editor?.getDocumentData().body?.dataStream ?? '\r\n').slice(0, -2);
-    const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(dataStream.slice(1)) ?? [];
+    const formulaText = dataStream.slice(1);
+    const tokenText = syntax.toEditorTokens(formulaText);
+    const sequenceNodes = getEditorSequenceNodes(lexerTreeBuilder, formulaText, tokenText);
     let offset: number;
 
     if (currentDocSelections?.length === 1) {
@@ -84,7 +88,8 @@ export const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTree
     return {
         nodeIndex,
         updatingRefIndex,
-        formulaText: dataStream.slice(1),
+        formulaText,
+        tokenText,
         sequenceNodes,
         offset,
     };
@@ -258,6 +263,7 @@ export function getInitialFormulaReferenceSelectionCount(renderSelectionCount: n
 }
 
 export const useSheetSelectionChange = (
+    syntax: IFormulaSyntax,
     isNeed: boolean,
     isFocus: boolean,
     isSelectingRef: RefObject<FormulaSelectingType>,
@@ -300,12 +306,11 @@ export const useSheetSelectionChange = (
             return;
         }
 
-        const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
+        const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder, syntax });
         if (!ctx) return;
-        const { nodeIndex, updatingRefIndex, formulaText, sequenceNodes, offset } = ctx;
+        const { nodeIndex, updatingRefIndex, formulaText, tokenText, sequenceNodes, offset } = ctx;
         const isAddingReference = isSelectingRef.current === FormulaSelectingType.NEED_ADD ||
-            isFormulaReferenceAddingContext(sequenceNodes, offset) ||
-            isFormulaReferenceAddingTextContext(formulaText, offset);
+            matchRefDrawToken(tokenText[offset - 1]);
         if (isAddingReference) {
             if (offset !== 0) {
                 if (nodeIndex === -1 && sequenceNodes.length) {
@@ -325,7 +330,7 @@ export const useSheetSelectionChange = (
                 const isAcrossSheet = rangeSheetId !== subUnitId;
                 const isAcrossWorkbook = activeWorkbook?.getUnitId() !== unitId;
                 const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
-                if (isFormulaReferenceAddingTextContext(formulaText, offset)) {
+                if (isFormulaReferenceAddingTextContext(tokenText, offset)) {
                     const result = insertFormulaReferenceText(formulaText, refRanges[0], offset);
                     handleRangeChange(result, offset + refRanges[0].length, isEnd);
                     return;
@@ -357,14 +362,15 @@ export const useSheetSelectionChange = (
             if (!last) return;
             const node = sequenceNodes[nodeIndex];
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
-                const oldToken = node.token;
+                let token: string;
                 const isAcrossWorkbook = activeWorkbook?.getUnitId() !== unitId;
                 if (isAcrossWorkbook) {
-                    node.token = serializeRangeWithSpreadsheet(activeWorkbook?.getUnitId() ?? '', sheetName, last);
+                    token = serializeRangeWithSpreadsheet(activeWorkbook?.getUnitId() ?? '', sheetName, last);
                 } else {
-                    node.token = sheetName === activeSheet?.getName() ? serializeRange(last) : serializeRangeWithSheet(activeSheet!.getName(), last);
+                    token = sheetName === activeSheet?.getName() ? serializeRange(last) : serializeRangeWithSheet(activeSheet!.getName(), last);
                 }
-                const newOffset = offset + (node.token.length - oldToken.length);
+                sequenceNodes[nodeIndex] = { ...node, token };
+                const newOffset = offset + token.length - node.token.length;
                 handleRangeChange(generateStringWithSequence(sequenceNodes), newOffset, isEnd);
             }
         } else {
@@ -411,7 +417,7 @@ export const useSheetSelectionChange = (
                     }
                     const refRangeText = getRefRangeText(selection);
                     if (insertedSelection && refIndex === updatingRefIndex) {
-                        return `${refRangeText},${getRefRangeText(insertedSelection)}`;
+                        return `${refRangeText}${syntax.argumentSeparator}${getRefRangeText(insertedSelection)}`;
                     }
 
                     return refRangeText;
@@ -434,7 +440,7 @@ export const useSheetSelectionChange = (
             }
             const preNode = sequenceNodes[sequenceNodes.length - 1];
             const isPreNodeRef = preNode && (typeof preNode === 'string' ? false : preNode.nodeType === sequenceNodeType.REFERENCE);
-            const result = `${currentText}${theLastList.length && isPreNodeRef ? ',' : ''}${theLastList.join(',')}`;
+            const result = `${currentText}${theLastList.length && isPreNodeRef ? syntax.argumentSeparator : ''}${theLastList.join(syntax.argumentSeparator)}`;
             handleRangeChange(result, !theLastList.length && newOffset ? newOffset : result.length, isEnd);
         }
     });
@@ -464,7 +470,7 @@ export const useSheetSelectionChange = (
                     onSelectionsChange(selections.map((i) => i.rangeWithCoord), isEnd, isCtrlAddMode);
                 },
                 onDuplicateEnd: () => {
-                    const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
+                    const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder, syntax });
                     if (!ctx) {
                         return;
                     }
@@ -498,7 +504,7 @@ export const useSheetSelectionChange = (
                 disposableCollection.dispose();
             };
         }
-    }, [allowMissingEditorFocus, contextService, editor, editorService, getRefSelections, isNeed, onSelectionsChange, refSelectionsRenderService, refSelectionsService]);
+    }, [allowMissingEditorFocus, contextService, editor, editorService, getRefSelections, isNeed, onSelectionsChange, refSelectionsRenderService, refSelectionsService, syntax]);
 
     useEffect(() => {
         if (isFocus && refSelectionsRenderService && editor) {
@@ -581,12 +587,9 @@ export const useSheetSelectionChange = (
                         range.unitId = params.unitId;
                         range.sheetId = params.subUnitId;
 
-                        const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
+                        const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder, syntax });
                         const isAdd = isSelectingRef.current === FormulaSelectingType.NEED_ADD ||
-                            Boolean(ctx && (
-                                isFormulaReferenceAddingContext(ctx.sequenceNodes, ctx.offset) ||
-                                isFormulaReferenceAddingTextContext(ctx.formulaText, ctx.offset)
-                            ));
+                            Boolean(ctx && matchRefDrawToken(ctx.tokenText[ctx.offset - 1]));
                         const selections: IRange[] = (refSelectionsRenderService?.getSelectionDataWithStyle() ?? []).map((i) => i.rangeWithCoord);
                         if (isAdd) {
                             if (selections.length > 0 && isSameFormulaSelection(selections[selections.length - 1], range)) {
@@ -611,7 +614,7 @@ export const useSheetSelectionChange = (
                 d.dispose();
             };
         }
-    }, [commandService, contextService, duplicateEndGuard, editor, editorService, isSelectingRef, lexerTreeBuilder, listenSelectionSet, onSelectionsChange, refSelectionsRenderService]);
+    }, [commandService, contextService, duplicateEndGuard, editor, editorService, isSelectingRef, lexerTreeBuilder, listenSelectionSet, onSelectionsChange, refSelectionsRenderService, syntax]);
 
     useEffect(() => {
         if (!editor) {

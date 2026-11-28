@@ -231,6 +231,7 @@ const locale: typeof enUS = {
             textToNumber: '文本转数字',
         },
         info: {
+            formulaSeparator: '请使用当前区域的公式分隔符，例如 {0}。',
             problem: '出现了一个问题',
             error: '错误',
             forceStringInfo: '以文本形式存储的数字',

@@ -143,6 +143,8 @@ export type { IUniverEngineFormulaConfig } from './config/config';
 export { CalculateController } from './controllers/calculate.controller';
 export { FormulaCalculationSessionController } from './controllers/formula-calculation-session.controller';
 export { SuperTableActiveDirtyController } from './controllers/super-table-active-dirty.controller';
+export { getFormulaProtectedTokenEnd, getFormulaSyntax } from './engine/analysis/formula-syntax';
+export type { FormulaInputError, IFormulaSyntax } from './engine/analysis/formula-syntax';
 export { Lexer } from './engine/analysis/lexer';
 export { LexerNode } from './engine/analysis/lexer-node';
 export { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';

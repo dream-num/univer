@@ -15,7 +15,6 @@
  */
 
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import type { LocaleKey } from '../../locale/types';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -27,9 +26,11 @@ import { Button } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { getSheetCommandTarget } from '@univerjs/sheets';
-import { IEditorBridgeService, SetCellEditVisibleOperation, useActiveWorkbook } from '@univerjs/sheets-ui';
+import { SetCellEditVisibleOperation, useActiveWorkbook } from '@univerjs/sheets-ui';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import { useCurrentFormulaSyntax } from '../formula-editor/hooks/use-formula-editor-syntax';
 import { InputParams } from './input-params/InputParams';
 import { SelectFunction } from './select-function/SelectFunction';
 
@@ -39,11 +40,11 @@ export interface IMoreFunctionsProps {
 
 export function MoreFunctions({ SelectFunctionComponent = SelectFunction }: IMoreFunctionsProps = {}) {
     const workbook = useActiveWorkbook();
+    const syntax = useCurrentFormulaSyntax();
     const [selectFunction, setSelectFunction] = useState<boolean>(true);
     const [inputParams, setInputParams] = useState<boolean>(false);
     // const [params, setParams] = useState<string[]>([]); // TODO@Dushusir: bind setParams to InputParams's onChange
     const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(null);
-    const editorBridgeService = useDependency(IEditorBridgeService);
     const localeService = useDependency(LocaleService);
     const editorService = useDependency(IEditorService);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -79,7 +80,7 @@ export function MoreFunctions({ SelectFunctionComponent = SelectFunction }: IMor
             className="univer-box-border univer-flex univer-h-full univer-flex-col univer-justify-between univer-py-2"
         >
             {selectFunction && <SelectFunctionComponent onChange={setFunctionInfo} />}
-            {inputParams && <InputParams functionInfo={functionInfo} onChange={() => {}} />}
+            {inputParams && <InputParams separator={syntax.argumentSeparator} functionInfo={functionInfo} onChange={() => {}} />}
             <div className="univer-flex univer-justify-end">
                 {/* TODO@Dushusir: open input params after range selector refactor */}
                 {inputParams && (

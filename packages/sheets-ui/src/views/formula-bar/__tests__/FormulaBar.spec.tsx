@@ -23,16 +23,18 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IConfigService,
+    Inject,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
+    RegionService,
     SheetTypes,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
-import { IDefinedNamesService, UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { getFormulaSyntax, IDefinedNamesService, UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     AutoFillService,
@@ -90,6 +92,9 @@ class TestResizeObserver {
 }
 
 class TestEditorBridgeService implements IEditorBridgeService {
+    constructor(@Inject(RegionService) private readonly _region: RegionService, @Inject(LocaleService) private readonly _locale: LocaleService) {}
+    getFormulaSyntax() { return getFormulaSyntax(this._region, this._locale); }
+
     private readonly _currentEditCellState$ = new BehaviorSubject<Nullable<ICellEditorState>>(null);
     readonly currentEditCellState$ = this._currentEditCellState$.asObservable();
 

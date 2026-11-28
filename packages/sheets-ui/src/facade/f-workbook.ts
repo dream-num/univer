@@ -267,12 +267,13 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         const editorBridgeService = this._injector.get(IEditorBridgeService);
 
         if (editorBridgeService.isVisible().visible) {
-            commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+            const closed = commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
                 eventType: DeviceInputEventType.Keyboard,
                 keycode: save ? KeyCode.ENTER : KeyCode.ESC,
                 visible: false,
                 unitId: this._workbook.getUnitId(),
             } as IEditorBridgeServiceVisibleParam);
+            if (!closed) return false;
         }
 
         // wait for the async cell edit operation to complete

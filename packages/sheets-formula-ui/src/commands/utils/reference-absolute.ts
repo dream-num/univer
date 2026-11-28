@@ -18,7 +18,6 @@ import type { ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { AbsoluteRefType, RANGE_TYPE } from '@univerjs/core';
 import {
     deserializeRangeWithSheetWithCache,
-    generateStringWithSequence,
     getAbsoluteRefTypeWithSingleString,
     handleRefStringInfo,
     sequenceNodeType,
@@ -42,13 +41,14 @@ interface IToggleReferenceTokenResult {
 export function toggleReferenceAbsoluteAtCursor(
     lexerTreeBuilder: LexerTreeBuilder,
     formulaText: string,
-    cursorOffset: number
+    cursorOffset: number,
+    tokenText = formulaText
 ): IReferenceAbsoluteResult | null {
     if (!formulaText.startsWith('=') || formulaText.length <= 1) {
         return null;
     }
 
-    const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(formulaText);
+    const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(tokenText);
     if (!sequenceNodes?.length) {
         return null;
     }
@@ -76,19 +76,7 @@ export function toggleReferenceAbsoluteAtCursor(
         return null;
     }
 
-    const nextSequenceNodes = sequenceNodes.map((node) => {
-        if (node !== matchedReference) {
-            return node;
-        }
-
-        return {
-            ...node,
-            token: nextReferenceState.token,
-            endIndex: node.startIndex + nextReferenceState.token.length - 1,
-        };
-    });
-
-    const nextFormulaText = `=${generateStringWithSequence(nextSequenceNodes)}`;
+    const nextFormulaText = formulaText.slice(0, matchedReference.startIndex + 1) + nextReferenceState.token + formulaText.slice(matchedReference.endIndex + 2);
     const nextCursorOffset = _translateCursorOffset(
         normalizedCursorOffset,
         matchedReference.startIndex + 1,

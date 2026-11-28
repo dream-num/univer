@@ -23,7 +23,6 @@ import type {
     IRemoveWorksheetMergeMutationParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
-import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 import {
     CellValueType,
     cloneCellDataMatrix,
@@ -35,11 +34,14 @@ import {
     getNumfmtParseValueFilter,
     isTextFormat,
     IUniverInstanceService,
+    LocaleService,
     ObjectMatrix,
     Rectangle,
+    RegionService,
     Tools,
     willLoseNumericPrecision,
 } from '@univerjs/core';
+import { getFormulaSyntax, LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
@@ -51,9 +53,24 @@ import {
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
 } from '@univerjs/sheets';
+import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 import { COPY_TYPE } from '../../services/clipboard/type';
 import { isRichText } from '../editor/editing.render-controller';
 import { virtualizeDiscreteRanges } from '../utils/range-tools';
+
+/** Capture the input syntax once for all formula cells in an external paste. */
+export function createPasteFormulaParser(accessor: IAccessor) {
+    const syntax = getFormulaSyntax(accessor.get(RegionService), accessor.get(LocaleService));
+    const lexer = accessor.get(LexerTreeBuilder);
+    return (text: string): ICellData => {
+        const standard = syntax.toStandard(text);
+        // Excel preserves invalid external formulas as text, including the leading equals sign.
+        if (standard === null || typeof lexer.treeBuilder(standard) === 'string') {
+            return { f: null, v: text, t: CellValueType.STRING };
+        }
+        return { f: standard, v: null };
+    };
+}
 
 interface IExternalPasteNumberFormatResult {
     n?: IStyleData['n'];

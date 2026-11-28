@@ -28,11 +28,11 @@ import {
     IUniverInstanceService,
     LocaleService,
     LocaleType,
+    RegionService,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { FunctionType, IDescriptionService } from '@univerjs/engine-formula';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { ISidebarService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -217,8 +217,6 @@ class TestEditorService {
     }
 }
 
-class TestEditorBridgeService {}
-
 class TestUniverInstanceService {
     private readonly _workbook = {
         getUnitId: () => 'formula-book',
@@ -296,11 +294,11 @@ function createFormulaViewTestBed() {
 
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([LocaleService, { useClass: LocaleService }]);
+    injector.add([RegionService]);
     injector.add([IDescriptionService, { useClass: TestDescriptionService as never }]);
     injector.add([ISidebarService, { useClass: TestSidebarService as never }]);
     injector.add([ICommandService, { useClass: TestCommandService as never }]);
     injector.add([IEditorService, { useClass: TestEditorService as never }]);
-    injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
     injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
 
     injector.get(LocaleService).load({

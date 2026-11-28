@@ -15,7 +15,7 @@
  */
 
 import type { Editor } from '@univerjs/docs-ui';
-import type { IFunctionInfo } from '@univerjs/engine-formula';
+import type { IFormulaSyntax, IFunctionInfo } from '@univerjs/engine-formula';
 import { IDescriptionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
@@ -24,7 +24,7 @@ import { IFormulaPromptService } from '../../../services/prompt.service';
 import { useStateRef } from './use-state-ref';
 
 // eslint-disable-next-line max-lines-per-function
-export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?: Editor) => {
+export const useFormulaDescribe = (syntax: IFormulaSyntax, isNeed: boolean, formulaText: string, editor?: Editor) => {
     const formulaPromptService = useDependency(IFormulaPromptService);
     const descriptionService = useDependency(IDescriptionService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
@@ -43,9 +43,9 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
     };
 
     useEffect(() => {
-        const nodes = lexerTreeBuilder.sequenceNodesBuilder(formulaText.slice(1));
+        const nodes = lexerTreeBuilder.sequenceNodesBuilder(syntax.toEditorTokens(formulaText.slice(1)));
         formulaPromptService.setSequenceNodes(nodes ?? []);
-    }, [formulaText]);
+    }, [formulaPromptService, formulaText, lexerTreeBuilder, syntax]);
 
     useEffect(() => {
         if (editor && isNeed) {
@@ -72,7 +72,7 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
                                 return;
                             } else {
                                 // Why subtract 1? Because the nodes do not include the initial '=' character, but the selection does include '='.
-                                const res = lexerTreeBuilder.getFunctionAndParameter(`${formulaTextRef.current}A`, startOffset - 1);
+                                const res = lexerTreeBuilder.getFunctionAndParameter(syntax.toEditorTokens(`${formulaTextRef.current}A`), startOffset - 1);
                                 if (res) {
                                     const { functionName, paramIndex } = res;
                                     const info = descriptionService.getFunctionInfo(functionName);
@@ -99,7 +99,7 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
                 d2.unsubscribe();
             };
         }
-    }, [editor, isNeed]);
+    }, [descriptionService, editor, formulaPromptService, isNeed, isShowRef, lexerTreeBuilder, syntax]);
 
     useEffect(() => {
         if (!isNeed) {

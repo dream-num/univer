@@ -65,9 +65,12 @@ export const InsertFunctionOperation: ICommand = {
         const { worksheet, unitId, subUnitId } = target;
         const cellMatrix = worksheet.getCellMatrix();
 
-        const { value } = params;
         const commandService = accessor.get(ICommandService);
         const editorBridgeService = accessor.get(IEditorBridgeService);
+        const syntax = editorBridgeService.getFormulaSyntax();
+        const functionCall = syntax.toStandard(`${params.value}(`);
+        if (functionCall === null) return false;
+        const value = functionCall.slice(0, -1);
 
         // No match refRange situation, enter edit mode
         // In each range, first take the judgment result of the primary position (if there is no primary, take the upper left corner),
@@ -221,7 +224,7 @@ export const InsertFunctionOperation: ICommand = {
                 unitId,
                 eventType: DeviceInputEventType.Dblclick,
             });
-            const formulaText = `=${value}(${editFormulaRangeString}`;
+            const formulaText = syntax.toLocal(`=${value}(${editFormulaRangeString}`);
             editor?.replaceText(formulaText);
             formulaEditor?.replaceText(formulaText, false);
         }

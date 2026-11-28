@@ -20,10 +20,12 @@ import type {
     ICellDataWithSpanAndDisplay,
     IMutationInfo,
     IRange,
+    IStyleData,
     Nullable,
     Workbook,
     Worksheet,
 } from '@univerjs/core';
+import type { IFormulaSyntax } from '@univerjs/engine-formula';
 import type { IDiscreteRange, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type {
     ICellDataWithSpanInfo,
@@ -41,14 +43,19 @@ import {
     Injector,
     isFormulaId,
     isFormulaString,
+    isTextFormat,
     IUniverInstanceService,
+    LocaleService,
     ObjectMatrix,
+    RegionService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { FormulaDataModel, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { FormulaDataModel, getFormulaSyntax, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import {
     COPY_TYPE,
+    createPasteFormulaParser,
+    escapeSpecialCode,
     ISheetClipboardService,
     PREDEFINED_HOOK_NAME_COPY,
     PREDEFINED_HOOK_NAME_PASTE,
@@ -83,26 +90,28 @@ export class FormulaClipboardController extends Disposable {
         const self = this;
         let currentSheet: Nullable<Worksheet> = null;
 
+        let syntax: IFormulaSyntax;
+        const getCopyCellFormula = (row: number, col: number) => {
+            if (!currentSheet) return '';
+            const cell = currentSheet.getCellRaw(row, col);
+            if (cell?.f && isFormulaString(cell.f)) return cell.f;
+            if (isFormulaId(cell?.si)) {
+                return self._formulaDataModel.getFormulaStringByCell(row, col, currentSheet.getSheetId(), currentSheet.getUnitId()) ?? '';
+            }
+            return '';
+        };
+
         return {
             id: PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY,
+            getCopyCellFormula,
             priority: 10,
             onBeforeCopy(unitId, subUnitId) {
                 currentSheet = self._getWorksheet(unitId, subUnitId);
+                syntax = getFormulaSyntax(self._injector.get(RegionService), self._injector.get(LocaleService));
             },
             onCopyCellContent(row: number, col: number): string {
-                if (!currentSheet) return '';
-
-                const cell = currentSheet.getCellRaw(row, col);
-                if (!cell) return '';
-
-                if (isFormulaString(cell.f)) return cell.f as string;
-                if (isFormulaId(cell.si)) {
-                    const formulaDataModel = self._formulaDataModel;
-                    const formulaString = formulaDataModel.getFormulaStringByCell(row, col, currentSheet.getSheetId(), currentSheet.getUnitId());
-                    return formulaString || '';
-                }
-
-                return '';
+                const formula = getCopyCellFormula(row, col);
+                return formula && escapeSpecialCode(syntax.toLocal(formula));
             },
             onAfterCopy() {
                 currentSheet = null;
@@ -131,10 +140,8 @@ export class FormulaClipboardController extends Disposable {
                 plainMatrix: ObjectMatrix<ICellDataWithSpanAndDisplay>
             ) {
                 const cellData = matrix.getValue(row, column);
-                if (currentSheet && cellData && (isFormulaString(cellData.f) || isFormulaId(cellData.si))) {
-                    const formulaString = isFormulaString(cellData.f)
-                        ? (cellData.f as string)
-                        : self._formulaDataModel.getFormulaStringByCell(row, column, currentSheet.getSheetId(), currentSheet.getUnitId()) as string;
+                const formulaString = cellData?.f && isFormulaString(cellData.f) ? cellData.f : getCopyCellFormula(row, column);
+                if (cellData && formulaString) {
                     matrixFragment.setValue(rowIndexInMatrix, columnIndexInMatrix, {
                         ...getEmptyCell(),
                         f: formulaString,
@@ -146,7 +153,7 @@ export class FormulaClipboardController extends Disposable {
                         f: formulaString,
                         ft: cellData.ft,
                         fd: cellData.fd,
-                        displayV: formulaString,
+                        displayV: syntax.toLocal(formulaString),
                     });
                 } else {
                     matrix.setValue(row, column, getEmptyCell());
@@ -271,7 +278,10 @@ export function getSetCellFormulaMutations(
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
 
-    const valueMatrix = getValueMatrix(unitId, subUnitId, range, matrix, copyInfo, lexerTreeBuilder, formulaDataModel, pasteFrom);
+    const worksheet = accessor.get(IUniverInstanceService).getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
+    const valueMatrix = pasteFrom
+        ? getInternalPasteValueMatrix(unitId, subUnitId, range, matrix, copyInfo, lexerTreeBuilder, formulaDataModel, pasteFrom)
+        : getExternalPasteValueMatrix(unitId, subUnitId, range, matrix, formulaDataModel, accessor, worksheet, copyInfo.pasteType);
 
     if (!valueMatrix.hasValue()) {
         return {
@@ -280,7 +290,6 @@ export function getSetCellFormulaMutations(
         };
     }
 
-    const worksheet = accessor.get(IUniverInstanceService).getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
     matrix.forValue((row, col, source) => {
         const targetRow = range.rows[row];
         const targetCol = range.cols[col];
@@ -327,7 +336,7 @@ export function getSetCellFormulaMutations(
     };
 }
 
-function getValueMatrix(
+function getInternalPasteValueMatrix(
     unitId: string,
     subUnitId: string,
     range: IDiscreteRange,
@@ -339,12 +348,8 @@ function getValueMatrix(
     },
     lexerTreeBuilder: LexerTreeBuilder,
     formulaDataModel: FormulaDataModel,
-    pasteFrom: ISheetDiscreteRangeLocation | null
+    pasteFrom: ISheetDiscreteRangeLocation
 ): ObjectMatrix<ICellData> {
-    if (!pasteFrom) {
-        return getValueMatrixOfPasteFromIsNull(unitId, subUnitId, range, matrix, formulaDataModel);
-    }
-
     if (copyInfo.pasteType === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE) {
         return getSpecialPasteValueValueMatrix(unitId, subUnitId, range, matrix, formulaDataModel, pasteFrom);
     }
@@ -356,25 +361,30 @@ function getValueMatrix(
     return getDefaultPasteValueMatrix(unitId, subUnitId, range, matrix, copyInfo.copyType, lexerTreeBuilder, formulaDataModel, pasteFrom);
 }
 
-function getValueMatrixOfPasteFromIsNull(
+function getExternalPasteValueMatrix(
     unitId: string,
     subUnitId: string,
     range: IDiscreteRange,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-    formulaDataModel: FormulaDataModel
+    formulaDataModel: FormulaDataModel,
+    accessor: IAccessor,
+    worksheet: Nullable<Worksheet>,
+    pasteType: string
 ): ObjectMatrix<ICellData> {
     const valueMatrix = new ObjectMatrix<ICellData>();
     const formulaData = formulaDataModel.getSheetFormulaData(unitId, subUnitId);
+    let parseFormula: ReturnType<typeof createPasteFormulaParser> | undefined;
 
     matrix.forValue((row, col, value) => {
         const toRow = range.rows[row];
         const toCol = range.cols[col];
         const valueObject: ICellDataWithSpanInfo = {};
 
-        if (isFormulaString(value.v)) {
-            // If the copy value is a formula
-            valueObject.v = null;
-            valueObject.f = `${value.v}`;
+        const text = value.v;
+        const isFormula = typeof text === 'string' && isFormulaString(text) && pasteType !== PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE;
+        if (isFormula && !isTextFormat((value.s as IStyleData)?.n?.pattern ?? worksheet?.getComposedCellStyle(toRow, toCol).n?.pattern)) {
+            parseFormula ??= createPasteFormulaParser(accessor);
+            Object.assign(valueObject, parseFormula(text));
             valueObject.si = null;
             valueObject.p = null;
 

@@ -94,7 +94,9 @@ describe('regional formula editing', () => {
         ['ar-arb-SA', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
         ['cmn-DE', '=SUM(1,5;2,5)', '=SUM({1,5\\2;3\\4})'],
         ['de-DE-u-nu-latn', '=SUM(1,5;2,5)', '=SUM({1,5\\2;3\\4})'],
-        ['x-univer', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
+        ['zh-Hans-DE', '=SUM(1.5,2.5)', '=SUM({1.5,2;3,4})'],
+        ['cmn-Arab-IR', '=SUM(1.5;2.5)', '=SUM({1.5,2;3,4})'],
+        ['x-univer', '=SUM(1.5;2.5)', '=SUM({1.5,2;3,4})'],
     ])('round-trips numbers, arguments and both array dimensions in %s', (region, localSum, localArray) => {
         const univer = new Univer({ locale: LocaleType.EN_US });
         try {

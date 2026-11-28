@@ -88,7 +88,7 @@ register(dotSemicolon, 'de', 'LI');
 register(dotSemicolon, 'dz', 'BT');
 register(commaSemicolon, 'ee', 'TG');
 register(dotComma, 'el tr', 'CY');
-register(commaSemicolon, 'en', 'AL AR AT BE BG BR CL CO CV CZ DE DK EE ES FI FR GE GR HU ID IT LT LV NL NO PL PT RO RU SE SI SK TR UA ZA');
+register(commaSemicolon, 'en zh', 'AL AR AT BE BG BR CL CO CV CZ DE DK EE ES FI FR GE GR HU ID IT LT LV NL NO PL PT RO RU SE SI SK TR UA ZA');
 register(dotComma, 'es', '003 AG BB BM BS BZ CA DM GD GY HT KN KY LC MX PH TC TT US VC VG VI');
 register(dotSemicolon, 'es', '419 CU DO GT HN NI PA PE PR SV');
 register(commaSemicolon, 'ff', 'BF GN GW MR SN');
@@ -147,6 +147,10 @@ function resolveProfile(language: string, script?: string, territory?: string): 
     // Excel recognizes Dari with Afghan settings and uses the root grammar for other territories.
     if (language === 'prs' && (!territory || territory === 'AF')) return script ? dotComma : arabicSemicolon;
     if (!languageRules) return dotSemicolon;
+    if (language === 'zh') {
+        if (script === 'arab') return dotSemicolon;
+        if (script === 'hans' || script === 'hant') return dotComma;
+    }
     if (territory && commaDecimalTerritories.has(territory)) return commaSemicolon;
     if (territory === 'US' || territory === 'CA' || territory === 'GB' || territory === 'CH') {
         if (territory === 'CH' && (!script || script === 'latn')) {
@@ -193,7 +197,8 @@ function acceptsArabicPunctuation(language: string, script?: string, territory?:
 export function getFormulaSeparators(region: string): IFormulaSeparators {
     const parts = localeTagPattern.exec(region);
     // Excel uses its default number settings for extended-language tags, including zh-cmn-Hans-DE.
-    if (!parts || parts[1].includes('-')) return dotComma;
+    if (!parts) return region.startsWith('x-') ? dotSemicolon : dotComma;
+    if (parts[1].includes('-')) return dotComma;
 
     const inputLanguage = parts[1].toLowerCase();
     const language = languageAliases.get(inputLanguage) ?? inputLanguage;
